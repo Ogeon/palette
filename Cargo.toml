@@ -1,0 +1,4 @@
+[package]
+name = "palette"
+version = "0.0.0"
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
