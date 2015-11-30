@@ -192,3 +192,40 @@ pub trait Shade: Sized {
         self.lighten(-amount)
     }
 }
+
+///A trait for colors where a hue may be calculated.
+///
+///```
+///use palette::{Rgb, GetHue};
+///
+///let red = Rgb::rgb(1.0, 0.0, 0.0);
+///let green = Rgb::rgb(0.0, 1.0, 0.0);
+///let blue = Rgb::rgb(0.0, 0.0, 1.0);
+///let gray = Rgb::rgb(0.5, 0.5, 0.5);
+///
+///assert_eq!(red.get_hue(), Some(0.0));
+///assert_eq!(green.get_hue(), Some(120.0));
+///assert_eq!(blue.get_hue(), Some(-120.0));
+///assert_eq!(gray.get_hue(), None);
+///```
+pub trait GetHue {
+    ///Calculate a hue if possible.
+    ///
+    ///The hue is calculated in degrees, as an angle around a color circle,
+    ///and may not always be uniform between color spaces. It's therefore not
+    ///recommended to take the hue from one color space and apply it to an
+    ///other.
+    ///
+    ///Colors in the gray scale has no well defined hue and should preferably
+    ///return `None`.
+    fn get_hue(&self) -> Option<f32>;
+}
+
+///A trait for colors where the hue can be manipulated without conversion.
+pub trait Hue: GetHue {
+    ///Return a new copy of `self`, but with a specific hue.
+    fn with_hue(&self, degrees: f32) -> Self;
+
+    ///Return a new copy of `self`, but with the hue shifted by `degrees`.
+    fn shift_hue(&self, degrees: f32) -> Self;
+}

@@ -1,4 +1,6 @@
-use {Color, Rgb, Luma, Xyz, Mix, Shade, clamp};
+use std::f32::consts::PI;
+
+use {Color, Rgb, Luma, Xyz, Mix, Shade, GetHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -51,6 +53,16 @@ impl Shade for Lab {
             a: self.a,
             b: self.b,
             alpha: self.alpha,
+        }
+    }
+}
+
+impl GetHue for Lab {
+    fn get_hue(&self) -> Option<f32> {
+        if self.a == 0.0 && self.b == 0.0 {
+            None
+        } else {
+            Some(self.b.atan2(self.a) * 180.0 / PI)
         }
     }
 }

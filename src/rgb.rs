@@ -1,4 +1,6 @@
-use {Color, Luma, Xyz, Lab, Mix, Shade, clamp};
+use std::f32::consts::PI;
+
+use {Color, Luma, Xyz, Lab, Mix, Shade, GetHue, clamp};
 
 ///Linear RGB with an alpha component.
 ///
@@ -148,6 +150,18 @@ impl Shade for Rgb {
             green: (self.green + amount).max(0.0),
             blue: (self.blue + amount).max(0.0),
             alpha: self.alpha,
+        }
+    }
+}
+
+impl GetHue for Rgb {
+    fn get_hue(&self) -> Option<f32> {
+        const SQRT_3: f32 = 1.73205081;
+
+        if self.red == self.green && self.red == self.blue {
+            None
+        } else {
+            Some((SQRT_3 * (self.green - self.blue)).atan2(2.0 * self.red - self.green - self.blue) * 180.0 / PI)
         }
     }
 }
