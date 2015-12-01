@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Lab, Mix, Shade, clamp};
+use {Color, Rgb, Luma, Lab, Lch, Mix, Shade, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -65,7 +65,7 @@ impl Default for Xyz {
     }
 }
 
-from_color!(to Xyz from Rgb, Luma, Lab);
+from_color!(to Xyz from Rgb, Luma, Lab, Lch);
 
 impl From<Rgb> for Xyz {
     fn from(rgb: Rgb) -> Xyz {
@@ -97,6 +97,12 @@ impl From<Lab> for Xyz {
             z: Z_N * f_inv((1.0 / 116.0) * (lab.l + 16.0) - (1.0 / 200.0) * lab.b),
             alpha: lab.alpha,
         }
+    }
+}
+
+impl From<Lch> for Xyz {
+    fn from(lch: Lch) -> Xyz {
+        Lab::from(lch).into()
     }
 }
 

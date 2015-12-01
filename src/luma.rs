@@ -1,4 +1,4 @@
-use {Color, Rgb, Xyz, Lab, Mix, Shade, clamp};
+use {Color, Rgb, Xyz, Lab, Lch, Mix, Shade, clamp};
 
 ///Linear luminance with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -77,7 +77,7 @@ impl Default for Luma {
     }
 }
 
-from_color!(to Luma from Rgb, Xyz, Lab);
+from_color!(to Luma from Rgb, Xyz, Lab, Lch);
 
 impl From<Rgb> for Luma {
     fn from(rgb: Rgb) -> Luma {
@@ -100,5 +100,11 @@ impl From<Xyz> for Luma {
 impl From<Lab> for Luma {
     fn from(lab: Lab) -> Luma {
         Xyz::from(lab).into()
+    }
+}
+
+impl From<Lch> for Luma {
+    fn from(lch: Lch) -> Luma {
+        Xyz::from(lch).into()
     }
 }

@@ -3,6 +3,9 @@ pub use rgb::Rgb;
 pub use luma::Luma;
 pub use xyz::Xyz;
 pub use lab::Lab;
+pub use lch::Lch;
+
+pub use hues::{LabHue, RgbHue};
 
 macro_rules! from_color {
     (to $to:ident from $($from:ident),+) => (
@@ -23,6 +26,9 @@ mod rgb;
 mod luma;
 mod xyz;
 mod lab;
+mod lch;
+
+mod hues;
 
 mod tristimulus;
 
@@ -67,6 +73,24 @@ macro_rules! make_color {
         impl Shade for Color {
             fn lighten(&self, amount: f32) -> Color {
                 Lab::from(self.clone()).lighten(amount).into()
+            }
+        }
+
+        impl GetHue for Color {
+            type Hue = LabHue;
+
+            fn get_hue(&self) -> Option<LabHue> {
+                Lch::from(self.clone()).get_hue()
+            }
+        }
+
+        impl Hue for Color {
+            fn with_hue(&self, hue: LabHue) -> Color {
+                Lch::from(self.clone()).with_hue(hue).into()
+            }
+
+            fn shift_hue(&self, amount: LabHue) -> Color {
+                Lch::from(self.clone()).shift_hue(amount).into()
             }
         }
 
@@ -142,13 +166,22 @@ make_color! {
         xyza(x: f32, y: f32, z: f32, alpha: f32) -> xyza;
     }
 
-    ///CIE L*a*b* (CIELAB)
+    ///CIE L*a*b* (CIELAB).
     Lab {
         ///CIE L*a*b*.
         lab(l: f32, a: f32, b: f32) -> lab;
 
         ///CIE L*a*b* and transparency.
         laba(l: f32, a: f32, b: f32, alpha: f32) -> laba;
+    }
+
+    ///CIE L*C*h°, a polar version of CIE L*a*b*.
+    Lch {
+        ///CIE L*C*h°.
+        lch(l: f32, chroma: f32, hue: LabHue) -> lch;
+
+        ///CIE L*C*h° and transparency.
+        lcha(l: f32, chroma: f32, hue: LabHue, alpha: f32) -> lcha;
     }
 }
 
@@ -203,29 +236,32 @@ pub trait Shade: Sized {
 ///let blue = Rgb::rgb(0.0, 0.0, 1.0);
 ///let gray = Rgb::rgb(0.5, 0.5, 0.5);
 ///
-///assert_eq!(red.get_hue(), Some(0.0));
-///assert_eq!(green.get_hue(), Some(120.0));
-///assert_eq!(blue.get_hue(), Some(-120.0));
+///assert_eq!(red.get_hue(), Some(0.0.into()));
+///assert_eq!(green.get_hue(), Some(120.0.into()));
+///assert_eq!(blue.get_hue(), Some(240.0.into()));
 ///assert_eq!(gray.get_hue(), None);
 ///```
 pub trait GetHue {
-    ///Calculate a hue if possible.
+    ///The kind of hue unit this color space uses.
     ///
-    ///The hue is calculated in degrees, as an angle around a color circle,
+    ///The hue is most commonly calculated as an angle around a color circle
     ///and may not always be uniform between color spaces. It's therefore not
-    ///recommended to take the hue from one color space and apply it to an
-    ///other.
+    ///recommended to take one type of hue and apply it to a color space that
+    ///expects an other.
+    type Hue;
+
+    ///Calculate a hue if possible.
     ///
     ///Colors in the gray scale has no well defined hue and should preferably
     ///return `None`.
-    fn get_hue(&self) -> Option<f32>;
+    fn get_hue(&self) -> Option<Self::Hue>;
 }
 
 ///A trait for colors where the hue can be manipulated without conversion.
 pub trait Hue: GetHue {
     ///Return a new copy of `self`, but with a specific hue.
-    fn with_hue(&self, degrees: f32) -> Self;
+    fn with_hue(&self, hue: Self::Hue) -> Self;
 
-    ///Return a new copy of `self`, but with the hue shifted by `degrees`.
-    fn shift_hue(&self, degrees: f32) -> Self;
+    ///Return a new copy of `self`, but with the hue shifted by `amount`.
+    fn shift_hue(&self, amount: Self::Hue) -> Self;
 }

@@ -1,6 +1,4 @@
-use std::f32::consts::PI;
-
-use {Color, Rgb, Luma, Xyz, Mix, Shade, GetHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lch, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -58,11 +56,13 @@ impl Shade for Lab {
 }
 
 impl GetHue for Lab {
-    fn get_hue(&self) -> Option<f32> {
+    type Hue = LabHue;
+
+    fn get_hue(&self) -> Option<LabHue> {
         if self.a == 0.0 && self.b == 0.0 {
             None
         } else {
-            Some(self.b.atan2(self.a) * 180.0 / PI)
+            Some(LabHue::from_radians(self.b.atan2(self.a)))
         }
     }
 }
@@ -72,7 +72,8 @@ impl Default for Lab {
         Lab::lab(0.0, 0.0, 0.0)
     }
 }
-from_color!(to Lab from Rgb, Luma, Xyz);
+
+from_color!(to Lab from Rgb, Luma, Xyz, Lch);
 
 impl From<Xyz> for Lab {
     fn from(xyz: Xyz) -> Lab {
@@ -94,6 +95,17 @@ impl From<Rgb> for Lab {
 impl From<Luma> for Lab {
     fn from(luma: Luma) -> Lab {
         Xyz::from(luma).into()
+    }
+}
+
+impl From<Lch> for Lab {
+    fn from(lch: Lch) -> Lab {
+        Lab {
+            l: lch.l,
+            a: lch.chroma.max(0.0) * lch.hue.to_radians().cos(),
+            b: lch.chroma.max(0.0) * lch.hue.to_radians().sin(),
+            alpha: lch.alpha,
+        }
     }
 }
 
