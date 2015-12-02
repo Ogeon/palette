@@ -65,10 +65,7 @@ macro_rules! make_color {
 
         impl Mix for Color {
             fn mix(&self, other: &Color, factor: f32) -> Color {
-                match (self, other) {
-                    $((&Color::$variant(ref a), &Color::$variant(ref b)) => a.mix(b, factor).into(),)+
-                    (a, b) => Rgb::from(a.clone()).mix(&Rgb::from(b.clone()), factor).into()
-                }
+                Rgb::from(self.clone()).mix(&Rgb::from(other.clone()), factor).into()
             }
         }
 
