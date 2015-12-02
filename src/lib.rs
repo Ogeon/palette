@@ -4,6 +4,7 @@ pub use luma::Luma;
 pub use xyz::Xyz;
 pub use lab::Lab;
 pub use lch::Lch;
+pub use hsv::Hsv;
 
 pub use hues::{LabHue, RgbHue};
 
@@ -27,6 +28,7 @@ mod luma;
 mod xyz;
 mod lab;
 mod lch;
+mod hsv;
 
 mod hues;
 
@@ -182,6 +184,15 @@ make_color! {
 
         ///CIE L*C*h° and transparency.
         lcha(l: f32, chroma: f32, hue: LabHue, alpha: f32) -> lcha;
+    }
+
+    ///Linear HSV, a cylindrical version of RGB.
+    Hsv {
+        ///Linear HSV.
+        hsv(hue: RgbHue, saturation: f32, value: f32) -> hsv;
+
+        ///Linear HSV and transparency.
+        hsva(hue: RgbHue, saturation: f32, value: f32, alpha: f32) -> hsva;
     }
 }
 
