@@ -1,4 +1,4 @@
-use {Color, Luma, Xyz, Lab, Lch, Hsv, Mix, Shade, GetHue, RgbHue, clamp};
+use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, Mix, Shade, GetHue, RgbHue, clamp};
 
 ///Linear RGB with an alpha component.
 ///
@@ -172,7 +172,7 @@ impl Default for Rgb {
     }
 }
 
-from_color!(to Rgb from Xyz, Luma, Lab, Lch, Hsv);
+from_color!(to Rgb from Xyz, Luma, Lab, Lch, Hsv, Hsl);
 
 impl From<Luma> for Rgb {
     fn from(luma: Luma) -> Rgb {
@@ -235,6 +235,37 @@ impl From<Hsv> for Rgb {
             green: green + m,
             blue: blue + m,
             alpha: hsv.alpha,
+        }
+    }
+}
+
+impl From<Hsl> for Rgb {
+    fn from(hsl: Hsl) -> Rgb {
+        let c = (1.0 - (2.0 * hsl.lightness - 1.0).abs()) * hsl.saturation;
+        let h = ((Into::<f32>::into(hsl.hue) + 360.0) % 360.0) / 60.0;
+        let x = c * (1.0 - (h % 2.0 - 1.0).abs());
+        let m = hsl.lightness - 0.5 * c;
+
+        let (red, green, blue) = if h >= 0.0 && h < 1.0 {
+            (c, x, 0.0)
+        } else if h >= 1.0 && h < 2.0 {
+            (x, c, 0.0)
+        } else if h >= 2.0 && h < 3.0 {
+            (0.0, c, x)
+        } else if h >= 3.0 && h < 4.0 {
+            (0.0, x, c)
+        } else if h >= 4.0 && h < 5.0 {
+            (x, 0.0, c)
+        } else {
+            (c, 0.0, x)
+        };
+
+
+        Rgb {
+            red: red + m,
+            green: green + m,
+            blue: blue + m,
+            alpha: hsl.alpha,
         }
     }
 }

@@ -1,0 +1,243 @@
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, Mix, Shade, GetHue, Hue, RgbHue, clamp};
+
+///Linear HSL color space with an alpha component.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Hsl {
+	pub hue: RgbHue,
+	pub saturation: f32,
+	pub lightness: f32,
+	pub alpha: f32,
+}
+
+impl Hsl {
+    ///Linear HSL.
+	pub fn hsl(hue: RgbHue, saturation: f32, lightness: f32) -> Hsl {
+		Hsl {
+			hue: hue,
+			saturation: saturation,
+			lightness: lightness,
+			alpha: 1.0,
+		}
+	}
+
+	///Linear HSL and transparency.
+	pub fn hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32) -> Hsl {
+		Hsl {
+			hue: hue,
+			saturation: saturation,
+			lightness: lightness,
+			alpha: alpha,
+		}
+	}
+}
+
+impl Mix for Hsl {
+	fn mix(&self, other: &Hsl, factor: f32) -> Hsl {
+        let factor = clamp(factor, 0.0, 1.0);
+        let hue_diff: f32 = (other.hue - self.hue).into();
+
+        Hsl {
+            hue: self.hue + factor * hue_diff,
+            saturation: self.saturation + factor * (other.saturation - self.saturation),
+            lightness: self.lightness + factor * (other.lightness - self.lightness),
+            alpha: self.alpha + factor * (other.alpha - self.alpha),
+        }
+    }
+}
+
+impl Shade for Hsl {
+    fn lighten(&self, amount: f32) -> Hsl {
+        Hsl {
+            hue: self.hue,
+            saturation: self.saturation,
+            lightness: (self.lightness + amount).max(0.0),
+            alpha: self.alpha,
+        }
+    }
+}
+
+impl GetHue for Hsl {
+    type Hue = RgbHue;
+
+    fn get_hue(&self) -> Option<RgbHue> {
+        if self.saturation <= 0.0 {
+            None
+        } else {
+            Some(self.hue)
+        }
+    }
+}
+
+impl Hue for Hsl {
+    fn with_hue(&self, hue: RgbHue) -> Hsl {
+        Hsl {
+            hue: hue,
+            saturation: self.saturation,
+            lightness: self.lightness,
+            alpha: self.alpha,
+        }
+    }
+
+    fn shift_hue(&self, amount: RgbHue) -> Hsl {
+        Hsl {
+            hue: self.hue + amount,
+            saturation: self.saturation,
+            lightness: self.lightness,
+            alpha: self.alpha,
+        }
+    }
+}
+
+impl Default for Hsl {
+	fn default() -> Hsl {
+		Hsl::hsl(0.0.into(), 0.0, 0.0)
+	}
+}
+
+from_color!(to Hsl from Rgb, Luma, Xyz, Lab, Lch, Hsv);
+
+impl From<Rgb> for Hsl {
+	fn from(rgb: Rgb) -> Hsl {
+		enum Channel { Red, Green, Blue };
+
+        let val_min = rgb.red.min(rgb.green).min(rgb.blue);
+        let mut val_max = rgb.red;
+        let mut chan_max = Channel::Red;
+
+        if rgb.green > val_max {
+            chan_max = Channel::Green;
+            val_max = rgb.green;
+        }
+
+        if rgb.blue > val_max {
+            chan_max = Channel::Blue;
+            val_max = rgb.blue;
+        }
+
+        let diff = val_max - val_min;
+        let lightness = (val_min + val_max) / 2.0;
+
+        let hue = if diff == 0.0 {
+            0.0
+        } else {
+            60.0 * match chan_max {
+                Channel::Red => ((rgb.green - rgb.blue) / diff) % 6.0,
+                Channel::Green => ((rgb.blue - rgb.red) / diff + 2.0),
+                Channel::Blue => ((rgb.red - rgb.green) / diff + 4.0),
+            }
+        };
+
+        let saturation = if diff == 0.0 {
+            0.0
+        } else {
+            diff / (1.0 - (2.0 * lightness - 1.0).abs())
+        };
+
+        Hsl {
+            hue: hue.into(),
+            saturation: saturation,
+            lightness: lightness,
+            alpha: rgb.alpha,
+        }
+	}
+}
+
+impl From<Luma> for Hsl {
+	fn from(luma: Luma) -> Hsl {
+		Rgb::from(luma).into()
+	}
+}
+
+impl From<Xyz> for Hsl {
+	fn from(xyz: Xyz) -> Hsl {
+		Rgb::from(xyz).into()
+	}
+}
+
+impl From<Lab> for Hsl {
+	fn from(lab: Lab) -> Hsl {
+		Rgb::from(lab).into()
+	}
+}
+
+impl From<Lch> for Hsl {
+	fn from(lch: Lch) -> Hsl {
+		Rgb::from(lch).into()
+	}
+}
+
+impl From<Hsv> for Hsl {
+    fn from(hsv: Hsv) -> Hsl {
+    	let x = (2.0 - hsv.saturation) * hsv.value;
+    	let saturation = if hsv.value == 0.0 {
+    		0.0
+    	} else if x < 1.0 {
+    		hsv.saturation * hsv.value / x
+    	} else {
+    		hsv.saturation * hsv.value / (2.0 - x)
+    	};
+
+    	Hsl {
+    		hue: hsv.hue,
+    		saturation: saturation,
+    		lightness: x / 2.0,
+    		alpha: hsv.alpha,
+    	}
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Hsl;
+    use ::{Rgb, Hsv};
+
+    #[test]
+    fn red() {
+        let a = Hsl::from(Rgb::rgb(1.0, 0.0, 0.0));
+        let b = Hsl::hsl(0.0.into(), 1.0, 0.5);
+        let c = Hsl::from(Hsv::hsv(0.0.into(), 1.0, 1.0));
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn orange() {
+        let a = Hsl::from(Rgb::rgb(1.0, 0.5, 0.0));
+        let b = Hsl::hsl(30.0.into(), 1.0, 0.5);
+        let c = Hsl::from(Hsv::hsv(30.0.into(), 1.0, 1.0));
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn green() {
+        let a = Hsl::from(Rgb::rgb(0.0, 1.0, 0.0));
+        let b = Hsl::hsl(120.0.into(), 1.0, 0.5);
+        let c = Hsl::from(Hsv::hsv(120.0.into(), 1.0, 1.0));
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn blue() {
+        let a = Hsl::from(Rgb::rgb(0.0, 0.0, 1.0));
+        let b = Hsl::hsl(240.0.into(), 1.0, 0.5);
+        let c = Hsl::from(Hsv::hsv(240.0.into(), 1.0, 1.0));
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn purple() {
+        let a = Hsl::from(Rgb::rgb(0.5, 0.0, 1.0));
+        let b = Hsl::hsl(270.0.into(), 1.0, 0.5);
+        let c = Hsl::from(Hsv::hsv(270.0.into(), 1.0, 1.0));
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+}

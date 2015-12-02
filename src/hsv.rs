@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Mix, Shade, GetHue, Hue, RgbHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, Mix, Shade, GetHue, Hue, RgbHue, clamp};
 
 ///Linear HSV color space with an alpha component.
 ///
@@ -99,7 +99,7 @@ impl Default for Hsv {
     }
 }
 
-from_color!(to Hsv from Rgb, Luma, Xyz, Lab, Lch);
+from_color!(to Hsv from Rgb, Luma, Xyz, Lab, Lch, Hsl);
 
 impl From<Rgb> for Hsv {
     fn from(rgb: Rgb) -> Hsv {
@@ -170,48 +170,75 @@ impl From<Lch> for Hsv {
     }
 }
 
+impl From<Hsl> for Hsv {
+    fn from(hsl: Hsl) -> Hsv {
+        let x = hsl.saturation * if hsl.lightness < 0.5 {
+            hsl.lightness
+        } else {
+            1.0 - hsl.lightness
+        };
+
+        Hsv {
+            hue: hsl.hue,
+            saturation: 2.0 * x / (hsl.lightness + x),
+            value: hsl.lightness + x,
+            alpha: hsl.alpha,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Hsv;
-    use ::Rgb;
+    use ::{Rgb, Hsl};
 
     #[test]
     fn red() {
         let a = Hsv::from(Rgb::rgb(1.0, 0.0, 0.0));
         let b = Hsv::hsv(0.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(0.0.into(), 1.0, 0.5));
 
         assert_eq!(a, b);
+        assert_eq!(a, c);
     }
 
     #[test]
     fn orange() {
         let a = Hsv::from(Rgb::rgb(1.0, 0.5, 0.0));
         let b = Hsv::hsv(30.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(30.0.into(), 1.0, 0.5));
 
         assert_eq!(a, b);
+        assert_eq!(a, c);
     }
 
     #[test]
     fn green() {
         let a = Hsv::from(Rgb::rgb(0.0, 1.0, 0.0));
         let b = Hsv::hsv(120.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(120.0.into(), 1.0, 0.5));
 
         assert_eq!(a, b);
+        assert_eq!(a, c);
     }
 
     #[test]
     fn blue() {
         let a = Hsv::from(Rgb::rgb(0.0, 0.0, 1.0));
         let b = Hsv::hsv(240.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(240.0.into(), 1.0, 0.5));
 
         assert_eq!(a, b);
+        assert_eq!(a, c);
     }
 
     #[test]
     fn purple() {
         let a = Hsv::from(Rgb::rgb(0.5, 0.0, 1.0));
         let b = Hsv::hsv(270.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(270.0.into(), 1.0, 0.5));
 
         assert_eq!(a, b);
+        assert_eq!(a, c);
     }
 }

@@ -1,4 +1,4 @@
-use {Color, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, LabHue, clamp};
+use {Color, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, LabHue, clamp};
 
 ///CIE L*C*h°, a polar version of CIE L*a*b*, with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -93,7 +93,7 @@ impl Default for Lch {
     }
 }
 
-from_color!(to Lch from Rgb, Luma, Xyz, Lab, Hsv);
+from_color!(to Lch from Rgb, Luma, Xyz, Lab, Hsv, Hsl);
 
 impl From<Lab> for Lch {
     fn from(lab: Lab) -> Lch {
@@ -127,5 +127,11 @@ impl From<Xyz> for Lch {
 impl From<Hsv> for Lch {
     fn from(hsv: Hsv) -> Lch {
         Lab::from(hsv).into()
+    }
+}
+
+impl From<Hsl> for Lch {
+    fn from(hsl: Hsl) -> Lch {
+        Lab::from(hsl).into()
     }
 }

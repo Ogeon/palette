@@ -5,6 +5,7 @@ pub use xyz::Xyz;
 pub use lab::Lab;
 pub use lch::Lch;
 pub use hsv::Hsv;
+pub use hsl::Hsl;
 
 pub use hues::{LabHue, RgbHue};
 
@@ -29,6 +30,7 @@ mod xyz;
 mod lab;
 mod lch;
 mod hsv;
+mod hsl;
 
 mod hues;
 
@@ -190,6 +192,15 @@ make_color! {
 
         ///Linear HSV and transparency.
         hsva(hue: RgbHue, saturation: f32, value: f32, alpha: f32) -> hsva;
+    }
+
+    ///Linear HSL, a cylindrical version of RGB.
+    Hsl {
+        ///Linear HSL.
+        hsl(hue: RgbHue, saturation: f32, lightness: f32) -> hsl;
+
+        ///Linear HSL and transparency.
+        hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32) -> hsla;
     }
 }
 

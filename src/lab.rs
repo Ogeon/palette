@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Xyz, Lch, Hsv, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -73,7 +73,7 @@ impl Default for Lab {
     }
 }
 
-from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv);
+from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 
 impl From<Xyz> for Lab {
     fn from(xyz: Xyz) -> Lab {
@@ -112,6 +112,12 @@ impl From<Lch> for Lab {
 impl From<Hsv> for Lab {
     fn from(hsv: Hsv) -> Lab {
         Xyz::from(hsv).into()
+    }
+}
+
+impl From<Hsl> for Lab {
+    fn from(hsl: Hsl) -> Lab {
+        Xyz::from(hsl).into()
     }
 }
 
