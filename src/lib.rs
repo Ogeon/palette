@@ -1,4 +1,4 @@
-pub use range::Range;
+pub use gradient::Gradient;
 pub use rgb::Rgb;
 pub use luma::Luma;
 pub use xyz::Xyz;
@@ -22,7 +22,7 @@ macro_rules! from_color {
     )
 }
 
-pub mod range;
+pub mod gradient;
 
 mod rgb;
 mod luma;

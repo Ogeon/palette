@@ -4,14 +4,14 @@ use std::cmp::max;
 
 use Mix;
 
-///An interpolated range of colors.
+///A linear interpolation between colors.
 #[derive(Clone)]
-pub struct Range<C: Mix + Clone>(Vec<(f32, C)>);
+pub struct Gradient<C: Mix + Clone>(Vec<(f32, C)>);
 
-impl<C: Mix + Clone> Range<C> {
-    ///Create a range of evenly spaced colors with the domain [0.0, 1.0].
+impl<C: Mix + Clone> Gradient<C> {
+    ///Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     ///There must be at least one color.
-    pub fn new<I: IntoIterator<Item=C>>(colors: I) -> Range<C> {
+    pub fn new<I: IntoIterator<Item=C>>(colors: I) -> Gradient<C> {
         let mut points: Vec<_> = colors.into_iter().map(|c| (0.0, c)).collect();
         assert!(points.len() > 0);
         let step_size = 1.0 / max(points.len() - 1, 1) as f32;
@@ -20,23 +20,23 @@ impl<C: Mix + Clone> Range<C> {
             *p = i as f32 * step_size;
         }
 
-        Range(points)
+        Gradient(points)
     }
 
-    ///Create a range of colors with custom spacing and domain. There must be
+    ///Create a gradient of colors with custom spacing and domain. There must be
     ///at least one color and they are expected to be ordered by their
     ///position value.
-    pub fn with_domain(colors: Vec<(f32, C)>) -> Range<C> {
+    pub fn with_domain(colors: Vec<(f32, C)>) -> Gradient<C> {
         assert!(colors.len() > 0);
 
         //Maybe sort the colors?
-        Range(colors)
+        Gradient(colors)
     }
 
-    ///Get a color from the range. The nearest color will be returned if `i`
+    ///Get a color from the gradient. The nearest color will be returned if `i`
     ///is outside the domain.
     pub fn get(&self, i: f32) -> C {
-        let &(mut min, ref min_color) = self.0.get(0).expect("a Range must contain at least one color");
+        let &(mut min, ref min_color) = self.0.get(0).expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
         let mut min_index = 0;
 
@@ -44,7 +44,7 @@ impl<C: Mix + Clone> Range<C> {
             return min_color.clone();
         }
 
-        let &(mut max, ref max_color) = self.0.last().expect("a Range must contain at least one color");
+        let &(mut max, ref max_color) = self.0.last().expect("a Gradient must contain at least one color");
         let mut max_color = max_color;
         let mut max_index = self.0.len() - 1;
 
@@ -73,13 +73,13 @@ impl<C: Mix + Clone> Range<C> {
         min_color.mix(max_color, factor)
     }
 
-    ///Take `n` evenly spaced colors from the range.
+    ///Take `n` evenly spaced colors from the gradient.
     pub fn take(&self, n: usize) -> Take<C> {
-        let &(min, _) = self.0.get(0).expect("a Range must contain at least one color");
-        let &(max, _) = self.0.last().expect("a Range must contain at least one color");
+        let &(min, _) = self.0.get(0).expect("a Gradient must contain at least one color");
+        let &(max, _) = self.0.last().expect("a Gradient must contain at least one color");
 
         Take {
-            range: self,
+            gradient: self,
             from: min,
             diff: max - min,
             len: n,
@@ -90,7 +90,7 @@ impl<C: Mix + Clone> Range<C> {
 
 ///An iterator over interpolated colors.
 pub struct Take<'a, C: Mix + Clone + 'a> {
-    range: &'a Range<C>,
+    gradient: &'a Gradient<C>,
     from: f32,
     diff: f32,
     len: usize,
@@ -104,7 +104,7 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
         if self.current < self.len {
             let i = self.from + self.current as f32 * (self.diff / self.len as f32);
             self.current += 1;
-            Some(self.range.get(i))
+            Some(self.gradient.get(i))
         } else {
             None
         }
