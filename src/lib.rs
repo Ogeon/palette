@@ -95,6 +95,12 @@ macro_rules! make_color {
             }
         }
 
+        impl Saturate for Color {
+            fn saturate(&self, factor: f32) -> Color {
+                Lch::from(self.clone()).saturate(factor).into()
+            }
+        }
+
         $(
             impl From<$variant> for Color {
                 fn from(color: $variant) -> Color {
@@ -296,4 +302,25 @@ pub trait Hue: GetHue {
 
     ///Return a new copy of `self`, but with the hue shifted by `amount`.
     fn shift_hue(&self, amount: Self::Hue) -> Self;
+}
+
+///A trait for colors where the saturation (or chroma) can be manipulated
+///without conversion.
+///
+///```
+///use palette::{Hsv, Saturate};
+///
+///let a = Hsv::hsv(0.0.into(), 0.25, 1.0);
+///let b = Hsv::hsv(0.0.into(), 1.0, 1.0);
+///
+///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
+///```
+pub trait Saturate: Sized {
+    ///Increase the saturation by `factor`.
+    fn saturate(&self, factor: f32) -> Self;
+
+    ///Decrease the saturation by `factor`.
+    fn desaturate(&self, factor: f32) -> Self {
+        self.saturate(-factor)
+    }
 }

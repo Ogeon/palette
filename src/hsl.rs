@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, RgbHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL color space with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -102,6 +102,17 @@ impl Hue for Hsl {
         Hsl {
             hue: self.hue + amount,
             saturation: self.saturation,
+            lightness: self.lightness,
+            alpha: self.alpha,
+        }
+    }
+}
+
+impl Saturate for Hsl {
+    fn saturate(&self, factor: f32) -> Hsl {
+        Hsl {
+            hue: self.hue,
+            saturation: self.saturation * (1.0 + factor),
             lightness: self.lightness,
             alpha: self.alpha,
         }

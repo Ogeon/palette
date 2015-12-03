@@ -1,4 +1,4 @@
-use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, LabHue, clamp};
+use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
 ///CIE L*C*h°, a polar version of CIE L*a*b*, with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -102,6 +102,17 @@ impl Hue for Lch {
             l: self.l,
             chroma: self.chroma,
             hue: self.hue + amount,
+            alpha: self.alpha,
+        }
+    }
+}
+
+impl Saturate for Lch {
+    fn saturate(&self, factor: f32) -> Lch {
+        Lch {
+            l: self.l,
+            chroma: self.chroma * (1.0 + factor),
+            hue: self.hue,
             alpha: self.alpha,
         }
     }
