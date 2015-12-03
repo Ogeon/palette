@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, Mix, Shade, GetHue, Hue, RgbHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, RgbHue, clamp};
 
 ///Linear HSL color space with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -31,6 +31,26 @@ impl Hsl {
 	}
 }
 
+impl ColorSpace for Hsl {
+    fn is_valid(&self) -> bool {
+        self.saturation >= 0.0 && self.saturation <= 1.0 &&
+        self.lightness >= 0.0 && self.lightness <= 1.0 &&
+        self.alpha >= 0.0 && self.alpha <= 1.0
+    }
+
+    fn clamp(&self) -> Hsl {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.saturation = clamp(self.saturation, 0.0, 1.0);
+        self.lightness = clamp(self.lightness, 0.0, 1.0);
+        self.alpha = clamp(self.alpha, 0.0, 1.0);
+    }
+}
+
 impl Mix for Hsl {
 	fn mix(&self, other: &Hsl, factor: f32) -> Hsl {
         let factor = clamp(factor, 0.0, 1.0);
@@ -50,7 +70,7 @@ impl Shade for Hsl {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
-            lightness: (self.lightness + amount).max(0.0),
+            lightness: self.lightness + amount,
             alpha: self.alpha,
         }
     }

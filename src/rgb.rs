@@ -1,4 +1,4 @@
-use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, Mix, Shade, GetHue, RgbHue, clamp};
+use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
 
 ///Linear RGB with an alpha component.
 ///
@@ -108,19 +108,23 @@ impl Rgb {
             (clamp(self.alpha, 0.0, 1.0) * 255.0) as u8,
         )
     }
+}
 
-    ///Return a new RGB value with all channels clamped to `[0.0, 1.0]`.
-    pub fn clamp(&self) -> Rgb {
-        Rgb {
-            red: clamp(self.red, 0.0, 1.0),
-            green: clamp(self.green, 0.0, 1.0),
-            blue: clamp(self.blue, 0.0, 1.0),
-            alpha: clamp(self.alpha, 0.0, 1.0),
-        }
+impl ColorSpace for Rgb {
+    fn is_valid(&self) -> bool {
+        self.red >= 0.0 && self.red <= 1.0 &&
+        self.green >= 0.0 && self.green <= 1.0 &&
+        self.blue >= 0.0 && self.blue <= 1.0 &&
+        self.alpha >= 0.0 && self.alpha <= 1.0
     }
 
-    ///Clamp all channels to `[0.0, 1.0]`.
-    pub fn clamp_self(&mut self) {
+    fn clamp(&self) -> Rgb {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
         self.red = clamp(self.red, 0.0, 1.0);
         self.green = clamp(self.green, 0.0, 1.0);
         self.blue = clamp(self.blue, 0.0, 1.0);
@@ -144,9 +148,9 @@ impl Mix for Rgb {
 impl Shade for Rgb {
     fn lighten(&self, amount: f32) -> Rgb {
         Rgb {
-            red: (self.red + amount).max(0.0),
-            green: (self.green + amount).max(0.0),
-            blue: (self.blue + amount).max(0.0),
+            red: self.red + amount,
+            green: self.green + amount,
+            blue: self.blue + amount,
             alpha: self.alpha,
         }
     }

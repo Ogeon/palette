@@ -1,4 +1,4 @@
-use {Color, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, LabHue, clamp};
+use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, LabHue, clamp};
 
 ///CIE L*C*h°, a polar version of CIE L*a*b*, with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -31,6 +31,26 @@ impl Lch {
     }
 }
 
+impl ColorSpace for Lch {
+    fn is_valid(&self) -> bool {
+        self.l >= 0.0 && self.l <= 100.0 &&
+        self.chroma >= 0.0 && self.chroma <= 182.0 && //should include all of L*a*b*, but will also overshoot...
+        self.alpha >= 0.0 && self.alpha <= 1.0
+    }
+
+    fn clamp(&self) -> Lch {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.l = clamp(self.l, 0.0, 100.0);
+        self.chroma = clamp(self.chroma, 0.0, 182.0); //should include all of L*a*b*, but will also overshoot...
+        self.alpha = clamp(self.alpha, 0.0, 1.0);
+    }
+}
+
 impl Mix for Lch {
     fn mix(&self, other: &Lch, factor: f32) -> Lch {
         let factor = clamp(factor, 0.0, 1.0);
@@ -47,7 +67,7 @@ impl Mix for Lch {
 impl Shade for Lch {
     fn lighten(&self, amount: f32) -> Lch {
         Lch {
-            l: (self.l + amount * 100.0).max(0.0),
+            l: self.l + amount * 100.0,
             chroma: self.chroma,
             hue: self.hue,
             alpha: self.alpha,

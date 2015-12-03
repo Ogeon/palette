@@ -204,6 +204,19 @@ make_color! {
     }
 }
 
+///Common functionality for color spaces.
+pub trait ColorSpace {
+    ///Check if the color's components are within the expected ranges.
+    fn is_valid(&self) -> bool;
+
+    ///Return a new color where the components has been clamped to the nearest
+    ///valid values.
+    fn clamp(&self) -> Self;
+
+    ///Clamp the color's components to the nearest valid values.
+    fn clamp_self(&mut self);
+}
+
 ///A trait for linear color interpolation.
 ///
 ///```

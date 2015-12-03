@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, Mix, Shade, clamp};
+use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -35,6 +35,28 @@ impl Xyz {
     }
 }
 
+impl ColorSpace for Xyz {
+    fn is_valid(&self) -> bool {
+        self.x >= 0.0 && self.x <= 1.0 &&
+        self.y >= 0.0 && self.y <= 1.0 &&
+        self.z >= 0.0 && self.z <= 1.0 &&
+        self.alpha >= 0.0 && self.alpha <= 1.0
+    }
+
+    fn clamp(&self) -> Xyz {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.x = clamp(self.x, 0.0, 1.0);
+        self.y = clamp(self.y, 0.0, 1.0);
+        self.z = clamp(self.z, 0.0, 1.0);
+        self.alpha = clamp(self.alpha, 0.0, 1.0);
+    }
+}
+
 impl Mix for Xyz {
     fn mix(&self, other: &Xyz, factor: f32) -> Xyz {
         let factor = clamp(factor, 0.0, 1.0);
@@ -52,7 +74,7 @@ impl Shade for Xyz {
     fn lighten(&self, amount: f32) -> Xyz {
         Xyz {
             x: self.x,
-            y: (self.y + amount).max(0.0),
+            y: self.y + amount,
             z: self.z,
             alpha: self.alpha,
         }

@@ -1,4 +1,4 @@
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, Mix, Shade, GetHue, Hue, RgbHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, RgbHue, clamp};
 
 ///Linear HSV color space with an alpha component.
 ///
@@ -36,6 +36,26 @@ impl Hsv {
     }
 }
 
+impl ColorSpace for Hsv {
+    fn is_valid(&self) -> bool {
+        self.saturation >= 0.0 && self.saturation <= 1.0 &&
+        self.value >= 0.0 && self.value <= 1.0 &&
+        self.alpha >= 0.0 && self.alpha <= 1.0
+    }
+
+    fn clamp(&self) -> Hsv {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.saturation = clamp(self.saturation, 0.0, 1.0);
+        self.value = clamp(self.value, 0.0, 1.0);
+        self.alpha = clamp(self.alpha, 0.0, 1.0);
+    }
+}
+
 impl Mix for Hsv {
     fn mix(&self, other: &Hsv, factor: f32) -> Hsv {
         let factor = clamp(factor, 0.0, 1.0);
@@ -55,7 +75,7 @@ impl Shade for Hsv {
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
-            value: (self.value + amount).max(0.0),
+            value: self.value + amount,
             alpha: self.alpha,
         }
     }

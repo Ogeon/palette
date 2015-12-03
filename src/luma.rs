@@ -1,4 +1,4 @@
-use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, Mix, Shade, clamp};
+use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 ///Linear luminance with an alpha component.
 #[derive(Clone, Debug, PartialEq)]
@@ -35,17 +35,21 @@ impl Luma {
             alpha: alpha as f32 / 255.0,
         }
     }
+}
 
-    ///Return a new luminance value with all channels clamped to `[0.0, 1.0]`.
-    pub fn clamp(&self) -> Luma {
-        Luma {
-            luma: clamp(self.luma, 0.0, 1.0),
-            alpha: clamp(self.alpha, 0.0, 1.0),
-        }
+impl ColorSpace for Luma {
+    fn is_valid(&self) -> bool {
+        self.luma >= 0.0 && self.luma <= 1.0 &&
+        self.alpha >= 0.0 && self.alpha <= 1.0
     }
 
-    ///Clamp all channels to `[0.0, 1.0]`.
-    pub fn clamp_self(&mut self) {
+    fn clamp(&self) -> Luma {
+        let mut c = self.clone();
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
         self.luma = clamp(self.luma, 0.0, 1.0);
         self.alpha = clamp(self.alpha, 0.0, 1.0);
     }
