@@ -1,0 +1,22 @@
+language: rust
+sudo: false
+cache:
+  directories:
+    - $HOME/.cargo
+rust:
+  - stable
+  - beta
+  - nightly
+os:
+  - linux
+  - osx
+branches:
+  only:
+    - master
+    - auto
+script:
+  - cargo build -v
+  - cargo test -v
+  - cargo doc
+after_success:
+  - sh scripts/upload_doc.sh
