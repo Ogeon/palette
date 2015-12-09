@@ -161,20 +161,20 @@ mod test {
     fn red() {
         let a = Xyz::from(Rgb::rgb(1.0, 0.0, 0.0));
         let b = Xyz::xyz(0.41240, 0.21260, 0.01930);
-        assert_eq!(a, b);
+        assert_approx_eq!(a, b, [x, y, z]);
     }
 
     #[test]
     fn green() {
         let a = Xyz::from(Rgb::rgb(0.0, 1.0, 0.0));
         let b = Xyz::xyz(0.35760, 0.71520, 0.11920);
-        assert_eq!(a, b);
+        assert_approx_eq!(a, b, [x, y, z]);
     }
 
     #[test]
     fn blue() {
         let a = Xyz::from(Rgb::rgb(0.0, 0.0, 1.0));
         let b = Xyz::xyz(0.18050, 0.07220, 0.95050);
-        assert_eq!(a, b);
+        assert_approx_eq!(a, b, [x, y, z]);
     }
 }

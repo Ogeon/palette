@@ -228,8 +228,8 @@ mod test {
         let b = Hsl::hsl(0.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(0.0.into(), 1.0, 1.0));
 
-        assert_eq!(a, b);
-        assert_eq!(a, c);
+        assert_approx_eq!(a, b, [hue, saturation, lightness]);
+        assert_approx_eq!(a, c, [hue, saturation, lightness]);
     }
 
     #[test]
@@ -238,8 +238,8 @@ mod test {
         let b = Hsl::hsl(30.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(30.0.into(), 1.0, 1.0));
 
-        assert_eq!(a, b);
-        assert_eq!(a, c);
+        assert_approx_eq!(a, b, [hue, saturation, lightness]);
+        assert_approx_eq!(a, c, [hue, saturation, lightness]);
     }
 
     #[test]
@@ -248,8 +248,8 @@ mod test {
         let b = Hsl::hsl(120.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(120.0.into(), 1.0, 1.0));
 
-        assert_eq!(a, b);
-        assert_eq!(a, c);
+        assert_approx_eq!(a, b, [hue, saturation, lightness]);
+        assert_approx_eq!(a, c, [hue, saturation, lightness]);
     }
 
     #[test]
@@ -258,8 +258,8 @@ mod test {
         let b = Hsl::hsl(240.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(240.0.into(), 1.0, 1.0));
 
-        assert_eq!(a, b);
-        assert_eq!(a, c);
+        assert_approx_eq!(a, b, [hue, saturation, lightness]);
+        assert_approx_eq!(a, c, [hue, saturation, lightness]);
     }
 
     #[test]
@@ -268,7 +268,7 @@ mod test {
         let b = Hsl::hsl(270.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(270.0.into(), 1.0, 1.0));
 
-        assert_eq!(a, b);
-        assert_eq!(a, c);
+        assert_approx_eq!(a, b, [hue, saturation, lightness]);
+        assert_approx_eq!(a, c, [hue, saturation, lightness]);
     }
 }

@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[macro_use]
+extern crate approx;
+
 pub use gradient::Gradient;
 pub use rgb::Rgb;
 pub use luma::Luma;
@@ -20,6 +24,20 @@ macro_rules! from_color {
             }
         }
     )
+}
+
+//Helper macro for approximate component wise comparison. Most color spaces
+//are in roughly the same ranges, so this epsilon should be alright.
+#[cfg(test)]
+macro_rules! assert_approx_eq {
+    ($a:ident, $b:ident, [$($components:ident),+]) => ({
+        $(
+            let a: f32 = $a.$components.into();
+            let b: f32 = $b.$components.into();
+            assert_relative_eq!(a, b, epsilon = 0.0001);
+        )+
+        assert_relative_eq!($a.alpha, $b.alpha, epsilon = 0.0001);
+    })
 }
 
 pub mod gradient;
