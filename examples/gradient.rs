@@ -37,25 +37,25 @@ fn main() {
     let mut image = RgbImage::new(256, 128);
 
     for (i, ((c1, c2), (c3, c4))) in grad1.take(256).zip(grad2.take(256)).zip(grad3.take(256).zip(grad4.take(256))).enumerate() {
-        let (r1, g1, b1, _) = c1.to_srgba8();
-        let (r2, g2, b2, _) = c2.to_srgba8();
-        let (r3, g3, b3, _) = Rgb::from(c3).to_srgba8();
-        let (r4, g4, b4, _) = Rgb::from(c4).to_srgba8();
+        let c1 = c1.to_srgb8_array();
+        let c2 = c2.to_srgb8_array();
+        let c3 = Rgb::from(c3).to_srgb8_array();
+        let c4 = Rgb::from(c4).to_srgb8_array();
 
         for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
-            pixel.data = [r1, g1, b1];
+            pixel.data = c1
         }
 
         for (_, _, pixel) in image.sub_image(i as u32, 32, 1, 31).pixels_mut() {
-            pixel.data = [r2, g2, b2];
+            pixel.data = c2;
         }
 
         for (_, _, pixel) in image.sub_image(i as u32, 65, 1, 31).pixels_mut() {
-            pixel.data = [r3, g3, b3];
+            pixel.data = c3;
         }
 
         for (_, _, pixel) in image.sub_image(i as u32, 97, 1, 31).pixels_mut() {
-            pixel.data = [r4, g4, b4];
+            pixel.data = c4;
         }
     }
 

@@ -95,18 +95,64 @@ impl Rgb {
     }
 
     ///Convert to sRGB values and transparency.
+    pub fn to_srgb(&self) -> (f32, f32, f32) {
+        let (r, g, b, _) = self.to_srgba();
+        (r, g, b)
+    }
+
+    ///Convert to 8 bit sRGB values and transparency.
+    pub fn to_srgb8(&self) -> (u8, u8, u8) {
+        let (r, g, b) = self.to_srgb();
+        (
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8,
+        )
+    }
+
+    ///Convert to sRGB values and transparency.
     pub fn to_srgba(&self) -> (f32, f32, f32, f32) {
-        (to_srgb(self.red), to_srgb(self.green), to_srgb(self.blue), self.alpha)
+        (
+            clamp(to_srgb(self.red), 0.0, 1.0),
+            clamp(to_srgb(self.green), 0.0, 1.0),
+            clamp(to_srgb(self.blue), 0.0, 1.0),
+            clamp(self.alpha, 0.0, 1.0),
+        )
     }
 
     ///Convert to 8 bit sRGB values and transparency.
     pub fn to_srgba8(&self) -> (u8, u8, u8, u8) {
+        let (r, g, b, a) = self.to_srgba();
         (
-            (clamp(to_srgb(self.red), 0.0, 1.0) * 255.0) as u8,
-            (clamp(to_srgb(self.green), 0.0, 1.0) * 255.0) as u8,
-            (clamp(to_srgb(self.blue), 0.0, 1.0) * 255.0) as u8,
-            (clamp(self.alpha, 0.0, 1.0) * 255.0) as u8,
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8,
+            (a * 255.0) as u8,
         )
+    }
+
+    ///Convert to an array of sRGB values.
+    pub fn to_srgb_array(&self) -> [f32; 3] {
+        let (r, g, b) = self.to_srgb();
+        [r, g, b]
+    }
+
+    ///Convert to an array of 8 bit sRGB values.
+    pub fn to_srgb8_array(&self) -> [u8; 3] {
+        let (r, g, b) = self.to_srgb8();
+        [r, g, b]
+    }
+
+    ///Convert to an array of sRGB values and transparency.
+    pub fn to_srgba_array(&self) -> [f32; 4] {
+        let (r, g, b, a) = self.to_srgba();
+        [r, g, b, a]
+    }
+
+    ///Convert to an array of 8 bit sRGB values and transparency.
+    pub fn to_srgba8_array(&self) -> [u8; 4] {
+        let (r, g, b, a) = self.to_srgba8();
+        [r, g, b, a]
     }
 }
 

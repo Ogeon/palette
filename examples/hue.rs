@@ -12,15 +12,13 @@ fn main() {
     for (x, y, pixel) in image.enumerate_pixels_mut() {
         let color = Rgb::srgb8(pixel.data[0], pixel.data[1], pixel.data[2]);
 
-        let (r, g, b, _) = if x < y {
+        pixel.data = if x < y {
             let saturated = Hsl::from(color).shift_hue(180.0.into());
-            Rgb::from(saturated).to_srgba8()
+            Rgb::from(saturated).to_srgb8_array()
         } else {
             let saturated = Lch::from(color).shift_hue(180.0.into());
-            Rgb::from(saturated).to_srgba8()
+            Rgb::from(saturated).to_srgb8_array()
         };
-
-        pixel.data = [r, g, b];
     }
 
     match image.save("examples/hue.png") {
