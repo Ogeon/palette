@@ -14,10 +14,10 @@ fn main() {
 
         pixel.data = if x < y {
             let saturated = Hsl::from(color).shift_hue(180.0.into());
-            Rgb::from(saturated).to_srgb8_array()
+            Rgb::from(saturated).to_srgb()
         } else {
             let saturated = Lch::from(color).shift_hue(180.0.into());
-            Rgb::from(saturated).to_srgb8_array()
+            Rgb::from(saturated).to_srgb()
         };
     }
 

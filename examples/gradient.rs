@@ -37,10 +37,10 @@ fn main() {
     let mut image = RgbImage::new(256, 128);
 
     for (i, ((c1, c2), (c3, c4))) in grad1.take(256).zip(grad2.take(256)).zip(grad3.take(256).zip(grad4.take(256))).enumerate() {
-        let c1 = c1.to_srgb8_array();
-        let c2 = c2.to_srgb8_array();
-        let c3 = Rgb::from(c3).to_srgb8_array();
-        let c4 = Rgb::from(c4).to_srgb8_array();
+        let c1 = c1.to_srgb();
+        let c2 = c2.to_srgb();
+        let c3 = Rgb::from(c3).to_srgb();
+        let c4 = Rgb::from(c4).to_srgb();
 
         for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
             pixel.data = c1

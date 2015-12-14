@@ -3,7 +3,7 @@
 extern crate approx;
 
 pub use gradient::Gradient;
-pub use rgb::Rgb;
+pub use rgb::{Rgb, RgbPixel};
 pub use luma::Luma;
 pub use xyz::Xyz;
 pub use lab::Lab;

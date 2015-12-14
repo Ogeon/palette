@@ -99,67 +99,42 @@ impl Rgb {
     }
 }
 
-///Conversion to sRGB.
+///Conversion to "pixel space".
 impl Rgb {
-    ///Convert to sRGB values and transparency.
-    pub fn to_srgb(&self) -> (f32, f32, f32) {
-        let (r, g, b, _) = self.to_srgba();
-        (r, g, b)
-    }
-
-    ///Convert to 8 bit sRGB values and transparency.
-    pub fn to_srgb8(&self) -> (u8, u8, u8) {
-        let (r, g, b) = self.to_srgb();
-        (
-            (r * 255.0) as u8,
-            (g * 255.0) as u8,
-            (b * 255.0) as u8,
+    ///Convert to a linear RGB pixel. `Rgb` is already assumed to be linear,
+    ///so the components will just be clamped to [0.0, 1.0] before conversion.
+    ///
+    ///```
+    ///use palette::Rgb;
+    ///
+    ///let c = Rgb::rgb(0.5, 0.3, 0.1);
+    ///assert_eq!((c.red, c.green, c.blue), c.to_linear());
+    ///assert_eq!((0.5, 0.3, 0.1), c.to_linear());
+    ///```
+    pub fn to_linear<P: RgbPixel>(&self) -> P {
+        P::from_rgba(
+            clamp(self.red, 0.0, 1.0),
+            clamp(self.green, 0.0, 1.0),
+            clamp(self.blue, 0.0, 1.0),
+            clamp(self.alpha, 0.0, 1.0),
         )
     }
 
-    ///Convert to sRGB values and transparency.
-    pub fn to_srgba(&self) -> (f32, f32, f32, f32) {
-        (
+    ///Convert to an sRGB pixel.
+    ///
+    ///```
+    ///use palette::Rgb;
+    ///
+    ///let c = Rgb::srgb(0.5, 0.3, 0.1);
+    ///assert_eq!((0.5, 0.3, 0.1), c.to_srgb());
+    ///```
+    pub fn to_srgb<P: RgbPixel>(&self) -> P {
+        P::from_rgba(
             clamp(to_srgb(self.red), 0.0, 1.0),
             clamp(to_srgb(self.green), 0.0, 1.0),
             clamp(to_srgb(self.blue), 0.0, 1.0),
             clamp(self.alpha, 0.0, 1.0),
         )
-    }
-
-    ///Convert to 8 bit sRGB values and transparency.
-    pub fn to_srgba8(&self) -> (u8, u8, u8, u8) {
-        let (r, g, b, a) = self.to_srgba();
-        (
-            (r * 255.0) as u8,
-            (g * 255.0) as u8,
-            (b * 255.0) as u8,
-            (a * 255.0) as u8,
-        )
-    }
-
-    ///Convert to an array of sRGB values.
-    pub fn to_srgb_array(&self) -> [f32; 3] {
-        let (r, g, b) = self.to_srgb();
-        [r, g, b]
-    }
-
-    ///Convert to an array of 8 bit sRGB values.
-    pub fn to_srgb8_array(&self) -> [u8; 3] {
-        let (r, g, b) = self.to_srgb8();
-        [r, g, b]
-    }
-
-    ///Convert to an array of sRGB values and transparency.
-    pub fn to_srgba_array(&self) -> [f32; 4] {
-        let (r, g, b, a) = self.to_srgba();
-        [r, g, b, a]
-    }
-
-    ///Convert to an array of 8 bit sRGB values and transparency.
-    pub fn to_srgba8_array(&self) -> [u8; 4] {
-        let (r, g, b, a) = self.to_srgba8();
-        [r, g, b, a]
     }
 }
 
@@ -340,5 +315,64 @@ fn to_srgb(x: f32) -> f32 {
         12.92 * x
     } else {
         1.055 * x.powf(1.0 / 2.4) - 0.055
+    }
+}
+
+///A conversion trait for RGB pixel types.
+///
+///It makes conversion from `Rgb` to various pixel representations easy and
+///extensible.
+pub trait RgbPixel {
+    ///Create an instance of self from red, green, blue and alpha values.
+    ///These can be assumed to already be gamma corrected and belongs to the
+    ///range [0.0, 1.0].
+    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Self;
+}
+
+impl RgbPixel for (f32, f32, f32, f32) {
+    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (f32, f32, f32, f32) {
+        (red, green, blue, alpha)
+    }
+}
+
+impl RgbPixel for (f32, f32, f32) {
+    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (f32, f32, f32) {
+        (red, green, blue)
+    }
+}
+
+impl RgbPixel for (u8, u8, u8, u8) {
+    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (u8, u8, u8, u8) {
+        ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8)
+    }
+}
+
+impl RgbPixel for (u8, u8, u8) {
+    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (u8, u8, u8) {
+        ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8)
+    }
+}
+
+impl RgbPixel for [f32; 4] {
+    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [f32; 4] {
+        [red, green, blue, alpha]
+    }
+}
+
+impl RgbPixel for [f32; 3] {
+    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [f32; 3] {
+        [red, green, blue]
+    }
+}
+
+impl RgbPixel for [u8; 4] {
+    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [u8; 4] {
+        [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8]
+    }
+}
+
+impl RgbPixel for [u8; 3] {
+    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [u8; 3] {
+        [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8]
     }
 }

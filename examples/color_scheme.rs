@@ -154,12 +154,12 @@ fn blit_shades<I: GenericImage<Pixel=image::Rgb<u8>> + 'static>(color: Color, mu
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Rgb::from(color.clone()).to_srgb8_array();
+    let primary = Rgb::from(color.clone()).to_srgb();
     
     //Generate one lighter and two darker versions of the color
-    let light = Rgb::from(color.lighten(0.1)).to_srgb8_array();
-    let dark1 = Rgb::from(color.darken(0.1)).to_srgb8_array();
-    let dark2 = Rgb::from(color.darken(0.2)).to_srgb8_array();
+    let light = Rgb::from(color.lighten(0.1)).to_srgb();
+    let dark1 = Rgb::from(color.darken(0.1)).to_srgb();
+    let dark2 = Rgb::from(color.darken(0.2)).to_srgb();
 
     for (x, y, pixel) in canvas.pixels_mut() {
         if y < height / 2 {

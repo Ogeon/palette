@@ -17,14 +17,14 @@ fn main() {
         let color = Rgb::srgb8(pixel.data[0], pixel.data[1], pixel.data[2]);
 
         let saturated = Hsl::from(color).saturate(0.8);
-        pixel.data = Rgb::from(saturated).to_srgb8_array();
+        pixel.data = Rgb::from(saturated).to_srgb();
     }
 
     for (_, _, pixel) in image.sub_image(width / 2, 0, width / 2, height).pixels_mut() {
         let color = Rgb::srgb8(pixel.data[0], pixel.data[1], pixel.data[2]);
 
         let saturated = Lch::from(color).saturate(0.8);
-        pixel.data = Rgb::from(saturated).to_srgb8_array();
+        pixel.data = Rgb::from(saturated).to_srgb();
     }
 
     match image.save("examples/saturate.png") {
