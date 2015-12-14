@@ -72,16 +72,16 @@ macro_rules! make_color {
             $(#[$variant_comment] $variant($variant)),+
         }
 
-        impl Color {
-            $(
+        $(
+            impl Color {
                 $(
                     #[$ctor_comment]
                     pub fn $ctor_name($($ctor_field: $ctor_ty),*) -> Color {
                         Color::$variant($variant::$ctor_proxy($($ctor_field),*))
                     }
                 )+
-            )+
-        }
+            }
+        )+
 
         impl Mix for Color {
             fn mix(&self, other: &Color, factor: f32) -> Color {

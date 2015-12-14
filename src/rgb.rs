@@ -13,6 +13,7 @@ pub struct Rgb {
     pub alpha: f32,
 }
 
+///Creation from linear RGB.
 impl Rgb {
     ///Linear RGB.
     pub fn rgb(red: f32, green: f32, blue: f32) -> Rgb {
@@ -53,7 +54,10 @@ impl Rgb {
             alpha: alpha as f32 / 255.0,
         }
     }
+}
 
+///Creation from sRGB.
+impl Rgb {
     ///Linear RGB from sRGB.
     pub fn srgb(red: f32, green: f32, blue: f32) -> Rgb {
         Rgb {
@@ -93,7 +97,10 @@ impl Rgb {
             alpha: alpha as f32 / 255.0,
         }
     }
+}
 
+///Conversion to sRGB.
+impl Rgb {
     ///Convert to sRGB values and transparency.
     pub fn to_srgb(&self) -> (f32, f32, f32) {
         let (r, g, b, _) = self.to_srgba();
