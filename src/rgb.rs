@@ -99,6 +99,49 @@ impl Rgb {
     }
 }
 
+///Creation from gamma corrected RGB.
+impl Rgb {
+    ///Linear RGB from gamma corrected RGB.
+    pub fn rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32) -> Rgb {
+        Rgb {
+            red: from_gamma(red, gamma),
+            green: from_gamma(green, gamma),
+            blue: from_gamma(blue, gamma),
+            alpha: 1.0,
+        }
+    }
+
+    ///Linear RGB from gamma corrected RGB with transparency.
+    pub fn rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> Rgb {
+        Rgb {
+            red: from_gamma(red, gamma),
+            green: from_gamma(green, gamma),
+            blue: from_gamma(blue, gamma),
+            alpha: alpha,
+        }
+    }
+
+    ///Linear RGB from 8 bit gamma corrected RGB.
+    pub fn rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32) -> Rgb {
+        Rgb {
+            red: from_gamma(red as f32 / 255.0, gamma),
+            green: from_gamma(green as f32 / 255.0, gamma),
+            blue: from_gamma(blue as f32 / 255.0, gamma),
+            alpha: 1.0,
+        }
+    }
+
+    ///Linear RGB from 8 bit gamma corrected RGB with transparency.
+    pub fn rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> Rgb {
+        Rgb {
+            red: from_gamma(red as f32 / 255.0, gamma),
+            green: from_gamma(green as f32 / 255.0, gamma),
+            blue: from_gamma(blue as f32 / 255.0, gamma),
+            alpha: alpha as f32 / 255.0,
+        }
+    }
+}
+
 ///Conversion to "pixel space".
 impl Rgb {
     ///Convert to a linear RGB pixel. `Rgb` is already assumed to be linear,
@@ -133,6 +176,23 @@ impl Rgb {
             clamp(to_srgb(self.red), 0.0, 1.0),
             clamp(to_srgb(self.green), 0.0, 1.0),
             clamp(to_srgb(self.blue), 0.0, 1.0),
+            clamp(self.alpha, 0.0, 1.0),
+        )
+    }
+
+    ///Convert to a gamma corrected RGB pixel.
+    ///
+    ///```
+    ///use palette::Rgb;
+    ///
+    ///let c = Rgb::rgb8_gamma(128, 64, 32, 2.2);
+    ///assert_eq!((128, 64, 32), c.to_gamma(2.2));
+    ///```
+    pub fn to_gamma<P: RgbPixel>(&self, gamma: f32) -> P {
+        P::from_rgba(
+            clamp(to_gamma(self.red, gamma), 0.0, 1.0),
+            clamp(to_gamma(self.green, gamma), 0.0, 1.0),
+            clamp(to_gamma(self.blue, gamma), 0.0, 1.0),
             clamp(self.alpha, 0.0, 1.0),
         )
     }
@@ -316,6 +376,14 @@ fn to_srgb(x: f32) -> f32 {
     } else {
         1.055 * x.powf(1.0 / 2.4) - 0.055
     }
+}
+
+fn from_gamma(x: f32, gamma: f32) -> f32 {
+    x.powf(1.0 / gamma)
+}
+
+fn to_gamma(x: f32, gamma: f32) -> f32 {
+    x.powf(gamma)
 }
 
 ///A conversion trait for RGB pixel types.

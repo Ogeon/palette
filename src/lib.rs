@@ -180,6 +180,18 @@ make_color! {
 
         ///Linear RGB from 8 bit sRGB with transparency.
         srgba8(red: u8, green: u8, blue: u8, alpha: u8) -> srgba8;
+
+        ///Linear RGB from gamma corrected RGB.
+        rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32) -> rgb_gamma;
+
+        ///Linear RGB from gamma corrected RGB with transparency.
+        rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> rgba_gamma;
+
+        ///Linear RGB from 8 bit gamma corrected RGB.
+        rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32) -> rgb8_gamma;
+
+        ///Linear RGB from 8 bit gamma corrected RGB with transparency.
+        rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> rgba8_gamma;
     }
 
     ///CIE 1931 XYZ.
