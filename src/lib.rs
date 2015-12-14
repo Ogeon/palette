@@ -66,7 +66,18 @@ macro_rules! make_color {
         ///A generic color type.
         ///
         ///The `Color` may belong to any color space and it may change
-        ///depending on which operation is performed.
+        ///depending on which operation is performed. That makes it immune to
+        ///the "without conversion" rule of the operations it supports. The
+        ///color spaces are selected as follows:
+        ///
+        /// * `Mix`: RGB for no particular reason, except that it's intuitive.
+        /// * `Shade`: CIE L*a*b* for its luminance component.
+        /// * `Hue` and `GetHue`: CIE L*C*h° for its hue component and how it preserves the apparent lightness.
+        /// * `Saturate`: CIE L*C*h° for its chromaticity component and how it preserves the apparent lightness.
+        ///
+        ///It's not recommended to use `Color` when full control is necessary,
+        ///but it can easily be converted to a fixed color space in those
+        ///cases.
         #[derive(Clone, Debug)]
         pub enum Color {
             $(#[$variant_comment] $variant($variant)),+
