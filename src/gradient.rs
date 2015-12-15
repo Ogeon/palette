@@ -5,6 +5,13 @@ use std::cmp::max;
 use Mix;
 
 ///A linear interpolation between colors.
+///
+///It's used to smoothly transition between a series of colors, that can be
+///either evenly spaced or have customized positions. The gradient is
+///continuous between the control points, but it's possible to iterate over a
+///number of evenly spaced points using the `take` method. Any point outside
+///the domain of the gradient will have the same color as the closest control
+///point.
 #[derive(Clone)]
 pub struct Gradient<C: Mix + Clone>(Vec<(f32, C)>);
 
@@ -33,8 +40,8 @@ impl<C: Mix + Clone> Gradient<C> {
         Gradient(colors)
     }
 
-    ///Get a color from the gradient. The nearest color will be returned if `i`
-    ///is outside the domain.
+    ///Get a color from the gradient. The color of the closest control point
+    ///will be returned if `i` is outside the domain.
     pub fn get(&self, i: f32) -> C {
         let &(mut min, ref min_color) = self.0.get(0).expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
@@ -73,7 +80,7 @@ impl<C: Mix + Clone> Gradient<C> {
         min_color.mix(max_color, factor)
     }
 
-    ///Take `n` evenly spaced colors from the gradient.
+    ///Take `n` evenly spaced colors from the gradient, as an iterator.
     pub fn take(&self, n: usize) -> Take<C> {
         let &(min, _) = self.0.get(0).expect("a Gradient must contain at least one color");
         let &(max, _) = self.0.last().expect("a Gradient must contain at least one color");
