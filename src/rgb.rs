@@ -2,14 +2,31 @@ use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHu
 
 ///Linear RGB with an alpha component.
 ///
+///RGB is probably the most common color space, when it comes to computer
+///graphics, and it's defined as an additive mixture of red, green and blue
+///light, where gray scale colors are created when these three channels are
+///equal in strength. This version of RGB is based on sRGB, which is pretty
+///much the standard RGB model today.
+///
 ///Conversions and operations on this color space assumes that it's linear,
 ///meaning that gamma correction is required when converting to and from
 ///a displayable RGB, such as sRGB.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Rgb {
+    ///The amount of red light, where 0.0 is no red light and 1.0 is the
+    ///highest displayable amount.
     pub red: f32,
+
+    ///The amount of green light, where 0.0 is no green light and 1.0 is the
+    ///highest displayable amount.
     pub green: f32,
+
+    ///The amount of blue light, where 0.0 is no blue light and 1.0 is the
+    ///highest displayable amount.
     pub blue: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 

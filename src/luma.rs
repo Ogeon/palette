@@ -1,13 +1,24 @@
 use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 ///Linear luminance with an alpha component.
+///
+///Luma is a purely gray scale color space, which is included more for
+///completeness than anything else, and represents how bright a color is
+///perceived to be. It's basically the `Y` component of [CIE
+///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
+///the set of operations that can be performed on it.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Luma {
+    ///The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 
 impl Luma {
+    ///Linear luminance.
     pub fn y(luma: f32) -> Luma {
         Luma {
             luma: luma,
@@ -15,6 +26,7 @@ impl Luma {
         }
     }
 
+    ///Linear luminance with transparency.
     pub fn ya(luma: f32, alpha: f32) -> Luma {
         Luma {
             luma: luma,
@@ -22,6 +34,7 @@ impl Luma {
         }
     }
 
+    ///Linear luminance from an 8 bit value.
     pub fn y8(luma: u8) -> Luma {
         Luma {
             luma: luma as f32 / 255.0,
@@ -29,6 +42,7 @@ impl Luma {
         }
     }
 
+    ///Linear luminance and transparency from 8 bit values.
     pub fn ya8(luma: u8, alpha: u8) -> Luma {
         Luma {
             luma: luma as f32 / 255.0,

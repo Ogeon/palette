@@ -1,11 +1,31 @@
 use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL color space with an alpha component.
+///
+///The HSL color space can be seen as a cylindrical version of
+///[RGB](struct.Rgb.html), where the `hue` is the angle around the color
+///cylinder, the `saturation` is the distance from the center, and the
+///`lightness` is the height from the bottom. Its composition makes it
+///especially good for operations like changing green to red, making a color
+///more gray, or making it darker.
+///
+///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hsl {
+    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
+    ///etc.
 	pub hue: RgbHue,
+
+    ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
+    ///give absolutely clear colors.
 	pub saturation: f32,
+
+    ///Decides how light the color will look. 0.0 will be black, 0.5 will give
+    ///a clear color, and 1.0 will give white.
 	pub lightness: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
 	pub alpha: f32,
 }
 

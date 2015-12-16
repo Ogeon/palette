@@ -3,15 +3,35 @@ use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHu
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///The CIE L*a*b* (CIELAB) color space with an alpha component.
+///
+///CIE L*a*b* is a device independent color space which includes all
+///perceivable colors. It's sometimes used to convert between other color
+///spaces, because of its ability to represent all of their colors, and
+///sometimes in color manipulation, because of its perceptual uniformity. This
+///means that the perceptual difference between two colors is equal to their
+///numerical difference.
+///
+///The parameters of L*a*b* are quite different, compared to many other color
+///spaces, so manipulating them manually can be unintuitive.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lab {
+    ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
+    ///give the brightest white.
     pub l: f32,
+
+    ///a* goes from red at -127.0 to green at 128.0.
     pub a: f32,
+
+    ///b* goes from yellow at -127.0 to blue at 128.0.
     pub b: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 
 impl Lab {
+    ///CIE L*a*b*.
     pub fn lab(l: f32, a: f32, b: f32) -> Lab {
         Lab {
             l: l,
@@ -21,6 +41,7 @@ impl Lab {
         }
     }
 
+    ///CIE L*a*b* and transparency.
     pub fn laba(l: f32, a: f32, b: f32, alpha: f32) -> Lab {
         Lab {
             l: l,

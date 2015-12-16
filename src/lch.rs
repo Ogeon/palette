@@ -1,11 +1,30 @@
 use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
-///CIE L*C*h°, a polar version of CIE L*a*b*, with an alpha component.
+///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html), with an alpha
+///component.
+///
+///L*C*h° shares its range and perceptual uniformity with L*a*b*, but it's a
+///cylindrical color space, like [HSL](struct.Hsl.html) and
+///[HSV](struct.Hsv.html). This gives it the same ability to directly change
+///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lch {
+    ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
+    ///give the brightest white.
     pub l: f32,
+
+    ///C* is the colorfulness of the color. It's similar to saturation. 0.0
+    ///gives gray scale colors, and numbers around 128.0-182.0 gives fully
+    ///saturated colors. The upper limit of 182.0 should include the whole
+    ///L*a*b* space and some more.
     pub chroma: f32,
+
+    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
+    ///etc.
     pub hue: LabHue,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 

@@ -4,18 +4,34 @@ use tristimulus::{X_N, Y_N, Z_N};
 
 ///The CIE 1931 XYZ color space with an alpha component.
 ///
+///XYZ links the perceived colors to their wavelengths and simply makes it
+///possible to describe the way we see colors as numbers. It's often used when
+///converting from one color space to an other, and requires a standard
+///illuminant and a standard observer to be defined.
+///
 ///Conversions and operations on this color space assumes the CIE Standard
 ///Illuminant D65 as the white point, and the 2° standard colorimetric
 ///observer.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Xyz {
+    ///X is the scale of what can be seen as a response curve for the cone
+    ///cells in the human eye. It goes from 0.0 to 1.0.
     pub x: f32,
+
+    ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
     pub y: f32,
+
+    ///Z is the scale of what can be seen as the blue stimulation. It goes
+    ///from 0.0 to 1.0.
     pub z: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 
 impl Xyz {
+    ///CIE XYZ.
     pub fn xyz(x: f32, y: f32, z: f32) -> Xyz {
         Xyz {
             x: x,
@@ -25,6 +41,7 @@ impl Xyz {
         }
     }
 
+    ///CIE XYZ and transparency.
     pub fn xyza(x: f32, y: f32, z: f32, alpha: f32) -> Xyz {
         Xyz {
             x: x,

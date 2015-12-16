@@ -2,15 +2,29 @@ use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, 
 
 ///Linear HSV color space with an alpha component.
 ///
-///HSV is a cylindrical version of RGB, where the `value` component determines
-///the _brightness_ of the color, and not the _lightness_. The difference is
-///that, for example, red (100% R, 0% G, 0% B) and white (100% R, 100% G, 100%
-///B) has the same brightness (or value), but not the same lightness.
+///HSV is a cylindrical version of [RGB](struct.Rgb.html) and it's very
+///similar to [HSL](struct.Hsl.html). The difference is that the `value`
+///component in HSV determines the _brightness_ of the color, and not the
+///_lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
+///and white (100% R, 100% G, 100% B) has the same brightness (or value), but
+///not the same lightness.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hsv {
+    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
+    ///etc.
     pub hue: RgbHue,
+
+    ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
+    ///give absolutely clear colors.
     pub saturation: f32,
+
+    ///Decides how bright the color will look. 0.0 will be black, and 1.0 will
+    ///give a bright an clear color that goes towards white when `saturation`
+    ///goes towards 0.0.
     pub value: f32,
+
+    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///completely opaque.
     pub alpha: f32,
 }
 
