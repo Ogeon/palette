@@ -1,4 +1,24 @@
+//!A library that makes linear color calculations and conversion easy and
+//!accessible for anyone. It provides both precision tools that lets you work
+//!in exactly the color space you want to, as well as a general color type
+//!that abstracts away some of the technical details.
+//!
+//!# Linear?
+//!
+//!Colors in, for example, images are often "gamma corrected" or stored in
+//!sRGB format as a compression method and to prevent banding. This is also a
+//!bit of a legacy from the ages of the CRT monitors, where the output from
+//!the electron guns was nonlinear. The problem is that these formats doesn't
+//!represent the actual intensities, and the compression has to be reverted to
+//!make sure that any operations on the colors are accurate. This library uses
+//!a completely linear work flow, and comes with the tools for transitioning
+//!between linear and non-linear RGB.
+
+
 #![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
+
+#![cfg_attr(feature = "strict", deny(missing_docs))]
+#![cfg_attr(feature = "strict", deny(warnings))]
 
 #[cfg(test)]
 #[macro_use]

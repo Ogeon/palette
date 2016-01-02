@@ -15,8 +15,8 @@ branches:
     - master
     - auto
 script:
-  - cargo build -v
-  - cargo test -v
+  - cargo build -v --features strict
+  - cargo test -v --features strict
   - cargo doc
 after_success:
   - sh scripts/upload_doc.sh
