@@ -1,3 +1,5 @@
+#![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
+
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
