@@ -39,6 +39,21 @@ image looks (as illustrated by some of the programs in `examples`), and
 Palette makes the conversion between them as easy as a call to `from` or
 `into`.
 
+This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue by
+60° and converts it back to RGB:
+
+```Rust
+extern crate palette;
+use palette::{Rgb, Lch, Hue};
+
+let lch_color = Lch::from(Rgb::srgb(0.8, 0.2, 0.1));
+let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
+```
+
+This results in the following two colors:
+
+![Hue Shift Comparison](gfx/readme_color_spaces.png)
+
 ## Manipulation
 
 Palette comes with a number of color manipulation tools, that are implemented
@@ -52,11 +67,51 @@ arbitrary defaults, such as saturating a gray color to red when there is no
 available hue information. The abstract `Color` type does still support every
 operation, for when this is less important.
 
+The following example shows how the `Color` type is used to make a lighter and
+a desaturated version of the original.
+
+```Rust
+extern crate palette;
+use palette::{Color, Shade, Saturate};
+
+let color = Color::srgb(0.8, 0.2, 0.1);
+let lighter = color.lighten(0.1);
+let desaturated = color.desaturate(0.5);
+```
+
+This results in the following three colors:
+
+![Manipulation Comparison](gfx/readme_manipulation.png)
+
+
 ## Gradients
 
 There is also a linear gradient type which makes it easy to interpolate
 between a series of colors. This gradient can be used in any color space and
 it can be used to make color sequence iterators.
+
+The following example shows two gradients between the same two endpoints, but
+one is in RGB and the other in is HSV space.
+
+```Rust
+extern crate palette;
+use palette::{Rgb, Hsv, Gradient};
+
+let grad1 = Gradient::new(vec![
+    Rgb::rgb(1.0, 0.1, 0.1),
+    Rgb::rgb(0.1, 1.0, 1.0)
+]);
+
+let grad2 = Gradient::new(vec![
+    Hsv::from(Rgb::rgb(1.0, 0.1, 0.1)),
+    Hsv::from(Rgb::rgb(0.1, 1.0, 1.0))
+]);
+```
+
+The RGB gradient goes through gray, while the HSV gradients changes only the
+hue:
+
+![Gradient Comparison](gfx/readme_gradients.png)
 
 # What It Isn't
 
