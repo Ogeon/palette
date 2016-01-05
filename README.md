@@ -121,3 +121,9 @@ This library is only meant for color manipulation and conversion. It's not...
  * ...an optimal pixel format. The colors are represented by linear 32-bit floats with a mandatory alpha component. It's not a compact format.
 
 You will have to look elsewhere for those features.
+
+# Contributing
+
+All sorts of contributions are welcome, no matter how huge or tiny, so take a
+look at [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, if you are
+interested.
