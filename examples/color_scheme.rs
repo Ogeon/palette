@@ -154,7 +154,7 @@ fn blit_shades<I: GenericImage<Pixel=image::Rgb<u8>> + 'static>(color: Color, mu
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Rgb::from(color.clone()).to_srgb();
+    let primary = Rgb::from(color).to_srgb();
     
     //Generate one lighter and two darker versions of the color
     let light = Rgb::from(color.lighten(0.1)).to_srgb();

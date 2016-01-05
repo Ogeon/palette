@@ -11,7 +11,7 @@ use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHu
 ///Conversions and operations on this color space assumes that it's linear,
 ///meaning that gamma correction is required when converting to and from
 ///a displayable RGB, such as sRGB.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Rgb {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -224,7 +224,7 @@ impl ColorSpace for Rgb {
     }
 
     fn clamp(&self) -> Rgb {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

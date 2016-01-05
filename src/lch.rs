@@ -7,7 +7,7 @@ use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, 
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Lch {
     ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
     ///give the brightest white.
@@ -58,7 +58,7 @@ impl ColorSpace for Lch {
     }
 
     fn clamp(&self) -> Lch {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

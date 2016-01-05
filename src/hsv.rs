@@ -8,7 +8,7 @@ use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, 
 ///_lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
 ///and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 ///not the same lightness.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Hsv {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
@@ -58,7 +58,7 @@ impl ColorSpace for Hsv {
     }
 
     fn clamp(&self) -> Hsv {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

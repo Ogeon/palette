@@ -100,7 +100,7 @@ macro_rules! make_color {
         ///It's not recommended to use `Color` when full control is necessary,
         ///but it can easily be converted to a fixed color space in those
         ///cases.
-        #[derive(Clone, Debug)]
+        #[derive(Clone, Copy, Debug)]
         pub enum Color {
             $(#[$variant_comment] $variant($variant)),+
         }
@@ -118,13 +118,13 @@ macro_rules! make_color {
 
         impl Mix for Color {
             fn mix(&self, other: &Color, factor: f32) -> Color {
-                Rgb::from(self.clone()).mix(&Rgb::from(other.clone()), factor).into()
+                Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
         impl Shade for Color {
             fn lighten(&self, amount: f32) -> Color {
-                Lab::from(self.clone()).lighten(amount).into()
+                Lab::from(*self).lighten(amount).into()
             }
         }
 
@@ -132,23 +132,23 @@ macro_rules! make_color {
             type Hue = LabHue;
 
             fn get_hue(&self) -> Option<LabHue> {
-                Lch::from(self.clone()).get_hue()
+                Lch::from(*self).get_hue()
             }
         }
 
         impl Hue for Color {
             fn with_hue(&self, hue: LabHue) -> Color {
-                Lch::from(self.clone()).with_hue(hue).into()
+                Lch::from(*self).with_hue(hue).into()
             }
 
             fn shift_hue(&self, amount: LabHue) -> Color {
-                Lch::from(self.clone()).shift_hue(amount).into()
+                Lch::from(*self).shift_hue(amount).into()
             }
         }
 
         impl Saturate for Color {
             fn saturate(&self, factor: f32) -> Color {
-                Lch::from(self.clone()).saturate(factor).into()
+                Lch::from(*self).saturate(factor).into()
             }
         }
 

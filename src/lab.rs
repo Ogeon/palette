@@ -13,7 +13,7 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Lab {
     ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
     ///give the brightest white.
@@ -61,7 +61,7 @@ impl ColorSpace for Lab {
     }
 
     fn clamp(&self) -> Lab {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

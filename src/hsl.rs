@@ -10,7 +10,7 @@ use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, 
 ///more gray, or making it darker.
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Hsl {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
@@ -59,7 +59,7 @@ impl ColorSpace for Hsl {
     }
 
     fn clamp(&self) -> Hsl {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

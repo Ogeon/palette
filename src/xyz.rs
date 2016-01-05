@@ -12,7 +12,7 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///Conversions and operations on this color space assumes the CIE Standard
 ///Illuminant D65 as the white point, and the 2° standard colorimetric
 ///observer.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Xyz {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. It goes from 0.0 to 1.0.
@@ -61,7 +61,7 @@ impl ColorSpace for Xyz {
     }
 
     fn clamp(&self) -> Xyz {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }

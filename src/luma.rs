@@ -7,7 +7,7 @@ use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 ///perceived to be. It's basically the `Y` component of [CIE
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Luma {
     ///The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: f32,
@@ -58,7 +58,7 @@ impl ColorSpace for Luma {
     }
 
     fn clamp(&self) -> Luma {
-        let mut c = self.clone();
+        let mut c = *self;
         c.clamp_self();
         c
     }
