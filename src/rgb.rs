@@ -33,7 +33,7 @@ pub struct Rgb {
 ///Creation from linear RGB.
 impl Rgb {
     ///Linear RGB.
-    pub fn rgb(red: f32, green: f32, blue: f32) -> Rgb {
+    pub fn linear_rgb(red: f32, green: f32, blue: f32) -> Rgb {
         Rgb {
             red: red,
             green: green,
@@ -43,7 +43,7 @@ impl Rgb {
     }
 
     ///Linear RGB with transparency.
-    pub fn rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Rgb {
+    pub fn linear_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Rgb {
         Rgb {
             red: red,
             green: green,
@@ -53,7 +53,7 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit values.
-    pub fn rgb8(red: u8, green: u8, blue: u8) -> Rgb {
+    pub fn linear_rgb8(red: u8, green: u8, blue: u8) -> Rgb {
         Rgb {
             red: red as f32 / 255.0,
             green: green as f32 / 255.0,
@@ -63,7 +63,7 @@ impl Rgb {
     }
 
     ///Linear RGB with transparency from 8 bit values.
-    pub fn rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb {
+    pub fn linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb {
         Rgb {
             red: red as f32 / 255.0,
             green: green as f32 / 255.0,
@@ -167,7 +167,7 @@ impl Rgb {
     ///```
     ///use palette::Rgb;
     ///
-    ///let c = Rgb::rgb(0.5, 0.3, 0.1);
+    ///let c = Rgb::linear_rgb(0.5, 0.3, 0.1);
     ///assert_eq!((c.red, c.green, c.blue), c.to_linear());
     ///assert_eq!((0.5, 0.3, 0.1), c.to_linear());
     ///```
@@ -277,7 +277,7 @@ impl GetHue for Rgb {
 
 impl Default for Rgb {
     fn default() -> Rgb {
-        Rgb::rgb(0.0, 0.0, 0.0)
+        Rgb::linear_rgb(0.0, 0.0, 0.0)
     }
 }
 

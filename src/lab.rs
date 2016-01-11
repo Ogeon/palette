@@ -184,21 +184,21 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Lab::from(Rgb::rgb(1.0, 0.0, 0.0));
+        let a = Lab::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
         let b = Lab::lab(53.23288, 80.10933, 67.22006);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(Rgb::rgb(0.0, 1.0, 0.0));
+        let a = Lab::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
         let b = Lab::lab(87.73704, -86.184654, 83.18117);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(Rgb::rgb(0.0, 0.0, 1.0));
+        let a = Lab::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
         let b = Lab::lab(32.302586, 79.19668, -107.863686);
         assert_approx_eq!(a, b, [l, a, b]);
     }

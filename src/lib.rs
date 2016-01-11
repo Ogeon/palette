@@ -191,16 +191,16 @@ make_color! {
     ///Linear RGB.
     Rgb {
         ///Linear RGB.
-        rgb(red: f32, green: f32, blue: f32) -> rgb;
+        linear_rgb(red: f32, green: f32, blue: f32) -> linear_rgb;
 
         ///Linear RGB and transparency.
-        rgba(red: f32, green: f32, blue: f32, alpha: f32) -> rgba;
+        linear_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> linear_rgba;
 
         ///Linear RGB from 8 bit values.
-        rgb8(red: u8, green: u8, blue: u8) -> rgb8;
+        linear_rgb8(red: u8, green: u8, blue: u8) -> linear_rgb8;
 
         ///Linear RGB and transparency from 8 bit values.
-        rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> rgba8;
+        linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> linear_rgba8;
 
         ///Linear RGB from sRGB.
         srgb(red: f32, green: f32, blue: f32) -> srgb;
@@ -291,11 +291,11 @@ pub trait ColorSpace {
 ///```
 ///use palette::{Rgb, Mix};
 ///
-///let a = Rgb::rgb(0.0, 0.5, 1.0);
-///let b = Rgb::rgb(1.0, 0.5, 0.0);
+///let a = Rgb::linear_rgb(0.0, 0.5, 1.0);
+///let b = Rgb::linear_rgb(1.0, 0.5, 0.0);
 ///
 ///assert_eq!(a.mix(&b, 0.0), a);
-///assert_eq!(a.mix(&b, 0.5), Rgb::rgb(0.5, 0.5, 0.5));
+///assert_eq!(a.mix(&b, 0.5), Rgb::linear_rgb(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
 pub trait Mix {
@@ -312,8 +312,8 @@ pub trait Mix {
 ///```
 ///use palette::{Rgb, Shade};
 ///
-///let a = Rgb::rgb(0.4, 0.4, 0.4);
-///let b = Rgb::rgb(0.6, 0.6, 0.6);
+///let a = Rgb::linear_rgb(0.4, 0.4, 0.4);
+///let b = Rgb::linear_rgb(0.6, 0.6, 0.6);
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
@@ -332,10 +332,10 @@ pub trait Shade: Sized {
 ///```
 ///use palette::{Rgb, GetHue};
 ///
-///let red = Rgb::rgb(1.0, 0.0, 0.0);
-///let green = Rgb::rgb(0.0, 1.0, 0.0);
-///let blue = Rgb::rgb(0.0, 0.0, 1.0);
-///let gray = Rgb::rgb(0.5, 0.5, 0.5);
+///let red = Rgb::linear_rgb(1.0, 0.0, 0.0);
+///let green = Rgb::linear_rgb(0.0, 1.0, 0.0);
+///let blue = Rgb::linear_rgb(0.0, 0.0, 1.0);
+///let gray = Rgb::linear_rgb(0.5, 0.5, 0.5);
 ///
 ///assert_eq!(red.get_hue(), Some(0.0.into()));
 ///assert_eq!(green.get_hue(), Some(120.0.into()));

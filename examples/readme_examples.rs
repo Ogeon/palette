@@ -40,13 +40,13 @@ mod gradients {
 
     pub fn run() {
         let grad1 = Gradient::new(vec![
-            Rgb::rgb(1.0, 0.1, 0.1),
-            Rgb::rgb(0.1, 1.0, 1.0)
+            Rgb::linear_rgb(1.0, 0.1, 0.1),
+            Rgb::linear_rgb(0.1, 1.0, 1.0)
         ]);
 
         let grad2 = Gradient::new(vec![
-            Hsv::from(Rgb::rgb(1.0, 0.1, 0.1)),
-            Hsv::from(Rgb::rgb(0.1, 1.0, 1.0))
+            Hsv::from(Rgb::linear_rgb(1.0, 0.1, 0.1)),
+            Hsv::from(Rgb::linear_rgb(0.1, 1.0, 1.0))
         ]);
 
         display_gradients("examples/readme_gradients.png", grad1, grad2);
