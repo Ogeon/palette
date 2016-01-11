@@ -40,7 +40,7 @@ Palette makes the conversion between them as easy as a call to `from` or
 `into`.
 
 This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue by
-60° and converts it back to RGB:
+180° and converts it back to RGB:
 
 ```Rust
 extern crate palette;
