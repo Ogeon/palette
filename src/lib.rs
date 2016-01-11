@@ -81,7 +81,7 @@ macro_rules! make_color {
         #[$variant_comment:meta]
         $variant:ident {$(
             #[$ctor_comment:meta]
-            $ctor_name:ident ($($ctor_field:ident : $ctor_ty:ty),*) -> $ctor_proxy:ident;
+            $ctor_name:ident $(<$($ty_params:ident: $ty_param_traits:ident),*>)* ($($ctor_field:ident : $ctor_ty:ty),*);
         )+}
     )+) => (
 
@@ -109,8 +109,8 @@ macro_rules! make_color {
             impl Color {
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name($($ctor_field: $ctor_ty),*) -> Color {
-                        Color::$variant($variant::$ctor_proxy($($ctor_field),*))
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits),*>)*($($ctor_field: $ctor_ty),*) -> Color {
+                        Color::$variant($variant::$ctor_name($($ctor_field),*))
                     }
                 )+
             }
@@ -176,100 +176,109 @@ make_color! {
     ///Linear luminance.
     Luma {
         ///Linear luminance.
-        y(luma: f32) -> y;
+        y(luma: f32);
 
         ///Linear luminance with transparency.
-        ya(luma: f32, alpha: f32) -> ya;
+        ya(luma: f32, alpha: f32);
 
         ///Linear luminance from an 8 bit value.
-        y8(luma: u8) -> y8;
+        y8(luma: u8);
 
         ///Linear luminance and transparency from 8 bit values.
-        ya8(luma: u8, alpha: u8) -> ya8;
+        ya8(luma: u8, alpha: u8);
     }
 
     ///Linear RGB.
     Rgb {
         ///Linear RGB.
-        linear_rgb(red: f32, green: f32, blue: f32) -> linear_rgb;
+        linear_rgb(red: f32, green: f32, blue: f32);
 
         ///Linear RGB and transparency.
-        linear_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> linear_rgba;
+        linear_rgba(red: f32, green: f32, blue: f32, alpha: f32);
 
         ///Linear RGB from 8 bit values.
-        linear_rgb8(red: u8, green: u8, blue: u8) -> linear_rgb8;
+        linear_rgb8(red: u8, green: u8, blue: u8);
 
         ///Linear RGB and transparency from 8 bit values.
-        linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> linear_rgba8;
+        linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8);
+
+        ///Linear RGB from a linear pixel value.
+        linear_pixel<P: RgbPixel>(pixel: &P);
 
         ///Linear RGB from sRGB.
-        srgb(red: f32, green: f32, blue: f32) -> srgb;
+        srgb(red: f32, green: f32, blue: f32);
 
         ///Linear RGB from sRGB with transparency.
-        srgba(red: f32, green: f32, blue: f32, alpha: f32) -> srgba;
+        srgba(red: f32, green: f32, blue: f32, alpha: f32);
 
         ///Linear RGB from 8 bit sRGB.
-        srgb8(red: u8, green: u8, blue: u8) -> srgb8;
+        srgb8(red: u8, green: u8, blue: u8);
 
         ///Linear RGB from 8 bit sRGB with transparency.
-        srgba8(red: u8, green: u8, blue: u8, alpha: u8) -> srgba8;
+        srgba8(red: u8, green: u8, blue: u8, alpha: u8);
+
+        ///Linear RGB from an sRGB pixel value.
+        srgb_pixel<P: RgbPixel>(pixel: &P);
 
         ///Linear RGB from gamma corrected RGB.
-        rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32) -> rgb_gamma;
+        rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32);
 
         ///Linear RGB from gamma corrected RGB with transparency.
-        rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> rgba_gamma;
+        rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32);
 
         ///Linear RGB from 8 bit gamma corrected RGB.
-        rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32) -> rgb8_gamma;
+        rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32);
 
         ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-        rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> rgba8_gamma;
+        rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32);
+
+        ///Linear RGB from a gamma corrected pixel value.
+        gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32);
     }
 
     ///CIE 1931 XYZ.
     Xyz {
         ///CIE XYZ.
-        xyz(x: f32, y: f32, z: f32) -> xyz;
+        xyz(x: f32, y: f32, z: f32);
 
         ///CIE XYZ and transparency.
-        xyza(x: f32, y: f32, z: f32, alpha: f32) -> xyza;
+        xyza(x: f32, y: f32, z: f32, alpha: f32);
     }
 
     ///CIE L*a*b* (CIELAB).
     Lab {
         ///CIE L*a*b*.
-        lab(l: f32, a: f32, b: f32) -> lab;
+        lab(l: f32, a: f32, b: f32);
 
         ///CIE L*a*b* and transparency.
-        laba(l: f32, a: f32, b: f32, alpha: f32) -> laba;
+        laba(l: f32, a: f32, b: f32, alpha: f32);
     }
 
     ///CIE L*C*h°, a polar version of CIE L*a*b*.
     Lch {
         ///CIE L*C*h°.
-        lch(l: f32, chroma: f32, hue: LabHue) -> lch;
+        lch(l: f32, chroma: f32, hue: LabHue);
 
         ///CIE L*C*h° and transparency.
-        lcha(l: f32, chroma: f32, hue: LabHue, alpha: f32) -> lcha;
+        lcha(l: f32, chroma: f32, hue: LabHue, alpha: f32);
     }
 
     ///Linear HSV, a cylindrical version of RGB.
     Hsv {
         ///Linear HSV.
-        hsv(hue: RgbHue, saturation: f32, value: f32) -> hsv;
+        hsv(hue: RgbHue, saturation: f32, value: f32);
 
         ///Linear HSV and transparency.
-        hsva(hue: RgbHue, saturation: f32, value: f32, alpha: f32) -> hsva;
+        hsva(hue: RgbHue, saturation: f32, value: f32, alpha: f32);
     }
 
     ///Linear HSL, a cylindrical version of RGB.
     Hsl {
         ///Linear HSL.
-        hsl(hue: RgbHue, saturation: f32, lightness: f32) -> hsl;
+        hsl(hue: RgbHue, saturation: f32, lightness: f32);
 
         ///Linear HSL and transparency.
-        hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32) -> hsla;
+        hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32);
     }
 }
 

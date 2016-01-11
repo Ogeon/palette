@@ -14,14 +14,14 @@ fn main() {
     //Increase the saturation by 80% (!) as HSL in the left half, and as LCh
     //in the right half. Notice the strong yellow tone in the HSL part.
     for (_, _, pixel) in image.sub_image(0, 0, width / 2, height).pixels_mut() {
-        let color = Rgb::srgb8(pixel.data[0], pixel.data[1], pixel.data[2]);
+        let color = Rgb::srgb_pixel(&pixel.data);
 
         let saturated = Hsl::from(color).saturate(0.8);
         pixel.data = Rgb::from(saturated).to_srgb();
     }
 
     for (_, _, pixel) in image.sub_image(width / 2, 0, width / 2, height).pixels_mut() {
-        let color = Rgb::srgb8(pixel.data[0], pixel.data[1], pixel.data[2]);
+        let color = Rgb::srgb_pixel(&pixel.data);
 
         let saturated = Lch::from(color).saturate(0.8);
         pixel.data = Rgb::from(saturated).to_srgb();

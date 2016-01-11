@@ -71,6 +71,12 @@ impl Rgb {
             alpha: alpha as f32 / 255.0,
         }
     }
+
+    ///Linear RGB from a linear pixel value.
+    pub fn linear_pixel<P: RgbPixel>(pixel: &P) -> Rgb {
+        let (r, g, b, a) = pixel.to_rgba();
+        Rgb::linear_rgba(r, g, b, a)
+    }
 }
 
 ///Creation from sRGB.
@@ -114,6 +120,12 @@ impl Rgb {
             alpha: alpha as f32 / 255.0,
         }
     }
+
+    ///Linear RGB from an sRGB pixel value.
+    pub fn srgb_pixel<P: RgbPixel>(pixel: &P) -> Rgb {
+        let (r, g, b, a) = pixel.to_rgba();
+        Rgb::srgba(r, g, b, a)
+    }
 }
 
 ///Creation from gamma corrected RGB.
@@ -156,6 +168,12 @@ impl Rgb {
             blue: from_gamma(blue as f32 / 255.0, gamma),
             alpha: alpha as f32 / 255.0,
         }
+    }
+
+    ///Linear RGB from a gamma corrected pixel value.
+    pub fn gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32) -> Rgb {
+        let (r, g, b, a) = pixel.to_rgba();
+        Rgb::rgba_gamma(r, g, b, a, gamma)
     }
 }
 
@@ -408,15 +426,23 @@ fn to_gamma(x: f32, gamma: f32) -> f32 {
 ///It makes conversion from `Rgb` to various pixel representations easy and
 ///extensible.
 pub trait RgbPixel {
-    ///Create an instance of self from red, green, blue and alpha values.
+    ///Create an instance of `Self` from red, green, blue and alpha values.
     ///These can be assumed to already be gamma corrected and belongs to the
     ///range [0.0, 1.0].
     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Self;
+
+    ///Convert the red, green, blue and alpha values of `self` to values in
+    ///the range [0.0, 1.0]. No gamma correction should be performed.
+    fn to_rgba(&self) -> (f32, f32, f32, f32);
 }
 
 impl RgbPixel for (f32, f32, f32, f32) {
     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (f32, f32, f32, f32) {
         (red, green, blue, alpha)
+    }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        self.clone()
     }
 }
 
@@ -424,11 +450,21 @@ impl RgbPixel for (f32, f32, f32) {
     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (f32, f32, f32) {
         (red, green, blue)
     }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        let (r, g, b) = *self;
+        (r, g, b, 1.0)
+    }
 }
 
 impl RgbPixel for (u8, u8, u8, u8) {
     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (u8, u8, u8, u8) {
         ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8)
+    }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        let (r, g, b, a) = *self;
+        (r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0)
     }
 }
 
@@ -436,11 +472,20 @@ impl RgbPixel for (u8, u8, u8) {
     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (u8, u8, u8) {
         ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8)
     }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        let (r, g, b) = *self;
+        (r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, 1.0)
+    }
 }
 
 impl RgbPixel for [f32; 4] {
     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [f32; 4] {
         [red, green, blue, alpha]
+    }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        (self[0], self[1], self[2], self[3])
     }
 }
 
@@ -448,16 +493,28 @@ impl RgbPixel for [f32; 3] {
     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [f32; 3] {
         [red, green, blue]
     }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        (self[0], self[1], self[2], 1.0)
+    }
 }
 
 impl RgbPixel for [u8; 4] {
     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [u8; 4] {
         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8]
     }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        (self[0] as f32 / 255.0, self[1] as f32 / 255.0, self[2] as f32 / 255.0, self[3] as f32 / 255.0)
+    }
 }
 
 impl RgbPixel for [u8; 3] {
     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [u8; 3] {
         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8]
+    }
+
+    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+        (self[0] as f32 / 255.0, self[1] as f32 / 255.0, self[2] as f32 / 255.0, 1.0)
     }
 }
