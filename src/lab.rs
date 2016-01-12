@@ -15,14 +15,14 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///spaces, so manipulating them manually can be unintuitive.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Lab {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
+    ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
     pub l: f32,
 
-    ///a* goes from red at -127.0 to green at 128.0.
+    ///a* goes from red at -1.0 to green at 1.0.
     pub a: f32,
 
-    ///b* goes from yellow at -127.0 to blue at 128.0.
+    ///b* goes from yellow at -1.0 to blue at 1.0.
     pub b: f32,
 
     ///The transparency of the color. 0.0 is completely transparent and 1.0 is
@@ -54,9 +54,9 @@ impl Lab {
 
 impl ColorSpace for Lab {
     fn is_valid(&self) -> bool {
-        self.l >= 0.0 && self.l <= 100.0 &&
-        self.a >= -127.0 && self.a <= 128.0 &&
-        self.b >= -127.0 && self.b <= 128.0 &&
+        self.l >= 0.0 && self.l <= 1.0 &&
+        self.a >= -1.0 && self.a <= 1.0 &&
+        self.b >= -1.0 && self.b <= 1.0 &&
         self.alpha >= 0.0 && self.alpha <= 1.0
     }
 
@@ -67,9 +67,9 @@ impl ColorSpace for Lab {
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, 0.0, 100.0);
-        self.a = clamp(self.a, -127.0, 128.0);
-        self.b = clamp(self.b, -127.0, 128.0);
+        self.l = clamp(self.l, 0.0, 1.0);
+        self.a = clamp(self.a, -1.0, 1.0);
+        self.b = clamp(self.b, -1.0, 1.0);
         self.alpha = clamp(self.alpha, 0.0, 1.0);
     }
 }
@@ -90,7 +90,7 @@ impl Mix for Lab {
 impl Shade for Lab {
     fn lighten(&self, amount: f32) -> Lab {
         Lab {
-            l: self.l + amount * 100.0,
+            l: self.l + amount * 1.0,
             a: self.a,
             b: self.b,
             alpha: self.alpha,
@@ -121,9 +121,9 @@ from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 impl From<Xyz> for Lab {
     fn from(xyz: Xyz) -> Lab {
         Lab {
-            l: 116.0 * f(xyz.y / Y_N) - 16.0,
-            a: 500.0 * (f(xyz.x / X_N) - f(xyz.y / Y_N)),
-            b: 200.0 * (f(xyz.y / Y_N) - f(xyz.z / Z_N)),
+            l: (116.0 * f(xyz.y / Y_N) - 16.0) / 100.0,
+            a: (500.0 * (f(xyz.x / X_N) - f(xyz.y / Y_N))) / 128.0,
+            b: (200.0 * (f(xyz.y / Y_N) - f(xyz.z / Z_N))) / 128.0,
             alpha: xyz.alpha,
         }
     }
@@ -185,21 +185,21 @@ mod test {
     #[test]
     fn red() {
         let a = Lab::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
-        let b = Lab::lab(53.23288, 80.10933, 67.22006);
+        let b = Lab::lab(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn green() {
         let a = Lab::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
-        let b = Lab::lab(87.73704, -86.184654, 83.18117);
+        let b = Lab::lab(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn blue() {
         let a = Lab::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
-        let b = Lab::lab(32.302586, 79.19668, -107.863686);
+        let b = Lab::lab(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 }

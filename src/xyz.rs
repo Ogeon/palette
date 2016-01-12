@@ -131,9 +131,9 @@ impl From<Luma> for Xyz {
 impl From<Lab> for Xyz {
     fn from(lab: Lab) -> Xyz {
         Xyz {
-            x: X_N * f_inv((1.0 / 116.0) * (lab.l + 16.0) + (1.0 / 500.0) * lab.a),
-            y: Y_N * f_inv((1.0 / 116.0) * (lab.l + 16.0)),
-            z: Z_N * f_inv((1.0 / 116.0) * (lab.l + 16.0) - (1.0 / 200.0) * lab.b),
+            x: X_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) + (1.0 / 500.0) * lab.a * 128.0),
+            y: Y_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0)),
+            z: Z_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) - (1.0 / 200.0) * lab.b * 128.0),
             alpha: lab.alpha,
         }
     }

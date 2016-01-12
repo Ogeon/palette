@@ -9,14 +9,14 @@ use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, 
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Lch {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
+    ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
     pub l: f32,
 
     ///C* is the colorfulness of the color. It's similar to saturation. 0.0
-    ///gives gray scale colors, and numbers around 128.0-182.0 gives fully
-    ///saturated colors. The upper limit of 182.0 should include the whole
-    ///L*a*b* space and some more.
+    ///gives gray scale colors, and numbers around 1.0-1.41421356 gives fully
+    ///saturated colors. The upper limit of 1.41421356 (or `sqrt(2.0)`) should
+    ///include the whole L*a*b* space and some more.
     pub chroma: f32,
 
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -52,8 +52,8 @@ impl Lch {
 
 impl ColorSpace for Lch {
     fn is_valid(&self) -> bool {
-        self.l >= 0.0 && self.l <= 100.0 &&
-        self.chroma >= 0.0 && self.chroma <= 182.0 && //should include all of L*a*b*, but will also overshoot...
+        self.l >= 0.0 && self.l <= 1.0 &&
+        self.chroma >= 0.0 && self.chroma <= 1.41421356 && //should include all of L*a*b*, but will also overshoot...
         self.alpha >= 0.0 && self.alpha <= 1.0
     }
 
@@ -64,8 +64,8 @@ impl ColorSpace for Lch {
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, 0.0, 100.0);
-        self.chroma = clamp(self.chroma, 0.0, 182.0); //should include all of L*a*b*, but will also overshoot...
+        self.l = clamp(self.l, 0.0, 1.0);
+        self.chroma = clamp(self.chroma, 0.0, 1.41421356); //should include all of L*a*b*, but will also overshoot...
         self.alpha = clamp(self.alpha, 0.0, 1.0);
     }
 }
@@ -86,7 +86,7 @@ impl Mix for Lch {
 impl Shade for Lch {
     fn lighten(&self, amount: f32) -> Lch {
         Lch {
-            l: self.l + amount * 100.0,
+            l: self.l + amount,
             chroma: self.chroma,
             hue: self.hue,
             alpha: self.alpha,
