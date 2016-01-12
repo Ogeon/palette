@@ -1,7 +1,13 @@
 [package]
 name = "palette"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = ["scripts/*", "examples/*", "res/*", ".travis.yml", ".gitignore"]
+description = "Makes linear color calculations and conversion easy and accessible for anyone."
+documentation = "https://ogeon.github.io/docs/palette/master/palette/index.html"
+repository = "https://github.com/Ogeon/palette"
+readme = "README.md"
+keywords = ["color", "colour", "space", "linear"]
 license = "MIT OR Apache-2.0"
 
 [features]
