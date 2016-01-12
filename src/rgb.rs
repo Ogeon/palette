@@ -131,7 +131,7 @@ impl Rgb {
 ///Creation from gamma corrected RGB.
 impl Rgb {
     ///Linear RGB from gamma corrected RGB.
-    pub fn rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32) -> Rgb {
+    pub fn gamma_rgb(red: f32, green: f32, blue: f32, gamma: f32) -> Rgb {
         Rgb {
             red: from_gamma(red, gamma),
             green: from_gamma(green, gamma),
@@ -141,7 +141,7 @@ impl Rgb {
     }
 
     ///Linear RGB from gamma corrected RGB with transparency.
-    pub fn rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> Rgb {
+    pub fn gamma_rgba(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> Rgb {
         Rgb {
             red: from_gamma(red, gamma),
             green: from_gamma(green, gamma),
@@ -151,7 +151,7 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit gamma corrected RGB.
-    pub fn rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32) -> Rgb {
+    pub fn gamma_rgb8(red: u8, green: u8, blue: u8, gamma: f32) -> Rgb {
         Rgb {
             red: from_gamma(red as f32 / 255.0, gamma),
             green: from_gamma(green as f32 / 255.0, gamma),
@@ -161,7 +161,7 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-    pub fn rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> Rgb {
+    pub fn gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> Rgb {
         Rgb {
             red: from_gamma(red as f32 / 255.0, gamma),
             green: from_gamma(green as f32 / 255.0, gamma),
@@ -173,7 +173,7 @@ impl Rgb {
     ///Linear RGB from a gamma corrected pixel value.
     pub fn gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32) -> Rgb {
         let (r, g, b, a) = pixel.to_rgba();
-        Rgb::rgba_gamma(r, g, b, a, gamma)
+        Rgb::gamma_rgba(r, g, b, a, gamma)
     }
 }
 
@@ -220,7 +220,7 @@ impl Rgb {
     ///```
     ///use palette::Rgb;
     ///
-    ///let c = Rgb::rgb8_gamma(128, 64, 32, 2.2);
+    ///let c = Rgb::gamma_rgb8(128, 64, 32, 2.2);
     ///assert_eq!((128, 64, 32), c.to_gamma(2.2));
     ///```
     pub fn to_gamma<P: RgbPixel>(&self, gamma: f32) -> P {

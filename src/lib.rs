@@ -221,16 +221,16 @@ make_color! {
         srgb_pixel<P: RgbPixel>(pixel: &P);
 
         ///Linear RGB from gamma corrected RGB.
-        rgb_gamma(red: f32, green: f32, blue: f32, gamma: f32);
+        gamma_rgb(red: f32, green: f32, blue: f32, gamma: f32);
 
         ///Linear RGB from gamma corrected RGB with transparency.
-        rgba_gamma(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32);
+        gamma_rgba(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32);
 
         ///Linear RGB from 8 bit gamma corrected RGB.
-        rgb8_gamma(red: u8, green: u8, blue: u8, gamma: f32);
+        gamma_rgb8(red: u8, green: u8, blue: u8, gamma: f32);
 
         ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-        rgba8_gamma(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32);
+        gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32);
 
         ///Linear RGB from a gamma corrected pixel value.
         gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32);
