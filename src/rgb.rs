@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub, Mul, Div};
+
 use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
 
 ///Linear RGB with an alpha component.
@@ -296,6 +298,110 @@ impl GetHue for Rgb {
 impl Default for Rgb {
     fn default() -> Rgb {
         Rgb::linear_rgb(0.0, 0.0, 0.0)
+    }
+}
+
+impl Add<Rgb> for Rgb {
+    type Output = Rgb;
+
+    fn add(self, other: Rgb) -> Rgb {
+        Rgb {
+            red: self.red + other.red,
+            green: self.green + other.green,
+            blue: self.blue + other.blue,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Rgb {
+    type Output = Rgb;
+
+    fn add(self, c: f32) -> Rgb {
+        Rgb {
+            red: self.red + c,
+            green: self.green + c,
+            blue: self.blue + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Rgb> for Rgb {
+    type Output = Rgb;
+
+    fn sub(self, other: Rgb) -> Rgb {
+        Rgb {
+            red: self.red - other.red,
+            green: self.green - other.green,
+            blue: self.blue - other.blue,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Rgb {
+    type Output = Rgb;
+
+    fn sub(self, c: f32) -> Rgb {
+        Rgb {
+            red: self.red - c,
+            green: self.green - c,
+            blue: self.blue - c,
+            alpha: self.alpha - c,
+        }
+    }
+}
+
+impl Mul<Rgb> for Rgb {
+    type Output = Rgb;
+
+    fn mul(self, other: Rgb) -> Rgb {
+        Rgb {
+            red: self.red * other.red,
+            green: self.green * other.green,
+            blue: self.blue * other.blue,
+            alpha: self.alpha * other.alpha,
+        }
+    }
+}
+
+impl Mul<f32> for Rgb {
+    type Output = Rgb;
+
+    fn mul(self, c: f32) -> Rgb {
+        Rgb {
+            red: self.red * c,
+            green: self.green * c,
+            blue: self.blue * c,
+            alpha: self.alpha * c,
+        }
+    }
+}
+
+impl Div<Rgb> for Rgb {
+    type Output = Rgb;
+
+    fn div(self, other: Rgb) -> Rgb {
+        Rgb {
+            red: self.red / other.red,
+            green: self.green / other.green,
+            blue: self.blue / other.blue,
+            alpha: self.alpha / other.alpha,
+        }
+    }
+}
+
+impl Div<f32> for Rgb {
+    type Output = Rgb;
+
+    fn div(self, c: f32) -> Rgb {
+        Rgb {
+            red: self.red / c,
+            green: self.green / c,
+            blue: self.blue / c,
+            alpha: self.alpha / c,
+        }
     }
 }
 
