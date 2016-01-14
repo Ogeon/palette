@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub, Mul, Div};
+
 use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
@@ -101,6 +103,110 @@ impl Shade for Xyz {
 impl Default for Xyz {
     fn default() -> Xyz {
         Xyz::xyz(0.0, 0.0, 0.0)
+    }
+}
+
+impl Add<Xyz> for Xyz {
+    type Output = Xyz;
+
+    fn add(self, other: Xyz) -> Xyz {
+        Xyz {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Xyz {
+    type Output = Xyz;
+
+    fn add(self, c: f32) -> Xyz {
+        Xyz {
+            x: self.x + c,
+            y: self.y + c,
+            z: self.z + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Xyz> for Xyz {
+    type Output = Xyz;
+
+    fn sub(self, other: Xyz) -> Xyz {
+        Xyz {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Xyz {
+    type Output = Xyz;
+
+    fn sub(self, c: f32) -> Xyz {
+        Xyz {
+            x: self.x - c,
+            y: self.y - c,
+            z: self.z - c,
+            alpha: self.alpha - c,
+        }
+    }
+}
+
+impl Mul<Xyz> for Xyz {
+    type Output = Xyz;
+
+    fn mul(self, other: Xyz) -> Xyz {
+        Xyz {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
+            alpha: self.alpha * other.alpha,
+        }
+    }
+}
+
+impl Mul<f32> for Xyz {
+    type Output = Xyz;
+
+    fn mul(self, c: f32) -> Xyz {
+        Xyz {
+            x: self.x * c,
+            y: self.y * c,
+            z: self.z * c,
+            alpha: self.alpha * c,
+        }
+    }
+}
+
+impl Div<Xyz> for Xyz {
+    type Output = Xyz;
+
+    fn div(self, other: Xyz) -> Xyz {
+        Xyz {
+            x: self.x / other.x,
+            y: self.y / other.y,
+            z: self.z / other.z,
+            alpha: self.alpha / other.alpha,
+        }
+    }
+}
+
+impl Div<f32> for Xyz {
+    type Output = Xyz;
+
+    fn div(self, c: f32) -> Xyz {
+        Xyz {
+            x: self.x / c,
+            y: self.y / c,
+            z: self.z / c,
+            alpha: self.alpha / c,
+        }
     }
 }
 
