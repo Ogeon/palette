@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub, Mul, Div};
+
 use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 ///Linear luminance with an alpha component.
@@ -92,6 +94,94 @@ impl Shade for Luma {
 impl Default for Luma {
     fn default() -> Luma {
         Luma::y(0.0)
+    }
+}
+
+impl Add<Luma> for Luma {
+    type Output = Luma;
+
+    fn add(self, other: Luma) -> Luma {
+        Luma {
+            luma: self.luma + other.luma,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Luma {
+    type Output = Luma;
+
+    fn add(self, c: f32) -> Luma {
+        Luma {
+            luma: self.luma + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Luma> for Luma {
+    type Output = Luma;
+
+    fn sub(self, other: Luma) -> Luma {
+        Luma {
+            luma: self.luma - other.luma,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Luma {
+    type Output = Luma;
+
+    fn sub(self, c: f32) -> Luma {
+        Luma {
+            luma: self.luma - c,
+            alpha: self.alpha - c,
+        }
+    }
+}
+
+impl Mul<Luma> for Luma {
+    type Output = Luma;
+
+    fn mul(self, other: Luma) -> Luma {
+        Luma {
+            luma: self.luma * other.luma,
+            alpha: self.alpha * other.alpha,
+        }
+    }
+}
+
+impl Mul<f32> for Luma {
+    type Output = Luma;
+
+    fn mul(self, c: f32) -> Luma {
+        Luma {
+            luma: self.luma * c,
+            alpha: self.alpha * c,
+        }
+    }
+}
+
+impl Div<Luma> for Luma {
+    type Output = Luma;
+
+    fn div(self, other: Luma) -> Luma {
+        Luma {
+            luma: self.luma / other.luma,
+            alpha: self.alpha / other.alpha,
+        }
+    }
+}
+
+impl Div<f32> for Luma {
+    type Output = Luma;
+
+    fn div(self, c: f32) -> Luma {
+        Luma {
+            luma: self.luma / c,
+            alpha: self.alpha / c,
+        }
     }
 }
 
