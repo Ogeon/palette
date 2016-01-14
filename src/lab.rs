@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub, Mul, Div};
+
 use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
@@ -113,6 +115,110 @@ impl GetHue for Lab {
 impl Default for Lab {
     fn default() -> Lab {
         Lab::lab(0.0, 0.0, 0.0)
+    }
+}
+
+impl Add<Lab> for Lab {
+    type Output = Lab;
+
+    fn add(self, other: Lab) -> Lab {
+        Lab {
+            l: self.l + other.l,
+            a: self.a + other.a,
+            b: self.b + other.b,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Lab {
+    type Output = Lab;
+
+    fn add(self, c: f32) -> Lab {
+        Lab {
+            l: self.l + c,
+            a: self.a + c,
+            b: self.b + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Lab> for Lab {
+    type Output = Lab;
+
+    fn sub(self, other: Lab) -> Lab {
+        Lab {
+            l: self.l - other.l,
+            a: self.a - other.a,
+            b: self.b - other.b,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Lab {
+    type Output = Lab;
+
+    fn sub(self, c: f32) -> Lab {
+        Lab {
+            l: self.l - c,
+            a: self.a - c,
+            b: self.b - c,
+            alpha: self.alpha - c,
+        }
+    }
+}
+
+impl Mul<Lab> for Lab {
+    type Output = Lab;
+
+    fn mul(self, other: Lab) -> Lab {
+        Lab {
+            l: self.l * other.l,
+            a: self.a * other.a,
+            b: self.b * other.b,
+            alpha: self.alpha * other.alpha,
+        }
+    }
+}
+
+impl Mul<f32> for Lab {
+    type Output = Lab;
+
+    fn mul(self, c: f32) -> Lab {
+        Lab {
+            l: self.l * c,
+            a: self.a * c,
+            b: self.b * c,
+            alpha: self.alpha * c,
+        }
+    }
+}
+
+impl Div<Lab> for Lab {
+    type Output = Lab;
+
+    fn div(self, other: Lab) -> Lab {
+        Lab {
+            l: self.l / other.l,
+            a: self.a / other.a,
+            b: self.b / other.b,
+            alpha: self.alpha / other.alpha,
+        }
+    }
+}
+
+impl Div<f32> for Lab {
+    type Output = Lab;
+
+    fn div(self, c: f32) -> Lab {
+        Lab {
+            l: self.l / c,
+            a: self.a / c,
+            b: self.b / c,
+            alpha: self.alpha / c,
+        }
     }
 }
 
