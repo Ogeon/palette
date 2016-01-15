@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL color space with an alpha component.
@@ -143,6 +145,58 @@ impl Default for Hsl {
 	fn default() -> Hsl {
 		Hsl::hsl(0.0.into(), 0.0, 0.0)
 	}
+}
+
+impl Add<Hsl> for Hsl {
+    type Output = Hsl;
+
+    fn add(self, other: Hsl) -> Hsl {
+        Hsl {
+            hue: self.hue + other.hue,
+            saturation: self.saturation + other.saturation,
+            lightness: self.lightness + other.lightness,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Hsl {
+    type Output = Hsl;
+
+    fn add(self, c: f32) -> Hsl {
+        Hsl {
+            hue: self.hue + c,
+            saturation: self.saturation + c,
+            lightness: self.lightness + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Hsl> for Hsl {
+    type Output = Hsl;
+
+    fn sub(self, other: Hsl) -> Hsl {
+        Hsl {
+            hue: self.hue - other.hue,
+            saturation: self.saturation - other.saturation,
+            lightness: self.lightness - other.lightness,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Hsl {
+    type Output = Hsl;
+
+    fn sub(self, c: f32) -> Hsl {
+        Hsl {
+            hue: self.hue - c,
+            saturation: self.saturation - c,
+            lightness: self.lightness - c,
+            alpha: self.alpha - c,
+        }
+    }
 }
 
 from_color!(to Hsl from Rgb, Luma, Xyz, Lab, Lch, Hsv);

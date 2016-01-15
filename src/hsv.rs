@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSV color space with an alpha component.
@@ -141,6 +143,58 @@ impl Saturate for Hsv {
 impl Default for Hsv {
     fn default() -> Hsv {
         Hsv::hsv(0.0.into(), 0.0, 0.0)
+    }
+}
+
+impl Add<Hsv> for Hsv {
+    type Output = Hsv;
+
+    fn add(self, other: Hsv) -> Hsv {
+        Hsv {
+            hue: self.hue + other.hue,
+            saturation: self.saturation + other.saturation,
+            value: self.value + other.value,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Hsv {
+    type Output = Hsv;
+
+    fn add(self, c: f32) -> Hsv {
+        Hsv {
+            hue: self.hue + c,
+            saturation: self.saturation + c,
+            value: self.value + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Hsv> for Hsv {
+    type Output = Hsv;
+
+    fn sub(self, other: Hsv) -> Hsv {
+        Hsv {
+            hue: self.hue - other.hue,
+            saturation: self.saturation - other.saturation,
+            value: self.value - other.value,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Hsv {
+    type Output = Hsv;
+
+    fn sub(self, c: f32) -> Hsv {
+        Hsv {
+            hue: self.hue - c,
+            saturation: self.saturation - c,
+            value: self.value - c,
+            alpha: self.alpha - c,
+        }
     }
 }
 

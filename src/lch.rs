@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
 ///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html), with an alpha
@@ -140,6 +142,58 @@ impl Saturate for Lch {
 impl Default for Lch {
     fn default() -> Lch {
         Lch::lch(0.0, 0.0, 0.0.into())
+    }
+}
+
+impl Add<Lch> for Lch {
+    type Output = Lch;
+
+    fn add(self, other: Lch) -> Lch {
+        Lch {
+            l: self.l + other.l,
+            chroma: self.chroma + other.chroma,
+            hue: self.hue + other.hue,
+            alpha: self.alpha + other.alpha,
+        }
+    }
+}
+
+impl Add<f32> for Lch {
+    type Output = Lch;
+
+    fn add(self, c: f32) -> Lch {
+        Lch {
+            l: self.l + c,
+            chroma: self.chroma + c,
+            hue: self.hue + c,
+            alpha: self.alpha + c,
+        }
+    }
+}
+
+impl Sub<Lch> for Lch {
+    type Output = Lch;
+
+    fn sub(self, other: Lch) -> Lch {
+        Lch {
+            l: self.l - other.l,
+            chroma: self.chroma - other.chroma,
+            hue: self.hue - other.hue,
+            alpha: self.alpha - other.alpha,
+        }
+    }
+}
+
+impl Sub<f32> for Lch {
+    type Output = Lch;
+
+    fn sub(self, c: f32) -> Lch {
+        Lch {
+            l: self.l - c,
+            chroma: self.chroma - c,
+            hue: self.hue - c,
+            alpha: self.alpha - c,
+        }
     }
 }
 
