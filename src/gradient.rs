@@ -116,4 +116,10 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
             None
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len - self.current, Some(self.len - self.current))
+    }
 }
+
+impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> { }
