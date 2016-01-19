@@ -288,7 +288,8 @@ impl<'a, C: Mix + Clone> MaybeSlice<'a, C> {
 
 #[cfg(test)]
 mod test {
-    use super::Range;
+    use super::{Range, Gradient};
+    use Rgb;
 
     #[test]
     fn range_clamp() {
@@ -306,7 +307,18 @@ mod test {
 
         assert_eq!(range.constrain(&(3.0..5.0).into()), (1.0..1.0).into());
         assert_eq!(range.constrain(&(0.2..5.0).into()), (0.2..1.0).into());
-        
+
         assert_eq!(range.constrain(&(0.2..0.8).into()), (0.2..0.8).into());
+    }
+
+    #[test]
+    fn simple_slice() {
+        let g1 = Gradient::new(vec![Rgb::linear_rgb(1.0, 0.0, 0.0), Rgb::linear_rgb(0.0, 0.0, 1.0)]);
+        let g2 = g1.slice(..0.5);
+
+        let v1: Vec<_> = g1.take(10).take(5).collect();
+        let v2: Vec<_> = g2.take(5).collect();
+
+        assert_eq!(v1, v2);
     }
 }
