@@ -75,7 +75,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB from a linear pixel value.
-    pub fn linear_pixel<P: RgbPixel>(pixel: &P) -> Rgb<T> {
+    pub fn linear_pixel<T: Float, P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::linear_rgba(r, g, b, a)
     }
@@ -124,7 +124,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB from an sRGB pixel value.
-    pub fn srgb_pixel<P: RgbPixel>(pixel: &P) -> Rgb<T> {
+    pub fn srgb_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::srgba(r, g, b, a)
     }
@@ -173,7 +173,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB from a gamma corrected pixel value.
-    pub fn gamma_pixel<P: RgbPixel>(pixel: &P, gamma: T) -> Rgb<T> {
+    pub fn gamma_pixel<T: Float, P: RgbPixel>(pixel: &P, gamma: T) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::gamma_rgba(r, g, b, a, gamma)
     }
@@ -191,7 +191,7 @@ impl<T: Float> Rgb<T> {
     ///assert_eq!((c.red, c.green, c.blue), c.to_linear());
     ///assert_eq!((0.5, 0.3, 0.1), c.to_linear());
     ///```
-    pub fn to_linear<P: RgbPixel>(&self) -> P {
+    pub fn to_linear<T: Float, P: RgbPixel<T>>(&self) -> P {
         P::from_rgba(clamp(self.red, T::Zero(), T::One()),
                      clamp(self.green, T::Zero(), T::One()),
                      clamp(self.blue, T::Zero(), T::One()),
@@ -206,7 +206,7 @@ impl<T: Float> Rgb<T> {
     ///let c = Rgb::srgb(0.5, 0.3, 0.1);
     ///assert_eq!((0.5, 0.3, 0.1), c.to_srgb());
     ///```
-    pub fn to_srgb<P: RgbPixel>(&self) -> P {
+    pub fn to_srgb<T: Float, P: RgbPixel<T>>(&self) -> P {
         P::from_rgba(clamp(to_srgb(self.red), T::Zero(), T::One()),
                      clamp(to_srgb(self.green), T::Zero(), T::One()),
                      clamp(to_srgb(self.blue), T::Zero(), T::One()),
@@ -221,7 +221,7 @@ impl<T: Float> Rgb<T> {
     ///let c = Rgb::gamma_rgb8(128, 64, 32, 2.2);
     ///assert_eq!((128, 64, 32), c.to_gamma(2.2));
     ///```
-    pub fn to_gamma<P: RgbPixel>(&self, gamma: T) -> P {
+    pub fn to_gamma<T: Float, P: RgbPixel<T>>(&self, gamma: T) -> P {
         P::from_rgba(clamp(to_gamma(self.red, gamma), T::Zero(), T::One()),
                      clamp(to_gamma(self.green, gamma), T::Zero(), T::One()),
                      clamp(to_gamma(self.blue, gamma), T::Zero(), T::One()),
@@ -251,7 +251,7 @@ impl<T: Float> ColorSpace for Rgb<T> {
 }
 
 impl<T: Float> Mix for Rgb<T> {
-    fn mix(&self, other: &Rgb, factor: T) -> Rgb<T> {
+    fn mix(&self, other: &Rgb<T>, factor: T) -> Rgb<T> {
         let factor = clamp(factor, T::Zero(), T::One());
 
         Rgb {

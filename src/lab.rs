@@ -16,35 +16,35 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lab {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
+pub struct Lab<T: Float> {
+    ///L* is the lightness of the color. T::zero() gives absolute black and T::one()
     ///give the brightest white.
-    pub l: f32,
+    pub l: T,
 
     ///a* goes from red at -1.0 to green at 1.0.
-    pub a: f32,
+    pub a: T,
 
     ///b* goes from yellow at -1.0 to blue at 1.0.
-    pub b: f32,
+    pub b: T,
 
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///The transparency of the color. T::zero() is completely transparent and T::one() is
     ///completely opaque.
-    pub alpha: f32,
+    pub alpha: T,
 }
 
-impl Lab {
+impl<T: Float> Lab<T> {
     ///CIE L*a*b*.
-    pub fn lab(l: f32, a: f32, b: f32) -> Lab {
+    pub fn lab(l: T, a: T, b: T) -> Lab<T> {
         Lab {
             l: l,
             a: a,
             b: b,
-            alpha: 1.0,
+            alpha: T::one(),
         }
     }
 
     ///CIE L*a*b* and transparency.
-    pub fn laba(l: f32, a: f32, b: f32, alpha: f32) -> Lab {
+    pub fn laba(l: T, a: T, b: T, alpha: T) -> Lab<T> {
         Lab {
             l: l,
             a: a,
@@ -54,31 +54,30 @@ impl Lab {
     }
 }
 
-impl ColorSpace for Lab {
+impl<T: Float> ColorSpace for Lab<T> {
     fn is_valid(&self) -> bool {
-        self.l >= 0.0 && self.l <= 1.0 &&
-        self.a >= -1.0 && self.a <= 1.0 &&
-        self.b >= -1.0 && self.b <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+        self.l >= T::zero() && self.l <= T::one() && self.a >= -1.0 && self.a <= T::one() &&
+        self.b >= -1.0 && self.b <= T::one() &&
+        self.alpha >= T::zero() && self.alpha <= T::one()
     }
 
-    fn clamp(&self) -> Lab {
+    fn clamp(&self) -> Lab<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, 0.0, 1.0);
-        self.a = clamp(self.a, -1.0, 1.0);
-        self.b = clamp(self.b, -1.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.l = clamp(self.l, T::zero(), T::one());
+        self.a = clamp(self.a, -1.0, T::one());
+        self.b = clamp(self.b, -1.0, T::one());
+        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
-impl Mix for Lab {
-    fn mix(&self, other: &Lab, factor: f32) -> Lab {
-        let factor = clamp(factor, 0.0, 1.0);
+impl<T: Float> Mix for Lab<T> {
+    fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
+        let factor = clamp(factor, T::zero(), T::one());
 
         Lab {
             l: self.l + factor * (other.l - self.l),
@@ -89,10 +88,10 @@ impl Mix for Lab {
     }
 }
 
-impl Shade for Lab {
-    fn lighten(&self, amount: f32) -> Lab {
+impl<T: Float> Shade for Lab<T> {
+    fn lighten(&self, amount: T) -> Lab<T> {
         Lab {
-            l: self.l + amount * 1.0,
+            l: self.l + amount * T::one(),
             a: self.a,
             b: self.b,
             alpha: self.alpha,
@@ -100,11 +99,11 @@ impl Shade for Lab {
     }
 }
 
-impl GetHue for Lab {
+impl<T: Float> GetHue for Lab<T> {
     type Hue = LabHue;
 
     fn get_hue(&self) -> Option<LabHue> {
-        if self.a == 0.0 && self.b == 0.0 {
+        if self.a == T::zero() && self.b == T::zero() {
             None
         } else {
             Some(LabHue::from_radians(self.b.atan2(self.a)))
@@ -112,9 +111,9 @@ impl GetHue for Lab {
     }
 }
 
-impl Default for Lab {
-    fn default() -> Lab {
-        Lab::lab(0.0, 0.0, 0.0)
+impl<T: Float> Default for Lab<T> {
+    fn default() -> Lab<T> {
+        Lab::lab(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -224,88 +223,98 @@ impl Div<f32> for Lab {
 
 from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 
-impl From<Xyz> for Lab {
-    fn from(xyz: Xyz) -> Lab {
+impl<T: Float> From<Xyz> for Lab<T> {
+    fn from(xyz: Xyz) -> Lab<T> {
         Lab {
-            l: (116.0 * f(xyz.y / Y_N) - 16.0) / 100.0,
-            a: (500.0 * (f(xyz.x / X_N) - f(xyz.y / Y_N))) / 128.0,
-            b: (200.0 * (f(xyz.y / Y_N) - f(xyz.z / Z_N))) / 128.0,
+            l: (T::from(116.0).unwrap() * f(xyz.y / Y_N) - T::from(16.0).unwrap()) /
+               T::from(100.0).unwrap(),
+            a: (T::from(500.0).unwrap() * (f(xyz.x / X_N) - f(xyz.y / Y_N))) /
+               T::from(128.0).unwrap(),
+            b: (T::from(200.0).unwrap() * (f(xyz.y / Y_N) - f(xyz.z / Z_N))) /
+               T::from(128.0).unwrap(),
             alpha: xyz.alpha,
         }
     }
 }
 
-impl From<Rgb> for Lab {
-    fn from(rgb: Rgb) -> Lab {
+impl<T: Float> From<Rgb<T>> for Lab<T> {
+    fn from(rgb: Rgb<T>) -> Lab<T> {
         Xyz::from(rgb).into()
     }
 }
 
-impl From<Luma> for Lab {
-    fn from(luma: Luma) -> Lab {
+impl<T: Float> From<Luma<T>> for Lab<T> {
+    fn from(luma: Luma<T>) -> Lab<T> {
         Xyz::from(luma).into()
     }
 }
 
-impl From<Lch> for Lab {
-    fn from(lch: Lch) -> Lab {
+impl<T: Float> From<Lch<T>> for Lab<T> {
+    fn from(lch: Lch<T>) -> Lab<T> {
         Lab {
             l: lch.l,
-            a: lch.chroma.max(0.0) * lch.hue.to_radians().cos(),
-            b: lch.chroma.max(0.0) * lch.hue.to_radians().sin(),
+            a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
+            b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
             alpha: lch.alpha,
         }
     }
 }
 
-impl From<Hsv> for Lab {
-    fn from(hsv: Hsv) -> Lab {
+impl<T: Float> From<Hsv> for Lab<T> {
+    fn from(hsv: Hsv) -> Lab<T> {
         Xyz::from(hsv).into()
     }
 }
 
-impl From<Hsl> for Lab {
-    fn from(hsl: Hsl) -> Lab {
+impl<T: Float> From<Hsl<T>> for Lab<T> {
+    fn from(hsl: Hsl<T>) -> Lab<T> {
         Xyz::from(hsl).into()
     }
 }
 
-fn f(t: f32) -> f32 {
-    //(6/29)^3
-    const C_6_O_29_P_3: f32 = 0.00885645167;
-    //(29/6)^2
-    const C_29_O_6_P_2: f32 = 23.3611111111;
+fn f<T: Float>(t: T) -> T {
+    // (T::from(6/29).unwrap())^3
+    let C_6_O_29_P_3: T = T::from(0.00885645167).unwrap();
+    // (T::from(29/6).unwrap())^2
+    let C_29_O_6_P_2: T = T::from(23.3611111111).unwrap();
 
     if t > C_6_O_29_P_3 {
-        t.powf(1.0 / 3.0)
+        t.powf(T::one() / T::from(3.0).unwrap())
     } else {
-        (1.0 / 3.0) * C_29_O_6_P_2 * t + (4.0 / 29.0)
+        (T::one() / T::from(3.0).unwrap()) * C_29_O_6_P_2 * t +
+        (T::from(4.0).unwrap() / T::from(29.0).unwrap())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use ::Rgb;
+    use Rgb;
 
     #[test]
     fn red() {
-        let a = Lab::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
-        let b = Lab::lab(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
+        let a = Lab::from(Rgb::linear_rgb(T::one(), T::zero(), T::zero()));
+        let b = Lab::lab(T::from(53.23288).unwrap() / T::from(100.0).unwrap(),
+                         T::from(80.10933).unwrap() / T::from(128.0).unwrap(),
+                         T::from(67.22006).unwrap() / T::from(128.0).unwrap());
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
-        let b = Lab::lab(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
+        let a = Lab::from(Rgb::linear_rgb(T::zero(), T::one(), T::zero()));
+        let b = Lab::lab(T::from(87.73704).unwrap() / T::from(100.0).unwrap(),
+                         -86.184654 / T::from(128.0).unwrap(),
+                         T::from(83.18117).unwrap() / T::from(128.0).unwrap());
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
-        let b = Lab::lab(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
+        let a = Lab::from(Rgb::linear_rgb(T::zero(), T::zero(), T::one()));
+        let b = Lab::lab(T::from(32.302586).unwrap() / T::from(100.0).unwrap(),
+                         T::from(79.19668).unwrap() / T::from(128.0).unwrap(),
+                         -107.863686 / T::from(128.0).unwrap());
         assert_approx_eq!(a, b, [l, a, b]);
     }
 }

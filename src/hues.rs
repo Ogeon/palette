@@ -1,4 +1,6 @@
-use std::f32::consts::PI;
+use num::traits::Float;
+
+use std::f64::consts::PI;
 use std::cmp::PartialEq;
 use std::ops::{Add, Sub};
 
@@ -12,81 +14,81 @@ macro_rules! make_hues {
         ///also have some surprising effects if it's expected to act as a
         ///linear number.
         #[derive(Clone, Copy, Debug, Default)]
-        pub struct $name(f32);
+        pub struct $name<T:Float>(T);
 
-        impl $name {
+        impl<T:Float> $name<T> {
             ///Create a new hue from radians, instead of degrees.
-            pub fn from_radians(radians: f32) -> $name {
-                $name(radians * 180.0 / PI)
+            pub fn from_radians<T:Float>(radians: T) -> $name {
+                $name(radians * T::from(180.0).unwrap() / PI)
             }
 
             ///Convert the hue to radians.
-            pub fn to_radians(self) -> f32 {
-                normalize_angle(self.0) * PI / 180.0
+            pub fn to_radians<T: Float>(self) -> T {
+                normalize_angle(self.0) * PI / T::from(180.0).unwrap()
             }
         }
 
-        impl From<f32> for $name {
-            fn from(degrees: f32) -> $name {
+        impl<T:Float> From<T> for $name<T> {
+            fn from(degrees: f32) -> $name<T> {
                 $name(degrees)
             }
         }
 
-        impl Into<f32> for $name {
-            fn into(self) -> f32 {
+        impl<T:Float> Into<T> for $name<T> {
+            fn into(self) -> T {
                 normalize_angle(self.0)
             }
         }
 
-        impl PartialEq for $name {
-            fn eq(&self, other: &$name) -> bool {
-                let hue_s: f32 = (*self).into();
-                let hue_o: f32 = (*other).into();
+        impl<T:Float> PartialEq for $name<T> {
+            fn eq(&self, other: &$name<T>) -> bool {
+                let hue_s: T = (*self).into();
+                let hue_o: T = (*other).into();
                 hue_s.eq(&hue_o)
             }
         }
 
-        impl PartialEq<f32> for $name {
-            fn eq(&self, other: &f32) -> bool {
-                let hue: f32 = (*self).into();
+        impl<T:Float> PartialEq for $name<T> {
+            fn eq(&self, other: &T) -> bool {
+                let hue: T = (*self).into();
                 hue.eq(&normalize_angle(*other))
             }
         }
 
-        impl PartialEq<$name> for f32 {
-            fn eq(&self, other: &$name) -> bool {
+        impl<T:Float> PartialEq<$name<T>> for T {
+            fn eq(&self, other: &$name<T>) -> bool {
                 other.eq(self)
             }
         }
 
-        impl Add<$name> for $name {
-            type Output = $name;
+        impl<T:Float> Add<$name<T>> for $name<T> {
+            type Output = $name<T>;
 
-            fn add(self, other: $name) -> $name {
+            fn add(self, other: $name<T>) -> $name<T> {
                 $name(self.0 + other.0)
             }
         }
 
-        impl Add<f32> for $name {
-            type Output = $name;
+        impl<T:Float> Add<T> for $name<T> {
+            type Output = $name<T>;
 
-            fn add(self, other: f32) -> $name {
+            fn add(self, other: T) -> $name<T> {
                 $name(self.0 + other)
             }
         }
 
-        impl Sub<$name> for $name {
-            type Output = $name;
+        impl<T:Float> Sub<$name<T>> for $name<T> {
+            type Output = $name<T>;
 
-            fn sub(self, other: $name) -> $name {
+            fn sub(self, other: $name<T>) -> $name<T> {
                 $name(self.0 - other.0)
             }
         }
 
-        impl Sub<f32> for $name {
-            type Output = $name;
+        impl<T:Float> Sub<T> for $name<T> {
+            type Output = $name<T>;
 
-            fn sub(self, other: f32) -> $name {
+            fn sub(self, other: T) -> $name<T> {
                 $name(self.0 - other)
             }
         }
@@ -108,13 +110,13 @@ make_hues! {
     struct RgbHue;
 }
 
-fn normalize_angle(mut deg: f32) -> f32 {
-    while deg > 180.0 {
-        deg -= 360.0;
+fn normalize_angle<T: Float>(mut deg: T) -> T {
+    while deg > T::from(180.0).unwrap() {
+        deg -= T::from(360.0).unwrap();
     }
 
-    while deg <= -180.0 {
-        deg += 360.0;
+    while deg <= -T::from(180.0).unwrap() {
+        deg += T::from(360.0).unwrap();
     }
 
     deg
