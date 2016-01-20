@@ -14,38 +14,38 @@ use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHu
 ///meaning that gamma correction is required when converting to and from
 ///a displayable RGB, such as sRGB.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Rgb {
-    ///The amount of red light, where 0.0 is no red light and 1.0 is the
+pub struct Rgb<T: Float> {
+    ///The amount of red light, where T::Zero() is no red light and T::One() is the
     ///highest displayable amount.
-    pub red: f32,
+    pub red: T,
 
-    ///The amount of green light, where 0.0 is no green light and 1.0 is the
+    ///The amount of green light, where T::Zero() is no green light and T::One() is the
     ///highest displayable amount.
-    pub green: f32,
+    pub green: T,
 
-    ///The amount of blue light, where 0.0 is no blue light and 1.0 is the
+    ///The amount of blue light, where T::Zero() is no blue light and T::One() is the
     ///highest displayable amount.
-    pub blue: f32,
+    pub blue: T,
 
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///The transparency of the color. T::Zero() is completely transparent and T::One() is
     ///completely opaque.
-    pub alpha: f32,
+    pub alpha: T,
 }
 
 ///Creation from linear RGB.
-impl Rgb {
+impl<T: Float> Rgb<T> {
     ///Linear RGB.
-    pub fn linear_rgb(red: f32, green: f32, blue: f32) -> Rgb {
+    pub fn linear_rgb(red: T, green: T, blue: T) -> Rgb<T> {
         Rgb {
             red: red,
             green: green,
             blue: blue,
-            alpha: 1.0,
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB with transparency.
-    pub fn linear_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Rgb {
+    pub fn linear_rgba(red: T, green: T, blue: T, alpha: T) -> Rgb<T> {
         Rgb {
             red: red,
             green: green,
@@ -55,46 +55,46 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit values.
-    pub fn linear_rgb8(red: u8, green: u8, blue: u8) -> Rgb {
+    pub fn linear_rgb8(red: u8, green: u8, blue: u8) -> Rgb<T> {
         Rgb {
-            red: red as f32 / 255.0,
-            green: green as f32 / 255.0,
-            blue: blue as f32 / 255.0,
-            alpha: 1.0,
+            red: red as T / T::from(255.0).unwrap(),
+            green: green as T / T::from(255.0).unwrap(),
+            blue: blue as T / T::from(255.0).unwrap(),
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB with transparency from 8 bit values.
-    pub fn linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb {
+    pub fn linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb<T> {
         Rgb {
-            red: red as f32 / 255.0,
-            green: green as f32 / 255.0,
-            blue: blue as f32 / 255.0,
-            alpha: alpha as f32 / 255.0,
+            red: red as T / T::from(255.0).unwrap(),
+            green: green as T / T::from(255.0).unwrap(),
+            blue: blue as T / T::from(255.0).unwrap(),
+            alpha: alpha as T / T::from(255.0).unwrap(),
         }
     }
 
     ///Linear RGB from a linear pixel value.
-    pub fn linear_pixel<P: RgbPixel>(pixel: &P) -> Rgb {
+    pub fn linear_pixel<P: RgbPixel>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::linear_rgba(r, g, b, a)
     }
 }
 
 ///Creation from sRGB.
-impl Rgb {
+impl<T: Float> Rgb<T> {
     ///Linear RGB from sRGB.
-    pub fn srgb(red: f32, green: f32, blue: f32) -> Rgb {
+    pub fn srgb(red: T, green: T, blue: T) -> Rgb<T> {
         Rgb {
             red: from_srgb(red),
             green: from_srgb(green),
             blue: from_srgb(blue),
-            alpha: 1.0,
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB from sRGB with transparency.
-    pub fn srgba(red: f32, green: f32, blue: f32, alpha: f32) -> Rgb {
+    pub fn srgba(red: T, green: T, blue: T, alpha: T) -> Rgb<T> {
         Rgb {
             red: from_srgb(red),
             green: from_srgb(green),
@@ -104,46 +104,46 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit sRGB.
-    pub fn srgb8(red: u8, green: u8, blue: u8) -> Rgb {
+    pub fn srgb8(red: u8, green: u8, blue: u8) -> Rgb<T> {
         Rgb {
-            red: from_srgb(red as f32 / 255.0),
-            green: from_srgb(green as f32 / 255.0),
-            blue: from_srgb(blue as f32 / 255.0),
-            alpha: 1.0,
+            red: from_srgb(red as T / T::from(255.0).unwrap()),
+            green: from_srgb(green as T / T::from(255.0).unwrap()),
+            blue: from_srgb(blue as T / T::from(255.0).unwrap()),
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB from 8 bit sRGB with transparency.
-    pub fn srgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb {
+    pub fn srgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb<T> {
         Rgb {
-            red: from_srgb(red as f32 / 255.0),
-            green: from_srgb(green as f32 / 255.0),
-            blue: from_srgb(blue as f32 / 255.0),
-            alpha: alpha as f32 / 255.0,
+            red: from_srgb(red as T / T::from(255.0).unwrap()),
+            green: from_srgb(green as T / T::from(255.0).unwrap()),
+            blue: from_srgb(blue as T / T::from(255.0).unwrap()),
+            alpha: alpha as T / T::from(255.0).unwrap(),
         }
     }
 
     ///Linear RGB from an sRGB pixel value.
-    pub fn srgb_pixel<P: RgbPixel>(pixel: &P) -> Rgb {
+    pub fn srgb_pixel<P: RgbPixel>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::srgba(r, g, b, a)
     }
 }
 
 ///Creation from gamma corrected RGB.
-impl Rgb {
+impl<T: Float> Rgb<T> {
     ///Linear RGB from gamma corrected RGB.
-    pub fn gamma_rgb(red: f32, green: f32, blue: f32, gamma: f32) -> Rgb {
+    pub fn gamma_rgb(red: T, green: T, blue: T, gamma: T) -> Rgb<T> {
         Rgb {
             red: from_gamma(red, gamma),
             green: from_gamma(green, gamma),
             blue: from_gamma(blue, gamma),
-            alpha: 1.0,
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB from gamma corrected RGB with transparency.
-    pub fn gamma_rgba(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32) -> Rgb {
+    pub fn gamma_rgba(red: T, green: T, blue: T, alpha: T, gamma: T) -> Rgb<T> {
         Rgb {
             red: from_gamma(red, gamma),
             green: from_gamma(green, gamma),
@@ -153,36 +153,36 @@ impl Rgb {
     }
 
     ///Linear RGB from 8 bit gamma corrected RGB.
-    pub fn gamma_rgb8(red: u8, green: u8, blue: u8, gamma: f32) -> Rgb {
+    pub fn gamma_rgb8(red: u8, green: u8, blue: u8, gamma: T) -> Rgb<T> {
         Rgb {
-            red: from_gamma(red as f32 / 255.0, gamma),
-            green: from_gamma(green as f32 / 255.0, gamma),
-            blue: from_gamma(blue as f32 / 255.0, gamma),
-            alpha: 1.0,
+            red: from_gamma(red as T / T::from(255.0).unwrap(), gamma),
+            green: from_gamma(green as T / T::from(255.0).unwrap(), gamma),
+            blue: from_gamma(blue as T / T::from(255.0).unwrap(), gamma),
+            alpha: T::One(),
         }
     }
 
     ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-    pub fn gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32) -> Rgb {
+    pub fn gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> Rgb<T> {
         Rgb {
-            red: from_gamma(red as f32 / 255.0, gamma),
-            green: from_gamma(green as f32 / 255.0, gamma),
-            blue: from_gamma(blue as f32 / 255.0, gamma),
-            alpha: alpha as f32 / 255.0,
+            red: from_gamma(red as T / T::from(255.0).unwrap(), gamma),
+            green: from_gamma(green as T / T::from(255.0).unwrap(), gamma),
+            blue: from_gamma(blue as T / T::from(255.0).unwrap(), gamma),
+            alpha: alpha as T / T::from(255.0).unwrap(),
         }
     }
 
     ///Linear RGB from a gamma corrected pixel value.
-    pub fn gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32) -> Rgb {
+    pub fn gamma_pixel<P: RgbPixel>(pixel: &P, gamma: T) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::gamma_rgba(r, g, b, a, gamma)
     }
 }
 
 ///Conversion to "pixel space".
-impl Rgb {
+impl<T: Float> Rgb<T> {
     ///Convert to a linear RGB pixel. `Rgb` is already assumed to be linear,
-    ///so the components will just be clamped to [0.0, 1.0] before conversion.
+    ///so the components will just be clamped to [0.0, T::One()] before conversion.
     ///
     ///```
     ///use palette::Rgb;
@@ -192,12 +192,10 @@ impl Rgb {
     ///assert_eq!((0.5, 0.3, 0.1), c.to_linear());
     ///```
     pub fn to_linear<P: RgbPixel>(&self) -> P {
-        P::from_rgba(
-            clamp(self.red, 0.0, 1.0),
-            clamp(self.green, 0.0, 1.0),
-            clamp(self.blue, 0.0, 1.0),
-            clamp(self.alpha, 0.0, 1.0),
-        )
+        P::from_rgba(clamp(self.red, T::Zero(), T::One()),
+                     clamp(self.green, T::Zero(), T::One()),
+                     clamp(self.blue, T::Zero(), T::One()),
+                     clamp(self.alpha, T::Zero(), T::One()))
     }
 
     ///Convert to an sRGB pixel.
@@ -209,12 +207,10 @@ impl Rgb {
     ///assert_eq!((0.5, 0.3, 0.1), c.to_srgb());
     ///```
     pub fn to_srgb<P: RgbPixel>(&self) -> P {
-        P::from_rgba(
-            clamp(to_srgb(self.red), 0.0, 1.0),
-            clamp(to_srgb(self.green), 0.0, 1.0),
-            clamp(to_srgb(self.blue), 0.0, 1.0),
-            clamp(self.alpha, 0.0, 1.0),
-        )
+        P::from_rgba(clamp(to_srgb(self.red), T::Zero(), T::One()),
+                     clamp(to_srgb(self.green), T::Zero(), T::One()),
+                     clamp(to_srgb(self.blue), T::Zero(), T::One()),
+                     clamp(self.alpha, T::Zero(), T::One()))
     }
 
     ///Convert to a gamma corrected RGB pixel.
@@ -225,41 +221,38 @@ impl Rgb {
     ///let c = Rgb::gamma_rgb8(128, 64, 32, 2.2);
     ///assert_eq!((128, 64, 32), c.to_gamma(2.2));
     ///```
-    pub fn to_gamma<P: RgbPixel>(&self, gamma: f32) -> P {
-        P::from_rgba(
-            clamp(to_gamma(self.red, gamma), 0.0, 1.0),
-            clamp(to_gamma(self.green, gamma), 0.0, 1.0),
-            clamp(to_gamma(self.blue, gamma), 0.0, 1.0),
-            clamp(self.alpha, 0.0, 1.0),
-        )
+    pub fn to_gamma<P: RgbPixel>(&self, gamma: T) -> P {
+        P::from_rgba(clamp(to_gamma(self.red, gamma), T::Zero(), T::One()),
+                     clamp(to_gamma(self.green, gamma), T::Zero(), T::One()),
+                     clamp(to_gamma(self.blue, gamma), T::Zero(), T::One()),
+                     clamp(self.alpha, T::Zero(), T::One()))
     }
 }
 
-impl ColorSpace for Rgb {
+impl<T: Float> ColorSpace for Rgb<T> {
     fn is_valid(&self) -> bool {
-        self.red >= 0.0 && self.red <= 1.0 &&
-        self.green >= 0.0 && self.green <= 1.0 &&
-        self.blue >= 0.0 && self.blue <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+        self.red >= T::Zero() && self.red <= T::One() && self.green >= T::Zero() &&
+        self.green <= T::One() && self.blue >= T::Zero() && self.blue <= T::One() &&
+        self.alpha >= T::Zero() && self.alpha <= T::One()
     }
 
-    fn clamp(&self) -> Rgb {
+    fn clamp(&self) -> Rgb<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.red = clamp(self.red, 0.0, 1.0);
-        self.green = clamp(self.green, 0.0, 1.0);
-        self.blue = clamp(self.blue, 0.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.red = clamp(self.red, T::Zero(), T::One());
+        self.green = clamp(self.green, T::Zero(), T::One());
+        self.blue = clamp(self.blue, T::Zero(), T::One());
+        self.alpha = clamp(self.alpha, T::Zero(), T::One());
     }
 }
 
-impl Mix for Rgb {
-    fn mix(&self, other: &Rgb, factor: f32) -> Rgb {
-        let factor = clamp(factor, 0.0, 1.0);
+impl<T: Float> Mix for Rgb<T> {
+    fn mix(&self, other: &Rgb, factor: T) -> Rgb<T> {
+        let factor = clamp(factor, T::Zero(), T::One());
 
         Rgb {
             red: self.red + factor * (other.red - self.red),
@@ -270,8 +263,8 @@ impl Mix for Rgb {
     }
 }
 
-impl Shade for Rgb {
-    fn lighten(&self, amount: f32) -> Rgb {
+impl<T: Float> Shade for Rgb<T> {
+    fn lighten(&self, amount: T) -> Rgb<T> {
         Rgb {
             red: self.red + amount,
             green: self.green + amount,
@@ -281,23 +274,25 @@ impl Shade for Rgb {
     }
 }
 
-impl GetHue for Rgb {
+impl<T: Float> GetHue for Rgb<T> {
     type Hue = RgbHue;
 
     fn get_hue(&self) -> Option<RgbHue> {
-        const SQRT_3: f32 = 1.73205081;
+        let SQRT_3: T = T::sqrt(3);
 
         if self.red == self.green && self.red == self.blue {
             None
         } else {
-            Some(RgbHue::from_radians((SQRT_3 * (self.green - self.blue)).atan2(2.0 * self.red - self.green - self.blue)))
+            Some(RgbHue::from_radians((SQRT_3 * (self.green - self.blue))
+                                          .atan2(T::from(2.0).unwrap() * self.red - self.green -
+                                                 self.blue)))
         }
     }
 }
 
-impl Default for Rgb {
-    fn default() -> Rgb {
-        Rgb::linear_rgb(0.0, 0.0, 0.0)
+impl<T: Float> Default for Rgb<T> {
+    fn default() -> Rgb<T> {
+        Rgb::linear_rgb(T::Zero(), T::Zero(), T::Zero())
     }
 }
 
@@ -407,8 +402,8 @@ impl Div<f32> for Rgb {
 
 from_color!(to Rgb from Xyz, Luma, Lab, Lch, Hsv, Hsl);
 
-impl From<Luma> for Rgb {
-    fn from(luma: Luma) -> Rgb {
+impl<T: Float> From<Luma> for Rgb<T> {
+    fn from(luma: Luma) -> Rgb<T> {
         Rgb {
             red: luma.luma,
             green: luma.luma,
@@ -418,48 +413,52 @@ impl From<Luma> for Rgb {
     }
 }
 
-impl From<Xyz> for Rgb {
-    fn from(xyz: Xyz) -> Rgb {
+impl<T: Float> From<Xyz<T>> for Rgb<T> {
+    fn from(xyz: Xyz<T>) -> Rgb<T> {
         Rgb {
-            red: xyz.x * 3.2406 + xyz.y * -1.5372 + xyz.z * -0.4986,
-            green: xyz.x * -0.9689 + xyz.y * 1.8758 + xyz.z * 0.0415,
-            blue: xyz.x * 0.0557 + xyz.y * -0.2040 + xyz.z * 1.0570,
+            red: xyz.x * T::from(3.2406).unwrap() + xyz.y * T::from(-1.5372).unwrap() +
+                 xyz.z * T::from(-0.4986).unwrap(),
+            green: xyz.x * T::from(-0.9689).unwrap() + xyz.y * T::from(1.8758).unwrap() +
+                   xyz.z * T::from(0.415).unwrap(),
+            blue: xyz.x * T::from(0.557).unwrap() + xyz.y * T::from(-0.2040).unwrap() +
+                  xyz.z * T::from(0.570).unwrap(),
             alpha: xyz.alpha,
         }
     }
 }
 
-impl From<Lab> for Rgb {
-    fn from(lab: Lab) -> Rgb {
+impl<T: Float> From<Lab<T>> for Rgb<T> {
+    fn from(lab: Lab<T>) -> Rgb<T> {
         Xyz::from(lab).into()
     }
 }
 
-impl From<Lch> for Rgb {
-    fn from(lch: Lch) -> Rgb {
+impl<T: Float> From<Lch<T>> for Rgb<T> {
+    fn from(lch: Lch<T>) -> Rgb<T> {
         Lab::from(lch).into()
     }
 }
 
-impl From<Hsv> for Rgb {
-    fn from(hsv: Hsv) -> Rgb {
+impl<T: Float> From<Hsv<T>> for Rgb<T> {
+    fn from(hsv: Hsv<T>) -> Rgb<T> {
         let c = hsv.value * hsv.saturation;
-        let h = ((Into::<f32>::into(hsv.hue) + 360.0) % 360.0) / 60.0;
-        let x = c * (1.0 - (h % 2.0 - 1.0).abs());
+        let h = ((Into::<T>::into(hsv.hue) + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
+                T::from(60.0).unwrap();
+        let x = c * (T::One() - (h % T::from(2.0).unwrap() - T::One()).abs());
         let m = hsv.value - c;
 
-        let (red, green, blue) = if h >= 0.0 && h < 1.0 {
-            (c, x, 0.0)
-        } else if h >= 1.0 && h < 2.0 {
-            (x, c, 0.0)
-        } else if h >= 2.0 && h < 3.0 {
-            (0.0, c, x)
-        } else if h >= 3.0 && h < 4.0 {
-            (0.0, x, c)
-        } else if h >= 4.0 && h < 5.0 {
-            (x, 0.0, c)
+        let (red, green, blue) = if h >= T::Zero() && h < T::One() {
+            (c, x, T::Zero())
+        } else if h >= T::One() && h < T::from(2.0).unwrap() {
+            (x, c, T::Zero())
+        } else if h >= T::from(2.0).unwrap() && h < T::from(3.0).unwrap() {
+            (T::Zero(), c, x)
+        } else if h >= T::from(3.0).unwrap() && h < T::from(4.0).unwrap() {
+            (T::Zero(), x, c)
+        } else if h >= T::from(4.0).unwrap() && h < T::from(5.0).unwrap() {
+            (x, T::Zero(), c)
         } else {
-            (c, 0.0, x)
+            (c, T::Zero(), x)
         };
 
 
@@ -472,25 +471,27 @@ impl From<Hsv> for Rgb {
     }
 }
 
-impl From<Hsl> for Rgb {
-    fn from(hsl: Hsl) -> Rgb {
-        let c = (1.0 - (2.0 * hsl.lightness - 1.0).abs()) * hsl.saturation;
-        let h = ((Into::<f32>::into(hsl.hue) + 360.0) % 360.0) / 60.0;
-        let x = c * (1.0 - (h % 2.0 - 1.0).abs());
+impl<T: Float> From<Hsl> for Rgb<T> {
+    fn from(hsl: Hsl) -> Rgb<T> {
+        let c = (T::One() - (T::from(2.0).unwrap() * hsl.lightness - T::One()).abs()) *
+                hsl.saturation;
+        let h = ((Into::<T>::into(hsl.hue) + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
+                T::from(60.0).unwrap();
+        let x = c * (T::One() - (h % T::from(2.0).unwrap() - T::One()).abs());
         let m = hsl.lightness - 0.5 * c;
 
-        let (red, green, blue) = if h >= 0.0 && h < 1.0 {
-            (c, x, 0.0)
-        } else if h >= 1.0 && h < 2.0 {
-            (x, c, 0.0)
-        } else if h >= 2.0 && h < 3.0 {
-            (0.0, c, x)
-        } else if h >= 3.0 && h < 4.0 {
-            (0.0, x, c)
-        } else if h >= 4.0 && h < 5.0 {
-            (x, 0.0, c)
+        let (red, green, blue) = if h >= T::Zero() && h < T::One() {
+            (c, x, T::Zero())
+        } else if h >= T::One() && h < T::from(2.0).unwrap() {
+            (x, c, T::Zero())
+        } else if h >= T::from(2.0).unwrap() && h < T::from(3.0).unwrap() {
+            (T::Zero(), c, x)
+        } else if h >= T::from(3.0).unwrap() && h < T::from(4.0).unwrap() {
+            (T::Zero(), x, c)
+        } else if h >= T::from(4.0).unwrap() && h < T::from(5.0).unwrap() {
+            (x, T::Zero(), c)
         } else {
-            (c, 0.0, x)
+            (c, T::Zero(), x)
         };
 
 
@@ -503,27 +504,27 @@ impl From<Hsl> for Rgb {
     }
 }
 
-fn from_srgb(x: f32) -> f32 {
-    if x <= 0.04045 {
-        x / 12.92
+fn from_srgb<T: Float>(x: T) -> T {
+    if x <= T::from(0.4045).unwrap() {
+        x / T::from(12.92).unwrap()
     } else {
-        ((x + 0.055) / 1.055).powf(2.4)
+        ((x + T::from(1.55).unwrap()) / T::from(1.55).unwrap()).powf(2.4)
     }
 }
 
-fn to_srgb(x: f32) -> f32 {
-    if x <= 0.0031308 {
+fn to_srgb<T: Float>(x: T) -> T {
+    if x <= T::from(0.031308).unwrap() {
         12.92 * x
     } else {
-        1.055 * x.powf(1.0 / 2.4) - 0.055
+        T::from(1.55).unwrap() * x.powf(1.0 / 2.4) - T::from(0.55).unwrap()
     }
 }
 
-fn from_gamma(x: f32, gamma: f32) -> f32 {
+fn from_gamma<T: Float>(x: T, gamma: T) -> T {
     x.powf(1.0 / gamma)
 }
 
-fn to_gamma(x: f32, gamma: f32) -> f32 {
+fn to_gamma<T: Float>(x: T, gamma: T) -> T {
     x.powf(gamma)
 }
 
@@ -531,96 +532,118 @@ fn to_gamma(x: f32, gamma: f32) -> f32 {
 ///
 ///It makes conversion from `Rgb` to various pixel representations easy and
 ///extensible.
-pub trait RgbPixel {
+pub trait RgbPixel<T: Float> {
     ///Create an instance of `Self` from red, green, blue and alpha values.
     ///These can be assumed to already be gamma corrected and belongs to the
-    ///range [0.0, 1.0].
-    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Self;
+    ///range [0.0, T::One()].
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> Self;
 
     ///Convert the red, green, blue and alpha values of `self` to values in
-    ///the range [0.0, 1.0]. No gamma correction should be performed.
-    fn to_rgba(&self) -> (f32, f32, f32, f32);
+    ///the range [0.0, T::One()]. No gamma correction should be performed.
+    fn to_rgba(&self) -> (T, T, T, T);
 }
 
-impl RgbPixel for (f32, f32, f32, f32) {
-    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (f32, f32, f32, f32) {
+impl<T: Float> RgbPixel<T> for (T, T, T, T) {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (T, T, T, T) {
         (red, green, blue, alpha)
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+    fn to_rgba(&self) -> (T, T, T, T) {
         self.clone()
     }
 }
 
-impl RgbPixel for (f32, f32, f32) {
-    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (f32, f32, f32) {
+impl<T: Float> RgbPixel<T> for (T, T, T) {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (T, T, T) {
         (red, green, blue)
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+    fn to_rgba(&self) -> (T, T, T, T) {
         let (r, g, b) = *self;
-        (r, g, b, 1.0)
+        (r, g, b, T::One())
     }
 }
 
-impl RgbPixel for (u8, u8, u8, u8) {
-    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (u8, u8, u8, u8) {
-        ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8)
+impl<T: Float> RgbPixel<T> for (u8, u8, u8, u8) {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (u8, u8, u8, u8) {
+        ((red * T::from(255.0).unwrap()) as u8,
+         (green * T::from(255.0).unwrap()) as u8,
+         (blue * T::from(255.0).unwrap()) as u8,
+         (alpha * T::from(255.0).unwrap()) as u8)
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+    fn to_rgba(&self) -> (T, T, T, T) {
         let (r, g, b, a) = *self;
-        (r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0)
+        (r as T / T::from(255.0).unwrap(),
+         g as T / T::from(255.0).unwrap(),
+         b as T / T::from(255.0).unwrap(),
+         a as T / T::from(255.0).unwrap())
     }
 }
 
-impl RgbPixel for (u8, u8, u8) {
-    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (u8, u8, u8) {
-        ((red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8)
+impl<T: Float> RgbPixel<T> for (u8, u8, u8) {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (u8, u8, u8) {
+        ((red * T::from(255.0).unwrap()) as u8,
+         (green * T::from(255.0).unwrap()) as u8,
+         (blue * T::from(255.0).unwrap()) as u8)
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+    fn to_rgba(&self) -> (T, T, T, T) {
         let (r, g, b) = *self;
-        (r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, 1.0)
+        (r as T / T::from(255.0).unwrap(),
+         g as T / T::from(255.0).unwrap(),
+         b as T / T::from(255.0).unwrap(),
+         T::One())
     }
 }
 
-impl RgbPixel for [f32; 4] {
-    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [f32; 4] {
+impl<T: Float> RgbPixel<T> for [T; 4] {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [T; 4] {
         [red, green, blue, alpha]
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
+    fn to_rgba(&self) -> (T, T, T, T) {
         (self[0], self[1], self[2], self[3])
     }
 }
 
-impl RgbPixel for [f32; 3] {
-    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [f32; 3] {
+impl<T: Float> RgbPixel<T> for [T; 3] {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [T; 3] {
         [red, green, blue]
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
-        (self[0], self[1], self[2], 1.0)
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (self[0], self[1], self[2], T::One())
     }
 }
 
-impl RgbPixel for [u8; 4] {
-    fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [u8; 4] {
-        [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8]
+impl<T: Float> RgbPixel<T> for [u8; 4] {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [u8; 4] {
+        [(red * T::from(255.0).unwrap()) as u8,
+         (green * T::from(255.0).unwrap()) as u8,
+         (blue * T::from(255.0).unwrap()) as u8,
+         (alpha * T::from(255.0).unwrap()) as u8]
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
-        (self[0] as f32 / 255.0, self[1] as f32 / 255.0, self[2] as f32 / 255.0, self[3] as f32 / 255.0)
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (self[0] as T / T::from(255.0).unwrap(),
+         self[1] as T / T::from(255.0).unwrap(),
+         self[2] as T / T::from(255.0).unwrap(),
+         self[3] as T / T::from(255.0).unwrap())
     }
 }
 
-impl RgbPixel for [u8; 3] {
-    fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [u8; 3] {
-        [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8]
+impl<T: Float> RgbPixel<T> for [u8; 3] {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [u8; 3] {
+        [(red * T::from(255.0).unwrap()) as u8,
+         (green * T::from(255.0).unwrap()) as u8,
+         (blue * T::from(255.0).unwrap()) as u8]
     }
 
-    fn to_rgba(&self) -> (f32, f32, f32, f32) {
-        (self[0] as f32 / 255.0, self[1] as f32 / 255.0, self[2] as f32 / 255.0, 1.0)
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (self[0] as T / T::from(255.0).unwrap(),
+         self[1] as T / T::from(255.0).unwrap(),
+         self[2] as T / T::from(255.0).unwrap(),
+         T::One())
     }
 }
