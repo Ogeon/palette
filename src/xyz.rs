@@ -15,36 +15,36 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///Illuminant D65 as the white point, and the 2° standard colorimetric
 ///observer.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Xyz {
+pub struct Xyz<T: Float> {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. It goes from 0.0 to 1.0.
-    pub x: f32,
+    pub x: T,
 
     ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
-    pub y: f32,
+    pub y: T,
 
     ///Z is the scale of what can be seen as the blue stimulation. It goes
     ///from 0.0 to 1.0.
-    pub z: f32,
+    pub z: T,
 
     ///The transparency of the color. 0.0 is completely transparent and 1.0 is
     ///completely opaque.
-    pub alpha: f32,
+    pub alpha: T,
 }
 
-impl Xyz {
+impl<T: Float> Xyz<T> {
     ///CIE XYZ.
-    pub fn xyz(x: f32, y: f32, z: f32) -> Xyz {
+    pub fn xyz(x: T, y: T, z: T) -> Xyz<T> {
         Xyz {
             x: x,
             y: y,
             z: z,
-            alpha: 1.0,
+            alpha: T::one(),
         }
     }
 
     ///CIE XYZ and transparency.
-    pub fn xyza(x: f32, y: f32, z: f32, alpha: f32) -> Xyz {
+    pub fn xyza(x: T, y: T, z: T, alpha: T) -> Xyz<T> {
         Xyz {
             x: x,
             y: y,
@@ -54,31 +54,30 @@ impl Xyz {
     }
 }
 
-impl ColorSpace for Xyz {
+impl<T: Float> ColorSpace for Xyz<T> {
     fn is_valid(&self) -> bool {
-        self.x >= 0.0 && self.x <= 1.0 &&
-        self.y >= 0.0 && self.y <= 1.0 &&
-        self.z >= 0.0 && self.z <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+        self.x >= T::Zero() && self.x <= T::One() && self.y >= T::Zero() &&
+        self.y <= T::One() && self.z >= T::Zero() && self.z <= T::One() &&
+        self.alpha >= T::Zero() && self.alpha <= T::One()
     }
 
-    fn clamp(&self) -> Xyz {
+    fn clamp(&self) -> Xyz<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.x = clamp(self.x, 0.0, 1.0);
-        self.y = clamp(self.y, 0.0, 1.0);
-        self.z = clamp(self.z, 0.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.x = clamp(self.x, T::Zero(), T::One());
+        self.y = clamp(self.y, T::Zero(), T::One());
+        self.z = clamp(self.z, T::Zero(), T::One());
+        self.alpha = clamp(self.alpha, T::Zero(), T::One());
     }
 }
 
-impl Mix for Xyz {
-    fn mix(&self, other: &Xyz, factor: f32) -> Xyz {
-        let factor = clamp(factor, 0.0, 1.0);
+impl<T: Float> Mix for Xyz<T> {
+    fn mix(&self, other: &Xyz<T>, factor: T) -> Xyz<T> {
+        let factor = clamp(factor, T::Zero(), T::One());
 
         Xyz {
             x: self.x + factor * (other.x - self.x),
@@ -89,8 +88,8 @@ impl Mix for Xyz {
     }
 }
 
-impl Shade for Xyz {
-    fn lighten(&self, amount: f32) -> Xyz {
+impl<T: Float> Shade for Xyz<T> {
+    fn lighten(&self, amount: T) -> Xyz<T> {
         Xyz {
             x: self.x,
             y: self.y + amount,
@@ -100,9 +99,9 @@ impl Shade for Xyz {
     }
 }
 
-impl Default for Xyz {
-    fn default() -> Xyz {
-        Xyz::xyz(0.0, 0.0, 0.0)
+impl<T: Float> Default for Xyz<T> {
+    fn default() -> Xyz<T> {
+        Xyz::xyz(T::Zero(), T::Zero(), T::Zero())
     }
 }
 
@@ -212,73 +211,84 @@ impl Div<f32> for Xyz {
 
 from_color!(to Xyz from Rgb, Luma, Lab, Lch, Hsv, Hsl);
 
-impl From<Rgb> for Xyz {
-    fn from(rgb: Rgb) -> Xyz {
+impl<T: Float> From<Rgb<T>> for Xyz<T> {
+    fn from(rgb: Rgb<T>) -> Xyz<T> {
         Xyz {
-            x: rgb.red * 0.4124 + rgb.green * 0.3576 + rgb.blue * 0.1805,
-            y: rgb.red * 0.2126 + rgb.green * 0.7152 + rgb.blue * 0.0722,
-            z: rgb.red * 0.0193 + rgb.green * 0.1192 + rgb.blue * 0.9505,
+            x: rgb.red * T::from(0.4124).unwrap() + rgb.green * T::from(0.3576).unwrap() +
+               rgb.blue * T::from(0.1805).unwrap(),
+            y: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() +
+               rgb.blue * T::from(0.0722).unwrap(),
+            z: rgb.red * T::from(0.0193).unwrap() + rgb.green * T::from(0.1192).unwrap() +
+               rgb.blue * T::from(0.9505).unwrap(),
             alpha: rgb.alpha,
         }
     }
 }
 
-impl From<Luma> for Xyz {
-    fn from(luma: Luma) -> Xyz {
+impl<T: Float> From<Luma<T>> for Xyz<T> {
+    fn from(luma: Luma) -> Xyz<T> {
         Xyz {
-            x: 0.0,
+            x: T::Zero(),
             y: luma.luma,
-            z: 0.0,
+            z: T::Zero(),
             alpha: luma.alpha,
         }
     }
 }
 
-impl From<Lab> for Xyz {
+impl<T: Float> From<Lab<T>> for Xyz<T> {
     fn from(lab: Lab) -> Xyz {
         Xyz {
-            x: X_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) + (1.0 / 500.0) * lab.a * 128.0),
-            y: Y_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0)),
-            z: Z_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) - (1.0 / 200.0) * lab.b * 128.0),
+            x: X_N *
+               f_inv((T::One() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0) + T::from(16.0)) +
+                     (T::One() / T::from(500.0).unwrap()) * lab.a * T::from(128.0).unwrap()),
+            y: Y_N *
+               f_inv((T::One() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0) + T::from(16.0))),
+            z: Z_N *
+               f_inv((T::One() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0) + T::from(16.0)) -
+                     (T::One() / T::from(200.0).unwrap()) * lab.b * T::from(128.0).unwrap()),
             alpha: lab.alpha,
         }
     }
 }
 
-impl From<Lch> for Xyz {
-    fn from(lch: Lch) -> Xyz {
+impl<T: Float> From<Lch<T>> for Xyz<T> {
+    fn from(lch: Lch<T>) -> Xyz<T> {
         Lab::from(lch).into()
     }
 }
 
-impl From<Hsv> for Xyz {
-    fn from(hsv: Hsv) -> Xyz {
+impl<T: Float> From<Hsv<T>> for Xyz<T> {
+    fn from(hsv: Hsv) -> Xyz<T> {
         Rgb::from(hsv).into()
     }
 }
 
-impl From<Hsl> for Xyz {
-    fn from(hsl: Hsl) -> Xyz {
+impl<T: Float> From<Hsl<T>> for Xyz<T> {
+    fn from(hsl: Hsl<T>) -> Xyz<T> {
         Rgb::from(hsl).into()
     }
 }
 
 
-fn f_inv(t: f32) -> f32 {
-    //(6/29)^2
-    const C_6_O_29_P_2: f32 = 0.04280618311;
+fn f_inv<T: Float>(t: T) -> T {
+    // (6/29)^2
+    let C_6_O_29_P_2: T = T::from(0.04280618311).unwrap();
 
-    if t > 6.0 / 29.0 {
+    if t > T::from(6.0 / 29.0).unwrap() {
         t * t * t
     } else {
-        3.0 * C_6_O_29_P_2 * (t - (4.0 / 29.0))
+        T::from(3.0).unwrap() * C_6_O_29_P_2 * (t - T::from(4.0 / 29.0).unwrap())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use ::Rgb;
+    use Rgb;
 
     #[test]
     fn red() {

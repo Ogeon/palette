@@ -23,6 +23,7 @@
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
+extern crate num;
 
 pub use gradient::Gradient;
 pub use rgb::{Rgb, RgbPixel};
