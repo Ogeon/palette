@@ -2,9 +2,12 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
+use {Color, Alpha, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
-///Linear luminance with an alpha component.
+///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
+pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
+
+///Linear luminance.
 ///
 ///Luma is a purely gray scale color space, which is included more for
 ///completeness than anything else, and represents how bright a color is
@@ -15,41 +18,38 @@ use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 pub struct Luma<T: Float = f32> {
     ///The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: T,
-
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
-    ///completely opaque.
-    pub alpha: T,
 }
 
 impl<T: Float> Luma<T> {
     ///Linear luminance.
-    pub fn y(luma: T) -> Luma<T> {
+    pub fn new(luma: T) -> Luma<T> {
         Luma {
             luma: luma,
-            alpha: T::zero(),
-        }
-    }
-
-    ///Linear luminance with transparency.
-    pub fn ya(luma: T, alpha: T) -> Luma<T> {
-        Luma {
-            luma: luma,
-            alpha: alpha,
         }
     }
 
     ///Linear luminance from an 8 bit value.
-    pub fn y8(luma: u8) -> Luma<T> {
+    pub fn new_u8(luma: u8) -> Luma<T> {
         Luma {
             luma: T::from(luma).unwrap() / T::from(255.0).unwrap(),
-            alpha: T::zero(),
+        }
+    }
+}
+
+///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
+impl<T: Float> Alpha<Luma<T>, T> {
+    ///Linear luminance with transparency.
+    pub fn new(luma: T, alpha: T) -> Lumaa<T> {
+        Alpha {
+            color: Luma::new(luma),
+            alpha: alpha,
         }
     }
 
     ///Linear luminance and transparency from 8 bit values.
-    pub fn ya8(luma: u8, alpha: u8) -> Luma<T> {
-        Luma {
-            luma: T::from(luma).unwrap() / T::from(255.0).unwrap(),
+    pub fn new_u8(luma: u8, alpha: u8) -> Lumaa<T> {
+        Alpha {
+            color: Luma::new_u8(luma),
             alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
         }
     }
@@ -57,8 +57,7 @@ impl<T: Float> Luma<T> {
 
 impl<T: Float> ColorSpace for Luma<T> {
     fn is_valid(&self) -> bool {
-        self.luma >= T::zero() && self.luma <= T::one() && self.alpha >= T::zero() &&
-        self.alpha <= T::one()
+        self.luma >= T::zero() && self.luma <= T::one()
     }
 
     fn clamp(&self) -> Luma<T> {
@@ -69,7 +68,6 @@ impl<T: Float> ColorSpace for Luma<T> {
 
     fn clamp_self(&mut self) {
         self.luma = clamp(self.luma, T::zero(), T::one());
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
@@ -81,7 +79,6 @@ impl<T: Float> Mix for Luma<T> {
 
         Luma {
             luma: self.luma + factor * (other.luma - self.luma),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
         }
     }
 }
@@ -92,14 +89,13 @@ impl<T: Float> Shade for Luma<T> {
     fn lighten(&self, amount: T) -> Luma<T> {
         Luma {
             luma: (self.luma + amount).max(T::zero()),
-            alpha: self.alpha,
         }
     }
 }
 
 impl<T: Float> Default for Luma<T> {
     fn default() -> Luma<T> {
-        Luma::y(T::zero())
+        Luma::new(T::zero())
     }
 }
 
@@ -109,7 +105,6 @@ impl<T: Float> Add<Luma<T>> for Luma<T> {
     fn add(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma + other.luma,
-            alpha: self.alpha + other.alpha,
         }
     }
 }
@@ -120,7 +115,6 @@ impl<T: Float> Add<T> for Luma<T> {
     fn add(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma + c,
-            alpha: self.alpha + c,
         }
     }
 }
@@ -131,7 +125,6 @@ impl<T: Float> Sub<Luma<T>> for Luma<T> {
     fn sub(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma - other.luma,
-            alpha: self.alpha - other.alpha,
         }
     }
 }
@@ -142,7 +135,6 @@ impl<T: Float> Sub<T> for Luma<T> {
     fn sub(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma - c,
-            alpha: self.alpha - c,
         }
     }
 }
@@ -153,7 +145,6 @@ impl<T: Float> Mul<Luma<T>> for Luma<T> {
     fn mul(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma * other.luma,
-            alpha: self.alpha * other.alpha,
         }
     }
 }
@@ -164,7 +155,6 @@ impl<T: Float> Mul<T> for Luma<T> {
     fn mul(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma * c,
-            alpha: self.alpha * c,
         }
     }
 }
@@ -175,7 +165,6 @@ impl<T: Float> Div<Luma<T>> for Luma<T> {
     fn div(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma / other.luma,
-            alpha: self.alpha / other.alpha,
         }
     }
 }
@@ -186,18 +175,18 @@ impl<T: Float> Div<T> for Luma<T> {
     fn div(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma / c,
-            alpha: self.alpha / c,
         }
     }
 }
 
 from_color!(to Luma from Rgb, Xyz, Lab, Lch, Hsv, Hsl);
 
+alpha_from!(Luma {Rgb, Xyz, Lab, Lch, Hsv, Hsl, Color});
+
 impl<T: Float> From<Rgb<T>> for Luma<T> {
     fn from(rgb: Rgb<T>) -> Luma<T> {
         Luma {
             luma: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() + rgb.blue * T::from(0.0722).unwrap(),
-            alpha: rgb.alpha
         }
     }
 }
@@ -206,7 +195,6 @@ impl<T: Float> From<Xyz<T>> for Luma<T> {
     fn from(xyz: Xyz<T>) -> Luma<T> {
         Luma {
             luma: xyz.y,
-            alpha: xyz.alpha,
         }
     }
 }

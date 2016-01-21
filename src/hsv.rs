@@ -2,9 +2,12 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
-///Linear HSV color space with an alpha component.
+///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
+pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
+
+///Linear HSV color space.
 ///
 ///HSV is a cylindrical version of [RGB](struct.Rgb.html) and it's very
 ///similar to [HSL](struct.Hsl.html). The difference is that the `value`
@@ -26,29 +29,25 @@ pub struct Hsv<T: Float = f32> {
     ///give a bright an clear color that goes towards white when `saturation`
     ///goes towards 0.0.
     pub value: T,
-
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
-    ///completely opaque.
-    pub alpha: T,
 }
 
 impl<T: Float> Hsv<T> {
     ///Linear HSV.
-    pub fn hsv(hue: RgbHue<T>, saturation: T, value: T) -> Hsv<T> {
+    pub fn new(hue: RgbHue<T>, saturation: T, value: T) -> Hsv<T> {
         Hsv {
             hue: hue,
             saturation: saturation,
             value: value,
-            alpha: T::one(),
         }
     }
+}
 
+///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
+impl<T: Float> Alpha<Hsv<T>, T> {
     ///Linear HSV and transparency.
-    pub fn hsva(hue: RgbHue<T>, saturation: T, value: T, alpha: T) -> Hsv<T> {
-        Hsv {
-            hue: hue,
-            saturation: saturation,
-            value: value,
+    pub fn new(hue: RgbHue<T>, saturation: T, value: T, alpha: T) -> Hsva<T> {
+        Alpha {
+            color: Hsv::new(hue, saturation, value),
             alpha: alpha,
         }
     }
@@ -57,8 +56,7 @@ impl<T: Float> Hsv<T> {
 impl<T: Float> ColorSpace for Hsv<T> {
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
-        self.value >= T::zero() && self.value <= T::one() && self.alpha >= T::zero() &&
-        self.alpha <= T::one()
+        self.value >= T::zero() && self.value <= T::one()
     }
 
     fn clamp(&self) -> Hsv<T> {
@@ -70,7 +68,6 @@ impl<T: Float> ColorSpace for Hsv<T> {
     fn clamp_self(&mut self) {
         self.saturation = clamp(self.saturation, T::zero(), T::one());
         self.value = clamp(self.value, T::zero(), T::one());
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
@@ -85,7 +82,6 @@ impl<T: Float> Mix for Hsv<T> {
             hue: self.hue + factor * hue_diff,
             saturation: self.saturation + factor * (other.saturation - self.saturation),
             value: self.value + factor * (other.value - self.value),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
         }
     }
 }
@@ -98,7 +94,6 @@ impl<T: Float> Shade for Hsv<T> {
             hue: self.hue,
             saturation: self.saturation,
             value: self.value + amount,
-            alpha: self.alpha,
         }
     }
 }
@@ -121,7 +116,6 @@ impl<T: Float> Hue for Hsv<T> {
             hue: hue,
             saturation: self.saturation,
             value: self.value,
-            alpha: self.alpha,
         }
     }
 
@@ -130,7 +124,6 @@ impl<T: Float> Hue for Hsv<T> {
             hue: self.hue + amount,
             saturation: self.saturation,
             value: self.value,
-            alpha: self.alpha,
         }
     }
 }
@@ -143,14 +136,13 @@ impl<T: Float> Saturate for Hsv<T> {
             hue: self.hue,
             saturation: self.saturation * (T::one() + factor),
             value: self.value,
-            alpha: self.alpha,
         }
     }
 }
 
 impl<T: Float> Default for Hsv<T> {
     fn default() -> Hsv<T> {
-        Hsv::hsv(RgbHue::from(T::zero()), T::zero(), T::zero())
+        Hsv::new(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
@@ -162,7 +154,6 @@ impl<T: Float> Add<Hsv<T>> for Hsv<T> {
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
             value: self.value + other.value,
-            alpha: self.alpha + other.alpha,
         }
     }
 }
@@ -175,7 +166,6 @@ impl<T: Float> Add<T> for Hsv<T> {
             hue: self.hue + c,
             saturation: self.saturation + c,
             value: self.value + c,
-            alpha: self.alpha + c,
         }
     }
 }
@@ -188,7 +178,6 @@ impl<T: Float> Sub<Hsv<T>> for Hsv<T> {
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
             value: self.value - other.value,
-            alpha: self.alpha - other.alpha,
         }
     }
 }
@@ -201,12 +190,14 @@ impl<T: Float> Sub<T> for Hsv<T> {
             hue: self.hue - c,
             saturation: self.saturation - c,
             value: self.value - c,
-            alpha: self.alpha - c,
         }
     }
 }
 
 from_color!(to Hsv from Rgb, Luma, Xyz, Lab, Lch, Hsl);
+
+alpha_from!(Hsv {Rgb, Xyz, Luma, Lab, Lch, Hsl, Color});
+
 
 impl<T: Float> From<Rgb<T>> for Hsv<T> {
     fn from(rgb: Rgb<T>) -> Hsv<T> {
@@ -248,7 +239,6 @@ impl<T: Float> From<Rgb<T>> for Hsv<T> {
             hue: hue.into(),
             saturation: saturation,
             value: val_max,
-            alpha: rgb.alpha,
         }
     }
 }
@@ -289,7 +279,6 @@ impl<T: Float> From<Hsl<T>> for Hsv<T> {
             hue: hsl.hue,
             saturation: T::from(2.0).unwrap() * x / (hsl.lightness + x),
             value: hsl.lightness + x,
-            alpha: hsl.alpha,
         }
     }
 }
@@ -301,9 +290,9 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Hsv::from(Rgb::rgb(1.0, 0.0, 0.0));
-        let b = Hsv::hsv(0.0.into(), 1.0, 1.0);
-        let c = Hsv::from(Hsl::hsl(0.0.into(), 1.0, 0.5));
+        let a = Hsv::from(Rgb::new(1.0, 0.0, 0.0));
+        let b = Hsv::new(0.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::new(0.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
@@ -311,9 +300,9 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsv::from(Rgb::rgb(1.0, 0.5, 0.0));
-        let b = Hsv::hsv(30.0.into(), 1.0, 1.0);
-        let c = Hsv::from(Hsl::hsl(30.0.into(), 1.0, 0.5));
+        let a = Hsv::from(Rgb::new(1.0, 0.5, 0.0));
+        let b = Hsv::new(30.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::new(30.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
@@ -321,9 +310,9 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsv::from(Rgb::rgb(0.0, 1.0, 0.0));
-        let b = Hsv::hsv(120.0.into(), 1.0, 1.0);
-        let c = Hsv::from(Hsl::hsl(120.0.into(), 1.0, 0.5));
+        let a = Hsv::from(Rgb::new(0.0, 1.0, 0.0));
+        let b = Hsv::new(120.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::new(120.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
@@ -331,9 +320,9 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsv::from(Rgb::rgb(0.0, 0.0, 1.0));
-        let b = Hsv::hsv(240.0.into(), 1.0, 1.0);
-        let c = Hsv::from(Hsl::hsl(240.0.into(), 1.0, 0.5));
+        let a = Hsv::from(Rgb::new(0.0, 0.0, 1.0));
+        let b = Hsv::new(240.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::new(240.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
@@ -341,9 +330,9 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsv::from(Rgb::rgb(0.5, 0.0, 1.0));
-        let b = Hsv::hsv(270.0.into(), 1.0, 1.0);
-        let c = Hsv::from(Hsl::hsl(270.0.into(), 1.0, 0.5));
+        let a = Hsv::from(Rgb::new(0.5, 0.0, 1.0));
+        let b = Hsv::new(270.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::new(270.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);

@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Rgb, clamp};
+use {Alpha, Rgb, Rgba, clamp};
 
 use pixel::RgbPixel;
 
@@ -96,7 +96,7 @@ impl<T: Float> GammaRgb<T> {
     }
 
     ///Convert linear color components to gamma encoding.
-    pub fn from_linear<C: Into<Rgb<T>>>(color: C, gamma: T) -> GammaRgb<T> {
+    pub fn from_linear<C: Into<Rgba<T>>>(color: C, gamma: T) -> GammaRgb<T> {
         let rgb = color.into();
         GammaRgb {
             red: to_gamma(rgb.red, gamma),
@@ -108,17 +108,19 @@ impl<T: Float> GammaRgb<T> {
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgb<T> {
-        Rgb {
-            red: from_gamma(self.red, self.gamma),
-            green: from_gamma(self.green, self.gamma),
-            blue: from_gamma(self.blue, self.gamma),
+    pub fn to_linear(&self) -> Rgba<T> {
+        Alpha {
+            color: Rgb {
+                red: from_gamma(self.red, self.gamma),
+                green: from_gamma(self.green, self.gamma),
+                blue: from_gamma(self.blue, self.gamma),
+            },
             alpha: self.alpha,
         }
     }
 
     ///Shortcut to convert a linear color to a gamma encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgb<T>>, P: RgbPixel<T>>(color: C, gamma: T) -> P {
+    pub fn linear_to_pixel<C: Into<Rgba<T>>, P: RgbPixel<T>>(color: C, gamma: T) -> P {
         GammaRgb::from_linear(color, gamma).to_pixel()
     }
 }
