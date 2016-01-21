@@ -1,5 +1,6 @@
-//!Types for interpolation between multiple colors.
+//! Types for interpolation between multiple colors.
 
+use num::traits::Float;
 use std::cmp::max;
 
 use Mix;
@@ -13,18 +14,18 @@ use Mix;
 ///the domain of the gradient will have the same color as the closest control
 ///point.
 #[derive(Clone, Debug)]
-pub struct Gradient<C: Mix + Clone>(Vec<(f32, C)>);
+pub struct Gradient<T: Float, C: Mix<T> + Clone>(Vec<(T, C)>);
 
-impl<C: Mix + Clone> Gradient<C> {
+impl<T: Float, C: Mix<T> + Clone> Gradient<T, C> {
     ///Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     ///There must be at least one color.
-    pub fn new<I: IntoIterator<Item=C>>(colors: I) -> Gradient<C> {
-        let mut points: Vec<_> = colors.into_iter().map(|c| (0.0, c)).collect();
+    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<T, C> {
+        let mut points: Vec<_> = colors.into_iter().map(|c| (T::zero(), c)).collect();
         assert!(points.len() > 0);
-        let step_size = 1.0 / max(points.len() - 1, 1) as f32;
+        let step_size = T::one() / T::from(max(points.len() - 1, 1) as f64).unwrap();
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = i as f32 * step_size;
+            *p = T::from(i).unwrap() * step_size;
         }
 
         Gradient(points)
@@ -33,17 +34,19 @@ impl<C: Mix + Clone> Gradient<C> {
     ///Create a gradient of colors with custom spacing and domain. There must be
     ///at least one color and they are expected to be ordered by their
     ///position value.
-    pub fn with_domain(colors: Vec<(f32, C)>) -> Gradient<C> {
+    pub fn with_domain(colors: Vec<(T, C)>) -> Gradient<T, C> {
         assert!(colors.len() > 0);
 
-        //Maybe sort the colors?
+        // Maybe sort the colors?
         Gradient(colors)
     }
 
     ///Get a color from the gradient. The color of the closest control point
     ///will be returned if `i` is outside the domain.
-    pub fn get(&self, i: f32) -> C {
-        let &(mut min, ref min_color) = self.0.get(0).expect("a Gradient must contain at least one color");
+    pub fn get(&self, i: T) -> C {
+        let &(mut min, ref min_color) = self.0
+                                            .get(0)
+                                            .expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
         let mut min_index = 0;
 
@@ -51,7 +54,9 @@ impl<C: Mix + Clone> Gradient<C> {
             return min_color.clone();
         }
 
-        let &(mut max, ref max_color) = self.0.last().expect("a Gradient must contain at least one color");
+        let &(mut max, ref max_color) = self.0
+                                            .last()
+                                            .expect("a Gradient must contain at least one color");
         let mut max_color = max_color;
         let mut max_index = self.0.len() - 1;
 
@@ -110,20 +115,21 @@ impl<C: Mix + Clone> Gradient<C> {
 }
 
 ///An iterator over interpolated colors.
-pub struct Take<'a, C: Mix + Clone + 'a> {
-    gradient: MaybeSlice<'a, C>,
-    from: f32,
-    diff: f32,
+pub struct Take<'a, T: Float + 'a, C: Mix<T> + Clone + 'a> {
+    gradient: MaybeSlice<'a, T, C>,
+    from: T,
+    diff: T,
     len: usize,
     current: usize,
 }
 
-impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
+impl<'a, T: Float, C: Mix<T> + Clone> Iterator for Take<'a, T, C> {
     type Item = C;
 
     fn next(&mut self) -> Option<C> {
         if self.current < self.len {
-            let i = self.from + self.current as f32 * (self.diff / self.len as f32);
+            let i = self.from +
+                    T::from(self.current).unwrap() * (self.diff / T::from(self.len).unwrap());
             self.current += 1;
             Some(self.gradient.get(i))
         } else {
@@ -136,7 +142,7 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
     }
 }
 
-impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> { }
+impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> {}
 
 
 ///A slice of a Gradient that limits its domain.
@@ -171,7 +177,7 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
     pub fn slice<R: Into<Range>>(&self, range: R) -> Slice<C> {
         Slice {
             gradient: self.gradient,
-            range: self.range.constrain(&range.into())
+            range: self.range.constrain(&range.into()),
         }
     }
 
@@ -209,7 +215,7 @@ impl Range {
             }
         }
 
-        
+
         if let (Some(t), Some(f)) = (other.to, self.from) {
             if t <= f {
                 return Range {
@@ -218,7 +224,7 @@ impl Range {
                 };
             }
         }
-        
+
         Range {
             from: match (self.from, other.from) {
                 (Some(s), Some(o)) => Some(s.max(o)),
@@ -313,7 +319,8 @@ mod test {
 
     #[test]
     fn simple_slice() {
-        let g1 = Gradient::new(vec![Rgb::linear_rgb(1.0, 0.0, 0.0), Rgb::linear_rgb(0.0, 0.0, 1.0)]);
+        let g1 = Gradient::new(vec![Rgb::linear_rgb(1.0, 0.0, 0.0),
+                                    Rgb::linear_rgb(0.0, 0.0, 1.0)]);
         let g2 = g1.slice(..0.5);
 
         let v1: Vec<_> = g1.take(10).take(5).collect();

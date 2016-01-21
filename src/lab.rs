@@ -75,7 +75,7 @@ impl<T: Float> ColorSpace for Lab<T> {
     }
 }
 
-impl<T: Float> Mix for Lab<T> {
+impl<T: Float> Mix<T> for Lab<T> {
     fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -88,7 +88,7 @@ impl<T: Float> Mix for Lab<T> {
     }
 }
 
-impl<T: Float> Shade for Lab<T> {
+impl<T: Float> Shade<T> for Lab<T> {
     fn lighten(&self, amount: T) -> Lab<T> {
         Lab {
             l: self.l + amount * T::one(),
@@ -100,9 +100,9 @@ impl<T: Float> Shade for Lab<T> {
 }
 
 impl<T: Float> GetHue for Lab<T> {
-    type Hue = LabHue;
+    type Hue = LabHue<T>;
 
-    fn get_hue(&self) -> Option<LabHue> {
+    fn get_hue(&self) -> Option<LabHue<T>> {
         if self.a == T::zero() && self.b == T::zero() {
             None
         } else {
@@ -223,8 +223,8 @@ impl Div<f32> for Lab {
 
 from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 
-impl<T: Float> From<Xyz> for Lab<T> {
-    fn from(xyz: Xyz) -> Lab<T> {
+impl<T: Float> From<Xyz<T>> for Lab<T> {
+    fn from(xyz: Xyz<T>) -> Lab<T> {
         Lab {
             l: (T::from(116.0).unwrap() * f(xyz.y / Y_N) - T::from(16.0).unwrap()) /
                T::from(100.0).unwrap(),
@@ -260,8 +260,8 @@ impl<T: Float> From<Lch<T>> for Lab<T> {
     }
 }
 
-impl<T: Float> From<Hsv> for Lab<T> {
-    fn from(hsv: Hsv) -> Lab<T> {
+impl<T: Float> From<Hsv<T>> for Lab<T> {
+    fn from(hsv: Hsv<T>) -> Lab<T> {
         Xyz::from(hsv).into()
     }
 }

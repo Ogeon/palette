@@ -24,7 +24,7 @@ impl<T: Float> Luma<T> {
     pub fn y(luma: T) -> Luma<T> {
         Luma {
             luma: luma,
-            alpha: T::Zero(),
+            alpha: T::zero(),
         }
     }
 
@@ -39,7 +39,7 @@ impl<T: Float> Luma<T> {
     ///Linear luminance from an 8 bit value.
     pub fn y8(luma: u8) -> Luma<T> {
         Luma {
-            luma: luma as T / 255.0,
+            luma: T::from(luma).unwrap() / T::from(255.0).unwrap(),
             alpha: T::zero(),
         }
     }
@@ -47,8 +47,8 @@ impl<T: Float> Luma<T> {
     ///Linear luminance and transparency from 8 bit values.
     pub fn ya8(luma: u8, alpha: u8) -> Luma<T> {
         Luma {
-            luma: luma as T / 255.0,
-            alpha: alpha as T / 255.0,
+            luma: T::from(luma).unwrap() / T::from(255.0).unwrap(),
+            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
         }
     }
 }
@@ -56,7 +56,7 @@ impl<T: Float> Luma<T> {
 impl<T: Float> ColorSpace for Luma<T> {
     fn is_valid(&self) -> bool {
         self.luma >= T::zero() && self.luma <= T::one() && self.alpha >= T::zero() &&
-        self.alpha <= 1.0
+        self.alpha <= T::one()
     }
 
     fn clamp(&self) -> Luma<T> {
@@ -71,7 +71,7 @@ impl<T: Float> ColorSpace for Luma<T> {
     }
 }
 
-impl<T: Float> Mix for Luma<T> {
+impl<T: Float> Mix<T> for Luma<T> {
     fn mix(&self, other: &Luma<T>, factor: T) -> Luma<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -82,7 +82,7 @@ impl<T: Float> Mix for Luma<T> {
     }
 }
 
-impl<T: Float> Shade for Luma<T> {
+impl<T: Float> Shade<T> for Luma<T> {
     fn lighten(&self, amount: T) -> Luma<T> {
         Luma {
             luma: (self.luma + amount).max(T::zero()),

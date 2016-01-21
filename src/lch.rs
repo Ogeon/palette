@@ -11,7 +11,7 @@ use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, 
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lch<T> {
+pub struct Lch<T: Float> {
     ///L* is the lightness of the color. T::zero()gives absolute black and T::one()
     ///give the brightest white.
     pub l: T,
@@ -24,7 +24,7 @@ pub struct Lch<T> {
 
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
-    pub hue: LabHue,
+    pub hue: LabHue<T>,
 
     ///The transparency of the color. T::zero()is completely transparent and T::one()is
     ///completely opaque.
@@ -33,7 +33,7 @@ pub struct Lch<T> {
 
 impl<T: Float> Lch<T> {
     ///CIE L*C*h°.
-    pub fn lch(l: T, chroma: T, hue: LabHue) -> Lch<T> {
+    pub fn lch(l: T, chroma: T, hue: LabHue<T>) -> Lch<T> {
         Lch {
             l: l,
             chroma: chroma,
@@ -43,7 +43,7 @@ impl<T: Float> Lch<T> {
     }
 
     ///CIE L*C*h° and transparency.
-    pub fn lcha(l: T, chroma: T, hue: LabHue, alpha: T) -> Lch<T> {
+    pub fn lcha(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lch<T> {
         Lch {
             l: l,
             chroma: chroma,
@@ -73,7 +73,7 @@ impl<T: Float> ColorSpace for Lch<T> {
     }
 }
 
-impl<T: Float> Mix for Lch<T> {
+impl<T: Float> Mix<T> for Lch<T> {
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).into();
@@ -86,7 +86,7 @@ impl<T: Float> Mix for Lch<T> {
     }
 }
 
-impl<T: Float> Shade for Lch<T> {
+impl<T: Float> Shade<T> for Lch<T> {
     fn lighten(&self, amount: T) -> Lch<T> {
         Lch {
             l: self.l + amount,
@@ -98,9 +98,9 @@ impl<T: Float> Shade for Lch<T> {
 }
 
 impl<T: Float> GetHue for Lch<T> {
-    type Hue = LabHue;
+    type Hue = LabHue<T>;
 
-    fn get_hue(&self) -> Option<LabHue> {
+    fn get_hue(&self) -> Option<LabHue<T>> {
         if self.chroma <= T::zero() {
             None
         } else {
@@ -110,7 +110,7 @@ impl<T: Float> GetHue for Lch<T> {
 }
 
 impl<T: Float> Hue for Lch<T> {
-    fn with_hue(&self, hue: LabHue) -> Lch<T> {
+    fn with_hue(&self, hue: LabHue<T>) -> Lch<T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
@@ -119,7 +119,7 @@ impl<T: Float> Hue for Lch<T> {
         }
     }
 
-    fn shift_hue(&self, amount: LabHue) -> Lch<T> {
+    fn shift_hue(&self, amount: LabHue<T>) -> Lch<T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
@@ -129,11 +129,11 @@ impl<T: Float> Hue for Lch<T> {
     }
 }
 
-impl<T: Float> Saturate for Lch<T> {
+impl<T: Float> Saturate<T> for Lch<T> {
     fn saturate(&self, factor: T) -> Lch<T> {
         Lch {
             l: self.l,
-            chroma: self.chroma * (1.0 + factor),
+            chroma: self.chroma * (T::from(1.0).unwrap() + factor),
             hue: self.hue,
             alpha: self.alpha,
         }
@@ -230,13 +230,13 @@ impl<T: Float> From<Xyz<T>> for Lch<T> {
 }
 
 impl<T: Float> From<Hsv<T>> for Lch<T> {
-    fn from(hsv: Hsv) -> Lch<T> {
+    fn from(hsv: Hsv<T>) -> Lch<T> {
         Lab::from(hsv).into()
     }
 }
 
 impl<T: Float> From<Hsl<T>> for Lch<T> {
-    fn from(hsl: Hsl) -> Lch<T> {
+    fn from(hsl: Hsl<T>) -> Lch<T> {
         Lab::from(hsl).into()
     }
 }

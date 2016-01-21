@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub};
 
-use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue,
+     clamp};
 
 ///Linear HSL color space with an alpha component.
 ///
@@ -13,70 +14,70 @@ use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, 
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Hsl {
+pub struct Hsl<T: Float> {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
-	pub hue: RgbHue,
+    pub hue: RgbHue<T>,
 
-    ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
+    ///The colorfulness of the color. T::zero() gives gray scale colors and T::one() will
     ///give absolutely clear colors.
-	pub saturation: f32,
+    pub saturation: T,
 
-    ///Decides how light the color will look. 0.0 will be black, 0.5 will give
-    ///a clear color, and 1.0 will give white.
-	pub lightness: f32,
+    ///Decides how light the color will look. T::zero() will be black, T::from(0.5).unwrap() will give
+    ///a clear color, and T::one() will give white.
+    pub lightness: T,
 
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
+    ///The transparency of the color. T::zero() is completely transparent and T::one() is
     ///completely opaque.
-	pub alpha: f32,
+    pub alpha: T,
 }
 
-impl Hsl {
+impl<T: Float> Hsl<T> {
     ///Linear HSL.
-	pub fn hsl(hue: RgbHue, saturation: f32, lightness: f32) -> Hsl {
-		Hsl {
-			hue: hue,
-			saturation: saturation,
-			lightness: lightness,
-			alpha: 1.0,
-		}
-	}
-
-	///Linear HSL and transparency.
-	pub fn hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32) -> Hsl {
-		Hsl {
-			hue: hue,
-			saturation: saturation,
-			lightness: lightness,
-			alpha: alpha,
-		}
-	}
-}
-
-impl ColorSpace for Hsl {
-    fn is_valid(&self) -> bool {
-        self.saturation >= 0.0 && self.saturation <= 1.0 &&
-        self.lightness >= 0.0 && self.lightness <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+    pub fn hsl(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<T> {
+        Hsl {
+            hue: hue,
+            saturation: saturation,
+            lightness: lightness,
+            alpha: T::one(),
+        }
     }
 
-    fn clamp(&self) -> Hsl {
+    ///Linear HSL and transparency.
+    pub fn hsla(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsl<T> {
+        Hsl {
+            hue: hue,
+            saturation: saturation,
+            lightness: lightness,
+            alpha: alpha,
+        }
+    }
+}
+
+impl<T: Float> ColorSpace for Hsl<T> {
+    fn is_valid(&self) -> bool {
+        self.saturation >= T::zero() && self.saturation <= T::one() &&
+        self.lightness >= T::zero() && self.lightness <= T::one() &&
+        self.alpha >= T::zero() && self.alpha <= T::one()
+    }
+
+    fn clamp(&self) -> Hsl<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.saturation = clamp(self.saturation, 0.0, 1.0);
-        self.lightness = clamp(self.lightness, 0.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.saturation = clamp(self.saturation, T::zero(), T::one());
+        self.lightness = clamp(self.lightness, T::zero(), T::one());
+        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
-impl Mix for Hsl {
-	fn mix(&self, other: &Hsl, factor: f32) -> Hsl {
-        let factor = clamp(factor, 0.0, 1.0);
-        let hue_diff: f32 = (other.hue - self.hue).into();
+impl<T: Float> Mix<T> for Hsl<T> {
+    fn mix(&self, other: &Hsl<T>, factor: T) -> Hsl<T> {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff: T = (other.hue - self.hue).into();
 
         Hsl {
             hue: self.hue + factor * hue_diff,
@@ -87,8 +88,8 @@ impl Mix for Hsl {
     }
 }
 
-impl Shade for Hsl {
-    fn lighten(&self, amount: f32) -> Hsl {
+impl<T: Float> Shade<T> for Hsl<T> {
+    fn lighten(&self, amount: T) -> Hsl<T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
@@ -98,11 +99,11 @@ impl Shade for Hsl {
     }
 }
 
-impl GetHue for Hsl {
-    type Hue = RgbHue;
+impl<T: Float> GetHue for Hsl<T> {
+    type Hue = RgbHue<T>;
 
-    fn get_hue(&self) -> Option<RgbHue> {
-        if self.saturation <= 0.0 {
+    fn get_hue(&self) -> Option<RgbHue<T>> {
+        if self.saturation <= T::zero() {
             None
         } else {
             Some(self.hue)
@@ -110,8 +111,8 @@ impl GetHue for Hsl {
     }
 }
 
-impl Hue for Hsl {
-    fn with_hue(&self, hue: RgbHue) -> Hsl {
+impl<T: Float> Hue for Hsl<T> {
+    fn with_hue(&self, hue: RgbHue<T>) -> Hsl<T> {
         Hsl {
             hue: hue,
             saturation: self.saturation,
@@ -120,7 +121,7 @@ impl Hue for Hsl {
         }
     }
 
-    fn shift_hue(&self, amount: RgbHue) -> Hsl {
+    fn shift_hue(&self, amount: RgbHue<T>) -> Hsl<T> {
         Hsl {
             hue: self.hue + amount,
             saturation: self.saturation,
@@ -130,21 +131,21 @@ impl Hue for Hsl {
     }
 }
 
-impl Saturate for Hsl {
-    fn saturate(&self, factor: f32) -> Hsl {
+impl<T: Float> Saturate<T> for Hsl<T> {
+    fn saturate(&self, factor: T) -> Hsl<T> {
         Hsl {
             hue: self.hue,
-            saturation: self.saturation * (1.0 + factor),
+            saturation: self.saturation * (T::one() + factor),
             lightness: self.lightness,
             alpha: self.alpha,
         }
     }
 }
 
-impl Default for Hsl {
-	fn default() -> Hsl {
-		Hsl::hsl(0.0.into(), 0.0, 0.0)
-	}
+impl<T: Float> Default for Hsl<T> {
+    fn default() -> Hsl<T> {
+        Hsl::hsl(T::zero(), T::zero(), T::zero())
+    }
 }
 
 impl Add<Hsl> for Hsl {
@@ -201,9 +202,13 @@ impl Sub<f32> for Hsl {
 
 from_color!(to Hsl from Rgb, Luma, Xyz, Lab, Lch, Hsv);
 
-impl From<Rgb> for Hsl {
-	fn from(rgb: Rgb) -> Hsl {
-		enum Channel { Red, Green, Blue };
+impl<T: Float> From<Rgb<T>> for Hsl<T> {
+    fn from(rgb: Rgb<T>) -> Hsl<T> {
+        enum Channel {
+            Red,
+            Green,
+            Blue,
+        };
 
         let val_min = rgb.red.min(rgb.green).min(rgb.blue);
         let mut val_max = rgb.red;
@@ -220,22 +225,23 @@ impl From<Rgb> for Hsl {
         }
 
         let diff = val_max - val_min;
-        let lightness = (val_min + val_max) / 2.0;
+        let lightness = (val_min + val_max) / T::from(2.0).unwrap();
 
-        let hue = if diff == 0.0 {
-            0.0
+        let hue = if diff == T::zero() {
+            T::zero()
         } else {
-            60.0 * match chan_max {
-                Channel::Red => ((rgb.green - rgb.blue) / diff) % 6.0,
-                Channel::Green => ((rgb.blue - rgb.red) / diff + 2.0),
-                Channel::Blue => ((rgb.red - rgb.green) / diff + 4.0),
+            T::from(60.0).unwrap() *
+            match chan_max {
+                Channel::Red => ((rgb.green - rgb.blue) / diff) % T::from(6.0).unwrap(),
+                Channel::Green => ((rgb.blue - rgb.red) / diff + T::from(2.0).unwrap()),
+                Channel::Blue => ((rgb.red - rgb.green) / diff + T::from(4.0).unwrap()),
             }
         };
 
-        let saturation = if diff == 0.0 {
-            0.0
+        let saturation = if diff == T::zero() {
+            T::zero()
         } else {
-            diff / (1.0 - (2.0 * lightness - 1.0).abs())
+            diff / (T::one() - (T::from(2.0).unwrap() * lightness - T::one()).abs())
         };
 
         Hsl {
@@ -244,63 +250,63 @@ impl From<Rgb> for Hsl {
             lightness: lightness,
             alpha: rgb.alpha,
         }
-	}
+    }
 }
 
-impl From<Luma> for Hsl {
-	fn from(luma: Luma) -> Hsl {
-		Rgb::from(luma).into()
-	}
+impl<T: Float> From<Luma<T>> for Hsl<T> {
+    fn from(luma: Luma<T>) -> Hsl<T> {
+        Rgb::from(luma).into()
+    }
 }
 
-impl From<Xyz> for Hsl {
-	fn from(xyz: Xyz) -> Hsl {
-		Rgb::from(xyz).into()
-	}
+impl<T: Float> From<Xyz<T>> for Hsl<T> {
+    fn from(xyz: Xyz<T>) -> Hsl<T> {
+        Rgb::from(xyz).into()
+    }
 }
 
-impl From<Lab> for Hsl {
-	fn from(lab: Lab) -> Hsl {
-		Rgb::from(lab).into()
-	}
+impl<T: Float> From<Lab<T>> for Hsl<T> {
+    fn from(lab: Lab<T>) -> Hsl<T> {
+        Rgb::from(lab).into()
+    }
 }
 
-impl From<Lch> for Hsl {
-	fn from(lch: Lch) -> Hsl {
-		Rgb::from(lch).into()
-	}
+impl<T: Float> From<Lch<T>> for Hsl<T> {
+    fn from(lch: Lch<T>) -> Hsl<T> {
+        Rgb::from(lch).into()
+    }
 }
 
-impl From<Hsv> for Hsl {
-    fn from(hsv: Hsv) -> Hsl {
-    	let x = (2.0 - hsv.saturation) * hsv.value;
-    	let saturation = if hsv.value == 0.0 {
-    		0.0
-    	} else if x < 1.0 {
-    		hsv.saturation * hsv.value / x
-    	} else {
-    		hsv.saturation * hsv.value / (2.0 - x)
-    	};
+impl<T: Float> From<Hsv<T>> for Hsl<T> {
+    fn from(hsv: Hsv<T>) -> Hsl<T> {
+        let x = (T::from(2.0).unwrap() - hsv.saturation) * hsv.value;
+        let saturation = if hsv.value == T::zero() {
+            T::zero()
+        } else if x < T::one() {
+            hsv.saturation * hsv.value / x
+        } else {
+            hsv.saturation * hsv.value / (T::from(2.0).unwrap() - x)
+        };
 
-    	Hsl {
-    		hue: hsv.hue,
-    		saturation: saturation,
-    		lightness: x / 2.0,
-    		alpha: hsv.alpha,
-    	}
+        Hsl {
+            hue: hsv.hue,
+            saturation: saturation,
+            lightness: x / T::from(2.0).unwrap(),
+            alpha: hsv.alpha,
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use ::{Rgb, Hsv};
+    use {Rgb, Hsv};
 
     #[test]
     fn red() {
-        let a = Hsl::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
-        let b = Hsl::hsl(0.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::hsv(0.0.into(), 1.0, 1.0));
+        let a = Hsl::from(Rgb::linear_rgb(T::one(), T::zero(), T::zero()));
+        let b = Hsl::hsl(0.0.into(), T::one(), T::from(0.5).unwrap());
+        let c = Hsl::from(Hsv::hsv(0.0.into(), T::one(), T::one()));
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
@@ -308,9 +314,9 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from(Rgb::linear_rgb(1.0, 0.5, 0.0));
-        let b = Hsl::hsl(30.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::hsv(30.0.into(), 1.0, 1.0));
+        let a = Hsl::from(Rgb::linear_rgb(T::one(), T::from(0.5).unwrap(), T::zero()));
+        let b = Hsl::hsl(30.0.into(), T::one(), T::from(0.5).unwrap());
+        let c = Hsl::from(Hsv::hsv(30.0.into(), T::one(), T::one()));
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
@@ -318,9 +324,9 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
-        let b = Hsl::hsl(120.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::hsv(120.0.into(), 1.0, 1.0));
+        let a = Hsl::from(Rgb::linear_rgb(T::zero(), T::one(), T::zero()));
+        let b = Hsl::hsl(120.0.into(), T::one(), T::from(0.5).unwrap());
+        let c = Hsl::from(Hsv::hsv(120.0.into(), T::one(), T::one()));
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
@@ -328,9 +334,9 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
-        let b = Hsl::hsl(240.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::hsv(240.0.into(), 1.0, 1.0));
+        let a = Hsl::from(Rgb::linear_rgb(T::zero(), T::zero(), T::one()));
+        let b = Hsl::hsl(240.0.into(), T::one(), T::from(0.5).unwrap());
+        let c = Hsl::from(Hsv::hsv(240.0.into(), T::one(), T::one()));
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
@@ -338,9 +344,9 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from(Rgb::linear_rgb(0.5, 0.0, 1.0));
-        let b = Hsl::hsl(270.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::hsv(270.0.into(), 1.0, 1.0));
+        let a = Hsl::from(Rgb::linear_rgb(T::from(0.5).unwrap(), T::zero(), T::one()));
+        let b = Hsl::hsl(270.0.into(), T::one(), T::from(0.5).unwrap());
+        let c = Hsl::from(Hsv::hsv(270.0.into(), T::one(), T::one()));
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
