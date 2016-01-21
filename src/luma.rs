@@ -12,7 +12,7 @@ use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Luma<T: Float> {
+pub struct Luma<T: Float = f32> {
     ///The lightness of the color. T::zero() is black and T::one() is white.
     pub luma: T,
 

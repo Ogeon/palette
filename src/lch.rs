@@ -13,7 +13,7 @@ use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, 
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lch<T: Float> {
+pub struct Lch<T: Float = f32> {
     ///L* is the lightness of the color. T::zero()gives absolute black and T::one()
     ///give the brightest white.
     pub l: T,

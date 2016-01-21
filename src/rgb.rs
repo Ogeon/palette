@@ -534,7 +534,7 @@ fn to_gamma<T: Float>(x: T, gamma: T) -> T {
 ///
 ///It makes conversion from `Rgb` to various pixel representations easy and
 ///extensible.
-pub trait RgbPixel<T: Float> {
+pub trait RgbPixel<T: Float = f32> {
     ///Create an instance of `Self` from red, green, blue and alpha values.
     ///These can be assumed to already be gamma corrected and belongs to the
     ///range [0.0, 1.0].

@@ -16,7 +16,7 @@ use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, 
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Hsl<T: Float> {
+pub struct Hsl<T: Float = f32> {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: RgbHue<T>,

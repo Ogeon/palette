@@ -17,7 +17,7 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///Illuminant D65 as the white point, and the 2° standard colorimetric
 ///observer.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Xyz<T: Float> {
+pub struct Xyz<T: Float = f32> {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. It goes from 0.0 to 1.0.
     pub x: T,

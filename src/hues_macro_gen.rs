@@ -9,7 +9,7 @@ macro_rules! make_hues {
         ///also have some surprising effects if it's expected to act as a
         ///linear number.
         #[derive(Clone, Copy, Debug, Default)]
-        pub struct $name<T:Float>(T);
+        pub struct $name<T:Float = f32>(T);
 
         impl<T:Float> $name<T> {
             ///Create a new hue from radians, instead of degrees.
@@ -22,7 +22,7 @@ macro_rules! make_hues {
                 normalize_angle(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
             }
 
-            ///get the value from hue.
+            ///Returns the hue value as a f32 or f64 as needed
             pub fn to_float(self) -> T {
                 normalize_angle(self.0)
             }
@@ -52,7 +52,7 @@ macro_rules! make_hues {
                 normalize_angle(self.0).to_f32().unwrap()
             }
         }
-        
+
         impl<T:Float> PartialEq for $name<T> {
             fn eq(&self, other: &$name<T>) -> bool {
                 let hue_s: T = (*self).into();

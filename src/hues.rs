@@ -30,7 +30,7 @@ impl<T: Float> LabHue<T> {
     pub fn to_radians(self) -> T {
         normalize_angle(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
     }
-
+    ///Returns the hue value as a f32 or f64 as needed
     pub fn to_float(self) -> T {
         normalize_angle(self.0)
     }
@@ -102,7 +102,7 @@ impl<T: Float> Sub<T> for LabHue<T> {
 ///also have some surprising effects if it's expected to act as a
 ///linear number.
 #[derive(Clone, Copy, Debug, Default)]
-pub struct RgbHue<T: Float>(T);
+pub struct RgbHue<T: Float = f32>(T);
 
 impl<T: Float> RgbHue<T> {
     ///Create a new hue from radians, instead of degrees.
@@ -113,7 +113,7 @@ impl<T: Float> RgbHue<T> {
     pub fn to_radians(self) -> T {
         normalize_angle(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
     }
-
+    ///Returns the hue value as a f32 or f64 as needed
     pub fn to_float(self) -> T {
         normalize_angle(self.0)
     }

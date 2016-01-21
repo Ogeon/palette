@@ -18,7 +18,7 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lab<T: Float> {
+pub struct Lab<T: Float = f32> {
     ///L* is the lightness of the color. T::zero() gives absolute black and T::one()
     ///give the brightest white.
     pub l: T,
