@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub};
 
 use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue,
@@ -146,10 +148,10 @@ impl<T: Float> Default for Lch<T> {
     }
 }
 
-impl Add<Lch> for Lch {
-    type Output = Lch;
+impl<T: Float> Add<Lch<T>> for Lch<T> {
+    type Output = Lch<T>;
 
-    fn add(self, other: Lch) -> Lch {
+    fn add(self, other: Lch<T>) -> Lch<T> {
         Lch {
             l: self.l + other.l,
             chroma: self.chroma + other.chroma,
@@ -159,10 +161,10 @@ impl Add<Lch> for Lch {
     }
 }
 
-impl Add<f32> for Lch {
-    type Output = Lch;
+impl<T: Float> Add<T> for Lch<T> {
+    type Output = Lch<T>;
 
-    fn add(self, c: f32) -> Lch {
+    fn add(self, c: T) -> Lch<T> {
         Lch {
             l: self.l + c,
             chroma: self.chroma + c,
@@ -172,10 +174,10 @@ impl Add<f32> for Lch {
     }
 }
 
-impl Sub<Lch> for Lch {
-    type Output = Lch;
+impl<T: Float> Sub<Lch<T>> for Lch<T> {
+    type Output = Lch<T>;
 
-    fn sub(self, other: Lch) -> Lch {
+    fn sub(self, other: Lch<T>) -> Lch<T> {
         Lch {
             l: self.l - other.l,
             chroma: self.chroma - other.chroma,
@@ -185,10 +187,10 @@ impl Sub<Lch> for Lch {
     }
 }
 
-impl Sub<f32> for Lch {
-    type Output = Lch;
+impl<T: Float> Sub<T> for Lch<T> {
+    type Output = Lch<T>;
 
-    fn sub(self, c: f32) -> Lch {
+    fn sub(self, c: T) -> Lch<T> {
         Lch {
             l: self.l - c,
             chroma: self.chroma - c,

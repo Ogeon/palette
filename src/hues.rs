@@ -37,11 +37,6 @@ impl<T: Float> From<T> for LabHue<T> {
         LabHue(degrees)
     }
 }
-impl<T: Float> Into<T> for LabHue<T> {
-    fn into(self) -> T {
-        normalize_angle(self.0)
-    }
-}
 // impl<T: Float> From<LabHue<T>> for T {
 //     fn into(self) -> T {
 //         normalize_angle(self.0)
@@ -184,11 +179,11 @@ impl<T: Float> Sub<T> for RgbHue<T> {
 
 fn normalize_angle<T: Float>(mut deg: T) -> T {
     while deg > T::from(180.0).unwrap() {
-        deg -= T::from(360.0).unwrap();
+        deg = deg - T::from(360.0).unwrap();
     }
 
     while deg <= -T::from(180.0).unwrap() {
-        deg += T::from(360.0).unwrap();
+        deg = deg - T::from(360.0).unwrap();
     }
 
     deg

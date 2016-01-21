@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub};
 
 use {Color, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue,
@@ -148,10 +150,10 @@ impl<T: Float> Default for Hsl<T> {
     }
 }
 
-impl Add<Hsl> for Hsl {
-    type Output = Hsl;
+impl<T: Float> Add<Hsl<T>> for Hsl<T> {
+    type Output = Hsl<T>;
 
-    fn add(self, other: Hsl) -> Hsl {
+    fn add(self, other: Hsl<T>) -> Hsl<T> {
         Hsl {
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
@@ -161,10 +163,10 @@ impl Add<Hsl> for Hsl {
     }
 }
 
-impl Add<f32> for Hsl {
-    type Output = Hsl;
+impl<T: Float> Add<T> for Hsl<T> {
+    type Output = Hsl<T>;
 
-    fn add(self, c: f32) -> Hsl {
+    fn add(self, c: T) -> Hsl<T> {
         Hsl {
             hue: self.hue + c,
             saturation: self.saturation + c,
@@ -174,10 +176,10 @@ impl Add<f32> for Hsl {
     }
 }
 
-impl Sub<Hsl> for Hsl {
-    type Output = Hsl;
+impl<T: Float> Sub<Hsl<T>> for Hsl<T> {
+    type Output = Hsl<T>;
 
-    fn sub(self, other: Hsl) -> Hsl {
+    fn sub(self, other: Hsl<T>) -> Hsl<T> {
         Hsl {
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
@@ -187,10 +189,10 @@ impl Sub<Hsl> for Hsl {
     }
 }
 
-impl Sub<f32> for Hsl {
-    type Output = Hsl;
+impl<T: Float> Sub<T> for Hsl<T> {
+    type Output = Hsl<T>;
 
-    fn sub(self, c: f32) -> Hsl {
+    fn sub(self, c: T) -> Hsl<T> {
         Hsl {
             hue: self.hue - c,
             saturation: self.saturation - c,

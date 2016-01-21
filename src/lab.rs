@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
@@ -56,8 +58,8 @@ impl<T: Float> Lab<T> {
 
 impl<T: Float> ColorSpace for Lab<T> {
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= T::one() && self.a >= -1.0 && self.a <= T::one() &&
-        self.b >= -1.0 && self.b <= T::one() &&
+        self.l >= T::zero() && self.l <= T::one() && self.a >= -T::one() &&
+        self.a <= -T::one() && self.b >= -T::one() && self.b <= T::one() &&
         self.alpha >= T::zero() && self.alpha <= T::one()
     }
 
@@ -69,8 +71,8 @@ impl<T: Float> ColorSpace for Lab<T> {
 
     fn clamp_self(&mut self) {
         self.l = clamp(self.l, T::zero(), T::one());
-        self.a = clamp(self.a, -1.0, T::one());
-        self.b = clamp(self.b, -1.0, T::one());
+        self.a = clamp(self.a, -T::one(), T::one());
+        self.b = clamp(self.b, -T::one(), T::one());
         self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
@@ -117,10 +119,10 @@ impl<T: Float> Default for Lab<T> {
     }
 }
 
-impl Add<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Add<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn add(self, other: Lab) -> Lab {
+    fn add(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l + other.l,
             a: self.a + other.a,
@@ -130,10 +132,10 @@ impl Add<Lab> for Lab {
     }
 }
 
-impl Add<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Add<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn add(self, c: f32) -> Lab {
+    fn add(self, c: T) -> Lab<T> {
         Lab {
             l: self.l + c,
             a: self.a + c,
@@ -143,10 +145,10 @@ impl Add<f32> for Lab {
     }
 }
 
-impl Sub<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Sub<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn sub(self, other: Lab) -> Lab {
+    fn sub(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l - other.l,
             a: self.a - other.a,
@@ -156,10 +158,10 @@ impl Sub<Lab> for Lab {
     }
 }
 
-impl Sub<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Sub<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn sub(self, c: f32) -> Lab {
+    fn sub(self, c: T) -> Lab<T> {
         Lab {
             l: self.l - c,
             a: self.a - c,
@@ -169,10 +171,10 @@ impl Sub<f32> for Lab {
     }
 }
 
-impl Mul<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Mul<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn mul(self, other: Lab) -> Lab {
+    fn mul(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l * other.l,
             a: self.a * other.a,
@@ -182,10 +184,10 @@ impl Mul<Lab> for Lab {
     }
 }
 
-impl Mul<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Mul<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn mul(self, c: f32) -> Lab {
+    fn mul(self, c: T) -> Lab<T> {
         Lab {
             l: self.l * c,
             a: self.a * c,
@@ -195,10 +197,10 @@ impl Mul<f32> for Lab {
     }
 }
 
-impl Div<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Div<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn div(self, other: Lab) -> Lab {
+    fn div(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l / other.l,
             a: self.a / other.a,
@@ -208,10 +210,10 @@ impl Div<Lab> for Lab {
     }
 }
 
-impl Div<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Div<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn div(self, c: f32) -> Lab {
+    fn div(self, c: T) -> Lab<T> {
         Lab {
             l: self.l / c,
             a: self.a / c,
@@ -226,11 +228,13 @@ from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 impl<T: Float> From<Xyz<T>> for Lab<T> {
     fn from(xyz: Xyz<T>) -> Lab<T> {
         Lab {
-            l: (T::from(116.0).unwrap() * f(xyz.y / Y_N) - T::from(16.0).unwrap()) /
-               T::from(100.0).unwrap(),
-            a: (T::from(500.0).unwrap() * (f(xyz.x / X_N) - f(xyz.y / Y_N))) /
+            l: (T::from(116.0).unwrap() * f(xyz.y / T::from(Y_N).unwrap()) -
+                T::from(16.0).unwrap()) / T::from(100.0).unwrap(),
+            a: (T::from(500.0).unwrap() *
+                (f(xyz.x / T::from(X_N).unwrap()) - f(xyz.y / T::from(Y_N).unwrap()))) /
                T::from(128.0).unwrap(),
-            b: (T::from(200.0).unwrap() * (f(xyz.y / Y_N) - f(xyz.z / Z_N))) /
+            b: (T::from(200.0).unwrap() *
+                (f(xyz.y / T::from(Y_N).unwrap()) - f(xyz.z / T::from(Z_N).unwrap()))) /
                T::from(128.0).unwrap(),
             alpha: xyz.alpha,
         }

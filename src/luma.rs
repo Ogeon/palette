@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
@@ -97,10 +99,10 @@ impl<T: Float> Default for Luma<T> {
     }
 }
 
-impl Add<Luma> for Luma {
-    type Output = Luma;
+impl<T: Float> Add<Luma<T>> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn add(self, other: Luma) -> Luma {
+    fn add(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma + other.luma,
             alpha: self.alpha + other.alpha,
@@ -108,10 +110,10 @@ impl Add<Luma> for Luma {
     }
 }
 
-impl Add<f32> for Luma {
-    type Output = Luma;
+impl<T: Float> Add<T> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn add(self, c: f32) -> Luma {
+    fn add(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma + c,
             alpha: self.alpha + c,
@@ -119,10 +121,10 @@ impl Add<f32> for Luma {
     }
 }
 
-impl Sub<Luma> for Luma {
-    type Output = Luma;
+impl<T: Float> Sub<Luma<T>> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn sub(self, other: Luma) -> Luma {
+    fn sub(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma - other.luma,
             alpha: self.alpha - other.alpha,
@@ -130,10 +132,10 @@ impl Sub<Luma> for Luma {
     }
 }
 
-impl Sub<f32> for Luma {
-    type Output = Luma;
+impl<T: Float> Sub<T> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn sub(self, c: f32) -> Luma {
+    fn sub(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma - c,
             alpha: self.alpha - c,
@@ -141,10 +143,10 @@ impl Sub<f32> for Luma {
     }
 }
 
-impl Mul<Luma> for Luma {
-    type Output = Luma;
+impl<T: Float> Mul<Luma<T>> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn mul(self, other: Luma) -> Luma {
+    fn mul(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma * other.luma,
             alpha: self.alpha * other.alpha,
@@ -152,10 +154,10 @@ impl Mul<Luma> for Luma {
     }
 }
 
-impl Mul<f32> for Luma {
-    type Output = Luma;
+impl<T: Float> Mul<T> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn mul(self, c: f32) -> Luma {
+    fn mul(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma * c,
             alpha: self.alpha * c,
@@ -163,10 +165,10 @@ impl Mul<f32> for Luma {
     }
 }
 
-impl Div<Luma> for Luma {
-    type Output = Luma;
+impl<T: Float> Div<Luma<T>> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn div(self, other: Luma) -> Luma {
+    fn div(self, other: Luma<T>) -> Luma<T> {
         Luma {
             luma: self.luma / other.luma,
             alpha: self.alpha / other.alpha,
@@ -174,10 +176,10 @@ impl Div<Luma> for Luma {
     }
 }
 
-impl Div<f32> for Luma {
-    type Output = Luma;
+impl<T: Float> Div<T> for Luma<T> {
+    type Output = Luma<T>;
 
-    fn div(self, c: f32) -> Luma {
+    fn div(self, c: T) -> Luma<T> {
         Luma {
             luma: self.luma / c,
             alpha: self.alpha / c,

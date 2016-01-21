@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
@@ -105,10 +107,10 @@ impl<T: Float> Default for Xyz<T> {
     }
 }
 
-impl Add<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Add<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn add(self, other: Xyz) -> Xyz {
+    fn add(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -118,10 +120,10 @@ impl Add<Xyz> for Xyz {
     }
 }
 
-impl Add<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Add<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn add(self, c: f32) -> Xyz {
+    fn add(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x + c,
             y: self.y + c,
@@ -131,10 +133,10 @@ impl Add<f32> for Xyz {
     }
 }
 
-impl Sub<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Sub<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn sub(self, other: Xyz) -> Xyz {
+    fn sub(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -144,10 +146,10 @@ impl Sub<Xyz> for Xyz {
     }
 }
 
-impl Sub<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Sub<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn sub(self, c: f32) -> Xyz {
+    fn sub(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x - c,
             y: self.y - c,
@@ -157,10 +159,10 @@ impl Sub<f32> for Xyz {
     }
 }
 
-impl Mul<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Mul<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn mul(self, other: Xyz) -> Xyz {
+    fn mul(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -170,10 +172,10 @@ impl Mul<Xyz> for Xyz {
     }
 }
 
-impl Mul<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Mul<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn mul(self, c: f32) -> Xyz {
+    fn mul(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x * c,
             y: self.y * c,
@@ -183,10 +185,10 @@ impl Mul<f32> for Xyz {
     }
 }
 
-impl Div<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Div<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn div(self, other: Xyz) -> Xyz {
+    fn div(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x / other.x,
             y: self.y / other.y,
@@ -196,10 +198,10 @@ impl Div<Xyz> for Xyz {
     }
 }
 
-impl Div<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Div<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn div(self, c: f32) -> Xyz {
+    fn div(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x / c,
             y: self.y / c,
@@ -239,16 +241,16 @@ impl<T: Float> From<Luma<T>> for Xyz<T> {
 impl<T: Float> From<Lab<T>> for Xyz<T> {
     fn from(lab: Lab<T>) -> Xyz<T> {
         Xyz {
-            x: X_N *
+            x: T::from(X_N).unwrap() *
                f_inv((T::one() / T::from(116.0).unwrap()) *
-                     (lab.l * T::from(100.0) + T::from(16.0)) +
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) +
                      (T::one() / T::from(500.0).unwrap()) * lab.a * T::from(128.0).unwrap()),
-            y: Y_N *
+            y: T::from(Y_N).unwrap() *
                f_inv((T::one() / T::from(116.0).unwrap()) *
-                     (lab.l * T::from(100.0) + T::from(16.0))),
-            z: Z_N *
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap())),
+            z: T::from(Z_N).unwrap() *
                f_inv((T::one() / T::from(116.0).unwrap()) *
-                     (lab.l * T::from(100.0) + T::from(16.0)) -
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) -
                      (T::one() / T::from(200.0).unwrap()) * lab.b * T::from(128.0).unwrap()),
             alpha: lab.alpha,
         }

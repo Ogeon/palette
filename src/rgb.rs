@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
@@ -296,10 +298,10 @@ impl<T: Float> Default for Rgb<T> {
     }
 }
 
-impl Add<Rgb> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Add<Rgb<T>> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn add(self, other: Rgb) -> Rgb {
+    fn add(self, other: Rgb<T>) -> Rgb<T> {
         Rgb {
             red: self.red + other.red,
             green: self.green + other.green,
@@ -309,10 +311,10 @@ impl Add<Rgb> for Rgb {
     }
 }
 
-impl Add<f32> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Add<T> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn add(self, c: f32) -> Rgb {
+    fn add(self, c: T) -> Rgb<T> {
         Rgb {
             red: self.red + c,
             green: self.green + c,
@@ -322,10 +324,10 @@ impl Add<f32> for Rgb {
     }
 }
 
-impl Sub<Rgb> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Sub<Rgb<T>> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn sub(self, other: Rgb) -> Rgb {
+    fn sub(self, other: Rgb<T>) -> Rgb<T> {
         Rgb {
             red: self.red - other.red,
             green: self.green - other.green,
@@ -335,10 +337,10 @@ impl Sub<Rgb> for Rgb {
     }
 }
 
-impl Sub<f32> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Sub<T> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn sub(self, c: f32) -> Rgb {
+    fn sub(self, c: T) -> Rgb<T> {
         Rgb {
             red: self.red - c,
             green: self.green - c,
@@ -348,10 +350,10 @@ impl Sub<f32> for Rgb {
     }
 }
 
-impl Mul<Rgb> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Mul<Rgb<T>> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn mul(self, other: Rgb) -> Rgb {
+    fn mul(self, other: Rgb<T>) -> Rgb<T> {
         Rgb {
             red: self.red * other.red,
             green: self.green * other.green,
@@ -361,10 +363,10 @@ impl Mul<Rgb> for Rgb {
     }
 }
 
-impl Mul<f32> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Mul<T> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn mul(self, c: f32) -> Rgb {
+    fn mul(self, c: T) -> Rgb<T> {
         Rgb {
             red: self.red * c,
             green: self.green * c,
@@ -374,10 +376,10 @@ impl Mul<f32> for Rgb {
     }
 }
 
-impl Div<Rgb> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Div<Rgb<T>> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn div(self, other: Rgb) -> Rgb {
+    fn div(self, other: Rgb<T>) -> Rgb<T> {
         Rgb {
             red: self.red / other.red,
             green: self.green / other.green,
@@ -387,10 +389,10 @@ impl Div<Rgb> for Rgb {
     }
 }
 
-impl Div<f32> for Rgb {
-    type Output = Rgb;
+impl<T: Float> Div<T> for Rgb<T> {
+    type Output = Rgb<T>;
 
-    fn div(self, c: f32) -> Rgb {
+    fn div(self, c: T) -> Rgb<T> {
         Rgb {
             red: self.red / c,
             green: self.green / c,
@@ -478,7 +480,7 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
         let h = ((Into::<T>::into(hsl.hue) + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
                 T::from(60.0).unwrap();
         let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
-        let m = hsl.lightness - 0.5 * c;
+        let m = hsl.lightness - T::from(0.5).unwrap() * c;
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
@@ -514,14 +516,14 @@ fn from_srgb<T: Float>(x: T) -> T {
 
 fn to_srgb<T: Float>(x: T) -> T {
     if x <= T::from(0.031308).unwrap() {
-        12.92 * x
+        T::from(12.92).unwrap() * x
     } else {
         T::from(1.55).unwrap() * x.powf(T::from(1.0 / 2.4).unwrap()) - T::from(0.55).unwrap()
     }
 }
 
 fn from_gamma<T: Float>(x: T, gamma: T) -> T {
-    x.powf(1.0 / gamma)
+    x.powf(T::one() / gamma)
 }
 
 fn to_gamma<T: Float>(x: T, gamma: T) -> T {
