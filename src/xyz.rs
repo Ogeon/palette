@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
@@ -15,36 +17,36 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///Illuminant D65 as the white point, and the 2° standard colorimetric
 ///observer.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Xyz {
+pub struct Xyz<T: Float = f32> {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. It goes from 0.0 to 1.0.
-    pub x: f32,
+    pub x: T,
 
     ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
-    pub y: f32,
+    pub y: T,
 
     ///Z is the scale of what can be seen as the blue stimulation. It goes
     ///from 0.0 to 1.0.
-    pub z: f32,
+    pub z: T,
 
     ///The transparency of the color. 0.0 is completely transparent and 1.0 is
     ///completely opaque.
-    pub alpha: f32,
+    pub alpha: T,
 }
 
-impl Xyz {
+impl<T: Float> Xyz<T> {
     ///CIE XYZ.
-    pub fn xyz(x: f32, y: f32, z: f32) -> Xyz {
+    pub fn xyz(x: T, y: T, z: T) -> Xyz<T> {
         Xyz {
             x: x,
             y: y,
             z: z,
-            alpha: 1.0,
+            alpha: T::one(),
         }
     }
 
     ///CIE XYZ and transparency.
-    pub fn xyza(x: f32, y: f32, z: f32, alpha: f32) -> Xyz {
+    pub fn xyza(x: T, y: T, z: T, alpha: T) -> Xyz<T> {
         Xyz {
             x: x,
             y: y,
@@ -54,31 +56,30 @@ impl Xyz {
     }
 }
 
-impl ColorSpace for Xyz {
+impl<T: Float> ColorSpace for Xyz<T> {
     fn is_valid(&self) -> bool {
-        self.x >= 0.0 && self.x <= 1.0 &&
-        self.y >= 0.0 && self.y <= 1.0 &&
-        self.z >= 0.0 && self.z <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+        self.x >= T::zero() && self.x <= T::one() && self.y >= T::zero() &&
+        self.y <= T::one() && self.z >= T::zero() && self.z <= T::one() &&
+        self.alpha >= T::zero() && self.alpha <= T::one()
     }
 
-    fn clamp(&self) -> Xyz {
+    fn clamp(&self) -> Xyz<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.x = clamp(self.x, 0.0, 1.0);
-        self.y = clamp(self.y, 0.0, 1.0);
-        self.z = clamp(self.z, 0.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.x = clamp(self.x, T::zero(), T::one());
+        self.y = clamp(self.y, T::zero(), T::one());
+        self.z = clamp(self.z, T::zero(), T::one());
+        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
-impl Mix for Xyz {
-    fn mix(&self, other: &Xyz, factor: f32) -> Xyz {
-        let factor = clamp(factor, 0.0, 1.0);
+impl<T: Float> Mix<T> for Xyz<T> {
+    fn mix(&self, other: &Xyz<T>, factor: T) -> Xyz<T> {
+        let factor = clamp(factor, T::zero(), T::one());
 
         Xyz {
             x: self.x + factor * (other.x - self.x),
@@ -89,8 +90,8 @@ impl Mix for Xyz {
     }
 }
 
-impl Shade for Xyz {
-    fn lighten(&self, amount: f32) -> Xyz {
+impl<T: Float> Shade<T> for Xyz<T> {
+    fn lighten(&self, amount: T) -> Xyz<T> {
         Xyz {
             x: self.x,
             y: self.y + amount,
@@ -100,16 +101,16 @@ impl Shade for Xyz {
     }
 }
 
-impl Default for Xyz {
-    fn default() -> Xyz {
-        Xyz::xyz(0.0, 0.0, 0.0)
+impl<T: Float> Default for Xyz<T> {
+    fn default() -> Xyz<T> {
+        Xyz::xyz(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl Add<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Add<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn add(self, other: Xyz) -> Xyz {
+    fn add(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -119,10 +120,10 @@ impl Add<Xyz> for Xyz {
     }
 }
 
-impl Add<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Add<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn add(self, c: f32) -> Xyz {
+    fn add(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x + c,
             y: self.y + c,
@@ -132,10 +133,10 @@ impl Add<f32> for Xyz {
     }
 }
 
-impl Sub<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Sub<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn sub(self, other: Xyz) -> Xyz {
+    fn sub(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -145,10 +146,10 @@ impl Sub<Xyz> for Xyz {
     }
 }
 
-impl Sub<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Sub<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn sub(self, c: f32) -> Xyz {
+    fn sub(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x - c,
             y: self.y - c,
@@ -158,10 +159,10 @@ impl Sub<f32> for Xyz {
     }
 }
 
-impl Mul<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Mul<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn mul(self, other: Xyz) -> Xyz {
+    fn mul(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -171,10 +172,10 @@ impl Mul<Xyz> for Xyz {
     }
 }
 
-impl Mul<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Mul<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn mul(self, c: f32) -> Xyz {
+    fn mul(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x * c,
             y: self.y * c,
@@ -184,10 +185,10 @@ impl Mul<f32> for Xyz {
     }
 }
 
-impl Div<Xyz> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Div<Xyz<T>> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn div(self, other: Xyz) -> Xyz {
+    fn div(self, other: Xyz<T>) -> Xyz<T> {
         Xyz {
             x: self.x / other.x,
             y: self.y / other.y,
@@ -197,10 +198,10 @@ impl Div<Xyz> for Xyz {
     }
 }
 
-impl Div<f32> for Xyz {
-    type Output = Xyz;
+impl<T: Float> Div<T> for Xyz<T> {
+    type Output = Xyz<T>;
 
-    fn div(self, c: f32) -> Xyz {
+    fn div(self, c: T) -> Xyz<T> {
         Xyz {
             x: self.x / c,
             y: self.y / c,
@@ -212,73 +213,84 @@ impl Div<f32> for Xyz {
 
 from_color!(to Xyz from Rgb, Luma, Lab, Lch, Hsv, Hsl);
 
-impl From<Rgb> for Xyz {
-    fn from(rgb: Rgb) -> Xyz {
+impl<T: Float> From<Rgb<T>> for Xyz<T> {
+    fn from(rgb: Rgb<T>) -> Xyz<T> {
         Xyz {
-            x: rgb.red * 0.4124 + rgb.green * 0.3576 + rgb.blue * 0.1805,
-            y: rgb.red * 0.2126 + rgb.green * 0.7152 + rgb.blue * 0.0722,
-            z: rgb.red * 0.0193 + rgb.green * 0.1192 + rgb.blue * 0.9505,
+            x: rgb.red * T::from(0.4124).unwrap() + rgb.green * T::from(0.3576).unwrap() +
+               rgb.blue * T::from(0.1805).unwrap(),
+            y: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() +
+               rgb.blue * T::from(0.0722).unwrap(),
+            z: rgb.red * T::from(0.0193).unwrap() + rgb.green * T::from(0.1192).unwrap() +
+               rgb.blue * T::from(0.9505).unwrap(),
             alpha: rgb.alpha,
         }
     }
 }
 
-impl From<Luma> for Xyz {
-    fn from(luma: Luma) -> Xyz {
+impl<T: Float> From<Luma<T>> for Xyz<T> {
+    fn from(luma: Luma<T>) -> Xyz<T> {
         Xyz {
-            x: 0.0,
+            x: T::zero(),
             y: luma.luma,
-            z: 0.0,
+            z: T::zero(),
             alpha: luma.alpha,
         }
     }
 }
 
-impl From<Lab> for Xyz {
-    fn from(lab: Lab) -> Xyz {
+impl<T: Float> From<Lab<T>> for Xyz<T> {
+    fn from(lab: Lab<T>) -> Xyz<T> {
         Xyz {
-            x: X_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) + (1.0 / 500.0) * lab.a * 128.0),
-            y: Y_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0)),
-            z: Z_N * f_inv((1.0 / 116.0) * (lab.l * 100.0 + 16.0) - (1.0 / 200.0) * lab.b * 128.0),
+            x: T::from(X_N).unwrap() *
+               f_inv((T::one() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) +
+                     (T::one() / T::from(500.0).unwrap()) * lab.a * T::from(128.0).unwrap()),
+            y: T::from(Y_N).unwrap() *
+               f_inv((T::one() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap())),
+            z: T::from(Z_N).unwrap() *
+               f_inv((T::one() / T::from(116.0).unwrap()) *
+                     (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) -
+                     (T::one() / T::from(200.0).unwrap()) * lab.b * T::from(128.0).unwrap()),
             alpha: lab.alpha,
         }
     }
 }
 
-impl From<Lch> for Xyz {
-    fn from(lch: Lch) -> Xyz {
+impl<T: Float> From<Lch<T>> for Xyz<T> {
+    fn from(lch: Lch<T>) -> Xyz<T> {
         Lab::from(lch).into()
     }
 }
 
-impl From<Hsv> for Xyz {
-    fn from(hsv: Hsv) -> Xyz {
+impl<T: Float> From<Hsv<T>> for Xyz<T> {
+    fn from(hsv: Hsv<T>) -> Xyz<T> {
         Rgb::from(hsv).into()
     }
 }
 
-impl From<Hsl> for Xyz {
-    fn from(hsl: Hsl) -> Xyz {
+impl<T: Float> From<Hsl<T>> for Xyz<T> {
+    fn from(hsl: Hsl<T>) -> Xyz<T> {
         Rgb::from(hsl).into()
     }
 }
 
 
-fn f_inv(t: f32) -> f32 {
-    //(6/29)^2
-    const C_6_O_29_P_2: f32 = 0.04280618311;
+fn f_inv<T: Float>(t: T) -> T {
+    // (6/29)^2
+    let c_6_o_29_p_2: T = T::from(0.04280618311).unwrap();
 
-    if t > 6.0 / 29.0 {
+    if t > T::from(6.0 / 29.0).unwrap() {
         t * t * t
     } else {
-        3.0 * C_6_O_29_P_2 * (t - (4.0 / 29.0))
+        T::from(3.0).unwrap() * c_6_o_29_p_2 * (t - T::from(4.0 / 29.0).unwrap())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use ::Rgb;
+    use Rgb;
 
     #[test]
     fn red() {

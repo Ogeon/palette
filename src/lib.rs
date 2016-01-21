@@ -23,6 +23,9 @@
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
+extern crate num;
+
+use num::traits::Float;
 
 pub use gradient::Gradient;
 pub use rgb::{Rgb, RgbPixel};
@@ -37,8 +40,8 @@ pub use hues::{LabHue, RgbHue};
 
 macro_rules! from_color {
     (to $to:ident from $($from:ident),+) => (
-        impl From<Color> for $to {
-            fn from(color: Color) -> $to {
+        impl<T:Float> From<Color<T>> for $to<T> {
+            fn from(color: Color<T>) -> $to<T> {
                 match color {
                     Color::$to(c) => c,
                     $(Color::$from(c) => c.into(),)+
@@ -76,12 +79,13 @@ mod hues;
 
 mod tristimulus;
 
+
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
         $variant:ident {$(
             #[$ctor_comment:meta]
-            $ctor_name:ident $(<$($ty_params:ident: $ty_param_traits:ident),*>)* ($($ctor_field:ident : $ctor_ty:ty),*);
+            $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*);
         )+}
     )+) => (
 
@@ -101,60 +105,60 @@ macro_rules! make_color {
         ///but it can easily be converted to a fixed color space in those
         ///cases.
         #[derive(Clone, Copy, Debug)]
-        pub enum Color {
-            $(#[$variant_comment] $variant($variant)),+
+        pub enum Color<T:Float> {
+            $(#[$variant_comment] $variant($variant<T>)),+
         }
 
         $(
-            impl Color {
+            impl<T:Float> Color<T> {
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits),*>)*($($ctor_field: $ctor_ty),*) -> Color {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<T> {
                         Color::$variant($variant::$ctor_name($($ctor_field),*))
                     }
                 )+
             }
         )+
 
-        impl Mix for Color {
-            fn mix(&self, other: &Color, factor: f32) -> Color {
+        impl<T:Float> Mix<T> for Color<T> {
+            fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
-        impl Shade for Color {
-            fn lighten(&self, amount: f32) -> Color {
+        impl<T:Float> Shade<T> for Color<T> {
+            fn lighten(&self, amount: T) -> Color<T> {
                 Lab::from(*self).lighten(amount).into()
             }
         }
 
-        impl GetHue for Color {
-            type Hue = LabHue;
+        impl<T:Float> GetHue for Color<T> {
+            type Hue = LabHue<T>;
 
-            fn get_hue(&self) -> Option<LabHue> {
+            fn get_hue(&self) -> Option<LabHue<T>> {
                 Lch::from(*self).get_hue()
             }
         }
 
-        impl Hue for Color {
-            fn with_hue(&self, hue: LabHue) -> Color {
+        impl<T:Float> Hue for Color<T> {
+            fn with_hue(&self, hue: LabHue<T>) -> Color<T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue) -> Color {
+            fn shift_hue(&self, amount: LabHue<T>) -> Color<T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
 
-        impl Saturate for Color {
-            fn saturate(&self, factor: f32) -> Color {
+        impl<T:Float> Saturate<T> for Color<T> {
+            fn saturate(&self, factor: T) -> Color<T> {
                 Lch::from(*self).saturate(factor).into()
             }
         }
 
         $(
-            impl From<$variant> for Color {
-                fn from(color: $variant) -> Color {
+            impl<T:Float> From<$variant<T>> for Color<T> {
+                fn from(color: $variant<T>) -> Color<T> {
                     Color::$variant(color)
                 }
             }
@@ -162,24 +166,17 @@ macro_rules! make_color {
     )
 }
 
-fn clamp(v: f32, min: f32, max: f32) -> f32 {
-    if v < min {
-        min
-    } else if v > max {
-        max
-    } else {
-        v
-    }
-}
+
+
 
 make_color! {
     ///Linear luminance.
     Luma {
         ///Linear luminance.
-        y(luma: f32);
+        y(luma: T);
 
         ///Linear luminance with transparency.
-        ya(luma: f32, alpha: f32);
+        ya(luma: T, alpha: T);
 
         ///Linear luminance from an 8 bit value.
         y8(luma: u8);
@@ -191,10 +188,10 @@ make_color! {
     ///Linear RGB.
     Rgb {
         ///Linear RGB.
-        linear_rgb(red: f32, green: f32, blue: f32);
+        linear_rgb(red: T, green: T, blue: T);
 
         ///Linear RGB and transparency.
-        linear_rgba(red: f32, green: f32, blue: f32, alpha: f32);
+        linear_rgba(red: T, green: T, blue: T, alpha: T);
 
         ///Linear RGB from 8 bit values.
         linear_rgb8(red: u8, green: u8, blue: u8);
@@ -203,13 +200,13 @@ make_color! {
         linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8);
 
         ///Linear RGB from a linear pixel value.
-        linear_pixel<P: RgbPixel>(pixel: &P);
+        linear_pixel<P: RgbPixel<T> >(pixel: &P);
 
         ///Linear RGB from sRGB.
-        srgb(red: f32, green: f32, blue: f32);
+        srgb(red: T, green: T, blue: T);
 
         ///Linear RGB from sRGB with transparency.
-        srgba(red: f32, green: f32, blue: f32, alpha: f32);
+        srgba(red: T, green: T, blue: T, alpha: T);
 
         ///Linear RGB from 8 bit sRGB.
         srgb8(red: u8, green: u8, blue: u8);
@@ -218,67 +215,79 @@ make_color! {
         srgba8(red: u8, green: u8, blue: u8, alpha: u8);
 
         ///Linear RGB from an sRGB pixel value.
-        srgb_pixel<P: RgbPixel>(pixel: &P);
+        srgb_pixel<P: RgbPixel<T> >(pixel: &P);
 
         ///Linear RGB from gamma corrected RGB.
-        gamma_rgb(red: f32, green: f32, blue: f32, gamma: f32);
+        gamma_rgb(red: T, green: T, blue: T, gamma: T);
 
         ///Linear RGB from gamma corrected RGB with transparency.
-        gamma_rgba(red: f32, green: f32, blue: f32, alpha: f32, gamma: f32);
+        gamma_rgba(red: T, green: T, blue: T, alpha: T, gamma: T);
 
         ///Linear RGB from 8 bit gamma corrected RGB.
-        gamma_rgb8(red: u8, green: u8, blue: u8, gamma: f32);
+        gamma_rgb8(red: u8, green: u8, blue: u8, gamma: T);
 
         ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-        gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: f32);
+        gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T);
 
         ///Linear RGB from a gamma corrected pixel value.
-        gamma_pixel<P: RgbPixel>(pixel: &P, gamma: f32);
+        gamma_pixel<P: RgbPixel<T> >(pixel: &P, gamma: T);
     }
 
     ///CIE 1931 XYZ.
     Xyz {
         ///CIE XYZ.
-        xyz(x: f32, y: f32, z: f32);
+        xyz(x: T, y: T, z: T);
 
         ///CIE XYZ and transparency.
-        xyza(x: f32, y: f32, z: f32, alpha: f32);
+        xyza(x: T, y: T, z: T, alpha: T);
     }
 
     ///CIE L*a*b* (CIELAB).
     Lab {
         ///CIE L*a*b*.
-        lab(l: f32, a: f32, b: f32);
+        lab(l: T, a: T, b: T);
 
         ///CIE L*a*b* and transparency.
-        laba(l: f32, a: f32, b: f32, alpha: f32);
+        laba(l: T, a: T, b: T, alpha: T);
     }
 
     ///CIE L*C*h°, a polar version of CIE L*a*b*.
     Lch {
         ///CIE L*C*h°.
-        lch(l: f32, chroma: f32, hue: LabHue);
+        lch(l: T, chroma: T, hue: LabHue<T>);
 
         ///CIE L*C*h° and transparency.
-        lcha(l: f32, chroma: f32, hue: LabHue, alpha: f32);
+        lcha(l: T, chroma: T, hue: LabHue<T>, alpha: T);
     }
 
     ///Linear HSV, a cylindrical version of RGB.
     Hsv {
         ///Linear HSV.
-        hsv(hue: RgbHue, saturation: f32, value: f32);
+        hsv(hue: RgbHue<T>, saturation: T, value: T);
 
         ///Linear HSV and transparency.
-        hsva(hue: RgbHue, saturation: f32, value: f32, alpha: f32);
+        hsva(hue: RgbHue<T>, saturation: T, value: T, alpha: T);
     }
 
     ///Linear HSL, a cylindrical version of RGB.
     Hsl {
         ///Linear HSL.
-        hsl(hue: RgbHue, saturation: f32, lightness: f32);
+        hsl(hue: RgbHue<T>, saturation: T, lightness: T);
 
         ///Linear HSL and transparency.
-        hsla(hue: RgbHue, saturation: f32, lightness: f32, alpha: f32);
+        hsla(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T);
+    }
+}
+
+
+
+fn clamp<T:Float>(v: T, min: T, max: T) -> T {
+    if v < min {
+        min
+    } else if v > max {
+        max
+    } else {
+        v
     }
 }
 
@@ -307,13 +316,13 @@ pub trait ColorSpace {
 ///assert_eq!(a.mix(&b, 0.5), Rgb::linear_rgb(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
-pub trait Mix {
+pub trait Mix<T:Float> {
     ///Mix the color with an other color, by `factor`.
     ///
     ///`factor` sould be between `0.0` and `1.0`, where `0.0` will result in
     ///the same color as `self` and `1.0` will result in the same color as
     ///`other`.
-    fn mix(&self, other: &Self, factor: f32) -> Self;
+    fn mix(&self, other: &Self, factor: T) -> Self;
 }
 
 ///The `Shade` trait allows a color to be lightened or darkened.
@@ -326,12 +335,12 @@ pub trait Mix {
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
-pub trait Shade: Sized {
+pub trait Shade<T:Float>: Sized {
     ///Lighten the color by `amount`.
-    fn lighten(&self, amount: f32) -> Self;
+    fn lighten(&self, amount: T) -> Self;
 
     ///Darken the color by `amount`.
-    fn darken(&self, amount: f32) -> Self {
+    fn darken(&self, amount: T) -> Self {
         self.lighten(-amount)
     }
 }
@@ -387,12 +396,12 @@ pub trait Hue: GetHue {
 ///
 ///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
 ///```
-pub trait Saturate: Sized {
+pub trait Saturate<T: Float>: Sized {
     ///Increase the saturation by `factor`.
-    fn saturate(&self, factor: f32) -> Self;
+    fn saturate(&self, factor: T) -> Self;
 
     ///Decrease the saturation by `factor`.
-    fn desaturate(&self, factor: f32) -> Self {
+    fn desaturate(&self, factor: T) -> Self {
         self.saturate(-factor)
     }
 }
