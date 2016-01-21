@@ -2,7 +2,7 @@
 name = "palette"
 version = "0.1.0"
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
-exclude = ["scripts/*", "examples/*", "res/*", ".travis.yml", ".gitignore"]
+exclude = ["scripts/*", "examples/*", "res/*", ".travis.yml", ".gitignore", "CHANGELOG.md", "version.sh"]
 description = "Makes linear color calculations and conversion easy and accessible for anyone."
 documentation = "https://ogeon.github.io/docs/palette/master/palette/index.html"
 repository = "https://github.com/Ogeon/palette"
