@@ -299,7 +299,7 @@ mod test {
 
     #[test]
     fn range_clamp() {
-        let range: Range = (0.0..1.0).into();
+        let range: Range<f64> = (0.0..1.0).into();
         assert_eq!(range.clamp(-1.0), 0.0);
         assert_eq!(range.clamp(2.0), 1.0);
         assert_eq!(range.clamp(0.5), 0.5);
@@ -307,7 +307,7 @@ mod test {
 
     #[test]
     fn range_constrain() {
-        let range: Range = (0.0..1.0).into();
+        let range: Range<f64> = (0.0..1.0).into();
         assert_eq!(range.constrain(&(-3.0..-5.0).into()), (0.0..0.0).into());
         assert_eq!(range.constrain(&(-3.0..0.8).into()), (0.0..0.8).into());
 

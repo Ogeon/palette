@@ -280,12 +280,12 @@ impl<T: Float> GetHue for Rgb<T> {
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        let SQRT_3: T = T::sqrt(T::from(3).unwrap());
+        let sqrt_3: T = T::sqrt(T::from(3).unwrap());
 
         if self.red == self.green && self.red == self.blue {
             None
         } else {
-            Some(RgbHue::from_radians((SQRT_3 * (self.green - self.blue))
+            Some(RgbHue::from_radians((sqrt_3 * (self.green - self.blue))
                                           .atan2(T::from(2.0).unwrap() * self.red - self.green -
                                                  self.blue)))
         }
@@ -444,7 +444,7 @@ impl<T: Float> From<Lch<T>> for Rgb<T> {
 impl<T: Float> From<Hsv<T>> for Rgb<T> {
     fn from(hsv: Hsv<T>) -> Rgb<T> {
         let c = hsv.value * hsv.saturation;
-        let h = ((Into::<T>::into(hsv.hue) + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
+        let h = ((hsv.hue.to_float() + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
                 T::from(60.0).unwrap();
         let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
         let m = hsv.value - c;
@@ -477,7 +477,7 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
     fn from(hsl: Hsl<T>) -> Rgb<T> {
         let c = (T::one() - (T::from(2.0).unwrap() * hsl.lightness - T::one()).abs()) *
                 hsl.saturation;
-        let h = ((Into::<T>::into(hsl.hue) + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
+        let h = ((hsl.hue.to_float() + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) /
                 T::from(60.0).unwrap();
         let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
         let m = hsl.lightness - T::from(0.5).unwrap() * c;
@@ -510,7 +510,7 @@ fn from_srgb<T: Float>(x: T) -> T {
     if x <= T::from(0.4045).unwrap() {
         x / T::from(12.92).unwrap()
     } else {
-        ((x + T::from(1.55).unwrap()) / T::from(1.55).unwrap()).powf(T::from(2.4).unwrap())
+        ((x + T::from(0.055).unwrap()) / T::from(1.055).unwrap()).powf(T::from(2.4).unwrap())
     }
 }
 
@@ -518,7 +518,7 @@ fn to_srgb<T: Float>(x: T) -> T {
     if x <= T::from(0.031308).unwrap() {
         T::from(12.92).unwrap() * x
     } else {
-        T::from(1.55).unwrap() * x.powf(T::from(1.0 / 2.4).unwrap()) - T::from(0.55).unwrap()
+        T::from(1.055).unwrap() * x.powf(T::from(1.0 / 2.4).unwrap()) - T::from(0.055).unwrap()
     }
 }
 
@@ -537,122 +537,376 @@ fn to_gamma<T: Float>(x: T, gamma: T) -> T {
 pub trait RgbPixel<T: Float> {
     ///Create an instance of `Self` from red, green, blue and alpha values.
     ///These can be assumed to already be gamma corrected and belongs to the
-    ///range [0.0, T::one()].
+    ///range [0.0, 1.0].
     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> Self;
 
     ///Convert the red, green, blue and alpha values of `self` to values in
-    ///the range [0.0, T::one()]. No gamma correction should be performed.
+    ///the range [0.0, 1.0]. No gamma correction should be performed.
     fn to_rgba(&self) -> (T, T, T, T);
 }
 
-impl<T: Float> RgbPixel<T> for (T, T, T, T) {
-    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (T, T, T, T) {
-        (red, green, blue, alpha)
-    }
-
-    fn to_rgba(&self) -> (T, T, T, T) {
-        self.clone()
-    }
-}
-
-impl<T: Float> RgbPixel<T> for (T, T, T) {
-    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (T, T, T) {
-        (red, green, blue)
-    }
-
-    fn to_rgba(&self) -> (T, T, T, T) {
-        let (r, g, b) = *self;
-        (r, g, b, T::one())
-    }
-}
-
-// TO-DO
-// Error: conflicting implementations of trait `rgb::RgbPixel<u8>` for type (u8, u8, u8, u8)
-// Error: conflicting with impl<T: Float> RgbPixel<T> for (T,T,T,T) defined above
-// impl<T: Float> RgbPixel<T> for (u8, u8, u8, u8) {
-//     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (u8, u8, u8, u8) {
-//         ((red * T::from(255.0).unwrap()) as u8,
-//          (green * T::from(255.0).unwrap()) as u8,
-//          (blue * T::from(255.0).unwrap()) as u8,
-//          (alpha * T::from(255.0).unwrap()) as u8)
+// impl<T: Float> RgbPixel<T> for (T, T, T, T) {
+//     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (T, T, T, T) {
+//         (red, green, blue, alpha)
 //     }
 //
 //     fn to_rgba(&self) -> (T, T, T, T) {
-//         let (r, g, b, a) = *self;
-//         (T::from(r).unwrap() / T::from(255.0).unwrap(),
-//          T::from(g).unwrap() / T::from(255.0).unwrap(),
-//          T::from(b).unwrap() / T::from(255.0).unwrap(),
-//          T::from(a).unwrap() / T::from(255.0).unwrap())
+//         self.clone()
 //     }
 // }
 //
-// impl<T: Float> RgbPixel<T> for (u8, u8, u8) {
-//     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (u8, u8, u8) {
-//         ((red * T::from(255.0).unwrap()) as u8,
-//          (green * T::from(255.0).unwrap()) as u8,
-//          (blue * T::from(255.0).unwrap()) as u8)
+// impl<T: Float> RgbPixel<T> for (T, T, T) {
+//     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (T, T, T) {
+//         (red, green, blue)
 //     }
 //
 //     fn to_rgba(&self) -> (T, T, T, T) {
 //         let (r, g, b) = *self;
-//         (T::from(r).unwrap() / T::from(255.0).unwrap(),
-//          T::from(g).unwrap() / T::from(255.0).unwrap(),
-//          T::from(b).unwrap() / T::from(255.0).unwrap(),
-//          T::one())
+//         (r, g, b, T::one())
+//     }
+// }
+impl<T: Float> RgbPixel<T> for (f32, f32, f32, f32) {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (f32, f32, f32, f32) {
+        (red.to_f32().unwrap(),
+         green.to_f32().unwrap(),
+         blue.to_f32().unwrap(),
+         alpha.to_f32().unwrap())
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        let (r, g, b, a) = *self;
+        (T::from(r).unwrap(),
+         T::from(g).unwrap(),
+         T::from(b).unwrap(),
+         T::from(a).unwrap())
+    }
+}
+
+impl<T: Float> RgbPixel<T> for (f32, f32, f32) {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (f32, f32, f32) {
+        (red.to_f32().unwrap(),
+         green.to_f32().unwrap(),
+         blue.to_f32().unwrap())
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        let (r, g, b) = *self;
+        (T::from(r).unwrap(),
+         T::from(g).unwrap(),
+         T::from(b).unwrap(),
+         T::one())
+    }
+}
+impl<T: Float> RgbPixel<T> for (f64, f64, f64, f64) {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (f64, f64, f64, f64) {
+        (red.to_f64().unwrap(),
+         green.to_f64().unwrap(),
+         blue.to_f64().unwrap(),
+         alpha.to_f64().unwrap())
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        let (r, g, b, a) = *self;
+        (T::from(r).unwrap(),
+         T::from(g).unwrap(),
+         T::from(b).unwrap(),
+         T::from(a).unwrap())
+    }
+}
+
+impl<T: Float> RgbPixel<T> for (f64, f64, f64) {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (f64, f64, f64) {
+        (red.to_f64().unwrap(),
+         green.to_f64().unwrap(),
+         blue.to_f64().unwrap())
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        let (r, g, b) = *self;
+        (T::from(r).unwrap(),
+         T::from(g).unwrap(),
+         T::from(b).unwrap(),
+         T::one())
+    }
+}
+// impl<T: Float> RgbPixel<T> for (T, T, T, T) {
+//     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (T, T, T, T) {
+//         (red, green, blue, alpha)
+//     }
+//
+//     fn to_rgba(&self) -> (T, T, T, T) {
+//         self.clone()
+//     }
+// }
+//
+// impl<T: Float> RgbPixel<T> for (T, T, T) {
+//     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (T, T, T) {
+//         (red, green, blue)
+//     }
+//
+//     fn to_rgba(&self) -> (T, T, T, T) {
+//         let (r, g, b) = *self;
+//         (r, g, b, T::one())
 //     }
 // }
 
-impl<T: Float> RgbPixel<T> for [T; 4] {
-    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [T; 4] {
-        [red, green, blue, alpha]
+
+
+
+
+// TO-DO
+// Error: conflicting implementations of trait `rgb::RgbPixel<u8>` for type (u8, u8, u8, u8)
+// Error: conflicting with impl<T: Float> RgbPixel<T> for (T,T,T,T) defined above
+impl<T: Float> RgbPixel<T> for (u8, u8, u8, u8) {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (u8, u8, u8, u8) {
+        ((red * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (green * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (alpha * T::from(255.0).unwrap()).to_u8().unwrap())
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
-        (self[0], self[1], self[2], self[3])
+        let (r, g, b, a) = *self;
+        (T::from(r).unwrap() / T::from(255.0).unwrap(),
+         T::from(g).unwrap() / T::from(255.0).unwrap(),
+         T::from(b).unwrap() / T::from(255.0).unwrap(),
+         T::from(a).unwrap() / T::from(255.0).unwrap())
     }
 }
 
-impl<T: Float> RgbPixel<T> for [T; 3] {
-    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [T; 3] {
-        [red, green, blue]
+impl<T: Float> RgbPixel<T> for (u8, u8, u8) {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (u8, u8, u8) {
+        ((red * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (green * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (blue * T::from(255.0).unwrap()).to_u8().unwrap())
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
-        (self[0], self[1], self[2], T::one())
+        let (r, g, b) = *self;
+        (T::from(r).unwrap() / T::from(255.0).unwrap(),
+         T::from(g).unwrap() / T::from(255.0).unwrap(),
+         T::from(b).unwrap() / T::from(255.0).unwrap(),
+         T::one())
     }
 }
+// impl RgbPixel<f32> for (u8, u8, u8, u8) {
+//     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> (u8, u8, u8, u8) {
+//         ((red * 255.0) as u8,
+//          (green * 255.0) as u8,
+//          (blue * 255.0) as u8,
+//          (alpha * 255.0) as u8)
+//     }
+//
+//     fn to_rgba(&self) -> (f32, f32, f32, f32) {
+//         let (r, g, b, a) = *self;
+//         (r as f32 / 255.0,
+//          g as f32 / 255.0,
+//          b as f32 / 255.0,
+//          a as f32 / 255.0)
+//     }
+// }
+//
+// impl RgbPixel<f32> for (u8, u8, u8) {
+//     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> (u8, u8, u8) {
+//         ((red * 255.0) as u8,
+//          (green * 255.0) as u8,
+//          (blue * 255.0) as u8)
+//     }
+//
+//     fn to_rgba(&self) -> (f32, f32, f32, f32) {
+//         let (r, g, b) = *self;
+//         (r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, 1.0)
+//     }
+// }
+// impl RgbPixel<f64> for (u8, u8, u8, u8) {
+//     fn from_rgba(red: f64, green: f64, blue: f64, alpha: f64) -> (u8, u8, u8, u8) {
+//         ((red * 255.0) as u8,
+//          (green * 255.0) as u8,
+//          (blue * 255.0) as u8,
+//          (alpha * 255.0) as u8)
+//     }
+//
+//     fn to_rgba(&self) -> (f64, f64, f64, f64) {
+//         let (r, g, b, a) = *self;
+//         (r as f64 / 255.0,
+//          g as f64 / 255.0,
+//          b as f64 / 255.0,
+//          a as f64 / 255.0)
+//     }
+// }
+//
+// impl RgbPixel<f64> for (u8, u8, u8) {
+//     fn from_rgba(red: f64, green: f64, blue: f64, _alpha: f64) -> (u8, u8, u8) {
+//         ((red * 255.0) as u8,
+//          (green * 255.0) as u8,
+//          (blue * 255.0) as u8)
+//     }
+//
+//     fn to_rgba(&self) -> (f64, f64, f64, f64) {
+//         let (r, g, b) = *self;
+//         (r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
+//     }
+// }
+
+// impl<T: Float> RgbPixel<T> for [T; 4] {
+//     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [T; 4] {
+//         [red, green, blue, alpha]
+//     }
+//
+//     fn to_rgba(&self) -> (T, T, T, T) {
+//         (self[0], self[1], self[2], self[3])
+//     }
+// }
+//
+// impl<T: Float> RgbPixel<T> for [T; 3] {
+//     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [T; 3] {
+//         [red, green, blue]
+//     }
+//
+//     fn to_rgba(&self) -> (T, T, T, T) {
+//         (self[0], self[1], self[2], T::one())
+//     }
+// }
+impl<T: Float> RgbPixel<T> for [f32; 4] {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [f32; 4] {
+        [red.to_f32().unwrap(),
+         green.to_f32().unwrap(),
+         blue.to_f32().unwrap(),
+         alpha.to_f32().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap(),
+         T::from(self[1]).unwrap(),
+         T::from(self[2]).unwrap(),
+         T::from(self[3]).unwrap())
+    }
+}
+
+impl<T: Float> RgbPixel<T> for [f32; 3] {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [f32; 3] {
+        [red.to_f32().unwrap(), green.to_f32().unwrap(), blue.to_f32().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap(),
+         T::from(self[1]).unwrap(),
+         T::from(self[2]).unwrap(),
+         T::one())
+    }
+}
+impl<T: Float> RgbPixel<T> for [f64; 4] {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [f64; 4] {
+        [red.to_f64().unwrap(),
+         green.to_f64().unwrap(),
+         blue.to_f64().unwrap(),
+         alpha.to_f64().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap(),
+         T::from(self[1]).unwrap(),
+         T::from(self[2]).unwrap(),
+         T::from(self[3]).unwrap())
+    }
+}
+
+impl<T: Float> RgbPixel<T> for [f64; 3] {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [f64; 3] {
+        [red.to_f64().unwrap(), green.to_f64().unwrap(), blue.to_f64().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap(),
+         T::from(self[1]).unwrap(),
+         T::from(self[2]).unwrap(),
+         T::one())
+    }
+}
+
+
 
 
 // TO-DO
 // Error: conflicting implementations of trait `rgb::RgbPixel<u8>` for type `[u8; 4]` and `[u8;3]`
 // Error: conflicting with impl<T: Float> RgbPixel<T> for [T; 4] defined above
-// impl<T: Float> RgbPixel<T> for [u8; 4] {
-//     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [u8; 4] {
-//         [(red * T::from(255.0).unwrap()) as u8,
-//          (green * T::from(255.0).unwrap()) as u8,
-//          (blue * T::from(255.0).unwrap()) as u8,
-//          (alpha * T::from(255.0).unwrap()) as u8]
+impl<T: Float> RgbPixel<T> for [u8; 4] {
+    fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [u8; 4] {
+        [(red * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (green * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (alpha * T::from(255.0).unwrap()).to_u8().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap() / T::from(255.0).unwrap(),
+         T::from(self[1]).unwrap() / T::from(255.0).unwrap(),
+         T::from(self[2]).unwrap() / T::from(255.0).unwrap(),
+         T::from(self[3]).unwrap() / T::from(255.0).unwrap())
+    }
+}
+
+impl<T: Float> RgbPixel<T> for [u8; 3] {
+    fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [u8; 3] {
+        [(red * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (green * T::from(255.0).unwrap()).to_u8().unwrap(),
+         (blue * T::from(255.0).unwrap()).to_u8().unwrap()]
+    }
+
+    fn to_rgba(&self) -> (T, T, T, T) {
+        (T::from(self[0]).unwrap() / T::from(255.0).unwrap(),
+         T::from(self[1]).unwrap() / T::from(255.0).unwrap(),
+         T::from(self[2]).unwrap() / T::from(255.0).unwrap(),
+         T::one())
+    }
+}
+// impl RgbPixel<f32> for [u8; 4] {
+//     fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> [u8; 4] {
+//         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8]
 //     }
 //
-//     fn to_rgba(&self) -> (T, T, T, T) {
-//         (self[0] as T / T::from(255.0).unwrap(),
-//          self[1] as T / T::from(255.0).unwrap(),
-//          self[2] as T / T::from(255.0).unwrap(),
-//          self[3] as T / T::from(255.0).unwrap())
+//     fn to_rgba(&self) -> (f32, f32, f32, f32) {
+//         (self[0] as f32 / 255.0,
+//          self[1] as f32 / 255.0,
+//          self[2] as f32 / 255.0,
+//          self[3] as f32 / 255.0)
 //     }
 // }
 //
-// impl<T: Float> RgbPixel<T> for [u8; 3] {
-//     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [u8; 3] {
-//         [(red * T::from(255.0).unwrap()) as u8,
-//          (green * T::from(255.0).unwrap()) as u8,
-//          (blue * T::from(255.0).unwrap()) as u8]
+// impl RgbPixel<f32> for [u8; 3] {
+//     fn from_rgba(red: f32, green: f32, blue: f32, _alpha: f32) -> [u8; 3] {
+//         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8]
 //     }
 //
-//     fn to_rgba(&self) -> (T, T, T, T) {
-//         (self[0] as T / T::from(255.0).unwrap(),
-//          self[1] as T / T::from(255.0).unwrap(),
-//          self[2] as T / T::from(255.0).unwrap(),
-//          T::one())
+//     fn to_rgba(&self) -> (f32, f32, f32, f32) {
+//         (self[0] as f32 / 255.0,
+//          self[1] as f32 / 255.0,
+//          self[2] as f32 / 255.0,
+//          1.0)
+//     }
+// }
+// impl RgbPixel<f64> for [u8; 4] {
+//     fn from_rgba(red: f64, green: f64, blue: f64, alpha: f64) -> [u8; 4] {
+//         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8, (alpha * 255.0) as u8]
+//     }
+//
+//     fn to_rgba(&self) -> (f64, f64, f64, f64) {
+//         (self[0] as f64 / 255.0,
+//          self[1] as f64 / 255.0,
+//          self[2] as f64 / 255.0,
+//          self[3] as f64 / 255.0)
+//     }
+// }
+//
+// impl RgbPixel<f64> for [u8; 3] {
+//     fn from_rgba(red: f64, green: f64, blue: f64, _alpha: f64) -> [u8; 3] {
+//         [(red * 255.0) as u8, (green * 255.0) as u8, (blue * 255.0) as u8]
+//     }
+//
+//     fn to_rgba(&self) -> (f64, f64, f64, f64) {
+//         (self[0] as f64 / 255.0,
+//          self[1] as f64 / 255.0,
+//          self[2] as f64 / 255.0,
+//          1.0)
 //     }
 // }

@@ -78,7 +78,7 @@ impl<T: Float> ColorSpace for Lch<T> {
 impl<T: Float> Mix<T> for Lch<T> {
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).into();
+        let hue_diff: T = (other.hue - self.hue).to_float();
         Lch {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
@@ -144,7 +144,7 @@ impl<T: Float> Saturate<T> for Lch<T> {
 
 impl<T: Float> Default for Lch<T> {
     fn default() -> Lch<T> {
-        Lch::<T>::lch(T::zero(), T::zero(), T::zero())
+        Lch::<T>::lch(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
@@ -207,7 +207,7 @@ impl<T: Float> From<Lab<T>> for Lch<T> {
         Lch {
             l: lab.l,
             chroma: (lab.a * lab.a + lab.b * lab.b).sqrt(),
-            hue: lab.get_hue().unwrap_or(T::zero()),
+            hue: lab.get_hue().unwrap_or(LabHue::from(T::zero())),
             alpha: lab.alpha,
         }
     }

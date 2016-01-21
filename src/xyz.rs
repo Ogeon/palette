@@ -278,12 +278,12 @@ impl<T: Float> From<Hsl<T>> for Xyz<T> {
 
 fn f_inv<T: Float>(t: T) -> T {
     // (6/29)^2
-    let C_6_O_29_P_2: T = T::from(0.04280618311).unwrap();
+    let c_6_o_29_p_2: T = T::from(0.04280618311).unwrap();
 
     if t > T::from(6.0 / 29.0).unwrap() {
         t * t * t
     } else {
-        T::from(3.0).unwrap() * C_6_O_29_P_2 * (t - T::from(4.0 / 29.0).unwrap())
+        T::from(3.0).unwrap() * c_6_o_29_p_2 * (t - T::from(4.0 / 29.0).unwrap())
     }
 }
 

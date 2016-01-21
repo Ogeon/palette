@@ -78,7 +78,7 @@ impl<T: Float> ColorSpace for Hsv<T> {
 impl<T: Float> Mix<T> for Hsv<T> {
     fn mix(&self, other: &Hsv<T>, factor: T) -> Hsv<T> {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).into();
+        let hue_diff: T = (other.hue - self.hue).to_float();
 
         Hsv {
             hue: self.hue + factor * hue_diff,
@@ -145,7 +145,7 @@ impl<T: Float> Saturate<T> for Hsv<T> {
 
 impl<T: Float> Default for Hsv<T> {
     fn default() -> Hsv<T> {
-        Hsv::hsv(T::zero(), T::zero(), T::zero())
+        Hsv::hsv(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
@@ -301,50 +301,50 @@ mod test {
     use {Rgb, Hsl};
 
     #[test]
-    fn red<T: Float>() {
-        let a = Hsv::from(Rgb::linear_rgb(T::one(), T::zero(), T::zero()));
-        let b = Hsv::hsv(T::zero(), T::one(), T::one());
-        let c = Hsv::from(Hsl::hsl(T::zero(), T::one(), T::from(0.5).unwrap()));
+    fn red() {
+        let a = Hsv::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
+        let b = Hsv::hsv(0.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(0.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
     }
 
     #[test]
-    fn orange<T: Float>() {
-        let a = Hsv::from(Rgb::linear_rgb(T::one(), T::from(0.5).unwrap(), T::zero()));
-        let b = Hsv::hsv(T::from(30.0).unwrap(), T::one(), T::one());
-        let c = Hsv::from(Hsl::hsl(T::from(30.0).unwrap(), T::one(), T::from(0.5).unwrap()));
+    fn orange() {
+        let a = Hsv::from(Rgb::linear_rgb(1.0, 0.5, 0.0));
+        let b = Hsv::hsv(30.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(30.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
     }
 
     #[test]
-    fn green<T: Float>() {
-        let a = Hsv::from(Rgb::linear_rgb(T::zero(), T::one(), T::zero()));
-        let b = Hsv::hsv(T::from(120.0).unwrap(), T::one(), T::one());
-        let c = Hsv::from(Hsl::hsl(T::from(120.0).unwrap(), T::one(), T::from(0.5).unwrap()));
+    fn green() {
+        let a = Hsv::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
+        let b = Hsv::hsv(120.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(120.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
     }
 
     #[test]
-    fn blue<T: Float>() {
-        let a = Hsv::from(Rgb::linear_rgb(T::zero(), T::zero(), T::one()));
-        let b = Hsv::hsv(T::from(240.0).unwrap(), T::one(), T::one());
-        let c = Hsv::from(Hsl::hsl(T::from(240.0).unwrap(), T::one(), T::from(0.5).unwrap()));
+    fn blue() {
+        let a = Hsv::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
+        let b = Hsv::hsv(240.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(240.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
     }
 
     #[test]
-    fn purple<T: Float>() {
-        let a = Hsv::from(Rgb::linear_rgb(T::from(0.5).unwrap(), T::zero(), T::one()));
-        let b = Hsv::hsv(T::from(270.0).unwrap(), T::one(), T::one());
-        let c = Hsv::from(Hsl::hsl(T::from(270.0).unwrap(), T::one(), T::from(0.5).unwrap()));
+    fn purple() {
+        let a = Hsv::from(Rgb::linear_rgb(0.5, 0.0, 1.0));
+        let b = Hsv::hsv(270.0.into(), 1.0, 1.0);
+        let c = Hsv::from(Hsl::hsl(270.0.into(), 1.0, 0.5));
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);

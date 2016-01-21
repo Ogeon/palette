@@ -278,14 +278,14 @@ impl<T: Float> From<Hsl<T>> for Lab<T> {
 
 fn f<T: Float>(t: T) -> T {
     // (T::from(6/29).unwrap())^3
-    let C_6_O_29_P_3: T = T::from(0.00885645167).unwrap();
+    let c_6_o_29_p_3: T = T::from(0.00885645167).unwrap();
     // (T::from(29/6).unwrap())^2
-    let C_29_O_6_P_2: T = T::from(23.3611111111).unwrap();
+    let c_29_o_6_p_2: T = T::from(23.3611111111).unwrap();
 
-    if t > C_6_O_29_P_3 {
+    if t > c_6_o_29_p_3 {
         t.powf(T::one() / T::from(3.0).unwrap())
     } else {
-        (T::one() / T::from(3.0).unwrap()) * C_29_O_6_P_2 * t +
+        (T::one() / T::from(3.0).unwrap()) * c_29_o_6_p_2 * t +
         (T::from(4.0).unwrap() / T::from(29.0).unwrap())
     }
 }
@@ -297,28 +297,22 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Lab::from(Rgb::linear_rgb(T::one(), T::zero(), T::zero()));
-        let b = Lab::lab(T::from(53.23288).unwrap() / T::from(100.0).unwrap(),
-                         T::from(80.10933).unwrap() / T::from(128.0).unwrap(),
-                         T::from(67.22006).unwrap() / T::from(128.0).unwrap());
+        let a = Lab::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
+        let b = Lab::lab(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(Rgb::linear_rgb(T::zero(), T::one(), T::zero()));
-        let b = Lab::lab(T::from(87.73704).unwrap() / T::from(100.0).unwrap(),
-                         -86.184654 / T::from(128.0).unwrap(),
-                         T::from(83.18117).unwrap() / T::from(128.0).unwrap());
+        let a = Lab::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
+        let b = Lab::lab(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(Rgb::linear_rgb(T::zero(), T::zero(), T::one()));
-        let b = Lab::lab(T::from(32.302586).unwrap() / T::from(100.0).unwrap(),
-                         T::from(79.19668).unwrap() / T::from(128.0).unwrap(),
-                         -107.863686 / T::from(128.0).unwrap());
+        let a = Lab::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
+        let b = Lab::lab(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 }

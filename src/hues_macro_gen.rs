@@ -21,6 +21,11 @@ macro_rules! make_hues {
             pub fn to_radians(self) -> T {
                 normalize_angle(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
             }
+
+            ///get the value from hue.
+            pub fn to_float(self) -> T {
+                normalize_angle(self.0)
+            }
         }
 
         impl<T:Float> From<T> for $name<T> {
@@ -37,7 +42,17 @@ macro_rules! make_hues {
         //         normalize_angle(self.0)
         //     }
         // }
-
+        impl<T: Float> Into<f64> for $name<T> {
+            fn into(self) -> f64 {
+                normalize_angle(self.0).to_f64().unwrap()
+            }
+        }
+        impl<T: Float> Into<f32> for $name<T> {
+            fn into(self) -> f32 {
+                normalize_angle(self.0).to_f32().unwrap()
+            }
+        }
+        
         impl<T:Float> PartialEq for $name<T> {
             fn eq(&self, other: &$name<T>) -> bool {
                 let hue_s: T = (*self).into();

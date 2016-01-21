@@ -95,41 +95,14 @@ mod tristimulus;
 ///It's not recommended to use `Color` when full control is necessary,
 ///but it can easily be converted to a fixed color space in those
 ///cases.
+ #[derive(Clone, Copy, Debug)]
 pub enum Color<T: Float> {
-
-
-
-
-
-
-
-
-
-
-
-
 
     #[doc = r"Linear luminance."]
     Luma(Luma<T>),
 
-
-
-
     #[doc = r"Linear RGB."]
     Rgb(Rgb<T>),
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     #[doc = r"CIE 1931 XYZ."]
@@ -151,75 +124,8 @@ pub enum Color<T: Float> {
     #[doc = r"Linear HSL, a cylindrical version of RGB."]
     Hsl(Hsl<T>),
 }
-#[automatically_derived]
-#[allow(unused_qualifications)]
-impl <T: ::std::fmt::Debug + Float> ::std::fmt::Debug for Color<T> {
-    fn fmt(&self, __arg_0: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        match (&*self,) {
-            (&Color::Luma(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Luma");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Rgb(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Rgb");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Xyz(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Xyz");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Lab(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Lab");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Lch(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Lch");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Hsv(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Hsv");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-            (&Color::Hsl(ref __self_0),) => {
-                let mut builder = __arg_0.debug_tuple("Hsl");
-                let _ = builder.field(&&(*__self_0));
-                builder.finish()
-            }
-        }
-    }
-}
-#[automatically_derived]
-#[allow(unused_qualifications)]
-impl <T: ::std::marker::Copy + Float> ::std::marker::Copy for Color<T> { }
-#[automatically_derived]
-#[allow(unused_qualifications)]
-impl <T: ::std::clone::Clone + Float> ::std::clone::Clone for Color<T> {
-    #[inline]
-    fn clone(&self) -> Color<T> {
-        match (&*self,) {
-            (&Color::Luma(ref __self_0),) =>
-            Color::Luma(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Rgb(ref __self_0),) =>
-            Color::Rgb(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Xyz(ref __self_0),) =>
-            Color::Xyz(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Lab(ref __self_0),) =>
-            Color::Lab(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Lch(ref __self_0),) =>
-            Color::Lch(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Hsv(ref __self_0),) =>
-            Color::Hsv(::std::clone::Clone::clone(&(*__self_0))),
-            (&Color::Hsl(ref __self_0),) =>
-            Color::Hsl(::std::clone::Clone::clone(&(*__self_0))),
-        }
-    }
-}
+
+
 impl <T: Float> Color<T> {
     #[doc = r"Linear luminance."]
     pub fn y(luma: T) -> Color<T> { Color::Luma(Luma::y(luma)) }
@@ -358,10 +264,7 @@ impl<T: Float> Shade<T> for Color<T> {
     }
 }
 impl <T: Float> GetHue for Color<T> {
-    type
-    Hue
-    =
-    LabHue<T>;
+    type Hue = LabHue<T>;
     fn get_hue(&self) -> Option<LabHue<T>> { Lch::from(*self).get_hue() }
 }
 impl <T: Float> Hue for Color<T> {
