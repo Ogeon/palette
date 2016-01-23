@@ -1,3 +1,5 @@
+use num::traits::Float;
+
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
@@ -16,35 +18,35 @@ use tristimulus::{X_N, Y_N, Z_N};
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lab {
+pub struct Lab<T: Float = f32> {
     ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
-    pub l: f32,
+    pub l: T,
 
     ///a* goes from red at -1.0 to green at 1.0.
-    pub a: f32,
+    pub a: T,
 
     ///b* goes from yellow at -1.0 to blue at 1.0.
-    pub b: f32,
+    pub b: T,
 
     ///The transparency of the color. 0.0 is completely transparent and 1.0 is
     ///completely opaque.
-    pub alpha: f32,
+    pub alpha: T,
 }
 
-impl Lab {
+impl<T: Float> Lab<T> {
     ///CIE L*a*b*.
-    pub fn lab(l: f32, a: f32, b: f32) -> Lab {
+    pub fn lab(l: T, a: T, b: T) -> Lab<T> {
         Lab {
             l: l,
             a: a,
             b: b,
-            alpha: 1.0,
+            alpha: T::one(),
         }
     }
 
     ///CIE L*a*b* and transparency.
-    pub fn laba(l: f32, a: f32, b: f32, alpha: f32) -> Lab {
+    pub fn laba(l: T, a: T, b: T, alpha: T) -> Lab<T> {
         Lab {
             l: l,
             a: a,
@@ -54,31 +56,30 @@ impl Lab {
     }
 }
 
-impl ColorSpace for Lab {
+impl<T: Float> ColorSpace for Lab<T> {
     fn is_valid(&self) -> bool {
-        self.l >= 0.0 && self.l <= 1.0 &&
-        self.a >= -1.0 && self.a <= 1.0 &&
-        self.b >= -1.0 && self.b <= 1.0 &&
-        self.alpha >= 0.0 && self.alpha <= 1.0
+        self.l >= T::zero() && self.l <= T::one() && self.a >= -T::one() &&
+        self.a <= -T::one() && self.b >= -T::one() && self.b <= T::one() &&
+        self.alpha >= T::zero() && self.alpha <= T::one()
     }
 
-    fn clamp(&self) -> Lab {
+    fn clamp(&self) -> Lab<T> {
         let mut c = *self;
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, 0.0, 1.0);
-        self.a = clamp(self.a, -1.0, 1.0);
-        self.b = clamp(self.b, -1.0, 1.0);
-        self.alpha = clamp(self.alpha, 0.0, 1.0);
+        self.l = clamp(self.l, T::zero(), T::one());
+        self.a = clamp(self.a, -T::one(), T::one());
+        self.b = clamp(self.b, -T::one(), T::one());
+        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
-impl Mix for Lab {
-    fn mix(&self, other: &Lab, factor: f32) -> Lab {
-        let factor = clamp(factor, 0.0, 1.0);
+impl<T: Float> Mix<T> for Lab<T> {
+    fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
+        let factor = clamp(factor, T::zero(), T::one());
 
         Lab {
             l: self.l + factor * (other.l - self.l),
@@ -89,10 +90,10 @@ impl Mix for Lab {
     }
 }
 
-impl Shade for Lab {
-    fn lighten(&self, amount: f32) -> Lab {
+impl<T: Float> Shade<T> for Lab<T> {
+    fn lighten(&self, amount: T) -> Lab<T> {
         Lab {
-            l: self.l + amount * 1.0,
+            l: self.l + amount,
             a: self.a,
             b: self.b,
             alpha: self.alpha,
@@ -100,11 +101,11 @@ impl Shade for Lab {
     }
 }
 
-impl GetHue for Lab {
-    type Hue = LabHue;
+impl<T: Float> GetHue for Lab<T> {
+    type Hue = LabHue<T>;
 
-    fn get_hue(&self) -> Option<LabHue> {
-        if self.a == 0.0 && self.b == 0.0 {
+    fn get_hue(&self) -> Option<LabHue<T>> {
+        if self.a == T::zero() && self.b == T::zero() {
             None
         } else {
             Some(LabHue::from_radians(self.b.atan2(self.a)))
@@ -112,16 +113,16 @@ impl GetHue for Lab {
     }
 }
 
-impl Default for Lab {
-    fn default() -> Lab {
-        Lab::lab(0.0, 0.0, 0.0)
+impl<T: Float> Default for Lab<T> {
+    fn default() -> Lab<T> {
+        Lab::lab(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl Add<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Add<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn add(self, other: Lab) -> Lab {
+    fn add(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l + other.l,
             a: self.a + other.a,
@@ -131,10 +132,10 @@ impl Add<Lab> for Lab {
     }
 }
 
-impl Add<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Add<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn add(self, c: f32) -> Lab {
+    fn add(self, c: T) -> Lab<T> {
         Lab {
             l: self.l + c,
             a: self.a + c,
@@ -144,10 +145,10 @@ impl Add<f32> for Lab {
     }
 }
 
-impl Sub<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Sub<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn sub(self, other: Lab) -> Lab {
+    fn sub(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l - other.l,
             a: self.a - other.a,
@@ -157,10 +158,10 @@ impl Sub<Lab> for Lab {
     }
 }
 
-impl Sub<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Sub<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn sub(self, c: f32) -> Lab {
+    fn sub(self, c: T) -> Lab<T> {
         Lab {
             l: self.l - c,
             a: self.a - c,
@@ -170,10 +171,10 @@ impl Sub<f32> for Lab {
     }
 }
 
-impl Mul<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Mul<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn mul(self, other: Lab) -> Lab {
+    fn mul(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l * other.l,
             a: self.a * other.a,
@@ -183,10 +184,10 @@ impl Mul<Lab> for Lab {
     }
 }
 
-impl Mul<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Mul<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn mul(self, c: f32) -> Lab {
+    fn mul(self, c: T) -> Lab<T> {
         Lab {
             l: self.l * c,
             a: self.a * c,
@@ -196,10 +197,10 @@ impl Mul<f32> for Lab {
     }
 }
 
-impl Div<Lab> for Lab {
-    type Output = Lab;
+impl<T: Float> Div<Lab<T>> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn div(self, other: Lab) -> Lab {
+    fn div(self, other: Lab<T>) -> Lab<T> {
         Lab {
             l: self.l / other.l,
             a: self.a / other.a,
@@ -209,10 +210,10 @@ impl Div<Lab> for Lab {
     }
 }
 
-impl Div<f32> for Lab {
-    type Output = Lab;
+impl<T: Float> Div<T> for Lab<T> {
+    type Output = Lab<T>;
 
-    fn div(self, c: f32) -> Lab {
+    fn div(self, c: T) -> Lab<T> {
         Lab {
             l: self.l / c,
             a: self.a / c,
@@ -224,62 +225,68 @@ impl Div<f32> for Lab {
 
 from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
 
-impl From<Xyz> for Lab {
-    fn from(xyz: Xyz) -> Lab {
+impl<T: Float> From<Xyz<T>> for Lab<T> {
+    fn from(xyz: Xyz<T>) -> Lab<T> {
         Lab {
-            l: (116.0 * f(xyz.y / Y_N) - 16.0) / 100.0,
-            a: (500.0 * (f(xyz.x / X_N) - f(xyz.y / Y_N))) / 128.0,
-            b: (200.0 * (f(xyz.y / Y_N) - f(xyz.z / Z_N))) / 128.0,
+            l: (T::from(116.0).unwrap() * f(xyz.y / T::from(Y_N).unwrap()) -
+                T::from(16.0).unwrap()) / T::from(100.0).unwrap(),
+            a: (T::from(500.0).unwrap() *
+                (f(xyz.x / T::from(X_N).unwrap()) - f(xyz.y / T::from(Y_N).unwrap()))) /
+               T::from(128.0).unwrap(),
+            b: (T::from(200.0).unwrap() *
+                (f(xyz.y / T::from(Y_N).unwrap()) - f(xyz.z / T::from(Z_N).unwrap()))) /
+               T::from(128.0).unwrap(),
             alpha: xyz.alpha,
         }
     }
 }
 
-impl From<Rgb> for Lab {
-    fn from(rgb: Rgb) -> Lab {
+impl<T: Float> From<Rgb<T>> for Lab<T> {
+    fn from(rgb: Rgb<T>) -> Lab<T> {
         Xyz::from(rgb).into()
     }
 }
 
-impl From<Luma> for Lab {
-    fn from(luma: Luma) -> Lab {
+impl<T: Float> From<Luma<T>> for Lab<T> {
+    fn from(luma: Luma<T>) -> Lab<T> {
         Xyz::from(luma).into()
     }
 }
 
-impl From<Lch> for Lab {
-    fn from(lch: Lch) -> Lab {
+impl<T: Float> From<Lch<T>> for Lab<T> {
+    fn from(lch: Lch<T>) -> Lab<T> {
         Lab {
             l: lch.l,
-            a: lch.chroma.max(0.0) * lch.hue.to_radians().cos(),
-            b: lch.chroma.max(0.0) * lch.hue.to_radians().sin(),
+            a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
+            b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
             alpha: lch.alpha,
         }
     }
 }
 
-impl From<Hsv> for Lab {
-    fn from(hsv: Hsv) -> Lab {
+impl<T: Float> From<Hsv<T>> for Lab<T> {
+    fn from(hsv: Hsv<T>) -> Lab<T> {
         Xyz::from(hsv).into()
     }
 }
 
-impl From<Hsl> for Lab {
-    fn from(hsl: Hsl) -> Lab {
+impl<T: Float> From<Hsl<T>> for Lab<T> {
+    fn from(hsl: Hsl<T>) -> Lab<T> {
         Xyz::from(hsl).into()
     }
 }
 
-fn f(t: f32) -> f32 {
+fn f<T: Float>(t: T) -> T {
     //(6/29)^3
-    const C_6_O_29_P_3: f32 = 0.00885645167;
+    let c_6_o_29_p_3: T = T::from(0.00885645167).unwrap();
     //(29/6)^2
-    const C_29_O_6_P_2: f32 = 23.3611111111;
+    let c_29_o_6_p_2: T = T::from(23.3611111111).unwrap();
 
-    if t > C_6_O_29_P_3 {
-        t.powf(1.0 / 3.0)
+    if t > c_6_o_29_p_3 {
+        t.powf(T::one() / T::from(3.0).unwrap())
     } else {
-        (1.0 / 3.0) * C_29_O_6_P_2 * t + (4.0 / 29.0)
+        (T::one() / T::from(3.0).unwrap()) * c_29_o_6_p_2 * t +
+        (T::from(4.0).unwrap() / T::from(29.0).unwrap())
     }
 }
 

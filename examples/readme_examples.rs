@@ -1,7 +1,9 @@
 extern crate image;
 extern crate palette;
+extern crate num;
 
 use image::{RgbImage, GenericImage};
+use num::traits::Float;
 
 use palette::{Rgb, Gradient, Mix};
 
@@ -11,7 +13,7 @@ mod color_spaces {
 
     pub fn run() {
         let lch_color = Lch::from(Rgb::srgb(0.8, 0.2, 0.1));
-        let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
+        let new_color: Rgb<f32> = lch_color.shift_hue(180.0.into()).into();
 
         display_colors("examples/readme_color_spaces.png", &[Rgb::srgb(0.8, 0.2, 0.1).to_srgb(), new_color.to_srgb()]);
     }
@@ -67,18 +69,18 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
     }
 }
 
-fn display_gradients<A: Mix + Clone, B: Mix + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where 
-    Rgb: From<A>,
-    Rgb: From<B>
+fn display_gradients<T: Float, A: Mix<T> + Clone, B: Mix<T> + Clone>(filename: &str, grad1: Gradient<T, A>, grad2: Gradient<T, B>)
+    where Rgb<T>: From<A>,
+        Rgb<T>: From<B>
 {
     let mut image = RgbImage::new(256, 64);
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Rgb::from(grad1.get(x as f32 / 255.0)).to_srgb();
+        pixel.data = Rgb::from(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_srgb();
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Rgb::from(grad2.get(x as f32 / 255.0)).to_srgb();
+        pixel.data = Rgb::from(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_srgb();
     }
 
     match image.save(filename) {

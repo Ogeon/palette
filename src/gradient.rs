@@ -1,5 +1,6 @@
 //!Types for interpolation between multiple colors.
 
+use num::traits::Float;
 use std::cmp::max;
 
 use Mix;
@@ -13,18 +14,18 @@ use Mix;
 ///the domain of the gradient will have the same color as the closest control
 ///point.
 #[derive(Clone, Debug)]
-pub struct Gradient<C: Mix + Clone>(Vec<(f32, C)>);
+pub struct Gradient<T: Float, C: Mix<T> + Clone>(Vec<(T, C)>);
 
-impl<C: Mix + Clone> Gradient<C> {
+impl<T: Float, C: Mix<T> + Clone> Gradient<T, C> {
     ///Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     ///There must be at least one color.
-    pub fn new<I: IntoIterator<Item=C>>(colors: I) -> Gradient<C> {
-        let mut points: Vec<_> = colors.into_iter().map(|c| (0.0, c)).collect();
+    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<T, C> {
+        let mut points: Vec<_> = colors.into_iter().map(|c| (T::zero(), c)).collect();
         assert!(points.len() > 0);
-        let step_size = 1.0 / max(points.len() - 1, 1) as f32;
+        let step_size = T::one() / T::from(max(points.len() - 1, 1) as f64).unwrap();
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = i as f32 * step_size;
+            *p = T::from(i).unwrap() * step_size;
         }
 
         Gradient(points)
@@ -33,7 +34,7 @@ impl<C: Mix + Clone> Gradient<C> {
     ///Create a gradient of colors with custom spacing and domain. There must be
     ///at least one color and they are expected to be ordered by their
     ///position value.
-    pub fn with_domain(colors: Vec<(f32, C)>) -> Gradient<C> {
+    pub fn with_domain(colors: Vec<(T, C)>) -> Gradient<T, C> {
         assert!(colors.len() > 0);
 
         //Maybe sort the colors?
@@ -42,7 +43,7 @@ impl<C: Mix + Clone> Gradient<C> {
 
     ///Get a color from the gradient. The color of the closest control point
     ///will be returned if `i` is outside the domain.
-    pub fn get(&self, i: f32) -> C {
+    pub fn get(&self, i: T) -> C {
         let &(mut min, ref min_color) = self.0.get(0).expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
         let mut min_index = 0;
@@ -81,7 +82,7 @@ impl<C: Mix + Clone> Gradient<C> {
     }
 
     ///Take `n` evenly spaced colors from the gradient, as an iterator.
-    pub fn take(&self, n: usize) -> Take<C> {
+    pub fn take(&self, n: usize) -> Take<T, C> {
         let (min, max) = self.domain();
 
         Take {
@@ -94,7 +95,7 @@ impl<C: Mix + Clone> Gradient<C> {
     }
 
     ///Slice this gradient to limit its domain.
-    pub fn slice<R: Into<Range>>(&self, range: R) -> Slice<C> {
+    pub fn slice<R: Into<Range<T>>>(&self, range: R) -> Slice<T, C> {
         Slice {
             gradient: self,
             range: range.into(),
@@ -102,7 +103,7 @@ impl<C: Mix + Clone> Gradient<C> {
     }
 
     ///Get the limits of this gradient's domain.
-    pub fn domain(&self) -> (f32, f32) {
+    pub fn domain(&self) -> (T, T) {
         let &(min, _) = self.0.get(0).expect("a Gradient must contain at least one color");
         let &(max, _) = self.0.last().expect("a Gradient must contain at least one color");
         (min, max)
@@ -110,20 +111,20 @@ impl<C: Mix + Clone> Gradient<C> {
 }
 
 ///An iterator over interpolated colors.
-pub struct Take<'a, C: Mix + Clone + 'a> {
-    gradient: MaybeSlice<'a, C>,
-    from: f32,
-    diff: f32,
+pub struct Take<'a, T: Float + 'a, C: Mix<T> + Clone + 'a> {
+    gradient: MaybeSlice<'a, T, C>,
+    from: T,
+    diff: T,
     len: usize,
     current: usize,
 }
 
-impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
+impl<'a, T: Float, C: Mix<T> + Clone> Iterator for Take<'a, T, C> {
     type Item = C;
 
     fn next(&mut self) -> Option<C> {
         if self.current < self.len {
-            let i = self.from + self.current as f32 * (self.diff / self.len as f32);
+            let i = self.from + T::from(self.current).unwrap() * (self.diff / T::from(self.len).unwrap());
             self.current += 1;
             Some(self.gradient.get(i))
         } else {
@@ -136,25 +137,25 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
     }
 }
 
-impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> { }
+impl<'a, T: Float, C: Mix<T> + Clone> ExactSizeIterator for Take<'a, T, C> {}
 
 
 ///A slice of a Gradient that limits its domain.
 #[derive(Clone, Debug)]
-pub struct Slice<'a, C: Mix + Clone + 'a> {
-    gradient: &'a Gradient<C>,
-    range: Range,
+pub struct Slice<'a, T: Float + 'a, C: Mix<T> + Clone + 'a> {
+    gradient: &'a Gradient<T, C>,
+    range: Range<T>,
 }
 
-impl<'a, C: Mix + Clone> Slice<'a, C> {
+impl<'a, T: Float, C: Mix<T> + Clone> Slice<'a, T, C> {
     ///Get a color from the gradient slice. The color of the closest domain
     ///limit will be returned if `i` is outside the domain.
-    pub fn get(&self, i: f32) -> C {
+    pub fn get(&self, i: T) -> C {
         self.gradient.get(self.range.clamp(i))
     }
 
     ///Take `n` evenly spaced colors from the gradient slice, as an iterator.
-    pub fn take(&self, n: usize) -> Take<C> {
+    pub fn take(&self, n: usize) -> Take<T, C> {
         let (min, max) = self.domain();
 
         Take {
@@ -168,7 +169,7 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
 
     ///Slice this gradient slice to further limit its domain. Ranges outside
     ///the domain will be clamped to the nearest domain limit.
-    pub fn slice<R: Into<Range>>(&self, range: R) -> Slice<C> {
+    pub fn slice<R: Into<Range<T>>>(&self, range: R) -> Slice<T, C> {
         Slice {
             gradient: self.gradient,
             range: self.range.constrain(&range.into())
@@ -176,7 +177,7 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
     }
 
     ///Get the limits of this gradient slice's domain.
-    pub fn domain(&self) -> (f32, f32) {
+    pub fn domain(&self) -> (T, T) {
         if let Range { from: Some(from), to: Some(to) } = self.range {
             (from, to)
         } else {
@@ -188,18 +189,18 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
 
 ///A domain range for gradient slices.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Range {
-    from: Option<f32>,
-    to: Option<f32>,
+pub struct Range<T: Float> {
+    from: Option<T>,
+    to: Option<T>,
 }
 
-impl Range {
-    fn clamp(&self, mut x: f32) -> f32 {
+impl<T: Float> Range<T> {
+    fn clamp(&self, mut x: T) -> T {
         x = self.from.unwrap_or(x).max(x);
         self.to.unwrap_or(x).min(x)
     }
 
-    fn constrain(&self, other: &Range) -> Range {
+    fn constrain(&self, other: &Range<T>) -> Range<T> {
         if let (Some(f), Some(t)) = (other.from, self.to) {
             if f >= t {
                 return Range {
@@ -209,7 +210,7 @@ impl Range {
             }
         }
 
-        
+
         if let (Some(t), Some(f)) = (other.to, self.from) {
             if t <= f {
                 return Range {
@@ -218,7 +219,7 @@ impl Range {
                 };
             }
         }
-        
+
         Range {
             from: match (self.from, other.from) {
                 (Some(s), Some(o)) => Some(s.max(o)),
@@ -236,8 +237,8 @@ impl Range {
     }
 }
 
-impl From<::std::ops::Range<f32>> for Range {
-    fn from(range: ::std::ops::Range<f32>) -> Range {
+impl<T: Float> From<::std::ops::Range<T>> for Range<T> {
+    fn from(range: ::std::ops::Range<T>) -> Range<T> {
         Range {
             from: Some(range.start),
             to: Some(range.end),
@@ -245,8 +246,8 @@ impl From<::std::ops::Range<f32>> for Range {
     }
 }
 
-impl From<::std::ops::RangeFrom<f32>> for Range {
-    fn from(range: ::std::ops::RangeFrom<f32>) -> Range {
+impl<T: Float> From<::std::ops::RangeFrom<T>> for Range<T> {
+    fn from(range: ::std::ops::RangeFrom<T>) -> Range<T> {
         Range {
             from: Some(range.start),
             to: None,
@@ -254,8 +255,8 @@ impl From<::std::ops::RangeFrom<f32>> for Range {
     }
 }
 
-impl From<::std::ops::RangeTo<f32>> for Range {
-    fn from(range: ::std::ops::RangeTo<f32>) -> Range {
+impl<T: Float> From<::std::ops::RangeTo<T>> for Range<T> {
+    fn from(range: ::std::ops::RangeTo<T>) -> Range<T> {
         Range {
             from: None,
             to: Some(range.end),
@@ -263,8 +264,8 @@ impl From<::std::ops::RangeTo<f32>> for Range {
     }
 }
 
-impl From<::std::ops::RangeFull> for Range {
-    fn from(_range: ::std::ops::RangeFull) -> Range {
+impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
+    fn from(_range: ::std::ops::RangeFull) -> Range<T> {
         Range {
             from: None,
             to: None,
@@ -272,13 +273,13 @@ impl From<::std::ops::RangeFull> for Range {
     }
 }
 
-enum MaybeSlice<'a, C: Mix + Clone + 'a> {
-    NotSlice(&'a Gradient<C>),
-    Slice(Slice<'a, C>),
+enum MaybeSlice<'a, T: Float + 'a, C: Mix<T> + Clone + 'a> {
+    NotSlice(&'a Gradient<T, C>),
+    Slice(Slice<'a, T, C>),
 }
 
-impl<'a, C: Mix + Clone> MaybeSlice<'a, C> {
-    fn get(&self, i: f32) -> C {
+impl<'a, T: Float, C: Mix<T> + Clone> MaybeSlice<'a, T, C> {
+    fn get(&self, i: T) -> C {
         match *self {
             MaybeSlice::NotSlice(g) => g.get(i),
             MaybeSlice::Slice(ref s) => s.get(i),
@@ -293,7 +294,7 @@ mod test {
 
     #[test]
     fn range_clamp() {
-        let range: Range = (0.0..1.0).into();
+        let range: Range<f64> = (0.0..1.0).into();
         assert_eq!(range.clamp(-1.0), 0.0);
         assert_eq!(range.clamp(2.0), 1.0);
         assert_eq!(range.clamp(0.5), 0.5);
@@ -301,7 +302,7 @@ mod test {
 
     #[test]
     fn range_constrain() {
-        let range: Range = (0.0..1.0).into();
+        let range: Range<f64> = (0.0..1.0).into();
         assert_eq!(range.constrain(&(-3.0..-5.0).into()), (0.0..0.0).into());
         assert_eq!(range.constrain(&(-3.0..0.8).into()), (0.0..0.8).into());
 

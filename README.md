@@ -57,7 +57,7 @@ extern crate palette;
 use palette::{Rgb, Lch, Hue};
 
 let lch_color = Lch::from(Rgb::srgb(0.8, 0.2, 0.1));
-let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
+let new_color: Rgb<f32> = lch_color.shift_hue(180.0.into()).into();
 ```
 
 This results in the following two colors:
