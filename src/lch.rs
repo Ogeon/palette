@@ -74,7 +74,9 @@ impl<T: Float> ColorSpace for Lch<T> {
     }
 }
 
-impl<T: Float> Mix<T> for Lch<T> {
+impl<T: Float> Mix for Lch<T> {
+    type Scalar = T;
+    
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_float();
@@ -87,7 +89,9 @@ impl<T: Float> Mix<T> for Lch<T> {
     }
 }
 
-impl<T: Float> Shade<T> for Lch<T> {
+impl<T: Float> Shade for Lch<T> {
+    type Scalar = T;
+    
     fn lighten(&self, amount: T) -> Lch<T> {
         Lch {
             l: self.l + amount,
@@ -130,7 +134,9 @@ impl<T: Float> Hue for Lch<T> {
     }
 }
 
-impl<T: Float> Saturate<T> for Lch<T> {
+impl<T: Float> Saturate for Lch<T> {
+    type Scalar = T;
+
     fn saturate(&self, factor: T) -> Lch<T> {
         Lch {
             l: self.l,

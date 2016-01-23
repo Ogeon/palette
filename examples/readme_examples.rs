@@ -69,7 +69,7 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
     }
 }
 
-fn display_gradients<T: Float, A: Mix<T> + Clone, B: Mix<T> + Clone>(filename: &str, grad1: Gradient<T, A>, grad2: Gradient<T, B>)
+fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>)
     where Rgb<T>: From<A>,
         Rgb<T>: From<B>
 {

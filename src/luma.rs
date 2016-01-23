@@ -73,7 +73,9 @@ impl<T: Float> ColorSpace for Luma<T> {
     }
 }
 
-impl<T: Float> Mix<T> for Luma<T> {
+impl<T: Float> Mix for Luma<T> {
+    type Scalar = T;
+
     fn mix(&self, other: &Luma<T>, factor: T) -> Luma<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -84,7 +86,9 @@ impl<T: Float> Mix<T> for Luma<T> {
     }
 }
 
-impl<T: Float> Shade<T> for Luma<T> {
+impl<T: Float> Shade for Luma<T> {
+    type Scalar = T;
+
     fn lighten(&self, amount: T) -> Luma<T> {
         Luma {
             luma: (self.luma + amount).max(T::zero()),
