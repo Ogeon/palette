@@ -74,7 +74,9 @@ impl<T: Float> ColorSpace for Hsv<T> {
     }
 }
 
-impl<T: Float> Mix<T> for Hsv<T> {
+impl<T: Float> Mix for Hsv<T> {
+    type Scalar = T;
+    
     fn mix(&self, other: &Hsv<T>, factor: T) -> Hsv<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_float();
@@ -88,7 +90,9 @@ impl<T: Float> Mix<T> for Hsv<T> {
     }
 }
 
-impl<T: Float> Shade<T> for Hsv<T> {
+impl<T: Float> Shade for Hsv<T> {
+    type Scalar = T;
+    
     fn lighten(&self, amount: T) -> Hsv<T> {
         Hsv {
             hue: self.hue,
@@ -131,7 +135,9 @@ impl<T: Float> Hue for Hsv<T> {
     }
 }
 
-impl<T: Float> Saturate<T> for Hsv<T> {
+impl<T: Float> Saturate for Hsv<T> {
+    type Scalar = T;
+
     fn saturate(&self, factor: T) -> Hsv<T> {
         Hsv {
             hue: self.hue,

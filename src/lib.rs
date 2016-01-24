@@ -119,13 +119,17 @@ macro_rules! make_color {
             }
         )+
 
-        impl<T:Float> Mix<T> for Color<T> {
+        impl<T:Float> Mix for Color<T> {
+            type Scalar = T;
+
             fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
-        impl<T:Float> Shade<T> for Color<T> {
+        impl<T:Float> Shade for Color<T> {
+            type Scalar = T;
+
             fn lighten(&self, amount: T) -> Color<T> {
                 Lab::from(*self).lighten(amount).into()
             }
@@ -149,7 +153,9 @@ macro_rules! make_color {
             }
         }
 
-        impl<T:Float> Saturate<T> for Color<T> {
+        impl<T:Float> Saturate for Color<T> {
+            type Scalar = T;
+
             fn saturate(&self, factor: T) -> Color<T> {
                 Lch::from(*self).saturate(factor).into()
             }
@@ -310,13 +316,16 @@ pub trait ColorSpace {
 ///assert_eq!(a.mix(&b, 0.5), Rgb::linear_rgb(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
-pub trait Mix<T:Float> {
+pub trait Mix {
+    ///The type of the mixing factor.
+    type Scalar: Float;
+
     ///Mix the color with an other color, by `factor`.
     ///
     ///`factor` sould be between `0.0` and `1.0`, where `0.0` will result in
     ///the same color as `self` and `1.0` will result in the same color as
     ///`other`.
-    fn mix(&self, other: &Self, factor: T) -> Self;
+    fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
 }
 
 ///The `Shade` trait allows a color to be lightened or darkened.
@@ -329,12 +338,15 @@ pub trait Mix<T:Float> {
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
-pub trait Shade<T:Float>: Sized {
+pub trait Shade: Sized {
+    ///The type of the lighten/darken amount.
+    type Scalar: Float;
+
     ///Lighten the color by `amount`.
-    fn lighten(&self, amount: T) -> Self;
+    fn lighten(&self, amount: Self::Scalar) -> Self;
 
     ///Darken the color by `amount`.
-    fn darken(&self, amount: T) -> Self {
+    fn darken(&self, amount: Self::Scalar) -> Self {
         self.lighten(-amount)
     }
 }
@@ -390,12 +402,15 @@ pub trait Hue: GetHue {
 ///
 ///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
 ///```
-pub trait Saturate<T: Float>: Sized {
+pub trait Saturate: Sized {
+    ///The type of the (de)saturation factor.
+    type Scalar: Float;
+
     ///Increase the saturation by `factor`.
-    fn saturate(&self, factor: T) -> Self;
+    fn saturate(&self, factor: Self::Scalar) -> Self;
 
     ///Decrease the saturation by `factor`.
-    fn desaturate(&self, factor: T) -> Self {
+    fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
 }
