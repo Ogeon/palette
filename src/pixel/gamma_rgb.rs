@@ -11,7 +11,7 @@ use pixel::RgbPixel;
 ///use palette::pixel::GammaRgb;
 ///
 ///let c: Rgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
-///assert_eq!((128, 64, 32), GammaRgb::from_linear(c, 2.2).to_pixel());
+///assert_eq!((128, 64, 32), GammaRgb::linear_to_pixel(c, 2.2));
 ///```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GammaRgb<T: Float = f32> {
@@ -104,6 +104,11 @@ impl<T: Float> GammaRgb<T> {
             blue: from_gamma(self.blue, self.gamma),
             alpha: self.alpha,
         }
+    }
+
+    ///Shortcut to convert a linear color to a gamma encoded pixel.
+    pub fn linear_to_pixel<C: Into<Rgb<T>>, P: RgbPixel<T>>(color: C, gamma: T) -> P {
+        GammaRgb::from_linear(color, gamma).to_pixel()
     }
 }
 

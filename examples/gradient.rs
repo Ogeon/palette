@@ -40,8 +40,8 @@ fn main() {
     for (i, ((c1, c2), (c3, c4))) in grad1.take(256).zip(grad2.take(256)).zip(grad3.take(256).zip(grad4.take(256))).enumerate() {
         let c1 = Srgb::from(c1).to_pixel();
         let c2 = Srgb::from(c2).to_pixel();
-        let c3 = Srgb::from_linear(c3).to_pixel();
-        let c4 = Srgb::from_linear(c4).to_pixel();
+        let c3 = Srgb::linear_to_pixel(c3);
+        let c4 = Srgb::linear_to_pixel(c4);
 
         for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
             pixel.data = c1

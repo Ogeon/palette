@@ -82,11 +82,11 @@ fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clon
     let mut image = RgbImage::new(256, 64);
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from_linear(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_pixel();
+        pixel.data = Srgb::linear_to_pixel(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap()));
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from_linear(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_pixel();
+        pixel.data = Srgb::linear_to_pixel(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap()));
     }
 
     match image.save(filename) {

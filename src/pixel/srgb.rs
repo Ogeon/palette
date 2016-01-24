@@ -99,6 +99,11 @@ impl<T: Float> Srgb<T> {
             alpha: self.alpha,
         }
     }
+
+    ///Shortcut to convert a linear color to an sRGB encoded pixel.
+    pub fn linear_to_pixel<C: Into<Rgb<T>>, P: RgbPixel<T>>(color: C) -> P {
+        Srgb::from_linear(color).to_pixel()
+    }
 }
 
 impl<T: Float> From<Rgb<T>> for Srgb<T> {
