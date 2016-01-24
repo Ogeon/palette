@@ -377,14 +377,12 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
 
 impl<T: Float> From<Srgb<T>> for Rgb<T> {
     fn from(srgb: Srgb<T>) -> Rgb<T> {
-        let (r, g, b, a) = srgb.to_linear();
-        Rgb::rgba(r, g, b, a)
+        srgb.to_linear()
     }
 }
 
 impl<T: Float> From<GammaRgb<T>> for Rgb<T> {
     fn from(gamma_rgb: GammaRgb<T>) -> Rgb<T> {
-        let (r, g, b, a) = gamma_rgb.to_linear();
-        Rgb::rgba(r, g, b, a)
+        gamma_rgb.to_linear()
     }
 }

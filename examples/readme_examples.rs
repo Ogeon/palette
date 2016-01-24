@@ -75,18 +75,18 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
     }
 }
 
-fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>)
-    where Rgb<T>: From<A>,
-        Rgb<T>: From<B>
+fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where
+    Rgb<T>: From<A>,
+    Rgb<T>: From<B>,
 {
     let mut image = RgbImage::new(256, 64);
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from(Rgb::from(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap()))).to_pixel();
+        pixel.data = Srgb::from_linear(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_pixel();
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from(Rgb::from(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap()))).to_pixel();
+        pixel.data = Srgb::from_linear(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_pixel();
     }
 
     match image.save(filename) {

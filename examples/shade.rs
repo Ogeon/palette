@@ -26,8 +26,8 @@ fn main() {
             pixel.data = rgb2;
         }
 
-        let lab1 = Srgb::from(Rgb::from(lab.darken(0.05 * i as f32))).to_pixel();
-        let lab2 = Srgb::from(Rgb::from(lab.lighten(0.05 * i as f32))).to_pixel();
+        let lab1 = Srgb::from_linear(lab.darken(0.05 * i as f32)).to_pixel();
+        let lab2 = Srgb::from_linear(lab.lighten(0.05 * i as f32)).to_pixel();
 
         for (_, _, pixel) in image.sub_image(i as u32 * 20, 65, 20, 31).pixels_mut() {
             pixel.data = lab1;
@@ -37,8 +37,8 @@ fn main() {
             pixel.data = lab2;
         }
 
-        let hsv1 = Srgb::from(Rgb::from(hsv.darken(0.05 * i as f32))).to_pixel();
-        let hsv2 = Srgb::from(Rgb::from(hsv.lighten(0.05 * i as f32))).to_pixel();
+        let hsv1 = Srgb::from_linear(hsv.darken(0.05 * i as f32)).to_pixel();
+        let hsv2 = Srgb::from_linear(hsv.lighten(0.05 * i as f32)).to_pixel();
 
         for (_, _, pixel) in image.sub_image(i as u32 * 20, 130, 20, 31).pixels_mut() {
             pixel.data = hsv1;

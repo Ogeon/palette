@@ -80,24 +80,30 @@ impl<T: Float> Srgb<T> {
     }
 
     ///Convert linear color components to sRGB encoding.
-    pub fn from_linear(red: T, green: T, blue: T, alpha: T) -> Srgb<T> {
+    pub fn from_linear<C: Into<Rgb<T>>>(color: C) -> Srgb<T> {
+        let rgb = color.into();
         Srgb {
-            red: to_srgb(red),
-            green: to_srgb(green),
-            blue: to_srgb(blue),
-            alpha: alpha,
+            red: to_srgb(rgb.red),
+            green: to_srgb(rgb.green),
+            blue: to_srgb(rgb.blue),
+            alpha: rgb.alpha,
         }
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> (T, T, T, T) {
-        (from_srgb(self.red), from_srgb(self.green), from_srgb(self.blue), self.alpha)
+    pub fn to_linear(&self) -> Rgb<T> {
+        Rgb {
+            red: from_srgb(self.red),
+            green: from_srgb(self.green),
+            blue: from_srgb(self.blue),
+            alpha: self.alpha,
+        }
     }
 }
 
 impl<T: Float> From<Rgb<T>> for Srgb<T> {
     fn from(rgb: Rgb<T>) -> Srgb<T> {
-        Srgb::from_linear(rgb.red, rgb.green, rgb.blue, rgb.alpha)
+        Srgb::from_linear(rgb)
     }
 }
 

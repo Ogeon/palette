@@ -97,13 +97,13 @@ impl<T: Float> GammaRgb<T> {
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> (T, T, T, T) {
-        (
-            from_gamma(self.red, self.gamma),
-            from_gamma(self.green, self.gamma),
-            from_gamma(self.blue, self.gamma),
-            self.alpha
-        )
+    pub fn to_linear(&self) -> Rgb<T> {
+        Rgb {
+            red: from_gamma(self.red, self.gamma),
+            green: from_gamma(self.green, self.gamma),
+            blue: from_gamma(self.blue, self.gamma),
+            alpha: self.alpha,
+        }
     }
 }
 
