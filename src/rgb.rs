@@ -10,12 +10,13 @@ use pixel::{RgbPixel, Srgb, GammaRgb};
 ///RGB is probably the most common color space, when it comes to computer
 ///graphics, and it's defined as an additive mixture of red, green and blue
 ///light, where gray scale colors are created when these three channels are
-///equal in strength. This version of RGB is based on sRGB, which is pretty
-///much the standard RGB model today.
+///equal in strength. This particular RGB type is based on the ITU-R BT.709
+///primaries, which makes it a linear version of sRGB.
 ///
 ///Conversions and operations on this color space assumes that it's linear,
-///meaning that gamma correction is required when converting to and from
-///a displayable RGB, such as sRGB.
+///meaning that gamma correction is required when converting to and from a
+///displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
+///for encoding types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Rgb<T: Float = f32> {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the

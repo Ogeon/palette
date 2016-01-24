@@ -4,7 +4,12 @@ use {Color, Rgb, clamp};
 
 use pixel::RgbPixel;
 
-///A normalized sRGB encoded color.
+///An sRGB encoded color.
+///
+///sRGB is a common kind of gamma encoding, but it doesn't exactly follow the
+///power-law, as in [`GammaRgb`](struct.GammaRgb.html). It's perhaps the most
+///common color space for monitors and on the Internet, so it's usually safe
+///to assume that an image or pixel with unknown gamma is sRGB encoded.
 ///
 ///```
 ///use palette::Rgb;

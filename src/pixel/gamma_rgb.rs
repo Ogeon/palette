@@ -4,7 +4,18 @@ use {Rgb, clamp};
 
 use pixel::RgbPixel;
 
-///A normalized gamma encoded color.
+///A gamma encoded color.
+///
+///Gamma encoding or gamma correction is used to transform the intensity
+///values to either match a non-linear display, like CRT, or to prevent
+///banding among the darker colors. `GammaRgb` represents a gamma corrected
+///RGB color, where the intensities are encoded using the following power-law
+///expression: _V ^γ_ (where _V_ is the intensity value an _γ_ is the encoding
+///gamma).
+///
+///This particular implementation is based on the ITU-R BT.709 primaries (same
+///as in sRGB, HDTV, etc.), so decoding it will basically result in decoded
+///sRGB.
 ///
 ///```
 ///use palette::Rgb;

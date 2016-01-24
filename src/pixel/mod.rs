@@ -1,4 +1,4 @@
-//!Pixel encodings.
+//!Pixel encodings and pixel format conversion.
 
 use num::Float;
 
@@ -8,10 +8,11 @@ pub use self::gamma_rgb::GammaRgb;
 mod srgb;
 mod gamma_rgb;
 
-///A conversion trait for RGB pixel types.
+///A conversion trait for RGB pixel formats.
 ///
-///It makes conversion from `Rgb` to various pixel representations easy and
-///extensible.
+///It provided methods for encoding and decoding RGB colors as pixel storage
+///formats, and is intended as a bridge between Palette and image processing
+///libraries.
 pub trait RgbPixel<T: Float = f32> {
     ///Create an instance of `Self` from red, green, blue and alpha values.
     ///These can be assumed to already be gamma corrected and belongs to the
