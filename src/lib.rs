@@ -27,8 +27,10 @@ extern crate num;
 
 use num::traits::Float;
 
+use pixel::RgbPixel;
+
 pub use gradient::Gradient;
-pub use rgb::{Rgb, RgbPixel};
+pub use rgb::Rgb;
 pub use luma::Luma;
 pub use xyz::Xyz;
 pub use lab::Lab;
@@ -66,6 +68,7 @@ macro_rules! assert_approx_eq {
 }
 
 pub mod gradient;
+pub mod pixel;
 
 mod rgb;
 mod luma;
