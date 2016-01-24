@@ -27,7 +27,7 @@ extern crate num;
 
 use num::traits::Float;
 
-use pixel::RgbPixel;
+use pixel::{RgbPixel, Srgb};
 
 pub use gradient::Gradient;
 pub use rgb::Rgb;
@@ -85,7 +85,7 @@ mod tristimulus;
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
-        $variant:ident {$(
+        $variant:ident $(and $($representations:ident),+ )* {$(
             #[$ctor_comment:meta]
             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*);
         )+}
@@ -170,6 +170,14 @@ macro_rules! make_color {
                     Color::$variant(color)
                 }
             }
+
+            $($(
+                impl<T:Float> From<$representations<T>> for Color<T> {
+                    fn from(color: $representations<T>) -> Color<T> {
+                        Color::$variant(color.into())
+                    }
+                }
+            )+)*
         )+
     )
 }
@@ -201,7 +209,7 @@ make_color! {
     }
 
     ///Linear RGB.
-    Rgb {
+    Rgb and Srgb {
         ///Linear RGB.
         linear_rgb(red: T, green: T, blue: T);
 
@@ -216,21 +224,6 @@ make_color! {
 
         ///Linear RGB from a linear pixel value.
         linear_pixel<P: RgbPixel<T> >(pixel: &P);
-
-        ///Linear RGB from sRGB.
-        srgb(red: T, green: T, blue: T);
-
-        ///Linear RGB from sRGB with transparency.
-        srgba(red: T, green: T, blue: T, alpha: T);
-
-        ///Linear RGB from 8 bit sRGB.
-        srgb8(red: u8, green: u8, blue: u8);
-
-        ///Linear RGB from 8 bit sRGB with transparency.
-        srgba8(red: u8, green: u8, blue: u8, alpha: u8);
-
-        ///Linear RGB from an sRGB pixel value.
-        srgb_pixel<P: RgbPixel<T> >(pixel: &P);
 
         ///Linear RGB from gamma corrected RGB.
         gamma_rgb(red: T, green: T, blue: T, gamma: T);

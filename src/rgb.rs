@@ -3,7 +3,7 @@ use num::traits::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
-use pixel::RgbPixel;
+use pixel::{RgbPixel, Srgb};
 
 ///Linear RGB with an alpha component.
 ///
@@ -17,7 +17,7 @@ use pixel::RgbPixel;
 ///meaning that gamma correction is required when converting to and from
 ///a displayable RGB, such as sRGB.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Rgb<T: Float> {
+pub struct Rgb<T: Float = f32> {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
     pub red: T,
@@ -81,55 +81,6 @@ impl<T: Float> Rgb<T> {
     pub fn linear_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgb::linear_rgba(r, g, b, a)
-    }
-}
-
-///Creation from sRGB.
-impl<T: Float> Rgb<T> {
-    ///Linear RGB from sRGB.
-    pub fn srgb(red: T, green: T, blue: T) -> Rgb<T> {
-        Rgb {
-            red: from_srgb(red),
-            green: from_srgb(green),
-            blue: from_srgb(blue),
-            alpha: T::one(),
-        }
-    }
-
-    ///Linear RGB from sRGB with transparency.
-    pub fn srgba(red: T, green: T, blue: T, alpha: T) -> Rgb<T> {
-        Rgb {
-            red: from_srgb(red),
-            green: from_srgb(green),
-            blue: from_srgb(blue),
-            alpha: alpha,
-        }
-    }
-
-    ///Linear RGB from 8 bit sRGB.
-    pub fn srgb8(red: u8, green: u8, blue: u8) -> Rgb<T> {
-        Rgb {
-            red: from_srgb(T::from(red).unwrap() / T::from(255.0).unwrap()),
-            green: from_srgb(T::from(green).unwrap() / T::from(255.0).unwrap()),
-            blue: from_srgb(T::from(blue).unwrap() / T::from(255.0).unwrap()),
-            alpha: T::one(),
-        }
-    }
-
-    ///Linear RGB from 8 bit sRGB with transparency.
-    pub fn srgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb<T> {
-        Rgb {
-            red: from_srgb(T::from(red).unwrap() / T::from(255.0).unwrap()),
-            green: from_srgb(T::from(green).unwrap() / T::from(255.0).unwrap()),
-            blue: from_srgb(T::from(blue).unwrap() / T::from(255.0).unwrap()),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
-        }
-    }
-
-    ///Linear RGB from an sRGB pixel value.
-    pub fn srgb_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
-        let (r, g, b, a) = pixel.to_rgba();
-        Rgb::srgba(r, g, b, a)
     }
 }
 
@@ -199,23 +150,6 @@ impl<T: Float> Rgb<T> {
             clamp(self.red, T::zero(), T::one()),
             clamp(self.green, T::zero(), T::one()),
             clamp(self.blue, T::zero(), T::one()),
-            clamp(self.alpha, T::zero(), T::one())
-        )
-    }
-
-    ///Convert to an sRGB pixel.
-    ///
-    ///```
-    ///use palette::Rgb;
-    ///
-    ///let c = Rgb::srgb(0.5, 0.3, 0.1);
-    ///assert_eq!((0.5, 0.3, 0.1), c.to_srgb());
-    ///```
-    pub fn to_srgb<P: RgbPixel<T>>(&self) -> P {
-        P::from_rgba(
-            clamp(to_srgb(self.red), T::zero(), T::one()),
-            clamp(to_srgb(self.green), T::zero(), T::one()),
-            clamp(to_srgb(self.blue), T::zero(), T::one()),
             clamp(self.alpha, T::zero(), T::one())
         )
     }
@@ -428,8 +362,8 @@ impl<T: Float> From<Xyz<T>> for Rgb<T> {
     fn from(xyz: Xyz<T>) -> Rgb<T> {
         Rgb {
             red: xyz.x * T::from(3.2406).unwrap() + xyz.y * T::from(-1.5372).unwrap() + xyz.z * T::from(-0.4986).unwrap(),
-            green: xyz.x * T::from(-0.9689).unwrap() + xyz.y * T::from(1.8758).unwrap() + xyz.z * T::from(0.415).unwrap(),
-            blue: xyz.x * T::from(0.557).unwrap() + xyz.y * T::from(-0.2040).unwrap() + xyz.z * T::from(0.570).unwrap(),
+            green: xyz.x * T::from(-0.9689).unwrap() + xyz.y * T::from(1.8758).unwrap() + xyz.z * T::from(0.0415).unwrap(),
+            blue: xyz.x * T::from(0.0557).unwrap() + xyz.y * T::from(-0.2040).unwrap() + xyz.z * T::from(1.0570).unwrap(),
             alpha: xyz.alpha,
         }
     }
@@ -509,19 +443,10 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
     }
 }
 
-fn from_srgb<T: Float>(x: T) -> T {
-    if x <= T::from(0.4045).unwrap() {
-        x / T::from(12.92).unwrap()
-    } else {
-        ((x + T::from(0.055).unwrap()) / T::from(1.055).unwrap()).powf(T::from(2.4).unwrap())
-    }
-}
-
-fn to_srgb<T: Float>(x: T) -> T {
-    if x <= T::from(0.031308).unwrap() {
-        T::from(12.92).unwrap() * x
-    } else {
-        T::from(1.055).unwrap() * x.powf(T::from(1.0 / 2.4).unwrap()) - T::from(0.055).unwrap()
+impl<T: Float> From<Srgb<T>> for Rgb<T> {
+    fn from(srgb: Srgb<T>) -> Rgb<T> {
+        let (r, g, b, a) = srgb.to_linear();
+        Rgb::linear_rgba(r, g, b, a)
     }
 }
 

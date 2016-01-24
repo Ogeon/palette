@@ -2,6 +2,7 @@ extern crate palette;
 extern crate image;
 
 use palette::{Rgb, Hsl, Lch, Saturate};
+use palette::pixel::Srgb;
 
 use image::GenericImage;
 
@@ -14,17 +15,17 @@ fn main() {
     //Increase the saturation by 80% (!) as HSL in the left half, and as LCh
     //in the right half. Notice the strong yellow tone in the HSL part.
     for (_, _, pixel) in image.sub_image(0, 0, width / 2, height).pixels_mut() {
-        let color = Rgb::srgb_pixel(&pixel.data);
+        let color: Rgb = Srgb::from_pixel(&pixel.data).into();
 
         let saturated = Hsl::from(color).saturate(0.8);
-        pixel.data = Rgb::from(saturated).to_srgb();
+        pixel.data = Srgb::from(Rgb::from(saturated)).to_pixel();
     }
 
     for (_, _, pixel) in image.sub_image(width / 2, 0, width / 2, height).pixels_mut() {
-        let color = Rgb::srgb_pixel(&pixel.data);
+        let color: Rgb = Srgb::from_pixel(&pixel.data).into();
 
         let saturated = Lch::from(color).saturate(0.8);
-        pixel.data = Rgb::from(saturated).to_srgb();
+        pixel.data = Srgb::from(Rgb::from(saturated)).to_pixel();
     }
 
     match image.save("examples/saturate.png") {

@@ -55,9 +55,10 @@ This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue b
 ```Rust
 extern crate palette;
 use palette::{Rgb, Lch, Hue};
+use palette::pixel::Srgb;
 
-let lch_color = Lch::from(Rgb::srgb(0.8, 0.2, 0.1));
-let new_color: Rgb<f32> = lch_color.shift_hue(180.0.into()).into();
+let lch_color: Lch = Rgb::from(Srgb::new(0.8, 0.2, 0.1)).into();
+let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
 ```
 
 This results in the following two colors:
@@ -83,8 +84,9 @@ a desaturated version of the original.
 ```Rust
 extern crate palette;
 use palette::{Color, Shade, Saturate};
+use palette::pixel::Srgb;
 
-let color = Color::srgb(0.8, 0.2, 0.1);
+let color: Color = Srgb::new(0.8, 0.2, 0.1).into();
 let lighter = color.lighten(0.1);
 let desaturated = color.desaturate(0.5);
 ```

@@ -58,8 +58,9 @@ impl<T: Float> Lab<T> {
 
 impl<T: Float> ColorSpace for Lab<T> {
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= T::one() && self.a >= -T::one() &&
-        self.a <= -T::one() && self.b >= -T::one() && self.b <= T::one() &&
+        self.l >= T::zero() && self.l <= T::one() &&
+        self.a >= -T::one() && self.a <= T::one() &&
+        self.b >= -T::one() && self.b <= T::one() &&
         self.alpha >= T::zero() && self.alpha <= T::one()
     }
 

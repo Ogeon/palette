@@ -3,6 +3,7 @@ extern crate image;
 extern crate clap;
 
 use palette::{Color, Rgb, Hue, Shade};
+use palette::pixel::Srgb;
 
 use image::{RgbImage, GenericImage, SubImage};
 
@@ -84,7 +85,7 @@ fn main() {
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary = Color::srgb8(red, green, blue);
+    let primary: Color = Srgb::new_u8(red, green, blue).into();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {
@@ -154,12 +155,12 @@ fn blit_shades<I: GenericImage<Pixel=image::Rgb<u8>> + 'static>(color: Color, mu
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Rgb::from(color).to_srgb();
+    let primary = Srgb::from(Rgb::from(color)).to_pixel();
     
     //Generate one lighter and two darker versions of the color
-    let light = Rgb::from(color.lighten(0.1)).to_srgb();
-    let dark1 = Rgb::from(color.darken(0.1)).to_srgb();
-    let dark2 = Rgb::from(color.darken(0.2)).to_srgb();
+    let light = Srgb::from(Rgb::from(color.lighten(0.1))).to_pixel();
+    let dark1 = Srgb::from(Rgb::from(color.darken(0.1))).to_pixel();
+    let dark2 = Srgb::from(Rgb::from(color.darken(0.2))).to_pixel();
 
     for (x, y, pixel) in canvas.pixels_mut() {
         if y < height / 2 {

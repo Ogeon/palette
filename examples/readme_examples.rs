@@ -6,32 +6,38 @@ use image::{RgbImage, GenericImage};
 use num::traits::Float;
 
 use palette::{Rgb, Gradient, Mix};
+use palette::pixel::Srgb;
 
 mod color_spaces {
     use palette::{Rgb, Lch, Hue};
+    use palette::pixel::Srgb;
     use display_colors;
 
     pub fn run() {
-        let lch_color = Lch::from(Rgb::srgb(0.8, 0.2, 0.1));
-        let new_color: Rgb<f32> = lch_color.shift_hue(180.0.into()).into();
+        let lch_color: Lch = Rgb::from(Srgb::new(0.8, 0.2, 0.1)).into();
+        let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
 
-        display_colors("examples/readme_color_spaces.png", &[Rgb::srgb(0.8, 0.2, 0.1).to_srgb(), new_color.to_srgb()]);
+        display_colors("examples/readme_color_spaces.png", &[
+            ::palette::pixel::Srgb::new(0.8, 0.2, 0.1).to_pixel(),
+            ::palette::pixel::Srgb::from(new_color).to_pixel()
+        ]);
     }
 }
 
 mod manipulation {
     use palette::{Color, Shade, Saturate};
+    use palette::pixel::Srgb;
     use display_colors;
 
     pub fn run() {
-        let color = Color::srgb(0.8, 0.2, 0.1);
+        let color: Color = Srgb::new(0.8, 0.2, 0.1).into();
         let lighter = color.lighten(0.1);
         let desaturated = color.desaturate(0.5);
 
         display_colors("examples/readme_manipulation.png", &[
-            ::palette::Rgb::from(color).to_srgb(),
-            ::palette::Rgb::from(lighter).to_srgb(),
-            ::palette::Rgb::from(desaturated).to_srgb()
+            ::palette::pixel::Srgb::from(color).to_pixel(),
+            ::palette::pixel::Srgb::from(lighter).to_pixel(),
+            ::palette::pixel::Srgb::from(desaturated).to_pixel()
         ]);
     }
 }
@@ -76,11 +82,11 @@ fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clon
     let mut image = RgbImage::new(256, 64);
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Rgb::from(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_srgb();
+        pixel.data = Srgb::from(Rgb::from(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap()))).to_pixel();
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Rgb::from(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap())).to_srgb();
+        pixel.data = Srgb::from(Rgb::from(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap()))).to_pixel();
     }
 
     match image.save(filename) {

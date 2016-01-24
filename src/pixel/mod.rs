@@ -2,6 +2,10 @@
 
 use num::Float;
 
+pub use self::srgb::Srgb;
+
+mod srgb;
+
 ///A conversion trait for RGB pixel types.
 ///
 ///It makes conversion from `Rgb` to various pixel representations easy and
