@@ -110,13 +110,13 @@ extern crate palette;
 use palette::{Rgb, Hsv, Gradient};
 
 let grad1 = Gradient::new(vec![
-    Rgb::linear_rgb(1.0, 0.1, 0.1),
-    Rgb::linear_rgb(0.1, 1.0, 1.0)
+    Rgb::rgb(1.0, 0.1, 0.1),
+    Rgb::rgb(0.1, 1.0, 1.0)
 ]);
 
 let grad2 = Gradient::new(vec![
-    Hsv::from(Rgb::linear_rgb(1.0, 0.1, 0.1)),
-    Hsv::from(Rgb::linear_rgb(0.1, 1.0, 1.0))
+    Hsv::from(Rgb::rgb(1.0, 0.1, 0.1)),
+    Hsv::from(Rgb::rgb(0.1, 1.0, 1.0))
 ]);
 ```
 

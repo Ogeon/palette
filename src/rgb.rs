@@ -3,7 +3,7 @@ use num::traits::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Color, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
-use pixel::{RgbPixel, Srgb};
+use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component.
 ///
@@ -38,7 +38,7 @@ pub struct Rgb<T: Float = f32> {
 ///Creation from linear RGB.
 impl<T: Float> Rgb<T> {
     ///Linear RGB.
-    pub fn linear_rgb(red: T, green: T, blue: T) -> Rgb<T> {
+    pub fn rgb(red: T, green: T, blue: T) -> Rgb<T> {
         Rgb {
             red: red,
             green: green,
@@ -48,7 +48,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB with transparency.
-    pub fn linear_rgba(red: T, green: T, blue: T, alpha: T) -> Rgb<T> {
+    pub fn rgba(red: T, green: T, blue: T, alpha: T) -> Rgb<T> {
         Rgb {
             red: red,
             green: green,
@@ -58,7 +58,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB from 8 bit values.
-    pub fn linear_rgb8(red: u8, green: u8, blue: u8) -> Rgb<T> {
+    pub fn rgb8(red: u8, green: u8, blue: u8) -> Rgb<T> {
         Rgb {
             red: T::from(red).unwrap() / T::from(255.0).unwrap(),
             green: T::from(green).unwrap() / T::from(255.0).unwrap(),
@@ -68,7 +68,7 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB with transparency from 8 bit values.
-    pub fn linear_rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb<T> {
+    pub fn rgba8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgb<T> {
         Rgb {
             red: T::from(red).unwrap() / T::from(255.0).unwrap(),
             green: T::from(green).unwrap() / T::from(255.0).unwrap(),
@@ -78,96 +78,28 @@ impl<T: Float> Rgb<T> {
     }
 
     ///Linear RGB from a linear pixel value.
-    pub fn linear_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
+    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<T> {
         let (r, g, b, a) = pixel.to_rgba();
-        Rgb::linear_rgba(r, g, b, a)
-    }
-}
-
-///Creation from gamma corrected RGB.
-impl<T: Float> Rgb<T> {
-    ///Linear RGB from gamma corrected RGB.
-    pub fn gamma_rgb(red: T, green: T, blue: T, gamma: T) -> Rgb<T> {
-        Rgb {
-            red: from_gamma(red, gamma),
-            green: from_gamma(green, gamma),
-            blue: from_gamma(blue, gamma),
-            alpha: T::one(),
-        }
+        Rgb::rgba(r, g, b, a)
     }
 
-    ///Linear RGB from gamma corrected RGB with transparency.
-    pub fn gamma_rgba(red: T, green: T, blue: T, alpha: T, gamma: T) -> Rgb<T> {
-        Rgb {
-            red: from_gamma(red, gamma),
-            green: from_gamma(green, gamma),
-            blue: from_gamma(blue, gamma),
-            alpha: alpha,
-        }
-    }
-
-    ///Linear RGB from 8 bit gamma corrected RGB.
-    pub fn gamma_rgb8(red: u8, green: u8, blue: u8, gamma: T) -> Rgb<T> {
-        Rgb {
-            red: from_gamma(T::from(red).unwrap() / T::from(255.0).unwrap(), gamma),
-            green: from_gamma(T::from(green).unwrap() / T::from(255.0).unwrap(), gamma),
-            blue: from_gamma(T::from(blue).unwrap() / T::from(255.0).unwrap(), gamma),
-            alpha: T::one(),
-        }
-    }
-
-    ///Linear RGB from 8 bit gamma corrected RGB with transparency.
-    pub fn gamma_rgba8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> Rgb<T> {
-        Rgb {
-            red: from_gamma(T::from(red).unwrap() / T::from(255.0).unwrap(), gamma),
-            green: from_gamma(T::from(green).unwrap() / T::from(255.0).unwrap(), gamma),
-            blue: from_gamma(T::from(blue).unwrap() / T::from(255.0).unwrap(), gamma),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
-        }
-    }
-
-    ///Linear RGB from a gamma corrected pixel value.
-    pub fn gamma_pixel<P: RgbPixel<T>>(pixel: &P, gamma: T) -> Rgb<T> {
-        let (r, g, b, a) = pixel.to_rgba();
-        Rgb::gamma_rgba(r, g, b, a, gamma)
-    }
-}
-
-///Conversion to "pixel space".
-impl<T: Float> Rgb<T> {
     ///Convert to a linear RGB pixel. `Rgb` is already assumed to be linear,
     ///so the components will just be clamped to [0.0, 1.0] before conversion.
     ///
     ///```
     ///use palette::Rgb;
     ///
-    ///let c = Rgb::linear_rgb(0.5, 0.3, 0.1);
-    ///assert_eq!((c.red, c.green, c.blue), c.to_linear());
-    ///assert_eq!((0.5, 0.3, 0.1), c.to_linear());
+    ///let c = Rgb::rgb(0.5, 0.3, 0.1);
+    ///assert_eq!((c.red, c.green, c.blue), c.to_pixel());
+    ///assert_eq!((0.5, 0.3, 0.1), c.to_pixel());
     ///```
-    pub fn to_linear<P: RgbPixel<T>>(&self) -> P {
+    pub fn to_pixel<P: RgbPixel<T>>(&self) -> P {
         P::from_rgba(
             clamp(self.red, T::zero(), T::one()),
             clamp(self.green, T::zero(), T::one()),
             clamp(self.blue, T::zero(), T::one()),
             clamp(self.alpha, T::zero(), T::one())
         )
-    }
-
-    ///Convert to a gamma corrected RGB pixel.
-    ///
-    ///```
-    ///use palette::Rgb;
-    ///
-    ///let c = Rgb::<f32>::gamma_rgb8(128, 64, 32, 2.2);
-    ///assert_eq!((128, 64, 32), c.to_gamma(2.2));
-    ///```
-    pub fn to_gamma<P: RgbPixel<T>>(&self, gamma: T) -> P {
-        P::from_rgba(
-            clamp(to_gamma(self.red, gamma), T::zero(), T::one()),
-            clamp(to_gamma(self.green, gamma), T::zero(), T::one()),
-            clamp(to_gamma(self.blue, gamma), T::zero(), T::one()),
-            clamp(self.alpha, T::zero(), T::one()))
     }
 }
 
@@ -237,7 +169,7 @@ impl<T: Float> GetHue for Rgb<T> {
 
 impl<T: Float> Default for Rgb<T> {
     fn default() -> Rgb<T> {
-        Rgb::linear_rgb(T::zero(), T::zero(), T::zero())
+        Rgb::rgb(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -446,14 +378,13 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
 impl<T: Float> From<Srgb<T>> for Rgb<T> {
     fn from(srgb: Srgb<T>) -> Rgb<T> {
         let (r, g, b, a) = srgb.to_linear();
-        Rgb::linear_rgba(r, g, b, a)
+        Rgb::rgba(r, g, b, a)
     }
 }
 
-fn from_gamma<T: Float>(x: T, gamma: T) -> T {
-    x.powf(T::one() / gamma)
-}
-
-fn to_gamma<T: Float>(x: T, gamma: T) -> T {
-    x.powf(gamma)
+impl<T: Float> From<GammaRgb<T>> for Rgb<T> {
+    fn from(gamma_rgb: GammaRgb<T>) -> Rgb<T> {
+        let (r, g, b, a) = gamma_rgb.to_linear();
+        Rgb::rgba(r, g, b, a)
+    }
 }

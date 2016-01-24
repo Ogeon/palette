@@ -306,7 +306,7 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Hsl::from(Rgb::linear_rgb(1.0, 0.0, 0.0));
+        let a = Hsl::from(Rgb::rgb(1.0, 0.0, 0.0));
         let b = Hsl::hsl(0.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(0.0.into(), 1.0, 1.0));
 
@@ -316,7 +316,7 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from(Rgb::linear_rgb(1.0, 0.5, 0.0));
+        let a = Hsl::from(Rgb::rgb(1.0, 0.5, 0.0));
         let b = Hsl::hsl(30.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(30.0.into(), 1.0, 1.0));
 
@@ -326,7 +326,7 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from(Rgb::linear_rgb(0.0, 1.0, 0.0));
+        let a = Hsl::from(Rgb::rgb(0.0, 1.0, 0.0));
         let b = Hsl::hsl(120.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(120.0.into(), 1.0, 1.0));
 
@@ -336,7 +336,7 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from(Rgb::linear_rgb(0.0, 0.0, 1.0));
+        let a = Hsl::from(Rgb::rgb(0.0, 0.0, 1.0));
         let b = Hsl::hsl(240.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(240.0.into(), 1.0, 1.0));
 
@@ -346,7 +346,7 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from(Rgb::linear_rgb(0.5, 0.0, 1.0));
+        let a = Hsl::from(Rgb::rgb(0.5, 0.0, 1.0));
         let b = Hsl::hsl(270.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::hsv(270.0.into(), 1.0, 1.0));
 
