@@ -2,6 +2,8 @@
 
 use num::Float;
 
+use clamp;
+
 pub use self::srgb::Srgb;
 pub use self::gamma_rgb::GammaRgb;
 
@@ -69,40 +71,44 @@ impl<T: Float> RgbPixel<T> for (f64, f64, f64) {
 
 impl<T: Float> RgbPixel<T> for (u8, u8, u8, u8) {
     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> (u8, u8, u8, u8) {
+        let c255 = T::from(255.0).unwrap();
         (
-            (red * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (green * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (alpha * T::from(255.0).unwrap()).to_u8().unwrap(),
+            clamp(red * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(green * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(blue * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(alpha * c255, T::zero(), c255).to_u8().unwrap(),
         )
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
         let (r, g, b, a) = *self;
+        let c255 = T::from(255.0).unwrap();
         (
-            T::from(r).unwrap() / T::from(255.0).unwrap(),
-            T::from(g).unwrap() / T::from(255.0).unwrap(),
-            T::from(b).unwrap() / T::from(255.0).unwrap(),
-            T::from(a).unwrap() / T::from(255.0).unwrap(),
+            T::from(r).unwrap() / c255,
+            T::from(g).unwrap() / c255,
+            T::from(b).unwrap() / c255,
+            T::from(a).unwrap() / c255,
         )
     }
 }
 
 impl<T: Float> RgbPixel<T> for (u8, u8, u8) {
     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> (u8, u8, u8) {
+        let c255 = T::from(255.0).unwrap();
         (
-            (red * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (green * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
+            clamp(red * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(green * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(blue * c255, T::zero(), c255).to_u8().unwrap(),
         )
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
         let (r, g, b) = *self;
+        let c255 = T::from(255.0).unwrap();
         (
-            T::from(r).unwrap() / T::from(255.0).unwrap(),
-            T::from(g).unwrap() / T::from(255.0).unwrap(),
-            T::from(b).unwrap() / T::from(255.0).unwrap(),
+            T::from(r).unwrap() / c255,
+            T::from(g).unwrap() / c255,
+            T::from(b).unwrap() / c255,
             T::one(),
         )
     }
@@ -149,38 +155,42 @@ impl<T: Float> RgbPixel<T> for [f64; 3] {
 
 impl<T: Float> RgbPixel<T> for [u8; 4] {
     fn from_rgba(red: T, green: T, blue: T, alpha: T) -> [u8; 4] {
+        let c255 = T::from(255.0).unwrap();
         [
-            (red * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (green * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (alpha * T::from(255.0).unwrap()).to_u8().unwrap(),
+            clamp(red * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(green * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(blue * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(alpha * c255, T::zero(), c255).to_u8().unwrap(),
         ]
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
+        let c255 = T::from(255.0).unwrap();
         (
-            T::from(self[0]).unwrap() / T::from(255.0).unwrap(),
-            T::from(self[1]).unwrap() / T::from(255.0).unwrap(),
-            T::from(self[2]).unwrap() / T::from(255.0).unwrap(),
-            T::from(self[3]).unwrap() / T::from(255.0).unwrap(),
+            T::from(self[0]).unwrap() / c255,
+            T::from(self[1]).unwrap() / c255,
+            T::from(self[2]).unwrap() / c255,
+            T::from(self[3]).unwrap() / c255,
         )
     }
 }
 
 impl<T: Float> RgbPixel<T> for [u8; 3] {
     fn from_rgba(red: T, green: T, blue: T, _alpha: T) -> [u8; 3] {
+        let c255 = T::from(255.0).unwrap();
         [
-            (red * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (green * T::from(255.0).unwrap()).to_u8().unwrap(),
-            (blue * T::from(255.0).unwrap()).to_u8().unwrap(),
+            clamp(red * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(green * c255, T::zero(), c255).to_u8().unwrap(),
+            clamp(blue * c255, T::zero(), c255).to_u8().unwrap(),
         ]
     }
 
     fn to_rgba(&self) -> (T, T, T, T) {
+        let c255 = T::from(255.0).unwrap();
         (
-            T::from(self[0]).unwrap() / T::from(255.0).unwrap(),
-            T::from(self[1]).unwrap() / T::from(255.0).unwrap(),
-            T::from(self[2]).unwrap() / T::from(255.0).unwrap(),
+            T::from(self[0]).unwrap() / c255,
+            T::from(self[1]).unwrap() / c255,
+            T::from(self[2]).unwrap() / c255,
             T::one(),
         )
     }
