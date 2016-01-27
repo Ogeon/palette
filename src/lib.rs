@@ -320,8 +320,8 @@ make_color! {
     }
 }
 
-///Common functionality for color spaces.
-pub trait ColorSpace {
+///A trait for clamping and checking if colors are within their ranges.
+pub trait Limited {
     ///Check if the color's components are within the expected ranges.
     fn is_valid(&self) -> bool;
 

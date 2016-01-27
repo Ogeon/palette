@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -55,7 +55,7 @@ impl<T: Float> Alpha<Lab<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Lab<T> {
+impl<T: Float> Limited for Lab<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.a >= -T::one() && self.a <= T::one() &&

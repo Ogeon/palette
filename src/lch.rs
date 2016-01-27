@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
+use {Color, Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
 pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
@@ -52,7 +52,7 @@ impl<T: Float> Alpha<Lch<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Lch<T> {
+impl<T: Float> Limited for Lch<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.chroma >= T::zero() && self.chroma <= T::from(1.41421356).unwrap() //should include all of L*a*b*, but will also overshoot...

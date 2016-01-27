@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
@@ -54,7 +54,7 @@ impl<T: Float> Alpha<Hsl<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Hsl<T> {
+impl<T: Float> Limited for Hsl<T> {
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
