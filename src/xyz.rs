@@ -2,11 +2,14 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
+use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
-///The CIE 1931 XYZ color space with an alpha component.
+///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
+pub type Xyza<T = f32> = Alpha<Xyz<T>, T>;
+
+///The CIE 1931 XYZ color space.
 ///
 ///XYZ links the perceived colors to their wavelengths and simply makes it
 ///possible to describe the way we see colors as numbers. It's often used when
@@ -28,29 +31,25 @@ pub struct Xyz<T: Float = f32> {
     ///Z is the scale of what can be seen as the blue stimulation. It goes
     ///from 0.0 to 1.0.
     pub z: T,
-
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
-    ///completely opaque.
-    pub alpha: T,
 }
 
 impl<T: Float> Xyz<T> {
     ///CIE XYZ.
-    pub fn xyz(x: T, y: T, z: T) -> Xyz<T> {
+    pub fn new(x: T, y: T, z: T) -> Xyz<T> {
         Xyz {
             x: x,
             y: y,
             z: z,
-            alpha: T::one(),
         }
     }
+}
 
+///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
+impl<T: Float> Alpha<Xyz<T>, T> {
     ///CIE XYZ and transparency.
-    pub fn xyza(x: T, y: T, z: T, alpha: T) -> Xyz<T> {
-        Xyz {
-            x: x,
-            y: y,
-            z: z,
+    pub fn new(x: T, y: T, z: T, alpha: T) -> Xyza<T> {
+        Alpha {
+            color: Xyz::new(x, y, z),
             alpha: alpha,
         }
     }
@@ -58,9 +57,9 @@ impl<T: Float> Xyz<T> {
 
 impl<T: Float> ColorSpace for Xyz<T> {
     fn is_valid(&self) -> bool {
-        self.x >= T::zero() && self.x <= T::one() && self.y >= T::zero() &&
-        self.y <= T::one() && self.z >= T::zero() && self.z <= T::one() &&
-        self.alpha >= T::zero() && self.alpha <= T::one()
+        self.x >= T::zero() && self.x <= T::one() &&
+        self.y >= T::zero() && self.y <= T::one() &&
+        self.z >= T::zero() && self.z <= T::one()
     }
 
     fn clamp(&self) -> Xyz<T> {
@@ -73,7 +72,6 @@ impl<T: Float> ColorSpace for Xyz<T> {
         self.x = clamp(self.x, T::zero(), T::one());
         self.y = clamp(self.y, T::zero(), T::one());
         self.z = clamp(self.z, T::zero(), T::one());
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
@@ -87,7 +85,6 @@ impl<T: Float> Mix for Xyz<T> {
             x: self.x + factor * (other.x - self.x),
             y: self.y + factor * (other.y - self.y),
             z: self.z + factor * (other.z - self.z),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
         }
     }
 }
@@ -100,14 +97,13 @@ impl<T: Float> Shade for Xyz<T> {
             x: self.x,
             y: self.y + amount,
             z: self.z,
-            alpha: self.alpha,
         }
     }
 }
 
 impl<T: Float> Default for Xyz<T> {
     fn default() -> Xyz<T> {
-        Xyz::xyz(T::zero(), T::zero(), T::zero())
+        Xyz::new(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -119,7 +115,6 @@ impl<T: Float> Add<Xyz<T>> for Xyz<T> {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
-            alpha: self.alpha + other.alpha,
         }
     }
 }
@@ -132,7 +127,6 @@ impl<T: Float> Add<T> for Xyz<T> {
             x: self.x + c,
             y: self.y + c,
             z: self.z + c,
-            alpha: self.alpha + c,
         }
     }
 }
@@ -145,7 +139,6 @@ impl<T: Float> Sub<Xyz<T>> for Xyz<T> {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
-            alpha: self.alpha - other.alpha,
         }
     }
 }
@@ -158,7 +151,6 @@ impl<T: Float> Sub<T> for Xyz<T> {
             x: self.x - c,
             y: self.y - c,
             z: self.z - c,
-            alpha: self.alpha - c,
         }
     }
 }
@@ -171,7 +163,6 @@ impl<T: Float> Mul<Xyz<T>> for Xyz<T> {
             x: self.x * other.x,
             y: self.y * other.y,
             z: self.z * other.z,
-            alpha: self.alpha * other.alpha,
         }
     }
 }
@@ -184,7 +175,6 @@ impl<T: Float> Mul<T> for Xyz<T> {
             x: self.x * c,
             y: self.y * c,
             z: self.z * c,
-            alpha: self.alpha * c,
         }
     }
 }
@@ -197,7 +187,6 @@ impl<T: Float> Div<Xyz<T>> for Xyz<T> {
             x: self.x / other.x,
             y: self.y / other.y,
             z: self.z / other.z,
-            alpha: self.alpha / other.alpha,
         }
     }
 }
@@ -210,12 +199,13 @@ impl<T: Float> Div<T> for Xyz<T> {
             x: self.x / c,
             y: self.y / c,
             z: self.z / c,
-            alpha: self.alpha / c,
         }
     }
 }
 
 from_color!(to Xyz from Rgb, Luma, Lab, Lch, Hsv, Hsl);
+
+alpha_from!(Xyz {Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Rgb<T>> for Xyz<T> {
     fn from(rgb: Rgb<T>) -> Xyz<T> {
@@ -223,7 +213,6 @@ impl<T: Float> From<Rgb<T>> for Xyz<T> {
             x: rgb.red * T::from(0.4124).unwrap() + rgb.green * T::from(0.3576).unwrap() + rgb.blue * T::from(0.1805).unwrap(),
             y: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() + rgb.blue * T::from(0.0722).unwrap(),
             z: rgb.red * T::from(0.0193).unwrap() + rgb.green * T::from(0.1192).unwrap() + rgb.blue * T::from(0.9505).unwrap(),
-            alpha: rgb.alpha,
         }
     }
 }
@@ -234,7 +223,6 @@ impl<T: Float> From<Luma<T>> for Xyz<T> {
             x: T::zero(),
             y: luma.luma,
             z: T::zero(),
-            alpha: luma.alpha,
         }
     }
 }
@@ -250,7 +238,6 @@ impl<T: Float> From<Lab<T>> for Xyz<T> {
             z: T::from(Z_N).unwrap() * f_inv((T::one() / T::from(116.0).unwrap()) *
                 (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) -
                 (T::one() / T::from(200.0).unwrap()) * lab.b * T::from(128.0).unwrap()),
-            alpha: lab.alpha,
         }
     }
 }
@@ -292,22 +279,22 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Xyz::from(Rgb::rgb(1.0, 0.0, 0.0));
-        let b = Xyz::xyz(0.41240, 0.21260, 0.01930);
+        let a = Xyz::from(Rgb::new(1.0, 0.0, 0.0));
+        let b = Xyz::new(0.41240, 0.21260, 0.01930);
         assert_approx_eq!(a, b, [x, y, z]);
     }
 
     #[test]
     fn green() {
-        let a = Xyz::from(Rgb::rgb(0.0, 1.0, 0.0));
-        let b = Xyz::xyz(0.35760, 0.71520, 0.11920);
+        let a = Xyz::from(Rgb::new(0.0, 1.0, 0.0));
+        let b = Xyz::new(0.35760, 0.71520, 0.11920);
         assert_approx_eq!(a, b, [x, y, z]);
     }
 
     #[test]
     fn blue() {
-        let a = Xyz::from(Rgb::rgb(0.0, 0.0, 1.0));
-        let b = Xyz::xyz(0.18050, 0.07220, 0.95050);
+        let a = Xyz::from(Rgb::new(0.0, 0.0, 1.0));
+        let b = Xyz::new(0.18050, 0.07220, 0.95050);
         assert_approx_eq!(a, b, [x, y, z]);
     }
 }

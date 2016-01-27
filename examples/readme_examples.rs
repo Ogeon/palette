@@ -5,7 +5,7 @@ extern crate num;
 use image::{RgbImage, GenericImage};
 use num::traits::Float;
 
-use palette::{Rgb, Gradient, Mix};
+use palette::{Rgba, Gradient, Mix};
 use palette::pixel::Srgb;
 
 mod color_spaces {
@@ -48,13 +48,13 @@ mod gradients {
 
     pub fn run() {
         let grad1 = Gradient::new(vec![
-            Rgb::rgb(1.0, 0.1, 0.1),
-            Rgb::rgb(0.1, 1.0, 1.0)
+            Rgb::new(1.0, 0.1, 0.1),
+            Rgb::new(0.1, 1.0, 1.0)
         ]);
 
         let grad2 = Gradient::new(vec![
-            Hsv::from(Rgb::rgb(1.0, 0.1, 0.1)),
-            Hsv::from(Rgb::rgb(0.1, 1.0, 1.0))
+            Hsv::from(Rgb::new(1.0, 0.1, 0.1)),
+            Hsv::from(Rgb::new(0.1, 1.0, 1.0))
         ]);
 
         display_gradients("examples/readme_gradients.png", grad1, grad2);
@@ -76,8 +76,8 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
 }
 
 fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where
-    Rgb<T>: From<A>,
-    Rgb<T>: From<B>,
+    Rgba<T>: From<A>,
+    Rgba<T>: From<B>,
 {
     let mut image = RgbImage::new(256, 64);
 

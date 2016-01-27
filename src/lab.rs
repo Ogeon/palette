@@ -2,11 +2,14 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
-///The CIE L*a*b* (CIELAB) color space with an alpha component.
+///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
+pub type Laba<T = f32> = Alpha<Lab<T>, T>;
+
+///The CIE L*a*b* (CIELAB) color space.
 ///
 ///CIE L*a*b* is a device independent color space which includes all
 ///perceivable colors. It's sometimes used to convert between other color
@@ -28,29 +31,25 @@ pub struct Lab<T: Float = f32> {
 
     ///b* goes from yellow at -1.0 to blue at 1.0.
     pub b: T,
-
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
-    ///completely opaque.
-    pub alpha: T,
 }
 
 impl<T: Float> Lab<T> {
     ///CIE L*a*b*.
-    pub fn lab(l: T, a: T, b: T) -> Lab<T> {
+    pub fn new(l: T, a: T, b: T) -> Lab<T> {
         Lab {
             l: l,
             a: a,
             b: b,
-            alpha: T::one(),
         }
     }
+}
 
+///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
+impl<T: Float> Alpha<Lab<T>, T> {
     ///CIE L*a*b* and transparency.
-    pub fn laba(l: T, a: T, b: T, alpha: T) -> Lab<T> {
-        Lab {
-            l: l,
-            a: a,
-            b: b,
+    pub fn new(l: T, a: T, b: T, alpha: T) -> Laba<T> {
+        Alpha {
+            color: Lab::new(l, a, b),
             alpha: alpha,
         }
     }
@@ -60,8 +59,7 @@ impl<T: Float> ColorSpace for Lab<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.a >= -T::one() && self.a <= T::one() &&
-        self.b >= -T::one() && self.b <= T::one() &&
-        self.alpha >= T::zero() && self.alpha <= T::one()
+        self.b >= -T::one() && self.b <= T::one()
     }
 
     fn clamp(&self) -> Lab<T> {
@@ -74,7 +72,6 @@ impl<T: Float> ColorSpace for Lab<T> {
         self.l = clamp(self.l, T::zero(), T::one());
         self.a = clamp(self.a, -T::one(), T::one());
         self.b = clamp(self.b, -T::one(), T::one());
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
@@ -88,7 +85,6 @@ impl<T: Float> Mix for Lab<T> {
             l: self.l + factor * (other.l - self.l),
             a: self.a + factor * (other.a - self.a),
             b: self.b + factor * (other.b - self.b),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
         }
     }
 }
@@ -101,7 +97,6 @@ impl<T: Float> Shade for Lab<T> {
             l: self.l + amount,
             a: self.a,
             b: self.b,
-            alpha: self.alpha,
         }
     }
 }
@@ -120,7 +115,7 @@ impl<T: Float> GetHue for Lab<T> {
 
 impl<T: Float> Default for Lab<T> {
     fn default() -> Lab<T> {
-        Lab::lab(T::zero(), T::zero(), T::zero())
+        Lab::new(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -132,7 +127,6 @@ impl<T: Float> Add<Lab<T>> for Lab<T> {
             l: self.l + other.l,
             a: self.a + other.a,
             b: self.b + other.b,
-            alpha: self.alpha + other.alpha,
         }
     }
 }
@@ -145,7 +139,6 @@ impl<T: Float> Add<T> for Lab<T> {
             l: self.l + c,
             a: self.a + c,
             b: self.b + c,
-            alpha: self.alpha + c,
         }
     }
 }
@@ -158,7 +151,6 @@ impl<T: Float> Sub<Lab<T>> for Lab<T> {
             l: self.l - other.l,
             a: self.a - other.a,
             b: self.b - other.b,
-            alpha: self.alpha - other.alpha,
         }
     }
 }
@@ -171,7 +163,6 @@ impl<T: Float> Sub<T> for Lab<T> {
             l: self.l - c,
             a: self.a - c,
             b: self.b - c,
-            alpha: self.alpha - c,
         }
     }
 }
@@ -184,7 +175,6 @@ impl<T: Float> Mul<Lab<T>> for Lab<T> {
             l: self.l * other.l,
             a: self.a * other.a,
             b: self.b * other.b,
-            alpha: self.alpha * other.alpha,
         }
     }
 }
@@ -197,7 +187,6 @@ impl<T: Float> Mul<T> for Lab<T> {
             l: self.l * c,
             a: self.a * c,
             b: self.b * c,
-            alpha: self.alpha * c,
         }
     }
 }
@@ -210,7 +199,6 @@ impl<T: Float> Div<Lab<T>> for Lab<T> {
             l: self.l / other.l,
             a: self.a / other.a,
             b: self.b / other.b,
-            alpha: self.alpha / other.alpha,
         }
     }
 }
@@ -223,12 +211,13 @@ impl<T: Float> Div<T> for Lab<T> {
             l: self.l / c,
             a: self.a / c,
             b: self.b / c,
-            alpha: self.alpha / c,
         }
     }
 }
 
 from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
+
+alpha_from!(Lab {Rgb, Xyz, Luma, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Xyz<T>> for Lab<T> {
     fn from(xyz: Xyz<T>) -> Lab<T> {
@@ -241,7 +230,6 @@ impl<T: Float> From<Xyz<T>> for Lab<T> {
             b: (T::from(200.0).unwrap() *
                 (f(xyz.y / T::from(Y_N).unwrap()) - f(xyz.z / T::from(Z_N).unwrap()))) /
                T::from(128.0).unwrap(),
-            alpha: xyz.alpha,
         }
     }
 }
@@ -264,7 +252,6 @@ impl<T: Float> From<Lch<T>> for Lab<T> {
             l: lch.l,
             a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
             b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
-            alpha: lch.alpha,
         }
     }
 }
@@ -302,22 +289,22 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Lab::from(Rgb::rgb(1.0, 0.0, 0.0));
-        let b = Lab::lab(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
+        let a = Lab::from(Rgb::new(1.0, 0.0, 0.0));
+        let b = Lab::new(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(Rgb::rgb(0.0, 1.0, 0.0));
-        let b = Lab::lab(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
+        let a = Lab::from(Rgb::new(0.0, 1.0, 0.0));
+        let b = Lab::new(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(Rgb::rgb(0.0, 0.0, 1.0));
-        let b = Lab::lab(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
+        let a = Lab::from(Rgb::new(0.0, 0.0, 1.0));
+        let b = Lab::new(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 }

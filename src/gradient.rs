@@ -314,7 +314,7 @@ mod test {
 
     #[test]
     fn simple_slice() {
-        let g1 = Gradient::new(vec![Rgb::rgb(1.0, 0.0, 0.0), Rgb::rgb(0.0, 0.0, 1.0)]);
+        let g1 = Gradient::new(vec![Rgb::new(1.0, 0.0, 0.0), Rgb::new(0.0, 0.0, 1.0)]);
         let g2 = g1.slice(..0.5);
 
         let v1: Vec<_> = g1.take(10).take(5).collect();

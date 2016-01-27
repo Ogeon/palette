@@ -2,10 +2,12 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
+use {Color, Alpha, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
-///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html), with an alpha
-///component.
+///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
+pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
+
+///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html).
 ///
 ///L*C*h° shares its range and perceptual uniformity with L*a*b*, but it's a
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
@@ -26,29 +28,25 @@ pub struct Lch<T: Float = f32> {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: LabHue<T>,
-
-    ///The transparency of the color. 0.0 is completely transparent and 1.0 is
-    ///completely opaque.
-    pub alpha: T,
 }
 
 impl<T: Float> Lch<T> {
     ///CIE L*C*h°.
-    pub fn lch(l: T, chroma: T, hue: LabHue<T>) -> Lch<T> {
+    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> Lch<T> {
         Lch {
             l: l,
             chroma: chroma,
             hue: hue,
-            alpha: T::one(),
         }
     }
+}
 
+///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
+impl<T: Float> Alpha<Lch<T>, T> {
     ///CIE L*C*h° and transparency.
-    pub fn lcha(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lch<T> {
-        Lch {
-            l: l,
-            chroma: chroma,
-            hue: hue,
+    pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<T> {
+        Alpha {
+            color: Lch::new(l, chroma, hue),
             alpha: alpha,
         }
     }
@@ -57,8 +55,7 @@ impl<T: Float> Lch<T> {
 impl<T: Float> ColorSpace for Lch<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
-        self.chroma >= T::zero() && self.chroma <= T::from(1.41421356).unwrap() && //should include all of L*a*b*, but will also overshoot...
-        self.alpha >= T::zero() && self.alpha <= T::one()
+        self.chroma >= T::zero() && self.chroma <= T::from(1.41421356).unwrap() //should include all of L*a*b*, but will also overshoot...
     }
 
     fn clamp(&self) -> Lch<T> {
@@ -70,7 +67,6 @@ impl<T: Float> ColorSpace for Lch<T> {
     fn clamp_self(&mut self) {
         self.l = clamp(self.l, T::zero(), T::one());
         self.chroma = clamp(self.chroma, T::zero(), T::from(1.41421356).unwrap()); //should include all of L*a*b*, but will also overshoot...
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 
@@ -84,7 +80,6 @@ impl<T: Float> Mix for Lch<T> {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
             hue: self.hue + factor * hue_diff,
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
         }
     }
 }
@@ -97,7 +92,6 @@ impl<T: Float> Shade for Lch<T> {
             l: self.l + amount,
             chroma: self.chroma,
             hue: self.hue,
-            alpha: self.alpha,
         }
     }
 }
@@ -120,7 +114,6 @@ impl<T: Float> Hue for Lch<T> {
             l: self.l,
             chroma: self.chroma,
             hue: hue,
-            alpha: self.alpha,
         }
     }
 
@@ -129,7 +122,6 @@ impl<T: Float> Hue for Lch<T> {
             l: self.l,
             chroma: self.chroma,
             hue: self.hue + amount,
-            alpha: self.alpha,
         }
     }
 }
@@ -142,14 +134,13 @@ impl<T: Float> Saturate for Lch<T> {
             l: self.l,
             chroma: self.chroma * (T::one() + factor),
             hue: self.hue,
-            alpha: self.alpha,
         }
     }
 }
 
 impl<T: Float> Default for Lch<T> {
     fn default() -> Lch<T> {
-        Lch::lch(T::zero(), T::zero(), LabHue::from(T::zero()))
+        Lch::new(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
@@ -161,7 +152,6 @@ impl<T: Float> Add<Lch<T>> for Lch<T> {
             l: self.l + other.l,
             chroma: self.chroma + other.chroma,
             hue: self.hue + other.hue,
-            alpha: self.alpha + other.alpha,
         }
     }
 }
@@ -174,7 +164,6 @@ impl<T: Float> Add<T> for Lch<T> {
             l: self.l + c,
             chroma: self.chroma + c,
             hue: self.hue + c,
-            alpha: self.alpha + c,
         }
     }
 }
@@ -187,7 +176,6 @@ impl<T: Float> Sub<Lch<T>> for Lch<T> {
             l: self.l - other.l,
             chroma: self.chroma - other.chroma,
             hue: self.hue - other.hue,
-            alpha: self.alpha - other.alpha,
         }
     }
 }
@@ -200,12 +188,13 @@ impl<T: Float> Sub<T> for Lch<T> {
             l: self.l - c,
             chroma: self.chroma - c,
             hue: self.hue - c,
-            alpha: self.alpha - c,
         }
     }
 }
 
 from_color!(to Lch from Rgb, Luma, Xyz, Lab, Hsv, Hsl);
+
+alpha_from!(Lch {Rgb, Xyz, Luma, Lab, Hsv, Hsl, Color});
 
 impl<T: Float> From<Lab<T>> for Lch<T> {
     fn from(lab: Lab<T>) -> Lch<T> {
@@ -213,7 +202,6 @@ impl<T: Float> From<Lab<T>> for Lch<T> {
             l: lab.l,
             chroma: (lab.a * lab.a + lab.b * lab.b).sqrt(),
             hue: lab.get_hue().unwrap_or(LabHue::from(T::zero())),
-            alpha: lab.alpha,
         }
     }
 }

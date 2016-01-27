@@ -9,30 +9,30 @@ use image::{RgbImage, GenericImage};
 fn main() {
     //A gradient of evenly spaced colors
     let grad1 = Gradient::new(vec![
-        Rgb::rgb(1.0, 0.1, 0.1),
-        Rgb::rgb(0.1, 0.1, 1.0),
-        Rgb::rgb(0.1, 1.0, 0.1)
+        Rgb::new(1.0, 0.1, 0.1),
+        Rgb::new(0.1, 0.1, 1.0),
+        Rgb::new(0.1, 1.0, 0.1)
     ]);
 
     //The same colors as in grad1, but with the blue point shifted down
     let grad2 = Gradient::with_domain(vec![
-        (0.0, Rgb::rgb(1.0, 0.1, 0.1)),
-        (0.25, Rgb::rgb(0.1, 0.1, 1.0)),
-        (1.0, Rgb::rgb(0.1, 1.0, 0.1))
+        (0.0, Rgb::new(1.0, 0.1, 0.1)),
+        (0.25, Rgb::new(0.1, 0.1, 1.0)),
+        (1.0, Rgb::new(0.1, 1.0, 0.1))
     ]);
 
     //The same colors and offsets as in grad1, but in a color space where the hue is a component
     let grad3 = Gradient::new(vec![
-        Lch::from(Rgb::rgb(1.0, 0.1, 0.1)),
-        Lch::from(Rgb::rgb(0.1, 0.1, 1.0)),
-        Lch::from(Rgb::rgb(0.1, 1.0, 0.1))
+        Lch::from(Rgb::new(1.0, 0.1, 0.1)),
+        Lch::from(Rgb::new(0.1, 0.1, 1.0)),
+        Lch::from(Rgb::new(0.1, 1.0, 0.1))
     ]);
 
     //The same colors and and color space as in grad3, but with the blue point shifted down
     let grad4 = Gradient::with_domain(vec![
-        (0.0, Lch::from(Rgb::rgb(1.0, 0.1, 0.1))),
-        (0.25, Lch::from(Rgb::rgb(0.1, 0.1, 1.0))),
-        (1.0, Lch::from(Rgb::rgb(0.1, 1.0, 0.1)))
+        (0.0, Lch::from(Rgb::new(1.0, 0.1, 0.1))),
+        (0.25, Lch::from(Rgb::new(0.1, 0.1, 1.0))),
+        (1.0, Lch::from(Rgb::new(0.1, 1.0, 0.1)))
     ]);
 
     let mut image = RgbImage::new(256, 128);

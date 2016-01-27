@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Color, Rgb, clamp};
+use {Color, Alpha, Rgb, Rgba, clamp};
 
 use pixel::RgbPixel;
 
@@ -85,7 +85,7 @@ impl<T: Float> Srgb<T> {
     }
 
     ///Convert linear color components to sRGB encoding.
-    pub fn from_linear<C: Into<Rgb<T>>>(color: C) -> Srgb<T> {
+    pub fn from_linear<C: Into<Rgba<T>>>(color: C) -> Srgb<T> {
         let rgb = color.into();
         Srgb {
             red: to_srgb(rgb.red),
@@ -96,24 +96,32 @@ impl<T: Float> Srgb<T> {
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgb<T> {
-        Rgb {
-            red: from_srgb(self.red),
-            green: from_srgb(self.green),
-            blue: from_srgb(self.blue),
+    pub fn to_linear(&self) -> Rgba<T> {
+        Alpha {
+            color: Rgb {
+                red: from_srgb(self.red),
+                green: from_srgb(self.green),
+                blue: from_srgb(self.blue),
+            },
             alpha: self.alpha,
         }
     }
 
     ///Shortcut to convert a linear color to an sRGB encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgb<T>>, P: RgbPixel<T>>(color: C) -> P {
+    pub fn linear_to_pixel<C: Into<Rgba<T>>, P: RgbPixel<T>>(color: C) -> P {
         Srgb::from_linear(color).to_pixel()
     }
 }
 
 impl<T: Float> From<Rgb<T>> for Srgb<T> {
     fn from(rgb: Rgb<T>) -> Srgb<T> {
-        Srgb::from_linear(rgb)
+        Rgba::from(rgb).into()
+    }
+}
+
+impl<T: Float> From<Rgba<T>> for Srgb<T> {
+    fn from(rgba: Rgba<T>) -> Srgb<T> {
+        Srgb::from_linear(rgba)
     }
 }
 
