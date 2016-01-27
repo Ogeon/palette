@@ -55,7 +55,7 @@ impl<T: Float> Alpha<Lch<T>, T> {
 impl<T: Float> Limited for Lch<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
-        self.chroma >= T::zero() && self.chroma <= T::from(1.41421356).unwrap() //should include all of L*a*b*, but will also overshoot...
+        self.chroma >= T::zero()
     }
 
     fn clamp(&self) -> Lch<T> {
@@ -66,7 +66,7 @@ impl<T: Float> Limited for Lch<T> {
 
     fn clamp_self(&mut self) {
         self.l = clamp(self.l, T::zero(), T::one());
-        self.chroma = clamp(self.chroma, T::zero(), T::from(1.41421356).unwrap()); //should include all of L*a*b*, but will also overshoot...
+        self.chroma = self.chroma.max(T::zero())
     }
 }
 

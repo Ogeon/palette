@@ -22,14 +22,14 @@ pub type Xyza<T = f32> = Alpha<Xyz<T>, T>;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Xyz<T: Float = f32> {
     ///X is the scale of what can be seen as a response curve for the cone
-    ///cells in the human eye. It goes from 0.0 to 1.0.
+    ///cells in the human eye. It goes from 0.0 to 0.95047.
     pub x: T,
 
     ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
     pub y: T,
 
     ///Z is the scale of what can be seen as the blue stimulation. It goes
-    ///from 0.0 to 1.0.
+    ///from 0.0 to 1.08883.
     pub z: T,
 }
 
@@ -57,9 +57,9 @@ impl<T: Float> Alpha<Xyz<T>, T> {
 
 impl<T: Float> Limited for Xyz<T> {
     fn is_valid(&self) -> bool {
-        self.x >= T::zero() && self.x <= T::one() &&
-        self.y >= T::zero() && self.y <= T::one() &&
-        self.z >= T::zero() && self.z <= T::one()
+        self.x >= T::zero() && self.x <= T::from(X_N).unwrap() &&
+        self.y >= T::zero() && self.y <= T::from(Y_N).unwrap() &&
+        self.z >= T::zero() && self.z <= T::from(Z_N).unwrap()
     }
 
     fn clamp(&self) -> Xyz<T> {
@@ -69,9 +69,9 @@ impl<T: Float> Limited for Xyz<T> {
     }
 
     fn clamp_self(&mut self) {
-        self.x = clamp(self.x, T::zero(), T::one());
-        self.y = clamp(self.y, T::zero(), T::one());
-        self.z = clamp(self.z, T::zero(), T::one());
+        self.x = clamp(self.x, T::zero(), T::from(X_N).unwrap());
+        self.y = clamp(self.y, T::zero(), T::from(Y_N).unwrap());
+        self.z = clamp(self.z, T::zero(), T::from(Z_N).unwrap());
     }
 }
 
