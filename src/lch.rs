@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, ColorSpace, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
+use {Color, Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
 pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
@@ -52,10 +52,10 @@ impl<T: Float> Alpha<Lch<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Lch<T> {
+impl<T: Float> Limited for Lch<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
-        self.chroma >= T::zero() && self.chroma <= T::from(1.41421356).unwrap() //should include all of L*a*b*, but will also overshoot...
+        self.chroma >= T::zero()
     }
 
     fn clamp(&self) -> Lch<T> {
@@ -66,7 +66,7 @@ impl<T: Float> ColorSpace for Lch<T> {
 
     fn clamp_self(&mut self) {
         self.l = clamp(self.l, T::zero(), T::one());
-        self.chroma = clamp(self.chroma, T::zero(), T::from(1.41421356).unwrap()); //should include all of L*a*b*, but will also overshoot...
+        self.chroma = self.chroma.max(T::zero())
     }
 }
 
@@ -233,5 +233,26 @@ impl<T: Float> From<Hsv<T>> for Lch<T> {
 impl<T: Float> From<Hsl<T>> for Lch<T> {
     fn from(hsl: Hsl<T>) -> Lch<T> {
         Lab::from(hsl).into()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use Lch;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Lch;
+            limited {
+                l: 0.0 => 1.0
+            }
+            limited_min {
+                chroma: 0.0 => 2.0
+            }
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
     }
 }

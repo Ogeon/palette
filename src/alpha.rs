@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut, Add, Sub, Mul, Div};
 
 use num::Float;
 
-use {Mix, Shade, GetHue, Hue, Saturate};
+use {Mix, Shade, GetHue, Hue, Saturate, Limited, clamp};
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -83,6 +83,24 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
             color: self.color.saturate(factor),
             alpha: self.alpha,
         }
+    }
+}
+
+impl<C: Limited, T: Float> Limited for Alpha<C, T> {
+    fn is_valid(&self) -> bool {
+        self.color.is_valid() && self.alpha >= T::zero() && self.alpha <= T::one()
+    }
+
+    fn clamp(&self) -> Alpha<C, T> {
+        Alpha {
+            color: self.color.clamp(),
+            alpha: clamp(self.alpha, T::zero(), T::one()),
+        }
+    }
+
+    fn clamp_self(&mut self) {
+        self.color.clamp_self();
+        self.alpha = clamp(self.alpha, T::zero(), T::one());
     }
 }
 

@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsv, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
@@ -54,7 +54,7 @@ impl<T: Float> Alpha<Hsl<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Hsl<T> {
+impl<T: Float> Limited for Hsl<T> {
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
@@ -290,7 +290,7 @@ impl<T: Float> From<Hsv<T>> for Hsl<T> {
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use ::{Rgb, Hsv};
+    use {Rgb, Hsv};
 
     #[test]
     fn red() {
@@ -340,5 +340,20 @@ mod test {
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
+    }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Hsl;
+            limited {
+                saturation: 0.0 => 1.0,
+                lightness: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
     }
 }

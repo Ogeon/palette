@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Luma, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, RgbHue, clamp};
+use {Color, Alpha, Luma, Xyz, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
@@ -124,7 +124,7 @@ impl<T: Float> Alpha<Rgb<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Rgb<T> {
+impl<T: Float> Limited for Rgb<T> {
     fn is_valid(&self) -> bool {
         self.red >= T::zero() && self.red <= T::one() &&
         self.green >= T::zero() && self.green <= T::one() &&
@@ -403,5 +403,24 @@ impl<T: Float> From<Srgb<T>> for Alpha<Rgb<T>, T> {
 impl<T: Float> From<GammaRgb<T>> for Alpha<Rgb<T>, T> {
     fn from(gamma_rgb: GammaRgb<T>) -> Alpha<Rgb<T>, T> {
         gamma_rgb.to_linear()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use Rgb;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Rgb;
+            limited {
+                red: 0.0 => 1.0,
+                green: 0.0 => 1.0,
+                blue: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
     }
 }

@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsl, ColorSpace, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
@@ -53,7 +53,7 @@ impl<T: Float> Alpha<Hsv<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Hsv<T> {
+impl<T: Float> Limited for Hsv<T> {
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.value >= T::zero() && self.value <= T::one()
@@ -336,5 +336,20 @@ mod test {
 
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
+    }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Hsv;
+            limited {
+                saturation: 0.0 => 1.0,
+                value: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Xyz, Lab, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, clamp};
+use {Color, Alpha, Rgb, Xyz, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp};
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
@@ -55,7 +55,7 @@ impl<T: Float> Alpha<Luma<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Luma<T> {
+impl<T: Float> Limited for Luma<T> {
     fn is_valid(&self) -> bool {
         self.luma >= T::zero() && self.luma <= T::one()
     }
@@ -220,5 +220,22 @@ impl<T: Float> From<Hsv<T>> for Luma<T> {
 impl<T: Float> From<Hsl<T>> for Luma<T> {
     fn from(hsl: Hsl<T>) -> Luma<T> {
         Rgb::from(hsl).into()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use Luma;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Luma;
+            limited {
+                luma: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
     }
 }

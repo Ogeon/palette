@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, ColorSpace, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -55,7 +55,7 @@ impl<T: Float> Alpha<Lab<T>, T> {
     }
 }
 
-impl<T: Float> ColorSpace for Lab<T> {
+impl<T: Float> Limited for Lab<T> {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.a >= -T::one() && self.a <= T::one() &&
@@ -306,5 +306,19 @@ mod test {
         let a = Lab::from(Rgb::new(0.0, 0.0, 1.0));
         let b = Lab::new(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
+    }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Lab;
+            limited {
+                l: 0.0 => 1.0,
+                a: -1.0 => 1.0,
+                b: -1.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
     }
 }
