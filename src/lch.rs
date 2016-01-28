@@ -235,3 +235,24 @@ impl<T: Float> From<Hsl<T>> for Lch<T> {
         Lab::from(hsl).into()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use Lch;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Lch;
+            limited {
+                l: 0.0 => 1.0
+            }
+            limited_min {
+                chroma: 0.0 => 2.0
+            }
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
+    }
+}

@@ -290,7 +290,7 @@ impl<T: Float> From<Hsv<T>> for Hsl<T> {
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use ::{Rgb, Hsv};
+    use {Rgb, Hsv};
 
     #[test]
     fn red() {
@@ -340,5 +340,20 @@ mod test {
 
         assert_approx_eq!(a, b, [hue, saturation, lightness]);
         assert_approx_eq!(a, c, [hue, saturation, lightness]);
+    }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Hsl;
+            limited {
+                saturation: 0.0 => 1.0,
+                lightness: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
     }
 }

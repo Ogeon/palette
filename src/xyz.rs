@@ -275,7 +275,8 @@ fn f_inv<T: Float>(t: T) -> T {
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use ::Rgb;
+    use Rgb;
+    use tristimulus::{X_N, Y_N, Z_N};
 
     #[test]
     fn red() {
@@ -296,5 +297,19 @@ mod test {
         let a = Xyz::from(Rgb::new(0.0, 0.0, 1.0));
         let b = Xyz::new(0.18050, 0.07220, 0.95050);
         assert_approx_eq!(a, b, [x, y, z]);
+    }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Xyz;
+            limited {
+                x: 0.0 => X_N,
+                y: 0.0 => Y_N,
+                z: 0.0 => Z_N
+            }
+            limited_min {}
+            unlimited {}
+        }
     }
 }

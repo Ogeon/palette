@@ -307,4 +307,18 @@ mod test {
         let b = Lab::new(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Lab;
+            limited {
+                l: 0.0 => 1.0,
+                a: -1.0 => 1.0,
+                b: -1.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
+    }
 }

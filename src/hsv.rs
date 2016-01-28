@@ -337,4 +337,19 @@ mod test {
         assert_approx_eq!(a, b, [hue, saturation, value]);
         assert_approx_eq!(a, c, [hue, saturation, value]);
     }
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Hsv;
+            limited {
+                saturation: 0.0 => 1.0,
+                value: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {
+                hue: -360.0 => 360.0
+            }
+        }
+    }
 }

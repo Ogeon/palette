@@ -126,7 +126,7 @@ fn normalize_angle<T: Float>(mut deg: T) -> T {
     }
 
     while deg <= -T::from(180.0).unwrap() {
-        deg = deg - T::from(360.0).unwrap();
+        deg = deg + T::from(360.0).unwrap();
     }
 
     deg

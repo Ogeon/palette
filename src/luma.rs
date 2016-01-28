@@ -222,3 +222,20 @@ impl<T: Float> From<Hsl<T>> for Luma<T> {
         Rgb::from(hsl).into()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use Luma;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Luma;
+            limited {
+                luma: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
+    }
+}

@@ -126,6 +126,152 @@ macro_rules! assert_approx_eq {
     })
 }
 
+//Helper macro for checking ranges and clamping.
+#[cfg(test)]
+macro_rules! assert_ranges {
+    (@make_tuple $first:pat, $next:ident,) => (($first, $next));
+
+    (@make_tuple $first:pat, $next:ident, $($rest:ident,)*) => (
+        assert_ranges!(@make_tuple ($first, $next), $($rest,)*)
+    );
+
+    (
+        $ty:ident;
+        limited {$($limited:ident: $limited_from:expr => $limited_to:expr),+}
+        limited_min {$($limited_min:ident: $limited_min_from:expr => $limited_min_to:expr),*}
+        unlimited {$($unlimited:ident: $unlimited_from:expr => $unlimited_to:expr),*}
+    ) => (
+        {
+            use std::iter::repeat;
+            use Limited;
+
+            {
+                print!("checking below limits ... ");
+                $(
+                    let from = $limited_from;
+                    let to = $limited_to;
+                    let diff = to - from;
+                    let $limited = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                )+
+
+                $(
+                    let from = $limited_min_from;
+                    let to = $limited_min_to;
+                    let diff = to - from;
+                    let $limited_min = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                )*
+
+                $(
+                    let from = $unlimited_from;
+                    let to = $unlimited_to;
+                    let diff = to - from;
+                    let $unlimited = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                )*
+
+                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                    let c = $ty::<f64> {
+                        $($limited: $limited.into(),)+
+                        $($limited_min: $limited_min.into(),)*
+                        $($unlimited: $unlimited.into(),)*
+                    };
+                    let clamped = c.clamp();
+                    let expected = $ty {
+                        $($limited: $limited_from.into(),)+
+                        $($limited_min: $limited_min_from.into(),)*
+                        $($unlimited: $unlimited.into(),)*
+                    };
+
+                    assert!(!c.is_valid());
+                    assert_eq!(clamped, expected);
+                }
+
+                println!("ok")
+            }
+
+            {
+                print!("checking within limits ... ");
+                $(
+                    let from = $limited_from;
+                    let to = $limited_to;
+                    let diff = to - from;
+                    let $limited = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                )+
+
+                $(
+                    let from = $limited_min_from;
+                    let to = $limited_min_to;
+                    let diff = to - from;
+                    let $limited_min = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                )*
+
+                $(
+                    let from = $unlimited_from;
+                    let to = $unlimited_to;
+                    let diff = to - from;
+                    let $unlimited = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                )*
+
+                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                    let c = $ty::<f64> {
+                        $($limited: $limited.into(),)+
+                        $($limited_min: $limited_min.into(),)*
+                        $($unlimited: $unlimited.into(),)*
+                    };
+                    let clamped = c.clamp();
+
+                    assert!(c.is_valid());
+                    assert_eq!(clamped, c);
+                }
+
+                println!("ok")
+            }
+
+            {
+                print!("checking above limits ... ");
+                $(
+                    let from = $limited_from;
+                    let to = $limited_to;
+                    let diff = to - from;
+                    let $limited = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                )+
+
+                $(
+                    let from = $limited_min_from;
+                    let to = $limited_min_to;
+                    let diff = to - from;
+                    let $limited_min = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                )*
+
+                $(
+                    let from = $unlimited_from;
+                    let to = $unlimited_to;
+                    let diff = to - from;
+                    let $unlimited = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                )*
+
+                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                    let c = $ty::<f64> {
+                        $($limited: $limited.into(),)+
+                        $($limited_min: $limited_min.into(),)*
+                        $($unlimited: $unlimited.into(),)*
+                    };
+                    let clamped = c.clamp();
+                    let expected = $ty {
+                        $($limited: $limited_to.into(),)+
+                        $($limited_min: $limited_min.into(),)*
+                        $($unlimited: $unlimited.into(),)*
+                    };
+
+                    assert!(!c.is_valid());
+                    assert_eq!(clamped, expected);
+                }
+
+                println!("ok")
+            }
+        }
+    );
+}
+
 pub mod gradient;
 pub mod pixel;
 

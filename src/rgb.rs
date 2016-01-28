@@ -405,3 +405,22 @@ impl<T: Float> From<GammaRgb<T>> for Alpha<Rgb<T>, T> {
         gamma_rgb.to_linear()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use Rgb;
+
+    #[test]
+    fn ranges() {
+        assert_ranges!{
+            Rgb;
+            limited {
+                red: 0.0 => 1.0,
+                green: 0.0 => 1.0,
+                blue: 0.0 => 1.0
+            }
+            limited_min {}
+            unlimited {}
+        }
+    }
+}
