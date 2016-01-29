@@ -325,7 +325,7 @@ impl<T: Float> From<Lch<T>> for Rgb<T> {
 impl<T: Float> From<Hsv<T>> for Rgb<T> {
     fn from(hsv: Hsv<T>) -> Rgb<T> {
         let c = hsv.value * hsv.saturation;
-        let h = ((hsv.hue.to_float() + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) / T::from(60.0).unwrap();
+        let h = hsv.hue.to_positive_degrees() / T::from(60.0).unwrap();
         let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
         let m = hsv.value - c;
 
@@ -355,7 +355,7 @@ impl<T: Float> From<Hsv<T>> for Rgb<T> {
 impl<T: Float> From<Hsl<T>> for Rgb<T> {
     fn from(hsl: Hsl<T>) -> Rgb<T> {
         let c = (T::one() - (T::from(2.0).unwrap() * hsl.lightness - T::one()).abs()) * hsl.saturation;
-        let h = ((hsl.hue.to_float() + T::from(360.0).unwrap()) % T::from(360.0).unwrap()) / T::from(60.0).unwrap();
+        let h = hsl.hue.to_positive_degrees() / T::from(60.0).unwrap();
         let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
         let m = hsl.lightness - T::from(0.5).unwrap() * c;
 

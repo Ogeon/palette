@@ -77,7 +77,7 @@ impl<T: Float> Mix for Hsl<T> {
 
     fn mix(&self, other: &Hsl<T>, factor: T) -> Hsl<T> {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_float();
+        let hue_diff: T = (other.hue - self.hue).to_degrees();
 
         Hsl {
             hue: self.hue + factor * hue_diff,

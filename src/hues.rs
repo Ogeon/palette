@@ -9,7 +9,7 @@ macro_rules! make_hues {
         $(#[$doc])+
         ///
         ///The hue is a circular type, where `0` and `360` is the same, and
-        ///it's normalized to `(-180, +180]` when it's converted to a linear
+        ///it's normalized to `(-180, 180]` when it's converted to a linear
         ///number (like `f32`). This makes many calculations easier, but may
         ///also have some surprising effects if it's expected to act as a
         ///linear number.
@@ -22,14 +22,24 @@ macro_rules! make_hues {
                 $name(radians * T::from(180.0).unwrap() / T::from(PI).unwrap())
             }
 
-            ///Convert the hue to radians.
+            ///Get the hue as degrees, in the range `(-180, 180]`.
+            pub fn to_degrees(self) -> T {
+                normalize_angle(self.0)
+            }
+
+            ///Convert the hue to radians, in the range `(-π, π]`.
             pub fn to_radians(self) -> T {
                 normalize_angle(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
             }
 
-            ///Returns the saved Hue value
-            pub fn to_float(self) -> T {
-                normalize_angle(self.0)
+            ///Convert the hue to positive degrees, in the range `[0, 360)`.
+            pub fn to_positive_degrees(self) -> T {
+                normalize_angle_positive(self.0)
+            }
+
+            ///Convert the hue to positive radians, in the range `[0, 2π)`.
+            pub fn to_positive_radians(self) -> T {
+                normalize_angle_positive(self.0) * T::from(PI).unwrap() / T::from(180.0).unwrap()
             }
         }
 
@@ -41,13 +51,13 @@ macro_rules! make_hues {
 
         impl Into<f64> for $name<f64> {
             fn into(self) -> f64 {
-                normalize_angle(self.0) as f64
+                normalize_angle(self.0)
             }
         }
 
         impl Into<f32> for $name<f32> {
             fn into(self) -> f32 {
-                normalize_angle(self.0) as f32
+                normalize_angle(self.0)
             }
         }
         impl Into<f32> for $name<f64> {
@@ -58,15 +68,15 @@ macro_rules! make_hues {
 
         impl<T:Float> PartialEq for $name<T> {
             fn eq(&self, other: &$name<T>) -> bool {
-                let hue_s: T = (*self).to_float();
-                let hue_o: T = (*other).to_float();
+                let hue_s: T = (*self).to_degrees();
+                let hue_o: T = (*other).to_degrees();
                 hue_s.eq(&hue_o)
             }
         }
 
         impl<T:Float> PartialEq<T> for $name<T> {
             fn eq(&self, other: &T) -> bool {
-                let hue: T = (*self).to_float();
+                let hue: T = (*self).to_degrees();
                 hue.eq(&normalize_angle(*other))
             }
         }
@@ -121,12 +131,27 @@ make_hues! {
 }
 
 fn normalize_angle<T: Float>(mut deg: T) -> T {
-    while deg > T::from(180.0).unwrap() {
-        deg = deg - T::from(360.0).unwrap();
+    let c180 = T::from(180.0).unwrap();
+    let c360 = T::from(360.0).unwrap();
+    while deg > c180 {
+        deg = deg - c360;
     }
 
-    while deg <= -T::from(180.0).unwrap() {
-        deg = deg + T::from(360.0).unwrap();
+    while deg <= -c180 {
+        deg = deg + c360;
+    }
+
+    deg
+}
+
+fn normalize_angle_positive<T: Float>(mut deg: T) -> T {
+    let c360 = T::from(360.0).unwrap();
+    while deg >= c360 {
+        deg = deg - c360;
+    }
+
+    while deg < T::zero() {
+        deg = deg + c360;
     }
 
     deg
