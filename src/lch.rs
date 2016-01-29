@@ -75,7 +75,7 @@ impl<T: Float> Mix for Lch<T> {
     
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_float();
+        let hue_diff: T = (other.hue - self.hue).to_degrees();
         Lch {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
