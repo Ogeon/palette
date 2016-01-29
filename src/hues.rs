@@ -156,3 +156,23 @@ fn normalize_angle_positive<T: Float>(mut deg: T) -> T {
 
     deg
 }
+
+#[cfg(test)]
+mod test {
+    use RgbHue;
+
+    #[test]
+    fn float_conversion() {
+        for i in -180..180 {
+            let hue = RgbHue::from(4.0 * i as f32);
+
+            let degs = hue.to_degrees();
+            assert!(degs > -180.0 && degs <= 180.0);
+
+            let pos_degs = hue.to_positive_degrees();
+            assert!(pos_degs >= 0.0 && pos_degs < 360.0);
+
+            assert_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
+        }
+    }
+}
