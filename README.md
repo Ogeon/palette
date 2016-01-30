@@ -130,9 +130,14 @@ hue:
 This library is only meant for color manipulation and conversion. It's not...
 
  * ...an image manipulation library. It will only handle colors, and not whole images.
- * ...an optimal pixel format. The colors are represented by linear 32-bit floats with a mandatory alpha component. It's not a compact format.
+ * ...an optimal pixel storage format. The colors are represented by linear floats, which is not a compact format and not meant to be displayed.
 
-You will have to look elsewhere for those features.
+You will have to look elsewhere for those particular features. There are,
+however, tools and traits in the [`pixel`][pixel_module] module for converting
+to and from various pixel formats. These are meant to work as bridges between
+Palette and other graphical libraries.
+
+[pixel_module]: https://ogeon.github.io/docs/palette/master/palette/pixel/index.html
 
 # Contributing
 
@@ -148,8 +153,6 @@ Licensed under either of
  * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
-
-## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
