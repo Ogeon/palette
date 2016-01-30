@@ -1,6 +1,6 @@
 [package]
 name = "palette"
-version = "0.1.1" #automatically updated
+version = "0.2.0" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = ["scripts/*", "examples/*", "res/*", ".travis.yml", ".gitignore", "CHANGELOG.md", "version.sh"]
 description = "Makes linear color calculations and conversion easy and accessible for anyone."

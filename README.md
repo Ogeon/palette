@@ -16,7 +16,7 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette = "0.1"
+palette = "0.2"
 ```
 
 # Linear?
