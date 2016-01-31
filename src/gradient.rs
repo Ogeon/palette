@@ -111,6 +111,7 @@ impl<C: Mix + Clone> Gradient<C> {
 }
 
 ///An iterator over interpolated colors.
+#[derive(Clone)]
 pub struct Take<'a, C: Mix + Clone + 'a> {
     gradient: MaybeSlice<'a, C>,
     from: C::Scalar,
@@ -273,6 +274,7 @@ impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
     }
 }
 
+#[derive(Clone)]
 enum MaybeSlice<'a, C: Mix + Clone + 'a> {
     NotSlice(&'a Gradient<C>),
     Slice(Slice<'a, C>),
