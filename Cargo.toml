@@ -10,6 +10,8 @@ readme = "README.md"
 keywords = ["color", "colour", "space", "linear"]
 license = "MIT OR Apache-2.0"
 
+build = "build/main.rs"
+
 [features]
 strict = []
 

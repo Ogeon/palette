@@ -275,6 +275,7 @@ macro_rules! assert_ranges {
 
 pub mod gradient;
 pub mod pixel;
+pub mod named;
 
 mod alpha;
 mod rgb;
