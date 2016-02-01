@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp};
+use {Color, Alpha, Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -203,9 +203,21 @@ impl<T: Float> Div<T> for Xyz<T> {
     }
 }
 
-from_color!(to Xyz from Rgb, Luma, Lab, Lch, Hsv, Hsl);
+from_color!(to Xyz from Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Xyz {Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
+alpha_from!(Xyz {Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
+
+impl<T: Float> From<Yxy<T>> for Xyz<T> {
+    fn from(yxy: Yxy<T>) -> Xyz<T> {
+        let mut xyz = Xyz::new(T::zero(), yxy.luma, T::zero());
+        // If denominator is zero, NAN or INFINITE leave x and z at the default 0
+        if yxy.y.is_normal() {
+            xyz.x = yxy.luma * yxy.x / yxy.y;
+            xyz.z = yxy.luma * ( T::one() - yxy.x - yxy.y ) / yxy.y;
+        }
+        xyz
+    }
+}
 
 impl<T: Float> From<Rgb<T>> for Xyz<T> {
     fn from(rgb: Rgb<T>) -> Xyz<T> {
@@ -219,10 +231,11 @@ impl<T: Float> From<Rgb<T>> for Xyz<T> {
 
 impl<T: Float> From<Luma<T>> for Xyz<T> {
     fn from(luma: Luma<T>) -> Xyz<T> {
+        // Use the D65 white point Xyz values for x and z as D65 is used as the default and scale by luma
         Xyz {
-            x: T::zero(),
+            x: T::from(X_N).unwrap() * luma.luma,
             y: luma.luma,
-            z: T::zero(),
+            z: T::from(Z_N).unwrap() * luma.luma,
         }
     }
 }
@@ -276,7 +289,15 @@ fn f_inv<T: Float>(t: T) -> T {
 mod test {
     use super::Xyz;
     use Rgb;
+    use Luma;
     use tristimulus::{X_N, Y_N, Z_N};
+
+    #[test]
+    fn luma() {
+        let a = Xyz::from(Luma::new(0.5));
+        let b = Xyz::new(0.475235, 0.5, 0.544415);
+        assert_approx_eq!(a, b, [x, y, z]);
+    }
 
     #[test]
     fn red() {
