@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
@@ -73,7 +73,7 @@ impl<T: Float> Limited for Hsv<T> {
 
 impl<T: Float> Mix for Hsv<T> {
     type Scalar = T;
-    
+
     fn mix(&self, other: &Hsv<T>, factor: T) -> Hsv<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
@@ -88,7 +88,7 @@ impl<T: Float> Mix for Hsv<T> {
 
 impl<T: Float> Shade for Hsv<T> {
     type Scalar = T;
-    
+
     fn lighten(&self, amount: T) -> Hsv<T> {
         Hsv {
             hue: self.hue,
@@ -194,9 +194,9 @@ impl<T: Float> Sub<T> for Hsv<T> {
     }
 }
 
-from_color!(to Hsv from Rgb, Luma, Xyz, Lab, Lch, Hsl);
+from_color!(to Hsv from Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl);
 
-alpha_from!(Hsv {Rgb, Xyz, Luma, Lab, Lch, Hsl, Color});
+alpha_from!(Hsv {Rgb, Xyz, Yxy, Luma, Lab, Lch, Hsl, Color});
 
 
 impl<T: Float> From<Rgb<T>> for Hsv<T> {
@@ -252,6 +252,12 @@ impl<T: Float> From<Luma<T>> for Hsv<T> {
 impl<T: Float> From<Xyz<T>> for Hsv<T> {
     fn from(xyz: Xyz<T>) -> Hsv<T> {
         Rgb::from(xyz).into()
+    }
+}
+
+impl<T: Float> From<Yxy<T>> for Hsv<T> {
+    fn from(yxy: Yxy<T>) -> Hsv<T> {
+        Rgb::from(yxy).into()
     }
 }
 

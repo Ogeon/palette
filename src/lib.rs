@@ -61,6 +61,7 @@ pub use lab::{Lab, Laba};
 pub use lch::{Lch, Lcha};
 pub use hsv::{Hsv, Hsva};
 pub use hsl::{Hsl, Hsla};
+pub use yxy::{Yxy, Yxya};
 
 pub use hues::{LabHue, RgbHue};
 
@@ -278,6 +279,7 @@ pub mod pixel;
 mod alpha;
 mod rgb;
 mod luma;
+mod yxy;
 mod xyz;
 mod lab;
 mod lch;
@@ -439,6 +441,12 @@ make_color! {
     Xyz {
         ///CIE XYZ.
         xyz(x: T, y: T, z: T)[alpha: T] => new;
+    }
+
+    ///CIE 1931 Yxy.
+    Yxy {
+        ///CIE Yxy.
+        yxy(x: T, y: T, luma: T)[alpha: T] => new;
     }
 
     ///CIE L*a*b* (CIELAB).

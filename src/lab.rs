@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -77,7 +77,7 @@ impl<T: Float> Limited for Lab<T> {
 
 impl<T: Float> Mix for Lab<T> {
     type Scalar = T;
-    
+
     fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -91,7 +91,7 @@ impl<T: Float> Mix for Lab<T> {
 
 impl<T: Float> Shade for Lab<T> {
     type Scalar = T;
-    
+
     fn lighten(&self, amount: T) -> Lab<T> {
         Lab {
             l: self.l + amount,
@@ -215,9 +215,9 @@ impl<T: Float> Div<T> for Lab<T> {
     }
 }
 
-from_color!(to Lab from Rgb, Luma, Xyz, Lch, Hsv, Hsl);
+from_color!(to Lab from Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl);
 
-alpha_from!(Lab {Rgb, Xyz, Luma, Lch, Hsv, Hsl, Color});
+alpha_from!(Lab {Rgb, Xyz, Yxy, Luma, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Xyz<T>> for Lab<T> {
     fn from(xyz: Xyz<T>) -> Lab<T> {
@@ -231,6 +231,12 @@ impl<T: Float> From<Xyz<T>> for Lab<T> {
                 (f(xyz.y / T::from(Y_N).unwrap()) - f(xyz.z / T::from(Z_N).unwrap()))) /
                T::from(128.0).unwrap(),
         }
+    }
+}
+
+impl<T: Float> From<Yxy<T>> for Lab<T> {
+    fn from(yxy: Yxy<T>) -> Lab<T> {
+        Xyz::from(yxy).into()
     }
 }
 

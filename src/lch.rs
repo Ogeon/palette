@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
+use {Color, Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Yxy, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
 pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
@@ -72,7 +72,7 @@ impl<T: Float> Limited for Lch<T> {
 
 impl<T: Float> Mix for Lch<T> {
     type Scalar = T;
-    
+
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
@@ -86,7 +86,7 @@ impl<T: Float> Mix for Lch<T> {
 
 impl<T: Float> Shade for Lch<T> {
     type Scalar = T;
-    
+
     fn lighten(&self, amount: T) -> Lch<T> {
         Lch {
             l: self.l + amount,
@@ -192,9 +192,9 @@ impl<T: Float> Sub<T> for Lch<T> {
     }
 }
 
-from_color!(to Lch from Rgb, Luma, Xyz, Lab, Hsv, Hsl);
+from_color!(to Lch from Rgb, Luma, Xyz, Yxy, Lab, Hsv, Hsl);
 
-alpha_from!(Lch {Rgb, Xyz, Luma, Lab, Hsv, Hsl, Color});
+alpha_from!(Lch {Rgb, Xyz, Yxy, Luma, Lab, Hsv, Hsl, Color});
 
 impl<T: Float> From<Lab<T>> for Lch<T> {
     fn from(lab: Lab<T>) -> Lch<T> {
@@ -221,6 +221,12 @@ impl<T: Float> From<Luma<T>> for Lch<T> {
 impl<T: Float> From<Xyz<T>> for Lch<T> {
     fn from(xyz: Xyz<T>) -> Lch<T> {
         Lab::from(xyz).into()
+    }
+}
+
+impl<T: Float> From<Yxy<T>> for Lch<T> {
+    fn from(yxy: Yxy<T>) -> Lch<T> {
+        Lab::from(yxy).into()
     }
 }
 

@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
@@ -195,9 +195,9 @@ impl<T: Float> Sub<T> for Hsl<T> {
     }
 }
 
-from_color!(to Hsl from Rgb, Luma, Xyz, Lab, Lch, Hsv);
+from_color!(to Hsl from Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv);
 
-alpha_from!(Hsl {Rgb, Xyz, Luma, Lab, Lch, Hsv, Color});
+alpha_from!(Hsl {Rgb, Xyz, Yxy, Luma, Lab, Lch, Hsv, Color});
 
 impl<T: Float> From<Rgb<T>> for Hsl<T> {
     fn from(rgb: Rgb<T>) -> Hsl<T> {
@@ -253,6 +253,12 @@ impl<T: Float> From<Luma<T>> for Hsl<T> {
 impl<T: Float> From<Xyz<T>> for Hsl<T> {
     fn from(xyz: Xyz<T>) -> Hsl<T> {
         Rgb::from(xyz).into()
+    }
+}
+
+impl<T: Float> From<Yxy<T>> for Hsl<T> {
+    fn from(yxy: Yxy<T>) -> Hsl<T> {
+        Rgb::from(yxy).into()
     }
 }
 

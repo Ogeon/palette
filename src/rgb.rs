@@ -2,7 +2,7 @@ use num::traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Luma, Xyz, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp};
+use {Color, Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
@@ -286,9 +286,9 @@ impl<T: Float> Div<T> for Rgb<T> {
     }
 }
 
-from_color!(to Rgb from Xyz, Luma, Lab, Lch, Hsv, Hsl);
+from_color!(to Rgb from Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Rgb {Xyz, Luma, Lab, Lch, Hsv, Hsl, Color});
+alpha_from!(Rgb {Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Luma<T>> for Rgb<T> {
     fn from(luma: Luma<T>) -> Rgb<T> {
@@ -307,6 +307,12 @@ impl<T: Float> From<Xyz<T>> for Rgb<T> {
             green: xyz.x * T::from(-0.9689).unwrap() + xyz.y * T::from(1.8758).unwrap() + xyz.z * T::from(0.0415).unwrap(),
             blue: xyz.x * T::from(0.0557).unwrap() + xyz.y * T::from(-0.2040).unwrap() + xyz.z * T::from(1.0570).unwrap(),
         }
+    }
+}
+
+impl<T: Float> From<Yxy<T>> for Rgb<T> {
+    fn from(yxy: Yxy<T>) -> Rgb<T> {
+        Xyz::from(yxy).into()
     }
 }
 
