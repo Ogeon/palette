@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp, flt};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -222,14 +222,9 @@ alpha_from!(Lab {Rgb, Xyz, Yxy, Luma, Lch, Hsv, Hsl, Color});
 impl<T: Float> From<Xyz<T>> for Lab<T> {
     fn from(xyz: Xyz<T>) -> Lab<T> {
         Lab {
-            l: (T::from(116.0).unwrap() * f(xyz.y / T::from(Y_N).unwrap()) -
-                T::from(16.0).unwrap()) / T::from(100.0).unwrap(),
-            a: (T::from(500.0).unwrap() *
-                (f(xyz.x / T::from(X_N).unwrap()) - f(xyz.y / T::from(Y_N).unwrap()))) /
-               T::from(128.0).unwrap(),
-            b: (T::from(200.0).unwrap() *
-                (f(xyz.y / T::from(Y_N).unwrap()) - f(xyz.z / T::from(Z_N).unwrap()))) /
-               T::from(128.0).unwrap(),
+            l: (f(xyz.y / flt(Y_N)) * flt(116.0) - flt(16.0)) / flt(100.0),
+            a: (f(xyz.x / flt(X_N)) - f(xyz.y / flt(Y_N))) * flt(500.0) / flt(128.0),
+            b: (f(xyz.y / flt(Y_N)) - f(xyz.z / flt(Z_N))) * flt(200.0) / flt(128.0),
         }
     }
 }
@@ -276,15 +271,14 @@ impl<T: Float> From<Hsl<T>> for Lab<T> {
 
 fn f<T: Float>(t: T) -> T {
     //(6/29)^3
-    let c_6_o_29_p_3: T = T::from(0.00885645167).unwrap();
+    let c_6_o_29_p_3: T = flt(0.00885645167);
     //(29/6)^2
-    let c_29_o_6_p_2: T = T::from(23.3611111111).unwrap();
+    let c_29_o_6_p_2: T = flt(23.3611111111);
 
     if t > c_6_o_29_p_3 {
-        t.powf(T::one() / T::from(3.0).unwrap())
+        t.powf(T::one() / flt(3.0))
     } else {
-        (T::one() / T::from(3.0).unwrap()) * c_29_o_6_p_2 * t +
-        (T::from(4.0).unwrap() / T::from(29.0).unwrap())
+        (T::one() / flt(3.0)) * c_29_o_6_p_2 * t + (flt::<T,_>(4.0) / flt(29.0))
     }
 }
 

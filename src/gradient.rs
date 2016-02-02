@@ -3,6 +3,8 @@
 use num::{Float, One, Zero, NumCast};
 use std::cmp::max;
 
+use flt;
+
 use Mix;
 
 ///A linear interpolation between colors.
@@ -22,10 +24,10 @@ impl<C: Mix + Clone> Gradient<C> {
     pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C> {
         let mut points: Vec<_> = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
         assert!(points.len() > 0);
-        let step_size = C::Scalar::one() / <C::Scalar as NumCast>::from(max(points.len() - 1, 1) as f64).unwrap();
+        let step_size = C::Scalar::one() / flt(max(points.len() - 1, 1) as f64);
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = <C::Scalar as NumCast>::from(i).unwrap() * step_size;
+            *p = flt::<C::Scalar, _>(i) * step_size;
         }
 
         Gradient(points)
@@ -125,7 +127,7 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
 
     fn next(&mut self) -> Option<C> {
         if self.current < self.len {
-            let i = self.from + <C::Scalar as NumCast>::from(self.current).unwrap() * (self.diff / <C::Scalar as NumCast>::from(self.len).unwrap());
+            let i = self.from + (self.diff / flt(self.len)) * flt(self.current);
             self.current += 1;
             Some(self.gradient.get(i))
         } else {

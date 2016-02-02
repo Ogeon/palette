@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp};
+use {Color, Alpha, Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
@@ -31,7 +31,7 @@ impl<T: Float> Luma<T> {
     ///Linear luminance from an 8 bit value.
     pub fn new_u8(luma: u8) -> Luma<T> {
         Luma {
-            luma: T::from(luma).unwrap() / T::from(255.0).unwrap(),
+            luma: flt::<T,_>(luma) / flt(255.0),
         }
     }
 }
@@ -50,7 +50,7 @@ impl<T: Float> Alpha<Luma<T>, T> {
     pub fn new_u8(luma: u8, alpha: u8) -> Lumaa<T> {
         Alpha {
             color: Luma::new_u8(luma),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
 }
@@ -186,7 +186,7 @@ alpha_from!(Luma {Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Color});
 impl<T: Float> From<Rgb<T>> for Luma<T> {
     fn from(rgb: Rgb<T>) -> Luma<T> {
         Luma {
-            luma: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() + rgb.blue * T::from(0.0722).unwrap(),
+            luma: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
         }
     }
 }

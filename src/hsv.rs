@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp, flt};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
@@ -222,10 +222,10 @@ impl<T: Float> From<Rgb<T>> for Hsv<T> {
         let hue = if diff == T::zero() {
             T::zero()
         } else {
-            T::from(60.0).unwrap() * match chan_max {
-                Channel::Red => ((rgb.green - rgb.blue) / diff) % T::from(6.0).unwrap(),
-                Channel::Green => ((rgb.blue - rgb.red) / diff + T::from(2.0).unwrap()),
-                Channel::Blue => ((rgb.red - rgb.green) / diff + T::from(4.0).unwrap()),
+            flt::<T,_>(60.0) * match chan_max {
+                Channel::Red => ((rgb.green - rgb.blue) / diff) % flt(6.0),
+                Channel::Green => ((rgb.blue - rgb.red) / diff + flt(2.0)),
+                Channel::Blue => ((rgb.red - rgb.green) / diff + flt(4.0)),
             }
         };
 
@@ -275,7 +275,7 @@ impl<T: Float> From<Lch<T>> for Hsv<T> {
 
 impl<T: Float> From<Hsl<T>> for Hsv<T> {
     fn from(hsl: Hsl<T>) -> Hsv<T> {
-        let x = hsl.saturation * if hsl.lightness < T::from(0.5).unwrap() {
+        let x = hsl.saturation * if hsl.lightness < flt(0.5) {
             hsl.lightness
         } else {
             T::one() - hsl.lightness
@@ -283,7 +283,7 @@ impl<T: Float> From<Hsl<T>> for Hsv<T> {
 
         Hsv {
             hue: hsl.hue,
-            saturation: T::from(2.0).unwrap() * x / (hsl.lightness + x),
+            saturation: x * flt(2.0) / (hsl.lightness + x),
             value: hsl.lightness + x,
         }
     }
