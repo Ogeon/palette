@@ -19,6 +19,13 @@ Add the following lines to your `Cargo.toml` file:
 palette = "0.2"
 ```
 
+###Optional Features
+
+These features are enabled by default:
+
+ * `"named"` - Enables color constants, located in the `named` module.
+ * `"named_from_str"` - Enables the `named::from_str`, which maps name string to colors.
+
 # Linear?
 
 Colors in, for example, images are often "gamma corrected" or stored in sRGB

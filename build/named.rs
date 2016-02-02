@@ -1,8 +1,10 @@
 use std::fs::File;
-use std::path::Path;
-use std::io::{Write, BufRead, BufReader};
 
+#[cfg(feature = "named")]
 pub fn build() {
+    use std::path::Path;
+    use std::io::{Write, BufRead, BufReader};
+
     let out_dir = ::std::env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("named.rs");
 
@@ -25,11 +27,28 @@ pub fn build() {
         entries.push((name.to_owned(), name.to_uppercase()));
     }
 
+    gen_from_str(&mut writer, &entries)
+}
+
+#[cfg(feature = "named_from_str")]
+fn gen_from_str(writer: &mut File, entries: &[(String, String)]) {
+    use std::io::Write;
+
     write!(writer, "static COLORS: ::phf::Map<&'static str, (u8, u8, u8)> = ").unwrap();
     let mut map = ::phf_codegen::Map::new();
-    for &(ref key, ref value) in &entries {
+    for &(ref key, ref value) in entries {
         map.entry(&**key, value);
     }
-    map.build(&mut writer).unwrap();
+    map.build(writer).unwrap();
     writeln!(writer, ";").unwrap();
 }
+
+
+
+
+#[cfg(not(feature = "named"))]
+pub fn build() {}
+
+#[allow(unused)]
+#[cfg(not(feature = "named_from_str"))]
+fn gen_from_str(_writer: &mut File, _entries: &[(String, String)]) {}
