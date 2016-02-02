@@ -8,6 +8,7 @@ pub fn build() {
 
     let reader = BufReader::new(File::open("build/svg_colors.txt").expect("could not open svg_colors.txt"));
     let mut writer = File::create(dest_path).expect("couldn't create named.rs");
+    let mut entries = vec![];
 
     for line in reader.lines() {
         let line = line.unwrap();
@@ -20,5 +21,15 @@ pub fn build() {
 
         writeln!(writer, "\n///<div style=\"display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: {0};\"></div>", name).unwrap();
         writeln!(writer, "pub const {}: (u8, u8, u8) = ({}, {}, {});", name.to_uppercase(), red, green, blue).unwrap();
+
+        entries.push((name.to_owned(), name.to_uppercase()));
     }
+
+    write!(writer, "static COLORS: ::phf::Map<&'static str, (u8, u8, u8)> = ").unwrap();
+    let mut map = ::phf_codegen::Map::new();
+    for &(ref key, ref value) in &entries {
+        map.entry(&**key, value);
+    }
+    map.build(&mut writer).unwrap();
+    writeln!(writer, ";").unwrap();
 }

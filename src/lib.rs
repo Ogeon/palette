@@ -47,6 +47,7 @@
 #[macro_use]
 extern crate approx;
 extern crate num;
+extern crate phf;
 
 use num::{Float, ToPrimitive, NumCast};
 
