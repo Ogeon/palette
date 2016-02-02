@@ -1,4 +1,4 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub};
 

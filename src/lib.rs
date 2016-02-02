@@ -48,7 +48,7 @@
 extern crate approx;
 extern crate num;
 
-use num::traits::Float;
+use num::{Float, ToPrimitive, NumCast};
 
 use pixel::{Srgb, GammaRgb};
 
@@ -596,4 +596,9 @@ pub trait Saturate: Sized {
     fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
+}
+
+///A convenience function to convert a constant number to Float Type
+fn flt<T: num::Float, P: ToPrimitive>(prim: P) -> T {
+    NumCast::from(prim).unwrap()
 }

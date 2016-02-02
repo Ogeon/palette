@@ -2,7 +2,7 @@ extern crate palette;
 extern crate image;
 extern crate clap;
 
-use palette::{Color, Rgb, Hue, Shade};
+use palette::{Color, Hue, Shade};
 use palette::pixel::Srgb;
 
 use image::{RgbImage, GenericImage, SubImage};
@@ -156,7 +156,7 @@ fn blit_shades<I: GenericImage<Pixel=image::Rgb<u8>> + 'static>(color: Color, mu
     let height = canvas.height();
 
     let primary = Srgb::linear_to_pixel(color);
-    
+
     //Generate one lighter and two darker versions of the color
     let light = Srgb::linear_to_pixel(color.lighten(0.1));
     let dark1 = Srgb::linear_to_pixel(color.darken(0.1));

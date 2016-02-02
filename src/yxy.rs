@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, Xyz};
+use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt, Xyz};
 
 const D65_X: f64 = 0.312727;
 const D65_Y: f64 = 0.329023;
@@ -110,7 +110,7 @@ impl<T: Float> Default for Yxy<T> {
         // Since Y (luma) is 0.0, this makes the default color black just like for other colors.
         // The reason for not using 0 for x and y is that this outside the usual color gamut and might
         // cause scaling issues.
-        Yxy::new(T::from(D65_X).unwrap(), T::from(D65_Y).unwrap(), T::zero())
+        Yxy::new(flt(D65_X), flt(D65_Y), T::zero())
     }
 }
 
@@ -231,8 +231,8 @@ impl<T: Float> From<Luma<T>> for Yxy<T> {
     fn from(luma: Luma<T>) -> Yxy<T> {
         // Use the D65 white point Yxy values for x and y as D65 is used as the default
         Yxy {
-            x: T::from(D65_X).unwrap(),
-            y: T::from(D65_Y).unwrap(),
+            x: flt(D65_X),
+            y: flt(D65_Y),
             luma: luma.luma,
         }
     }

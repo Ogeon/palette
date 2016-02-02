@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp};
+use {Color, Alpha, Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -57,9 +57,9 @@ impl<T: Float> Alpha<Xyz<T>, T> {
 
 impl<T: Float> Limited for Xyz<T> {
     fn is_valid(&self) -> bool {
-        self.x >= T::zero() && self.x <= T::from(X_N).unwrap() &&
-        self.y >= T::zero() && self.y <= T::from(Y_N).unwrap() &&
-        self.z >= T::zero() && self.z <= T::from(Z_N).unwrap()
+        self.x >= T::zero() && self.x <= flt(X_N) &&
+        self.y >= T::zero() && self.y <= flt(Y_N) &&
+        self.z >= T::zero() && self.z <= flt(Z_N)
     }
 
     fn clamp(&self) -> Xyz<T> {
@@ -69,9 +69,9 @@ impl<T: Float> Limited for Xyz<T> {
     }
 
     fn clamp_self(&mut self) {
-        self.x = clamp(self.x, T::zero(), T::from(X_N).unwrap());
-        self.y = clamp(self.y, T::zero(), T::from(Y_N).unwrap());
-        self.z = clamp(self.z, T::zero(), T::from(Z_N).unwrap());
+        self.x = clamp(self.x, T::zero(), flt(X_N));
+        self.y = clamp(self.y, T::zero(), flt(Y_N));
+        self.z = clamp(self.z, T::zero(), flt(Z_N));
     }
 }
 
@@ -222,9 +222,9 @@ impl<T: Float> From<Yxy<T>> for Xyz<T> {
 impl<T: Float> From<Rgb<T>> for Xyz<T> {
     fn from(rgb: Rgb<T>) -> Xyz<T> {
         Xyz {
-            x: rgb.red * T::from(0.4124).unwrap() + rgb.green * T::from(0.3576).unwrap() + rgb.blue * T::from(0.1805).unwrap(),
-            y: rgb.red * T::from(0.2126).unwrap() + rgb.green * T::from(0.7152).unwrap() + rgb.blue * T::from(0.0722).unwrap(),
-            z: rgb.red * T::from(0.0193).unwrap() + rgb.green * T::from(0.1192).unwrap() + rgb.blue * T::from(0.9505).unwrap(),
+            x: rgb.red * flt(0.4124) + rgb.green * flt(0.3576) + rgb.blue * flt(0.1805),
+            y: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
+            z: rgb.red * flt(0.0193) + rgb.green * flt(0.1192) + rgb.blue * flt(0.9505),
         }
     }
 }
@@ -233,9 +233,9 @@ impl<T: Float> From<Luma<T>> for Xyz<T> {
     fn from(luma: Luma<T>) -> Xyz<T> {
         // Use the D65 white point Xyz values for x and z as D65 is used as the default and scale by luma
         Xyz {
-            x: T::from(X_N).unwrap() * luma.luma,
+            x: luma.luma * flt(X_N),
             y: luma.luma,
-            z: T::from(Z_N).unwrap() * luma.luma,
+            z: luma.luma * flt(Z_N),
         }
     }
 }
@@ -243,14 +243,11 @@ impl<T: Float> From<Luma<T>> for Xyz<T> {
 impl<T: Float> From<Lab<T>> for Xyz<T> {
     fn from(lab: Lab<T>) -> Xyz<T> {
         Xyz {
-            x: T::from(X_N).unwrap() * f_inv((T::one() / T::from(116.0).unwrap()) *
-                (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) +
-                (T::one() / T::from(500.0).unwrap()) * lab.a * T::from(128.0).unwrap()),
-            y: T::from(Y_N).unwrap() * f_inv((T::one() / T::from(116.0).unwrap()) *
-                (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap())),
-            z: T::from(Z_N).unwrap() * f_inv((T::one() / T::from(116.0).unwrap()) *
-                (lab.l * T::from(100.0).unwrap() + T::from(16.0).unwrap()) -
-                (T::one() / T::from(200.0).unwrap()) * lab.b * T::from(128.0).unwrap()),
+            x: flt::<T,_>(X_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
+                (T::one() / flt(500.0)) * lab.a * flt(128.0)),
+            y: flt::<T,_>(Y_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
+            z: flt::<T,_>(Z_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
+                (T::one() / flt(200.0)) * lab.b * flt(128.0)),
         }
     }
 }
@@ -276,12 +273,12 @@ impl<T: Float> From<Hsl<T>> for Xyz<T> {
 
 fn f_inv<T: Float>(t: T) -> T {
     //(6/29)^2
-    let c_6_o_29_p_2: T = T::from(0.04280618311).unwrap();
+    let c_6_o_29_p_2: T = flt(0.04280618311);
 
-    if t > T::from(6.0 / 29.0).unwrap() {
+    if t > flt::<T,_>(6.0) / flt(29.0) {
         t * t * t
     } else {
-        T::from(3.0).unwrap() * c_6_o_29_p_2 * (t - T::from(4.0 / 29.0).unwrap())
+         c_6_o_29_p_2 * flt(3.0) * (t - (flt::<T,_>(4.0) / flt(29.0)))
     }
 }
 

@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp};
+use {Color, Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
@@ -48,9 +48,9 @@ impl<T: Float> Rgb<T> {
     ///Linear RGB from 8 bit values.
     pub fn new_u8(red: u8, green: u8, blue: u8) -> Rgb<T> {
         Rgb {
-            red: T::from(red).unwrap() / T::from(255.0).unwrap(),
-            green: T::from(green).unwrap() / T::from(255.0).unwrap(),
-            blue: T::from(blue).unwrap() / T::from(255.0).unwrap(),
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
         }
     }
 
@@ -94,7 +94,7 @@ impl<T: Float> Alpha<Rgb<T>, T> {
     pub fn new_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgba<T> {
         Alpha {
             color: Rgb::new_u8(red, green, blue),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
 
@@ -174,12 +174,12 @@ impl<T: Float> GetHue for Rgb<T> {
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        let sqrt_3: T = T::from(1.73205081).unwrap();
+        let sqrt_3: T = flt(1.73205081);
 
         if self.red == self.green && self.red == self.blue {
             None
         } else {
-            Some(RgbHue::from_radians((sqrt_3 * (self.green - self.blue)).atan2(T::from(2.0).unwrap() * self.red - self.green - self.blue)))
+            Some(RgbHue::from_radians((sqrt_3 * (self.green - self.blue)).atan2(self.red * flt(2.0) - self.green - self.blue)))
         }
     }
 }
@@ -303,9 +303,9 @@ impl<T: Float> From<Luma<T>> for Rgb<T> {
 impl<T: Float> From<Xyz<T>> for Rgb<T> {
     fn from(xyz: Xyz<T>) -> Rgb<T> {
         Rgb {
-            red: xyz.x * T::from(3.2406).unwrap() + xyz.y * T::from(-1.5372).unwrap() + xyz.z * T::from(-0.4986).unwrap(),
-            green: xyz.x * T::from(-0.9689).unwrap() + xyz.y * T::from(1.8758).unwrap() + xyz.z * T::from(0.0415).unwrap(),
-            blue: xyz.x * T::from(0.0557).unwrap() + xyz.y * T::from(-0.2040).unwrap() + xyz.z * T::from(1.0570).unwrap(),
+            red: xyz.x * flt(3.2406) + xyz.y * flt(-1.5372) + xyz.z * flt(-0.4986),
+            green: xyz.x * flt(-0.9689) + xyz.y * flt(1.8758) + xyz.z * flt(0.0415),
+            blue: xyz.x * flt(0.0557) + xyz.y * flt(-0.2040) + xyz.z * flt(1.0570),
         }
     }
 }
@@ -331,19 +331,19 @@ impl<T: Float> From<Lch<T>> for Rgb<T> {
 impl<T: Float> From<Hsv<T>> for Rgb<T> {
     fn from(hsv: Hsv<T>) -> Rgb<T> {
         let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / T::from(60.0).unwrap();
-        let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
+        let h = hsv.hue.to_positive_degrees() / flt(60.0);
+        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
         let m = hsv.value - c;
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < T::from(2.0).unwrap() {
+        } else if h >= T::one() && h < flt(2.0) {
             (x, c, T::zero())
-        } else if h >= T::from(2.0).unwrap() && h < T::from(3.0).unwrap() {
+        } else if h >= flt(2.0) && h < flt(3.0) {
             (T::zero(), c, x)
-        } else if h >= T::from(3.0).unwrap() && h < T::from(4.0).unwrap() {
+        } else if h >= flt(3.0) && h < flt(4.0) {
             (T::zero(), x, c)
-        } else if h >= T::from(4.0).unwrap() && h < T::from(5.0).unwrap() {
+        } else if h >= flt(4.0) && h < flt(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)
@@ -360,20 +360,20 @@ impl<T: Float> From<Hsv<T>> for Rgb<T> {
 
 impl<T: Float> From<Hsl<T>> for Rgb<T> {
     fn from(hsl: Hsl<T>) -> Rgb<T> {
-        let c = (T::one() - (T::from(2.0).unwrap() * hsl.lightness - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / T::from(60.0).unwrap();
-        let x = c * (T::one() - (h % T::from(2.0).unwrap() - T::one()).abs());
-        let m = hsl.lightness - T::from(0.5).unwrap() * c;
+        let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
+        let h = hsl.hue.to_positive_degrees() / flt(60.0);
+        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
+        let m = hsl.lightness - c * flt(0.5);
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < T::from(2.0).unwrap() {
+        } else if h >= T::one() && h < flt(2.0) {
             (x, c, T::zero())
-        } else if h >= T::from(2.0).unwrap() && h < T::from(3.0).unwrap() {
+        } else if h >= flt(2.0) && h < flt(3.0) {
             (T::zero(), c, x)
-        } else if h >= T::from(3.0).unwrap() && h < T::from(4.0).unwrap() {
+        } else if h >= flt(3.0) && h < flt(4.0) {
             (T::zero(), x, c)
-        } else if h >= T::from(4.0).unwrap() && h < T::from(5.0).unwrap() {
+        } else if h >= flt(4.0) && h < flt(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)

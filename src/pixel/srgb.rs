@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Color, Alpha, Rgb, Rgba, clamp};
+use {Color, Alpha, Rgb, Rgba, clamp, flt};
 
 use pixel::RgbPixel;
 
@@ -61,10 +61,10 @@ impl<T: Float> Srgb<T> {
     ///Create a new sRGB encoded color, with transparency, from `u8` values.
     pub fn with_alpha_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Srgb<T> {
         Srgb {
-            red: T::from(red).unwrap() / T::from(255.0).unwrap(),
-            green: T::from(green).unwrap() / T::from(255.0).unwrap(),
-            blue: T::from(blue).unwrap() / T::from(255.0).unwrap(),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
 
@@ -132,17 +132,17 @@ impl<T: Float> From<Color<T>> for Srgb<T> {
 }
 
 fn from_srgb<T: Float>(x: T) -> T {
-    if x <= T::from(0.04045).unwrap() {
-        x / T::from(12.92).unwrap()
+    if x <= flt(0.04045) {
+        x / flt(12.92)
     } else {
-        ((x + T::from(0.055).unwrap()) / T::from(1.055).unwrap()).powf(T::from(2.4).unwrap())
+        ((x + flt(0.055)) / flt(1.055)).powf(flt(2.4))
     }
 }
 
 fn to_srgb<T: Float>(x: T) -> T {
-    if x <= T::from(0.0031308).unwrap() {
-        T::from(12.92).unwrap() * x
+    if x <= flt(0.0031308) {
+        x * flt(12.92)
     } else {
-        T::from(1.055).unwrap() * x.powf(T::from(1.0 / 2.4).unwrap()) - T::from(0.055).unwrap()
+        x.powf(T::one() / flt(2.4)) * flt(1.055)  - flt(0.055)
     }
 }

@@ -1,8 +1,8 @@
-use num::traits::Float;
+use num::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp};
+use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp, flt};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
@@ -218,22 +218,22 @@ impl<T: Float> From<Rgb<T>> for Hsl<T> {
         }
 
         let diff = val_max - val_min;
-        let lightness = (val_min + val_max) / T::from(2.0).unwrap();
+        let lightness = (val_min + val_max) / flt(2.0);
 
         let hue = if diff == T::zero() {
             T::zero()
         } else {
-            T::from(60.0).unwrap() * match chan_max {
-                Channel::Red => ((rgb.green - rgb.blue) / diff) % T::from(6.0).unwrap(),
-                Channel::Green => ((rgb.blue - rgb.red) / diff + T::from(2.0).unwrap()),
-                Channel::Blue => ((rgb.red - rgb.green) / diff + T::from(4.0).unwrap()),
+            flt::<T,_>(60.0) * match chan_max {
+                Channel::Red => ((rgb.green - rgb.blue) / diff) % flt(6.0),
+                Channel::Green => ((rgb.blue - rgb.red) / diff + flt(2.0)),
+                Channel::Blue => ((rgb.red - rgb.green) / diff + flt(4.0)),
             }
         };
 
         let saturation = if diff == T::zero() {
             T::zero()
         } else {
-            diff / (T::one() - (T::from(2.0).unwrap() * lightness - T::one()).abs())
+            diff / (T::one() - ( lightness * flt(2.0) - T::one()).abs())
         };
 
         Hsl {
@@ -276,19 +276,19 @@ impl<T: Float> From<Lch<T>> for Hsl<T> {
 
 impl<T: Float> From<Hsv<T>> for Hsl<T> {
     fn from(hsv: Hsv<T>) -> Hsl<T> {
-        let x = (T::from(2.0).unwrap() - hsv.saturation) * hsv.value;
+        let x = (flt::<T,_>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if hsv.value == T::zero() {
             T::zero()
         } else if x < T::one() {
             hsv.saturation * hsv.value / x
         } else {
-            hsv.saturation * hsv.value / (T::from(2.0).unwrap() - x)
+            hsv.saturation * hsv.value / (flt::<T,_>(2.0) - x)
         };
 
         Hsl {
             hue: hsv.hue,
             saturation: saturation,
-            lightness: x / T::from(2.0).unwrap(),
+            lightness: x / flt(2.0),
         }
     }
 }

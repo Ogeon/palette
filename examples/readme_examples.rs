@@ -3,7 +3,6 @@ extern crate palette;
 extern crate num;
 
 use image::{RgbImage, GenericImage};
-use num::traits::Float;
 
 use palette::{Rgba, Gradient, Mix};
 use palette::pixel::Srgb;
@@ -75,18 +74,18 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
     }
 }
 
-fn display_gradients<T: Float, A: Mix<Scalar=T> + Clone, B: Mix<Scalar=T> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where
-    Rgba<T>: From<A>,
-    Rgba<T>: From<B>,
+fn display_gradients<A: Mix<Scalar=f64> + Clone, B: Mix<Scalar=f64> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where
+    Rgba<f64>: From<A>,
+    Rgba<f64>: From<B>,
 {
     let mut image = RgbImage::new(256, 64);
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Srgb::linear_to_pixel(grad1.get(T::from(x).unwrap() / T::from(255.0).unwrap()));
+        pixel.data = Srgb::linear_to_pixel(grad1.get(x as f64 / 255.0));
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Srgb::linear_to_pixel(grad2.get(T::from(x).unwrap() / T::from(255.0).unwrap()));
+        pixel.data = Srgb::linear_to_pixel(grad2.get(x as f64/ 255.0));
     }
 
     match image.save(filename) {

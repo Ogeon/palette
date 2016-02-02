@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Alpha, Rgb, Rgba, clamp};
+use {Alpha, Rgb, Rgba, clamp, flt};
 
 use pixel::RgbPixel;
 
@@ -71,10 +71,10 @@ impl<T: Float> GammaRgb<T> {
     ///Create a new gamma encoded color, with transparency, from `u8` values.
     pub fn with_alpha_u8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> GammaRgb<T> {
         GammaRgb {
-            red: T::from(red).unwrap() / T::from(255.0).unwrap(),
-            green: T::from(green).unwrap() / T::from(255.0).unwrap(),
-            blue: T::from(blue).unwrap() / T::from(255.0).unwrap(),
-            alpha: T::from(alpha).unwrap() / T::from(255.0).unwrap(),
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
             gamma: gamma,
         }
     }
