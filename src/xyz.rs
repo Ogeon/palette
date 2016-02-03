@@ -2,7 +2,10 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
+use { Alpha, Yxy, Rgb, Luma, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
+use lch::LchSpace;
+use lab::LabSpace;
+use white_point::WhitePoint;
 
 use tristimulus::{X_N, Y_N, Z_N};
 
@@ -203,9 +206,9 @@ impl<T: Float> Div<T> for Xyz<T> {
     }
 }
 
-from_color!(to Xyz from Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl);
+// from_color!(to Xyz from Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Xyz {Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
+// alpha_from!(Xyz {Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Yxy<T>> for Xyz<T> {
     fn from(yxy: Yxy<T>) -> Xyz<T> {
@@ -240,21 +243,28 @@ impl<T: Float> From<Luma<T>> for Xyz<T> {
     }
 }
 
-impl<T: Float> From<Lab<T>> for Xyz<T> {
-    fn from(lab: Lab<T>) -> Xyz<T> {
+impl<WP, T> From<LabSpace<WP, T>> for Xyz<T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lab: LabSpace<WP, T>) -> Xyz<T> {
+        let wp_xyz: Xyz<T> = WP::get_yxy().into();
         Xyz {
-            x: flt::<T,_>(X_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
+            x: wp_xyz.x * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
                 (T::one() / flt(500.0)) * lab.a * flt(128.0)),
-            y: flt::<T,_>(Y_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
-            z: flt::<T,_>(Z_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
+            y: wp_xyz.y * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
+            z: wp_xyz.z * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
                 (T::one() / flt(200.0)) * lab.b * flt(128.0)),
         }
     }
 }
 
-impl<T: Float> From<Lch<T>> for Xyz<T> {
-    fn from(lch: Lch<T>) -> Xyz<T> {
-        Lab::from(lch).into()
+impl<WP, T> From<LchSpace<WP, T>> for Xyz<T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lch: LchSpace<WP, T>) -> Xyz<T> {
+        LabSpace::<WP, T>::from(lch).into()
     }
 }
 

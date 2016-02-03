@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
+use { Alpha, Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
@@ -179,9 +179,9 @@ impl<T: Float> Div<T> for Luma<T> {
     }
 }
 
-from_color!(to Luma from Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl);
+// from_color!(to Luma from Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Luma {Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Color});
+// alpha_from!(Luma {Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Rgb<T>> for Luma<T> {
     fn from(rgb: Rgb<T>) -> Luma<T> {

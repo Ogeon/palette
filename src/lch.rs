@@ -1,11 +1,16 @@
 use num::Float;
 
 use std::ops::{Add, Sub};
+use std::marker::PhantomData;
 
-use {Color, Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Yxy, Lab, Hsv, Hsl, Saturate, LabHue, clamp};
+use { Alpha, Limited, Mix, Shade, GetHue, Hue, Rgb, Luma, Xyz, Yxy, Hsv, Hsl, Saturate, LabHue, WhitePoint, D65, clamp};
+use lab::LabSpace;
+
+pub type Lch<T> = LchSpace<D65, T>;
+pub type Lcha<T> = AlphaLchSpace<D65, T>;
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
-pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
+pub type AlphaLchSpace<WP, T = f32> = Alpha<LchSpace<WP, T>, T>;
 
 ///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html).
 ///
@@ -14,7 +19,10 @@ pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lch<T: Float = f32> {
+pub struct LchSpace<WP = D65, T = f32>
+where T: Float,
+    WP: WhitePoint<T>
+{
     ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
     pub l: T,
@@ -28,21 +36,32 @@ pub struct Lch<T: Float = f32> {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: LabHue<T>,
+
+    _wp: PhantomData<WP>,
 }
 
-impl<T: Float> Lch<T> {
+
+impl<WP, T> LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     ///CIE L*C*h°.
-    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> Lch<T> {
-        Lch {
+    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: l,
             chroma: chroma,
             hue: hue,
+            _wp: PhantomData,
         }
     }
 }
 
+
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
-impl<T: Float> Alpha<Lch<T>, T> {
+impl<WP, T> Alpha<LchSpace<WP, T>, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     ///CIE L*C*h° and transparency.
     pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<T> {
         Alpha {
@@ -52,51 +71,65 @@ impl<T: Float> Alpha<Lch<T>, T> {
     }
 }
 
-impl<T: Float> Limited for Lch<T> {
-    fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= T::one() &&
-        self.chroma >= T::zero()
-    }
+// impl<WP, T> Limited for LchSpace<WP, T>
+//     where T: Float,
+//         WP: WhitePoint<T>
+// {
+//     fn is_valid(&self) -> bool {
+//         self.l >= T::zero() && self.l <= T::one() &&
+//         self.chroma >= T::zero()
+//     }
+//
+//     fn clamp(&self) -> LchSpace<WP, T> {
+//         let mut c = *self;
+//         c.clamp_self();
+//         c
+//     }
+//
+//     fn clamp_self(&mut self) {
+//         self.l = clamp(self.l, T::zero(), T::one());
+//         self.chroma = self.chroma.max(T::zero())
+//     }
+// }
 
-    fn clamp(&self) -> Lch<T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), T::one());
-        self.chroma = self.chroma.max(T::zero())
-    }
-}
-
-impl<T: Float> Mix for Lch<T> {
+impl<WP, T> Mix for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
+    fn mix(&self, other: &LchSpace<WP, T>, factor: T) -> LchSpace<WP, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
-        Lch {
+        LchSpace {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
             hue: self.hue + factor * hue_diff,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Shade for Lch<T> {
+impl<WP, T> Shade for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Lch<T> {
-        Lch {
+    fn lighten(&self, amount: T) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l + amount,
             chroma: self.chroma,
             hue: self.hue,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> GetHue for Lch<T> {
+impl<WP, T> GetHue for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Hue = LabHue<T>;
 
     fn get_hue(&self) -> Option<LabHue<T>> {
@@ -108,137 +141,187 @@ impl<T: Float> GetHue for Lch<T> {
     }
 }
 
-impl<T: Float> Hue for Lch<T> {
-    fn with_hue(&self, hue: LabHue<T>) -> Lch<T> {
-        Lch {
+impl<WP, T> Hue for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn with_hue(&self, hue: LabHue<T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l,
             chroma: self.chroma,
             hue: hue,
+            _wp: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: LabHue<T>) -> Lch<T> {
-        Lch {
+    fn shift_hue(&self, amount: LabHue<T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l,
             chroma: self.chroma,
             hue: self.hue + amount,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Saturate for Lch<T> {
+impl<WP, T> Saturate for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Lch<T> {
-        Lch {
+    fn saturate(&self, factor: T) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l,
             chroma: self.chroma * (T::one() + factor),
             hue: self.hue,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Default for Lch<T> {
-    fn default() -> Lch<T> {
-        Lch::new(T::zero(), T::zero(), LabHue::from(T::zero()))
+impl<WP, T> Default for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn default() -> LchSpace<WP, T> {
+        LchSpace::new(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
-impl<T: Float> Add<Lch<T>> for Lch<T> {
-    type Output = Lch<T>;
+impl<WP, T> Add<LchSpace<WP, T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LchSpace<WP, T>;
 
-    fn add(self, other: Lch<T>) -> Lch<T> {
-        Lch {
+    fn add(self, other: LchSpace<WP, T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l + other.l,
             chroma: self.chroma + other.chroma,
             hue: self.hue + other.hue,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Add<T> for Lch<T> {
-    type Output = Lch<T>;
+impl<WP, T> Add<T> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LchSpace<WP, T>;
 
-    fn add(self, c: T) -> Lch<T> {
-        Lch {
+    fn add(self, c: T) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l + c,
             chroma: self.chroma + c,
             hue: self.hue + c,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<Lch<T>> for Lch<T> {
-    type Output = Lch<T>;
+impl<WP, T> Sub<LchSpace<WP, T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LchSpace<WP, T>;
 
-    fn sub(self, other: Lch<T>) -> Lch<T> {
-        Lch {
+    fn sub(self, other: LchSpace<WP, T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l - other.l,
             chroma: self.chroma - other.chroma,
             hue: self.hue - other.hue,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<T> for Lch<T> {
-    type Output = Lch<T>;
+impl<WP, T> Sub<T> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LchSpace<WP, T>;
 
-    fn sub(self, c: T) -> Lch<T> {
-        Lch {
+    fn sub(self, c: T) -> LchSpace<WP, T> {
+        LchSpace {
             l: self.l - c,
             chroma: self.chroma - c,
             hue: self.hue - c,
+            _wp: PhantomData,
         }
     }
 }
 
-from_color!(to Lch from Rgb, Luma, Xyz, Yxy, Lab, Hsv, Hsl);
+// from_color!(to Lch from Rgb, Luma, Xyz, Yxy, Lab, Hsv, Hsl);
 
-alpha_from!(Lch {Rgb, Xyz, Yxy, Luma, Lab, Hsv, Hsl, Color});
+// alpha_from!(LchSpace {Rgb, Xyz, Yxy, Luma, Lab, Hsv, Hsl, Color});
 
-impl<T: Float> From<Lab<T>> for Lch<T> {
-    fn from(lab: Lab<T>) -> Lch<T> {
-        Lch {
+impl<WP, T> From<LabSpace<WP, T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lab: LabSpace<WP, T>) -> LchSpace<WP, T> {
+        LchSpace {
             l: lab.l,
             chroma: (lab.a * lab.a + lab.b * lab.b).sqrt(),
             hue: lab.get_hue().unwrap_or(LabHue::from(T::zero())),
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> From<Rgb<T>> for Lch<T> {
-    fn from(rgb: Rgb<T>) -> Lch<T> {
-        Lab::from(rgb).into()
+impl<WP, T> From<Rgb<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(rgb: Rgb<T>) -> LchSpace<WP, T> {
+        LabSpace::from(rgb).into()
     }
 }
 
-impl<T: Float> From<Luma<T>> for Lch<T> {
-    fn from(luma: Luma<T>) -> Lch<T> {
-        Lab::from(luma).into()
+impl<WP, T> From<Luma<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(luma: Luma<T>) -> LchSpace<WP, T> {
+        LabSpace::from(luma).into()
     }
 }
 
-impl<T: Float> From<Xyz<T>> for Lch<T> {
-    fn from(xyz: Xyz<T>) -> Lch<T> {
-        Lab::from(xyz).into()
+impl<WP, T> From<Xyz<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(xyz: Xyz<T>) -> LchSpace<WP, T> {
+        LabSpace::from(xyz).into()
     }
 }
 
-impl<T: Float> From<Yxy<T>> for Lch<T> {
-    fn from(yxy: Yxy<T>) -> Lch<T> {
-        Lab::from(yxy).into()
+impl<WP, T> From<Yxy<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(yxy: Yxy<T>) -> LchSpace<WP, T> {
+        LabSpace::from(yxy).into()
     }
 }
 
-impl<T: Float> From<Hsv<T>> for Lch<T> {
-    fn from(hsv: Hsv<T>) -> Lch<T> {
-        Lab::from(hsv).into()
+impl<WP, T> From<Hsv<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(hsv: Hsv<T>) -> LchSpace<WP, T> {
+        LabSpace::from(hsv).into()
     }
 }
 
-impl<T: Float> From<Hsl<T>> for Lch<T> {
-    fn from(hsl: Hsl<T>) -> Lch<T> {
-        Lab::from(hsl).into()
+impl<WP, T> From<Hsl<T>> for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(hsl: Hsl<T>) -> LchSpace<WP, T> {
+        LabSpace::from(hsl).into()
     }
 }
 

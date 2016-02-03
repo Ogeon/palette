@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp, flt};
+use {Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
@@ -286,9 +286,9 @@ impl<T: Float> Div<T> for Rgb<T> {
     }
 }
 
-from_color!(to Rgb from Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl);
+// from_color!(to Rgb from Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Rgb {Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl, Color});
+// alpha_from!(Rgb {Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Luma<T>> for Rgb<T> {
     fn from(luma: Luma<T>) -> Rgb<T> {
@@ -388,17 +388,17 @@ impl<T: Float> From<Hsl<T>> for Rgb<T> {
     }
 }
 
-impl<T: Float> From<Srgb<T>> for Rgb<T> {
-    fn from(srgb: Srgb<T>) -> Rgb<T> {
-        srgb.to_linear().into()
-    }
-}
-
-impl<T: Float> From<GammaRgb<T>> for Rgb<T> {
-    fn from(gamma_rgb: GammaRgb<T>) -> Rgb<T> {
-        gamma_rgb.to_linear().into()
-    }
-}
+// impl<T: Float> From<Srgb<T>> for Rgb<T> {
+//     fn from(srgb: Srgb<T>) -> Rgb<T> {
+//         srgb.to_linear().into()
+//     }
+// }
+//
+// impl<T: Float> From<GammaRgb<T>> for Rgb<T> {
+//     fn from(gamma_rgb: GammaRgb<T>) -> Rgb<T> {
+//         gamma_rgb.to_linear().into()
+//     }
+// }
 
 impl<T: Float> From<Srgb<T>> for Alpha<Rgb<T>, T> {
     fn from(srgb: Srgb<T>) -> Alpha<Rgb<T>, T> {
