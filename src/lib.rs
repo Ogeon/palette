@@ -46,7 +46,11 @@
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
+
 extern crate num;
+
+#[cfg(feature = "phf")]
+extern crate phf;
 
 use num::{Float, ToPrimitive, NumCast};
 
@@ -275,6 +279,9 @@ macro_rules! assert_ranges {
 
 pub mod gradient;
 pub mod pixel;
+
+#[cfg(feature = "named")]
+pub mod named;
 
 mod alpha;
 mod rgb;
