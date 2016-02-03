@@ -18,7 +18,7 @@ pub type AlphaLchSpace<WP, T = f32> = Alpha<LchSpace<WP, T>, T>;
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct LchSpace<WP = D65, T = f32>
 where T: Float,
     WP: WhitePoint<T>
@@ -40,6 +40,17 @@ where T: Float,
     _wp: PhantomData<WP>,
 }
 
+impl<WP, T> Copy for LchSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{}
+
+impl<WP, T> Clone for LchSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn clone(&self) -> LchSpace<WP,T> { *self }
+}
 
 impl<WP, T> LchSpace<WP, T>
     where T: Float,
@@ -71,26 +82,26 @@ impl<WP, T> Alpha<LchSpace<WP, T>, T>
     }
 }
 
-// impl<WP, T> Limited for LchSpace<WP, T>
-//     where T: Float,
-//         WP: WhitePoint<T>
-// {
-//     fn is_valid(&self) -> bool {
-//         self.l >= T::zero() && self.l <= T::one() &&
-//         self.chroma >= T::zero()
-//     }
-//
-//     fn clamp(&self) -> LchSpace<WP, T> {
-//         let mut c = *self;
-//         c.clamp_self();
-//         c
-//     }
-//
-//     fn clamp_self(&mut self) {
-//         self.l = clamp(self.l, T::zero(), T::one());
-//         self.chroma = self.chroma.max(T::zero())
-//     }
-// }
+impl<WP, T> Limited for LchSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn is_valid(&self) -> bool {
+        self.l >= T::zero() && self.l <= T::one() &&
+        self.chroma >= T::zero()
+    }
+
+    fn clamp(&self) -> LchSpace<WP, T> {
+        let mut c = *self;
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.l = clamp(self.l, T::zero(), T::one());
+        self.chroma = self.chroma.max(T::zero())
+    }
+}
 
 impl<WP, T> Mix for LchSpace<WP, T>
     where T: Float,

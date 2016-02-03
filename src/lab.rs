@@ -23,7 +23,7 @@ pub type AlphaLabSpace<WP, T = f32> = Alpha<LabSpace<WP,T>, T>;
 ///
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct LabSpace<WP = D65, T = f32>
     where T: Float,
         WP: WhitePoint<T>
@@ -39,6 +39,19 @@ pub struct LabSpace<WP = D65, T = f32>
     pub b: T,
 
     _wp: PhantomData<WP>,
+}
+
+
+impl<WP, T> Copy for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{}
+
+impl<WP, T> Clone for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn clone(&self) -> LabSpace<WP,T> { *self }
 }
 
 impl<WP, T> LabSpace<WP,T>
@@ -70,29 +83,28 @@ impl<WP, T> Alpha<LabSpace<WP, T>, T>
     }
 }
 
-// Rendered error http://is.gd/tHCm5C
-// impl<WP, T> Limited for LabSpace<WP, T>
-// where T: Float,
-//     WP: WhitePoint<T>
-// {
-//     fn is_valid(&self) -> bool {
-//         self.l >= T::zero() && self.l <= T::one() &&
-//         self.a >= -T::one() && self.a <= T::one() &&
-//         self.b >= -T::one() && self.b <= T::one()
-//     }
-//
-//     fn clamp(&self) -> LabSpace<WP, T> {
-//         let mut c = *self;
-//         c.clamp_self();
-//         c
-//     }
-//
-//     fn clamp_self(&mut self) {
-//         self.l = clamp(self.l, T::zero(), T::one());
-//         self.a = clamp(self.a, -T::one(), T::one());
-//         self.b = clamp(self.b, -T::one(), T::one());
-//     }
-// }
+impl<WP, T> Limited for LabSpace<WP, T>
+where T: Float,
+    WP: WhitePoint<T>
+{
+    fn is_valid(&self) -> bool {
+        self.l >= T::zero() && self.l <= T::one() &&
+        self.a >= -T::one() && self.a <= T::one() &&
+        self.b >= -T::one() && self.b <= T::one()
+    }
+
+    fn clamp(&self) -> LabSpace<WP, T> {
+        let mut c = *self;
+        c.clamp_self();
+        c
+    }
+
+    fn clamp_self(&mut self) {
+        self.l = clamp(self.l, T::zero(), T::one());
+        self.a = clamp(self.a, -T::one(), T::one());
+        self.b = clamp(self.b, -T::one(), T::one());
+    }
+}
 
 impl<WP, T> Mix for LabSpace<WP, T>
     where T: Float,
