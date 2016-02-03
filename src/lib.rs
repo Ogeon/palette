@@ -50,7 +50,7 @@ extern crate num;
 
 use num::{Float, ToPrimitive, NumCast};
 
-use pixel::{Srgb, GammaRgb};
+// use pixel::{Srgb, GammaRgb};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -290,6 +290,7 @@ mod hsl;
 mod hues;
 
 mod white_point;
+mod rgb_variant;
 mod tristimulus;
 
 // macro_rules! make_color {
