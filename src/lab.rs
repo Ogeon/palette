@@ -1,13 +1,16 @@
 use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
+use std::marker::PhantomData;
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp, flt};
+use { Alpha, Rgb, Luma, Xyz, Yxy, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, WhitePoint, D65, clamp, flt};
+use lch::LchSpace;
 
-use tristimulus::{X_N, Y_N, Z_N};
+pub type Lab<T> = LabSpace<D65, T>;
+pub type Laba<T> = AlphaLabSpace<D65, T>;
 
 ///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
-pub type Laba<T = f32> = Alpha<Lab<T>, T>;
+pub type AlphaLabSpace<WP, T = f32> = Alpha<LabSpace<WP,T>, T>;
 
 ///The CIE L*a*b* (CIELAB) color space.
 ///
@@ -20,8 +23,11 @@ pub type Laba<T = f32> = Alpha<Lab<T>, T>;
 ///
 ///The parameters of L*a*b* are quite different, compared to many other color
 ///spaces, so manipulating them manually can be unintuitive.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lab<T: Float = f32> {
+#[derive(Debug, PartialEq)]
+pub struct LabSpace<WP = D65, T = f32>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
     pub l: T,
@@ -31,38 +37,63 @@ pub struct Lab<T: Float = f32> {
 
     ///b* goes from yellow at -1.0 to blue at 1.0.
     pub b: T,
+
+    _wp: PhantomData<WP>,
 }
 
-impl<T: Float> Lab<T> {
+
+impl<WP, T> Copy for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{}
+
+impl<WP, T> Clone for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn clone(&self) -> LabSpace<WP,T> { *self }
+}
+
+impl<WP, T> LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     ///CIE L*a*b*.
-    pub fn new(l: T, a: T, b: T) -> Lab<T> {
-        Lab {
+    pub fn new(l: T, a: T, b: T) -> LabSpace<WP, T> {
+        LabSpace {
             l: l,
             a: a,
             b: b,
+            _wp: PhantomData,
         }
     }
 }
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
-impl<T: Float> Alpha<Lab<T>, T> {
+impl<WP, T> Alpha<LabSpace<WP, T>, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     ///CIE L*a*b* and transparency.
-    pub fn new(l: T, a: T, b: T, alpha: T) -> Laba<T> {
+    pub fn new(l: T, a: T, b: T, alpha: T) -> AlphaLabSpace<WP, T> {
         Alpha {
-            color: Lab::new(l, a, b),
+            color: LabSpace::new(l, a, b),
             alpha: alpha,
         }
     }
 }
 
-impl<T: Float> Limited for Lab<T> {
+impl<WP, T> Limited for LabSpace<WP, T>
+where T: Float,
+    WP: WhitePoint<T>
+{
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.a >= -T::one() && self.a <= T::one() &&
         self.b >= -T::one() && self.b <= T::one()
     }
 
-    fn clamp(&self) -> Lab<T> {
+    fn clamp(&self) -> LabSpace<WP, T> {
         let mut c = *self;
         c.clamp_self();
         c
@@ -75,33 +106,44 @@ impl<T: Float> Limited for Lab<T> {
     }
 }
 
-impl<T: Float> Mix for Lab<T> {
+impl<WP, T> Mix for LabSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
+    fn mix(&self, other: &LabSpace<WP, T>, factor: T) -> LabSpace<WP, T> {
         let factor = clamp(factor, T::zero(), T::one());
 
-        Lab {
+        LabSpace {
             l: self.l + factor * (other.l - self.l),
             a: self.a + factor * (other.a - self.a),
             b: self.b + factor * (other.b - self.b),
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Shade for Lab<T> {
+impl<WP, T> Shade for LabSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Lab<T> {
-        Lab {
+    fn lighten(&self, amount: T) -> LabSpace<WP, T> {
+        LabSpace {
             l: self.l + amount,
             a: self.a,
             b: self.b,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> GetHue for Lab<T> {
+impl<WP, T> GetHue for LabSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
     type Hue = LabHue<T>;
 
     fn get_hue(&self) -> Option<LabHue<T>> {
@@ -119,152 +161,210 @@ impl<T: Float> Default for Lab<T> {
     }
 }
 
-impl<T: Float> Add<Lab<T>> for Lab<T> {
-    type Output = Lab<T>;
 
-    fn add(self, other: Lab<T>) -> Lab<T> {
-        Lab {
+impl<WP, T> Add<LabSpace<WP, T>> for LabSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP, T>;
+
+    fn add(self, other: LabSpace<WP, T>) -> LabSpace<WP, T> {
+        LabSpace {
             l: self.l + other.l,
             a: self.a + other.a,
             b: self.b + other.b,
+            _wp: PhantomData,
         }
     }
 }
 
-impl<T: Float> Add<T> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Add<T> for LabSpace<WP, T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP, T>;
 
-    fn add(self, c: T) -> Lab<T> {
-        Lab {
+    fn add(self, c: T) -> LabSpace<WP, T> {
+        LabSpace {
             l: self.l + c,
             a: self.a + c,
             b: self.b + c,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Sub<Lab<T>> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Sub<LabSpace<WP,T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn sub(self, other: Lab<T>) -> Lab<T> {
-        Lab {
+    fn sub(self, other: LabSpace<WP,T>) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l - other.l,
             a: self.a - other.a,
             b: self.b - other.b,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Sub<T> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Sub<T> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn sub(self, c: T) -> Lab<T> {
-        Lab {
+    fn sub(self, c: T) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l - c,
             a: self.a - c,
             b: self.b - c,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Mul<Lab<T>> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Mul<LabSpace<WP,T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn mul(self, other: Lab<T>) -> Lab<T> {
-        Lab {
+    fn mul(self, other: LabSpace<WP,T>) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l * other.l,
             a: self.a * other.a,
             b: self.b * other.b,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Mul<T> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Mul<T> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn mul(self, c: T) -> Lab<T> {
-        Lab {
+    fn mul(self, c: T) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l * c,
             a: self.a * c,
             b: self.b * c,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Div<Lab<T>> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Div<LabSpace<WP,T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn div(self, other: Lab<T>) -> Lab<T> {
-        Lab {
+    fn div(self, other: LabSpace<WP,T>) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l / other.l,
             a: self.a / other.a,
             b: self.b / other.b,
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> Div<T> for Lab<T> {
-    type Output = Lab<T>;
+impl<WP, T> Div<T> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    type Output = LabSpace<WP,T>;
 
-    fn div(self, c: T) -> Lab<T> {
-        Lab {
+    fn div(self, c: T) -> LabSpace<WP,T> {
+        LabSpace {
             l: self.l / c,
             a: self.a / c,
             b: self.b / c,
+            _wp: PhantomData
         }
     }
 }
 
-from_color!(to Lab from Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl);
+// from_color!(to Lab from Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl);
 
-alpha_from!(Lab {Rgb, Xyz, Yxy, Luma, Lch, Hsv, Hsl, Color});
+// alpha_from!(LabSpace {Rgb, Xyz, Yxy, Luma, Lch, Hsv, Hsl, Color});
 
-impl<T: Float> From<Xyz<T>> for Lab<T> {
-    fn from(xyz: Xyz<T>) -> Lab<T> {
-        Lab {
-            l: (f(xyz.y / flt(Y_N)) * flt(116.0) - flt(16.0)) / flt(100.0),
-            a: (f(xyz.x / flt(X_N)) - f(xyz.y / flt(Y_N))) * flt(500.0) / flt(128.0),
-            b: (f(xyz.y / flt(Y_N)) - f(xyz.z / flt(Z_N))) * flt(200.0) / flt(128.0),
+impl<WP, T> From<Xyz<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(xyz: Xyz<T>) -> LabSpace<WP,T> {
+        let wp_xyz: Xyz<T> = WP::get_yxy().into();
+
+        LabSpace {
+            l: (f(xyz.y / wp_xyz.y) * flt(116.0) - flt(16.0)) / flt(100.0),
+            a: (f(xyz.x / wp_xyz.x) - f(xyz.y / wp_xyz.y)) * flt(500.0) / flt(128.0),
+            b: (f(xyz.y / wp_xyz.y) - f(xyz.z / wp_xyz.z)) * flt(200.0) / flt(128.0),
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> From<Yxy<T>> for Lab<T> {
-    fn from(yxy: Yxy<T>) -> Lab<T> {
+impl<WP, T> From<Yxy<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(yxy: Yxy<T>) -> LabSpace<WP,T> {
         Xyz::from(yxy).into()
     }
 }
 
-impl<T: Float> From<Rgb<T>> for Lab<T> {
-    fn from(rgb: Rgb<T>) -> Lab<T> {
+impl<WP, T> From<Rgb<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(rgb: Rgb<T>) -> LabSpace<WP,T> {
         Xyz::from(rgb).into()
     }
 }
 
-impl<T: Float> From<Luma<T>> for Lab<T> {
-    fn from(luma: Luma<T>) -> Lab<T> {
+impl<WP, T> From<Luma<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(luma: Luma<T>) -> LabSpace<WP,T> {
         Xyz::from(luma).into()
     }
 }
 
-impl<T: Float> From<Lch<T>> for Lab<T> {
-    fn from(lch: Lch<T>) -> Lab<T> {
-        Lab {
+impl<WP, T> From<LchSpace<WP, T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lch: LchSpace<WP, T>) -> LabSpace<WP,T> {
+        LabSpace {
             l: lch.l,
             a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
             b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
+            _wp: PhantomData
         }
     }
 }
 
-impl<T: Float> From<Hsv<T>> for Lab<T> {
-    fn from(hsv: Hsv<T>) -> Lab<T> {
+impl<WP, T> From<Hsv<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(hsv: Hsv<T>) -> LabSpace<WP,T> {
         Xyz::from(hsv).into()
     }
 }
 
-impl<T: Float> From<Hsl<T>> for Lab<T> {
-    fn from(hsl: Hsl<T>) -> Lab<T> {
+impl<WP, T> From<Hsl<T>> for LabSpace<WP,T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(hsl: Hsl<T>) -> LabSpace<WP,T> {
         Xyz::from(hsl).into()
     }
 }

@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Color, Alpha, Rgb, Rgba, clamp, flt};
+use { Alpha, Rgb, Rgba, clamp, flt};
 
 use pixel::RgbPixel;
 
@@ -113,23 +113,23 @@ impl<T: Float> Srgb<T> {
     }
 }
 
-impl<T: Float> From<Rgb<T>> for Srgb<T> {
-    fn from(rgb: Rgb<T>) -> Srgb<T> {
-        Rgba::from(rgb).into()
-    }
-}
-
-impl<T: Float> From<Rgba<T>> for Srgb<T> {
-    fn from(rgba: Rgba<T>) -> Srgb<T> {
-        Srgb::from_linear(rgba)
-    }
-}
-
-impl<T: Float> From<Color<T>> for Srgb<T> {
-    fn from(color: Color<T>) -> Srgb<T> {
-        Rgb::from(color).into()
-    }
-}
+// impl<T: Float> From<Rgb<T>> for Srgb<T> {
+//     fn from(rgb: Rgb<T>) -> Srgb<T> {
+//         Rgba::from(rgb).into()
+//     }
+// }
+//
+// impl<T: Float> From<Rgba<T>> for Srgb<T> {
+//     fn from(rgba: Rgba<T>) -> Srgb<T> {
+//         Srgb::from_linear(rgba)
+//     }
+// }
+//
+// impl<T: Float> From<Color<T>> for Srgb<T> {
+//     fn from(color: Color<T>) -> Srgb<T> {
+//         Rgb::from(color).into()
+//     }
+// }
 
 fn from_srgb<T: Float>(x: T) -> T {
     if x <= flt(0.04045) {

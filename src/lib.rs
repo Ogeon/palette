@@ -54,7 +54,7 @@ extern crate phf;
 
 use num::{Float, ToPrimitive, NumCast};
 
-use pixel::{Srgb, GammaRgb};
+// use pixel::{Srgb, GammaRgb};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -66,57 +66,58 @@ pub use lch::{Lch, Lcha};
 pub use hsv::{Hsv, Hsva};
 pub use hsl::{Hsl, Hsla};
 pub use yxy::{Yxy, Yxya};
+pub use white_point::{WhitePoint, D50, D65};
 
 pub use hues::{LabHue, RgbHue};
 
-macro_rules! from_color {
-    (to $to:ident from $($from:ident),+) => (
-        impl<T:Float> From<Color<T>> for $to<T> {
-            fn from(color: Color<T>) -> $to<T> {
-                match color {
-                    Color::$to(c) => c,
-                    $(Color::$from(c) => c.into(),)+
-                }
-            }
-        }
-    )
-}
-
-macro_rules! alpha_from {
-    ($self_ty:ident {$($other:ident),+}) => (
-        impl<T: Float> From<Alpha<$self_ty<T>, T>> for $self_ty<T> {
-            fn from(color: Alpha<$self_ty<T>, T>) -> $self_ty<T> {
-                color.color
-            }
-        }
-
-        $(
-            impl<T: Float> From<Alpha<$other<T>, T>> for Alpha<$self_ty<T>, T> {
-                fn from(other: Alpha<$other<T>, T>) -> Alpha<$self_ty<T>, T> {
-                    Alpha {
-                        color: other.color.into(),
-                        alpha: other.alpha,
-                    }
-                }
-            }
-
-            impl<T: Float> From<$other<T>> for Alpha<$self_ty<T>, T> {
-                fn from(color: $other<T>) -> Alpha<$self_ty<T>, T> {
-                    Alpha {
-                        color: color.into(),
-                        alpha: T::one(),
-                    }
-                }
-            }
-
-            impl<T: Float> From<Alpha<$other<T>, T>> for $self_ty<T> {
-                fn from(other: Alpha<$other<T>, T>) -> $self_ty<T> {
-                    other.color.into()
-                }
-            }
-        )+
-    )
-}
+// macro_rules! from_color {
+//     (to $to:ident from $($from:ident),+) => (
+//         impl<T:Float> From<Color<T>> for $to<T> {
+//             fn from(color: Color<T>) -> $to<T> {
+//                 match color {
+//                     Color::$to(c) => c,
+//                     $(Color::$from(c) => c.into(),)+
+//                 }
+//             }
+//         }
+//     )
+// }
+//
+// macro_rules! alpha_from {
+//     ($self_ty:ident {$($other:ident),+}) => (
+//         impl<T: Float> From<Alpha<$self_ty<T>, T>> for $self_ty<T> {
+//             fn from(color: Alpha<$self_ty<T>, T>) -> $self_ty<T> {
+//                 color.color
+//             }
+//         }
+//
+//         $(
+//             impl<T: Float> From<Alpha<$other<T>, T>> for Alpha<$self_ty<T>, T> {
+//                 fn from(other: Alpha<$other<T>, T>) -> Alpha<$self_ty<T>, T> {
+//                     Alpha {
+//                         color: other.color.into(),
+//                         alpha: other.alpha,
+//                     }
+//                 }
+//             }
+//
+//             impl<T: Float> From<$other<T>> for Alpha<$self_ty<T>, T> {
+//                 fn from(color: $other<T>) -> Alpha<$self_ty<T>, T> {
+//                     Alpha {
+//                         color: color.into(),
+//                         alpha: T::one(),
+//                     }
+//                 }
+//             }
+//
+//             impl<T: Float> From<Alpha<$other<T>, T>> for $self_ty<T> {
+//                 fn from(other: Alpha<$other<T>, T>) -> $self_ty<T> {
+//                     other.color.into()
+//                 }
+//             }
+//         )+
+//     )
+// }
 
 //Helper macro for approximate component wise comparison. Most color spaces
 //are in roughly the same ranges, so this epsilon should be alright.
@@ -295,125 +296,127 @@ mod hsl;
 
 mod hues;
 
+mod white_point;
+mod rgb_variant;
 mod tristimulus;
 
-macro_rules! make_color {
-    ($(
-        #[$variant_comment:meta]
-        $variant:ident $(and $($representations:ident),+ )* {$(
-            #[$ctor_comment:meta]
-            $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
-        )+}
-    )+) => (
-
-        ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<T = f32> = Alpha<Color<T>, T>;
-
-        ///A generic color type.
-        ///
-        ///The `Color` may belong to any color space and it may change
-        ///depending on which operation is performed. That makes it immune to
-        ///the "without conversion" rule of the operations it supports. The
-        ///color spaces are selected as follows:
-        ///
-        /// * `Mix`: RGB for no particular reason, except that it's intuitive.
-        /// * `Shade`: CIE L*a*b* for its luminance component.
-        /// * `Hue` and `GetHue`: CIE L*C*h° for its hue component and how it preserves the apparent lightness.
-        /// * `Saturate`: CIE L*C*h° for its chromaticity component and how it preserves the apparent lightness.
-        ///
-        ///It's not recommended to use `Color` when full control is necessary,
-        ///but it can easily be converted to a fixed color space in those
-        ///cases.
-        #[derive(Clone, Copy, Debug)]
-        pub enum Color<T:Float = f32> {
-            $(#[$variant_comment] $variant($variant<T>)),+
-        }
-
-        impl<T:Float> Color<T> {
-            $(
-                $(
-                    #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<T> {
-                        Color::$variant($variant::$ctor_original($($ctor_field),*))
-                    }
-                )+
-            )+
-        }
-
-        ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T:Float> Alpha<Color<T>, T> {
-            $(
-                $(
-                    #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<T> {
-                        Alpha::<$variant<T>, T>::$ctor_original($($ctor_field,)* alpha).into()
-                    }
-                )+
-            )+
-        }
-
-        impl<T:Float> Mix for Color<T> {
-            type Scalar = T;
-
-            fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
-                Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
-            }
-        }
-
-        impl<T:Float> Shade for Color<T> {
-            type Scalar = T;
-
-            fn lighten(&self, amount: T) -> Color<T> {
-                Lab::from(*self).lighten(amount).into()
-            }
-        }
-
-        impl<T:Float> GetHue for Color<T> {
-            type Hue = LabHue<T>;
-
-            fn get_hue(&self) -> Option<LabHue<T>> {
-                Lch::from(*self).get_hue()
-            }
-        }
-
-        impl<T:Float> Hue for Color<T> {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<T> {
-                Lch::from(*self).with_hue(hue).into()
-            }
-
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<T> {
-                Lch::from(*self).shift_hue(amount).into()
-            }
-        }
-
-        impl<T:Float> Saturate for Color<T> {
-            type Scalar = T;
-
-            fn saturate(&self, factor: T) -> Color<T> {
-                Lch::from(*self).saturate(factor).into()
-            }
-        }
-
-        $(
-            impl<T:Float> From<$variant<T>> for Color<T> {
-                fn from(color: $variant<T>) -> Color<T> {
-                    Color::$variant(color)
-                }
-            }
-
-            $($(
-                impl<T:Float> From<$representations<T>> for Color<T> {
-                    fn from(color: $representations<T>) -> Color<T> {
-                        Color::$variant(color.into())
-                    }
-                }
-            )+)*
-        )+
-
-        alpha_from!(Color {$($variant),+});
-
-    )
-}
+// macro_rules! make_color {
+//     ($(
+//         #[$variant_comment:meta]
+//         $variant:ident $(and $($representations:ident),+ )* {$(
+//             #[$ctor_comment:meta]
+//             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
+//         )+}
+//     )+) => (
+//
+//         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
+//         pub type Colora<T = f32> = Alpha<Color<T>, T>;
+//
+//         ///A generic color type.
+//         ///
+//         ///The `Color` may belong to any color space and it may change
+//         ///depending on which operation is performed. That makes it immune to
+//         ///the "without conversion" rule of the operations it supports. The
+//         ///color spaces are selected as follows:
+//         ///
+//         /// * `Mix`: RGB for no particular reason, except that it's intuitive.
+//         /// * `Shade`: CIE L*a*b* for its luminance component.
+//         /// * `Hue` and `GetHue`: CIE L*C*h° for its hue component and how it preserves the apparent lightness.
+//         /// * `Saturate`: CIE L*C*h° for its chromaticity component and how it preserves the apparent lightness.
+//         ///
+//         ///It's not recommended to use `Color` when full control is necessary,
+//         ///but it can easily be converted to a fixed color space in those
+//         ///cases.
+//         // #[derive(Clone, Copy, Debug)]
+//         pub enum Color<T:Float = f32> {
+//             $(#[$variant_comment] $variant($variant<T>)),+
+//         }
+//
+//         impl<T:Float> Color<T> {
+//             $(
+//                 $(
+//                     #[$ctor_comment]
+//                     pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<T> {
+//                         Color::$variant($variant::$ctor_original($($ctor_field),*))
+//                     }
+//                 )+
+//             )+
+//         }
+//
+//         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
+//         impl<T:Float> Alpha<Color<T>, T> {
+//             $(
+//                 $(
+//                     #[$ctor_comment]
+//                     pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<T> {
+//                         Alpha::<$variant<T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+//                     }
+//                 )+
+//             )+
+//         }
+//
+//         impl<T:Float> Mix for Color<T> {
+//             type Scalar = T;
+//
+//             fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
+//                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
+//             }
+//         }
+//
+//         impl<T:Float> Shade for Color<T> {
+//             type Scalar = T;
+//
+//             fn lighten(&self, amount: T) -> Color<T> {
+//                 Lab::from(*self).lighten(amount).into()
+//             }
+//         }
+//
+//         impl<T:Float> GetHue for Color<T> {
+//             type Hue = LabHue<T>;
+//
+//             fn get_hue(&self) -> Option<LabHue<T>> {
+//                 Lch::from(*self).get_hue()
+//             }
+//         }
+//
+//         impl<T:Float> Hue for Color<T> {
+//             fn with_hue(&self, hue: LabHue<T>) -> Color<T> {
+//                 Lch::from(*self).with_hue(hue).into()
+//             }
+//
+//             fn shift_hue(&self, amount: LabHue<T>) -> Color<T> {
+//                 Lch::from(*self).shift_hue(amount).into()
+//             }
+//         }
+//
+//         impl<T:Float> Saturate for Color<T> {
+//             type Scalar = T;
+//
+//             fn saturate(&self, factor: T) -> Color<T> {
+//                 Lch::from(*self).saturate(factor).into()
+//             }
+//         }
+//
+//         $(
+//             impl<T:Float> From<$variant<T>> for Color<T> {
+//                 fn from(color: $variant<T>) -> Color<T> {
+//                     Color::$variant(color)
+//                 }
+//             }
+//
+//             $($(
+//                 impl<T:Float> From<$representations<T>> for Color<T> {
+//                     fn from(color: $representations<T>) -> Color<T> {
+//                         Color::$variant(color.into())
+//                     }
+//                 }
+//             )+)*
+//         )+
+//
+//         // alpha_from!(Color {$($variant),+});
+//
+//     )
+// }
 
 fn clamp<T:Float>(v: T, min: T, max: T) -> T {
     if v < min {
@@ -425,61 +428,61 @@ fn clamp<T:Float>(v: T, min: T, max: T) -> T {
     }
 }
 
-make_color! {
-    ///Linear luminance.
-    Luma {
-        ///Linear luminance.
-        y(luma: T)[alpha: T] => new;
-
-        ///Linear luminance from an 8 bit value.
-        y_u8(luma: u8)[alpha: u8] => new_u8;
-    }
-
-    ///Linear RGB.
-    Rgb and Srgb, GammaRgb {
-        ///Linear RGB.
-        rgb(red: T, green: T, blue: T)[alpha: T] => new;
-
-        ///Linear RGB from 8 bit values.
-        rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
-    }
-
-    ///CIE 1931 XYZ.
-    Xyz {
-        ///CIE XYZ.
-        xyz(x: T, y: T, z: T)[alpha: T] => new;
-    }
-
-    ///CIE 1931 Yxy.
-    Yxy {
-        ///CIE Yxy.
-        yxy(x: T, y: T, luma: T)[alpha: T] => new;
-    }
-
-    ///CIE L*a*b* (CIELAB).
-    Lab {
-        ///CIE L*a*b*.
-        lab(l: T, a: T, b: T)[alpha: T] => new;
-    }
-
-    ///CIE L*C*h°, a polar version of CIE L*a*b*.
-    Lch {
-        ///CIE L*C*h°.
-        lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
-    }
-
-    ///Linear HSV, a cylindrical version of RGB.
-    Hsv {
-        ///Linear HSV.
-        hsv(hue: RgbHue<T>, saturation: T, value: T)[alpha: T] => new;
-    }
-
-    ///Linear HSL, a cylindrical version of RGB.
-    Hsl {
-        ///Linear HSL.
-        hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
-    }
-}
+// make_color! {
+//     ///Linear luminance.
+//     Luma {
+//         ///Linear luminance.
+//         y(luma: T)[alpha: T] => new;
+//
+//         ///Linear luminance from an 8 bit value.
+//         y_u8(luma: u8)[alpha: u8] => new_u8;
+//     }
+//
+//     ///Linear RGB.
+//     Rgb and Srgb, GammaRgb {
+//         ///Linear RGB.
+//         rgb(red: T, green: T, blue: T)[alpha: T] => new;
+//
+//         ///Linear RGB from 8 bit values.
+//         rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
+//     }
+//
+//     ///CIE 1931 XYZ.
+//     Xyz {
+//         ///CIE XYZ.
+//         xyz(x: T, y: T, z: T)[alpha: T] => new;
+//     }
+//
+//     ///CIE 1931 Yxy.
+//     Yxy {
+//         ///CIE Yxy.
+//         yxy(x: T, y: T, luma: T)[alpha: T] => new;
+//     }
+//
+//     ///CIE L*a*b* (CIELAB).
+//     Lab {
+//         ///CIE L*a*b*.
+//         lab(l: T, a: T, b: T)[alpha: T] => new;
+//     }
+//
+//     ///CIE L*C*h°, a polar version of CIE L*a*b*.
+//     Lch {
+//         ///CIE L*C*h°.
+//         lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
+//     }
+//
+//     ///Linear HSV, a cylindrical version of RGB.
+//     Hsv {
+//         ///Linear HSV.
+//         hsv(hue: RgbHue<T>, saturation: T, value: T)[alpha: T] => new;
+//     }
+//
+//     ///Linear HSL, a cylindrical version of RGB.
+//     Hsl {
+//         ///Linear HSL.
+//         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
+//     }
+// }
 
 ///A trait for clamping and checking if colors are within their ranges.
 pub trait Limited {

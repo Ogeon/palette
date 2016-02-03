@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp, flt};
+use { Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp, flt};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
@@ -195,9 +195,9 @@ impl<T: Float> Sub<T> for Hsl<T> {
     }
 }
 
-from_color!(to Hsl from Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv);
+// from_color!(to Hsl from Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv);
 
-alpha_from!(Hsl {Rgb, Xyz, Yxy, Luma, Lab, Lch, Hsv, Color});
+// alpha_from!(Hsl {Rgb, Xyz, Yxy, Luma, Lab, Lch, Hsv, Color});
 
 impl<T: Float> From<Rgb<T>> for Hsl<T> {
     fn from(rgb: Rgb<T>) -> Hsl<T> {

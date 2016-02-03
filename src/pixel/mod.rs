@@ -4,11 +4,11 @@ use num::Float;
 
 use {clamp, flt};
 
-pub use self::srgb::Srgb;
-pub use self::gamma_rgb::GammaRgb;
+// pub use self::srgb::Srgb;
+// pub use self::gamma_rgb::GammaRgb;
 
-mod srgb;
-mod gamma_rgb;
+// mod srgb;
+// mod gamma_rgb;
 
 ///A conversion trait for RGB pixel formats.
 ///

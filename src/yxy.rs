@@ -2,7 +2,10 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt, Xyz};
+use { Alpha, Rgb, Luma, Hsv, Hsl, Limited, Mix, Shade, clamp, flt, Xyz};
+use lab::LabSpace;
+use lch::LchSpace;
+use white_point::WhitePoint;
 
 const D65_X: f64 = 0.312727;
 const D65_Y: f64 = 0.329023;
@@ -210,9 +213,9 @@ impl<T: Float> Div<T> for Yxy<T> {
     }
 }
 
-from_color!(to Yxy from Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl);
+// from_color!(to Yxy from Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl);
 
-alpha_from!(Yxy {Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
+// alpha_from!(Yxy {Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
 
 impl<T: Float> From<Xyz<T>> for Yxy<T> {
     fn from(xyz: Xyz<T>) -> Yxy<T> {
@@ -238,15 +241,21 @@ impl<T: Float> From<Luma<T>> for Yxy<T> {
     }
 }
 
-impl<T: Float> From<Lab<T>> for Yxy<T> {
-    fn from(lab: Lab<T>) -> Yxy<T> {
+impl<WP, T> From<LabSpace<WP, T>> for Yxy<T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lab: LabSpace<WP, T>) -> Yxy<T> {
         Xyz::from(lab).into()
     }
 }
 
-impl<T: Float> From<Lch<T>> for Yxy<T> {
-    fn from(lch: Lch<T>) -> Yxy<T> {
-        Lab::from(lch).into()
+impl<WP, T> From<LchSpace<WP, T>> for Yxy<T>
+    where T: Float,
+        WP: WhitePoint<T>
+{
+    fn from(lch: LchSpace<WP, T>) -> Yxy<T> {
+        LabSpace::from(lch).into()
     }
 }
 
