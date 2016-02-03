@@ -2,7 +2,10 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Alpha, Limited, Mix, Shade, FromColor,  Rgb, Lab, Yxy, Luma, clamp, flt};
+use {Alpha, Yxy, Rgb, Luma, Lab};
+use {Limited, Mix, Shade, FromColor, ComponentWise};
+use {clamp, flt};
+
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
@@ -157,6 +160,26 @@ impl<T: Float> Shade for Xyz<T> {
             x: self.x,
             y: self.y + amount,
             z: self.z,
+        }
+    }
+}
+
+impl<T: Float> ComponentWise for Xyz<T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Xyz<T>, mut f: F) -> Xyz<T> {
+        Xyz {
+            x: f(self.x, other.x),
+            y: f(self.y, other.y),
+            z: f(self.z, other.z),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Xyz<T> {
+        Xyz {
+            x: f(self.x),
+            y: f(self.y),
+            z: f(self.z),
         }
     }
 }

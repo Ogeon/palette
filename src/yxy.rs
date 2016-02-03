@@ -2,7 +2,9 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Alpha, Xyz, Luma, Limited, Mix, Shade, FromColor, clamp, flt};
+use {Alpha, Luma, Xyz};
+use {Limited, Mix, Shade, FromColor, ComponentWise};
+use {clamp, flt};
 
 const D65_X: f64 = 0.312727;
 const D65_Y: f64 = 0.329023;
@@ -123,6 +125,26 @@ impl<T: Float> Shade for Yxy<T> {
             x: self.x,
             y: self.y,
             luma: self.luma + amount,
+        }
+    }
+}
+
+impl<T: Float> ComponentWise for Yxy<T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Yxy<T>, mut f: F) -> Yxy<T> {
+        Yxy {
+            x: f(self.x, other.x),
+            y: f(self.y, other.y),
+            luma: f(self.luma, other.luma),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Yxy<T> {
+        Yxy {
+            x: f(self.x),
+            y: f(self.y),
+            luma: f(self.luma),
         }
     }
 }

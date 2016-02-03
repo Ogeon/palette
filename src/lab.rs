@@ -2,7 +2,10 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Alpha, Xyz, Limited, Mix, Shade, GetHue, LabHue, FromColor, Lch, clamp, flt};
+use {Alpha, Xyz, Lch, LabHue};
+use {Limited, Mix, Shade, GetHue, FromColor, ComponentWise};
+use {clamp, flt};
+
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
@@ -151,6 +154,26 @@ impl<T: Float> GetHue for Lab<T> {
             None
         } else {
             Some(LabHue::from_radians(self.b.atan2(self.a)))
+        }
+    }
+}
+
+impl<T: Float> ComponentWise for Lab<T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Lab<T>, mut f: F) -> Lab<T> {
+        Lab {
+            l: f(self.l, other.l),
+            a: f(self.a, other.a),
+            b: f(self.b, other.b),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Lab<T> {
+        Lab {
+            l: f(self.l),
+            a: f(self.a),
+            b: f(self.b),
         }
     }
 }

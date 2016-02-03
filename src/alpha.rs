@@ -4,7 +4,8 @@ use num::Float;
 
 use approx::ApproxEq;
 
-use {Mix, Shade, GetHue, Hue, Saturate, Limited, clamp};
+use {Mix, Shade, GetHue, Hue, Saturate, Limited, Blend, ComponentWise, clamp};
+use blend::PreAlpha;
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -103,6 +104,39 @@ impl<C: Limited, T: Float> Limited for Alpha<C, T> {
     fn clamp_self(&mut self) {
         self.color.clamp_self();
         self.alpha = clamp(self.alpha, T::zero(), T::one());
+    }
+}
+
+impl<C: Blend, T: Float> Blend for Alpha<C, T> where
+    C::Color: ComponentWise<Scalar=T>,
+    Alpha<C, T>: Into<Alpha<C::Color, T>> + From<Alpha<C::Color, T>>,
+{
+    type Color = C::Color;
+
+    fn into_premultiplied(self) -> PreAlpha<C::Color, T> {
+        PreAlpha::<C::Color, T>::from(self.into())
+    }
+
+    fn from_premultiplied(color: PreAlpha<C::Color, T>) -> Alpha<C, T> {
+        Alpha::<C::Color, T>::from(color).into()
+    }
+}
+
+impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for Alpha<C, T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Alpha<C, T>, mut f: F) -> Alpha<C, T> {
+        Alpha {
+            alpha: f(self.alpha, other.alpha),
+            color: self.color.component_wise(&other.color, f),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Alpha<C, T> {
+        Alpha {
+            alpha: f(self.alpha),
+            color: self.color.component_wise_self(f),
+        }
     }
 }
 
