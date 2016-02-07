@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, RgbHue, clamp, flt};
+use {Alpha, Xyz, Luma, Hsl, Hsv, Limited, Mix, Shade, GetHue, RgbHue, FromColor, clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
@@ -122,6 +122,87 @@ impl<T: Float> Alpha<Rgb<T>, T> {
             clamp(self.alpha, T::zero(), T::one())
         )
     }
+}
+
+impl<T: Float> FromColor<T> for Rgb<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        Rgb {
+            red: xyz.x * flt(3.2406) + xyz.y * flt(-1.5372) + xyz.z * flt(-0.4986),
+            green: xyz.x * flt(-0.9689) + xyz.y * flt(1.8758) + xyz.z * flt(0.0415),
+            blue: xyz.x * flt(0.0557) + xyz.y * flt(-0.2040) + xyz.z * flt(1.0570),
+        }
+    }
+
+
+    fn from_rgb(rgb: Rgb<T>) -> Self {
+        rgb
+    }
+
+    fn from_hsl(hsl: Hsl<T>) -> Self {
+        let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
+        let h = hsl.hue.to_positive_degrees() / flt(60.0);
+        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
+        let m = hsl.lightness - c * flt(0.5);
+
+        let (red, green, blue) = if h >= T::zero() && h < T::one() {
+            (c, x, T::zero())
+        } else if h >= T::one() && h < flt(2.0) {
+            (x, c, T::zero())
+        } else if h >= flt(2.0) && h < flt(3.0) {
+            (T::zero(), c, x)
+        } else if h >= flt(3.0) && h < flt(4.0) {
+            (T::zero(), x, c)
+        } else if h >= flt(4.0) && h < flt(5.0) {
+            (x, T::zero(), c)
+        } else {
+            (c, T::zero(), x)
+        };
+
+
+        Rgb {
+            red: red + m,
+            green: green + m,
+            blue: blue + m,
+        }
+    }
+
+    fn from_hsv(hsv: Hsv<T>) -> Self {
+        let c = hsv.value * hsv.saturation;
+        let h = hsv.hue.to_positive_degrees() / flt(60.0);
+        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
+        let m = hsv.value - c;
+
+        let (red, green, blue) = if h >= T::zero() && h < T::one() {
+            (c, x, T::zero())
+        } else if h >= T::one() && h < flt(2.0) {
+            (x, c, T::zero())
+        } else if h >= flt(2.0) && h < flt(3.0) {
+            (T::zero(), c, x)
+        } else if h >= flt(3.0) && h < flt(4.0) {
+            (T::zero(), x, c)
+        } else if h >= flt(4.0) && h < flt(5.0) {
+            (x, T::zero(), c)
+        } else {
+            (c, T::zero(), x)
+        };
+
+
+        Rgb {
+            red: red + m,
+            green: green + m,
+            blue: blue + m,
+        }
+
+    }
+
+    fn from_luma(luma: Luma<T>) -> Self {
+        Rgb {
+            red: luma.luma,
+            green: luma.luma,
+            blue: luma.luma,
+        }
+    }
+
 }
 
 impl<T: Float> Limited for Rgb<T> {
@@ -282,108 +363,6 @@ impl<T: Float> Div<T> for Rgb<T> {
             red: self.red / c,
             green: self.green / c,
             blue: self.blue / c,
-        }
-    }
-}
-
-from_color!(to Rgb from Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl);
-
-alpha_from!(Rgb {Xyz, Yxy, Luma, Lab, Lch, Hsv, Hsl, Color});
-
-impl<T: Float> From<Luma<T>> for Rgb<T> {
-    fn from(luma: Luma<T>) -> Rgb<T> {
-        Rgb {
-            red: luma.luma,
-            green: luma.luma,
-            blue: luma.luma,
-        }
-    }
-}
-
-impl<T: Float> From<Xyz<T>> for Rgb<T> {
-    fn from(xyz: Xyz<T>) -> Rgb<T> {
-        Rgb {
-            red: xyz.x * flt(3.2406) + xyz.y * flt(-1.5372) + xyz.z * flt(-0.4986),
-            green: xyz.x * flt(-0.9689) + xyz.y * flt(1.8758) + xyz.z * flt(0.0415),
-            blue: xyz.x * flt(0.0557) + xyz.y * flt(-0.2040) + xyz.z * flt(1.0570),
-        }
-    }
-}
-
-impl<T: Float> From<Yxy<T>> for Rgb<T> {
-    fn from(yxy: Yxy<T>) -> Rgb<T> {
-        Xyz::from(yxy).into()
-    }
-}
-
-impl<T: Float> From<Lab<T>> for Rgb<T> {
-    fn from(lab: Lab<T>) -> Rgb<T> {
-        Xyz::from(lab).into()
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Rgb<T> {
-    fn from(lch: Lch<T>) -> Rgb<T> {
-        Lab::from(lch).into()
-    }
-}
-
-impl<T: Float> From<Hsv<T>> for Rgb<T> {
-    fn from(hsv: Hsv<T>) -> Rgb<T> {
-        let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / flt(60.0);
-        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
-        let m = hsv.value - c;
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < flt(2.0) {
-            (x, c, T::zero())
-        } else if h >= flt(2.0) && h < flt(3.0) {
-            (T::zero(), c, x)
-        } else if h >= flt(3.0) && h < flt(4.0) {
-            (T::zero(), x, c)
-        } else if h >= flt(4.0) && h < flt(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-
-        Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
-        }
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Rgb<T> {
-    fn from(hsl: Hsl<T>) -> Rgb<T> {
-        let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / flt(60.0);
-        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
-        let m = hsl.lightness - c * flt(0.5);
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < flt(2.0) {
-            (x, c, T::zero())
-        } else if h >= flt(2.0) && h < flt(3.0) {
-            (T::zero(), c, x)
-        } else if h >= flt(3.0) && h < flt(4.0) {
-            (T::zero(), x, c)
-        } else if h >= flt(4.0) && h < flt(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-
-        Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
         }
     }
 }

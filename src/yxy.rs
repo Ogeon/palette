@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt, Xyz};
+use {Alpha, Xyz, Luma, Limited, Mix, Shade, FromColor, clamp, flt};
 
 const D65_X: f64 = 0.312727;
 const D65_Y: f64 = 0.329023;
@@ -56,6 +56,29 @@ impl<T: Float> Alpha<Yxy<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> FromColor<T> for Yxy<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        let mut yxy = Yxy{ luma: xyz.y, ..Default::default() };
+        let sum = xyz.x + xyz.y + xyz.z;
+        // If denominator is zero, NAN or INFINITE leave x and y at the default 0
+        if sum.is_normal() {
+            yxy.x = xyz.x / sum;
+            yxy.y = xyz.y / sum;
+        }
+        yxy
+    }
+
+    fn from_yxy(yxy: Yxy<T>) -> Self {
+        yxy
+    }
+
+    // direct conversion implemented in Luma
+    fn from_luma(luma: Luma<T>) -> Self {
+        Yxy { luma: luma.luma, ..Default::default() }
+    }
+
 }
 
 impl<T: Float> Limited for Yxy<T> {
@@ -209,66 +232,6 @@ impl<T: Float> Div<T> for Yxy<T> {
         }
     }
 }
-
-from_color!(to Yxy from Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl);
-
-alpha_from!(Yxy {Xyz, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
-
-impl<T: Float> From<Xyz<T>> for Yxy<T> {
-    fn from(xyz: Xyz<T>) -> Yxy<T> {
-        let mut yxy = Yxy::new(T::zero(), T::zero(), xyz.y);
-        let sum = xyz.x + xyz.y + xyz.z;
-        // If denominator is zero, NAN or INFINITE leave x and y at the default 0
-        if sum.is_normal() {
-            yxy.x = xyz.x / sum;
-            yxy.y = xyz.y / sum;
-        }
-        yxy
-    }
-}
-
-impl<T: Float> From<Luma<T>> for Yxy<T> {
-    fn from(luma: Luma<T>) -> Yxy<T> {
-        // Use the D65 white point Yxy values for x and y as D65 is used as the default
-        Yxy {
-            x: flt(D65_X),
-            y: flt(D65_Y),
-            luma: luma.luma,
-        }
-    }
-}
-
-impl<T: Float> From<Lab<T>> for Yxy<T> {
-    fn from(lab: Lab<T>) -> Yxy<T> {
-        Xyz::from(lab).into()
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Yxy<T> {
-    fn from(lch: Lch<T>) -> Yxy<T> {
-        Lab::from(lch).into()
-    }
-}
-
-impl<T: Float> From<Rgb<T>> for Yxy<T> {
-    fn from(rgb: Rgb<T>) -> Yxy<T> {
-        Xyz::from(rgb).into()
-    }
-}
-
-
-impl<T: Float> From<Hsv<T>> for Yxy<T> {
-    fn from(hsv: Hsv<T>) -> Yxy<T> {
-        Rgb::from(hsv).into()
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Yxy<T> {
-    fn from(hsl: Hsl<T>) -> Yxy<T> {
-        Rgb::from(hsl).into()
-    }
-}
-
 
 #[cfg(test)]
 mod test {

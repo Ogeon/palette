@@ -2,8 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
-
+use {Alpha, Limited, Mix, Shade, FromColor,  Rgb, Lab, Yxy, Luma, clamp, flt};
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
@@ -53,6 +52,48 @@ impl<T: Float> Alpha<Xyz<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> FromColor<T> for Xyz<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        xyz
+    }
+
+    fn from_rgb(rgb: Rgb<T>) -> Self {
+        Xyz {
+            x: rgb.red * flt(0.4124) + rgb.green * flt(0.3576) + rgb.blue * flt(0.1805),
+            y: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
+            z: rgb.red * flt(0.0193) + rgb.green * flt(0.1192) + rgb.blue * flt(0.9505),
+        }
+    }
+
+    fn from_yxy(yxy: Yxy<T>) -> Self {
+        let mut xyz = Xyz { y: yxy.luma, ..Default::default() };
+        // If denominator is zero, NAN or INFINITE leave x and z at the default 0
+        if yxy.y.is_normal() {
+            xyz.x = yxy.luma * yxy.x / yxy.y;
+            xyz.z = yxy.luma * ( T::one() - yxy.x - yxy.y ) / yxy.y;
+        }
+        xyz
+    }
+
+    fn from_lab(lab: Lab<T>) -> Self {
+        Xyz {
+            x: flt::<T,_>(X_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
+                (T::one() / flt(500.0)) * lab.a * flt(128.0)),
+            y: flt::<T,_>(Y_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
+            z: flt::<T,_>(Z_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
+                (T::one() / flt(200.0)) * lab.b * flt(128.0)),
+        }
+    }
+    fn from_luma(luma: Luma<T>) -> Self {
+        Xyz {
+            x: luma.luma * flt(X_N),
+            y: luma.luma,
+            z: luma.luma * flt(Z_N),
+        }
+    }
+
 }
 
 impl<T: Float> Limited for Xyz<T> {
@@ -202,74 +243,6 @@ impl<T: Float> Div<T> for Xyz<T> {
         }
     }
 }
-
-from_color!(to Xyz from Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl);
-
-alpha_from!(Xyz {Yxy, Rgb, Luma, Lab, Lch, Hsv, Hsl, Color});
-
-impl<T: Float> From<Yxy<T>> for Xyz<T> {
-    fn from(yxy: Yxy<T>) -> Xyz<T> {
-        let mut xyz = Xyz::new(T::zero(), yxy.luma, T::zero());
-        // If denominator is zero, NAN or INFINITE leave x and z at the default 0
-        if yxy.y.is_normal() {
-            xyz.x = yxy.luma * yxy.x / yxy.y;
-            xyz.z = yxy.luma * ( T::one() - yxy.x - yxy.y ) / yxy.y;
-        }
-        xyz
-    }
-}
-
-impl<T: Float> From<Rgb<T>> for Xyz<T> {
-    fn from(rgb: Rgb<T>) -> Xyz<T> {
-        Xyz {
-            x: rgb.red * flt(0.4124) + rgb.green * flt(0.3576) + rgb.blue * flt(0.1805),
-            y: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
-            z: rgb.red * flt(0.0193) + rgb.green * flt(0.1192) + rgb.blue * flt(0.9505),
-        }
-    }
-}
-
-impl<T: Float> From<Luma<T>> for Xyz<T> {
-    fn from(luma: Luma<T>) -> Xyz<T> {
-        // Use the D65 white point Xyz values for x and z as D65 is used as the default and scale by luma
-        Xyz {
-            x: luma.luma * flt(X_N),
-            y: luma.luma,
-            z: luma.luma * flt(Z_N),
-        }
-    }
-}
-
-impl<T: Float> From<Lab<T>> for Xyz<T> {
-    fn from(lab: Lab<T>) -> Xyz<T> {
-        Xyz {
-            x: flt::<T,_>(X_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
-                (T::one() / flt(500.0)) * lab.a * flt(128.0)),
-            y: flt::<T,_>(Y_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
-            z: flt::<T,_>(Z_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
-                (T::one() / flt(200.0)) * lab.b * flt(128.0)),
-        }
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Xyz<T> {
-    fn from(lch: Lch<T>) -> Xyz<T> {
-        Lab::from(lch).into()
-    }
-}
-
-impl<T: Float> From<Hsv<T>> for Xyz<T> {
-    fn from(hsv: Hsv<T>) -> Xyz<T> {
-        Rgb::from(hsv).into()
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Xyz<T> {
-    fn from(hsl: Hsl<T>) -> Xyz<T> {
-        Rgb::from(hsl).into()
-    }
-}
-
 
 fn f_inv<T: Float>(t: T) -> T {
     //(6/29)^2

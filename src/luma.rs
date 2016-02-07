@@ -1,8 +1,9 @@
 use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
+use std::default::Default;
 
-use {Color, Alpha, Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Limited, Mix, Shade, clamp, flt};
+use {Alpha, Rgb, Xyz, Yxy, Limited, Mix, Shade, FromColor, clamp, flt};
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
@@ -53,6 +54,31 @@ impl<T: Float> Alpha<Luma<T>, T> {
             alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
+}
+
+impl<T: Float> FromColor<T> for Luma<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        Luma {
+            luma: xyz.y,
+        }
+    }
+
+    fn from_yxy(yxy: Yxy<T>) -> Self {
+        Luma {
+            luma: yxy.luma,
+        }
+    }
+
+    fn from_rgb(rgb: Rgb<T>) -> Self {
+        Luma {
+            luma: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
+        }
+    }
+
+    fn from_luma(luma: Luma<T>) -> Self {
+        luma
+    }
+
 }
 
 impl<T: Float> Limited for Luma<T> {
@@ -176,58 +202,6 @@ impl<T: Float> Div<T> for Luma<T> {
         Luma {
             luma: self.luma / c,
         }
-    }
-}
-
-from_color!(to Luma from Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl);
-
-alpha_from!(Luma {Rgb, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Color});
-
-impl<T: Float> From<Rgb<T>> for Luma<T> {
-    fn from(rgb: Rgb<T>) -> Luma<T> {
-        Luma {
-            luma: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
-        }
-    }
-}
-
-impl<T: Float> From<Xyz<T>> for Luma<T> {
-    fn from(xyz: Xyz<T>) -> Luma<T> {
-        Luma {
-            luma: xyz.y,
-        }
-    }
-}
-
-impl<T: Float> From<Yxy<T>> for Luma<T> {
-    fn from(yxy: Yxy<T>) -> Luma<T> {
-        Luma {
-            luma: yxy.luma,
-        }
-    }
-}
-
-impl<T: Float> From<Lab<T>> for Luma<T> {
-    fn from(lab: Lab<T>) -> Luma<T> {
-        Xyz::from(lab).into()
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Luma<T> {
-    fn from(lch: Lch<T>) -> Luma<T> {
-        Xyz::from(lch).into()
-    }
-}
-
-impl<T: Float> From<Hsv<T>> for Luma<T> {
-    fn from(hsv: Hsv<T>) -> Luma<T> {
-        Rgb::from(hsv).into()
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Luma<T> {
-    fn from(hsl: Hsl<T>) -> Luma<T> {
-        Rgb::from(hsl).into()
     }
 }
 
