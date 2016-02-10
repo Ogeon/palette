@@ -132,36 +132,51 @@ make_hues! {
     struct RgbHue;
 }
 
-fn normalize_angle<T: Float>(mut deg: T) -> T {
-    let c180 = flt(180.0);
+fn normalize_angle<T: Float>(deg: T) -> T {
     let c360 = flt(360.0);
-    while deg > c180 {
-        deg = deg - c360;
-    }
-
-    while deg <= -c180 {
-        deg = deg + c360;
-    }
-
-    deg
+    let c180 = flt(180.0);
+    deg - ( ((deg + c180) / c360) - T::one() ).ceil() * c360
 }
 
-fn normalize_angle_positive<T: Float>(mut deg: T) -> T {
+fn normalize_angle_positive<T: Float>(deg: T) -> T {
     let c360 = flt(360.0);
-    while deg >= c360 {
-        deg = deg - c360;
-    }
-
-    while deg < T::zero() {
-        deg = deg + c360;
-    }
-
-    deg
+    deg - ((deg / c360).floor() * c360)
 }
 
 #[cfg(test)]
 mod test {
     use RgbHue;
+    use super::{normalize_angle, normalize_angle_positive};
+
+    #[test]
+    fn normalize_angle_0_360() {
+        let inp = [-1000.0_f32, -900.0 , -360.5, -360.0, -359.5, -240.0 , -180.5, -180.0, -179.5,
+            -90.0, -0.5, 0.0, 0.5, 90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 360.0, 360.5,
+             900.0, 1000.0 ];
+
+        let expected = [80.0_f32, 180.0, 359.5, 0.0, 0.5, 120.0, 179.5, 180.0, 180.5, 270.0,
+            359.5, 0.0, 0.5, 90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 0.0, 0.5, 180.0, 280.0];
+
+        let result: Vec<f32> = inp.iter().map(|x| normalize_angle_positive(*x) ).collect();
+        for (res, exp) in result.iter().zip(expected.iter()) {
+            assert_eq!(res, exp);
+        }
+    }
+
+    #[test]
+    fn normalize_angle_180_180() {
+        let inp = [-1000.0_f32, -900.0 , -360.5, -360.0, -359.5, -240.0 , -180.5, -180.0, -179.5,
+            -90.0, -0.5, 0.0, 0.5, 90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 360.0, 360.5,
+             900.0, 1000.0 ];
+
+        let expected = [80.0, 180.0, -0.5, 0.0, 0.5, 120.0, 179.5, 180.0, -179.5, -90.0, -0.5,
+            0.0, 0.5, 90.0, 179.5, 180.0, -179.5, -120.0, -0.5, 0.0, 0.5, 180.0, -80.0];
+
+        let result: Vec<f32> = inp.iter().map(|x| normalize_angle(*x) ).collect();
+        for (res, exp) in result.iter().zip(expected.iter()) {
+            assert_eq!(res, exp);
+        }
+    }
 
     #[test]
     fn float_conversion() {
