@@ -2,8 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl, Limited, Mix, Shade, GetHue, LabHue, clamp, flt};
-
+use {Alpha, Xyz, Limited, Mix, Shade, GetHue, LabHue, FromColor, Lch, clamp, flt};
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
@@ -53,6 +52,30 @@ impl<T: Float> Alpha<Lab<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> FromColor<T> for Lab<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        Lab {
+            l: (f(xyz.y / flt(Y_N)) * flt(116.0) - flt(16.0)) / flt(100.0),
+            a: (f(xyz.x / flt(X_N)) - f(xyz.y / flt(Y_N))) * flt(500.0) / flt(128.0),
+            b: (f(xyz.y / flt(Y_N)) - f(xyz.z / flt(Z_N))) * flt(200.0) / flt(128.0),
+        }
+    }
+
+    fn from_lab(lab: Lab<T>) -> Self {
+        lab
+    }
+
+    fn from_lch(lch: Lch<T>) -> Self {
+        Lab {
+            l: lch.l,
+            a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
+            b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
+        }
+    }
+
+
 }
 
 impl<T: Float> Limited for Lab<T> {
@@ -212,60 +235,6 @@ impl<T: Float> Div<T> for Lab<T> {
             a: self.a / c,
             b: self.b / c,
         }
-    }
-}
-
-from_color!(to Lab from Rgb, Luma, Xyz, Yxy, Lch, Hsv, Hsl);
-
-alpha_from!(Lab {Rgb, Xyz, Yxy, Luma, Lch, Hsv, Hsl, Color});
-
-impl<T: Float> From<Xyz<T>> for Lab<T> {
-    fn from(xyz: Xyz<T>) -> Lab<T> {
-        Lab {
-            l: (f(xyz.y / flt(Y_N)) * flt(116.0) - flt(16.0)) / flt(100.0),
-            a: (f(xyz.x / flt(X_N)) - f(xyz.y / flt(Y_N))) * flt(500.0) / flt(128.0),
-            b: (f(xyz.y / flt(Y_N)) - f(xyz.z / flt(Z_N))) * flt(200.0) / flt(128.0),
-        }
-    }
-}
-
-impl<T: Float> From<Yxy<T>> for Lab<T> {
-    fn from(yxy: Yxy<T>) -> Lab<T> {
-        Xyz::from(yxy).into()
-    }
-}
-
-impl<T: Float> From<Rgb<T>> for Lab<T> {
-    fn from(rgb: Rgb<T>) -> Lab<T> {
-        Xyz::from(rgb).into()
-    }
-}
-
-impl<T: Float> From<Luma<T>> for Lab<T> {
-    fn from(luma: Luma<T>) -> Lab<T> {
-        Xyz::from(luma).into()
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Lab<T> {
-    fn from(lch: Lch<T>) -> Lab<T> {
-        Lab {
-            l: lch.l,
-            a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
-            b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
-        }
-    }
-}
-
-impl<T: Float> From<Hsv<T>> for Lab<T> {
-    fn from(hsv: Hsv<T>) -> Lab<T> {
-        Xyz::from(hsv).into()
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Lab<T> {
-    fn from(hsl: Hsl<T>) -> Lab<T> {
-        Xyz::from(hsl).into()
     }
 }
 

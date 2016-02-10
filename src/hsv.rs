@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub};
 
-use {Color, Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, clamp, flt};
+use {Alpha, Rgb, Xyz, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, clamp, flt};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
@@ -51,6 +51,74 @@ impl<T: Float> Alpha<Hsv<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> FromColor<T> for Hsv<T> {
+    fn from_xyz(xyz: Xyz<T>) -> Self {
+        let rgb: Rgb<T> = Rgb::from_xyz(xyz);
+        Self::from_rgb(rgb)
+    }
+
+    fn from_rgb(rgb: Rgb<T>) -> Self {
+        enum Channel { Red, Green, Blue };
+
+        let val_min = rgb.red.min(rgb.green).min(rgb.blue);
+        let mut val_max = rgb.red;
+        let mut chan_max = Channel::Red;
+
+        if rgb.green > val_max {
+            chan_max = Channel::Green;
+            val_max = rgb.green;
+        }
+
+        if rgb.blue > val_max {
+            chan_max = Channel::Blue;
+            val_max = rgb.blue;
+        }
+
+        let diff = val_max - val_min;
+
+        let hue = if diff == T::zero() {
+            T::zero()
+        } else {
+            flt::<T,_>(60.0) * match chan_max {
+                Channel::Red => ((rgb.green - rgb.blue) / diff) % flt(6.0),
+                Channel::Green => ((rgb.blue - rgb.red) / diff + flt(2.0)),
+                Channel::Blue => ((rgb.red - rgb.green) / diff + flt(4.0)),
+            }
+        };
+
+        let saturation = if val_max == T::zero() {
+            T::zero()
+        } else {
+            diff / val_max
+        };
+
+        Hsv {
+            hue: hue.into(),
+            saturation: saturation,
+            value: val_max,
+        }
+    }
+
+    fn from_hsl(hsl: Hsl<T>) -> Self {
+        let x = hsl.saturation * if hsl.lightness < flt(0.5) {
+            hsl.lightness
+        } else {
+            T::one() - hsl.lightness
+        };
+
+        Hsv {
+            hue: hsl.hue,
+            saturation: x * flt(2.0) / (hsl.lightness + x),
+            value: hsl.lightness + x,
+        }
+    }
+
+    fn from_hsv(hsv: Hsv<T>) -> Self {
+        hsv
+    }
+
 }
 
 impl<T: Float> Limited for Hsv<T> {
@@ -190,101 +258,6 @@ impl<T: Float> Sub<T> for Hsv<T> {
             hue: self.hue - c,
             saturation: self.saturation - c,
             value: self.value - c,
-        }
-    }
-}
-
-from_color!(to Hsv from Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsl);
-
-alpha_from!(Hsv {Rgb, Xyz, Yxy, Luma, Lab, Lch, Hsl, Color});
-
-
-impl<T: Float> From<Rgb<T>> for Hsv<T> {
-    fn from(rgb: Rgb<T>) -> Hsv<T> {
-        enum Channel { Red, Green, Blue };
-
-        let val_min = rgb.red.min(rgb.green).min(rgb.blue);
-        let mut val_max = rgb.red;
-        let mut chan_max = Channel::Red;
-
-        if rgb.green > val_max {
-            chan_max = Channel::Green;
-            val_max = rgb.green;
-        }
-
-        if rgb.blue > val_max {
-            chan_max = Channel::Blue;
-            val_max = rgb.blue;
-        }
-
-        let diff = val_max - val_min;
-
-        let hue = if diff == T::zero() {
-            T::zero()
-        } else {
-            flt::<T,_>(60.0) * match chan_max {
-                Channel::Red => ((rgb.green - rgb.blue) / diff) % flt(6.0),
-                Channel::Green => ((rgb.blue - rgb.red) / diff + flt(2.0)),
-                Channel::Blue => ((rgb.red - rgb.green) / diff + flt(4.0)),
-            }
-        };
-
-        let saturation = if val_max == T::zero() {
-            T::zero()
-        } else {
-            diff / val_max
-        };
-
-        Hsv {
-            hue: hue.into(),
-            saturation: saturation,
-            value: val_max,
-        }
-    }
-}
-
-impl<T: Float> From<Luma<T>> for Hsv<T> {
-    fn from(luma: Luma<T>) -> Hsv<T> {
-        Rgb::from(luma).into()
-    }
-}
-
-impl<T: Float> From<Xyz<T>> for Hsv<T> {
-    fn from(xyz: Xyz<T>) -> Hsv<T> {
-        Rgb::from(xyz).into()
-    }
-}
-
-impl<T: Float> From<Yxy<T>> for Hsv<T> {
-    fn from(yxy: Yxy<T>) -> Hsv<T> {
-        Rgb::from(yxy).into()
-    }
-}
-
-impl<T: Float> From<Lab<T>> for Hsv<T> {
-    fn from(lab: Lab<T>) -> Hsv<T> {
-        Rgb::from(lab).into()
-    }
-}
-
-impl<T: Float> From<Lch<T>> for Hsv<T> {
-    fn from(lch: Lch<T>) -> Hsv<T> {
-        Rgb::from(lch).into()
-    }
-}
-
-impl<T: Float> From<Hsl<T>> for Hsv<T> {
-    fn from(hsl: Hsl<T>) -> Hsv<T> {
-        let x = hsl.saturation * if hsl.lightness < flt(0.5) {
-            hsl.lightness
-        } else {
-            T::one() - hsl.lightness
-        };
-
-        Hsv {
-            hue: hsl.hue,
-            saturation: x * flt(2.0) / (hsl.lightness + x),
-            value: hsl.lightness + x,
         }
     }
 }

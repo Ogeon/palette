@@ -68,55 +68,7 @@ pub use hsl::{Hsl, Hsla};
 pub use yxy::{Yxy, Yxya};
 
 pub use hues::{LabHue, RgbHue};
-
-macro_rules! from_color {
-    (to $to:ident from $($from:ident),+) => (
-        impl<T:Float> From<Color<T>> for $to<T> {
-            fn from(color: Color<T>) -> $to<T> {
-                match color {
-                    Color::$to(c) => c,
-                    $(Color::$from(c) => c.into(),)+
-                }
-            }
-        }
-    )
-}
-
-macro_rules! alpha_from {
-    ($self_ty:ident {$($other:ident),+}) => (
-        impl<T: Float> From<Alpha<$self_ty<T>, T>> for $self_ty<T> {
-            fn from(color: Alpha<$self_ty<T>, T>) -> $self_ty<T> {
-                color.color
-            }
-        }
-
-        $(
-            impl<T: Float> From<Alpha<$other<T>, T>> for Alpha<$self_ty<T>, T> {
-                fn from(other: Alpha<$other<T>, T>) -> Alpha<$self_ty<T>, T> {
-                    Alpha {
-                        color: other.color.into(),
-                        alpha: other.alpha,
-                    }
-                }
-            }
-
-            impl<T: Float> From<$other<T>> for Alpha<$self_ty<T>, T> {
-                fn from(color: $other<T>) -> Alpha<$self_ty<T>, T> {
-                    Alpha {
-                        color: color.into(),
-                        alpha: T::one(),
-                    }
-                }
-            }
-
-            impl<T: Float> From<Alpha<$other<T>, T>> for $self_ty<T> {
-                fn from(other: Alpha<$other<T>, T>) -> $self_ty<T> {
-                    other.color.into()
-                }
-            }
-        )+
-    )
-}
+pub use convert::{FromColor, IntoColor};
 
 //Helper macro for approximate component wise comparison. Most color spaces
 //are in roughly the same ranges, so this epsilon should be alright.
@@ -296,6 +248,7 @@ mod hsl;
 mod hues;
 
 mod tristimulus;
+mod convert;
 
 macro_rules! make_color {
     ($(
@@ -401,6 +354,21 @@ macro_rules! make_color {
                 }
             }
 
+            impl<T:Float> From<Alpha<$variant<T>, T>> for Color<T> {
+                fn from(color: Alpha<$variant<T>,T>) -> Color<T> {
+                    Color::$variant(color.color)
+                }
+            }
+
+            impl<T:Float> From<Alpha<$variant<T>, T>> for Alpha<Color<T>,T> {
+                fn from(color: Alpha<$variant<T>,T>) -> Alpha<Color<T>,T> {
+                    Alpha {
+                        color: Color::$variant(color.color),
+                        alpha: color.alpha,
+                    }
+                }
+            }
+
             $($(
                 impl<T:Float> From<$representations<T>> for Color<T> {
                     fn from(color: $representations<T>) -> Color<T> {
@@ -409,9 +377,6 @@ macro_rules! make_color {
                 }
             )+)*
         )+
-
-        alpha_from!(Color {$($variant),+});
-
     )
 }
 
