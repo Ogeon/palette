@@ -61,9 +61,9 @@ impl<T: Float> FromColor<T> for Xyz<T> {
 
     fn from_rgb(rgb: Rgb<T>) -> Self {
         Xyz {
-            x: rgb.red * flt(0.4124) + rgb.green * flt(0.3576) + rgb.blue * flt(0.1805),
-            y: rgb.red * flt(0.2126) + rgb.green * flt(0.7152) + rgb.blue * flt(0.0722),
-            z: rgb.red * flt(0.0193) + rgb.green * flt(0.1192) + rgb.blue * flt(0.9505),
+            x: rgb.red * flt(0.4124564) + rgb.green * flt(0.3575761) + rgb.blue * flt(0.1804375),
+            y: rgb.red * flt(0.2126729) + rgb.green * flt(0.7151522) + rgb.blue * flt(0.0721750),
+            z: rgb.red * flt(0.0193339) + rgb.green * flt(0.1191920) + rgb.blue * flt(0.9503041),
         }
     }
 
@@ -77,13 +77,32 @@ impl<T: Float> FromColor<T> for Xyz<T> {
         xyz
     }
 
-    fn from_lab(lab: Lab<T>) -> Self {
+    fn from_lab(input_lab: Lab<T>) -> Self {
+        let mut lab: Lab<T> = input_lab.clone();
+        lab.l = lab.l * flt(100.0);
+        lab.a = lab.a * flt(128.0);
+        lab.b = lab.b * flt(128.0);
+        let y = (lab.l + flt(16.0)) / flt(116.0);
+        let x = y + (lab.a / flt(500.0));
+        let z = y - (lab.b / flt(200.0));
+
+
+        fn convert<T: Float>(c: T) -> T {
+            let epsilon: T = flt(6.0 / 29.0);
+            let kappa: T = flt(108.0 / 841.0);
+            let delta: T = flt(4.0 / 29.0);
+
+            if c > epsilon {
+                c.powi(3)
+            } else {
+                (c - delta) * kappa
+            }
+        }
+
         Xyz {
-            x: flt::<T,_>(X_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) +
-                (T::one() / flt(500.0)) * lab.a * flt(128.0)),
-            y: flt::<T,_>(Y_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0))),
-            z: flt::<T,_>(Z_N) * f_inv((T::one() / flt(116.0)) * (lab.l * flt(100.0) + flt(16.0)) -
-                (T::one() / flt(200.0)) * lab.b * flt(128.0)),
+            x: convert(x) * flt(X_N),
+            y: convert(y) * flt(Y_N),
+            z: convert(z) * flt(Z_N),
         }
     }
     fn from_luma(luma: Luma<T>) -> Self {
@@ -244,17 +263,6 @@ impl<T: Float> Div<T> for Xyz<T> {
     }
 }
 
-fn f_inv<T: Float>(t: T) -> T {
-    //(6/29)^2
-    let c_6_o_29_p_2: T = flt(0.04280618311);
-
-    if t > flt::<T,_>(6.0) / flt(29.0) {
-        t * t * t
-    } else {
-         c_6_o_29_p_2 * flt(3.0) * (t - (flt::<T,_>(4.0) / flt(29.0)))
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::Xyz;
@@ -286,7 +294,7 @@ mod test {
     #[test]
     fn blue() {
         let a = Xyz::from(Rgb::new(0.0, 0.0, 1.0));
-        let b = Xyz::new(0.18050, 0.07220, 0.95050);
+        let b = Xyz::new(0.18050, 0.07220, 0.95030);
         assert_approx_eq!(a, b, [x, y, z]);
     }
 
