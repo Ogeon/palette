@@ -107,10 +107,16 @@ impl<T: Float> FromColor<T> for Hsv<T> {
         } else {
             T::one() - hsl.lightness
         };
-
+        let mut s = T::zero();
+        
+        // avoid divide by zero
+        let denom = hsl.lightness + x;
+        if denom.is_normal() {
+            s = x * flt(2.0) / denom;
+        }
         Hsv {
             hue: hsl.hue,
-            saturation: x * flt(2.0) / (hsl.lightness + x),
+            saturation: s,
             value: hsl.lightness + x,
         }
     }

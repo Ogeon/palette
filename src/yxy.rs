@@ -60,7 +60,7 @@ impl<T: Float> Alpha<Yxy<T>, T> {
 
 impl<T: Float> FromColor<T> for Yxy<T> {
     fn from_xyz(xyz: Xyz<T>) -> Self {
-        let mut yxy = Yxy{ luma: xyz.y, ..Default::default() };
+        let mut yxy = Yxy{ x: T::zero(), y: T::zero(), luma: xyz.y };
         let sum = xyz.x + xyz.y + xyz.z;
         // If denominator is zero, NAN or INFINITE leave x and y at the default 0
         if sum.is_normal() {

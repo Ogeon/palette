@@ -56,10 +56,29 @@ impl<T: Float> Alpha<Lab<T>, T> {
 
 impl<T: Float> FromColor<T> for Lab<T> {
     fn from_xyz(xyz: Xyz<T>) -> Self {
+        let mut x: T = xyz.x / flt(X_N);
+        let mut y: T = xyz.y / flt(Y_N);
+        let mut z: T = xyz.z / flt(Z_N);
+
+        fn convert<T: Float>(c: T) -> T {
+            let epsilon: T = (flt::<T,_>(6.0 / 29.0)).powi(3);
+            let kappa: T = flt(841.0 / 108.0);
+            let delta: T = flt(4.0 / 29.0);
+            if c > epsilon {
+                c.powf(T::one() / flt(3.0))
+            } else {
+                (kappa * c ) + delta
+            }
+        }
+
+        x = convert(x);
+        y = convert(y);
+        z = convert(z);
+
         Lab {
-            l: (f(xyz.y / flt(Y_N)) * flt(116.0) - flt(16.0)) / flt(100.0),
-            a: (f(xyz.x / flt(X_N)) - f(xyz.y / flt(Y_N))) * flt(500.0) / flt(128.0),
-            b: (f(xyz.y / flt(Y_N)) - f(xyz.z / flt(Z_N))) * flt(200.0) / flt(128.0),
+            l: ( (y * flt(116.0)) - flt(16.0) ) / flt(100.0),
+            a: ( (x - y) * flt(500.0) ) / flt(128.0),
+            b: ( (y - z) * flt(200.0) ) / flt(128.0),
         }
     }
 
@@ -238,19 +257,6 @@ impl<T: Float> Div<T> for Lab<T> {
     }
 }
 
-fn f<T: Float>(t: T) -> T {
-    //(6/29)^3
-    let c_6_o_29_p_3: T = flt(0.00885645167);
-    //(29/6)^2
-    let c_29_o_6_p_2: T = flt(23.3611111111);
-
-    if t > c_6_o_29_p_3 {
-        t.powf(T::one() / flt(3.0))
-    } else {
-        (T::one() / flt(3.0)) * c_29_o_6_p_2 * t + (flt::<T,_>(4.0) / flt(29.0))
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::Lab;
@@ -259,7 +265,7 @@ mod test {
     #[test]
     fn red() {
         let a = Lab::from(Rgb::new(1.0, 0.0, 0.0));
-        let b = Lab::new(53.23288 / 100.0, 80.10933 / 128.0, 67.22006 / 128.0);
+        let b = Lab::new(53.23288 / 100.0, 80.09246 / 128.0, 67.2031 / 128.0);
         assert_approx_eq!(a, b, [l, a, b]);
     }
 

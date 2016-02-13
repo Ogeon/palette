@@ -109,12 +109,13 @@ impl<T: Float> FromColor<T> for Hsl<T> {
 
     fn from_hsv(hsv: Hsv<T>) -> Self {
         let x = (flt::<T,_>(2.0) - hsv.saturation) * hsv.value;
-        let saturation = if hsv.value == T::zero() {
+        let saturation = if !hsv.value.is_normal() {
             T::zero()
         } else if x < T::one() {
-            hsv.saturation * hsv.value / x
+            if x.is_normal() { hsv.saturation * hsv.value / x } else { T::zero() }
         } else {
-            hsv.saturation * hsv.value / (flt::<T,_>(2.0) - x)
+            let denom = flt::<T,_>(2.0) - x;
+            if denom.is_normal() { hsv.saturation * hsv.value / denom } else { T::zero() }
         };
 
         Hsl {

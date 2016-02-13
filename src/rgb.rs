@@ -127,9 +127,9 @@ impl<T: Float> Alpha<Rgb<T>, T> {
 impl<T: Float> FromColor<T> for Rgb<T> {
     fn from_xyz(xyz: Xyz<T>) -> Self {
         Rgb {
-            red: xyz.x * flt(3.2406) + xyz.y * flt(-1.5372) + xyz.z * flt(-0.4986),
-            green: xyz.x * flt(-0.9689) + xyz.y * flt(1.8758) + xyz.z * flt(0.0415),
-            blue: xyz.x * flt(0.0557) + xyz.y * flt(-0.2040) + xyz.z * flt(1.0570),
+            red: xyz.x * flt(3.2404542) + xyz.y * flt(-1.5371385) + xyz.z * flt(-0.4985314),
+            green: xyz.x * flt(-0.9692660) + xyz.y * flt(1.8760108) + xyz.z * flt(0.0415560),
+            blue: xyz.x * flt(0.0556434) + xyz.y * flt(-0.2040259) + xyz.z * flt(1.0572252),
         }
     }
 
