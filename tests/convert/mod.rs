@@ -39,6 +39,10 @@ pub fn color_mine_from_hsl() {
 pub fn color_mine_from_hsv() {
     data_color_mine::run_from_hsv_tests(data_color_mine::COLOR_MINE_FILE_MINI);
 }
+#[test]
+pub fn color_mine_from_hwb() {
+    data_color_mine::run_from_hwb_tests(data_color_mine::COLOR_MINE_FILE_MINI);
+}
 
 
 #[test]
@@ -72,4 +76,8 @@ pub fn color_mine_from_hsl_full() {
 #[test]
 pub fn color_mine_from_hsv_full() {
     data_color_mine::run_from_hsv_tests(data_color_mine::COLOR_MINE_FILE_FULL);
+}
+#[test]
+pub fn color_mine_from_hwb_full() {
+    data_color_mine::run_from_hwb_tests(data_color_mine::COLOR_MINE_FILE_FULL);
 }

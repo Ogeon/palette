@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hsl, Color};
+use {Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
 
 ///FromColor provides conversion between the colors.
 ///
@@ -44,6 +44,11 @@ pub trait FromColor<T>: Sized
     ///Convert from HSV color space
     fn from_hsv(inp: Hsv<T>) -> Self {
         Self::from_rgb(inp.into_rgb())
+    }
+
+    ///Convert from HWB color space
+    fn from_hwb(inp: Hwb<T>) -> Self {
+        Self::from_hsv(inp.into_hsv())
     }
 
     ///Convert from Luma
@@ -93,6 +98,11 @@ pub trait IntoColor<T>: Sized
     ///Convert into HSV color space
     fn into_hsv(self) -> Hsv<T> {
         Hsv::from_rgb(self.into_rgb())
+    }
+
+    ///Convert into HWB color space
+    fn into_hwb(self) -> Hwb<T> {
+        Hwb::from_hsv(self.into_hsv())
     }
 
     ///Convert into Luma
@@ -163,6 +173,7 @@ macro_rules! impl_from_trait {
                     Color::Lch(c) => c.$into_fn(),
                     Color::Hsv(c) => c.$into_fn(),
                     Color::Hsl(c) => c.$into_fn(),
+                    Color::Hwb(c) => c.$into_fn(),
                 }
             }
         }
@@ -218,14 +229,16 @@ impl_into_color!(Lch,from_lch);
 impl_into_color!(Rgb,from_rgb);
 impl_into_color!(Hsl,from_hsl);
 impl_into_color!(Hsv,from_hsv);
+impl_into_color!(Hwb,from_hwb);
 impl_into_color!(Luma,from_luma);
 
 
-impl_from_trait!((Xyz,into_xyz) => {Yxy, Lab, Lch, Rgb, Hsl, Hsv, Luma});
-impl_from_trait!((Yxy,into_yxy) => {Xyz, Lab, Lch, Rgb, Hsl, Hsv, Luma});
-impl_from_trait!((Lab,into_lab) => {Xyz, Yxy, Lch, Rgb, Hsl, Hsv, Luma});
-impl_from_trait!((Lch,into_lch) => {Xyz, Yxy, Lab, Rgb, Hsl, Hsv, Luma});
-impl_from_trait!((Rgb,into_rgb) => {Xyz, Yxy, Lab, Lch, Hsl, Hsv, Luma});
-impl_from_trait!((Hsl,into_hsl) => {Xyz, Yxy, Lab, Lch, Rgb, Hsv, Luma});
-impl_from_trait!((Hsv,into_hsv) => {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Luma});
-impl_from_trait!((Luma,into_luma) => {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv});
+impl_from_trait!((Xyz,into_xyz) => {Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma});
+impl_from_trait!((Yxy,into_yxy) => {Xyz, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma});
+impl_from_trait!((Lab,into_lab) => {Xyz, Yxy, Lch, Rgb, Hsl, Hsv, Hwb, Luma});
+impl_from_trait!((Lch,into_lch) => {Xyz, Yxy, Lab, Rgb, Hsl, Hsv, Hwb, Luma});
+impl_from_trait!((Rgb,into_rgb) => {Xyz, Yxy, Lab, Lch, Hsl, Hsv, Hwb, Luma});
+impl_from_trait!((Hsl,into_hsl) => {Xyz, Yxy, Lab, Lch, Rgb, Hsv, Hwb, Luma});
+impl_from_trait!((Hsv,into_hsv) => {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hwb, Luma});
+impl_from_trait!((Hwb,into_hwb) => {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Luma});
+impl_from_trait!((Luma,into_luma) => {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb});

@@ -65,6 +65,7 @@ pub use lch::{Lch, Lcha};
 pub use hsv::{Hsv, Hsva};
 pub use hsl::{Hsl, Hsla};
 pub use yxy::{Yxy, Yxya};
+pub use hwb::{Hwb, Hwba};
 
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
@@ -230,6 +231,7 @@ mod lab;
 mod lch;
 mod hsv;
 mod hsl;
+mod hwb;
 
 mod hues;
 
@@ -430,6 +432,12 @@ make_color! {
     Hsl {
         ///Linear HSL.
         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
+    }
+
+    ///Linear HWB, an intuitive cylindrical version of RGB.
+    Hwb {
+        ///Linear HWB.
+        hwb(hue: RgbHue<T>, whiteness: T, balckness: T)[alpha: T] => new;
     }
 }
 

@@ -1,7 +1,7 @@
 use num::Float;
 use approx::ApproxEq;
 
-use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv , Luma, LabHue, RgbHue, flt};
+use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
@@ -44,6 +44,7 @@ impl_eq!( Luma, [luma] );
 impl_eq!( Lch, [l, chroma] );
 impl_eq!( Hsl, [hue, saturation, lightness] );
 impl_eq!( Hsv, [hue, saturation, value] );
+impl_eq!( Hwb, [hue, whiteness, blackness] );
 
 // For hues diffence is calculated and compared to zero. However due to the way floating point's
 // work this is not so simple

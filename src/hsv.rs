@@ -2,7 +2,7 @@ use num::Float;
 
 use std::ops::{Add, Sub};
 
-use {Alpha, Rgb, Xyz, Hsl, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, clamp, flt};
+use {Alpha, Rgb, Xyz, Hsl, Hwb, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, clamp, flt};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
@@ -123,6 +123,21 @@ impl<T: Float> FromColor<T> for Hsv<T> {
 
     fn from_hsv(hsv: Hsv<T>) -> Self {
         hsv
+    }
+
+    fn from_hwb(hwb: Hwb<T>) -> Self {
+        let inv = T::one() - hwb.blackness;
+        // avoid divide by zero
+        let s = if inv.is_normal() {
+            T::one() - ( hwb.whiteness / inv )
+        } else {
+            T::zero()
+        };
+        Hsv {
+            hue: hwb.hue,
+            saturation: s,
+            value: inv,
+        }
     }
 
 }
