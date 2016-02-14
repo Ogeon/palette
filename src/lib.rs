@@ -53,6 +53,8 @@ extern crate phf;
 
 use num::{Float, ToPrimitive, NumCast};
 
+use approx::ApproxEq;
+
 use pixel::{Srgb, GammaRgb};
 
 pub use gradient::Gradient;
@@ -333,6 +335,39 @@ macro_rules! make_color {
 
             fn saturate(&self, factor: T) -> Color<T> {
                 Lch::from(*self).saturate(factor).into()
+            }
+        }
+
+        impl<T> ApproxEq for Color<T> where
+            T: Float + ApproxEq,
+            T::Epsilon: Copy + Float,
+        {
+            type Epsilon = T::Epsilon;
+
+            fn default_epsilon() -> Self::Epsilon {
+                T::default_epsilon()
+            }
+
+            fn default_max_relative() -> Self::Epsilon {
+                T::default_max_relative()
+            }
+
+            fn default_max_ulps() -> u32 {
+                T::default_max_ulps()
+            }
+
+            fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+                match (*self, *other) {
+                    $((Color::$variant(ref s), Color::$variant(ref o)) => s.relative_eq(o, epsilon, max_relative),)+
+                    _ => false
+                }
+            }
+
+            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+                match (*self, *other) {
+                    $((Color::$variant(ref s), Color::$variant(ref o)) => s.ulps_eq(o, epsilon, max_ulps),)+
+                    _ => false
+                }
             }
         }
 
