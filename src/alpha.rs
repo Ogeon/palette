@@ -2,6 +2,8 @@ use std::ops::{Deref, DerefMut, Add, Sub, Mul, Div};
 
 use num::Float;
 
+use approx::ApproxEq;
+
 use {Mix, Shade, GetHue, Hue, Saturate, Limited, clamp};
 
 ///An alpha component wrapper for colors.
@@ -110,6 +112,36 @@ impl<C: Default, T: Float> Default for Alpha<C, T> {
             color: C::default(),
             alpha: T::one(),
         }
+    }
+}
+
+impl<C, T> ApproxEq for Alpha<C, T> where
+    C: ApproxEq<Epsilon=T::Epsilon>,
+    T: ApproxEq + Float,
+    T::Epsilon: Copy,
+{
+    type Epsilon = T::Epsilon;
+
+    fn default_epsilon() -> Self::Epsilon {
+        T::default_epsilon()
+    }
+
+    fn default_max_relative() -> Self::Epsilon {
+        T::default_max_relative()
+    }
+
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn relative_eq(&self, other: &Alpha<C, T>, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        self.color.relative_eq(&other.color, epsilon, max_relative) &&
+        self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
+    }
+
+    fn ulps_eq(&self, other: &Alpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+        self.color.ulps_eq(&other.color, epsilon, max_ulps) &&
+        self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
