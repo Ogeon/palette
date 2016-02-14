@@ -64,8 +64,8 @@ fn load_data() -> Vec<Cie2004> {
 }
 
 fn check_equal(src: &Cie2004, tgt: &Cie2004) {
-    assert_color_eq!(src.xyz, tgt.xyz, [x,y,z]);
-    assert_color_eq!(src.yxy, tgt.yxy, [x,y,luma]);
+    assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.0001);
+    assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.0001);
 }
 
 

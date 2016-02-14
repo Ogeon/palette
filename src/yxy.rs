@@ -243,28 +243,28 @@ mod test {
     fn luma() {
         let a = Yxy::from(Luma::new(0.5));
         let b = Yxy::new(0.312727, 0.329023, 0.5);
-        assert_approx_eq!(a, b, [x, y, luma]);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn red() {
         let a = Yxy::from(Rgb::new(1.0, 0.0, 0.0));
         let b = Yxy::new(0.64, 0.33, 0.212673);
-        assert_approx_eq!(a, b, [x, y, luma]);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
         let a = Yxy::from(Rgb::new(0.0, 1.0, 0.0));
         let b = Yxy::new(0.3, 0.6, 0.715152);
-        assert_approx_eq!(a, b, [x, y, luma]);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn blue() {
         let a = Yxy::from(Rgb::new(0.0, 0.0, 1.0));
         let b = Yxy::new(0.15, 0.06, 0.072175);
-        assert_approx_eq!(a, b, [x, y, luma]);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]

@@ -8,10 +8,8 @@ fn lab_lch_green() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_color_eq!(lab, expect_lab, [l, a, b]);
-    assert_color_eq!(lch, expect_lch, [l, chroma]);
-    assert_color_hue_eq!(lch, expect_lch, [hue], 0.1);
-
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
 }
 
 #[test]
@@ -22,9 +20,8 @@ fn lab_lch_magenta() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_color_eq!(lab, expect_lab, [l, a, b]);
-    assert_color_eq!(lch, expect_lch, [l, chroma]);
-    assert_color_hue_eq!(lch, expect_lch, [hue], 0.1);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
 }
 
 #[test]
@@ -36,7 +33,6 @@ fn lab_lch_blue() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_color_eq!(lab, expect_lab, [l, a, b]);
-    assert_color_eq!(lch, expect_lch, [l, chroma]);
-    assert_color_hue_eq!(lch, expect_lch, [hue], 0.1);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
 }

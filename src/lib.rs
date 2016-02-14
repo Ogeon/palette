@@ -43,7 +43,6 @@
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
-#[cfg(test)]
 #[macro_use]
 extern crate approx;
 
@@ -69,19 +68,6 @@ pub use yxy::{Yxy, Yxya};
 
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
-
-//Helper macro for approximate component wise comparison. Most color spaces
-//are in roughly the same ranges, so this epsilon should be alright.
-#[cfg(test)]
-macro_rules! assert_approx_eq {
-    ($a:ident, $b:ident, [$($components:ident),+]) => ({
-        $(
-            let a: f32 = $a.$components.into();
-            let b: f32 = $b.$components.into();
-            assert_relative_eq!(a, b, epsilon = 0.0001);
-        )+
-    })
-}
 
 //Helper macro for checking ranges and clamping.
 #[cfg(test)]
@@ -249,6 +235,7 @@ mod hues;
 
 mod tristimulus;
 mod convert;
+mod equality;
 
 macro_rules! make_color {
     ($(

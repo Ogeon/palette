@@ -108,7 +108,7 @@ impl<T: Float> FromColor<T> for Hsv<T> {
             T::one() - hsl.lightness
         };
         let mut s = T::zero();
-        
+
         // avoid divide by zero
         let denom = hsl.lightness + x;
         if denom.is_normal() {
@@ -279,8 +279,8 @@ mod test {
         let b = Hsv::new(0.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(0.0.into(), 1.0, 0.5));
 
-        assert_approx_eq!(a, b, [hue, saturation, value]);
-        assert_approx_eq!(a, c, [hue, saturation, value]);
+        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, c);
     }
 
     #[test]
@@ -289,8 +289,8 @@ mod test {
         let b = Hsv::new(30.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(30.0.into(), 1.0, 0.5));
 
-        assert_approx_eq!(a, b, [hue, saturation, value]);
-        assert_approx_eq!(a, c, [hue, saturation, value]);
+        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, c);
     }
 
     #[test]
@@ -299,8 +299,8 @@ mod test {
         let b = Hsv::new(120.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(120.0.into(), 1.0, 0.5));
 
-        assert_approx_eq!(a, b, [hue, saturation, value]);
-        assert_approx_eq!(a, c, [hue, saturation, value]);
+        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, c);
     }
 
     #[test]
@@ -309,8 +309,8 @@ mod test {
         let b = Hsv::new(240.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(240.0.into(), 1.0, 0.5));
 
-        assert_approx_eq!(a, b, [hue, saturation, value]);
-        assert_approx_eq!(a, c, [hue, saturation, value]);
+        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, c);
     }
 
     #[test]
@@ -319,8 +319,8 @@ mod test {
         let b = Hsv::new(270.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(270.0.into(), 1.0, 0.5));
 
-        assert_approx_eq!(a, b, [hue, saturation, value]);
-        assert_approx_eq!(a, c, [hue, saturation, value]);
+        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, c);
     }
 
     #[test]
