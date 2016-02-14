@@ -120,21 +120,22 @@ pub fn load_data(file_name: &str) -> Vec<ColorMine> {
 }
 
 fn check_equal_cie(src: &ColorMine, tgt: &ColorMine) {
-    assert_color_eq!(src.xyz, tgt.xyz, [x,y,z]);
-    assert_color_eq!(src.yxy, tgt.yxy, [x,y,luma]);
-    assert_color_eq!(src.lab, tgt.lab, [l,a,b]);
-    assert_color_eq!(src.lch, tgt.lch, [l,chroma]);
+
+    assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.05);
+    assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.05);
+    assert_relative_eq!(src.lab, tgt.lab, epsilon = 0.05);
+
+    assert_relative_eq!(src.lch.l, tgt.lch.l, epsilon = 0.05);
+    assert_relative_eq!(src.lch.chroma, tgt.lch.chroma, epsilon = 0.05);
 
     // hue values are not passing for from_yxy conversion. Check github #48 for more information
-    // assert_color_hue_eq!(src.lch, tgt.lch, [hue], 0.1);
+    // assert_relative_eq!(src.lch.hue, tgt.lch.hue, epsilon = 0.05);
 
 }
 fn check_equal_rgb(src: &ColorMine, tgt: &ColorMine) {
-    assert_color_eq!(src.rgb, tgt.rgb, [red,green,blue]);
-    assert_color_eq!(src.hsl, tgt.hsl, [saturation,lightness]);
-    assert_color_hue_eq!(src.hsl, tgt.hsl, [hue], 0.1);
-    assert_color_eq!(src.hsv, tgt.hsv, [saturation,value]);
-    assert_color_hue_eq!(src.hsv, tgt.hsv, [hue], 0.1);
+    assert_relative_eq!(src.rgb, tgt.rgb, epsilon = 0.05);
+    assert_relative_eq!(src.hsl, tgt.hsl, epsilon = 0.05);
+    assert_relative_eq!(src.hsv, tgt.hsv, epsilon = 0.05);
 }
 
 pub fn run_from_xyz_tests(file_name: &str) {
