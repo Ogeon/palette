@@ -41,7 +41,7 @@ impl_eq!( Yxy, [y, x, luma] );
 impl_eq!( Lab, [l, a, b] );
 impl_eq!( Rgb, [red, blue, green] );
 impl_eq!( Luma, [luma] );
-impl_eq!( Lch, [l, chroma] );
+impl_eq!( Lch, [l, chroma, hue] );
 impl_eq!( Hsl, [hue, saturation, lightness] );
 impl_eq!( Hsv, [hue, saturation, value] );
 impl_eq!( Hwb, [hue, whiteness, blackness] );
