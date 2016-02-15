@@ -2,6 +2,7 @@
 
 use num::{Float, One, Zero, NumCast};
 use std::cmp::max;
+use approx::ApproxEq;
 
 use flt;
 
@@ -273,6 +274,57 @@ impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
             from: None,
             to: None,
         }
+    }
+}
+
+impl<T> ApproxEq for Range<T> where
+    T: ApproxEq + Float,
+    T::Epsilon: Copy,
+{
+    type Epsilon = T::Epsilon;
+
+    fn default_epsilon() -> Self::Epsilon {
+        T::default_epsilon()
+    }
+
+    fn default_max_relative() -> Self::Epsilon {
+        T::default_max_relative()
+    }
+
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn relative_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        let from = match (self.from, other.from) {
+            (Some(s), Some(o)) => s.relative_eq(&o, epsilon, max_relative),
+            (None, None) => true,
+            _ => false,
+        };
+
+        let to = match (self.to, other.to) {
+            (Some(s), Some(o)) => s.relative_eq(&o, epsilon, max_relative),
+            (None, None) => true,
+            _ => false,
+        };
+
+        from && to
+    }
+
+    fn ulps_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+        let from = match (self.from, other.from) {
+            (Some(s), Some(o)) => s.ulps_eq(&o, epsilon, max_ulps),
+            (None, None) => true,
+            _ => false,
+        };
+
+        let to = match (self.to, other.to) {
+            (Some(s), Some(o)) => s.ulps_eq(&o, epsilon, max_ulps),
+            (None, None) => true,
+            _ => false,
+        };
+
+        from && to
     }
 }
 
