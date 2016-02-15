@@ -2,7 +2,7 @@
 List of color from www.colormine.org
 */
 use csv;
-use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, IntoColor};
+use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
 
 pub const COLOR_MINE_FILE_FULL: &'static str = "tests/convert/data_color_mine.csv";
@@ -52,6 +52,9 @@ pub struct ColorMineRaw {
     pub hsv_h: f32,
     pub hsv_s: f32,
     pub hsv_v: f32,
+    pub hwb_h: f32,
+    pub hwb_w: f32,
+    pub hwb_b: f32,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -64,6 +67,7 @@ pub struct ColorMine {
     linear_rgb: Rgb<f32>,
     hsl: Hsl<f32>,
     hsv: Hsv<f32>,
+    hwb: Hwb<f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {
@@ -77,6 +81,7 @@ impl From<ColorMineRaw> for ColorMine {
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into(),
             hsl: Hsl::new(src.hsl_h.into(), src.hsl_s, src.hsl_l),
             hsv: Hsv::new(src.hsv_h.into(), src.hsv_s, src.hsv_v),
+            hwb: Hwb::new(src.hwb_h.into(), src.hwb_w, src.hwb_b),
         }
     }
 }
@@ -94,6 +99,7 @@ macro_rules! impl_from_color {
                     rgb: color.into_rgb(),
                     hsl: color.into_hsl(),
                     hsv: color.into_hsv(),
+                    hwb: color.into_hwb(),
                 }
             }
         }
@@ -108,6 +114,7 @@ impl_from_color!(Lab);
 impl_from_color!(Lch);
 impl_from_color!(Hsl);
 impl_from_color!(Hsv);
+impl_from_color!(Hwb);
 
 pub fn load_data(file_name: &str) -> Vec<ColorMine> {
     let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for color mine data");
@@ -136,6 +143,7 @@ fn check_equal_rgb(src: &ColorMine, tgt: &ColorMine) {
     assert_relative_eq!(src.rgb, tgt.rgb, epsilon = 0.05);
     assert_relative_eq!(src.hsl, tgt.hsl, epsilon = 0.05);
     assert_relative_eq!(src.hsv, tgt.hsv, epsilon = 0.05);
+    assert_relative_eq!(src.hwb, tgt.hwb, epsilon = 0.05);
 }
 
 pub fn run_from_xyz_tests(file_name: &str) {
@@ -186,6 +194,12 @@ pub fn run_from_hsv_tests(file_name: &str) {
         test_from_hsv(expected);
     }
 }
+pub fn run_from_hwb_tests(file_name: &str) {
+    let data = load_data(file_name);
+    for expected in data.iter() {
+        test_from_hwb(expected);
+    }
+}
 
 
 fn test_from_xyz(expected: &ColorMine) {
@@ -225,5 +239,10 @@ fn test_from_hsl(expected: &ColorMine) {
 
 fn test_from_hsv(expected: &ColorMine) {
     let result = ColorMine::from(expected.hsv);
+    check_equal_rgb(&result, expected);
+}
+
+fn test_from_hwb(expected: &ColorMine) {
+    let result = ColorMine::from(expected.hwb);
     check_equal_rgb(&result, expected);
 }
