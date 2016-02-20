@@ -61,45 +61,35 @@ impl<T: Float> FromColor<T> for Hsl<T> {
     }
 
     fn from_rgb(rgb: Rgb<T>) -> Self {
-        enum Channel { Red, Green, Blue };
-
-        let val_min = rgb.red.min(rgb.green).min(rgb.blue);
-        let mut val_max = rgb.red;
-        let mut chan_max = Channel::Red;
-
-        if rgb.green > val_max {
-            chan_max = Channel::Green;
-            val_max = rgb.green;
-        }
-
-        if rgb.blue > val_max {
-            chan_max = Channel::Blue;
-            val_max = rgb.blue;
-        }
-
-        let diff = val_max - val_min;
-        let lightness = (val_min + val_max) / flt(2.0);
-
-        let hue = if diff == T::zero() {
-            T::zero()
-        } else {
-            flt::<T,_>(60.0) * match chan_max {
-                Channel::Red => ((rgb.green - rgb.blue) / diff) % flt(6.0),
-                Channel::Green => ((rgb.blue - rgb.red) / diff + flt(2.0)),
-                Channel::Blue => ((rgb.red - rgb.green) / diff + flt(4.0)),
+        let ( max, min, sep , coeff) = {
+            let (max, min , sep, coeff) = if rgb.red > rgb.green {
+                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
+            } else {
+                (rgb.green, rgb.red, rgb.blue - rgb.red , flt(2.0))
+            };
+            if rgb.blue > max {
+                ( rgb.blue, min , rgb.red - rgb.green , flt(4.0))
+            } else {
+                let min_val = if rgb.blue < min { rgb.blue } else { min };
+                (max , min_val , sep, coeff)
             }
         };
 
-        let saturation = if diff == T::zero() {
-            T::zero()
-        } else {
-            diff / (T::one() - ( lightness * flt(2.0) - T::one()).abs())
+        let mut h = T::zero();
+        let mut s = T::zero();
+
+        let sum = max + min;
+        let l = sum / flt(2.0);
+        if max != min {
+            let d = max - min;
+            s = if sum > T::one() { d /( flt::<T,_>(2.0) - sum) } else { d / sum };
+            h = (( sep / d ) + coeff) *  flt(60.0);
         };
 
         Hsl {
-            hue: hue.into(),
-            saturation: saturation,
-            lightness: lightness,
+            hue: h.into(),
+            saturation: s,
+            lightness: l,
         }
     }
 
