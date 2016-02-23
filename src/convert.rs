@@ -156,8 +156,8 @@ macro_rules! impl_into_color {
 
 macro_rules! impl_from_trait {
     (($self_ty:ident, $into_fn: ident) => {$($other:ident),+}) => (
-        impl<T: Float> From<Alpha<$self_ty<T>, T>> for $self_ty<T> {
-            fn from(color: Alpha<$self_ty<T>, T>) -> $self_ty<T> {
+        impl<T: Float> From<Alpha<$self_ty<T>>> for $self_ty<T> {
+            fn from(color: Alpha<$self_ty<T>>) -> $self_ty<T> {
                 color.color
             }
         }
@@ -178,8 +178,8 @@ macro_rules! impl_from_trait {
             }
         }
 
-        impl<T: Float> From<Color<T>> for Alpha<$self_ty<T>,T> {
-            fn from(color: Color<T>) -> Alpha<$self_ty<T>,T> {
+        impl<T: Float> From<Color<T>> for Alpha<$self_ty<T>> {
+            fn from(color: Color<T>) -> Alpha<$self_ty<T>> {
                 Alpha {
                     color: color.into(),
                     alpha: T::one(),
@@ -187,8 +187,8 @@ macro_rules! impl_from_trait {
             }
         }
 
-        impl<T: Float> From<Alpha<Color<T>, T>> for Alpha<$self_ty<T>,T> {
-            fn from(color: Alpha<Color<T>, T>) -> Alpha<$self_ty<T>,T> {
+        impl<T: Float> From<Alpha<Color<T>>> for Alpha<$self_ty<T>> {
+            fn from(color: Alpha<Color<T>>) -> Alpha<$self_ty<T>> {
                 Alpha {
                     color: color.color.into(),
                     alpha: color.alpha,
@@ -203,8 +203,8 @@ macro_rules! impl_from_trait {
                 }
             }
 
-            impl<T: Float> From<Alpha<$other<T>, T>> for Alpha<$self_ty<T>, T> {
-                fn from(other: Alpha<$other<T>, T>) -> Alpha<$self_ty<T>, T> {
+            impl<T: Float> From<Alpha<$other<T>>> for Alpha<$self_ty<T>> {
+                fn from(other: Alpha<$other<T>>) -> Alpha<$self_ty<T>> {
                     Alpha {
                         color: other.color.$into_fn(),
                         alpha: other.alpha,
@@ -212,8 +212,8 @@ macro_rules! impl_from_trait {
                 }
             }
 
-            impl<T: Float> From<$other<T>> for Alpha<$self_ty<T>, T> {
-                fn from(color: $other<T>) -> Alpha<$self_ty<T>, T> {
+            impl<T: Float> From<$other<T>> for Alpha<$self_ty<T>> {
+                fn from(color: $other<T>) -> Alpha<$self_ty<T>> {
                     Alpha {
                         color: color.$into_fn(),
                         alpha: T::one(),
@@ -221,8 +221,8 @@ macro_rules! impl_from_trait {
                 }
             }
 
-            impl<T: Float> From<Alpha<$other<T>, T>> for $self_ty<T> {
-                fn from(other: Alpha<$other<T>, T>) -> $self_ty<T> {
+            impl<T: Float> From<Alpha<$other<T>>> for $self_ty<T> {
+                fn from(other: Alpha<$other<T>>) -> $self_ty<T> {
                     other.color.$into_fn()
                 }
             }

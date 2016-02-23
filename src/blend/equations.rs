@@ -1,6 +1,6 @@
-use num::Float;
+use num::{Float, Zero, One};
 
-use {ComponentWise, Blend};
+use {ComponentWise, Blend, ColorType};
 use blend::{PreAlpha, BlendFunction};
 
 ///A pair of blending equations and corresponding parameters.
@@ -61,7 +61,7 @@ impl Equations {
 }
 
 impl<C: Blend<Color=C> + ComponentWise + Clone> BlendFunction<C> for Equations {
-    fn apply_to(self, source: PreAlpha<C, C::Scalar>, destination: PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar> {
+    fn apply_to(self, source: PreAlpha<C>, destination: PreAlpha<C>) -> PreAlpha<C> {
         let col_src_param = self.color_parameters.source.apply_to(source.clone(), destination.clone());
         let col_dst_param = self.color_parameters.destination.apply_to(source.clone(), destination.clone());
         let alpha_src_param = self.alpha_parameters.source.apply_to(source.clone(), destination.clone());
@@ -163,31 +163,31 @@ pub enum Parameter {
 }
 
 impl Parameter {
-    fn apply_to<C, T: Float>(&self, source: PreAlpha<C, T>, destination: PreAlpha<C, T>) -> ParamOut<C, T> where
-        PreAlpha<C, T>: ComponentWise<Scalar=T>,
+    fn apply_to<C: ColorType>(&self, source: PreAlpha<C>, destination: PreAlpha<C>) -> ParamOut<C> where
+        PreAlpha<C>: ComponentWise<Scalar=C::Scalar>,
     {
         match *self {
-            Parameter::One => ParamOut::Constant(T::one()),
-            Parameter::Zero => ParamOut::Constant(T::zero()),
+            Parameter::One => ParamOut::Constant(C::Scalar::one()),
+            Parameter::Zero => ParamOut::Constant(C::Scalar::zero()),
             Parameter::SourceColor => ParamOut::Color(source),
-            Parameter::OneMinusSourceColor => ParamOut::Color(source.component_wise_self(|a| T::one() - a)),
+            Parameter::OneMinusSourceColor => ParamOut::Color(source.component_wise_self(|a| C::Scalar::one() - a)),
             Parameter::DestinationColor => ParamOut::Color(destination),
-            Parameter::OneMinusDestinationColor => ParamOut::Color(destination.component_wise_self(|a| T::one() - a)),
+            Parameter::OneMinusDestinationColor => ParamOut::Color(destination.component_wise_self(|a| C::Scalar::one() - a)),
             Parameter::SourceAlpha => ParamOut::Constant(source.alpha),
-            Parameter::OneMinusSourceAlpha => ParamOut::Constant(T::one() - source.alpha),
+            Parameter::OneMinusSourceAlpha => ParamOut::Constant(C::Scalar::one() - source.alpha),
             Parameter::DestinationAlpha => ParamOut::Constant(destination.alpha),
-            Parameter::OneMinusDestinationAlpha => ParamOut::Constant(T::one() - destination.alpha),
+            Parameter::OneMinusDestinationAlpha => ParamOut::Constant(C::Scalar::one() - destination.alpha),
         }
     }
 }
 
-enum ParamOut<C, T: Float> {
-    Color(PreAlpha<C, T>),
-    Constant(T),
+enum ParamOut<C: ColorType> {
+    Color(PreAlpha<C>),
+    Constant(C::Scalar),
 }
 
-impl<C: ComponentWise<Scalar=T>, T: Float> ParamOut<C, T> {
-    fn mul_constant(self, other: T) -> T {
+impl<C: ComponentWise> ParamOut<C> {
+    fn mul_constant(self, other: C::Scalar) -> C::Scalar {
         match self {
             ParamOut::Color(c) => c.alpha * other,
             ParamOut::Constant(c) => c * other,

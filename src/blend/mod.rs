@@ -52,14 +52,14 @@ mod test;
 ///A trait for custom blend functions.
 pub trait BlendFunction<C: Blend<Color=C> + ComponentWise> {
     ///Apply this blend function to a pair of colors.
-    fn apply_to(self, source: PreAlpha<C, C::Scalar>, destination: PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>;
+    fn apply_to(self, source: PreAlpha<C>, destination: PreAlpha<C>) -> PreAlpha<C>;
 }
 
 impl<C, F> BlendFunction<C> for F where
     C: Blend<Color=C> + ComponentWise,
-    F: FnOnce(PreAlpha<C, C::Scalar>, PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>,
+    F: FnOnce(PreAlpha<C>, PreAlpha<C>) -> PreAlpha<C>,
 {
-    fn apply_to(self, source: PreAlpha<C, C::Scalar>, destination: PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar> {
+    fn apply_to(self, source: PreAlpha<C>, destination: PreAlpha<C>) -> PreAlpha<C> {
         (self)(source, destination)
     }
 }

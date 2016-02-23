@@ -3,13 +3,13 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Alpha, Yxy, Rgb, Luma, Lab};
-use {Limited, Mix, Shade, FromColor, ComponentWise};
+use {Limited, Mix, Shade, FromColor, ComponentWise, ColorType};
 use {clamp, flt};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
-pub type Xyza<T = f32> = Alpha<Xyz<T>, T>;
+pub type Xyza<T = f32> = Alpha<Xyz<T>>;
 
 ///The CIE 1931 XYZ color space.
 ///
@@ -47,7 +47,7 @@ impl<T: Float> Xyz<T> {
 }
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
-impl<T: Float> Alpha<Xyz<T>, T> {
+impl<T: Float> Alpha<Xyz<T>> {
     ///CIE XYZ and transparency.
     pub fn new(x: T, y: T, z: T, alpha: T) -> Xyza<T> {
         Alpha {
@@ -55,6 +55,10 @@ impl<T: Float> Alpha<Xyz<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Xyz<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Xyz<T> {
@@ -139,8 +143,6 @@ impl<T: Float> Limited for Xyz<T> {
 }
 
 impl<T: Float> Mix for Xyz<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Xyz<T>, factor: T) -> Xyz<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -153,8 +155,6 @@ impl<T: Float> Mix for Xyz<T> {
 }
 
 impl<T: Float> Shade for Xyz<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Xyz<T> {
         Xyz {
             x: self.x,
@@ -165,8 +165,6 @@ impl<T: Float> Shade for Xyz<T> {
 }
 
 impl<T: Float> ComponentWise for Xyz<T> {
-    type Scalar = T;
-
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Xyz<T>, mut f: F) -> Xyz<T> {
         Xyz {
             x: f(self.x, other.x),

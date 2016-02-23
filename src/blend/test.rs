@@ -6,7 +6,7 @@ fn blend_color() {
     let a = Color::rgb(1.0, 0.0, 0.0);
     let b = Color::rgb(0.0, 0.0, 1.0);
 
-    let c: Rgb = a.blend(b, |a: PreAlpha<Rgb<_>, _>, b: PreAlpha<Rgb<_>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: Rgb = a.blend(b, |a: PreAlpha<Rgb<_>>, b: PreAlpha<Rgb<_>>| a.component_wise(&b, |a, b| a + b)).into();
     assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0), c);
 }
 
@@ -15,7 +15,7 @@ fn blend_alpha_color() {
     let a = Colora::rgb(1.0, 0.0, 0.0, 0.2);
     let b = Colora::rgb(0.0, 0.0, 1.0, 0.2);
 
-    let c: Rgba = a.blend(b, |a: PreAlpha<Rgb<_>, _>, b: PreAlpha<Rgb<_>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: Rgba = a.blend(b, |a: PreAlpha<Rgb<_>>, b: PreAlpha<Rgb<_>>| a.component_wise(&b, |a, b| a + b)).into();
     assert_relative_eq!(Rgba::new(0.2 / 0.4, 0.0, 0.2 / 0.4, 0.4), c);
 }
 

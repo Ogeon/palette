@@ -3,12 +3,12 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Alpha, Rgb, Xyz, Yxy};
-use {Limited, Mix, Shade, FromColor, Blend, ComponentWise};
+use {Limited, Mix, Shade, FromColor, Blend, ComponentWise, ColorType};
 use {clamp, flt};
 use blend::PreAlpha;
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
-pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
+pub type Lumaa<T = f32> = Alpha<Luma<T>>;
 
 ///Linear luminance.
 ///
@@ -40,7 +40,7 @@ impl<T: Float> Luma<T> {
 }
 
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
-impl<T: Float> Alpha<Luma<T>, T> {
+impl<T: Float> Alpha<Luma<T>> {
     ///Linear luminance with transparency.
     pub fn new(luma: T, alpha: T) -> Lumaa<T> {
         Alpha {
@@ -56,6 +56,10 @@ impl<T: Float> Alpha<Luma<T>, T> {
             alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
+}
+
+impl<T: Float> ColorType for Luma<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Luma<T> {
@@ -100,8 +104,6 @@ impl<T: Float> Limited for Luma<T> {
 }
 
 impl<T: Float> Mix for Luma<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Luma<T>, factor: T) -> Luma<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -112,8 +114,6 @@ impl<T: Float> Mix for Luma<T> {
 }
 
 impl<T: Float> Shade for Luma<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Luma<T> {
         Luma {
             luma: (self.luma + amount).max(T::zero()),
@@ -124,18 +124,16 @@ impl<T: Float> Shade for Luma<T> {
 impl<T: Float> Blend for Luma<T> {
     type Color = Luma<T>;
 
-    fn into_premultiplied(self) -> PreAlpha<Luma<T>, T> {
+    fn into_premultiplied(self) -> PreAlpha<Luma<T>> {
         Lumaa::from(self).into()
     }
 
-    fn from_premultiplied(color: PreAlpha<Luma<T>, T>) -> Self {
+    fn from_premultiplied(color: PreAlpha<Luma<T>>) -> Self {
         Lumaa::from(color).into()
     }
 }
 
 impl<T: Float> ComponentWise for Luma<T> {
-    type Scalar = T;
-
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luma<T>, mut f: F) -> Luma<T> {
         Luma {
             luma: f(self.luma, other.luma),

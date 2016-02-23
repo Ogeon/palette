@@ -255,7 +255,7 @@ macro_rules! make_color {
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<T = f32> = Alpha<Color<T>, T>;
+        pub type Colora<T = f32> = Alpha<Color<T>>;
 
         ///A generic color type.
         ///
@@ -289,28 +289,28 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T:Float> Alpha<Color<T>, T> {
+        impl<T:Float> Alpha<Color<T>> {
             $(
                 $(
                     #[$ctor_comment]
                     pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<T> {
-                        Alpha::<$variant<T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+                        Alpha::<$variant<T>>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
         }
 
-        impl<T:Float> Mix for Color<T> {
+        impl<T: Float> ColorType for Color<T> {
             type Scalar = T;
+        }
 
+        impl<T:Float> Mix for Color<T> {
             fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
         impl<T:Float> Shade for Color<T> {
-            type Scalar = T;
-
             fn lighten(&self, amount: T) -> Color<T> {
                 Lab::from(*self).lighten(amount).into()
             }
@@ -334,9 +334,7 @@ macro_rules! make_color {
             }
         }
 
-        impl<T:Float> Saturate for Color<T> {
-            type Scalar = T;
-
+        impl<T: Float> Saturate for Color<T> {
             fn saturate(&self, factor: T) -> Color<T> {
                 Lch::from(*self).saturate(factor).into()
             }
@@ -345,11 +343,11 @@ macro_rules! make_color {
         impl<T: Float> Blend for Color<T> {
             type Color = Rgb<T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<T>, T> {
+            fn into_premultiplied(self) -> PreAlpha<Rgb<T>> {
                 Rgba::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<T>, T>) -> Self {
+            fn from_premultiplied(color: PreAlpha<Rgb<T>>) -> Self {
                 Rgba::from(color).into()
             }
         }
@@ -394,14 +392,14 @@ macro_rules! make_color {
                 }
             }
 
-            impl<T:Float> From<Alpha<$variant<T>, T>> for Color<T> {
-                fn from(color: Alpha<$variant<T>,T>) -> Color<T> {
+            impl<T:Float> From<Alpha<$variant<T>>> for Color<T> {
+                fn from(color: Alpha<$variant<T>>) -> Color<T> {
                     Color::$variant(color.color)
                 }
             }
 
-            impl<T:Float> From<Alpha<$variant<T>, T>> for Alpha<Color<T>,T> {
-                fn from(color: Alpha<$variant<T>,T>) -> Alpha<Color<T>,T> {
+            impl<T:Float> From<Alpha<$variant<T>>> for Alpha<Color<T>> {
+                fn from(color: Alpha<$variant<T>>) -> Alpha<Color<T>> {
                     Alpha {
                         color: Color::$variant(color.color),
                         alpha: color.alpha,
@@ -517,10 +515,7 @@ pub trait Limited {
 ///assert_eq!(a.mix(&b, 0.5), Rgb::new(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
-pub trait Mix {
-    ///The type of the mixing factor.
-    type Scalar: Float;
-
+pub trait Mix: ColorType {
     ///Mix the color with an other color, by `factor`.
     ///
     ///`factor` sould be between `0.0` and `1.0`, where `0.0` will result in
@@ -539,10 +534,7 @@ pub trait Mix {
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
-pub trait Shade: Sized {
-    ///The type of the lighten/darken amount.
-    type Scalar: Float;
-
+pub trait Shade: Sized + ColorType {
     ///Lighten the color by `amount`.
     fn lighten(&self, amount: Self::Scalar) -> Self;
 
@@ -603,10 +595,7 @@ pub trait Hue: GetHue {
 ///
 ///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
 ///```
-pub trait Saturate: Sized {
-    ///The type of the (de)saturation factor.
-    type Scalar: Float;
-
+pub trait Saturate: Sized + ColorType {
     ///Increase the saturation by `factor`.
     fn saturate(&self, factor: Self::Scalar) -> Self;
 
@@ -617,15 +606,20 @@ pub trait Saturate: Sized {
 }
 
 ///Perform a unary or binary operation on each component of a color.
-pub trait ComponentWise {
-    ///The scalar type for color components.
-    type Scalar: Float;
-
+pub trait ComponentWise: ColorType {
     ///Perform a binary operation on this and an other color.
     fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(&self, other: &Self, f: F) -> Self;
 
     ///Perform a unary operation on this color.
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
+}
+
+///Basic trait for colors.
+///
+///This trait defines the most basic properties of a color.
+pub trait ColorType {
+    ///The scalar type for the color components.
+    type Scalar: Float;
 }
 
 ///A convenience function to convert a constant number to Float Type

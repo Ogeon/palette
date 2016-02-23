@@ -1,8 +1,8 @@
 use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
 use approx::ApproxEq;
-use num::Float;
+use num::{Float, Zero, One};
 
-use {Alpha, ComponentWise, Mix, Blend, clamp};
+use {Alpha, ComponentWise, Mix, Blend, ColorType, clamp};
 
 ///Premultiplied alpha wrapper.
 ///
@@ -26,21 +26,20 @@ use {Alpha, ComponentWise, Mix, Blend, clamp};
 ///Note that converting to and from premultiplied alpha will cause the alpha
 ///component to be clamped to [0.0, 1.0].
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub struct PreAlpha<C, T: Float> {
+pub struct PreAlpha<C: ColorType> {
     ///The premultiplied color components (`original.color * original.alpha`).
     pub color: C,
 
     ///The transparency component. 0.0 is fully transparent and 1.0 is fully
     ///opaque.
-    pub alpha: T,
+    pub alpha: C::Scalar,
 }
 
-impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T> where
-    C: ComponentWise<Scalar=T>,
-    T: Float,
+impl<C> From<Alpha<C>> for PreAlpha<C> where
+    C: ComponentWise,
 {
-    fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
-        let alpha = clamp(color.alpha, T::zero(), T::one());
+    fn from(color: Alpha<C>) -> PreAlpha<C> {
+        let alpha = clamp(color.alpha, C::Scalar::zero(), C::Scalar::one());
 
         PreAlpha{
             color: color.color.component_wise_self(|a| a * alpha),
@@ -49,17 +48,14 @@ impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T> where
     }
 }
 
-impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T> where
-    C: ComponentWise<Scalar=T>,
-    T: Float,
-{
-    fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
-        let alpha = clamp(color.alpha, T::zero(), T::one());
+impl<C: ComponentWise> From<PreAlpha<C>> for Alpha<C> {
+    fn from(color: PreAlpha<C>) -> Alpha<C> {
+        let alpha = clamp(color.alpha, C::Scalar::zero(), C::Scalar::one());
 
         let color = color.color.component_wise_self(|a| if alpha.is_normal() {
             a / alpha
         } else {
-            T::zero()
+            C::Scalar::zero()
         });
 
         Alpha {
@@ -69,25 +65,20 @@ impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T> where
     }
 }
 
-impl<C, T> Blend for PreAlpha<C, T> where
-    C: Blend<Color=C> + ComponentWise<Scalar=T>,
-    T: Float,
-{
+impl<C: Blend<Color=C> + ComponentWise> Blend for PreAlpha<C> {
     type Color = C;
 
-    fn into_premultiplied(self) -> PreAlpha<C, T> {
+    fn into_premultiplied(self) -> PreAlpha<C> {
         self
     }
 
-    fn from_premultiplied(color: PreAlpha<C, T>) -> PreAlpha<C, T> {
+    fn from_premultiplied(color: PreAlpha<C>) -> PreAlpha<C> {
         color
     }
 }
 
-impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
-    type Scalar = C::Scalar;
-    
-    fn mix(&self, other: &PreAlpha<C, C::Scalar>, factor: C::Scalar) -> PreAlpha<C, C::Scalar> {
+impl<C: Mix> Mix for PreAlpha<C> {
+    fn mix(&self, other: &PreAlpha<C>, factor: C::Scalar) -> PreAlpha<C> {
         PreAlpha {
             color: self.color.mix(&other.color, factor),
             alpha: self.alpha + factor * (other.alpha - self.alpha),
@@ -95,34 +86,37 @@ impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
     }
 }
 
-impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for PreAlpha<C, T> {
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &PreAlpha<C, T>, mut f: F) -> PreAlpha<C, T> {
+impl<C: ComponentWise> ComponentWise for PreAlpha<C> {
+    fn component_wise<F: FnMut(C::Scalar, C::Scalar) -> C::Scalar>(&self, other: &PreAlpha<C>, mut f: F) -> PreAlpha<C> {
         PreAlpha {
             alpha: f(self.alpha, other.alpha),
             color: self.color.component_wise(&other.color, f),
         }
     }
 
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> PreAlpha<C, T> {
+    fn component_wise_self<F: FnMut(C::Scalar) -> C::Scalar>(&self, mut f: F) -> PreAlpha<C> {
         PreAlpha {
             alpha: f(self.alpha),
             color: self.color.component_wise_self(f),
         }
     }
-}impl<C, T> ApproxEq for PreAlpha<C, T> where
-    C: ApproxEq<Epsilon=T::Epsilon>,
-    T: ApproxEq + Float,
-    T::Epsilon: Copy,
-{
-    type Epsilon = T::Epsilon;
+}
 
-    fn default_epsilon() -> Self::Epsilon {
+impl<C: ColorType> ColorType for PreAlpha<C> {
+    type Scalar = C::Scalar;
+}
+
+impl<C, T> ApproxEq for PreAlpha<C> where
+    C: ApproxEq<Epsilon=T> + ColorType<Scalar=T>,
+    T: ApproxEq<Epsilon=T> + Float,
+{
+    type Epsilon = T;
+
+    fn default_epsilon() -> T {
         T::default_epsilon()
     }
 
-    fn default_max_relative() -> Self::Epsilon {
+    fn default_max_relative() -> T {
         T::default_max_relative()
     }
 
@@ -130,21 +124,25 @@ impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for PreAlpha<C, T> {
         T::default_max_ulps()
     }
 
-    fn relative_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+    fn relative_eq(&self, other: &PreAlpha<C>, epsilon: T, max_relative: T) -> bool {
         self.color.relative_eq(&other.color, epsilon, max_relative) &&
         self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
     }
 
-    fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+    fn ulps_eq(&self, other: &PreAlpha<C>, epsilon: T, max_ulps: u32) -> bool{
         self.color.ulps_eq(&other.color, epsilon, max_ulps) &&
         self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
-impl<C: Add, T: Float> Add for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Add for PreAlpha<C> where
+    C: Add + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn add(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn add(self, other: PreAlpha<C>) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color + other.color,
             alpha: self.alpha + other.alpha,
@@ -152,10 +150,14 @@ impl<C: Add, T: Float> Add for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Add<T> for PreAlpha<C> where
+    C: Add<T> + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn add(self, c: T) -> PreAlpha<C::Output, T> {
+    fn add(self, c: T) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color + c,
             alpha: self.alpha + c,
@@ -163,10 +165,14 @@ impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Sub for PreAlpha<C> where
+    C: Sub + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn sub(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn sub(self, other: PreAlpha<C>) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color - other.color,
             alpha: self.alpha - other.alpha,
@@ -174,10 +180,14 @@ impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Sub<T> for PreAlpha<C> where
+    C: Sub<T> + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn sub(self, c: T) -> PreAlpha<C::Output, T> {
+    fn sub(self, c: T) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color - c,
             alpha: self.alpha - c,
@@ -185,10 +195,14 @@ impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Mul for PreAlpha<C> where
+    C: Mul + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn mul(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn mul(self, other: PreAlpha<C>) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color * other.color,
             alpha: self.alpha * other.alpha,
@@ -196,10 +210,14 @@ impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Mul<T> for PreAlpha<C> where
+    C: Mul<T> + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn mul(self, c: T) -> PreAlpha<C::Output, T> {
+    fn mul(self, c: T) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color * c,
             alpha: self.alpha * c,
@@ -207,10 +225,14 @@ impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: Div, T: Float> Div for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Div for PreAlpha<C> where
+    C: Div + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn div(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn div(self, other: PreAlpha<C>) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color / other.color,
             alpha: self.alpha / other.alpha,
@@ -218,10 +240,14 @@ impl<C: Div, T: Float> Div for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C, T> Div<T> for PreAlpha<C> where
+    C: Div<T> + ColorType<Scalar=T>,
+    C::Output: ColorType<Scalar=T>,
+    T: Float,
+{
+    type Output = PreAlpha<C::Output>;
 
-    fn div(self, c: T) -> PreAlpha<C::Output, T> {
+    fn div(self, c: T) -> PreAlpha<C::Output> {
         PreAlpha {
             color: self.color / c,
             alpha: self.alpha / c,
@@ -229,7 +255,7 @@ impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C, T: Float> Deref for PreAlpha<C, T> {
+impl<C: ColorType> Deref for PreAlpha<C> {
     type Target = C;
 
     fn deref(&self) -> &C {
@@ -237,7 +263,7 @@ impl<C, T: Float> Deref for PreAlpha<C, T> {
     }
 }
 
-impl<C, T: Float> DerefMut for PreAlpha<C, T> {
+impl<C: ColorType> DerefMut for PreAlpha<C> {
     fn deref_mut(&mut self) -> &mut C {
         &mut self.color
     }

@@ -1,6 +1,6 @@
 use num::{Float, One, Zero};
 
-use {ComponentWise, clamp, flt};
+use {ComponentWise, ColorType, clamp, flt};
 use blend::{PreAlpha, BlendFunction};
 
 ///A trait for colors that can be blended together.
@@ -16,10 +16,10 @@ pub trait Blend: Sized {
     type Color: Blend<Color=Self::Color> + ComponentWise;
 
     ///Convert the color to premultiplied alpha.
-    fn into_premultiplied(self) -> PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>;
+    fn into_premultiplied(self) -> PreAlpha<Self::Color>;
 
     ///Convert the color from premultiplied alpha.
-    fn from_premultiplied(color: PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>) -> Self;
+    fn from_premultiplied(color: PreAlpha<Self::Color>) -> Self;
 
     ///Blend self, as the source color, with `destination`, using
     ///`blend_function`. Anything that implements `BlendFunction` is
@@ -29,7 +29,7 @@ pub trait Blend: Sized {
     ///use palette::{Rgb, Rgba, Blend};
     ///use palette::blend::PreAlpha;
     ///
-    ///type PreRgba = PreAlpha<Rgb<f32>, f32>;
+    ///type PreRgba = PreAlpha<Rgb<f32>>;
     ///
     ///fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
     ///    PreAlpha {
@@ -49,8 +49,8 @@ pub trait Blend: Sized {
     ///Place `self` over `other`. This is the good old common alpha
     ///composition equation.
     fn over(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -66,8 +66,8 @@ pub trait Blend: Sized {
     ///Results in the parts of `self` that overlaps the visible parts of
     ///`other`.
     fn inside(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -83,8 +83,8 @@ pub trait Blend: Sized {
     ///Results in the parts of `self` that lies outside the visible parts of
     ///`other`.
     fn outside(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -99,8 +99,8 @@ pub trait Blend: Sized {
 
     ///Place `self` over only the visible parts of `other`.
     fn atop(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -115,8 +115,8 @@ pub trait Blend: Sized {
 
     ///Results in either `self` or `other`, where they do not overlap.
     fn xor(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();
@@ -134,8 +134,8 @@ pub trait Blend: Sized {
     ///Add `self` and `other`. This uses the alpha component to regulate the
     ///effect, so it's not just plain component wise addition.
     fn plus(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -151,8 +151,8 @@ pub trait Blend: Sized {
     ///Multiply `self` with `other`. This uses the alpha component to regulate
     ///the effect, so it's not just plain component wise multiplication.
     fn multiply(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -169,8 +169,8 @@ pub trait Blend: Sized {
 
     ///Make a color which is at least as light as `self` or `other`.
     fn screen(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -186,8 +186,8 @@ pub trait Blend: Sized {
     ///Multiply `self` or `other` if other is dark, or screen them if `other`
     ///is light. This results in an S curve.
     fn overlay(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();
@@ -207,8 +207,8 @@ pub trait Blend: Sized {
 
     ///Return the darkest parts of `self` and `other`.
     fn darken(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -223,8 +223,8 @@ pub trait Blend: Sized {
 
     ///Return the lightest parts of `self` and `other`.
     fn lighten(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -240,8 +240,8 @@ pub trait Blend: Sized {
     ///Lighten `other` to reflect `self`. Results in `other` if `self` is
     ///black.
     fn dodge(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -263,8 +263,8 @@ pub trait Blend: Sized {
     ///Darken `other` to reflect `self`. Results in `other` if `self` is
     ///white.
     fn burn(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -287,8 +287,8 @@ pub trait Blend: Sized {
     ///is light. This is similar to `overlay`, but depends on `self` instead
     ///of `other`.
     fn hard_light(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();
@@ -310,8 +310,8 @@ pub trait Blend: Sized {
     ///if `self` is dark. The effect is increased if the components of `self`
     ///is further from 0.5.
     fn soft_light(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();
@@ -341,8 +341,8 @@ pub trait Blend: Sized {
     ///Return the absolute difference between `self` and `other`. It's
     ///basically `abs(self - other)`, but regulated by the alpha component.
     fn difference(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();
@@ -360,8 +360,8 @@ pub trait Blend: Sized {
     ///`other` is inverted if `self` is white, and preserved if `self` is
     ///black.
     fn exclusion(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ColorType>::Scalar::one();
+        let zero = <Self::Color as ColorType>::Scalar::zero();
         let two = one + one;
 
         let src = self.into_premultiplied();

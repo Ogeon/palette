@@ -3,13 +3,13 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
-use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
+use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise, ColorType};
 use {clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};
 use blend::PreAlpha;
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
-pub type Rgba<T = f32> = Alpha<Rgb<T>, T>;
+pub type Rgba<T = f32> = Alpha<Rgb<T>>;
 
 ///Linear RGB.
 ///
@@ -84,7 +84,7 @@ impl<T: Float> Rgb<T> {
 }
 
 ///<span id="Rgba"></span>[`Rgba`](type.Rgba.html) implementations.
-impl<T: Float> Alpha<Rgb<T>, T> {
+impl<T: Float> Alpha<Rgb<T>> {
     ///Linear RGB with transparency.
     pub fn new(red: T, green: T, blue: T, alpha: T) -> Rgba<T> {
         Alpha {
@@ -125,6 +125,10 @@ impl<T: Float> Alpha<Rgb<T>, T> {
             clamp(self.alpha, T::zero(), T::one())
         )
     }
+}
+
+impl<T: Float> ColorType for Rgb<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Rgb<T> {
@@ -229,8 +233,6 @@ impl<T: Float> Limited for Rgb<T> {
 }
 
 impl<T: Float> Mix for Rgb<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Rgb<T>, factor: T) -> Rgb<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -243,8 +245,6 @@ impl<T: Float> Mix for Rgb<T> {
 }
 
 impl<T: Float> Shade for Rgb<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Rgb<T> {
         Rgb {
             red: self.red + amount,
@@ -271,18 +271,16 @@ impl<T: Float> GetHue for Rgb<T> {
 impl<T: Float> Blend for Rgb<T> {
     type Color = Rgb<T>;
 
-    fn into_premultiplied(self) -> PreAlpha<Rgb<T>, T> {
+    fn into_premultiplied(self) -> PreAlpha<Rgb<T>> {
         Rgba::from(self).into()
     }
 
-    fn from_premultiplied(color: PreAlpha<Rgb<T>, T>) -> Self {
+    fn from_premultiplied(color: PreAlpha<Rgb<T>>) -> Self {
         Rgba::from(color).into()
     }
 }
 
 impl<T: Float> ComponentWise for Rgb<T> {
-    type Scalar = T;
-
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Rgb<T>, mut f: F) -> Rgb<T> {
         Rgb {
             red: f(self.red, other.red),
@@ -414,14 +412,14 @@ impl<T: Float> From<GammaRgb<T>> for Rgb<T> {
     }
 }
 
-impl<T: Float> From<Srgb<T>> for Alpha<Rgb<T>, T> {
-    fn from(srgb: Srgb<T>) -> Alpha<Rgb<T>, T> {
+impl<T: Float> From<Srgb<T>> for Alpha<Rgb<T>> {
+    fn from(srgb: Srgb<T>) -> Alpha<Rgb<T>> {
         srgb.to_linear()
     }
 }
 
-impl<T: Float> From<GammaRgb<T>> for Alpha<Rgb<T>, T> {
-    fn from(gamma_rgb: GammaRgb<T>) -> Alpha<Rgb<T>, T> {
+impl<T: Float> From<GammaRgb<T>> for Alpha<Rgb<T>> {
+    fn from(gamma_rgb: GammaRgb<T>) -> Alpha<Rgb<T>> {
         gamma_rgb.to_linear()
     }
 }
