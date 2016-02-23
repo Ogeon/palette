@@ -3,9 +3,10 @@ use num::Float;
 use std::ops::{Add, Sub};
 
 use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, RgbHue, FromColor, clamp};
+use ColorType;
 
 ///Linear HWB with an alpha component. See the [`Hwba` implementation in `Alpha`](struct.Alpha.html#Hwba).
-pub type Hwba<T = f32> = Alpha<Hwb<T>, T>;
+pub type Hwba<T = f32> = Alpha<Hwb<T>>;
 
 ///Linear HWB color space.
 ///
@@ -45,7 +46,7 @@ impl<T: Float> Hwb<T> {
 }
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
-impl<T: Float> Alpha<Hwb<T>, T> {
+impl<T: Float> Alpha<Hwb<T>> {
     ///Linear HSV and transparency.
     pub fn new(hue: RgbHue<T>, whiteness: T, blackness: T, alpha: T) -> Hwba<T> {
         Alpha {
@@ -53,6 +54,10 @@ impl<T: Float> Alpha<Hwb<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Hwb<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Hwb<T> {
@@ -100,8 +105,6 @@ impl<T: Float> Limited for Hwb<T> {
 }
 
 impl<T: Float> Mix for Hwb<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Hwb<T>, factor: T) -> Hwb<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
@@ -115,8 +118,6 @@ impl<T: Float> Mix for Hwb<T> {
 }
 
 impl<T: Float> Shade for Hwb<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Hwb<T> {
         Hwb {
             hue: self.hue,

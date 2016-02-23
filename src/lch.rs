@@ -3,9 +3,10 @@ use num::Float;
 use std::ops::{Add, Sub};
 
 use {Alpha, Limited, Mix, Shade, GetHue, FromColor, IntoColor, Hue, Xyz, Lab, Saturate, LabHue, clamp};
+use ColorType;
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
-pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
+pub type Lcha<T = f32> = Alpha<Lch<T>>;
 
 ///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html).
 ///
@@ -42,7 +43,7 @@ impl<T: Float> Lch<T> {
 }
 
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
-impl<T: Float> Alpha<Lch<T>, T> {
+impl<T: Float> Alpha<Lch<T>> {
     ///CIE L*C*h° and transparency.
     pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<T> {
         Alpha {
@@ -50,6 +51,10 @@ impl<T: Float> Alpha<Lch<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Lch<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Lch<T> {
@@ -91,8 +96,6 @@ impl<T: Float> Limited for Lch<T> {
 }
 
 impl<T: Float> Mix for Lch<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
@@ -105,8 +108,6 @@ impl<T: Float> Mix for Lch<T> {
 }
 
 impl<T: Float> Shade for Lch<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Lch<T> {
         Lch {
             l: self.l + amount,
@@ -147,8 +148,6 @@ impl<T: Float> Hue for Lch<T> {
 }
 
 impl<T: Float> Saturate for Lch<T> {
-    type Scalar = T;
-
     fn saturate(&self, factor: T) -> Lch<T> {
         Lch {
             l: self.l,

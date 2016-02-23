@@ -3,13 +3,13 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Alpha, Xyz, Lch, LabHue};
-use {Limited, Mix, Shade, GetHue, FromColor, ComponentWise};
+use {Limited, Mix, Shade, GetHue, FromColor, ComponentWise, ColorType};
 use {clamp, flt};
 
 use tristimulus::{X_N, Y_N, Z_N};
 
 ///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
-pub type Laba<T = f32> = Alpha<Lab<T>, T>;
+pub type Laba<T = f32> = Alpha<Lab<T>>;
 
 ///The CIE L*a*b* (CIELAB) color space.
 ///
@@ -47,7 +47,7 @@ impl<T: Float> Lab<T> {
 }
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
-impl<T: Float> Alpha<Lab<T>, T> {
+impl<T: Float> Alpha<Lab<T>> {
     ///CIE L*a*b* and transparency.
     pub fn new(l: T, a: T, b: T, alpha: T) -> Laba<T> {
         Alpha {
@@ -55,6 +55,10 @@ impl<T: Float> Alpha<Lab<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Lab<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Lab<T> {
@@ -121,8 +125,6 @@ impl<T: Float> Limited for Lab<T> {
 }
 
 impl<T: Float> Mix for Lab<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Lab<T>, factor: T) -> Lab<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -135,8 +137,6 @@ impl<T: Float> Mix for Lab<T> {
 }
 
 impl<T: Float> Shade for Lab<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Lab<T> {
         Lab {
             l: self.l + amount,
@@ -159,8 +159,6 @@ impl<T: Float> GetHue for Lab<T> {
 }
 
 impl<T: Float> ComponentWise for Lab<T> {
-    type Scalar = T;
-
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Lab<T>, mut f: F) -> Lab<T> {
         Lab {
             l: f(self.l, other.l),

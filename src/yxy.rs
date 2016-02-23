@@ -3,14 +3,14 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 
 use {Alpha, Luma, Xyz};
-use {Limited, Mix, Shade, FromColor, ComponentWise};
+use {Limited, Mix, Shade, FromColor, ComponentWise, ColorType};
 use {clamp, flt};
 
 const D65_X: f64 = 0.312727;
 const D65_Y: f64 = 0.329023;
 
 ///CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation in `Alpha`](struct.Alpha.html#Yxya).
-pub type Yxya<T = f32> = Alpha<Yxy<T>, T>;
+pub type Yxya<T = f32> = Alpha<Yxy<T>>;
 
 ///The CIE 1931 Yxy (xyY)  color space.
 ///
@@ -50,7 +50,7 @@ impl<T: Float> Yxy<T> {
 }
 
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
-impl<T: Float> Alpha<Yxy<T>, T> {
+impl<T: Float> Alpha<Yxy<T>> {
     ///CIE Yxy and transparency.
     pub fn new(x: T, y: T, luma: T, alpha: T) -> Yxya<T> {
         Alpha {
@@ -58,6 +58,10 @@ impl<T: Float> Alpha<Yxy<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Yxy<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Yxy<T> {
@@ -104,8 +108,6 @@ impl<T: Float> Limited for Yxy<T> {
 }
 
 impl<T: Float> Mix for Yxy<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Yxy<T>, factor: T) -> Yxy<T> {
         let factor = clamp(factor, T::zero(), T::one());
 
@@ -118,8 +120,6 @@ impl<T: Float> Mix for Yxy<T> {
 }
 
 impl<T: Float> Shade for Yxy<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Yxy<T> {
         Yxy {
             x: self.x,
@@ -130,8 +130,6 @@ impl<T: Float> Shade for Yxy<T> {
 }
 
 impl<T: Float> ComponentWise for Yxy<T> {
-    type Scalar = T;
-
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Yxy<T>, mut f: F) -> Yxy<T> {
         Yxy {
             x: f(self.x, other.x),

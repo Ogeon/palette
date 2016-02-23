@@ -3,9 +3,10 @@ use num::Float;
 use std::ops::{Add, Sub};
 
 use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use ColorType;
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
-pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
+pub type Hsla<T = f32> = Alpha<Hsl<T>>;
 
 ///Linear HSL color space.
 ///
@@ -44,7 +45,7 @@ impl<T: Float> Hsl<T> {
 }
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
-impl<T: Float> Alpha<Hsl<T>, T> {
+impl<T: Float> Alpha<Hsl<T>> {
     ///Linear HSL and transparency.
     pub fn new(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<T> {
         Alpha {
@@ -52,6 +53,10 @@ impl<T: Float> Alpha<Hsl<T>, T> {
             alpha: alpha,
         }
     }
+}
+
+impl<T: Float> ColorType for Hsl<T> {
+    type Scalar = T;
 }
 
 impl<T: Float> FromColor<T> for Hsl<T> {
@@ -136,8 +141,6 @@ impl<T: Float> Limited for Hsl<T> {
 }
 
 impl<T: Float> Mix for Hsl<T> {
-    type Scalar = T;
-
     fn mix(&self, other: &Hsl<T>, factor: T) -> Hsl<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
@@ -151,8 +154,6 @@ impl<T: Float> Mix for Hsl<T> {
 }
 
 impl<T: Float> Shade for Hsl<T> {
-    type Scalar = T;
-
     fn lighten(&self, amount: T) -> Hsl<T> {
         Hsl {
             hue: self.hue,
@@ -193,8 +194,6 @@ impl<T: Float> Hue for Hsl<T> {
 }
 
 impl<T: Float> Saturate for Hsl<T> {
-    type Scalar = T;
-
     fn saturate(&self, factor: T) -> Hsl<T> {
         Hsl {
             hue: self.hue,
