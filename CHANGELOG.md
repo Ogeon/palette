@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 0.2.1 - 2016-02-23
+
+ * [#39][39]: Implement color blending. Closes [#3][3].
+ * [#54][54]: Faster Rgb to Hsl and Hsv conversions.
+ * [#52][52]: Add missing ApproxEq implementations.
+ * [#53][53]: Add hwb color. Closes [#32][32].
+ * [#51][51]: Implement approx eq trait.
+ * [#48][48]: Add tests for conversions. Closes [#44][44].
+ * [#47][47]: Change normalize to use floor and ceil formula. Closes [#46][46].
+ * [#43][43]: Add conversion trait.
+ * [#34][34]: Add color constants. Closes [#5][5].
+ * [#35][35]: use flt() function. Closes [#33][33].
+ * [#30][30]: Add Cie Yxy (xyY) Color Space.
+ * [#29][29]: Derive Clone for Take and MaybeSlice.
+
 ## Version 0.2.0 - 2016-01-30
 
  * [#26][26]: Offer both 0 centered and positive hue -> float conversion. Closes [#15][15].
@@ -16,6 +31,18 @@
 
 ## Version 0.1.0 - 2016-01-12
 
+[39]: https://github.com/Ogeon/palette/pull/39
+[54]: https://github.com/Ogeon/palette/pull/54
+[52]: https://github.com/Ogeon/palette/pull/52
+[53]: https://github.com/Ogeon/palette/pull/53
+[51]: https://github.com/Ogeon/palette/pull/51
+[48]: https://github.com/Ogeon/palette/pull/48
+[47]: https://github.com/Ogeon/palette/pull/47
+[43]: https://github.com/Ogeon/palette/pull/43
+[34]: https://github.com/Ogeon/palette/pull/34
+[35]: https://github.com/Ogeon/palette/pull/35
+[30]: https://github.com/Ogeon/palette/pull/30
+[29]: https://github.com/Ogeon/palette/pull/29
 [26]: https://github.com/Ogeon/palette/pull/26
 [25]: https://github.com/Ogeon/palette/pull/25
 [22]: https://github.com/Ogeon/palette/pull/22
@@ -24,6 +51,12 @@
 [18]: https://github.com/Ogeon/palette/pull/18
 [12]: https://github.com/Ogeon/palette/pull/12
 [9]: https://github.com/Ogeon/palette/pull/9
+[3]: https://github.com/Ogeon/palette/issues/3
+[32]: https://github.com/Ogeon/palette/issues/32
+[44]: https://github.com/Ogeon/palette/issues/44
+[46]: https://github.com/Ogeon/palette/issues/46
+[5]: https://github.com/Ogeon/palette/issues/5
+[33]: https://github.com/Ogeon/palette/issues/33
 [15]: https://github.com/Ogeon/palette/issues/15
 [19]: https://github.com/Ogeon/palette/issues/19
 [11]: https://github.com/Ogeon/palette/issues/11
