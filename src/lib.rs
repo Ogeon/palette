@@ -56,9 +56,12 @@ use num::{Float, ToPrimitive, NumCast};
 use approx::ApproxEq;
 
 use pixel::{Srgb, GammaRgb};
+use blend::PreAlpha;
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
+pub use blend::Blend;
+
 pub use rgb::{Rgb, Rgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
@@ -220,6 +223,7 @@ macro_rules! assert_ranges {
 
 pub mod gradient;
 pub mod pixel;
+pub mod blend;
 
 #[cfg(feature = "named")]
 pub mod named;
@@ -335,6 +339,18 @@ macro_rules! make_color {
 
             fn saturate(&self, factor: T) -> Color<T> {
                 Lch::from(*self).saturate(factor).into()
+            }
+        }
+
+        impl<T: Float> Blend for Color<T> {
+            type Color = Rgb<T>;
+
+            fn into_premultiplied(self) -> PreAlpha<Rgb<T>, T> {
+                Rgba::from(self).into()
+            }
+
+            fn from_premultiplied(color: PreAlpha<Rgb<T>, T>) -> Self {
+                Rgba::from(color).into()
             }
         }
 
@@ -598,6 +614,18 @@ pub trait Saturate: Sized {
     fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
+}
+
+///Perform a unary or binary operation on each component of a color.
+pub trait ComponentWise {
+    ///The scalar type for color components.
+    type Scalar: Float;
+
+    ///Perform a binary operation on this and an other color.
+    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(&self, other: &Self, f: F) -> Self;
+
+    ///Perform a unary operation on this color.
+    fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
 }
 
 ///A convenience function to convert a constant number to Float Type

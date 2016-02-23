@@ -187,6 +187,15 @@ macro_rules! impl_from_trait {
             }
         }
 
+        impl<T: Float> From<Alpha<Color<T>, T>> for Alpha<$self_ty<T>,T> {
+            fn from(color: Alpha<Color<T>, T>) -> Alpha<$self_ty<T>,T> {
+                Alpha {
+                    color: color.color.into(),
+                    alpha: color.alpha,
+                }
+            }
+        }
+
         $(
             impl<T: Float> From<$other<T>> for $self_ty<T> {
                 fn from(other: $other<T>) -> $self_ty<T> {

@@ -1,9 +1,11 @@
 use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
-use std::default::Default;
 
-use {Alpha, Rgb, Xyz, Yxy, Limited, Mix, Shade, FromColor, clamp, flt};
+use {Alpha, Rgb, Xyz, Yxy};
+use {Limited, Mix, Shade, FromColor, Blend, ComponentWise};
+use {clamp, flt};
+use blend::PreAlpha;
 
 ///Linear luminance with an alpha component. See the [`Lumaa` implementation in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<T = f32> = Alpha<Luma<T>, T>;
@@ -115,6 +117,34 @@ impl<T: Float> Shade for Luma<T> {
     fn lighten(&self, amount: T) -> Luma<T> {
         Luma {
             luma: (self.luma + amount).max(T::zero()),
+        }
+    }
+}
+
+impl<T: Float> Blend for Luma<T> {
+    type Color = Luma<T>;
+
+    fn into_premultiplied(self) -> PreAlpha<Luma<T>, T> {
+        Lumaa::from(self).into()
+    }
+
+    fn from_premultiplied(color: PreAlpha<Luma<T>, T>) -> Self {
+        Lumaa::from(color).into()
+    }
+}
+
+impl<T: Float> ComponentWise for Luma<T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luma<T>, mut f: F) -> Luma<T> {
+        Luma {
+            luma: f(self.luma, other.luma),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Luma<T> {
+        Luma {
+            luma: f(self.luma),
         }
     }
 }

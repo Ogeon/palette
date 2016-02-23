@@ -2,8 +2,11 @@ use num::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 
-use {Alpha, Xyz, Luma, Hsl, Hsv, Limited, Mix, Shade, GetHue, RgbHue, FromColor, clamp, flt};
+use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
+use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
+use {clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};
+use blend::PreAlpha;
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
 pub type Rgba<T = f32> = Alpha<Rgb<T>, T>;
@@ -261,6 +264,38 @@ impl<T: Float> GetHue for Rgb<T> {
             None
         } else {
             Some(RgbHue::from_radians((sqrt_3 * (self.green - self.blue)).atan2(self.red * flt(2.0) - self.green - self.blue)))
+        }
+    }
+}
+
+impl<T: Float> Blend for Rgb<T> {
+    type Color = Rgb<T>;
+
+    fn into_premultiplied(self) -> PreAlpha<Rgb<T>, T> {
+        Rgba::from(self).into()
+    }
+
+    fn from_premultiplied(color: PreAlpha<Rgb<T>, T>) -> Self {
+        Rgba::from(color).into()
+    }
+}
+
+impl<T: Float> ComponentWise for Rgb<T> {
+    type Scalar = T;
+
+    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Rgb<T>, mut f: F) -> Rgb<T> {
+        Rgb {
+            red: f(self.red, other.red),
+            green: f(self.green, other.green),
+            blue: f(self.blue, other.blue),
+        }
+    }
+
+    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Rgb<T> {
+        Rgb {
+            red: f(self.red),
+            green: f(self.green),
+            blue: f(self.blue),
         }
     }
 }
