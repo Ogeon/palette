@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 
 use {Alpha, Xyz, Lab, LabHue, Hue};
 use {Limited, Mix, Shade, GetHue, FromColor, IntoColor, Saturate};
-use {clamp};
+use {clamp, flt};
 use white_point::{WhitePoint, D65};
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
@@ -24,14 +24,14 @@ pub struct Lch<Wp = D65, T: Float = f32>
     where T: Float,
         Wp: WhitePoint<T>
 {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
+    ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
     ///give the brightest white.
     pub l: T,
 
     ///C* is the colorfulness of the color. It's similar to saturation. 0.0
-    ///gives gray scale colors, and numbers around 1.0-1.41421356 gives fully
-    ///saturated colors. The upper limit of 1.41421356 (or `sqrt(2.0)`) should
-    ///include the whole L*a*b* space and some more.
+    ///gives gray scale colors, and numbers around 128-181 gives fully
+    ///saturated colors. The upper limit of 181 should include the whole
+    ///L*a*b* space and some more.
     pub chroma: T,
 
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -182,7 +182,7 @@ impl<Wp, T> Shade for Lch<Wp, T>
 
     fn lighten(&self, amount: T) -> Lch<Wp, T> {
         Lch {
-            l: self.l + amount,
+            l: self.l + amount * flt(100.0),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
@@ -326,10 +326,10 @@ mod test {
         assert_ranges!{
             Lch;
             limited {
-                l: 0.0 => 1.0
+                l: 0.0 => 100.0
             }
             limited_min {
-                chroma: 0.0 => 2.0
+                chroma: 0.0 => 200.0
             }
             unlimited {
                 hue: -360.0 => 360.0
