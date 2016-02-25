@@ -3,11 +3,15 @@ use approx::ApproxEq;
 
 use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
 use pixel::{Srgb, GammaRgb};
+use white_point::WhitePoint;
+
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
-        impl<T: Float + ApproxEq> ApproxEq for $self_ty<T>
-        where T::Epsilon: Copy + Float
+        impl<Wp, T> ApproxEq for $self_ty<Wp, T>
+        where T: Float + ApproxEq,
+            T::Epsilon: Copy + Float,
+            Wp: WhitePoint<T>
         {
             type Epsilon = <T as ApproxEq>::Epsilon;
 

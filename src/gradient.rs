@@ -375,7 +375,8 @@ mod test {
 
         let v1: Vec<_> = g1.take(10).take(5).collect();
         let v2: Vec<_> = g2.take(5).collect();
-
-        assert_eq!(v1, v2);
+        for (t1, t2) in v1.iter().zip(v2.iter()){
+            assert_relative_eq!(t1, t2);
+        }
     }
 }

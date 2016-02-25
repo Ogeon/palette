@@ -9,6 +9,7 @@ Tests XYZ and YXY conversion
 
 use csv;
 use palette::{Xyz, Yxy,IntoColor};
+use palette::white_point::D65;
 
 #[derive(RustcDecodable, PartialEq)]
 struct Cie2004Raw{
@@ -22,8 +23,8 @@ struct Cie2004Raw{
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 struct Cie2004 {
-    xyz: Xyz<f32>,
-    yxy: Yxy<f32>,
+    xyz: Xyz<D65, f32>,
+    yxy: Yxy<D65, f32>,
 }
 
 impl From<Cie2004Raw> for Cie2004 {

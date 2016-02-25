@@ -4,6 +4,7 @@ List of color from www.colormine.org
 use csv;
 use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
+use palette::white_point::D65;
 
 pub const COLOR_MINE_FILE_FULL: &'static str = "tests/convert/data_color_mine.csv";
 pub const COLOR_MINE_FILE_MINI: &'static str = "tests/convert/data_color_mine_mini.csv";
@@ -59,15 +60,15 @@ pub struct ColorMineRaw {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorMine {
-    lab: Lab<f32>,
-    xyz: Xyz<f32>,
-    yxy: Yxy<f32>,
-    lch: Lch<f32>,
-    rgb: Rgb<f32>,
-    linear_rgb: Rgb<f32>,
-    hsl: Hsl<f32>,
-    hsv: Hsv<f32>,
-    hwb: Hwb<f32>,
+    lab: Lab<D65, f32>,
+    xyz: Xyz<D65, f32>,
+    yxy: Yxy<D65, f32>,
+    lch: Lch<D65, f32>,
+    rgb: Rgb<D65, f32>,
+    linear_rgb: Rgb<D65, f32>,
+    hsl: Hsl<D65, f32>,
+    hsv: Hsv<D65, f32>,
+    hwb: Hwb<D65, f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {
@@ -88,8 +89,8 @@ impl From<ColorMineRaw> for ColorMine {
 
 macro_rules! impl_from_color {
     ($self_ty:ident) => {
-        impl From<$self_ty<f32>> for ColorMine {
-            fn from(color: $self_ty<f32>) -> ColorMine {
+        impl From<$self_ty<D65, f32>> for ColorMine {
+            fn from(color: $self_ty<D65, f32>) -> ColorMine {
                 ColorMine {
                     lab: color.into_lab(),
                     xyz: color.into_xyz(),

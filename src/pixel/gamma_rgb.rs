@@ -1,8 +1,11 @@
 use num::Float;
 
+use std::marker::PhantomData;
+
 use {Alpha, Rgb, Rgba, clamp, flt};
 
 use pixel::RgbPixel;
+use white_point::{WhitePoint, D65};
 
 ///A gamma encoded color.
 ///
@@ -24,8 +27,11 @@ use pixel::RgbPixel;
 ///let c: Rgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
 ///assert_eq!((128, 64, 32), GammaRgb::linear_to_pixel(c, 2.2));
 ///```
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct GammaRgb<T: Float = f32> {
+#[derive(Debug, PartialEq)]
+pub struct GammaRgb<Wp = D65, T = f32>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     ///The red component, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
     pub red: T,
@@ -44,45 +50,104 @@ pub struct GammaRgb<T: Float = f32> {
 
     ///The decoding gamma value. Commonly 2.2.
     pub gamma: T,
+
+    ///The white point associated with the color's illuminant and observer.
+    ///D65 for 2 degree observer is used by default.
+    pub white_point: PhantomData<Wp>,
 }
 
-impl<T: Float> GammaRgb<T> {
+impl<Wp, T> Copy for GammaRgb<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{}
+
+impl<Wp, T> Clone for GammaRgb<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn clone(&self) -> GammaRgb<Wp, T> { *self }
+}
+
+impl<T> GammaRgb<D65, T>
+    where T: Float,
+{
     ///Create a new opaque gamma encoded color.
-    pub fn new(red: T, green: T, blue: T, gamma: T) -> GammaRgb<T> {
+    pub fn new(red: T, green: T, blue: T, gamma: T) -> GammaRgb<D65, T> {
         GammaRgb::with_alpha(red, green, blue, T::one(), gamma)
     }
 
     ///Create a new gamma encoded color with transparency.
-    pub fn with_alpha(red: T, green: T, blue: T, alpha: T, gamma: T) -> GammaRgb<T> {
+    pub fn with_alpha(red: T, green: T, blue: T, alpha: T, gamma: T) -> GammaRgb<D65, T> {
         GammaRgb {
             red: red,
             green: green,
             blue: blue,
             alpha: alpha,
             gamma: gamma,
+            white_point: PhantomData,
         }
     }
 
     ///Create a new opaque gamma encoded color from `u8` values.
-    pub fn new_u8(red: u8, green: u8, blue: u8, gamma: T) -> GammaRgb<T> {
+    pub fn new_u8(red: u8, green: u8, blue: u8, gamma: T) -> GammaRgb<D65, T> {
         GammaRgb::with_alpha_u8(red, green, blue, 255, gamma)
     }
 
     ///Create a new gamma encoded color, with transparency, from `u8` values.
-    pub fn with_alpha_u8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> GammaRgb<T> {
+    pub fn with_alpha_u8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> GammaRgb<D65, T> {
         GammaRgb {
             red: flt::<T,_>(red) / flt(255.0),
             green: flt::<T,_>(green) / flt(255.0),
             blue: flt::<T,_>(blue) / flt(255.0),
             alpha: flt::<T,_>(alpha) / flt(255.0),
             gamma: gamma,
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> GammaRgb<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///Create a new opaque gamma encoded color.
+    pub fn with_wp(red: T, green: T, blue: T, gamma: T) -> GammaRgb<Wp, T> {
+        GammaRgb::with_wp_alpha(red, green, blue, T::one(), gamma)
+    }
+
+    ///Create a new gamma encoded color with transparency.
+    pub fn with_wp_alpha(red: T, green: T, blue: T, alpha: T, gamma: T) -> GammaRgb<Wp, T> {
+        GammaRgb {
+            red: red,
+            green: green,
+            blue: blue,
+            alpha: alpha,
+            gamma: gamma,
+            white_point: PhantomData,
+        }
+    }
+
+    ///Create a new opaque gamma encoded color from `u8` values.
+    pub fn new_wp_u8(red: u8, green: u8, blue: u8, gamma: T) -> GammaRgb<Wp, T> {
+        GammaRgb::with_wp_alpha_u8(red, green, blue, 255, gamma)
+    }
+
+    ///Create a new gamma encoded color, with transparency, from `u8` values.
+    pub fn with_wp_alpha_u8(red: u8, green: u8, blue: u8, alpha: u8, gamma: T) -> GammaRgb<Wp, T> {
+        GammaRgb {
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
+            gamma: gamma,
+            white_point: PhantomData,
         }
     }
 
     ///Create a new gamma encoded color from a pixel value.
-    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P, gamma: T) -> GammaRgb<T> {
+    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P, gamma: T) -> GammaRgb<Wp, T> {
         let (r, g, b, a) = pixel.to_rgba();
-        GammaRgb::with_alpha(r, g, b, a, gamma)
+        GammaRgb::with_wp_alpha(r, g, b, a, gamma)
     }
 
     ///Transform this color into a pixel representation.
@@ -96,7 +161,7 @@ impl<T: Float> GammaRgb<T> {
     }
 
     ///Convert linear color components to gamma encoding.
-    pub fn from_linear<C: Into<Rgba<T>>>(color: C, gamma: T) -> GammaRgb<T> {
+    pub fn from_linear<C: Into<Rgba<Wp, T>>>(color: C, gamma: T) -> GammaRgb<Wp, T> {
         let rgb = color.into();
         GammaRgb {
             red: to_gamma(rgb.red, gamma),
@@ -104,23 +169,24 @@ impl<T: Float> GammaRgb<T> {
             blue: to_gamma(rgb.blue, gamma),
             alpha: rgb.alpha,
             gamma: gamma,
+            white_point: PhantomData,
         }
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgba<T> {
+    pub fn to_linear(&self) -> Rgba<Wp, T> {
         Alpha {
-            color: Rgb {
-                red: from_gamma(self.red, self.gamma),
-                green: from_gamma(self.green, self.gamma),
-                blue: from_gamma(self.blue, self.gamma),
-            },
+            color: Rgb::with_wp (
+                from_gamma(self.red, self.gamma),
+                from_gamma(self.green, self.gamma),
+                from_gamma(self.blue, self.gamma),
+            ),
             alpha: self.alpha,
         }
     }
 
     ///Shortcut to convert a linear color to a gamma encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgba<T>>, P: RgbPixel<T>>(color: C, gamma: T) -> P {
+    pub fn linear_to_pixel<C: Into<Rgba<Wp, T>>, P: RgbPixel<T>>(color: C, gamma: T) -> P {
         GammaRgb::from_linear(color, gamma).to_pixel()
     }
 }

@@ -16,9 +16,9 @@ macro_rules! make_hues {
         ///also have some surprising effects if it's expected to act as a
         ///linear number.
         #[derive(Clone, Copy, Debug, Default)]
-        pub struct $name<T:Float = f32>(T);
+        pub struct $name<T: Float = f32>(T);
 
-        impl<T:Float> $name<T> {
+        impl<T: Float> $name<T> {
             ///Create a new hue from radians, instead of degrees.
             pub fn from_radians(radians: T) -> $name<T> {
                 $name(radians * flt(180.0) / flt(PI))
@@ -45,7 +45,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> From<T> for $name<T> {
+        impl<T: Float> From<T> for $name<T> {
             fn from(degrees: T) -> $name<T> {
                 $name(degrees)
             }
@@ -68,7 +68,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> PartialEq for $name<T> {
+        impl<T: Float> PartialEq for $name<T> {
             fn eq(&self, other: &$name<T>) -> bool {
                 let hue_s: T = (*self).to_degrees();
                 let hue_o: T = (*other).to_degrees();
@@ -76,14 +76,14 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> PartialEq<T> for $name<T> {
+        impl<T: Float> PartialEq<T> for $name<T> {
             fn eq(&self, other: &T) -> bool {
                 let hue: T = (*self).to_degrees();
                 hue.eq(&normalize_angle(*other))
             }
         }
 
-        impl<T:Float> Add<$name<T>> for $name<T> {
+        impl<T: Float> Add<$name<T>> for $name<T> {
             type Output = $name<T>;
 
             fn add(self, other: $name<T>) -> $name<T> {
@@ -91,7 +91,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> Add<T> for $name<T> {
+        impl<T: Float> Add<T> for $name<T> {
             type Output = $name<T>;
 
             fn add(self, other: T) -> $name<T> {
@@ -99,7 +99,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> Sub<$name<T>> for $name<T> {
+        impl<T: Float> Sub<$name<T>> for $name<T> {
             type Output = $name<T>;
 
             fn sub(self, other: $name<T>) -> $name<T> {
@@ -107,7 +107,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T:Float> Sub<T> for $name<T> {
+        impl<T: Float> Sub<T> for $name<T> {
             type Output = $name<T>;
 
             fn sub(self, other: T) -> $name<T> {
