@@ -1,11 +1,13 @@
 use num::Float;
 
 use std::ops::{Add, Sub};
+use std::marker::PhantomData;
 
 use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use white_point::{WhitePoint, D65};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
-pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
+pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
 
 ///Linear HSL color space.
 ///
@@ -17,8 +19,11 @@ pub type Hsla<T = f32> = Alpha<Hsl<T>, T>;
 ///more gray, or making it darker.
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Hsl<T: Float = f32> {
+#[derive(Debug, PartialEq)]
+pub struct Hsl<Wp = D65, T = f32>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: RgbHue<T>,
@@ -30,23 +35,61 @@ pub struct Hsl<T: Float = f32> {
     ///Decides how light the color will look. 0.0 will be black, 0.5 will give
     ///a clear color, and 1.0 will give white.
     pub lightness: T,
+
+    ///The white point associated with the color's illuminant and observer.
+    ///D65 for 2 degree observer is used by default.
+    pub white_point: PhantomData<Wp>,
+
 }
 
-impl<T: Float> Hsl<T> {
-    ///Linear HSL.
-    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<T> {
+impl<Wp, T> Copy for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{}
+
+impl<Wp, T> Clone for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn clone(&self) -> Hsl<Wp, T> { *self }
+}
+
+
+impl<T> Hsl<D65, T>
+    where T: Float,
+{
+    ///Linear HSL with white point D65.
+    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<D65,T> {
         Hsl {
             hue: hue,
             saturation: saturation,
             lightness: lightness,
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///Linear HSL.
+    pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<Wp, T> {
+        Hsl {
+            hue: hue,
+            saturation: saturation,
+            lightness: lightness,
+            white_point: PhantomData,
         }
     }
 }
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
-impl<T: Float> Alpha<Hsl<T>, T> {
-    ///Linear HSL and transparency.
-    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<T> {
+impl<T> Alpha<Hsl<D65, T>, T>
+    where T: Float,
+{
+    ///Linear HSL and transparency and white point D65.
+    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<D65, T> {
         Alpha {
             color: Hsl::new(hue, saturation, lightness),
             alpha: alpha,
@@ -54,13 +97,30 @@ impl<T: Float> Alpha<Hsl<T>, T> {
     }
 }
 
-impl<T: Float> FromColor<T> for Hsl<T> {
-    fn from_xyz(xyz: Xyz<T>) -> Self {
-        let rgb: Rgb<T> = xyz.into_rgb();
+///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
+impl<Wp, T> Alpha<Hsl<Wp, T>, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///Linear HSL and transparency.
+    pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<Wp, T> {
+        Alpha {
+            color: Hsl::with_wp(hue, saturation, lightness),
+            alpha: alpha,
+        }
+    }
+}
+
+impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+        let rgb: Rgb<Wp, T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb(rgb: Rgb<T>) -> Self {
+    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
@@ -90,14 +150,15 @@ impl<T: Float> FromColor<T> for Hsl<T> {
             hue: h.into(),
             saturation: s,
             lightness: l,
+            white_point: PhantomData,
         }
     }
 
-    fn from_hsl(hsl: Hsl<T>) -> Self {
+    fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
         hsl
     }
 
-    fn from_hsv(hsv: Hsv<T>) -> Self {
+    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
         let x = (flt::<T,_>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
             T::zero()
@@ -112,18 +173,22 @@ impl<T: Float> FromColor<T> for Hsl<T> {
             hue: hsv.hue,
             saturation: saturation,
             lightness: x / flt(2.0),
+            white_point: PhantomData,
         }
     }
 
 }
 
-impl<T: Float> Limited for Hsl<T> {
+impl<Wp, T> Limited for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
     }
 
-    fn clamp(&self) -> Hsl<T> {
+    fn clamp(&self) -> Hsl<Wp, T> {
         let mut c = *self;
         c.clamp_self();
         c
@@ -135,10 +200,13 @@ impl<T: Float> Limited for Hsl<T> {
     }
 }
 
-impl<T: Float> Mix for Hsl<T> {
+impl<Wp, T> Mix for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn mix(&self, other: &Hsl<T>, factor: T) -> Hsl<T> {
+    fn mix(&self, other: &Hsl<Wp, T>, factor: T) -> Hsl<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 
@@ -146,23 +214,31 @@ impl<T: Float> Mix for Hsl<T> {
             hue: self.hue + factor * hue_diff,
             saturation: self.saturation + factor * (other.saturation - self.saturation),
             lightness: self.lightness + factor * (other.lightness - self.lightness),
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Shade for Hsl<T> {
+impl<Wp, T> Shade for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Hsl<T> {
+    fn lighten(&self, amount: T) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
             lightness: self.lightness + amount,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> GetHue for Hsl<T> {
+impl<Wp, T> GetHue for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
@@ -174,86 +250,114 @@ impl<T: Float> GetHue for Hsl<T> {
     }
 }
 
-impl<T: Float> Hue for Hsl<T> {
-    fn with_hue(&self, hue: RgbHue<T>) -> Hsl<T> {
+impl<Wp, T> Hue for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn with_hue(&self, hue: RgbHue<T>) -> Hsl<Wp, T> {
         Hsl {
             hue: hue,
             saturation: self.saturation,
             lightness: self.lightness,
+            white_point: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: RgbHue<T>) -> Hsl<T> {
+    fn shift_hue(&self, amount: RgbHue<T>) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue + amount,
             saturation: self.saturation,
             lightness: self.lightness,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Saturate for Hsl<T> {
+impl<Wp, T> Saturate for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsl<T> {
+    fn saturate(&self, factor: T) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation * (T::one() + factor),
             lightness: self.lightness,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Default for Hsl<T> {
-    fn default() -> Hsl<T> {
-        Hsl::new(RgbHue::from(T::zero()), T::zero(), T::zero())
+impl<Wp, T> Default for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn default() -> Hsl<Wp, T> {
+        Hsl::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
-impl<T: Float> Add<Hsl<T>> for Hsl<T> {
-    type Output = Hsl<T>;
+impl<Wp, T> Add<Hsl<Wp, T>> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsl<Wp, T>;
 
-    fn add(self, other: Hsl<T>) -> Hsl<T> {
+    fn add(self, other: Hsl<Wp, T>) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
             lightness: self.lightness + other.lightness,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Add<T> for Hsl<T> {
-    type Output = Hsl<T>;
+impl<Wp, T> Add<T> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsl<Wp, T>;
 
-    fn add(self, c: T) -> Hsl<T> {
+    fn add(self, c: T) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue + c,
             saturation: self.saturation + c,
             lightness: self.lightness + c,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<Hsl<T>> for Hsl<T> {
-    type Output = Hsl<T>;
+impl<Wp, T> Sub<Hsl<Wp, T>> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsl<Wp, T>;
 
-    fn sub(self, other: Hsl<T>) -> Hsl<T> {
+    fn sub(self, other: Hsl<Wp, T>) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
             lightness: self.lightness - other.lightness,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<T> for Hsl<T> {
-    type Output = Hsl<T>;
+impl<Wp, T> Sub<T> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsl<Wp, T>;
 
-    fn sub(self, c: T) -> Hsl<T> {
+    fn sub(self, c: T) -> Hsl<Wp, T> {
         Hsl {
             hue: self.hue - c,
             saturation: self.saturation - c,
             lightness: self.lightness - c,
+            white_point: PhantomData,
         }
     }
 }

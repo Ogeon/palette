@@ -1,11 +1,17 @@
 use num::Float;
 
 use std::ops::{Add, Sub};
+use std::marker::PhantomData;
 
-use {Alpha, Limited, Mix, Shade, GetHue, FromColor, IntoColor, Hue, Xyz, Lab, Saturate, LabHue, clamp};
+use {Alpha, Xyz, Lab, LabHue, Hue};
+use {Limited, Mix, Shade, GetHue, FromColor, IntoColor, Saturate};
+use {clamp};
+use white_point::{WhitePoint, D65};
 
 ///CIE L*C*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
-pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
+pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
+
+
 
 ///CIE L*C*h°, a polar version of [CIE L*a*b*](struct.Lab.html).
 ///
@@ -13,8 +19,11 @@ pub type Lcha<T = f32> = Alpha<Lch<T>, T>;
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Lch<T: Float = f32> {
+#[derive(Debug, PartialEq)]
+pub struct Lch<Wp = D65, T: Float = f32>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
     ///give the brightest white.
     pub l: T,
@@ -28,23 +37,59 @@ pub struct Lch<T: Float = f32> {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: LabHue<T>,
+
+    ///The white point associated with the color's illuminant and observer.
+    ///D65 for 2 degree observer is used by default.
+    pub white_point: PhantomData<Wp>,
 }
 
-impl<T: Float> Lch<T> {
-    ///CIE L*C*h°.
-    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> Lch<T> {
+impl<Wp, T> Copy for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{}
+
+impl<Wp, T> Clone for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn clone(&self) -> Lch<Wp, T> { *self }
+}
+
+impl<T> Lch<D65, T>
+    where T: Float,
+{
+    ///CIE L*C*h° with white point D65.
+    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> Lch<D65, T> {
         Lch {
             l: l,
             chroma: chroma,
             hue: hue,
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///CIE L*C*h°.
+    pub fn with_wp(l: T, chroma: T, hue: LabHue<T>) -> Lch<Wp, T> {
+        Lch {
+            l: l,
+            chroma: chroma,
+            hue: hue,
+            white_point: PhantomData,
         }
     }
 }
 
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
-impl<T: Float> Alpha<Lch<T>, T> {
-    ///CIE L*C*h° and transparency.
-    pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<T> {
+impl<T> Alpha<Lch<D65, T>, T>
+    where T: Float,
+{
+    ///CIE L*C*h° and transparency with white point D65.
+    pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<D65, T> {
         Alpha {
             color: Lch::new(l, chroma, hue),
             alpha: alpha,
@@ -52,33 +97,54 @@ impl<T: Float> Alpha<Lch<T>, T> {
     }
 }
 
-impl<T: Float> FromColor<T> for Lch<T> {
-    fn from_xyz(xyz: Xyz<T>) -> Self {
-        let lab: Lab<T> = xyz.into_lab();
+///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
+impl<Wp, T> Alpha<Lch<Wp, T>, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///CIE L*C*h° and transparency.
+    pub fn with_wp(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<Wp, T> {
+        Alpha {
+            color: Lch::with_wp(l, chroma, hue),
+            alpha: alpha,
+        }
+    }
+}
+
+impl<Wp, T> FromColor<Wp, T> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+        let lab: Lab<Wp, T> = xyz.into_lab();
         Self::from_lab(lab)
     }
 
-    fn from_lab(lab: Lab<T>) -> Self {
+    fn from_lab(lab: Lab<Wp, T>) -> Self {
         Lch {
             l: lab.l,
             chroma: (lab.a * lab.a + lab.b * lab.b).sqrt(),
             hue: lab.get_hue().unwrap_or(LabHue::from(T::zero())),
+            white_point: PhantomData,
         }
     }
 
-    fn from_lch(lch: Lch<T>) -> Self {
+    fn from_lch(lch: Lch<Wp, T>) -> Self {
         lch
     }
 
 }
 
-impl<T: Float> Limited for Lch<T> {
+impl<Wp, T> Limited for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= T::one() &&
         self.chroma >= T::zero()
     }
 
-    fn clamp(&self) -> Lch<T> {
+    fn clamp(&self) -> Lch<Wp, T> {
         let mut c = *self;
         c.clamp_self();
         c
@@ -90,33 +156,44 @@ impl<T: Float> Limited for Lch<T> {
     }
 }
 
-impl<T: Float> Mix for Lch<T> {
+impl<Wp, T> Mix for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn mix(&self, other: &Lch<T>, factor: T) -> Lch<T> {
+    fn mix(&self, other: &Lch<Wp, T>, factor: T) -> Lch<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Lch {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
             hue: self.hue + factor * hue_diff,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Shade for Lch<T> {
+impl<Wp, T> Shade for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Lch<T> {
+    fn lighten(&self, amount: T) -> Lch<Wp, T> {
         Lch {
             l: self.l + amount,
             chroma: self.chroma,
             hue: self.hue,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> GetHue for Lch<T> {
+impl<Wp, T> GetHue for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Hue = LabHue<T>;
 
     fn get_hue(&self) -> Option<LabHue<T>> {
@@ -128,86 +205,114 @@ impl<T: Float> GetHue for Lch<T> {
     }
 }
 
-impl<T: Float> Hue for Lch<T> {
-    fn with_hue(&self, hue: LabHue<T>) -> Lch<T> {
+impl<Wp, T> Hue for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn with_hue(&self, hue: LabHue<T>) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
             hue: hue,
+            white_point: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: LabHue<T>) -> Lch<T> {
+    fn shift_hue(&self, amount: LabHue<T>) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
             hue: self.hue + amount,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Saturate for Lch<T> {
+impl<Wp, T> Saturate for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Lch<T> {
+    fn saturate(&self, factor: T) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: self.chroma * (T::one() + factor),
             hue: self.hue,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Default for Lch<T> {
-    fn default() -> Lch<T> {
-        Lch::new(T::zero(), T::zero(), LabHue::from(T::zero()))
+impl<Wp, T> Default for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn default() -> Lch<Wp, T> {
+        Lch::with_wp(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
-impl<T: Float> Add<Lch<T>> for Lch<T> {
-    type Output = Lch<T>;
+impl<Wp, T> Add<Lch<Wp, T>> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Lch<Wp, T>;
 
-    fn add(self, other: Lch<T>) -> Lch<T> {
+    fn add(self, other: Lch<Wp, T>) -> Lch<Wp, T> {
         Lch {
             l: self.l + other.l,
             chroma: self.chroma + other.chroma,
             hue: self.hue + other.hue,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Add<T> for Lch<T> {
-    type Output = Lch<T>;
+impl<Wp, T> Add<T> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Lch<Wp, T>;
 
-    fn add(self, c: T) -> Lch<T> {
+    fn add(self, c: T) -> Lch<Wp, T> {
         Lch {
             l: self.l + c,
             chroma: self.chroma + c,
             hue: self.hue + c,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<Lch<T>> for Lch<T> {
-    type Output = Lch<T>;
+impl<Wp, T> Sub<Lch<Wp, T>> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Lch<Wp, T>;
 
-    fn sub(self, other: Lch<T>) -> Lch<T> {
+    fn sub(self, other: Lch<Wp, T>) -> Lch<Wp, T> {
         Lch {
             l: self.l - other.l,
             chroma: self.chroma - other.chroma,
             hue: self.hue - other.hue,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<T> for Lch<T> {
-    type Output = Lch<T>;
+impl<Wp, T> Sub<T> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Lch<Wp, T>;
 
-    fn sub(self, c: T) -> Lch<T> {
+    fn sub(self, c: T) -> Lch<Wp, T> {
         Lch {
             l: self.l - c,
             chroma: self.chroma - c,
             hue: self.hue - c,
+            white_point: PhantomData,
         }
     }
 }

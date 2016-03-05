@@ -28,8 +28,9 @@ pub trait Blend: Sized {
     ///```
     ///use palette::{Rgb, Rgba, Blend};
     ///use palette::blend::PreAlpha;
+    ///use palette::white_point::D65;
     ///
-    ///type PreRgba = PreAlpha<Rgb<f32>, f32>;
+    ///type PreRgba = PreAlpha<Rgb<D65, f32>, f32>;
     ///
     ///fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
     ///    PreAlpha {
@@ -326,7 +327,7 @@ pub trait Blend: Sized {
                 } else if b * flt(4.0) <= dst.alpha {
                     let m2 = m * m;
                     let m3 = m2 * m;
-                    
+
                     dst.alpha * (two * a - src.alpha) * (m3 * flt(16.0) - m2 * flt(12.0) - m * flt(3.0)) + a - a * dst.alpha + b
                 } else {
                     dst.alpha * (two * a - src.alpha) * (m.sqrt() - m) + a - a * dst.alpha + b

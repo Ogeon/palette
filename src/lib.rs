@@ -74,6 +74,7 @@ pub use hwb::{Hwb, Hwba};
 
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
+pub use matrix::Mat3;
 
 //Helper macro for checking ranges and clamping.
 #[cfg(test)]
@@ -92,7 +93,9 @@ macro_rules! assert_ranges {
     ) => (
         {
             use std::iter::repeat;
+            use std::marker::PhantomData;
             use Limited;
+            use white_point::D65;
 
             {
                 print!("checking below limits ... ");
@@ -118,20 +121,22 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<f64> {
+                    let c = $ty::<D65, f64> {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
+                        white_point: PhantomData,
                     };
                     let clamped = c.clamp();
-                    let expected = $ty {
+                    let expected = $ty::<D65, f64> {
                         $($limited: $limited_from.into(),)+
                         $($limited_min: $limited_min_from.into(),)*
                         $($unlimited: $unlimited.into(),)*
+                        white_point: PhantomData,
                     };
 
                     assert!(!c.is_valid());
-                    assert_eq!(clamped, expected);
+                    assert_relative_eq!(clamped, expected);
                 }
 
                 println!("ok")
@@ -161,15 +166,16 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<f64> {
+                    let c = $ty::<D65, f64> {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
+                        white_point: PhantomData,
                     };
                     let clamped = c.clamp();
 
                     assert!(c.is_valid());
-                    assert_eq!(clamped, c);
+                    assert_relative_eq!(clamped, c);
                 }
 
                 println!("ok")
@@ -199,20 +205,22 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<f64> {
+                    let c = $ty::<D65, f64> {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
+                        white_point: PhantomData,
                     };
                     let clamped = c.clamp();
-                    let expected = $ty {
+                    let expected = $ty::<D65, _> {
                         $($limited: $limited_to.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
+                        white_point: PhantomData,
                     };
 
                     assert!(!c.is_valid());
-                    assert_eq!(clamped, expected);
+                    assert_relative_eq!(clamped, expected);
                 }
 
                 println!("ok")
@@ -241,21 +249,26 @@ mod hwb;
 
 mod hues;
 
-mod tristimulus;
 mod convert;
 mod equality;
+pub mod chromatic_adaptation;
+pub mod white_point;
+mod matrix;
+mod rgb_primaries;
+
+use white_point::{WhitePoint, D65};
 
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
-        $variant:ident $(and $($representations:ident),+ )* {$(
+        $variant: ident $(and $($representations:ident),+ )* {$(
             #[$ctor_comment:meta]
             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
         )+}
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<T = f32> = Alpha<Color<T>, T>;
+        pub type Colora<Wp = D65, T = f32> = Alpha<Color<Wp, T>, T>;
 
         ///A generic color type.
         ///
@@ -272,16 +285,31 @@ macro_rules! make_color {
         ///It's not recommended to use `Color` when full control is necessary,
         ///but it can easily be converted to a fixed color space in those
         ///cases.
-        #[derive(Clone, Copy, Debug)]
-        pub enum Color<T:Float = f32> {
-            $(#[$variant_comment] $variant($variant<T>)),+
+        #[derive(Debug)]
+        pub enum Color<Wp = D65, T = f32>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
+            $(#[$variant_comment] $variant($variant<Wp, T>)),+
         }
 
-        impl<T:Float> Color<T> {
+        impl<Wp, T> Copy for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {}
+
+        impl<Wp, T> Clone for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
+            fn clone(&self) -> Color<Wp, T> { *self }
+        }
+
+        impl<T: Float> Color<D65, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<D65, T> {
                         Color::$variant($variant::$ctor_original($($ctor_field),*))
                     }
                 )+
@@ -289,34 +317,43 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T:Float> Alpha<Color<T>, T> {
+        impl<T: Float> Alpha<Color<D65, T>, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<T> {
-                        Alpha::<$variant<T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<D65, T> {
+                        Alpha::<$variant<D65, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
         }
 
-        impl<T:Float> Mix for Color<T> {
+        impl<Wp, T> Mix for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
             type Scalar = T;
 
-            fn mix(&self, other: &Color<T>, factor: T) -> Color<T> {
+            fn mix(&self, other: &Color<Wp, T>, factor: T) -> Color<Wp, T> {
                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
-        impl<T:Float> Shade for Color<T> {
+        impl<Wp, T> Shade for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
             type Scalar = T;
 
-            fn lighten(&self, amount: T) -> Color<T> {
+            fn lighten(&self, amount: T) -> Color<Wp, T> {
                 Lab::from(*self).lighten(amount).into()
             }
         }
 
-        impl<T:Float> GetHue for Color<T> {
+        impl<Wp, T> GetHue for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
             type Hue = LabHue<T>;
 
             fn get_hue(&self) -> Option<LabHue<T>> {
@@ -324,39 +361,49 @@ macro_rules! make_color {
             }
         }
 
-        impl<T:Float> Hue for Color<T> {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<T> {
+        impl<Wp, T> Hue for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
+            fn with_hue(&self, hue: LabHue<T>) -> Color<Wp, T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<T> {
+            fn shift_hue(&self, amount: LabHue<T>) -> Color<Wp, T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
 
-        impl<T:Float> Saturate for Color<T> {
+        impl<Wp, T> Saturate for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
             type Scalar = T;
 
-            fn saturate(&self, factor: T) -> Color<T> {
+            fn saturate(&self, factor: T) -> Color<Wp, T> {
                 Lch::from(*self).saturate(factor).into()
             }
         }
 
-        impl<T: Float> Blend for Color<T> {
-            type Color = Rgb<T>;
+        impl<Wp, T> Blend for Color<Wp, T>
+            where T: Float,
+                Wp: WhitePoint<T>
+        {
+            type Color = Rgb<Wp, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<T>, T> {
+            fn into_premultiplied(self) -> PreAlpha<Rgb<Wp, T>, T> {
                 Rgba::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<T>, T>) -> Self {
+            fn from_premultiplied(color: PreAlpha<Rgb<Wp, T>, T>) -> Self {
                 Rgba::from(color).into()
             }
         }
 
-        impl<T> ApproxEq for Color<T> where
-            T: Float + ApproxEq,
-            T::Epsilon: Copy + Float,
+        impl<Wp, T> ApproxEq for Color<Wp, T>
+            where T: Float + ApproxEq,
+                T::Epsilon: Copy + Float,
+                Wp: WhitePoint<T>
         {
             type Epsilon = T::Epsilon;
 
@@ -388,20 +435,29 @@ macro_rules! make_color {
         }
 
         $(
-            impl<T:Float> From<$variant<T>> for Color<T> {
-                fn from(color: $variant<T>) -> Color<T> {
+            impl<Wp, T> From<$variant<Wp, T>> for Color<Wp, T>
+                where T: Float,
+                    Wp: WhitePoint<T>
+            {
+                fn from(color: $variant<Wp, T>) -> Color<Wp, T> {
                     Color::$variant(color)
                 }
             }
 
-            impl<T:Float> From<Alpha<$variant<T>, T>> for Color<T> {
-                fn from(color: Alpha<$variant<T>,T>) -> Color<T> {
+            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Color<Wp, T>
+                where T: Float,
+                    Wp: WhitePoint<T>
+            {
+                fn from(color: Alpha<$variant<Wp, T>,T>) -> Color<Wp, T> {
                     Color::$variant(color.color)
                 }
             }
 
-            impl<T:Float> From<Alpha<$variant<T>, T>> for Alpha<Color<T>,T> {
-                fn from(color: Alpha<$variant<T>,T>) -> Alpha<Color<T>,T> {
+            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Alpha<Color<Wp, T>,T>
+                where T: Float,
+                    Wp: WhitePoint<T>
+            {
+                fn from(color: Alpha<$variant<Wp, T>,T>) -> Alpha<Color<Wp, T>,T> {
                     Alpha {
                         color: Color::$variant(color.color),
                         alpha: color.alpha,
@@ -410,8 +466,11 @@ macro_rules! make_color {
             }
 
             $($(
-                impl<T:Float> From<$representations<T>> for Color<T> {
-                    fn from(color: $representations<T>) -> Color<T> {
+                impl<Wp, T> From<$representations<Wp, T>> for Color<Wp, T>
+                    where T: Float,
+                        Wp: WhitePoint<T>
+                {
+                    fn from(color: $representations<Wp, T>) -> Color<Wp, T> {
                         Color::$variant(color.into())
                     }
                 }
@@ -420,7 +479,11 @@ macro_rules! make_color {
     )
 }
 
-fn clamp<T:Float>(v: T, min: T, max: T) -> T {
+
+
+
+
+fn clamp<T: Float>(v: T, min: T, max: T) -> T {
     if v < min {
         min
     } else if v > max {

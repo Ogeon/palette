@@ -1,11 +1,15 @@
 use num::Float;
 
 use std::ops::{Add, Sub};
+use std::marker::PhantomData;
 
-use {Alpha, Rgb, Xyz, Hsl, Hwb, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, clamp, flt};
+use {Alpha, Rgb, Xyz, Hsl, Hwb};
+use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
+use {clamp, flt};
+use white_point::{WhitePoint, D65};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
-pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
+pub type Hsva<Wp = D65, T = f32> = Alpha<Hsv<Wp, T>, T>;
 
 ///Linear HSV color space.
 ///
@@ -15,8 +19,11 @@ pub type Hsva<T = f32> = Alpha<Hsv<T>, T>;
 ///_lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
 ///and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 ///not the same lightness.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Hsv<T: Float = f32> {
+#[derive(Debug, PartialEq)]
+pub struct Hsv<Wp = D65, T = f32>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
     pub hue: RgbHue<T>,
@@ -29,23 +36,60 @@ pub struct Hsv<T: Float = f32> {
     ///give a bright an clear color that goes towards white when `saturation`
     ///goes towards 0.0.
     pub value: T,
+
+    ///The white point associated with the color's illuminant and observer.
+    ///D65 for 2 degree observer is used by default.
+    pub white_point: PhantomData<Wp>,
 }
 
-impl<T: Float> Hsv<T> {
-    ///Linear HSV.
-    pub fn new(hue: RgbHue<T>, saturation: T, value: T) -> Hsv<T> {
+impl<Wp, T> Copy for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{}
+
+impl<Wp, T> Clone for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn clone(&self) -> Hsv<Wp, T> { *self }
+}
+
+
+impl<T> Hsv<D65, T>
+    where T: Float,
+{
+    ///Linear HSV with white point D65.
+    pub fn new(hue: RgbHue<T>, saturation: T, value: T) -> Hsv<D65, T> {
         Hsv {
             hue: hue,
             saturation: saturation,
             value: value,
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///Linear HSV.
+    pub fn with_wp(hue: RgbHue<T>, saturation: T, value: T) -> Hsv<Wp, T> {
+        Hsv {
+            hue: hue,
+            saturation: saturation,
+            value: value,
+            white_point: PhantomData,
         }
     }
 }
 
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
-impl<T: Float> Alpha<Hsv<T>, T> {
-    ///Linear HSV and transparency.
-    pub fn new(hue: RgbHue<T>, saturation: T, value: T, alpha: T) -> Hsva<T> {
+impl<T> Alpha<Hsv<D65, T>, T>
+    where T: Float,
+{
+    ///Linear HSV and transparency with white point D65.
+    pub fn new(hue: RgbHue<T>, saturation: T, value: T, alpha: T) -> Hsva<D65, T> {
         Alpha {
             color: Hsv::new(hue, saturation, value),
             alpha: alpha,
@@ -53,13 +97,31 @@ impl<T: Float> Alpha<Hsv<T>, T> {
     }
 }
 
-impl<T: Float> FromColor<T> for Hsv<T> {
-    fn from_xyz(xyz: Xyz<T>) -> Self {
-        let rgb: Rgb<T> = Rgb::from_xyz(xyz);
+///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
+impl<Wp, T> Alpha<Hsv<Wp, T>, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    ///Linear HSV and transparency.
+    pub fn with_wp(hue: RgbHue<T>, saturation: T, value: T, alpha: T) -> Hsva<Wp, T> {
+        Alpha {
+            color: Hsv::with_wp(hue, saturation, value),
+            alpha: alpha,
+        }
+    }
+}
+
+impl<Wp, T> FromColor<Wp, T> for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+        let rgb: Rgb<Wp, T> = Rgb::from_xyz(xyz);
+        // let hsl = xyz.into_hsl();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb(rgb: Rgb<T>) -> Self {
+    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
@@ -84,14 +146,15 @@ impl<T: Float> FromColor<T> for Hsv<T> {
             h = (( sep / d ) + coeff) *  flt(60.0);
         };
 
-        Hsv{
+        Hsv {
             hue: h.into(),
             saturation: s,
             value: v,
+            white_point: PhantomData,
         }
     }
 
-    fn from_hsl(hsl: Hsl<T>) -> Self {
+    fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
         let x = hsl.saturation * if hsl.lightness < flt(0.5) {
             hsl.lightness
         } else {
@@ -108,14 +171,15 @@ impl<T: Float> FromColor<T> for Hsv<T> {
             hue: hsl.hue,
             saturation: s,
             value: hsl.lightness + x,
+            white_point: PhantomData,
         }
     }
 
-    fn from_hsv(hsv: Hsv<T>) -> Self {
+    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
         hsv
     }
 
-    fn from_hwb(hwb: Hwb<T>) -> Self {
+    fn from_hwb(hwb: Hwb<Wp, T>) -> Self {
         let inv = T::one() - hwb.blackness;
         // avoid divide by zero
         let s = if inv.is_normal() {
@@ -127,18 +191,22 @@ impl<T: Float> FromColor<T> for Hsv<T> {
             hue: hwb.hue,
             saturation: s,
             value: inv,
+            white_point: PhantomData,
         }
     }
 
 }
 
-impl<T: Float> Limited for Hsv<T> {
+impl<Wp, T> Limited for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.value >= T::zero() && self.value <= T::one()
     }
 
-    fn clamp(&self) -> Hsv<T> {
+    fn clamp(&self) -> Hsv<Wp, T> {
         let mut c = *self;
         c.clamp_self();
         c
@@ -150,10 +218,13 @@ impl<T: Float> Limited for Hsv<T> {
     }
 }
 
-impl<T: Float> Mix for Hsv<T> {
+impl<Wp, T> Mix for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn mix(&self, other: &Hsv<T>, factor: T) -> Hsv<T> {
+    fn mix(&self, other: &Hsv<Wp, T>, factor: T) -> Hsv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 
@@ -161,23 +232,31 @@ impl<T: Float> Mix for Hsv<T> {
             hue: self.hue + factor * hue_diff,
             saturation: self.saturation + factor * (other.saturation - self.saturation),
             value: self.value + factor * (other.value - self.value),
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Shade for Hsv<T> {
+impl<Wp, T> Shade for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Hsv<T> {
+    fn lighten(&self, amount: T) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
             value: self.value + amount,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> GetHue for Hsv<T> {
+impl<Wp, T> GetHue for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
@@ -189,86 +268,114 @@ impl<T: Float> GetHue for Hsv<T> {
     }
 }
 
-impl<T: Float> Hue for Hsv<T> {
-    fn with_hue(&self, hue: RgbHue<T>) -> Hsv<T> {
+impl<Wp, T> Hue for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn with_hue(&self, hue: RgbHue<T>) -> Hsv<Wp, T> {
         Hsv {
             hue: hue,
             saturation: self.saturation,
             value: self.value,
+            white_point: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: RgbHue<T>) -> Hsv<T> {
+    fn shift_hue(&self, amount: RgbHue<T>) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue + amount,
             saturation: self.saturation,
             value: self.value,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Saturate for Hsv<T> {
+impl<Wp, T> Saturate for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsv<T> {
+    fn saturate(&self, factor: T) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue,
             saturation: self.saturation * (T::one() + factor),
             value: self.value,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Default for Hsv<T> {
-    fn default() -> Hsv<T> {
-        Hsv::new(RgbHue::from(T::zero()), T::zero(), T::zero())
+impl<Wp, T> Default for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    fn default() -> Hsv<Wp, T> {
+        Hsv::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
-impl<T: Float> Add<Hsv<T>> for Hsv<T> {
-    type Output = Hsv<T>;
+impl<Wp, T> Add<Hsv<Wp, T>> for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsv<Wp, T>;
 
-    fn add(self, other: Hsv<T>) -> Hsv<T> {
+    fn add(self, other: Hsv<Wp, T>) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
             value: self.value + other.value,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Add<T> for Hsv<T> {
-    type Output = Hsv<T>;
+impl<Wp, T> Add<T> for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsv<Wp, T>;
 
-    fn add(self, c: T) -> Hsv<T> {
+    fn add(self, c: T) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue + c,
             saturation: self.saturation + c,
             value: self.value + c,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<Hsv<T>> for Hsv<T> {
-    type Output = Hsv<T>;
+impl<Wp, T> Sub<Hsv<Wp, T>> for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsv<Wp, T>;
 
-    fn sub(self, other: Hsv<T>) -> Hsv<T> {
+    fn sub(self, other: Hsv<Wp, T>) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
             value: self.value - other.value,
+            white_point: PhantomData,
         }
     }
 }
 
-impl<T: Float> Sub<T> for Hsv<T> {
-    type Output = Hsv<T>;
+impl<Wp, T> Sub<T> for Hsv<Wp, T>
+    where T: Float,
+        Wp: WhitePoint<T>
+{
+    type Output = Hsv<Wp, T>;
 
-    fn sub(self, c: T) -> Hsv<T> {
+    fn sub(self, c: T) -> Hsv<Wp, T> {
         Hsv {
             hue: self.hue - c,
             saturation: self.saturation - c,
             value: self.value - c,
+            white_point: PhantomData,
         }
     }
 }
