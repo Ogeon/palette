@@ -396,7 +396,7 @@ impl<Wp, T> Div<T> for Lab<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use ::Rgb;
+    use Rgb;
 
     #[test]
     fn red() {

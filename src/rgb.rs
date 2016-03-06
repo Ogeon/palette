@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
 use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
 use white_point::{WhitePoint, D65};
-use ::rgb_primaries::rgb_to_xyz_matrix;
+use rgb_variant::RgbVariant;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb};
 use {clamp, flt};
 use pixel::{RgbPixel, Srgb, GammaRgb};

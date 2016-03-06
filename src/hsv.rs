@@ -383,7 +383,7 @@ impl<Wp, T> Sub<T> for Hsv<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hsv;
-    use ::{Rgb, Hsl};
+    use {Rgb, Hsl};
 
     #[test]
     fn red() {

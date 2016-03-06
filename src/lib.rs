@@ -254,7 +254,7 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
-mod rgb_primaries;
+mod rgb_variant;
 
 use white_point::{WhitePoint, D65};
 
