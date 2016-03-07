@@ -55,7 +55,6 @@ use num::{Float, ToPrimitive, NumCast};
 
 use approx::ApproxEq;
 
-use pixel::{Srgb, GammaRgb};
 use blend::PreAlpha;
 
 pub use gradient::Gradient;
@@ -63,6 +62,7 @@ pub use alpha::Alpha;
 pub use blend::Blend;
 
 pub use rgb_linear::{RgbLinear, RgbaLinear};
+pub use rgb_gamma::{Rgb, Rgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
@@ -238,6 +238,7 @@ pub mod named;
 
 mod alpha;
 mod rgb_linear;
+mod rgb_gamma;
 mod luma;
 mod yxy;
 mod xyz;
@@ -254,21 +255,22 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
-mod rgb_profile;
+mod profile;
 
 use white_point::{WhitePoint, D65};
+use profile::{Primaries, SrgbProfile};
 
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
-        $variant: ident $(and $($representations:ident),+ )* {$(
+        ($var_label: ident, $variant: ident, $var_ty: ty) $(and $($representations: ty),+ )* {$(
             #[$ctor_comment:meta]
             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
         )+}
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<Wp = D65, T = f32> = Alpha<Color<Wp, T>, T>;
+        pub type Colora<P = SrgbProfile, Wp = D65, T = f32> = Alpha<Color<P, Wp, T>, T>;
 
         ///A generic color type.
         ///
@@ -286,73 +288,79 @@ macro_rules! make_color {
         ///but it can easily be converted to a fixed color space in those
         ///cases.
         #[derive(Debug)]
-        pub enum Color<Wp = D65, T = f32>
+        pub enum Color<P = SrgbProfile, Wp = D65, T = f32>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
-            $(#[$variant_comment] $variant($variant<Wp, T>)),+
+            $(#[$variant_comment] $var_label($var_ty)),+
         }
 
-        impl<Wp, T> Copy for Color<Wp, T>
+        impl<P, Wp, T> Copy for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {}
 
-        impl<Wp, T> Clone for Color<Wp, T>
+        impl<P, Wp, T> Clone for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
-            fn clone(&self) -> Color<Wp, T> { *self }
+            fn clone(&self) -> Color<P, Wp, T> { *self }
         }
 
-        impl<T: Float> Color<D65, T> {
+        impl<T: Float> Color<SrgbProfile, D65, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<D65, T> {
-                        Color::$variant($variant::$ctor_original($($ctor_field),*))
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<SrgbProfile, D65, T> {
+                        Color::$var_label($variant::$ctor_original($($ctor_field),*))
                     }
                 )+
             )+
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T: Float> Alpha<Color<D65, T>, T> {
+        impl<T: Float> Alpha<Color<SrgbProfile, D65, T>, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<D65, T> {
-                        Alpha::<$variant<D65, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<SrgbProfile, D65, T> {
+                        Alpha::<$var_ty, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
         }
 
-        impl<Wp, T> Mix for Color<Wp, T>
+        impl<P, Wp, T> Mix for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
             type Scalar = T;
 
-            fn mix(&self, other: &Color<Wp, T>, factor: T) -> Color<Wp, T> {
-                Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
+            fn mix(&self, other: &Color<P, Wp, T>, factor: T) -> Color<P, Wp, T> {
+                RgbLinear::from(*self).mix(&RgbLinear::from(*other), factor).into()
             }
         }
 
-        impl<Wp, T> Shade for Color<Wp, T>
+        impl<P, Wp, T> Shade for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
             type Scalar = T;
 
-            fn lighten(&self, amount: T) -> Color<Wp, T> {
+            fn lighten(&self, amount: T) -> Color<P, Wp, T> {
                 Lab::from(*self).lighten(amount).into()
             }
         }
 
-        impl<Wp, T> GetHue for Color<Wp, T>
+        impl<P, Wp, T> GetHue for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
             type Hue = LabHue<T>;
 
@@ -361,49 +369,53 @@ macro_rules! make_color {
             }
         }
 
-        impl<Wp, T> Hue for Color<Wp, T>
+        impl<P, Wp, T> Hue for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<Wp, T> {
+            fn with_hue(&self, hue: LabHue<T>) -> Color<P, Wp, T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<Wp, T> {
+            fn shift_hue(&self, amount: LabHue<T>) -> Color<P, Wp, T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
 
-        impl<Wp, T> Saturate for Color<Wp, T>
+        impl<P, Wp, T> Saturate for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
             type Scalar = T;
 
-            fn saturate(&self, factor: T) -> Color<Wp, T> {
+            fn saturate(&self, factor: T) -> Color<P, Wp, T> {
                 Lch::from(*self).saturate(factor).into()
             }
         }
 
-        impl<Wp, T> Blend for Color<Wp, T>
+        impl<P, Wp, T> Blend for Color<P, Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
-            type Color = Rgb<Wp, T>;
+            type Color = RgbLinear<P, Wp, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<Wp, T>, T> {
-                Rgba::from(self).into()
+            fn into_premultiplied(self) -> PreAlpha<RgbLinear<P, Wp, T>, T> {
+                RgbaLinear::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<Wp, T>, T>) -> Self {
-                Rgba::from(color).into()
+            fn from_premultiplied(color: PreAlpha<RgbLinear<P, Wp, T>, T>) -> Self {
+                RgbaLinear::from(color).into()
             }
         }
 
-        impl<Wp, T> ApproxEq for Color<Wp, T>
+        impl<P, Wp, T> ApproxEq for Color<P, Wp, T>
             where T: Float + ApproxEq,
                 T::Epsilon: Copy + Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint<T>,
+                P: Primaries<Wp, T>,
         {
             type Epsilon = T::Epsilon;
 
@@ -421,57 +433,61 @@ macro_rules! make_color {
 
             fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
                 match (*self, *other) {
-                    $((Color::$variant(ref s), Color::$variant(ref o)) => s.relative_eq(o, epsilon, max_relative),)+
+                    $((Color::$var_label(ref s), Color::$var_label(ref o)) => s.relative_eq(o, epsilon, max_relative),)+
                     _ => false
                 }
             }
 
             fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
                 match (*self, *other) {
-                    $((Color::$variant(ref s), Color::$variant(ref o)) => s.ulps_eq(o, epsilon, max_ulps),)+
+                    $((Color::$var_label(ref s), Color::$var_label(ref o)) => s.ulps_eq(o, epsilon, max_ulps),)+
                     _ => false
                 }
             }
         }
 
         $(
-            impl<Wp, T> From<$variant<Wp, T>> for Color<Wp, T>
+            impl<P, Wp, T> From<$var_ty> for Color<P, Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint<T>,
+                    P: Primaries<Wp, T>,
             {
-                fn from(color: $variant<Wp, T>) -> Color<Wp, T> {
-                    Color::$variant(color)
+                fn from(color: $var_ty) -> Color<P, Wp, T> {
+                    Color::$var_label(color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Color<Wp, T>
+            impl<P, Wp, T> From<Alpha<$var_ty, T>> for Color<P, Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint<T>,
+                    P: Primaries<Wp, T>,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Color<Wp, T> {
-                    Color::$variant(color.color)
+                fn from(color: Alpha<$var_ty,T>) -> Color<P, Wp, T> {
+                    Color::$var_label(color.color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Alpha<Color<Wp, T>,T>
+            impl<P, Wp, T> From<Alpha<$var_ty, T>> for Alpha<Color<P, Wp, T>, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint<T>,
+                    P: Primaries<Wp, T>,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Alpha<Color<Wp, T>,T> {
+                fn from(color: Alpha<$var_ty,T>) -> Alpha<Color<P, Wp, T>, T> {
                     Alpha {
-                        color: Color::$variant(color.color),
+                        color: Color::$var_label(color.color),
                         alpha: color.alpha,
                     }
                 }
             }
 
             $($(
-                impl<Wp, T> From<$representations<Wp, T>> for Color<Wp, T>
+                impl<P, Wp, T> From<$representations> for Color<P, Wp, T>
                     where T: Float,
-                        Wp: WhitePoint<T>
+                        Wp: WhitePoint<T>,
+                        P: Primaries<Wp, T>,
                 {
-                    fn from(color: $representations<Wp, T>) -> Color<Wp, T> {
-                        Color::$variant(color.into())
+                    fn from(color: $representations) -> Color<P, Wp, T> {
+                        Color::$var_label(color.into())
                     }
                 }
             )+)*
@@ -495,7 +511,7 @@ fn clamp<T: Float>(v: T, min: T, max: T) -> T {
 
 make_color! {
     ///Linear luminance.
-    Luma {
+    (Luma, Luma, Luma<Wp, T>) {
         ///Linear luminance.
         y(luma: T)[alpha: T] => new;
 
@@ -504,7 +520,7 @@ make_color! {
     }
 
     ///Linear RGB.
-    Rgb and Srgb, GammaRgb {
+    (Rgb, RgbLinear, RgbLinear<P, Wp, T> ) {
         ///Linear RGB.
         rgb(red: T, green: T, blue: T)[alpha: T] => new;
 
@@ -513,43 +529,43 @@ make_color! {
     }
 
     ///CIE 1931 XYZ.
-    Xyz {
+    (Xyz, Xyz, Xyz<Wp, T>) {
         ///CIE XYZ.
         xyz(x: T, y: T, z: T)[alpha: T] => new;
     }
 
     ///CIE 1931 Yxy.
-    Yxy {
+    (Yxy, Yxy, Yxy<Wp, T>) {
         ///CIE Yxy.
         yxy(x: T, y: T, luma: T)[alpha: T] => new;
     }
 
     ///CIE L*a*b* (CIELAB).
-    Lab {
+    (Lab, Lab, Lab<Wp, T>) {
         ///CIE L*a*b*.
         lab(l: T, a: T, b: T)[alpha: T] => new;
     }
 
     ///CIE L*C*h°, a polar version of CIE L*a*b*.
-    Lch {
+    (Lch, Lch, Lch<Wp, T>) {
         ///CIE L*C*h°.
         lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
     }
 
     ///Linear HSV, a cylindrical version of RGB.
-    Hsv {
+    (Hsv, Hsv, Hsv<Wp, T>) {
         ///Linear HSV.
         hsv(hue: RgbHue<T>, saturation: T, value: T)[alpha: T] => new;
     }
 
     ///Linear HSL, a cylindrical version of RGB.
-    Hsl {
+    (Hsl, Hsl, Hsl<Wp, T>) {
         ///Linear HSL.
         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
     }
 
     ///Linear HWB, an intuitive cylindrical version of RGB.
-    Hwb {
+    (Hwb, Hwb, Hwb<Wp, T>) {
         ///Linear HWB.
         hwb(hue: RgbHue<T>, whiteness: T, balckness: T)[alpha: T] => new;
     }

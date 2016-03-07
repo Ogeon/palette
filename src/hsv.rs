@@ -7,6 +7,7 @@ use {Alpha, RgbLinear, Xyz, Hsl, Hwb};
 use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
 use {clamp, flt};
 use white_point::{WhitePoint, D65};
+use profile::{Primaries, SrgbProfile};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<Wp = D65, T = f32> = Alpha<Hsv<Wp, T>, T>;
@@ -116,12 +117,12 @@ impl<Wp, T> FromColor<Wp, T> for Hsv<Wp, T>
         Wp: WhitePoint<T>
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<Wp, T> = Rgb::from_xyz(xyz);
+        let rgb: RgbLinear<SrgbProfile, Wp, T> = RgbLinear::from_xyz(xyz);
         // let hsl = xyz.into_hsl();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
+    fn from_rgb<P: Primaries<Wp, T>>(rgb: RgbLinear<P, Wp, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )

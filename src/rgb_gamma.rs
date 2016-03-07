@@ -6,14 +6,15 @@ use std::marker::PhantomData;
 use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
 use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
 use white_point::{WhitePoint, D65};
-use rgb_variant::RgbVariant;
+use pixel::RgbPixel;
+use profile::{Encoding, SrgbProfile};
 use matrix::{matrix_inverse, multiply_xyz_to_rgb};
 use {clamp, flt};
-use pixel::{RgbPixel, Srgb, GammaRgb};
+// use pixel::{RgbPixel, Srgb, GammaRgb};
 use blend::PreAlpha;
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
-pub type Rgba<Wp = D65, T = f32> = Alpha<Rgb<Wp, T>, T>;
+pub type Rgba<E = SrgbProfile, Wp = D65, T = f32> = Alpha<Rgb<E, Wp, T>, T>;
 
 ///Linear RGB.
 ///
@@ -28,9 +29,10 @@ pub type Rgba<Wp = D65, T = f32> = Alpha<Rgb<Wp, T>, T>;
 ///displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
 ///for encoding types.
 #[derive(Debug, PartialEq)]
-pub struct Rgb<Wp = D65, T = f32>
+pub struct Rgb<E = SrgbProfile, Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -47,70 +49,80 @@ pub struct Rgb<Wp = D65, T = f32>
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
     pub white_point: PhantomData<Wp>,
+
+    ///The encoding associated with the color profile
+    pub encoding: PhantomData<E>,
 }
 
-impl<Wp, T> Copy for Rgb<Wp, T>
+impl<E, Wp, T> Copy for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {}
 
-impl<Wp, T> Clone for Rgb<Wp, T>
+impl<E, Wp, T> Clone for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    fn clone(&self) -> Rgb<Wp, T> { *self }
+    fn clone(&self) -> Rgb<E, Wp, T> { *self }
 }
 
-impl<T> Rgb<D65, T>
+impl<T> Rgb<SrgbProfile, D65, T>
     where T: Float,
 {
     ///Linear RGB with white point D65.
-    pub fn new(red: T, green: T, blue: T) -> Rgb<D65, T> {
+    pub fn new(red: T, green: T, blue: T) -> Rgb<SrgbProfile, D65, T> {
         Rgb {
             red: red,
             green: green,
             blue: blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 
     ///Linear RGB from 8 bit values with whtie point D65.
-    pub fn new_u8(red: u8, green: u8, blue: u8) -> Rgb<D65, T> {
+    pub fn new_u8(red: u8, green: u8, blue: u8) -> Rgb<SrgbProfile, D65, T> {
         Rgb {
             red: flt::<T,_>(red) / flt(255.0),
             green: flt::<T,_>(green) / flt(255.0),
             blue: flt::<T,_>(blue) / flt(255.0),
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Rgb<Wp, T>
+impl<E, Wp, T> Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     ///Linear RGB.
-    pub fn with_wp(red: T, green: T, blue: T) -> Rgb<Wp, T> {
+    pub fn with_wp(red: T, green: T, blue: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: red,
             green: green,
             blue: blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 
     ///Linear RGB from 8 bit values.
-    pub fn with_wp_u8(red: u8, green: u8, blue: u8) -> Rgb<Wp, T> {
+    pub fn with_wp_u8(red: u8, green: u8, blue: u8) -> Rgb<E, Wp, T> {
         Rgb {
             red: flt::<T,_>(red) / flt(255.0),
             green: flt::<T,_>(green) / flt(255.0),
             blue: flt::<T,_>(blue) / flt(255.0),
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 
     ///Linear RGB from a linear pixel value.
-    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<Wp, T> {
+    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgb<E, Wp, T> {
         let (r, g, b, _) = pixel.to_rgba();
         Rgb::with_wp(r, g, b)
     }
@@ -136,11 +148,11 @@ impl<Wp, T> Rgb<Wp, T>
 }
 
 ///<span id="Rgba"></span>[`Rgba`](type.Rgba.html) implementations.
-impl<T> Alpha<Rgb<D65, T>, T>
+impl<T> Alpha<Rgb<SrgbProfile, D65, T>, T>
     where T: Float,
 {
     ///Linear RGB with transparency and with white point D65.
-    pub fn new(red: T, green: T, blue: T, alpha: T) -> Rgba<D65, T> {
+    pub fn new(red: T, green: T, blue: T, alpha: T) -> Rgba<SrgbProfile, D65, T> {
         Alpha {
             color: Rgb::new(red, green, blue),
             alpha: alpha,
@@ -148,7 +160,7 @@ impl<T> Alpha<Rgb<D65, T>, T>
     }
 
     ///Linear RGB with transparency from 8 bit values and with white point D65.
-    pub fn new_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgba<D65, T> {
+    pub fn new_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgba<SrgbProfile, D65, T> {
         Alpha {
             color: Rgb::new_u8(red, green, blue),
             alpha: flt::<T,_>(alpha) / flt(255.0),
@@ -158,12 +170,13 @@ impl<T> Alpha<Rgb<D65, T>, T>
 }
 
 ///<span id="Rgba"></span>[`Rgba`](type.Rgba.html) implementations.
-impl<Wp, T> Alpha<Rgb<Wp, T>, T>
+impl<E, Wp, T> Alpha<Rgb<E, Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     ///Linear RGB with transparency.
-    pub fn with_wp(red: T, green: T, blue: T, alpha: T) -> Rgba<Wp, T> {
+    pub fn with_wp(red: T, green: T, blue: T, alpha: T) -> Rgba<E, Wp, T> {
         Alpha {
             color: Rgb::with_wp(red, green, blue),
             alpha: alpha,
@@ -171,7 +184,7 @@ impl<Wp, T> Alpha<Rgb<Wp, T>, T>
     }
 
     ///Linear RGB with transparency from 8 bit values.
-    pub fn with_wp_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgba<Wp, T> {
+    pub fn with_wp_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Rgba<E, Wp, T> {
         Alpha {
             color: Rgb::with_wp_u8(red, green, blue),
             alpha: flt::<T,_>(alpha) / flt(255.0),
@@ -179,7 +192,7 @@ impl<Wp, T> Alpha<Rgb<Wp, T>, T>
     }
 
     ///Linear RGB from a linear pixel value.
-    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgba<Wp, T> {
+    pub fn from_pixel<P: RgbPixel<T>>(pixel: &P) -> Rgba<E, Wp, T> {
         let (r, g, b, a) = pixel.to_rgba();
         Rgba::with_wp(r, g, b, a)
     }
@@ -204,93 +217,11 @@ impl<Wp, T> Alpha<Rgb<Wp, T>, T>
     }
 }
 
-impl<Wp, T> FromColor<Wp, T> for Rgb<Wp, T>
+
+impl<E, Wp, T> Limited for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<Wp, T>());
-        multiply_xyz_to_rgb::<Wp, Wp, T>(&transform_matrix, &xyz)
-    }
-
-
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
-        rgb
-    }
-
-    fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
-        let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / flt(60.0);
-        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
-        let m = hsl.lightness - c * flt(0.5);
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < flt(2.0) {
-            (x, c, T::zero())
-        } else if h >= flt(2.0) && h < flt(3.0) {
-            (T::zero(), c, x)
-        } else if h >= flt(3.0) && h < flt(4.0) {
-            (T::zero(), x, c)
-        } else if h >= flt(4.0) && h < flt(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-
-        Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
-            white_point: PhantomData,
-        }
-    }
-
-    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
-        let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / flt(60.0);
-        let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
-        let m = hsv.value - c;
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < flt(2.0) {
-            (x, c, T::zero())
-        } else if h >= flt(2.0) && h < flt(3.0) {
-            (T::zero(), c, x)
-        } else if h >= flt(3.0) && h < flt(4.0) {
-            (T::zero(), x, c)
-        } else if h >= flt(4.0) && h < flt(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-
-        Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
-            white_point: PhantomData,
-        }
-
-    }
-
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
-        Rgb {
-            red: luma.luma,
-            green: luma.luma,
-            blue: luma.luma,
-            white_point: PhantomData,
-        }
-    }
-
-}
-
-impl<Wp, T> Limited for Rgb<Wp, T>
-    where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     fn is_valid(&self) -> bool {
         self.red >= T::zero() && self.red <= T::one() &&
@@ -298,7 +229,7 @@ impl<Wp, T> Limited for Rgb<Wp, T>
         self.blue >= T::zero() && self.blue <= T::one()
     }
 
-    fn clamp(&self) -> Rgb<Wp, T> {
+    fn clamp(&self) -> Rgb<E, Wp, T> {
         let mut c = *self;
         c.clamp_self();
         c
@@ -311,13 +242,14 @@ impl<Wp, T> Limited for Rgb<Wp, T>
     }
 }
 
-impl<Wp, T> Mix for Rgb<Wp, T>
+impl<E, Wp, T> Mix for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Rgb<Wp, T>, factor: T) -> Rgb<Wp, T> {
+    fn mix(&self, other: &Rgb<E, Wp, T>, factor: T) -> Rgb<E, Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
 
         Rgb {
@@ -325,29 +257,33 @@ impl<Wp, T> Mix for Rgb<Wp, T>
             green: self.green + factor * (other.green - self.green),
             blue: self.blue + factor * (other.blue - self.blue),
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Shade for Rgb<Wp, T>
+impl<E, Wp, T> Shade for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Rgb<Wp, T> {
+    fn lighten(&self, amount: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red + amount,
             green: self.green + amount,
             blue: self.blue + amount,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> GetHue for Rgb<Wp, T>
+impl<E, Wp, T> GetHue for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
     type Hue = RgbHue<T>;
 
@@ -362,218 +298,160 @@ impl<Wp, T> GetHue for Rgb<Wp, T>
     }
 }
 
-impl<Wp, T> Blend for Rgb<Wp, T>
+impl<E, Wp, T> Default for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Color = Rgb<Wp, T>;
-
-    fn into_premultiplied(self) -> PreAlpha<Rgb<Wp, T>, T> {
-        Rgba::from(self).into()
-    }
-
-    fn from_premultiplied(color: PreAlpha<Rgb<Wp, T>, T>) -> Self {
-        Rgba::from(color).into()
-    }
-}
-
-impl<Wp, T> ComponentWise for Rgb<Wp, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Rgb<Wp, T>, mut f: F) -> Rgb<Wp, T> {
-        Rgb {
-            red: f(self.red, other.red),
-            green: f(self.green, other.green),
-            blue: f(self.blue, other.blue),
-            white_point: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Rgb<Wp, T> {
-        Rgb {
-            red: f(self.red),
-            green: f(self.green),
-            blue: f(self.blue),
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Default for Rgb<Wp, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn default() -> Rgb<Wp, T> {
+    fn default() -> Rgb<E, Wp, T> {
         Rgb::with_wp(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl<Wp, T> Add<Rgb<Wp, T>> for Rgb<Wp, T>
+impl<E, Wp, T> Add<Rgb<E, Wp, T>> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn add(self, other: Rgb<Wp, T>) -> Rgb<Wp, T> {
+    fn add(self, other: Rgb<E, Wp, T>) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red + other.red,
             green: self.green + other.green,
             blue: self.blue + other.blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Add<T> for Rgb<Wp, T>
+impl<E, Wp, T> Add<T> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn add(self, c: T) -> Rgb<Wp, T> {
+    fn add(self, c: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red + c,
             green: self.green + c,
             blue: self.blue + c,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Sub<Rgb<Wp, T>> for Rgb<Wp, T>
+impl<E, Wp, T> Sub<Rgb<E, Wp, T>> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn sub(self, other: Rgb<Wp, T>) -> Rgb<Wp, T> {
+    fn sub(self, other: Rgb<E, Wp, T>) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red - other.red,
             green: self.green - other.green,
             blue: self.blue - other.blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Sub<T> for Rgb<Wp, T>
+impl<E, Wp, T> Sub<T> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn sub(self, c: T) -> Rgb<Wp, T> {
+    fn sub(self, c: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red - c,
             green: self.green - c,
             blue: self.blue - c,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Mul<Rgb<Wp, T>> for Rgb<Wp, T>
+impl<E, Wp, T> Mul<Rgb<E, Wp, T>> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn mul(self, other: Rgb<Wp, T>) -> Rgb<Wp, T> {
+    fn mul(self, other: Rgb<E, Wp, T>) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red * other.red,
             green: self.green * other.green,
             blue: self.blue * other.blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Mul<T> for Rgb<Wp, T>
+impl<E, Wp, T> Mul<T> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn mul(self, c: T) -> Rgb<Wp, T> {
+    fn mul(self, c: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red * c,
             green: self.green * c,
             blue: self.blue * c,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Div<Rgb<Wp, T>> for Rgb<Wp, T>
+impl<E, Wp, T> Div<Rgb<E, Wp, T>> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn div(self, other: Rgb<Wp, T>) -> Rgb<Wp, T> {
+    fn div(self, other: Rgb<E, Wp, T>) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red / other.red,
             green: self.green / other.green,
             blue: self.blue / other.blue,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> Div<T> for Rgb<Wp, T>
+impl<E, Wp, T> Div<T> for Rgb<E, Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint<T>,
+        E: Encoding<T>,
 {
-    type Output = Rgb<Wp, T>;
+    type Output = Rgb<E, Wp, T>;
 
-    fn div(self, c: T) -> Rgb<Wp, T> {
+    fn div(self, c: T) -> Rgb<E, Wp, T> {
         Rgb {
             red: self.red / c,
             green: self.green / c,
             blue: self.blue / c,
             white_point: PhantomData,
+            encoding: PhantomData,
         }
     }
 }
 
-impl<Wp, T> From<Srgb<Wp, T>> for Rgb<Wp, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn from(srgb: Srgb<Wp, T>) -> Rgb<Wp, T> {
-        srgb.to_linear().into()
-    }
-}
-
-impl<Wp, T> From<GammaRgb<Wp, T>> for Rgb<Wp, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn from(gamma_rgb: GammaRgb<Wp, T>) -> Rgb<Wp, T> {
-        gamma_rgb.to_linear().into()
-    }
-}
-
-impl<Wp, T> From<Srgb<Wp, T>> for Alpha<Rgb<Wp, T>, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn from(srgb: Srgb<Wp, T>) -> Alpha<Rgb<Wp, T>, T> {
-        srgb.to_linear()
-    }
-}
-
-impl<Wp, T> From<GammaRgb<Wp, T>> for Alpha<Rgb<Wp, T>, T>
-    where T: Float,
-        Wp: WhitePoint<T>
-{
-    fn from(gamma_rgb: GammaRgb<Wp, T>) -> Alpha<Rgb<Wp, T>, T> {
-        gamma_rgb.to_linear()
-    }
-}
 
 #[cfg(test)]
 mod test {

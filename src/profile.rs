@@ -7,7 +7,7 @@ use matrix::{Mat3, matrix_inverse, multiply_xyz_to_rgb};
 use flt;
 
 ///Represents the tristimulus values for the Rgb primaries
-pub trait RgbEncoding<T: Float>
+pub trait Encoding<T: Float>
 {
     ///Encode a color component.
     fn encode(T) -> T;
@@ -17,7 +17,7 @@ pub trait RgbEncoding<T: Float>
 }
 
 ///Represents the tristimulus values for the Rgb primaries
-pub trait RgbPrimaries<Wp, T>
+pub trait Primaries<Wp, T>
     where T: Float,
         Wp: WhitePoint<T>,
 {
@@ -32,9 +32,9 @@ pub trait RgbPrimaries<Wp, T>
 
     ///Convert primaries into a 3x3 matrix
     fn mat3_from_primaries() -> Mat3<T> {
-        let r: Xyz<Wp, T> = SrgbSpace::red().into_xyz();
-        let g: Xyz<Wp, T> = SrgbSpace::green().into_xyz();
-        let b: Xyz<Wp, T> = SrgbSpace::blue().into_xyz();
+        let r: Xyz<Wp, T> = SrgbProfile::red().into_xyz();
+        let g: Xyz<Wp, T> = SrgbProfile::green().into_xyz();
+        let b: Xyz<Wp, T> = SrgbProfile::blue().into_xyz();
 
         [
             r.x, g.x, b.x,
@@ -48,7 +48,7 @@ pub trait RgbPrimaries<Wp, T>
 
         let mut transform_matrix = Self::mat3_from_primaries();
 
-        let s_matrix: Rgb<Wp, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &Wp::get_xyz());
+        let s_matrix: RgbLinear<SrgbProfile, Wp, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &Wp::get_xyz());
 
         transform_matrix[0] = transform_matrix[0] * s_matrix.red;
         transform_matrix[1] = transform_matrix[1] * s_matrix.green;
@@ -73,9 +73,9 @@ pub trait RgbPrimaries<Wp, T>
 
 ///Srgb color space with default D65 white point
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct SrgbSpace;
+pub struct SrgbProfile;
 
-impl<Wp, T> RgbVariant<Wp, T> for SrgbSpace
+impl<Wp, T> Primaries<Wp, T> for SrgbProfile
     where T: Float,
         Wp: WhitePoint<T>,
 {
@@ -91,22 +91,22 @@ impl<Wp, T> RgbVariant<Wp, T> for SrgbSpace
 
 }
 
-impl<T: Float> RgbEncoding for SrgbSpace {
+impl<T: Float> Encoding<T> for SrgbProfile {
     ///Encode a color component.
-    fn encode<T: Float>(c: T) -> T {
+    fn encode(c: T) -> T {
         if c <= flt(0.0031308) {
             c * flt(12.92)
         } else {
-            (( c + flt(0.055) )  / flt(1.055)).powf(2.4)
+            (( c + flt(0.055) )  / flt(1.055)).powf(flt(2.4))
         }
     }
 
     ///Decode a color component.
-    fn decode<T: Float>(c: T) -> T {
+    fn decode(c: T) -> T {
         if c <= flt(0.04045) {
             c / flt(12.92)
         } else {
-            flt(1.055) * c.powf(1.0/2.4) +  flt(0.055)
+            c.powf( flt(1.0 / 2.4)) * flt(1.055) +  flt(0.055)
         }
     }
 }
@@ -117,7 +117,7 @@ mod test {
     use Rgb;
     use chromatic_adaptation::AdaptInto;
     use white_point::{D65,D50};
-    use super::{rgb_to_xyz_matrix, SrgbSpace};
+    use super::{rgb_to_xyz_matrix, SrgbProfile};
 
     #[test]
     fn d65_rgb_conversion_matrix() {
@@ -146,7 +146,7 @@ mod test {
         let c_gamma = 0.5;
         let expected = 0.735357;
 
-        let computed = SrgbSpace::encode(c_gamma);
+        let computed = SrgbProfile::encode(c_gamma);
         assert_relative_eq!(expected, computed);
     }
 
@@ -155,7 +155,7 @@ mod test {
         let c_linear = 0.5;
         let expected = 0.214043;
 
-        let computed = SrgbSpace::decode(c_gamma);
+        let computed = SrgbProfile::decode(c_gamma);
         assert_relative_eq!(expected, computed);
     }
 

@@ -2,9 +2,8 @@ use num::Float;
 use approx::ApproxEq;
 
 use {Xyz, Yxy, Lab, Lch, RgbLinear, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
-use pixel::{Srgb, GammaRgb};
 use white_point::WhitePoint;
-
+use profile::Primaries;
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
@@ -41,18 +40,52 @@ macro_rules! impl_eq {
     }
 }
 
+macro_rules! impl_eq_primary {
+    (  $self_ty: ident , [$($element: ident),+]) => {
+        impl<P, Wp, T> ApproxEq for $self_ty<P, Wp, T>
+        where T: Float + ApproxEq,
+            T::Epsilon: Copy + Float,
+            Wp: WhitePoint<T>,
+            P: Primaries<Wp, T>,
+        {
+            type Epsilon = <T as ApproxEq>::Epsilon;
+
+            fn default_epsilon() -> Self::Epsilon {
+                T::default_epsilon()
+            }
+            fn default_max_relative() -> Self::Epsilon {
+                T::default_max_relative()
+            }
+            fn default_max_ulps() -> u32 {
+                T::default_max_ulps()
+            }
+            fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+                $( self.$element.relative_eq(&other.$element, epsilon, max_relative) )&&+
+            }
+            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+                $( self.$element.ulps_eq(&other.$element, epsilon, max_ulps) )&&+
+            }
+
+            fn relative_ne(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )&&+
+            }
+            fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+                $( self.$element.ulps_ne(&other.$element, epsilon, max_ulps) )&&+
+            }
+        }
+    }
+}
+
 impl_eq!( Xyz, [x, y, z] );
 impl_eq!( Yxy, [y, x, luma] );
 impl_eq!( Lab, [l, a, b] );
-impl_eq!( Rgb, [red, blue, green] );
 impl_eq!( Luma, [luma] );
 impl_eq!( Lch, [l, chroma, hue] );
 impl_eq!( Hsl, [hue, saturation, lightness] );
 impl_eq!( Hsv, [hue, saturation, value] );
 impl_eq!( Hwb, [hue, whiteness, blackness] );
-impl_eq!( Srgb, [red, blue, green, alpha] );
-impl_eq!( GammaRgb, [red, blue, green, alpha, gamma] );
 
+impl_eq_primary!( RgbLinear, [red, blue, green] );
 // For hues diffence is calculated and compared to zero. However due to the way floating point's
 // work this is not so simple
 // reference
