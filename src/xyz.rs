@@ -3,10 +3,10 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
 
-use {Alpha, Yxy, Rgb, Luma, Lab};
+use {Alpha, Yxy, RgbLinear, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
-use rgb_variant::RgbVariant;
+use rgb_profile::RgbPrimaries;
 use matrix::multiply_rgb_to_xyz;
 use {clamp, flt};
 

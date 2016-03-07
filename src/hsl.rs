@@ -3,7 +3,7 @@ use num::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use {Alpha, RgbLinear, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::{WhitePoint, D65};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).

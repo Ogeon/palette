@@ -27,7 +27,7 @@
 //!selectively affect the alpha component:
 //!
 //!```
-//!use palette::{Rgb, Rgba};
+//!use palette::{Rgb, RgbaLinear};
 //!
 //!let mut c1 = Rgba::new(1.0, 0.5, 0.5, 0.8);
 //!let c2 = Rgb::new(0.5, 1.0, 1.0);
@@ -62,7 +62,7 @@ pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
-pub use rgb::{Rgb, Rgba};
+pub use rgb_linear::{RgbLinear, RgbaLinear};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
@@ -237,7 +237,7 @@ pub mod blend;
 pub mod named;
 
 mod alpha;
-mod rgb;
+mod rgb_linear;
 mod luma;
 mod yxy;
 mod xyz;
@@ -254,7 +254,7 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
-mod rgb_variant;
+mod rgb_profile;
 
 use white_point::{WhitePoint, D65};
 

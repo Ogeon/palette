@@ -1,7 +1,7 @@
 use num::Float;
 use approx::ApproxEq;
 
-use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
+use {Xyz, Yxy, Lab, Lch, RgbLinear, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
 use pixel::{Srgb, GammaRgb};
 use white_point::WhitePoint;
 

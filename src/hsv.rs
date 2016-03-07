@@ -3,7 +3,7 @@ use num::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Xyz, Hsl, Hwb};
+use {Alpha, RgbLinear, Xyz, Hsl, Hwb};
 use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
 use {clamp, flt};
 use white_point::{WhitePoint, D65};

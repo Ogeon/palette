@@ -1,7 +1,7 @@
 extern crate palette;
 extern crate image;
 
-use palette::{Gradient, Rgb, Lch};
+use palette::{Gradient, RgbLinear, Lch};
 use palette::pixel::Srgb;
 
 use image::{RgbImage, GenericImage};

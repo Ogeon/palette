@@ -1,38 +1,36 @@
 //!This module defines the red, blue and green primaries for the common Rgb color spaces
 use num::Float;
 
-
-use {Yxy, Xyz, Rgb, IntoColor};
+use {Yxy, Xyz, RgbLinear, IntoColor};
 use white_point::WhitePoint;
 use matrix::{Mat3, matrix_inverse, multiply_xyz_to_rgb};
 use flt;
 
 ///Represents the tristimulus values for the Rgb primaries
-pub trait RgbVariant<Wp, T>
+pub trait RgbEncoding<T: Float>
+{
+    ///Encode a color component.
+    fn encode(T) -> T;
+
+    ///Decode a color component i.e convert into linear
+    fn decode(T) -> T;
+}
+
+///Represents the tristimulus values for the Rgb primaries
+pub trait RgbPrimaries<Wp, T>
     where T: Float,
         Wp: WhitePoint<T>,
 {
     ///Tristimulus values for red
     fn red() -> Yxy<Wp, T>;
+
     ///Tristimulus values for green
     fn green() -> Yxy<Wp, T>;
+
     ///Tristimulus values for blue
     fn blue() -> Yxy<Wp, T>;
-    ///The default gamma value for the rgb color space
-    fn gamma() -> T;
-    ///Converts linear rgb into the gamma encoded rgb
-    fn into_gamma(inp: Rgb<Wp, T>) -> Rgb<Wp, T>{
-        let gamma = Self::gamma();
-        //TO-DO is this check necessary?
-        let inv_gamma = if gamma.is_normal() { T::one() / gamma } else { T::one() };
-        Rgb::with_wp(inp.red.powf(inv_gamma), inp.green.powf(inv_gamma), inp.blue.powf(inv_gamma) )
-    }
-    ///Converts gamma enocded rgb into the linear rgb
-    fn into_linear(inp: Rgb<Wp, T>) -> Rgb<Wp, T> {
-        let gamma = Self::gamma();
-        Rgb::with_wp(inp.red.powf(gamma), inp.green.powf(gamma), inp.blue.powf(gamma) )
-    }
 
+    ///Convert primaries into a 3x3 matrix
     fn mat3_from_primaries() -> Mat3<T> {
         let r: Xyz<Wp, T> = SrgbSpace::red().into_xyz();
         let g: Xyz<Wp, T> = SrgbSpace::green().into_xyz();
@@ -45,7 +43,7 @@ pub trait RgbVariant<Wp, T>
         ]
     }
 
-    ///Geneartes to Rgb to Xyz transformation matrix for the given white point
+    ///Generates to Rgb to Xyz transformation matrix for the given white point
     fn rgb_to_xyz_matrix() -> Mat3<T> {
 
         let mut transform_matrix = Self::mat3_from_primaries();
@@ -66,7 +64,7 @@ pub trait RgbVariant<Wp, T>
 
     }
 
-    ///Geneartes the Xyz to Rgb transformation matrix for the given white point
+    ///Generates the Xyz to Rgb transformation matrix for the given white point
     fn xyz_to_rgb_matrix() -> Mat3<T> {
         matrix_inverse(&Self::rgb_to_xyz_matrix())
     }
@@ -91,13 +89,27 @@ impl<Wp, T> RgbVariant<Wp, T> for SrgbSpace
         Yxy::with_wp(flt(0.1500), flt(0.0600), flt(0.072186))
     }
 
-    fn gamma() -> T {
-        flt(2.2)
-    }
-
 }
 
+impl<T: Float> RgbEncoding for SrgbSpace {
+    ///Encode a color component.
+    fn encode<T: Float>(c: T) -> T {
+        if c <= flt(0.0031308) {
+            c * flt(12.92)
+        } else {
+            (( c + flt(0.055) )  / flt(1.055)).powf(2.4)
+        }
+    }
 
+    ///Decode a color component.
+    fn decode<T: Float>(c: T) -> T {
+        if c <= flt(0.04045) {
+            c / flt(12.92)
+        } else {
+            flt(1.055) * c.powf(1.0/2.4) +  flt(0.055)
+        }
+    }
+}
 
 
 #[cfg(test)]
@@ -105,7 +117,7 @@ mod test {
     use Rgb;
     use chromatic_adaptation::AdaptInto;
     use white_point::{D65,D50};
-    use super::rgb_to_xyz_matrix;
+    use super::{rgb_to_xyz_matrix, SrgbSpace};
 
     #[test]
     fn d65_rgb_conversion_matrix() {
@@ -127,6 +139,24 @@ mod test {
 
         let computed: Rgb<D50> = input.adapt_into();
         assert_relative_eq!(expected, computed, epsilon = 0.000001);
+    }
+
+    #[test]
+    fn srgb_to_gamma_encoded() {
+        let c_gamma = 0.5;
+        let expected = 0.735357;
+
+        let computed = SrgbSpace::encode(c_gamma);
+        assert_relative_eq!(expected, computed);
+    }
+
+    #[test]
+    fn srgb_to_linear() {
+        let c_linear = 0.5;
+        let expected = 0.214043;
+
+        let computed = SrgbSpace::decode(c_gamma);
+        assert_relative_eq!(expected, computed);
     }
 
 }

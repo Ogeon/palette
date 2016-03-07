@@ -2,7 +2,7 @@ use num::Float;
 
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Rgba, clamp, flt};
+use {Alpha, RgbLinear, RgbaLinear, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};

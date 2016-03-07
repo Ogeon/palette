@@ -13,7 +13,7 @@ use {Alpha, ComponentWise, Mix, Blend, clamp};
 ///computations in composition chains.
 ///
 ///```
-///use palette::{Blend, Rgb, Rgba};
+///use palette::{Blend, RgbLinear, RgbaLinear};
 ///use palette::blend::PreAlpha;
 ///
 ///let a = PreAlpha::from(Rgba::new(0.4, 0.5, 0.5, 0.3));

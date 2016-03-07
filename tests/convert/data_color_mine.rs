@@ -2,7 +2,7 @@
 List of color from www.colormine.org
 */
 use csv;
-use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
+use palette::{Lch, Lab, Xyz, Yxy, RgbLinear, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
 use palette::white_point::D65;
 
