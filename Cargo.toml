@@ -33,6 +33,7 @@ image = "0.7"
 clap = "1"
 csv = "0.14"
 rustc-serialize  = "0.3"
+lazy_static = "0.1"
 
 [build-dependencies.phf_codegen]
 version = "0.7"

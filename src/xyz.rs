@@ -134,11 +134,7 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
         xyz
     }
 
-    fn from_lab(input_lab: Lab<Wp, T>) -> Self {
-        let mut lab = input_lab.clone();
-        lab.l = lab.l * flt(100.0);
-        lab.a = lab.a * flt(128.0);
-        lab.b = lab.b * flt(128.0);
+    fn from_lab(lab: Lab<Wp, T>) -> Self {
         let y = (lab.l + flt(16.0)) / flt(116.0);
         let x = y + (lab.a / flt(500.0));
         let z = y - (lab.b / flt(200.0));

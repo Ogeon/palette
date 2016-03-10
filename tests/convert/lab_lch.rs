@@ -1,38 +1,37 @@
 use palette::{Lab, Lch, IntoColor};
-use palette::white_point::D65;
 
 #[test]
 fn lab_lch_green() {
-    let lab = Lab::new(0.4623,-0.517,0.499);
-    let lch = Lch::<D65, f64>::new(0.4623, 0.7185, 136.02.into());
+    let lab = Lab::new(46.23, -66.176, 63.872);
+    let lch = Lch::new(46.23, 91.972, 136.015.into());
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
 }
 
 #[test]
 fn lab_lch_magenta() {
-    let lab = Lab::new(0.6032, 0.9825, -0.6084);
-    let lch = Lch::<D65, f64>::new(0.6032, 1.1557, 328.23.into());
+    let lab = Lab::new(60.320, 98.254, -60.843);
+    let lch = Lch::new(60.320, 115.567, 328.233.into());
 
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
 }
 
 #[test]
 fn lab_lch_blue() {
 
-    let lab = Lab::new(0.323, 0.792, -1.0786);
-    let lch = Lch::<D65, f64>::new(0.323, 1.3382, 306.29.into());
+    let lab = Lab::new(32.303, 79.197, -107.864);
+    let lch = Lch::new(32.303, 133.816, 306.287.into());
 
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.0001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.01);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
 }

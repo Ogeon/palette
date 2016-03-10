@@ -21,20 +21,20 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///numerical difference.
 ///
 ///The parameters of L*a*b* are quite different, compared to many other color
-///spaces, so manipulating them manually can be unintuitive.
+///spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq)]
 pub struct Lab<Wp = D65, T = f32>
     where T: Float,
         Wp: WhitePoint<T>
 {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 1.0
+    ///L* is the lightness of the color. 0.0 gives absolute black and 100
     ///give the brightest white.
     pub l: T,
 
-    ///a* goes from red at -1.0 to green at 1.0.
+    ///a* goes from red at -128 to green at 127.
     pub a: T,
 
-    ///b* goes from yellow at -1.0 to blue at 1.0.
+    ///b* goes from yellow at -128 to blue at 127.
     pub b: T,
 
     ///The white point associated with the color's illuminant and observer.
@@ -136,9 +136,9 @@ impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
         z = convert(z);
 
         Lab {
-            l: ( (y * flt(116.0)) - flt(16.0) ) / flt(100.0),
-            a: ( (x - y) * flt(500.0) ) / flt(128.0),
-            b: ( (y - z) * flt(200.0) ) / flt(128.0),
+            l: ( (y * flt(116.0)) - flt(16.0) ),
+            a: ( (x - y) * flt(500.0) ),
+            b: ( (y - z) * flt(200.0) ),
             white_point: PhantomData,
         }
     }
@@ -164,9 +164,9 @@ impl<Wp, T> Limited for Lab<Wp, T>
         Wp: WhitePoint<T>
 {
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= T::one() &&
-        self.a >= -T::one() && self.a <= T::one() &&
-        self.b >= -T::one() && self.b <= T::one()
+        self.l >= T::zero() && self.l <= flt(100.0) &&
+        self.a >= flt(-128) && self.a <= flt(127.0) &&
+        self.b >= flt(-128) && self.b <= flt(127.0)
     }
 
     fn clamp(&self) -> Lab<Wp, T> {
@@ -176,9 +176,9 @@ impl<Wp, T> Limited for Lab<Wp, T>
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), T::one());
-        self.a = clamp(self.a, -T::one(), T::one());
-        self.b = clamp(self.b, -T::one(), T::one());
+        self.l = clamp(self.l, T::zero(), flt(100.0));
+        self.a = clamp(self.a, flt(-128.0), flt(127.0));
+        self.b = clamp(self.b, flt(-128.0), flt(127.0));
     }
 }
 
@@ -208,7 +208,7 @@ impl<Wp, T> Shade for Lab<Wp, T>
 
     fn lighten(&self, amount: T) -> Lab<Wp, T> {
         Lab {
-            l: self.l + amount,
+            l: self.l + amount * flt(100.0),
             a: self.a,
             b: self.b,
             white_point: PhantomData,
@@ -401,22 +401,22 @@ mod test {
     #[test]
     fn red() {
         let a = Lab::from(Rgb::new(1.0, 0.0, 0.0));
-        let b = Lab::new(53.23288 / 100.0, 80.09246 / 128.0, 67.2031 / 128.0);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
+        let b = Lab::new(53.23288, 80.09246, 67.2031);
+        assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn green() {
         let a = Lab::from(Rgb::new(0.0, 1.0, 0.0));
-        let b = Lab::new(87.73704 / 100.0, -86.184654 / 128.0, 83.18117 / 128.0);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
+        let b = Lab::new(87.73704, -86.184654, 83.18117);
+        assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn blue() {
         let a = Lab::from(Rgb::new(0.0, 0.0, 1.0));
-        let b = Lab::new(32.302586 / 100.0, 79.19668 / 128.0, -107.863686 / 128.0);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
+        let b = Lab::new(32.302586, 79.19668, -107.863686);
+        assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
@@ -424,9 +424,9 @@ mod test {
         assert_ranges!{
             Lab;
             limited {
-                l: 0.0 => 1.0,
-                a: -1.0 => 1.0,
-                b: -1.0 => 1.0
+                l: 0.0 => 100.0,
+                a: -128.0 => 127.0,
+                b: -128.0 => 127.0
             }
             limited_min {}
             unlimited {}
