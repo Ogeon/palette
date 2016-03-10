@@ -390,10 +390,20 @@ impl<Wp, T> Div<T> for Lab<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Lab<Wp, T>, T>> for Lab<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Lab<Wp, T>, T>) -> Lab<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use ::Rgb;
+    use Rgb;
+    use white_point::D65;
 
     #[test]
     fn red() {
@@ -419,7 +429,7 @@ mod test {
     #[test]
     fn ranges() {
         assert_ranges!{
-            Lab;
+            Lab<D65, f64>;
             limited {
                 l: 0.0 => 100.0,
                 a: -128.0 => 127.0,

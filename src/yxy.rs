@@ -361,11 +361,21 @@ impl<Wp, T> Div<T> for Yxy<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Yxy<Wp, T>, T>) -> Yxy<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Yxy;
     use Rgb;
     use Luma;
+    use white_point::D65;
 
     #[test]
     fn luma() {
@@ -398,7 +408,7 @@ mod test {
     #[test]
     fn ranges() {
         assert_ranges!{
-            Yxy;
+            Yxy<D65, f64>;
             limited {
                 x: 0.0 => 1.0,
                 y: 0.0 => 1.0,

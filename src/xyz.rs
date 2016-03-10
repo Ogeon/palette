@@ -6,6 +6,7 @@ use std::marker::PhantomData;
 use {Alpha, Yxy, Rgb, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
+use rgb::RgbSpace;
 use matrix::{rgb_to_xyz_matrix, multiply_rgb_to_xyz};
 use {clamp, flt};
 
@@ -118,8 +119,8 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
         xyz
     }
 
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<::rgb::standards::Srgb, Wp, T>();
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<S, T>) -> Self {
+        let transform_matrix = rgb_to_xyz_matrix::<S, T>();
         multiply_rgb_to_xyz(&transform_matrix, &rgb)
     }
 
@@ -155,7 +156,7 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
     }
 
     fn from_luma(luma: Luma<Wp, T>) -> Self {
-        Wp::get_xyz() * luma.luma
+       Wp::get_xyz() * luma.luma
     }
 }
 
@@ -380,11 +381,21 @@ impl<Wp, T> Div<T> for Xyz<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Xyz<Wp, T>, T>> for Xyz<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Xyz<Wp, T>, T>) -> Xyz<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Xyz;
     use Rgb;
     use Luma;
+    use white_point::D65;
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;
@@ -420,7 +431,7 @@ mod test {
     #[test]
     fn ranges() {
         assert_ranges!{
-            Xyz;
+            Xyz<D65, f64>;
             limited {
                 x: 0.0 => X_N,
                 y: 0.0 => Y_N,

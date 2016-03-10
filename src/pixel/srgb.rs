@@ -100,6 +100,35 @@ impl<T> Srgb<D65, T>
             white_point: PhantomData,
         }
     }
+
+    ///Convert linear color components to sRGB encoding.
+    pub fn from_linear<C: Into<Rgba<::rgb::standards::Srgb, T>>>(color: C) -> Srgb<D65, T> {
+        let rgb = color.into();
+        Srgb {
+            red: to_srgb(rgb.red),
+            green: to_srgb(rgb.green),
+            blue: to_srgb(rgb.blue),
+            alpha: rgb.alpha,
+            white_point: PhantomData,
+        }
+    }
+
+    ///Decode this color to a linear representation.
+    pub fn to_linear(&self) -> Rgba<::rgb::standards::Srgb, T> {
+        Alpha {
+            color: Rgb::<::rgb::standards::Srgb, T>::with_wp(
+                from_srgb(self.red),
+                from_srgb(self.green),
+                from_srgb(self.blue),
+            ),
+            alpha: self.alpha,
+        }
+    }
+
+    ///Shortcut to convert a linear color to an sRGB encoded pixel.
+    pub fn linear_to_pixel<C: Into<Rgba<::rgb::standards::Srgb, T>>, P: RgbPixel<T>>(color: C) -> P {
+        Srgb::from_linear(color).to_pixel()
+    }
 }
 
 impl<Wp, T> Srgb<Wp, T>
@@ -153,60 +182,28 @@ impl<Wp, T> Srgb<Wp, T>
             clamp(self.alpha, T::zero(), T::one()),
         )
     }
-
-    ///Convert linear color components to sRGB encoding.
-    pub fn from_linear<C: Into<Rgba<Wp, T>>>(color: C) -> Srgb<Wp, T> {
-        let rgb = color.into();
-        Srgb {
-            red: to_srgb(rgb.red),
-            green: to_srgb(rgb.green),
-            blue: to_srgb(rgb.blue),
-            alpha: rgb.alpha,
-            white_point: PhantomData,
-        }
-    }
-
-    ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgba<Wp, T> {
-        Alpha {
-            color: Rgb::with_wp(
-                from_srgb(self.red),
-                from_srgb(self.green),
-                from_srgb(self.blue),
-            ),
-            alpha: self.alpha,
-        }
-    }
-
-    ///Shortcut to convert a linear color to an sRGB encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgba<Wp, T>>, P: RgbPixel<T>>(color: C) -> P {
-        Srgb::from_linear(color).to_pixel()
-    }
 }
 
-impl<Wp, T> From<Rgb<Wp, T>> for Srgb<Wp, T>
+impl<T> From<Rgb<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
-        Wp: WhitePoint
 {
-    fn from(rgb: Rgb<Wp, T>) -> Srgb<Wp, T> {
+    fn from(rgb: Rgb<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
         Rgba::from(rgb).into()
     }
 }
 
-impl<Wp, T> From<Rgba<Wp, T>> for Srgb<Wp, T>
+impl<T> From<Rgba<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
-        Wp: WhitePoint
 {
-    fn from(rgba: Rgba<Wp, T>) -> Srgb<Wp, T> {
+    fn from(rgba: Rgba<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
         Srgb::from_linear(rgba)
     }
 }
 
-impl<Wp, T> From<Color<Wp, T>> for Srgb<Wp, T>
+impl<T> From<Color<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
-        Wp: WhitePoint
 {
-    fn from(color: Color<Wp, T>) -> Srgb<Wp, T> {
+    fn from(color: Color<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
         Rgb::from(color).into()
     }
 }

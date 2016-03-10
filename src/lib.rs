@@ -57,6 +57,7 @@ use approx::ApproxEq;
 
 use pixel::{Srgb, GammaRgb};
 use blend::PreAlpha;
+use rgb::RgbSpace;
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -86,16 +87,14 @@ macro_rules! assert_ranges {
     );
 
     (
-        $ty:ident;
+        $ty:ident < $($ty_params:ty),+ >;
         limited {$($limited:ident: $limited_from:expr => $limited_to:expr),+}
         limited_min {$($limited_min:ident: $limited_min_from:expr => $limited_min_to:expr),*}
         unlimited {$($unlimited:ident: $unlimited_from:expr => $unlimited_to:expr),*}
     ) => (
         {
             use std::iter::repeat;
-            use std::marker::PhantomData;
             use Limited;
-            use white_point::D65;
 
             {
                 print!("checking below limits ... ");
@@ -121,18 +120,18 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
-                    let expected = $ty::<D65, f64> {
+                    let expected: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited_from.into(),)+
                         $($limited_min: $limited_min_from.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
 
                     assert!(!c.is_valid());
@@ -166,11 +165,11 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
 
@@ -205,18 +204,18 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
-                    let expected = $ty::<D65, _> {
+                    let expected: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited_to.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
 
                     assert!(!c.is_valid());
@@ -267,7 +266,7 @@ macro_rules! make_color {
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<Wp = D65, T = f32> = Alpha<Color<Wp, T>, T>;
+        pub type Colora<S = rgb::standards::Srgb, T = f32> = Alpha<Color<S, T>, T>;
 
         ///A generic color type.
         ///
@@ -285,30 +284,42 @@ macro_rules! make_color {
         ///but it can easily be converted to a fixed color space in those
         ///cases.
         #[derive(Debug)]
-        pub enum Color<Wp = D65, T = f32>
+        pub enum Color<S = rgb::standards::Srgb, T = f32>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
-            $(#[$variant_comment] $variant($variant<Wp, T>)),+
+            ///Linear RGB.
+            Rgb(Rgb<S, T>),
+            $(#[$variant_comment] $variant($variant<S::WhitePoint, T>)),+
         }
 
-        impl<Wp, T> Copy for Color<Wp, T>
+        impl<S, T> Copy for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {}
 
-        impl<Wp, T> Clone for Color<Wp, T>
+        impl<S, T> Clone for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
-            fn clone(&self) -> Color<Wp, T> { *self }
+            fn clone(&self) -> Color<S, T> { *self }
         }
 
-        impl<T: Float> Color<D65, T> {
+        impl<T: Float> Color<rgb::standards::Srgb, T> {
+            ///Linear RGB.
+            pub fn rgb(red: T, green: T, blue: T) -> Color<rgb::standards::Srgb, T> {
+                Color::Rgb(Rgb::new(red, green, blue))
+            }
+
+            ///Linear RGB from 8 bit values.
+            pub fn rgb_u8(red: u8, green: u8, blue: u8) -> Color<rgb::standards::Srgb, T> {
+                Color::Rgb(Rgb::new_u8(red, green, blue))
+            }
+
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<D65, T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<rgb::standards::Srgb, T> {
                         Color::$variant($variant::$ctor_original($($ctor_field),*))
                     }
                 )+
@@ -316,42 +327,52 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T: Float> Alpha<Color<D65, T>, T> {
+        impl<T: Float> Alpha<Color<rgb::standards::Srgb, T>, T> {
+            ///Linear RGB.
+            pub fn rgb(red: T, green: T, blue: T, alpha: T) -> Colora<rgb::standards::Srgb, T> {
+                Rgba::new(red, green, blue, alpha).into()
+            }
+
+            ///Linear RGB from 8 bit values.
+            pub fn rgb_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Colora<rgb::standards::Srgb, T> {
+                Rgba::new_u8(red, green, blue, alpha).into()
+            }
+
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<D65, T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<rgb::standards::Srgb, T> {
                         Alpha::<$variant<D65, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
         }
 
-        impl<Wp, T> Mix for Color<Wp, T>
+        impl<S, T> Mix for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn mix(&self, other: &Color<Wp, T>, factor: T) -> Color<Wp, T> {
+            fn mix(&self, other: &Color<S, T>, factor: T) -> Color<S, T> {
                 Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
             }
         }
 
-        impl<Wp, T> Shade for Color<Wp, T>
+        impl<S, T> Shade for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn lighten(&self, amount: T) -> Color<Wp, T> {
+            fn lighten(&self, amount: T) -> Color<S, T> {
                 Lab::from(*self).lighten(amount).into()
             }
         }
 
-        impl<Wp, T> GetHue for Color<Wp, T>
+        impl<S, T> GetHue for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
             type Hue = LabHue<T>;
 
@@ -360,49 +381,49 @@ macro_rules! make_color {
             }
         }
 
-        impl<Wp, T> Hue for Color<Wp, T>
+        impl<S, T> Hue for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<Wp, T> {
+            fn with_hue(&self, hue: LabHue<T>) -> Color<S, T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<Wp, T> {
+            fn shift_hue(&self, amount: LabHue<T>) -> Color<S, T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
 
-        impl<Wp, T> Saturate for Color<Wp, T>
+        impl<S, T> Saturate for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn saturate(&self, factor: T) -> Color<Wp, T> {
+            fn saturate(&self, factor: T) -> Color<S, T> {
                 Lch::from(*self).saturate(factor).into()
             }
         }
 
-        impl<Wp, T> Blend for Color<Wp, T>
+        impl<S, T> Blend for Color<S, T>
             where T: Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
-            type Color = Rgb<Wp, T>;
+            type Color = Rgb<S, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<Wp, T>, T> {
+            fn into_premultiplied(self) -> PreAlpha<Rgb<S, T>, T> {
                 Rgba::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<Wp, T>, T>) -> Self {
+            fn from_premultiplied(color: PreAlpha<Rgb<S, T>, T>) -> Self {
                 Rgba::from(color).into()
             }
         }
 
-        impl<Wp, T> ApproxEq for Color<Wp, T>
+        impl<S, T> ApproxEq for Color<S, T>
             where T: Float + ApproxEq,
                 T::Epsilon: Copy + Float,
-                Wp: WhitePoint
+                S: RgbSpace,
         {
             type Epsilon = T::Epsilon;
 
@@ -434,47 +455,84 @@ macro_rules! make_color {
         }
 
         $(
-            impl<Wp, T> From<$variant<Wp, T>> for Color<Wp, T>
+            impl<S, T> From<$variant<S::WhitePoint, T>> for Color<S, T>
                 where T: Float,
-                    Wp: WhitePoint
+                    S: RgbSpace,
             {
-                fn from(color: $variant<Wp, T>) -> Color<Wp, T> {
+                fn from(color: $variant<S::WhitePoint, T>) -> Color<S, T> {
                     Color::$variant(color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Color<Wp, T>
+            impl<S, T> From<Alpha<$variant<S::WhitePoint, T>, T>> for Color<S, T>
                 where T: Float,
-                    Wp: WhitePoint
+                    S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Color<Wp, T> {
+                fn from(color: Alpha<$variant<S::WhitePoint, T>,T>) -> Color<S, T> {
                     Color::$variant(color.color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Alpha<Color<Wp, T>,T>
+            impl<S, T> From<Alpha<$variant<S::WhitePoint, T>, T>> for Alpha<Color<S, T>,T>
                 where T: Float,
-                    Wp: WhitePoint
+                    S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Alpha<Color<Wp, T>,T> {
+                fn from(color: Alpha<$variant<S::WhitePoint, T>,T>) -> Alpha<Color<S, T>,T> {
                     Alpha {
                         color: Color::$variant(color.color),
                         alpha: color.alpha,
                     }
                 }
             }
-
-            $($(
-                impl<Wp, T> From<$representations<Wp, T>> for Color<Wp, T>
-                    where T: Float,
-                        Wp: WhitePoint
-                {
-                    fn from(color: $representations<Wp, T>) -> Color<Wp, T> {
-                        Color::$variant(color.into())
-                    }
-                }
-            )+)*
         )+
+
+        impl<S, T> From<Rgb<S, T>> for Color<S, T>
+            where T: Float,
+                S: RgbSpace,
+        {
+            fn from(color: Rgb<S, T>) -> Color<S, T> {
+                Color::Rgb(color)
+            }
+        }
+
+        impl<S, T> From<Alpha<Rgb<S, T>, T>> for Color<S, T>
+            where T: Float,
+                S: RgbSpace,
+        {
+            fn from(color: Alpha<Rgb<S, T>,T>) -> Color<S, T> {
+                Color::Rgb(color.color)
+            }
+        }
+
+        impl<S, T> From<Alpha<Rgb<S, T>, T>> for Alpha<Color<S, T>,T>
+            where T: Float,
+                S: RgbSpace,
+        {
+            fn from(color: Alpha<Rgb<S, T>,T>) -> Alpha<Color<S, T>,T> {
+                Alpha {
+                    color: Color::Rgb(color.color),
+                    alpha: color.alpha,
+                }
+            }
+        }
+
+        impl<T> From<Srgb<D65, T>> for Color<::rgb::standards::Srgb, T> where
+            T: Float
+        {
+            fn from(color: Srgb<D65, T>) -> Color<::rgb::standards::Srgb, T> {
+                Color::Rgb(color.into())
+            }
+        }
+
+        impl<S, Wp, T> From<GammaRgb<Wp, T>> for Color<S, T> where
+            S: RgbSpace<WhitePoint=Wp>,
+            Wp: WhitePoint,
+            T: Float
+        {
+            fn from(color: GammaRgb<Wp, T>) -> Color<S, T> {
+                Color::Rgb(color.into())
+            }
+        }
     )
 }
 
@@ -500,15 +558,6 @@ make_color! {
 
         ///Linear luminance from an 8 bit value.
         y_u8(luma: u8)[alpha: u8] => new_u8;
-    }
-
-    ///Linear RGB.
-    Rgb and Srgb, GammaRgb {
-        ///Linear RGB.
-        rgb(red: T, green: T, blue: T)[alpha: T] => new;
-
-        ///Linear RGB from 8 bit values.
-        rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
     }
 
     ///CIE 1931 XYZ.

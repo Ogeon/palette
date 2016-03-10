@@ -5,6 +5,7 @@ use std::marker::PhantomData;
 
 use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::{WhitePoint, D65};
+use rgb::RgbSpace;
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
@@ -113,14 +114,14 @@ impl<Wp, T> Alpha<Hsl<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint
+        Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<Wp, T> = xyz.into_rgb();
+        let rgb: Rgb<(::rgb::standards::Srgb, Wp), T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<S, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
@@ -362,10 +363,20 @@ impl<Wp, T> Sub<T> for Hsl<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Hsl<Wp, T>, T>> for Hsl<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Hsl<Wp, T>, T>) -> Hsl<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Hsl;
     use {Rgb, Hsv};
+    use white_point::D65;
 
     #[test]
     fn red() {
@@ -421,7 +432,7 @@ mod test {
     #[test]
     fn ranges() {
         assert_ranges!{
-            Hsl;
+            Hsl<D65, f64>;
             limited {
                 saturation: 0.0 => 1.0,
                 lightness: 0.0 => 1.0

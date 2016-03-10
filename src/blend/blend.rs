@@ -28,9 +28,9 @@ pub trait Blend: Sized {
     ///```
     ///use palette::{Rgb, Rgba, Blend};
     ///use palette::blend::PreAlpha;
-    ///use palette::white_point::D65;
+    ///use palette::rgb::standards::Srgb;
     ///
-    ///type PreRgba = PreAlpha<Rgb<D65, f32>, f32>;
+    ///type PreRgba = PreAlpha<Rgb<Srgb, f32>, f32>;
     ///
     ///fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
     ///    PreAlpha {

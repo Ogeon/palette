@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 
 use {Xyz, Rgb};
 use white_point::WhitePoint;
-use rgb::Primaries;
+use rgb::{Primaries, RgbSpace};
 use convert::IntoColor;
 
 ///A 9 element array representing a 3x3 matrix
@@ -23,16 +23,16 @@ pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Float>(c: &Mat3<T>, f: 
     }
 }
 ///Multiply the 3x3 matrix with the XYZ color into RGB color
-pub fn multiply_xyz_to_rgb<Wp: WhitePoint, T: Float>(c: &Mat3<T>, f: &Xyz<Wp, T>) -> Rgb<Wp, T> {
+pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Xyz<S::WhitePoint, T>) -> Rgb<S, T> {
     Rgb {
         red: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         green: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
         blue: (c[6] * f.x) + (c[7] * f.y) + (c[8] * f.z),
-        white_point: PhantomData,
+        space: PhantomData,
     }
 }
 ///Multiply the 3x3 matrix with the  RGB into XYZ color
-pub fn multiply_rgb_to_xyz<Wp: WhitePoint, T: Float>(c: &Mat3<T>, f: &Rgb<Wp, T>) -> Xyz<Wp, T> {
+pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Rgb<S, T>) -> Xyz<S::WhitePoint, T> {
     Xyz {
         x: (c[0] * f.red) + (c[1] * f.green) + (c[2] * f.blue),
         y: (c[3] * f.red) + (c[4] * f.green) + (c[5] * f.blue),
@@ -79,14 +79,14 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
 }
 
 ///Geneartes to Srgb to Xyz transformation matrix for the given white point
-pub fn rgb_to_xyz_matrix<P: Primaries, Wp: WhitePoint, T: Float>() -> Mat3<T> {
-    let r: Xyz<Wp, T> = P::red().into_xyz();
-    let g: Xyz<Wp, T> = P::green().into_xyz();
-    let b: Xyz<Wp, T> = P::blue().into_xyz();
+pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Float>() -> Mat3<T> {
+    let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_xyz();
+    let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_xyz();
+    let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_xyz();
 
     let mut transform_matrix = mat3_from_primaries(r, g, b);
 
-    let s_matrix: Rgb<Wp, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &Wp::get_xyz());
+    let s_matrix: Rgb<S, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &S::WhitePoint::get_xyz());
     transform_matrix[0] = transform_matrix[0] * s_matrix.red;
     transform_matrix[1] = transform_matrix[1] * s_matrix.green;
     transform_matrix[2] = transform_matrix[2] * s_matrix.blue;
@@ -116,7 +116,7 @@ mod test {
     use Rgb;
     use rgb::standards::Srgb;
     use chromatic_adaptation::AdaptInto;
-    use white_point::{D65,D50};
+    use white_point::D50;
     use super::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
 
     #[test]
@@ -171,7 +171,7 @@ mod test {
             0.2126729, 0.7151522, 0.0721750,
             0.0193339, 0.1191920, 0.9503041
         ];
-        let computed = rgb_to_xyz_matrix::<Srgb, D65, f64>();
+        let computed = rgb_to_xyz_matrix::<Srgb, f64>();
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.000001)
         }
@@ -179,10 +179,10 @@ mod test {
 
     #[test]
     fn d65_to_d50() {
-        let input: Rgb<D65> = Rgb::new(1.0, 1.0, 1.0);
-        let expected: Rgb<D50> = Rgb::with_wp(1.0, 1.0, 1.0);
+        let input: Rgb<Srgb> = Rgb::new(1.0, 1.0, 1.0);
+        let expected: Rgb<(Srgb, D50)> = Rgb::with_wp(1.0, 1.0, 1.0);
 
-        let computed: Rgb<D50> = input.adapt_into();
+        let computed: Rgb<(Srgb, D50)> = input.adapt_into();
         assert_relative_eq!(expected, computed, epsilon = 0.000001);
     }
 }

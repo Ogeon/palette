@@ -317,14 +317,24 @@ impl<Wp, T> Sub<T> for Lch<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Lch<Wp, T>, T>> for Lch<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Lch<Wp, T>, T>) -> Lch<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use Lch;
+    use white_point::D65;
 
     #[test]
     fn ranges() {
         assert_ranges!{
-            Lch;
+            Lch<D65, f64>;
             limited {
                 l: 0.0 => 100.0
             }

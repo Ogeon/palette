@@ -360,14 +360,24 @@ impl<Wp, T> Div<T> for Luma<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Luma<Wp, T>, T>> for Luma<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Luma<Wp, T>, T>) -> Luma<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use Luma;
+    use white_point::D65;
 
     #[test]
     fn ranges() {
         assert_ranges!{
-            Luma;
+            Luma<D65, f64>;
             limited {
                 luma: 0.0 => 1.0
             }

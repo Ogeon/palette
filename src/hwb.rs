@@ -308,6 +308,15 @@ impl<Wp, T> Sub<T> for Hwb<Wp, T>
     }
 }
 
+impl<Wp, T> From<Alpha<Hwb<Wp, T>, T>> for Hwb<Wp, T>
+    where T: Float,
+        Wp: WhitePoint
+{
+    fn from(color: Alpha<Hwb<Wp, T>, T>) -> Hwb<Wp, T> {
+        color.color
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Hwb;

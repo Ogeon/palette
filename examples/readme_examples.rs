@@ -6,7 +6,6 @@ use image::{RgbImage, GenericImage};
 
 use palette::{Rgba, Gradient, Mix};
 use palette::pixel::Srgb;
-use palette::white_point::D65;
 
 mod color_spaces {
     use palette::{Rgb, Lch, Hue};
@@ -76,8 +75,8 @@ fn display_colors(filename: &str, colors: &[[u8; 3]]) {
 }
 
 fn display_gradients<A: Mix<Scalar=f64> + Clone, B: Mix<Scalar=f64> + Clone>(filename: &str, grad1: Gradient<A>, grad2: Gradient<B>) where
-    Rgba<D65, f64>: From<A>,
-    Rgba<D65, f64>: From<B>,
+    Rgba<::palette::rgb::standards::Srgb, f64>: From<A>,
+    Rgba<::palette::rgb::standards::Srgb, f64>: From<B>,
 {
     let mut image = RgbImage::new(256, 64);
 

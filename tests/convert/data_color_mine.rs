@@ -59,8 +59,8 @@ pub struct ColorMineRaw {
 pub struct ColorMine {
     xyz: Xyz<D65, f32>,
     yxy: Yxy<D65, f32>,
-    rgb: Rgb<D65, f32>,
-    linear_rgb: Rgb<D65, f32>,
+    rgb: Rgb<::palette::rgb::standards::Srgb, f32>,
+    linear_rgb: Rgb<::palette::rgb::standards::Srgb, f32>,
     hsl: Hsl<D65, f32>,
     hsv: Hsv<D65, f32>,
     hwb: Hwb<D65, f32>,
@@ -81,9 +81,9 @@ impl From<ColorMineRaw> for ColorMine {
 }
 
 macro_rules! impl_from_color {
-    ($self_ty:ident) => {
-        impl From<$self_ty<D65, f32>> for ColorMine {
-            fn from(color: $self_ty<D65, f32>) -> ColorMine {
+    ($self_ty:ty) => {
+        impl From<$self_ty> for ColorMine {
+            fn from(color: $self_ty) -> ColorMine {
                 ColorMine {
                     xyz: color.into_xyz(),
                     yxy: color.into_yxy(),
@@ -99,14 +99,14 @@ macro_rules! impl_from_color {
     }
 }
 
-impl_from_color!(Rgb);
-impl_from_color!(Xyz);
-impl_from_color!(Yxy);
-impl_from_color!(Lab);
-impl_from_color!(Lch);
-impl_from_color!(Hsl);
-impl_from_color!(Hsv);
-impl_from_color!(Hwb);
+impl_from_color!(Rgb<::palette::rgb::standards::Srgb, f32>);
+impl_from_color!(Xyz<D65, f32>);
+impl_from_color!(Yxy<D65, f32>);
+impl_from_color!(Lab<D65, f32>);
+impl_from_color!(Lch<D65, f32>);
+impl_from_color!(Hsl<D65, f32>);
+impl_from_color!(Hsv<D65, f32>);
+impl_from_color!(Hwb<D65, f32>);
 
 
 
