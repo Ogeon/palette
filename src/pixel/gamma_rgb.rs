@@ -30,7 +30,7 @@ use white_point::{WhitePoint, D65};
 #[derive(Debug, PartialEq)]
 pub struct GammaRgb<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///The red component, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -58,12 +58,12 @@ pub struct GammaRgb<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for GammaRgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for GammaRgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> GammaRgb<Wp, T> { *self }
 }
@@ -108,7 +108,7 @@ impl<T> GammaRgb<D65, T>
 
 impl<Wp, T> GammaRgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Create a new opaque gamma encoded color.
     pub fn with_wp(red: T, green: T, blue: T, gamma: T) -> GammaRgb<Wp, T> {

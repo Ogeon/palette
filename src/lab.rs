@@ -25,7 +25,7 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Lab<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///L* is the lightness of the color. 0.0 gives absolute black and 100
     ///give the brightest white.
@@ -44,12 +44,12 @@ pub struct Lab<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Lab<Wp, T> { *self }
 }
@@ -70,7 +70,7 @@ impl<T> Lab<D65, T>
 
 impl<Wp, T> Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE L*a*b*.
     pub fn with_wp(l: T, a: T, b: T) -> Lab<Wp, T> {
@@ -99,7 +99,7 @@ impl<T> Alpha<Lab<D65, T>, T>
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
 impl<Wp, T> Alpha<Lab<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE L*a*b* and transparency.
     pub fn with_wp(l: T, a: T, b: T, alpha: T) -> Laba<Wp, T> {
@@ -112,13 +112,10 @@ impl<Wp, T> Alpha<Lab<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let xyz_ref = Wp::get_xyz();
-        let mut x: T = xyz.x / xyz_ref.x;
-        let mut y: T = xyz.y / xyz_ref.y;
-        let mut z: T = xyz.z / xyz_ref.z;
+        let Xyz { mut x, mut y, mut z, .. } = xyz / Wp::get_xyz();
 
         fn convert<T: Float>(c: T) -> T {
             let epsilon: T = (flt::<T,_>(6.0 / 29.0)).powi(3);
@@ -161,7 +158,7 @@ impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
 
 impl<Wp, T> Limited for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= flt(100.0) &&
@@ -184,7 +181,7 @@ impl<Wp, T> Limited for Lab<Wp, T>
 
 impl<Wp, T> Mix for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -202,7 +199,7 @@ impl<Wp, T> Mix for Lab<Wp, T>
 
 impl<Wp, T> Shade for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -218,7 +215,7 @@ impl<Wp, T> Shade for Lab<Wp, T>
 
 impl<Wp, T> GetHue for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Hue = LabHue<T>;
 
@@ -233,7 +230,7 @@ impl<Wp, T> GetHue for Lab<Wp, T>
 
 impl<Wp, T> ComponentWise for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -258,7 +255,7 @@ impl<Wp, T> ComponentWise for Lab<Wp, T>
 
 impl<Wp, T> Default for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Lab<Wp, T> {
         Lab::with_wp(T::zero(), T::zero(), T::zero())
@@ -267,7 +264,7 @@ impl<Wp, T> Default for Lab<Wp, T>
 
 impl<Wp, T> Add<Lab<Wp, T>> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -283,7 +280,7 @@ impl<Wp, T> Add<Lab<Wp, T>> for Lab<Wp, T>
 
 impl<Wp, T> Add<T> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -299,7 +296,7 @@ impl<Wp, T> Add<T> for Lab<Wp, T>
 
 impl<Wp, T> Sub<Lab<Wp, T>> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -315,7 +312,7 @@ impl<Wp, T> Sub<Lab<Wp, T>> for Lab<Wp, T>
 
 impl<Wp, T> Sub<T> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -331,7 +328,7 @@ impl<Wp, T> Sub<T> for Lab<Wp, T>
 
 impl<Wp, T> Mul<Lab<Wp, T>> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -347,7 +344,7 @@ impl<Wp, T> Mul<Lab<Wp, T>> for Lab<Wp, T>
 
 impl<Wp, T> Mul<T> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -363,7 +360,7 @@ impl<Wp, T> Mul<T> for Lab<Wp, T>
 
 impl<Wp, T> Div<Lab<Wp, T>> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 
@@ -379,7 +376,7 @@ impl<Wp, T> Div<Lab<Wp, T>> for Lab<Wp, T>
 
 impl<Wp, T> Div<T> for Lab<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lab<Wp, T>;
 

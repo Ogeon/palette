@@ -22,7 +22,7 @@ pub type Lumaa<Wp = D65, T = f32> = Alpha<Luma<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Luma<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: T,
@@ -35,12 +35,12 @@ pub struct Luma<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Luma<Wp, T> { *self }
 }
@@ -68,7 +68,7 @@ impl<T> Luma<D65, T>
 
 impl<Wp, T> Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear luminance.
     pub fn with_wp(luma: T) -> Luma<Wp, T> {
@@ -111,7 +111,7 @@ impl<T> Alpha<Luma<D65, T>, T>
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
 impl<Wp, T> Alpha<Luma<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear luminance with transparency.
     pub fn with_wp(luma: T, alpha: T) -> Lumaa<Wp, T> {
@@ -132,7 +132,7 @@ impl<Wp, T> Alpha<Luma<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         Luma {
@@ -156,7 +156,7 @@ impl<Wp, T> FromColor<Wp, T> for Luma<Wp, T>
 
 impl<Wp, T> Limited for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.luma >= T::zero() && self.luma <= T::one()
@@ -175,7 +175,7 @@ impl<Wp, T> Limited for Luma<Wp, T>
 
 impl<Wp, T> Mix for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -191,7 +191,7 @@ impl<Wp, T> Mix for Luma<Wp, T>
 
 impl<Wp, T> Shade for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -205,7 +205,7 @@ impl<Wp, T> Shade for Luma<Wp, T>
 
 impl<Wp, T> Blend for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Color = Luma<Wp, T>;
 
@@ -220,7 +220,7 @@ impl<Wp, T> Blend for Luma<Wp, T>
 
 impl<Wp, T> ComponentWise for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -241,7 +241,7 @@ impl<Wp, T> ComponentWise for Luma<Wp, T>
 
 impl<Wp, T> Default for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Luma<Wp, T> {
         Luma::with_wp(T::zero())
@@ -250,7 +250,7 @@ impl<Wp, T> Default for Luma<Wp, T>
 
 impl<Wp, T> Add<Luma<Wp, T>> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -264,7 +264,7 @@ impl<Wp, T> Add<Luma<Wp, T>> for Luma<Wp, T>
 
 impl<Wp, T> Add<T> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -278,7 +278,7 @@ impl<Wp, T> Add<T> for Luma<Wp, T>
 
 impl<Wp, T> Sub<Luma<Wp, T>> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -292,7 +292,7 @@ impl<Wp, T> Sub<Luma<Wp, T>> for Luma<Wp, T>
 
 impl<Wp, T> Sub<T> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -306,7 +306,7 @@ impl<Wp, T> Sub<T> for Luma<Wp, T>
 
 impl<Wp, T> Mul<Luma<Wp, T>> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -320,7 +320,7 @@ impl<Wp, T> Mul<Luma<Wp, T>> for Luma<Wp, T>
 
 impl<Wp, T> Mul<T> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -334,7 +334,7 @@ impl<Wp, T> Mul<T> for Luma<Wp, T>
 
 impl<Wp, T> Div<Luma<Wp, T>> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 
@@ -348,7 +348,7 @@ impl<Wp, T> Div<Luma<Wp, T>> for Luma<Wp, T>
 
 impl<Wp, T> Div<T> for Luma<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Luma<Wp, T>;
 

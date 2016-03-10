@@ -11,7 +11,7 @@ macro_rules! impl_eq {
         impl<Wp, T> ApproxEq for $self_ty<Wp, T>
         where T: Float + ApproxEq,
             T::Epsilon: Copy + Float,
-            Wp: WhitePoint<T>
+            Wp: WhitePoint
         {
             type Epsilon = <T as ApproxEq>::Epsilon;
 

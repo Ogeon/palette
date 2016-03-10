@@ -22,7 +22,7 @@ pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Hsl<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
@@ -44,12 +44,12 @@ pub struct Hsl<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Hsl<Wp, T> { *self }
 }
@@ -71,7 +71,7 @@ impl<T> Hsl<D65, T>
 
 impl<Wp, T> Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear HSL.
     pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<Wp, T> {
@@ -100,7 +100,7 @@ impl<T> Alpha<Hsl<D65, T>, T>
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<Wp, T> Alpha<Hsl<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear HSL and transparency.
     pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<Wp, T> {
@@ -113,7 +113,7 @@ impl<Wp, T> Alpha<Hsl<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let rgb: Rgb<Wp, T> = xyz.into_rgb();
@@ -181,7 +181,7 @@ impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
 
 impl<Wp, T> Limited for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
@@ -202,7 +202,7 @@ impl<Wp, T> Limited for Hsl<Wp, T>
 
 impl<Wp, T> Mix for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -221,7 +221,7 @@ impl<Wp, T> Mix for Hsl<Wp, T>
 
 impl<Wp, T> Shade for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -237,7 +237,7 @@ impl<Wp, T> Shade for Hsl<Wp, T>
 
 impl<Wp, T> GetHue for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Hue = RgbHue<T>;
 
@@ -252,7 +252,7 @@ impl<Wp, T> GetHue for Hsl<Wp, T>
 
 impl<Wp, T> Hue for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn with_hue(&self, hue: RgbHue<T>) -> Hsl<Wp, T> {
         Hsl {
@@ -275,7 +275,7 @@ impl<Wp, T> Hue for Hsl<Wp, T>
 
 impl<Wp, T> Saturate for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -291,7 +291,7 @@ impl<Wp, T> Saturate for Hsl<Wp, T>
 
 impl<Wp, T> Default for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Hsl<Wp, T> {
         Hsl::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
@@ -300,7 +300,7 @@ impl<Wp, T> Default for Hsl<Wp, T>
 
 impl<Wp, T> Add<Hsl<Wp, T>> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Hsl<Wp, T>;
 
@@ -316,7 +316,7 @@ impl<Wp, T> Add<Hsl<Wp, T>> for Hsl<Wp, T>
 
 impl<Wp, T> Add<T> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Hsl<Wp, T>;
 
@@ -332,7 +332,7 @@ impl<Wp, T> Add<T> for Hsl<Wp, T>
 
 impl<Wp, T> Sub<Hsl<Wp, T>> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Hsl<Wp, T>;
 
@@ -348,7 +348,7 @@ impl<Wp, T> Sub<Hsl<Wp, T>> for Hsl<Wp, T>
 
 impl<Wp, T> Sub<T> for Hsl<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Hsl<Wp, T>;
 

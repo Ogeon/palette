@@ -1,16 +1,62 @@
+//!RGB types, spaces and standards.
+
 use num_traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
 
-use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
+use {Alpha, Luma, Xyz, Yxy, Hsv, Hsl, RgbHue};
 use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
 use white_point::{WhitePoint, D65};
-use ::rgb_primaries::rgb_to_xyz_matrix;
-use matrix::{matrix_inverse, multiply_xyz_to_rgb};
+use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use {clamp, flt};
-use pixel::{RgbPixel, Srgb, GammaRgb};
+use pixel::{RgbPixel, Srgb, GammaRgb, TransferFn};
 use blend::PreAlpha;
+
+pub mod standards;
+
+///An RGB space and a transfer function.
+pub trait RgbStandard {
+    ///The RGB color space.
+    type Space: RgbSpace;
+
+    ///The transfer function for the color components.
+    type TransferFn: TransferFn;
+}
+
+impl<S: RgbSpace, T: TransferFn> RgbStandard for (S, T) {
+    type Space = S;
+    type TransferFn = T;
+}
+
+impl<P: Primaries, W: WhitePoint, T: TransferFn> RgbStandard for (P, W, T) {
+    type Space = (P, W);
+    type TransferFn = T;
+}
+
+///A set of primaries and a white point.
+pub trait RgbSpace {
+    ///The primaries of the RGB color space.
+    type Primaries: Primaries;
+
+    ///The white point of the RGB color space.
+    type WhitePoint: WhitePoint;
+}
+
+impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
+    type Primaries = P;
+    type WhitePoint = W;
+}
+
+///Represents the red, green and blue primaries of an RGB space.
+pub trait Primaries {
+    ///Primary red.
+    fn red<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+    ///Primary green.
+    fn green<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+    ///Primary blue.
+    fn blue<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+}
 
 ///Linear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](struct.Alpha.html#Rgba).
 pub type Rgba<Wp = D65, T = f32> = Alpha<Rgb<Wp, T>, T>;
@@ -30,7 +76,7 @@ pub type Rgba<Wp = D65, T = f32> = Alpha<Rgb<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Rgb<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -51,12 +97,12 @@ pub struct Rgb<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Rgb<Wp, T> { *self }
 }
@@ -87,7 +133,7 @@ impl<T> Rgb<D65, T>
 
 impl<Wp, T> Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear RGB.
     pub fn with_wp(red: T, green: T, blue: T) -> Rgb<Wp, T> {
@@ -160,7 +206,7 @@ impl<T> Alpha<Rgb<D65, T>, T>
 ///<span id="Rgba"></span>[`Rgba`](type.Rgba.html) implementations.
 impl<Wp, T> Alpha<Rgb<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Linear RGB with transparency.
     pub fn with_wp(red: T, green: T, blue: T, alpha: T) -> Rgba<Wp, T> {
@@ -206,11 +252,11 @@ impl<Wp, T> Alpha<Rgb<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<Wp, T>());
-        multiply_xyz_to_rgb::<Wp, Wp, T>(&transform_matrix, &xyz)
+        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<::rgb::standards::Srgb, Wp, T>());
+        multiply_xyz_to_rgb(&transform_matrix, &xyz)
     }
 
 
@@ -290,7 +336,7 @@ impl<Wp, T> FromColor<Wp, T> for Rgb<Wp, T>
 
 impl<Wp, T> Limited for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.red >= T::zero() && self.red <= T::one() &&
@@ -313,7 +359,7 @@ impl<Wp, T> Limited for Rgb<Wp, T>
 
 impl<Wp, T> Mix for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -331,7 +377,7 @@ impl<Wp, T> Mix for Rgb<Wp, T>
 
 impl<Wp, T> Shade for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -347,7 +393,7 @@ impl<Wp, T> Shade for Rgb<Wp, T>
 
 impl<Wp, T> GetHue for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Hue = RgbHue<T>;
 
@@ -364,7 +410,7 @@ impl<Wp, T> GetHue for Rgb<Wp, T>
 
 impl<Wp, T> Blend for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Color = Rgb<Wp, T>;
 
@@ -379,7 +425,7 @@ impl<Wp, T> Blend for Rgb<Wp, T>
 
 impl<Wp, T> ComponentWise for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -404,7 +450,7 @@ impl<Wp, T> ComponentWise for Rgb<Wp, T>
 
 impl<Wp, T> Default for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Rgb<Wp, T> {
         Rgb::with_wp(T::zero(), T::zero(), T::zero())
@@ -413,7 +459,7 @@ impl<Wp, T> Default for Rgb<Wp, T>
 
 impl<Wp, T> Add<Rgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -429,7 +475,7 @@ impl<Wp, T> Add<Rgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> Add<T> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -445,7 +491,7 @@ impl<Wp, T> Add<T> for Rgb<Wp, T>
 
 impl<Wp, T> Sub<Rgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -461,7 +507,7 @@ impl<Wp, T> Sub<Rgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> Sub<T> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -477,7 +523,7 @@ impl<Wp, T> Sub<T> for Rgb<Wp, T>
 
 impl<Wp, T> Mul<Rgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -493,7 +539,7 @@ impl<Wp, T> Mul<Rgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> Mul<T> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -509,7 +555,7 @@ impl<Wp, T> Mul<T> for Rgb<Wp, T>
 
 impl<Wp, T> Div<Rgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -525,7 +571,7 @@ impl<Wp, T> Div<Rgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> Div<T> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Rgb<Wp, T>;
 
@@ -541,7 +587,7 @@ impl<Wp, T> Div<T> for Rgb<Wp, T>
 
 impl<Wp, T> From<Srgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(srgb: Srgb<Wp, T>) -> Rgb<Wp, T> {
         srgb.to_linear().into()
@@ -550,7 +596,7 @@ impl<Wp, T> From<Srgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> From<GammaRgb<Wp, T>> for Rgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(gamma_rgb: GammaRgb<Wp, T>) -> Rgb<Wp, T> {
         gamma_rgb.to_linear().into()
@@ -559,7 +605,7 @@ impl<Wp, T> From<GammaRgb<Wp, T>> for Rgb<Wp, T>
 
 impl<Wp, T> From<Srgb<Wp, T>> for Alpha<Rgb<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(srgb: Srgb<Wp, T>) -> Alpha<Rgb<Wp, T>, T> {
         srgb.to_linear()
@@ -568,7 +614,7 @@ impl<Wp, T> From<Srgb<Wp, T>> for Alpha<Rgb<Wp, T>, T>
 
 impl<Wp, T> From<GammaRgb<Wp, T>> for Alpha<Rgb<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(gamma_rgb: GammaRgb<Wp, T>) -> Alpha<Rgb<Wp, T>, T> {
         gamma_rgb.to_linear()

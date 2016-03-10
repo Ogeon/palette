@@ -13,7 +13,7 @@ use white_point::{WhitePoint, D65};
 ///with self to avoid the unnecessary converison.
 pub trait FromColor<Wp = D65, T = f32>: Sized
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Convert from XYZ color space
     fn from_xyz(Xyz<Wp, T>) -> Self;
@@ -67,7 +67,7 @@ pub trait FromColor<Wp = D65, T = f32>: Sized
 ///These defaults must be overridden when direct conversion exists between colors.
 pub trait IntoColor<Wp = D65, T = f32>: Sized
     where T: Float,
-     Wp: WhitePoint<T>
+     Wp: WhitePoint
 {
 
     ///Convert into XYZ space
@@ -119,7 +119,7 @@ macro_rules! impl_into_color {
     ($self_ty:ident, $from_fn: ident) => {
         impl<Wp, T> IntoColor<Wp, T> for $self_ty<Wp, T>
             where T: Float,
-             Wp: WhitePoint<T>
+             Wp: WhitePoint
         {
 
             fn into_xyz(self) -> Xyz<Wp, T> {
@@ -164,7 +164,7 @@ macro_rules! impl_from_trait {
     (($self_ty: ident, $into_fn: ident) => {$($other: ident),+}) => (
         impl<Wp, T> From<Alpha<$self_ty<Wp, T>, T>> for $self_ty<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn from(color: Alpha<$self_ty<Wp, T>, T>) -> $self_ty<Wp, T> {
                 color.color
@@ -173,7 +173,7 @@ macro_rules! impl_from_trait {
 
         impl<Wp, T> From<Color<Wp, T>> for $self_ty<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn from(color: Color<Wp, T>) -> $self_ty<Wp, T> {
                 match color {
@@ -192,7 +192,7 @@ macro_rules! impl_from_trait {
 
         impl<Wp, T> From<Color<Wp, T>> for Alpha<$self_ty<Wp, T>,T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn from(color: Color<Wp, T>) -> Alpha<$self_ty<Wp, T>,T> {
                 Alpha {
@@ -204,7 +204,7 @@ macro_rules! impl_from_trait {
 
         impl<Wp, T> From<Alpha<Color<Wp, T>, T>> for Alpha<$self_ty<Wp, T>,T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn from(color: Alpha<Color<Wp, T>, T>) -> Alpha<$self_ty<Wp, T>,T> {
                 Alpha {
@@ -217,7 +217,7 @@ macro_rules! impl_from_trait {
         $(
             impl<Wp, T> From<$other<Wp, T>> for $self_ty<Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(other: $other<Wp, T>) -> $self_ty<Wp, T> {
                     other.$into_fn()
@@ -226,7 +226,7 @@ macro_rules! impl_from_trait {
 
             impl<Wp, T> From<Alpha<$other<Wp, T>, T>> for Alpha<$self_ty<Wp, T>, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(other: Alpha<$other<Wp, T>, T>) -> Alpha<$self_ty<Wp, T>, T> {
                     Alpha {
@@ -238,7 +238,7 @@ macro_rules! impl_from_trait {
 
             impl<Wp, T> From<$other<Wp, T>> for Alpha<$self_ty<Wp, T>, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(color: $other<Wp, T>) -> Alpha<$self_ty<Wp, T>, T> {
                     Alpha {
@@ -250,7 +250,7 @@ macro_rules! impl_from_trait {
 
             impl<Wp, T> From<Alpha<$other<Wp, T>, T>> for $self_ty<Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(other: Alpha<$other<Wp, T>, T>) -> $self_ty<Wp, T> {
                     other.color.$into_fn()

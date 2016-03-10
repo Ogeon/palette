@@ -51,8 +51,8 @@ pub struct ConeResponseMatrices<T: Float> {
 ///one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
     where T: Float,
-        Swp: WhitePoint<T>,
-        Dwp: WhitePoint<T>,
+        Swp: WhitePoint,
+        Dwp: WhitePoint,
 {
     ///Get the cone response functions for the chromatic adaptation method
     fn get_cone_response(&self) -> ConeResponseMatrices<T>;
@@ -60,8 +60,8 @@ pub trait TransformMatrix<Swp, Dwp, T>
     ///Generates a 3x3 transformation matrix to convert color from one reference white point
     ///to another with the given cone_response
     fn generate_transform_matrix(&self) -> Mat3<T> {
-        let s_wp = Swp::get_xyz();
-        let t_wp = Dwp::get_xyz();
+        let s_wp: Xyz<Swp, T> = Swp::get_xyz();
+        let t_wp: Xyz<Dwp, T> = Dwp::get_xyz();
         let adapt = self.get_cone_response();
 
         let resp_src: Xyz<Swp,_> = multiply_xyz(&adapt.ma, &s_wp);
@@ -77,8 +77,8 @@ pub trait TransformMatrix<Swp, Dwp, T>
 
 impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
     where T: Float,
-        Swp: WhitePoint<T>,
-        Dwp: WhitePoint<T>,
+        Swp: WhitePoint,
+        Dwp: WhitePoint,
 {
     fn get_cone_response(&self) -> ConeResponseMatrices<T> {
         match *self {
@@ -129,8 +129,8 @@ impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
 ///Uses the bradford method for conversion by default.
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
     where T: Float,
-          Swp: WhitePoint<T>,
-          Dwp: WhitePoint<T>,
+          Swp: WhitePoint,
+          Dwp: WhitePoint,
 {
     ///Convert the source color to the destination color using the bradford method by default
     fn adapt_from(color: S) -> Self {
@@ -142,8 +142,8 @@ pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
 
 impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
     where T: Float,
-          Swp: WhitePoint<T>,
-          Dwp: WhitePoint<T>,
+          Swp: WhitePoint,
+          Dwp: WhitePoint,
           S: IntoColor<Swp, T>,
           D: FromColor<Dwp, T>,
 
@@ -162,8 +162,8 @@ impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
 ///Uses the bradford method for conversion by default.
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
     where T: Float,
-          Swp: WhitePoint<T>,
-          Dwp: WhitePoint<T>,
+          Swp: WhitePoint,
+          Dwp: WhitePoint,
 {
     ///Convert the source color to the destination color using the bradford method by default
     fn adapt_into(self) -> D {
@@ -175,8 +175,8 @@ pub trait AdaptInto<D, Swp, Dwp, T>: Sized
 
 impl<S, D, Swp, Dwp, T> AdaptInto<D, Swp, Dwp, T> for S
     where T: Float,
-          Swp: WhitePoint<T>,
-          Dwp: WhitePoint<T>,
+          Swp: WhitePoint,
+          Dwp: WhitePoint,
           D: AdaptFrom<S, Swp, Dwp, T>
 
 {

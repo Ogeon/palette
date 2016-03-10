@@ -31,7 +31,7 @@ use white_point::{WhitePoint, D65};
 #[derive(Debug, PartialEq)]
 pub struct Srgb<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///The red component, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -56,12 +56,12 @@ pub white_point: PhantomData<Wp>,
 
 impl<Wp, T> Copy for Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Srgb<Wp, T> { *self }
 }
@@ -104,7 +104,7 @@ impl<T> Srgb<D65, T>
 
 impl<Wp, T> Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///Create a new opaque sRGB encoded color.
     pub fn with_wp(red: T, green: T, blue: T) -> Srgb<Wp, T> {
@@ -186,7 +186,7 @@ impl<Wp, T> Srgb<Wp, T>
 
 impl<Wp, T> From<Rgb<Wp, T>> for Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(rgb: Rgb<Wp, T>) -> Srgb<Wp, T> {
         Rgba::from(rgb).into()
@@ -195,7 +195,7 @@ impl<Wp, T> From<Rgb<Wp, T>> for Srgb<Wp, T>
 
 impl<Wp, T> From<Rgba<Wp, T>> for Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(rgba: Rgba<Wp, T>) -> Srgb<Wp, T> {
         Srgb::from_linear(rgba)
@@ -204,7 +204,7 @@ impl<Wp, T> From<Rgba<Wp, T>> for Srgb<Wp, T>
 
 impl<Wp, T> From<Color<Wp, T>> for Srgb<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from(color: Color<Wp, T>) -> Srgb<Wp, T> {
         Rgb::from(color).into()

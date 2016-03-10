@@ -21,7 +21,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Yxy<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
 
     ///x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
@@ -44,12 +44,12 @@ pub struct Yxy<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Yxy<Wp, T> { *self }
 }
@@ -70,7 +70,7 @@ impl<T> Yxy<D65, T>
 
 impl<Wp, T> Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE Yxy.
     pub fn with_wp(x: T, y: T, luma: T,) -> Yxy<Wp, T> {
@@ -98,7 +98,7 @@ impl<T> Alpha<Yxy<D65, T>, T>
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
 impl<Wp, T> Alpha<Yxy<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE Yxy and transparency.
     pub fn with_wp(x: T, y: T, luma: T, alpha: T) -> Yxya<Wp, T> {
@@ -111,7 +111,7 @@ impl<Wp, T> Alpha<Yxy<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let mut yxy = Yxy{ x: T::zero(), y: T::zero(), luma: xyz.y, white_point: PhantomData };
@@ -137,7 +137,7 @@ impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
 
 impl<Wp, T> Limited for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.x >= T::zero() && self.x <= T::one() &&
@@ -160,7 +160,7 @@ impl<Wp, T> Limited for Yxy<Wp, T>
 
 impl<Wp, T> Mix for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -178,7 +178,7 @@ impl<Wp, T> Mix for Yxy<Wp, T>
 
 impl<Wp, T> Shade for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -194,7 +194,7 @@ impl<Wp, T> Shade for Yxy<Wp, T>
 
 impl<Wp, T> ComponentWise for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -219,21 +219,23 @@ impl<Wp, T> ComponentWise for Yxy<Wp, T>
 
 impl<Wp, T> Default for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Yxy<Wp, T> {
         // The default for x and y are the white point x and y ( from the default D65).
         // Since Y (luma) is 0.0, this makes the default color black just like for other colors.
         // The reason for not using 0 for x and y is that this outside the usual color gamut and might
         // cause scaling issues.
-        let yxy_wp = Wp::get_xyz().into_yxy();
-        Yxy::with_wp(yxy_wp.x, yxy_wp.y, T::zero())
+        Yxy {
+            luma: T::zero(),
+            ..Wp::get_xyz().into_yxy()
+        }
     }
 }
 
 impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -249,7 +251,7 @@ impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
 
 impl<Wp, T> Add<T> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -265,7 +267,7 @@ impl<Wp, T> Add<T> for Yxy<Wp, T>
 
 impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -281,7 +283,7 @@ impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
 
 impl<Wp, T> Sub<T> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -297,7 +299,7 @@ impl<Wp, T> Sub<T> for Yxy<Wp, T>
 
 impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -313,7 +315,7 @@ impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
 
 impl<Wp, T> Mul<T> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -329,7 +331,7 @@ impl<Wp, T> Mul<T> for Yxy<Wp, T>
 
 impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 
@@ -345,7 +347,7 @@ impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
 
 impl<Wp, T> Div<T> for Yxy<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Yxy<Wp, T>;
 

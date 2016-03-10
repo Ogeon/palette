@@ -237,7 +237,7 @@ pub mod blend;
 pub mod named;
 
 mod alpha;
-mod rgb;
+pub mod rgb;
 mod luma;
 mod yxy;
 mod xyz;
@@ -254,7 +254,6 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
-mod rgb_primaries;
 
 use white_point::{WhitePoint, D65};
 
@@ -288,19 +287,19 @@ macro_rules! make_color {
         #[derive(Debug)]
         pub enum Color<Wp = D65, T = f32>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             $(#[$variant_comment] $variant($variant<Wp, T>)),+
         }
 
         impl<Wp, T> Copy for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {}
 
         impl<Wp, T> Clone for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn clone(&self) -> Color<Wp, T> { *self }
         }
@@ -330,7 +329,7 @@ macro_rules! make_color {
 
         impl<Wp, T> Mix for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Scalar = T;
 
@@ -341,7 +340,7 @@ macro_rules! make_color {
 
         impl<Wp, T> Shade for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Scalar = T;
 
@@ -352,7 +351,7 @@ macro_rules! make_color {
 
         impl<Wp, T> GetHue for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Hue = LabHue<T>;
 
@@ -363,7 +362,7 @@ macro_rules! make_color {
 
         impl<Wp, T> Hue for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             fn with_hue(&self, hue: LabHue<T>) -> Color<Wp, T> {
                 Lch::from(*self).with_hue(hue).into()
@@ -376,7 +375,7 @@ macro_rules! make_color {
 
         impl<Wp, T> Saturate for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Scalar = T;
 
@@ -387,7 +386,7 @@ macro_rules! make_color {
 
         impl<Wp, T> Blend for Color<Wp, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Color = Rgb<Wp, T>;
 
@@ -403,7 +402,7 @@ macro_rules! make_color {
         impl<Wp, T> ApproxEq for Color<Wp, T>
             where T: Float + ApproxEq,
                 T::Epsilon: Copy + Float,
-                Wp: WhitePoint<T>
+                Wp: WhitePoint
         {
             type Epsilon = T::Epsilon;
 
@@ -437,7 +436,7 @@ macro_rules! make_color {
         $(
             impl<Wp, T> From<$variant<Wp, T>> for Color<Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(color: $variant<Wp, T>) -> Color<Wp, T> {
                     Color::$variant(color)
@@ -446,7 +445,7 @@ macro_rules! make_color {
 
             impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Color<Wp, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(color: Alpha<$variant<Wp, T>,T>) -> Color<Wp, T> {
                     Color::$variant(color.color)
@@ -455,7 +454,7 @@ macro_rules! make_color {
 
             impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Alpha<Color<Wp, T>,T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    Wp: WhitePoint
             {
                 fn from(color: Alpha<$variant<Wp, T>,T>) -> Alpha<Color<Wp, T>,T> {
                     Alpha {
@@ -468,7 +467,7 @@ macro_rules! make_color {
             $($(
                 impl<Wp, T> From<$representations<Wp, T>> for Color<Wp, T>
                     where T: Float,
-                        Wp: WhitePoint<T>
+                        Wp: WhitePoint
                 {
                     fn from(color: $representations<Wp, T>) -> Color<Wp, T> {
                         Color::$variant(color.into())

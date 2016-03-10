@@ -22,7 +22,7 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Lch<Wp = D65, T: Float = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///L* is the lightness of the color. 0.0 gives absolute black and 100.0
     ///gives the brightest white.
@@ -45,12 +45,12 @@ pub struct Lch<Wp = D65, T: Float = f32>
 
 impl<Wp, T> Copy for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Lch<Wp, T> { *self }
 }
@@ -71,7 +71,7 @@ impl<T> Lch<D65, T>
 
 impl<Wp, T> Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE L*C*h°.
     pub fn with_wp(l: T, chroma: T, hue: LabHue<T>) -> Lch<Wp, T> {
@@ -100,7 +100,7 @@ impl<T> Alpha<Lch<D65, T>, T>
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
 impl<Wp, T> Alpha<Lch<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE L*C*h° and transparency.
     pub fn with_wp(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<Wp, T> {
@@ -113,7 +113,7 @@ impl<Wp, T> Alpha<Lch<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let lab: Lab<Wp, T> = xyz.into_lab();
@@ -137,7 +137,7 @@ impl<Wp, T> FromColor<Wp, T> for Lch<Wp, T>
 
 impl<Wp, T> Limited for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= flt(100.0) &&
@@ -158,7 +158,7 @@ impl<Wp, T> Limited for Lch<Wp, T>
 
 impl<Wp, T> Mix for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -176,7 +176,7 @@ impl<Wp, T> Mix for Lch<Wp, T>
 
 impl<Wp, T> Shade for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -192,7 +192,7 @@ impl<Wp, T> Shade for Lch<Wp, T>
 
 impl<Wp, T> GetHue for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Hue = LabHue<T>;
 
@@ -207,7 +207,7 @@ impl<Wp, T> GetHue for Lch<Wp, T>
 
 impl<Wp, T> Hue for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn with_hue(&self, hue: LabHue<T>) -> Lch<Wp, T> {
         Lch {
@@ -230,7 +230,7 @@ impl<Wp, T> Hue for Lch<Wp, T>
 
 impl<Wp, T> Saturate for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -246,7 +246,7 @@ impl<Wp, T> Saturate for Lch<Wp, T>
 
 impl<Wp, T> Default for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Lch<Wp, T> {
         Lch::with_wp(T::zero(), T::zero(), LabHue::from(T::zero()))
@@ -255,7 +255,7 @@ impl<Wp, T> Default for Lch<Wp, T>
 
 impl<Wp, T> Add<Lch<Wp, T>> for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lch<Wp, T>;
 
@@ -271,7 +271,7 @@ impl<Wp, T> Add<Lch<Wp, T>> for Lch<Wp, T>
 
 impl<Wp, T> Add<T> for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lch<Wp, T>;
 
@@ -287,7 +287,7 @@ impl<Wp, T> Add<T> for Lch<Wp, T>
 
 impl<Wp, T> Sub<Lch<Wp, T>> for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lch<Wp, T>;
 
@@ -303,7 +303,7 @@ impl<Wp, T> Sub<Lch<Wp, T>> for Lch<Wp, T>
 
 impl<Wp, T> Sub<T> for Lch<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Lch<Wp, T>;
 

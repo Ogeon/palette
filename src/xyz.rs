@@ -6,8 +6,7 @@ use std::marker::PhantomData;
 use {Alpha, Yxy, Rgb, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
-use ::rgb_primaries::rgb_to_xyz_matrix;
-use matrix::multiply_rgb_to_xyz;
+use matrix::{rgb_to_xyz_matrix, multiply_rgb_to_xyz};
 use {clamp, flt};
 
 ///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
@@ -24,7 +23,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 #[derive(Debug, PartialEq)]
 pub struct Xyz<Wp = D65, T = f32>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. Its range depends
@@ -45,12 +44,12 @@ pub struct Xyz<Wp = D65, T = f32>
 
 impl<Wp, T> Copy for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {}
 
 impl<Wp, T> Clone for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn clone(&self) -> Xyz<Wp, T> { *self }
 }
@@ -71,7 +70,7 @@ impl<T> Xyz<D65, T>
 
 impl<Wp, T> Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE XYZ.
     pub fn with_wp(x: T, y: T, z: T) -> Xyz<Wp, T> {
@@ -100,7 +99,7 @@ impl<T> Alpha<Xyz<D65, T>, T>
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
 impl<Wp, T> Alpha<Xyz<Wp, T>, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     ///CIE XYZ and transparency.
     pub fn with_wp(x: T, y: T, z: T, alpha: T) -> Xyza<Wp, T> {
@@ -113,15 +112,15 @@ impl<Wp, T> Alpha<Xyz<Wp, T>, T>
 
 impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         xyz
     }
 
     fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<Wp, T>();
-        multiply_rgb_to_xyz::<Wp, Wp, T>(&transform_matrix, &rgb)
+        let transform_matrix = rgb_to_xyz_matrix::<::rgb::standards::Srgb, Wp, T>();
+        multiply_rgb_to_xyz(&transform_matrix, &rgb)
     }
 
     fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
@@ -151,32 +150,21 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
                 (c - delta) * kappa
             }
         }
-        let xyz_ref = Wp::get_xyz();
-        Xyz {
-            x: convert(x) * xyz_ref.x,
-            y: convert(y) * xyz_ref.y,
-            z: convert(z) * xyz_ref.z,
-            white_point: PhantomData,
-        }
-    }
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
-        let xyz_ref = Wp::get_xyz();
-        Xyz {
-            x: luma.luma * xyz_ref.x,
-            y: luma.luma,
-            z: luma.luma * xyz_ref.z,
-            white_point: PhantomData,
-        }
+
+        Xyz::with_wp(convert(x), convert(y), convert(z)) * Wp::get_xyz()
     }
 
+    fn from_luma(luma: Luma<Wp, T>) -> Self {
+        Wp::get_xyz() * luma.luma
+    }
 }
 
 impl<Wp, T> Limited for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn is_valid(&self) -> bool {
-        let xyz_ref = Wp::get_xyz();
+        let xyz_ref: Self = Wp::get_xyz();
         self.x >= T::zero() && self.x <= xyz_ref.x &&
         self.y >= T::zero() && self.y <= xyz_ref.y &&
         self.z >= T::zero() && self.z <= xyz_ref.z
@@ -189,7 +177,7 @@ impl<Wp, T> Limited for Xyz<Wp, T>
     }
 
     fn clamp_self(&mut self) {
-        let xyz_ref = Wp::get_xyz();
+        let xyz_ref: Self = Wp::get_xyz();
         self.x = clamp(self.x, T::zero(), xyz_ref.x);
         self.y = clamp(self.y, T::zero(), xyz_ref.y);
         self.z = clamp(self.z, T::zero(), xyz_ref.z);
@@ -198,7 +186,7 @@ impl<Wp, T> Limited for Xyz<Wp, T>
 
 impl<Wp, T> Mix for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -216,7 +204,7 @@ impl<Wp, T> Mix for Xyz<Wp, T>
 
 impl<Wp, T> Shade for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -232,7 +220,7 @@ impl<Wp, T> Shade for Xyz<Wp, T>
 
 impl<Wp, T> ComponentWise for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Scalar = T;
 
@@ -257,7 +245,7 @@ impl<Wp, T> ComponentWise for Xyz<Wp, T>
 
 impl<Wp, T> Default for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     fn default() -> Xyz<Wp, T> {
         Xyz::with_wp(T::zero(), T::zero(), T::zero())
@@ -266,7 +254,7 @@ impl<Wp, T> Default for Xyz<Wp, T>
 
 impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -282,7 +270,7 @@ impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
 
 impl<Wp, T> Add<T> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -298,7 +286,7 @@ impl<Wp, T> Add<T> for Xyz<Wp, T>
 
 impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -314,7 +302,7 @@ impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
 
 impl<Wp, T> Sub<T> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -330,7 +318,7 @@ impl<Wp, T> Sub<T> for Xyz<Wp, T>
 
 impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -346,7 +334,7 @@ impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
 
 impl<Wp, T> Mul<T> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -362,7 +350,7 @@ impl<Wp, T> Mul<T> for Xyz<Wp, T>
 
 impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
@@ -378,7 +366,7 @@ impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
 
 impl<Wp, T> Div<T> for Xyz<Wp, T>
     where T: Float,
-        Wp: WhitePoint<T>
+        Wp: WhitePoint
 {
     type Output = Xyz<Wp, T>;
 
