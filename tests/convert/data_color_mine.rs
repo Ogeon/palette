@@ -6,9 +6,6 @@ use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
 use palette::white_point::D65;
 
-pub const COLOR_MINE_FILE_FULL: &'static str = "tests/convert/data_color_mine.csv";
-pub const COLOR_MINE_FILE_MINI: &'static str = "tests/convert/data_color_mine_mini.csv";
-
 #[derive(RustcDecodable, PartialEq)]
 pub struct ColorMineRaw {
     pub color: String,
@@ -60,10 +57,8 @@ pub struct ColorMineRaw {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorMine {
-    lab: Lab<D65, f32>,
     xyz: Xyz<D65, f32>,
     yxy: Yxy<D65, f32>,
-    lch: Lch<D65, f32>,
     rgb: Rgb<D65, f32>,
     linear_rgb: Rgb<D65, f32>,
     hsl: Hsl<D65, f32>,
@@ -76,8 +71,6 @@ impl From<ColorMineRaw> for ColorMine {
         ColorMine {
             xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
-            lab: Lab::new(src.lab_l, src.lab_a, src.lab_b),
-            lch: Lch::new(src.lch_l, src.lch_c, src.lch_h.into()),
             rgb: Rgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into(),
             hsl: Hsl::new(src.hsl_h.into(), src.hsl_s, src.hsl_l),
@@ -92,10 +85,8 @@ macro_rules! impl_from_color {
         impl From<$self_ty<D65, f32>> for ColorMine {
             fn from(color: $self_ty<D65, f32>) -> ColorMine {
                 ColorMine {
-                    lab: color.into_lab(),
                     xyz: color.into_xyz(),
                     yxy: color.into_yxy(),
-                    lch: color.into_lch(),
                     linear_rgb: color.into_rgb(),
                     rgb: color.into_rgb(),
                     hsl: color.into_hsl(),
@@ -117,8 +108,16 @@ impl_from_color!(Hsl);
 impl_from_color!(Hsv);
 impl_from_color!(Hwb);
 
-pub fn load_data(file_name: &str) -> Vec<ColorMine> {
-    let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for color mine data");
+
+
+lazy_static! {
+    static ref TEST_DATA: Vec<ColorMine> = load_data();
+}
+
+
+pub fn load_data() -> Vec<ColorMine> {
+    let mut rdr = csv::Reader::from_file("tests/convert/data_color_mine.csv")
+        .expect("csv file could not be loaded in tests for color mine data");
     let mut color_data: Vec<ColorMine> = Vec::new();
     for record in rdr.decode() {
         let r: ColorMineRaw = record.expect("color data could not be decoded in tests for color mine data");
@@ -131,10 +130,6 @@ fn check_equal_cie(src: &ColorMine, tgt: &ColorMine) {
 
     assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.05);
     assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.05);
-    assert_relative_eq!(src.lab, tgt.lab, epsilon = 0.05);
-
-    assert_relative_eq!(src.lch.l, tgt.lch.l, epsilon = 0.05);
-    assert_relative_eq!(src.lch.chroma, tgt.lch.chroma, epsilon = 0.05);
 
     // hue values are not passing for from_yxy conversion. Check github #48 for more information
     // assert_relative_eq!(src.lch.hue, tgt.lch.hue, epsilon = 0.05);
@@ -147,103 +142,45 @@ fn check_equal_rgb(src: &ColorMine, tgt: &ColorMine) {
     assert_relative_eq!(src.hwb, tgt.hwb, epsilon = 0.05);
 }
 
-pub fn run_from_xyz_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_xyz(expected);
+pub fn run_from_xyz_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.xyz);
+        check_equal_cie(&result, expected);
     }
 }
-pub fn run_from_yxy_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_yxy(expected);
+pub fn run_from_yxy_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.yxy);
+        check_equal_cie(&result, expected);
     }
 }
-pub fn run_from_lab_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_lab(expected);
+pub fn run_from_rgb_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.rgb);
+        check_equal_rgb(&result, expected);
     }
 }
-pub fn run_from_lch_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_lch(expected);
+pub fn run_from_linear_rgb_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.linear_rgb);
+        check_equal_cie(&result, expected);
     }
 }
-pub fn run_from_rgb_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_rgb(expected);
+pub fn run_from_hsl_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.hsl);
+        check_equal_rgb(&result, expected);
     }
 }
-pub fn run_from_linear_rgb_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_linear_rgb(expected);
+pub fn run_from_hsv_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.hsv);
+        check_equal_rgb(&result, expected);
     }
 }
-pub fn run_from_hsl_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_hsl(expected);
+pub fn run_from_hwb_tests() {
+    for expected in TEST_DATA.iter() {
+        let result = ColorMine::from(expected.hwb);
+        check_equal_rgb(&result, expected);
     }
-}
-pub fn run_from_hsv_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_hsv(expected);
-    }
-}
-pub fn run_from_hwb_tests(file_name: &str) {
-    let data = load_data(file_name);
-    for expected in data.iter() {
-        test_from_hwb(expected);
-    }
-}
-
-
-fn test_from_xyz(expected: &ColorMine) {
-    let result = ColorMine::from(expected.xyz);
-    check_equal_cie(&result, expected);
-}
-
-fn test_from_yxy(expected: &ColorMine) {
-    let result = ColorMine::from(expected.yxy);
-    check_equal_cie(&result, expected);
-}
-
-fn test_from_lab(expected: &ColorMine) {
-    let result = ColorMine::from(expected.lab);
-    check_equal_cie(&result, expected);
-}
-
-fn test_from_lch(expected: &ColorMine) {
-    let result = ColorMine::from(expected.lch);
-    check_equal_cie(&result, expected);
-}
-
-fn test_from_linear_rgb(expected: &ColorMine) {
-    let result = ColorMine::from(expected.linear_rgb);
-    check_equal_cie(&result, expected);
-}
-
-fn test_from_rgb(expected: &ColorMine) {
-    let result = ColorMine::from(expected.rgb);
-    check_equal_rgb(&result, expected);
-}
-
-fn test_from_hsl(expected: &ColorMine) {
-    let result = ColorMine::from(expected.hsl);
-    check_equal_rgb(&result, expected);
-}
-
-fn test_from_hsv(expected: &ColorMine) {
-    let result = ColorMine::from(expected.hsv);
-    check_equal_rgb(&result, expected);
-}
-
-fn test_from_hwb(expected: &ColorMine) {
-    let result = ColorMine::from(expected.hwb);
-    check_equal_rgb(&result, expected);
 }
