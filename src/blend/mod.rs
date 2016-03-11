@@ -7,10 +7,10 @@
 //!color type:
 //!
 //!```
-//!use palette::{Rgba, Blend};
+//!use palette::{LinRgba, Blend};
 //!
-//!let a = Rgba::new(0.2, 0.5, 0.1, 0.8);
-//!let b = Rgba::new(0.6, 0.3, 0.5, 0.1);
+//!let a = LinRgba::new(0.2, 0.5, 0.1, 0.8);
+//!let b = LinRgba::new(0.6, 0.3, 0.5, 0.1);
 //!let c = a.overlay(b);
 //!```
 //!
@@ -19,7 +19,7 @@
 //!`blend` function, from the `Blend` trait:
 //!
 //!```
-//!use palette::{Rgba, Blend};
+//!use palette::{LinRgba, Blend};
 //!use palette::blend::{Equations, Parameter};
 //!
 //!let blend_mode = Equations::from_parameters(
@@ -27,8 +27,8 @@
 //!    Parameter::OneMinusSourceAlpha
 //!);
 //!
-//!let a = Rgba::new(0.2, 0.5, 0.1, 0.8);
-//!let b = Rgba::new(0.6, 0.3, 0.5, 0.1);
+//!let a = LinRgba::new(0.2, 0.5, 0.1, 0.8);
+//!let b = LinRgba::new(0.6, 0.3, 0.5, 0.1);
 //!let c = a.blend(b, blend_mode);
 //!```
 //!

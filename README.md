@@ -61,11 +61,11 @@ This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue b
 
 ```Rust
 extern crate palette;
-use palette::{Rgb, Lch, Hue};
+use palette::{LinRgb, Lch, Hue};
 use palette::pixel::Srgb;
 
-let lch_color: Lch = Rgb::from(Srgb::new(0.8, 0.2, 0.1)).into();
-let new_color: Rgb = lch_color.shift_hue(180.0.into()).into();
+let lch_color: Lch = LinRgb::from(Srgb::new(0.8, 0.2, 0.1)).into();
+let new_color: LinRgb = lch_color.shift_hue(180.0.into()).into();
 ```
 
 This results in the following two colors:
@@ -114,16 +114,16 @@ one is in RGB and the other in is HSV space.
 
 ```Rust
 extern crate palette;
-use palette::{Rgb, Hsv, Gradient};
+use palette::{LinRgb, Hsv, Gradient};
 
 let grad1 = Gradient::new(vec![
-    Rgb::new(1.0, 0.1, 0.1),
-    Rgb::new(0.1, 1.0, 1.0)
+    LinRgb::new(1.0, 0.1, 0.1),
+    LinRgb::new(0.1, 1.0, 1.0)
 ]);
 
 let grad2 = Gradient::new(vec![
-    Hsv::from(Rgb::new(1.0, 0.1, 0.1)),
-    Hsv::from(Rgb::new(0.1, 1.0, 1.0))
+    Hsv::from(LinRgb::new(1.0, 0.1, 0.1)),
+    Hsv::from(LinRgb::new(0.1, 1.0, 1.0))
 ]);
 ```
 

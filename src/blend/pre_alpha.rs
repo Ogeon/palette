@@ -13,14 +13,14 @@ use {Alpha, ComponentWise, Mix, Blend, clamp};
 ///computations in composition chains.
 ///
 ///```
-///use palette::{Blend, Rgb, Rgba};
+///use palette::{Blend, LinRgb, LinRgba};
 ///use palette::blend::PreAlpha;
 ///
-///let a = PreAlpha::from(Rgba::new(0.4, 0.5, 0.5, 0.3));
-///let b = PreAlpha::from(Rgba::new(0.3, 0.8, 0.4, 0.4));
-///let c = PreAlpha::from(Rgba::new(0.7, 0.1, 0.8, 0.8));
+///let a = PreAlpha::from(LinRgba::new(0.4, 0.5, 0.5, 0.3));
+///let b = PreAlpha::from(LinRgba::new(0.3, 0.8, 0.4, 0.4));
+///let c = PreAlpha::from(LinRgba::new(0.7, 0.1, 0.8, 0.8));
 ///
-///let res = Rgb::from_premultiplied(a.screen(b).overlay(c));
+///let res = LinRgb::from_premultiplied(a.screen(b).overlay(c));
 ///```
 ///
 ///Note that converting to and from premultiplied alpha will cause the alpha

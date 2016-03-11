@@ -402,26 +402,26 @@ impl<Wp, T> From<Alpha<Lab<Wp, T>, T>> for Lab<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use Rgb;
+    use LinRgb;
     use white_point::D65;
 
     #[test]
     fn red() {
-        let a = Lab::from(Rgb::new(1.0, 0.0, 0.0));
+        let a = Lab::from(LinRgb::new(1.0, 0.0, 0.0));
         let b = Lab::new(53.23288, 80.09246, 67.2031);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(Rgb::new(0.0, 1.0, 0.0));
+        let a = Lab::from(LinRgb::new(0.0, 1.0, 0.0));
         let b = Lab::new(87.73704, -86.184654, 83.18117);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(Rgb::new(0.0, 0.0, 1.0));
+        let a = Lab::from(LinRgb::new(0.0, 0.0, 1.0));
         let b = Lab::new(32.302586, 79.19668, -107.863686);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }

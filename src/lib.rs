@@ -27,10 +27,10 @@
 //!selectively affect the alpha component:
 //!
 //!```
-//!use palette::{Rgb, Rgba};
+//!use palette::{LinRgb, LinRgba};
 //!
-//!let mut c1 = Rgba::new(1.0, 0.5, 0.5, 0.8);
-//!let c2 = Rgb::new(0.5, 1.0, 1.0);
+//!let mut c1 = LinRgba::new(1.0, 0.5, 0.5, 0.8);
+//!let c2 = LinRgb::new(0.5, 1.0, 1.0);
 //!
 //!c1.color = c1.color * c2; //Leave the alpha as it is
 //!c1.blue += 0.2; //The color components can easily be accessed
@@ -63,7 +63,7 @@ pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
-pub use rgb::{Rgb, Rgba};
+pub use rgb::{LinRgb, LinRgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
@@ -289,7 +289,7 @@ macro_rules! make_color {
                 S: RgbSpace,
         {
             ///Linear RGB.
-            Rgb(Rgb<S, T>),
+            Rgb(LinRgb<S, T>),
             $(#[$variant_comment] $variant($variant<S::WhitePoint, T>)),+
         }
 
@@ -307,13 +307,13 @@ macro_rules! make_color {
 
         impl<T: Float> Color<rgb::standards::Srgb, T> {
             ///Linear RGB.
-            pub fn rgb(red: T, green: T, blue: T) -> Color<rgb::standards::Srgb, T> {
-                Color::Rgb(Rgb::new(red, green, blue))
+            pub fn linear_rgb(red: T, green: T, blue: T) -> Color<rgb::standards::Srgb, T> {
+                Color::Rgb(LinRgb::new(red, green, blue))
             }
 
             ///Linear RGB from 8 bit values.
-            pub fn rgb_u8(red: u8, green: u8, blue: u8) -> Color<rgb::standards::Srgb, T> {
-                Color::Rgb(Rgb::new_u8(red, green, blue))
+            pub fn linear_rgb_u8(red: u8, green: u8, blue: u8) -> Color<rgb::standards::Srgb, T> {
+                Color::Rgb(LinRgb::new_u8(red, green, blue))
             }
 
             $(
@@ -329,13 +329,13 @@ macro_rules! make_color {
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
         impl<T: Float> Alpha<Color<rgb::standards::Srgb, T>, T> {
             ///Linear RGB.
-            pub fn rgb(red: T, green: T, blue: T, alpha: T) -> Colora<rgb::standards::Srgb, T> {
-                Rgba::new(red, green, blue, alpha).into()
+            pub fn linear_rgb(red: T, green: T, blue: T, alpha: T) -> Colora<rgb::standards::Srgb, T> {
+                LinRgba::new(red, green, blue, alpha).into()
             }
 
             ///Linear RGB from 8 bit values.
-            pub fn rgb_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Colora<rgb::standards::Srgb, T> {
-                Rgba::new_u8(red, green, blue, alpha).into()
+            pub fn linear_rgb_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Colora<rgb::standards::Srgb, T> {
+                LinRgba::new_u8(red, green, blue, alpha).into()
             }
 
             $(
@@ -355,7 +355,7 @@ macro_rules! make_color {
             type Scalar = T;
 
             fn mix(&self, other: &Color<S, T>, factor: T) -> Color<S, T> {
-                Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
+                LinRgb::from(*self).mix(&LinRgb::from(*other), factor).into()
             }
         }
 
@@ -409,14 +409,14 @@ macro_rules! make_color {
             where T: Float,
                 S: RgbSpace,
         {
-            type Color = Rgb<S, T>;
+            type Color = LinRgb<S, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<S, T>, T> {
-                Rgba::from(self).into()
+            fn into_premultiplied(self) -> PreAlpha<LinRgb<S, T>, T> {
+                LinRgba::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<S, T>, T>) -> Self {
-                Rgba::from(color).into()
+            fn from_premultiplied(color: PreAlpha<LinRgb<S, T>, T>) -> Self {
+                LinRgba::from(color).into()
             }
         }
 
@@ -486,29 +486,29 @@ macro_rules! make_color {
             }
         )+
 
-        impl<S, T> From<Rgb<S, T>> for Color<S, T>
+        impl<S, T> From<LinRgb<S, T>> for Color<S, T>
             where T: Float,
                 S: RgbSpace,
         {
-            fn from(color: Rgb<S, T>) -> Color<S, T> {
+            fn from(color: LinRgb<S, T>) -> Color<S, T> {
                 Color::Rgb(color)
             }
         }
 
-        impl<S, T> From<Alpha<Rgb<S, T>, T>> for Color<S, T>
+        impl<S, T> From<Alpha<LinRgb<S, T>, T>> for Color<S, T>
             where T: Float,
                 S: RgbSpace,
         {
-            fn from(color: Alpha<Rgb<S, T>,T>) -> Color<S, T> {
+            fn from(color: Alpha<LinRgb<S, T>,T>) -> Color<S, T> {
                 Color::Rgb(color.color)
             }
         }
 
-        impl<S, T> From<Alpha<Rgb<S, T>, T>> for Alpha<Color<S, T>,T>
+        impl<S, T> From<Alpha<LinRgb<S, T>, T>> for Alpha<Color<S, T>,T>
             where T: Float,
                 S: RgbSpace,
         {
-            fn from(color: Alpha<Rgb<S, T>,T>) -> Alpha<Color<S, T>,T> {
+            fn from(color: Alpha<LinRgb<S, T>,T>) -> Alpha<Color<S, T>,T> {
                 Alpha {
                     color: Color::Rgb(color.color),
                     alpha: color.alpha,
@@ -619,13 +619,13 @@ pub trait Limited {
 ///A trait for linear color interpolation.
 ///
 ///```
-///use palette::{Rgb, Mix};
+///use palette::{LinRgb, Mix};
 ///
-///let a = Rgb::new(0.0, 0.5, 1.0);
-///let b = Rgb::new(1.0, 0.5, 0.0);
+///let a = LinRgb::new(0.0, 0.5, 1.0);
+///let b = LinRgb::new(1.0, 0.5, 0.0);
 ///
 ///assert_eq!(a.mix(&b, 0.0), a);
-///assert_eq!(a.mix(&b, 0.5), Rgb::new(0.5, 0.5, 0.5));
+///assert_eq!(a.mix(&b, 0.5), LinRgb::new(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
 pub trait Mix {
@@ -643,10 +643,10 @@ pub trait Mix {
 ///The `Shade` trait allows a color to be lightened or darkened.
 ///
 ///```
-///use palette::{Rgb, Shade};
+///use palette::{LinRgb, Shade};
 ///
-///let a = Rgb::new(0.4, 0.4, 0.4);
-///let b = Rgb::new(0.6, 0.6, 0.6);
+///let a = LinRgb::new(0.4, 0.4, 0.4);
+///let b = LinRgb::new(0.6, 0.6, 0.6);
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
@@ -666,12 +666,12 @@ pub trait Shade: Sized {
 ///A trait for colors where a hue may be calculated.
 ///
 ///```
-///use palette::{Rgb, GetHue};
+///use palette::{LinRgb, GetHue};
 ///
-///let red = Rgb::new(1.0f32, 0.0, 0.0);
-///let green = Rgb::new(0.0f32, 1.0, 0.0);
-///let blue = Rgb::new(0.0f32, 0.0, 1.0);
-///let gray = Rgb::new(0.5f32, 0.5, 0.5);
+///let red = LinRgb::new(1.0f32, 0.0, 0.0);
+///let green = LinRgb::new(0.0f32, 1.0, 0.0);
+///let blue = LinRgb::new(0.0f32, 0.0, 1.0);
+///let gray = LinRgb::new(0.5f32, 0.5, 0.5);
 ///
 ///assert_eq!(red.get_hue(), Some(0.0.into()));
 ///assert_eq!(green.get_hue(), Some(120.0.into()));

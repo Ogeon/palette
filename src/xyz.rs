@@ -3,7 +3,7 @@ use num_traits::Float;
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
 
-use {Alpha, Yxy, Rgb, Luma, Lab};
+use {Alpha, Yxy, LinRgb, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
 use rgb::RgbSpace;
@@ -119,7 +119,7 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
         xyz
     }
 
-    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<S, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<S, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S, T>();
         multiply_rgb_to_xyz(&transform_matrix, &rgb)
     }
@@ -393,7 +393,7 @@ impl<Wp, T> From<Alpha<Xyz<Wp, T>, T>> for Xyz<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use Rgb;
+    use LinRgb;
     use Luma;
     use white_point::D65;
     const X_N: f64 = 0.95047;
@@ -409,21 +409,21 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Xyz::from(Rgb::new(1.0, 0.0, 0.0));
+        let a = Xyz::from(LinRgb::new(1.0, 0.0, 0.0));
         let b = Xyz::new(0.41240, 0.21260, 0.01930);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn green() {
-        let a = Xyz::from(Rgb::new(0.0, 1.0, 0.0));
+        let a = Xyz::from(LinRgb::new(0.0, 1.0, 0.0));
         let b = Xyz::new(0.35760, 0.71520, 0.11920);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn blue() {
-        let a = Xyz::from(Rgb::new(0.0, 0.0, 1.0));
+        let a = Xyz::from(LinRgb::new(0.0, 0.0, 1.0));
         let b = Xyz::new(0.18050, 0.07220, 0.95030);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }

@@ -373,7 +373,7 @@ impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Yxy;
-    use Rgb;
+    use LinRgb;
     use Luma;
     use white_point::D65;
 
@@ -386,21 +386,21 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Yxy::from(Rgb::new(1.0, 0.0, 0.0));
+        let a = Yxy::from(LinRgb::new(1.0, 0.0, 0.0));
         let b = Yxy::new(0.64, 0.33, 0.212673);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
-        let a = Yxy::from(Rgb::new(0.0, 1.0, 0.0));
+        let a = Yxy::from(LinRgb::new(0.0, 1.0, 0.0));
         let b = Yxy::new(0.3, 0.6, 0.715152);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn blue() {
-        let a = Yxy::from(Rgb::new(0.0, 0.0, 1.0));
+        let a = Yxy::from(LinRgb::new(0.0, 0.0, 1.0));
         let b = Yxy::new(0.15, 0.06, 0.072175);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }

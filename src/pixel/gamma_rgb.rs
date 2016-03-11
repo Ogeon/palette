@@ -2,7 +2,7 @@ use num_traits::Float;
 
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Rgba, clamp, flt};
+use {Alpha, LinRgb, LinRgba, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};
@@ -22,10 +22,10 @@ use rgb::RgbSpace;
 ///sRGB.
 ///
 ///```
-///use palette::Rgb;
+///use palette::LinRgb;
 ///use palette::pixel::GammaRgb;
 ///
-///let c: Rgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
+///let c: LinRgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
 ///assert_eq!((128, 64, 32), GammaRgb::linear_to_pixel(c, 2.2));
 ///```
 #[derive(Debug, PartialEq)]
@@ -162,7 +162,7 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Convert linear color components to gamma encoding.
-    pub fn from_linear<C: Into<Rgba<S, T>>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> GammaRgb<Wp, T> {
+    pub fn from_linear<C: Into<LinRgba<S, T>>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> GammaRgb<Wp, T> {
         let rgb = color.into();
         GammaRgb {
             red: to_gamma(rgb.red, gamma),
@@ -175,9 +175,9 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear<S: RgbSpace<WhitePoint=Wp>>(&self) -> Rgba<S, T> {
+    pub fn to_linear<S: RgbSpace<WhitePoint=Wp>>(&self) -> LinRgba<S, T> {
         Alpha {
-            color: Rgb::with_wp (
+            color: LinRgb::with_wp (
                 from_gamma(self.red, self.gamma),
                 from_gamma(self.green, self.gamma),
                 from_gamma(self.blue, self.gamma),
@@ -187,7 +187,7 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Shortcut to convert a linear color to a gamma encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgba<S, T>>, P: RgbPixel<T>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> P {
+    pub fn linear_to_pixel<C: Into<LinRgba<S, T>>, P: RgbPixel<T>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> P {
         GammaRgb::from_linear(color, gamma).to_pixel()
     }
 }

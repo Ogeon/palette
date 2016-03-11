@@ -2,7 +2,7 @@
 List of color from www.colormine.org
 */
 use csv;
-use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
+use palette::{Lch, Lab, Xyz, Yxy, LinRgb, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
 use palette::white_point::D65;
 
@@ -59,8 +59,8 @@ pub struct ColorMineRaw {
 pub struct ColorMine {
     xyz: Xyz<D65, f32>,
     yxy: Yxy<D65, f32>,
-    rgb: Rgb<::palette::rgb::standards::Srgb, f32>,
-    linear_rgb: Rgb<::palette::rgb::standards::Srgb, f32>,
+    rgb: LinRgb<::palette::rgb::standards::Srgb, f32>,
+    linear_rgb: LinRgb<::palette::rgb::standards::Srgb, f32>,
     hsl: Hsl<D65, f32>,
     hsv: Hsv<D65, f32>,
     hwb: Hwb<D65, f32>,
@@ -71,7 +71,7 @@ impl From<ColorMineRaw> for ColorMine {
         ColorMine {
             xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
-            rgb: Rgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
+            rgb: LinRgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into(),
             hsl: Hsl::new(src.hsl_h.into(), src.hsl_s, src.hsl_l),
             hsv: Hsv::new(src.hsv_h.into(), src.hsv_s, src.hsv_v),
@@ -99,7 +99,7 @@ macro_rules! impl_from_color {
     }
 }
 
-impl_from_color!(Rgb<::palette::rgb::standards::Srgb, f32>);
+impl_from_color!(LinRgb<::palette::rgb::standards::Srgb, f32>);
 impl_from_color!(Xyz<D65, f32>);
 impl_from_color!(Yxy<D65, f32>);
 impl_from_color!(Lab<D65, f32>);

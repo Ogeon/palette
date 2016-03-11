@@ -2,7 +2,7 @@ use num_traits::Float;
 
 use std::marker::PhantomData;
 
-use {Color, Alpha, Rgb, Rgba, clamp, flt};
+use {Color, Alpha, LinRgb, LinRgba, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};
@@ -17,11 +17,11 @@ use white_point::{WhitePoint, D65};
 ///```
 /// #[macro_use] extern crate approx;
 /// # extern crate palette;
-/// # use palette::Rgb;
+/// # use palette::LinRgb;
 /// # use palette::pixel::Srgb;
 ///
 /// # fn main() {
-/// let c: Rgb = Srgb::new(0.5, 0.3, 0.1).into();
+/// let c: LinRgb = Srgb::new(0.5, 0.3, 0.1).into();
 /// let (r, g, b) = Srgb::from(c).to_pixel();
 /// assert_relative_eq!(0.5f32, r);
 /// assert_relative_eq!(0.3f32, g);
@@ -102,7 +102,7 @@ impl<T> Srgb<D65, T>
     }
 
     ///Convert linear color components to sRGB encoding.
-    pub fn from_linear<C: Into<Rgba<::rgb::standards::Srgb, T>>>(color: C) -> Srgb<D65, T> {
+    pub fn from_linear<C: Into<LinRgba<::rgb::standards::Srgb, T>>>(color: C) -> Srgb<D65, T> {
         let rgb = color.into();
         Srgb {
             red: to_srgb(rgb.red),
@@ -114,9 +114,9 @@ impl<T> Srgb<D65, T>
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgba<::rgb::standards::Srgb, T> {
+    pub fn to_linear(&self) -> LinRgba<::rgb::standards::Srgb, T> {
         Alpha {
-            color: Rgb::<::rgb::standards::Srgb, T>::with_wp(
+            color: LinRgb::<::rgb::standards::Srgb, T>::with_wp(
                 from_srgb(self.red),
                 from_srgb(self.green),
                 from_srgb(self.blue),
@@ -126,7 +126,7 @@ impl<T> Srgb<D65, T>
     }
 
     ///Shortcut to convert a linear color to an sRGB encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgba<::rgb::standards::Srgb, T>>, P: RgbPixel<T>>(color: C) -> P {
+    pub fn linear_to_pixel<C: Into<LinRgba<::rgb::standards::Srgb, T>>, P: RgbPixel<T>>(color: C) -> P {
         Srgb::from_linear(color).to_pixel()
     }
 }
@@ -184,18 +184,18 @@ impl<Wp, T> Srgb<Wp, T>
     }
 }
 
-impl<T> From<Rgb<::rgb::standards::Srgb, T>> for Srgb<D65, T>
+impl<T> From<LinRgb<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
 {
-    fn from(rgb: Rgb<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
-        Rgba::from(rgb).into()
+    fn from(rgb: LinRgb<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
+        LinRgba::from(rgb).into()
     }
 }
 
-impl<T> From<Rgba<::rgb::standards::Srgb, T>> for Srgb<D65, T>
+impl<T> From<LinRgba<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
 {
-    fn from(rgba: Rgba<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
+    fn from(rgba: LinRgba<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
         Srgb::from_linear(rgba)
     }
 }
@@ -204,7 +204,7 @@ impl<T> From<Color<::rgb::standards::Srgb, T>> for Srgb<D65, T>
     where T: Float,
 {
     fn from(color: Color<::rgb::standards::Srgb, T>) -> Srgb<D65, T> {
-        Rgb::from(color).into()
+        LinRgb::from(color).into()
     }
 }
 

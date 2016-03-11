@@ -3,7 +3,7 @@ use num_traits::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use {Alpha, LinRgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::{WhitePoint, D65};
 use rgb::RgbSpace;
 
@@ -13,7 +13,7 @@ pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
 ///Linear HSL color space.
 ///
 ///The HSL color space can be seen as a cylindrical version of
-///[RGB](struct.Rgb.html), where the `hue` is the angle around the color
+///[RGB](rgb/struct.LinRgb.html), where the `hue` is the angle around the color
 ///cylinder, the `saturation` is the distance from the center, and the
 ///`lightness` is the height from the bottom. Its composition makes it
 ///especially good for operations like changing green to red, making a color
@@ -117,11 +117,11 @@ impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
         Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<(::rgb::standards::Srgb, Wp), T> = xyz.into_rgb();
+        let rgb: LinRgb<(::rgb::standards::Srgb, Wp), T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<S, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<S, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
@@ -375,12 +375,12 @@ impl<Wp, T> From<Alpha<Hsl<Wp, T>, T>> for Hsl<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use {Rgb, Hsv};
+    use {LinRgb, Hsv};
     use white_point::D65;
 
     #[test]
     fn red() {
-        let a = Hsl::from(Rgb::new(1.0, 0.0, 0.0));
+        let a = Hsl::from(LinRgb::new(1.0, 0.0, 0.0));
         let b = Hsl::new(0.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(0.0.into(), 1.0, 1.0));
 
@@ -391,7 +391,7 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from(Rgb::new(1.0, 0.5, 0.0));
+        let a = Hsl::from(LinRgb::new(1.0, 0.5, 0.0));
         let b = Hsl::new(30.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(30.0.into(), 1.0, 1.0));
 
@@ -401,7 +401,7 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from(Rgb::new(0.0, 1.0, 0.0));
+        let a = Hsl::from(LinRgb::new(0.0, 1.0, 0.0));
         let b = Hsl::new(120.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(120.0.into(), 1.0, 1.0));
 
@@ -411,7 +411,7 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from(Rgb::new(0.0, 0.0, 1.0));
+        let a = Hsl::from(LinRgb::new(0.0, 0.0, 1.0));
         let b = Hsl::new(240.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(240.0.into(), 1.0, 1.0));
 
@@ -421,7 +421,7 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from(Rgb::new(0.5, 0.0, 1.0));
+        let a = Hsl::from(LinRgb::new(0.5, 0.0, 1.0));
         let b = Hsl::new(270.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(270.0.into(), 1.0, 1.0));
 
