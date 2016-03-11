@@ -5,9 +5,9 @@ use num_traits::Float;
 
 use std::marker::PhantomData;
 
-use {Xyz, LinRgb};
+use Xyz;
 use white_point::WhitePoint;
-use rgb::{Primaries, RgbSpace};
+use rgb::{Primaries, RgbSpace, LinRgb};
 use convert::IntoColor;
 
 ///A 9 element array representing a 3x3 matrix
@@ -113,7 +113,7 @@ fn mat3_from_primaries<T: Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b
 #[cfg(test)]
 mod test {
     use Xyz;
-    use LinRgb;
+    use rgb::LinRgb;
     use rgb::standards::Srgb;
     use chromatic_adaptation::AdaptInto;
     use white_point::D50;

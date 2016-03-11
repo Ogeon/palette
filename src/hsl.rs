@@ -3,9 +3,9 @@ use num_traits::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, LinRgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::{WhitePoint, D65};
-use rgb::RgbSpace;
+use rgb::{LinRgb, RgbSpace};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
@@ -375,12 +375,12 @@ impl<Wp, T> From<Alpha<Hsl<Wp, T>, T>> for Hsl<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use {LinRgb, Hsv};
+    use {LinSrgb, Hsv};
     use white_point::D65;
 
     #[test]
     fn red() {
-        let a = Hsl::from(LinRgb::new(1.0, 0.0, 0.0));
+        let a = Hsl::from(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hsl::new(0.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(0.0.into(), 1.0, 1.0));
 
@@ -391,7 +391,7 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from(LinRgb::new(1.0, 0.5, 0.0));
+        let a = Hsl::from(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hsl::new(30.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(30.0.into(), 1.0, 1.0));
 
@@ -401,7 +401,7 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from(LinRgb::new(0.0, 1.0, 0.0));
+        let a = Hsl::from(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Hsl::new(120.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(120.0.into(), 1.0, 1.0));
 
@@ -411,7 +411,7 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from(LinRgb::new(0.0, 0.0, 1.0));
+        let a = Hsl::from(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Hsl::new(240.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(240.0.into(), 1.0, 1.0));
 
@@ -421,7 +421,7 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from(LinRgb::new(0.5, 0.0, 1.0));
+        let a = Hsl::from(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hsl::new(270.0.into(), 1.0, 0.5);
         let c = Hsl::from(Hsv::new(270.0.into(), 1.0, 1.0));
 

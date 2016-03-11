@@ -2,7 +2,7 @@ use num_traits::Float;
 use approx::ApproxEq;
 
 use {Xyz, Yxy, Lab, Lch, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
-use pixel::{Srgb, GammaRgb};
+use pixel::GammaRgb;
 use white_point::WhitePoint;
 
 
@@ -49,7 +49,6 @@ impl_eq!( Lch, [l, chroma, hue] );
 impl_eq!( Hsl, [hue, saturation, lightness] );
 impl_eq!( Hsv, [hue, saturation, value] );
 impl_eq!( Hwb, [hue, whiteness, blackness] );
-impl_eq!( Srgb, [red, blue, green, alpha] );
 impl_eq!( GammaRgb, [red, blue, green, alpha, gamma] );
 
 // For hues diffence is calculated and compared to zero. However due to the way floating point's

@@ -1,8 +1,8 @@
 use num_traits::Float;
 
-use {Alpha, LinRgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
+use {Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
 use white_point::{WhitePoint, D65};
-use rgb::RgbSpace;
+use rgb::{RgbSpace, LinRgb};
 
 ///FromColor provides conversion between the colors.
 ///

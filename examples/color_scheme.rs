@@ -2,8 +2,7 @@ extern crate palette;
 extern crate image;
 extern crate clap;
 
-use palette::{Color, Hue, Shade};
-use palette::pixel::Srgb;
+use palette::{Color, Hue, Shade, Srgb};
 
 use image::{RgbImage, GenericImage, SubImage};
 

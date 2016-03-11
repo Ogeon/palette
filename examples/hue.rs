@@ -1,8 +1,7 @@
 extern crate palette;
 extern crate image;
 
-use palette::{LinRgb, Hsl, Lch, Hue};
-use palette::pixel::Srgb;
+use palette::{Srgb, Hsl, Lch, Hue};
 
 fn main() {
     let mut image = image::open("res/fruits.png").expect("could not open 'res/fruits.png'").to_rgb();
@@ -11,7 +10,7 @@ fn main() {
     //right part. Notice how LCh manages to preserve the apparent lightness of
     //of the colors, compared to the original.
     for (x, y, pixel) in image.enumerate_pixels_mut() {
-        let color: LinRgb = Srgb::from_pixel(&pixel.data).into();
+        let color = Srgb::from_pixel(&pixel.data).into_linear();
 
         pixel.data = if x < y {
             let saturated = Hsl::from(color).shift_hue(180.0.into());

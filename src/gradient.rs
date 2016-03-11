@@ -346,7 +346,7 @@ impl<'a, C: Mix + Clone> MaybeSlice<'a, C> {
 #[cfg(test)]
 mod test {
     use super::{Range, Gradient};
-    use LinRgb;
+    use LinSrgb;
 
     #[test]
     fn range_clamp() {
@@ -370,7 +370,7 @@ mod test {
 
     #[test]
     fn simple_slice() {
-        let g1 = Gradient::new(vec![LinRgb::new(1.0, 0.0, 0.0), LinRgb::new(0.0, 0.0, 1.0)]);
+        let g1 = Gradient::new(vec![LinSrgb::new(1.0, 0.0, 0.0), LinSrgb::new(0.0, 0.0, 1.0)]);
         let g2 = g1.slice(..0.5);
 
         let v1: Vec<_> = g1.take(10).take(5).collect();

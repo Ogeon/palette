@@ -1,45 +1,44 @@
 extern crate palette;
 extern crate image;
 
-use palette::{Gradient, LinRgb, Lch};
-use palette::pixel::Srgb;
+use palette::{Gradient, LinSrgb, Srgb, Lch};
 
 use image::{RgbImage, GenericImage};
 
 fn main() {
     //A gradient of evenly spaced colors
     let grad1 = Gradient::new(vec![
-        LinRgb::new(1.0, 0.1, 0.1),
-        LinRgb::new(0.1, 0.1, 1.0),
-        LinRgb::new(0.1, 1.0, 0.1)
+        LinSrgb::new(1.0, 0.1, 0.1),
+        LinSrgb::new(0.1, 0.1, 1.0),
+        LinSrgb::new(0.1, 1.0, 0.1)
     ]);
 
     //The same colors as in grad1, but with the blue point shifted down
     let grad2 = Gradient::with_domain(vec![
-        (0.0, LinRgb::new(1.0, 0.1, 0.1)),
-        (0.25, LinRgb::new(0.1, 0.1, 1.0)),
-        (1.0, LinRgb::new(0.1, 1.0, 0.1))
+        (0.0, LinSrgb::new(1.0, 0.1, 0.1)),
+        (0.25, LinSrgb::new(0.1, 0.1, 1.0)),
+        (1.0, LinSrgb::new(0.1, 1.0, 0.1))
     ]);
 
     //The same colors and offsets as in grad1, but in a color space where the hue is a component
     let grad3 = Gradient::new(vec![
-        Lch::from(LinRgb::new(1.0, 0.1, 0.1)),
-        Lch::from(LinRgb::new(0.1, 0.1, 1.0)),
-        Lch::from(LinRgb::new(0.1, 1.0, 0.1))
+        Lch::from(LinSrgb::new(1.0, 0.1, 0.1)),
+        Lch::from(LinSrgb::new(0.1, 0.1, 1.0)),
+        Lch::from(LinSrgb::new(0.1, 1.0, 0.1))
     ]);
 
     //The same colors and and color space as in grad3, but with the blue point shifted down
     let grad4 = Gradient::with_domain(vec![
-        (0.0, Lch::from(LinRgb::new(1.0, 0.1, 0.1))),
-        (0.25, Lch::from(LinRgb::new(0.1, 0.1, 1.0))),
-        (1.0, Lch::from(LinRgb::new(0.1, 1.0, 0.1)))
+        (0.0, Lch::from(LinSrgb::new(1.0, 0.1, 0.1))),
+        (0.25, Lch::from(LinSrgb::new(0.1, 0.1, 1.0))),
+        (1.0, Lch::from(LinSrgb::new(0.1, 1.0, 0.1)))
     ]);
 
     let mut image = RgbImage::new(256, 128);
 
     for (i, ((c1, c2), (c3, c4))) in grad1.take(256).zip(grad2.take(256)).zip(grad3.take(256).zip(grad4.take(256))).enumerate() {
-        let c1 = Srgb::from(c1).to_pixel();
-        let c2 = Srgb::from(c2).to_pixel();
+        let c1 = Srgb::linear_to_pixel(c1);
+        let c2 = Srgb::linear_to_pixel(c2);
         let c3 = Srgb::linear_to_pixel(c3);
         let c4 = Srgb::linear_to_pixel(c4);
 

@@ -3,11 +3,11 @@ use num_traits::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, LinRgb, Xyz, Hsl, Hwb};
+use {Alpha, Xyz, Hsl, Hwb};
 use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
 use {clamp, flt};
 use white_point::{WhitePoint, D65};
-use rgb::RgbSpace;
+use rgb::{RgbSpace, LinRgb};
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
 pub type Hsva<Wp = D65, T = f32> = Alpha<Hsv<Wp, T>, T>;
@@ -392,12 +392,12 @@ impl<Wp, T> From<Alpha<Hsv<Wp, T>, T>> for Hsv<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hsv;
-    use {LinRgb, Hsl};
+    use {LinSrgb, Hsl};
     use white_point::D65;
 
     #[test]
     fn red() {
-        let a = Hsv::from(LinRgb::new(1.0, 0.0, 0.0));
+        let a = Hsv::from(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hsv::new(0.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(0.0.into(), 1.0, 0.5));
 
@@ -407,7 +407,7 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsv::from(LinRgb::new(1.0, 0.5, 0.0));
+        let a = Hsv::from(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hsv::new(30.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(30.0.into(), 1.0, 0.5));
 
@@ -417,7 +417,7 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsv::from(LinRgb::new(0.0, 1.0, 0.0));
+        let a = Hsv::from(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Hsv::new(120.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(120.0.into(), 1.0, 0.5));
 
@@ -427,7 +427,7 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsv::from(LinRgb::new(0.0, 0.0, 1.0));
+        let a = Hsv::from(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Hsv::new(240.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(240.0.into(), 1.0, 0.5));
 
@@ -437,7 +437,7 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsv::from(LinRgb::new(0.5, 0.0, 1.0));
+        let a = Hsv::from(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hsv::new(270.0.into(), 1.0, 1.0);
         let c = Hsv::from(Hsl::new(270.0.into(), 1.0, 0.5));
 

@@ -320,39 +320,39 @@ impl<Wp, T> From<Alpha<Hwb<Wp, T>, T>> for Hwb<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use ::{LinRgb, Limited};
+    use ::{LinSrgb, Limited};
 
     #[test]
     fn red() {
-        let a = Hwb::from(LinRgb::new(1.0, 0.0, 0.0));
+        let a = Hwb::from(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hwb::new(0.0.into(), 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn orange() {
-        let a = Hwb::from(LinRgb::new(1.0, 0.5, 0.0));
+        let a = Hwb::from(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hwb::new(30.0.into(), 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn green() {
-        let a = Hwb::from(LinRgb::new(0.0, 1.0, 0.0));
+        let a = Hwb::from(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Hwb::new(120.0.into(), 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn blue() {
-        let a = Hwb::from(LinRgb::new(0.0, 0.0, 1.0));
+        let a = Hwb::from(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Hwb::new(240.0.into(), 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn purple() {
-        let a = Hwb::from(LinRgb::new(0.5, 0.0, 1.0));
+        let a = Hwb::from(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hwb::new(270.0.into(), 0.0, 0.0);
         assert_relative_eq!(a, b);
     }

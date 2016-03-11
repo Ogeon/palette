@@ -1,14 +1,13 @@
 extern crate palette;
 extern crate image;
 
-use palette::{LinRgb, Lab, Hsv, Shade};
-use palette::pixel::Srgb;
+use palette::{LinSrgb, Srgb, Lab, Hsv, Shade};
 
 use image::{RgbImage, GenericImage};
 
 fn main() {
     //The same color in linear RGB, CIE L*a*b*, and HSV
-    let rgb = LinRgb::new(0.5, 0.0, 0.0);
+    let rgb = LinSrgb::new(0.5, 0.0, 0.0);
     let lab = Lab::from(rgb);
     let hsv = Hsv::from(rgb);
 

@@ -4,10 +4,8 @@ use num_traits::Float;
 
 use {clamp, flt};
 
-pub use self::srgb::Srgb;
 pub use self::gamma_rgb::GammaRgb;
 
-mod srgb;
 mod gamma_rgb;
 
 ///A transfer function to and from linear space.

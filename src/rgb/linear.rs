@@ -1,20 +1,21 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
 
-use {Alpha, Hsl, Hsv, Luma, RgbHue, Xyz};
-use {Blend, ComponentWise, FromColor, GetHue, Limited, Mix, Shade};
-use white_point::{D65, WhitePoint};
+use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
+use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
+use white_point::WhitePoint;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use {clamp, flt};
-use pixel::{GammaRgb, RgbPixel, Srgb};
+use pixel::{RgbPixel, GammaRgb};
 use blend::PreAlpha;
-use rgb::RgbSpace;
+use rgb::{Rgb, Rgba, RgbSpace, RgbStandard};
+use rgb::standards::Srgb;
 
-///Linear RGB with an alpha component. See the [`LinRgba` implementation in `Alpha`](struct.Alpha.html#LinRgba).
-pub type LinRgba<S = ::rgb::standards::Srgb, T = f32> = Alpha<LinRgb<S, T>, T>;
+///Linear RGB with an alpha component. See the [`LinRgba` implementation in `Alpha`](../struct.Alpha.html#LinRgba).
+pub type LinRgba<S = Srgb, T = f32> = Alpha<LinRgb<S, T>, T>;
 
 ///Linear RGB.
 ///
@@ -29,10 +30,9 @@ pub type LinRgba<S = ::rgb::standards::Srgb, T = f32> = Alpha<LinRgb<S, T>, T>;
 ///displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
 ///for encoding types.
 #[derive(Debug, PartialEq)]
-pub struct LinRgb<S = ::rgb::standards::Srgb, T = f32>
-where
-    T: Float,
-    S: RgbSpace,
+pub struct LinRgb<S = Srgb, T = f32>
+    where T: Float,
+        S: RgbSpace
 {
     ///The amount of red light, where 0.0 is no red light and 1.0 is the
     ///highest displayable amount.
@@ -46,34 +46,27 @@ where
     ///highest displayable amount.
     pub blue: T,
 
-    ///The white point associated with the color's illuminant and observer.
-    ///D65 for 2 degree observer is used by default.
+    ///The kind of RGB space. sRGB is the default.
     pub space: PhantomData<S>,
 }
 
 impl<S, T> Copy for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
-{
-}
+    where T: Float,
+        S: RgbSpace,
+{}
 
 impl<S, T> Clone for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
-    fn clone(&self) -> LinRgb<S, T> {
-        *self
-    }
+    fn clone(&self) -> LinRgb<S, T> { *self }
 }
 
-impl<T> LinRgb<::rgb::standards::Srgb, T>
-where
-    T: Float,
+impl<T> LinRgb<Srgb, T>
+    where T: Float,
 {
     ///Linear RGB with white point D65.
-    pub fn new(red: T, green: T, blue: T) -> LinRgb<::rgb::standards::Srgb, T> {
+    pub fn new(red: T, green: T, blue: T) -> LinRgb<Srgb, T> {
         LinRgb {
             red: red,
             green: green,
@@ -83,20 +76,19 @@ where
     }
 
     ///Linear RGB from 8 bit values with whtie point D65.
-    pub fn new_u8(red: u8, green: u8, blue: u8) -> LinRgb<::rgb::standards::Srgb, T> {
+    pub fn new_u8(red: u8, green: u8, blue: u8) -> LinRgb<Srgb, T> {
         LinRgb {
-            red: flt::<T, _>(red) / flt(255.0),
-            green: flt::<T, _>(green) / flt(255.0),
-            blue: flt::<T, _>(blue) / flt(255.0),
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
             space: PhantomData,
         }
     }
 }
 
 impl<S, T> LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     ///Linear RGB.
     pub fn with_wp(red: T, green: T, blue: T) -> LinRgb<S, T> {
@@ -111,9 +103,9 @@ where
     ///Linear RGB from 8 bit values.
     pub fn with_wp_u8(red: u8, green: u8, blue: u8) -> LinRgb<S, T> {
         LinRgb {
-            red: flt::<T, _>(red) / flt(255.0),
-            green: flt::<T, _>(green) / flt(255.0),
-            blue: flt::<T, _>(blue) / flt(255.0),
+            red: flt::<T,_>(red) / flt(255.0),
+            green: flt::<T,_>(green) / flt(255.0),
+            blue: flt::<T,_>(blue) / flt(255.0),
             space: PhantomData,
         }
     }
@@ -124,13 +116,13 @@ where
         LinRgb::with_wp(r, g, b)
     }
 
-    ///Convert to a linear RGB pixel. `LinRgb` is already assumed to be linear,
+    ///Convert to a linear RGB pixel. `LinSrgb` is already assumed to be linear,
     ///so the components will just be clamped to [0.0, 1.0] before conversion.
     ///
     ///```
-    ///use palette::LinRgb;
+    ///use palette::LinSrgb;
     ///
-    ///let c = LinRgb::new(0.5, 0.3, 0.1);
+    ///let c = LinSrgb::new(0.5, 0.3, 0.1);
     ///assert_eq!((c.red, c.green, c.blue), c.to_pixel());
     ///assert_eq!((0.5, 0.3, 0.1), c.to_pixel());
     ///```
@@ -144,13 +136,12 @@ where
     }
 }
 
-///<span id="LinRgba"></span>[`LinRgba`](type.LinRgba.html) implementations.
-impl<T> Alpha<LinRgb<::rgb::standards::Srgb, T>, T>
-where
-    T: Float,
+///<span id="LinRgba"></span>[`LinRgba`](rgb/type.LinRgba.html) implementations.
+impl<T> Alpha<LinRgb<Srgb, T>, T>
+    where T: Float,
 {
     ///Linear RGB with transparency and with white point D65.
-    pub fn new(red: T, green: T, blue: T, alpha: T) -> LinRgba<::rgb::standards::Srgb, T> {
+    pub fn new(red: T, green: T, blue: T, alpha: T) -> LinRgba<Srgb, T> {
         Alpha {
             color: LinRgb::new(red, green, blue),
             alpha: alpha,
@@ -158,19 +149,19 @@ where
     }
 
     ///Linear RGB with transparency from 8 bit values and with white point D65.
-    pub fn new_u8(red: u8, green: u8, blue: u8, alpha: u8) -> LinRgba<::rgb::standards::Srgb, T> {
+    pub fn new_u8(red: u8, green: u8, blue: u8, alpha: u8) -> LinRgba<Srgb, T> {
         Alpha {
             color: LinRgb::new_u8(red, green, blue),
-            alpha: flt::<T, _>(alpha) / flt(255.0),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
+
 }
 
 ///<span id="LinRgba"></span>[`LinRgba`](type.LinRgba.html) implementations.
 impl<S, T> Alpha<LinRgb<S, T>, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace
 {
     ///Linear RGB with transparency.
     pub fn with_wp(red: T, green: T, blue: T, alpha: T) -> LinRgba<S, T> {
@@ -184,7 +175,7 @@ where
     pub fn with_wp_u8(red: u8, green: u8, blue: u8, alpha: u8) -> LinRgba<S, T> {
         Alpha {
             color: LinRgb::with_wp_u8(red, green, blue),
-            alpha: flt::<T, _>(alpha) / flt(255.0),
+            alpha: flt::<T,_>(alpha) / flt(255.0),
         }
     }
 
@@ -194,13 +185,13 @@ where
         LinRgba::with_wp(r, g, b, a)
     }
 
-    ///Convert to a linear RGB pixel. `LinRgb` is already assumed to be linear,
+    ///Convert to a linear RGB pixel. `LinSrgba` is already assumed to be linear,
     ///so the components will just be clamped to [0.0, 1.0] before conversion.
     ///
     ///```
-    ///use palette::LinRgba;
+    ///use palette::LinSrgba;
     ///
-    ///let c = LinRgba::new(0.5, 0.3, 0.1, 0.5);
+    ///let c = LinSrgba::new(0.5, 0.3, 0.1, 0.5);
     ///assert_eq!((c.red, c.green, c.blue, c.alpha), c.to_pixel());
     ///assert_eq!((0.5, 0.3, 0.1, 0.5), c.to_pixel());
     ///```
@@ -209,28 +200,28 @@ where
             clamp(self.red, T::zero(), T::one()),
             clamp(self.green, T::zero(), T::one()),
             clamp(self.blue, T::zero(), T::one()),
-            clamp(self.alpha, T::zero(), T::one()),
+            clamp(self.alpha, T::zero(), T::one())
         )
     }
 }
 
 impl<S, Wp, T> FromColor<Wp, T> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace<WhitePoint = Wp>,
-    Wp: WhitePoint,
+    where T: Float,
+        S: RgbSpace<WhitePoint=Wp>,
+        Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<S, T>());
         multiply_xyz_to_rgb(&transform_matrix, &xyz)
     }
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint = Wp>>(rgb: LinRgb<Sp, T>) -> Self {
+
+    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<Sp, T>) -> Self {
         Self::from_xyz(Xyz::from_rgb(rgb))
     }
 
     fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
-        let c = (T::one() - (hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
+        let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
         let h = hsl.hue.to_positive_degrees() / flt(60.0);
         let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());
         let m = hsl.lightness - c * flt(0.5);
@@ -248,6 +239,7 @@ where
         } else {
             (c, T::zero(), x)
         };
+
 
         LinRgb {
             red: red + m,
@@ -277,12 +269,14 @@ where
             (c, T::zero(), x)
         };
 
+
         LinRgb {
             red: red + m,
             green: green + m,
             blue: blue + m,
             space: PhantomData,
         }
+
     }
 
     fn from_luma(luma: Luma<Wp, T>) -> Self {
@@ -293,16 +287,17 @@ where
             space: PhantomData,
         }
     }
+
 }
 
 impl<S, T> Limited for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     fn is_valid(&self) -> bool {
-        self.red >= T::zero() && self.red <= T::one() && self.green >= T::zero()
-            && self.green <= T::one() && self.blue >= T::zero() && self.blue <= T::one()
+        self.red >= T::zero() && self.red <= T::one() &&
+        self.green >= T::zero() && self.green <= T::one() &&
+        self.blue >= T::zero() && self.blue <= T::one()
     }
 
     fn clamp(&self) -> LinRgb<S, T> {
@@ -319,9 +314,8 @@ where
 }
 
 impl<S, T> Mix for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Scalar = T;
 
@@ -338,9 +332,8 @@ where
 }
 
 impl<S, T> Shade for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Scalar = T;
 
@@ -355,9 +348,8 @@ where
 }
 
 impl<S, T> GetHue for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Hue = RgbHue<T>;
 
@@ -367,18 +359,14 @@ where
         if self.red == self.green && self.red == self.blue {
             None
         } else {
-            Some(RgbHue::from_radians(
-                (sqrt_3 * (self.green - self.blue))
-                    .atan2(self.red * flt(2.0) - self.green - self.blue),
-            ))
+            Some(RgbHue::from_radians((sqrt_3 * (self.green - self.blue)).atan2(self.red * flt(2.0) - self.green - self.blue)))
         }
     }
 }
 
 impl<S, T> Blend for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Color = LinRgb<S, T>;
 
@@ -392,9 +380,8 @@ where
 }
 
 impl<S, T> ComponentWise for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Scalar = T;
 
@@ -418,9 +405,8 @@ where
 }
 
 impl<S, T> Default for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     fn default() -> LinRgb<S, T> {
         LinRgb::with_wp(T::zero(), T::zero(), T::zero())
@@ -428,9 +414,8 @@ where
 }
 
 impl<S, T> Add<LinRgb<S, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -445,9 +430,8 @@ where
 }
 
 impl<S, T> Add<T> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -462,9 +446,8 @@ where
 }
 
 impl<S, T> Sub<LinRgb<S, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -479,9 +462,8 @@ where
 }
 
 impl<S, T> Sub<T> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -496,9 +478,8 @@ where
 }
 
 impl<S, T> Mul<LinRgb<S, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -513,9 +494,8 @@ where
 }
 
 impl<S, T> Mul<T> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -530,9 +510,8 @@ where
 }
 
 impl<S, T> Div<LinRgb<S, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -547,9 +526,8 @@ where
 }
 
 impl<S, T> Div<T> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     type Output = LinRgb<S, T>;
 
@@ -564,47 +542,44 @@ where
 }
 
 impl<S, T> From<Alpha<LinRgb<S, T>, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     fn from(color: Alpha<LinRgb<S, T>, T>) -> LinRgb<S, T> {
         color.color
     }
 }
 
-impl<T> From<Srgb<D65, T>> for LinRgb<::rgb::standards::Srgb, T>
-where
-    T: Float,
+impl<S, T> From<Rgb<S, T>> for LinRgb<S::Space, T>
+    where T: Float,
+        S: RgbStandard,
 {
-    fn from(srgb: Srgb<D65, T>) -> LinRgb<::rgb::standards::Srgb, T> {
-        srgb.to_linear().into()
+    fn from(srgb: Rgb<S, T>) -> LinRgb<S::Space, T> {
+        srgb.into_linear().into()
     }
 }
 
 impl<S, T> From<GammaRgb<S::WhitePoint, T>> for LinRgb<S, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     fn from(gamma_rgb: GammaRgb<S::WhitePoint, T>) -> LinRgb<S, T> {
         gamma_rgb.to_linear().into()
     }
 }
 
-impl<T> From<Srgb<D65, T>> for Alpha<LinRgb<::rgb::standards::Srgb, T>, T>
-where
-    T: Float,
+impl<S, T> From<Rgba<S, T>> for Alpha<LinRgb<S::Space, T>, T>
+    where T: Float,
+        S: RgbStandard,
 {
-    fn from(srgb: Srgb<D65, T>) -> Alpha<LinRgb<::rgb::standards::Srgb, T>, T> {
-        srgb.to_linear()
+    fn from(srgb: Rgba<S, T>) -> Alpha<LinRgb<S::Space, T>, T> {
+        srgb.into_linear()
     }
 }
 
 impl<S, T> From<GammaRgb<S::WhitePoint, T>> for Alpha<LinRgb<S, T>, T>
-where
-    T: Float,
-    S: RgbSpace,
+    where T: Float,
+        S: RgbSpace,
 {
     fn from(gamma_rgb: GammaRgb<S::WhitePoint, T>) -> Alpha<LinRgb<S, T>, T> {
         gamma_rgb.to_linear()
@@ -612,10 +587,9 @@ where
 }
 
 impl<S, T> ApproxEq for LinRgb<S, T>
-where
-    T: Float + ApproxEq,
-    T::Epsilon: Copy + Float,
-    S: RgbSpace,
+    where T: Float + ApproxEq,
+        T::Epsilon: Copy + Float,
+        S: RgbSpace,
 {
     type Epsilon = <T as ApproxEq>::Epsilon;
 
@@ -628,27 +602,22 @@ where
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        self.red.relative_eq(&other.red, epsilon, max_relative)
-            && self.green.relative_eq(&other.green, epsilon, max_relative)
-            && self.blue.relative_eq(&other.blue, epsilon, max_relative)
+    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        self.red.relative_eq(&other.red, epsilon, max_relative) &&
+        self.green.relative_eq(&other.green, epsilon, max_relative) &&
+        self.blue.relative_eq(&other.blue, epsilon, max_relative)
     }
 
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.red.ulps_eq(&other.red, epsilon, max_ulps)
-            && self.green.ulps_eq(&other.green, epsilon, max_ulps)
-            && self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+        self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
+        self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
+        self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use LinRgb;
+    use super::LinRgb;
     use rgb::standards::Srgb;
 
     #[test]

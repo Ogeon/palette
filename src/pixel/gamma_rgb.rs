@@ -2,11 +2,11 @@ use num_traits::Float;
 
 use std::marker::PhantomData;
 
-use {Alpha, LinRgb, LinRgba, clamp, flt};
+use {Alpha, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};
-use rgb::RgbSpace;
+use rgb::{RgbSpace, LinRgb, LinRgba};
 
 ///A gamma encoded color.
 ///
@@ -22,10 +22,10 @@ use rgb::RgbSpace;
 ///sRGB.
 ///
 ///```
-///use palette::LinRgb;
+///use palette::LinSrgb;
 ///use palette::pixel::GammaRgb;
 ///
-///let c: LinRgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
+///let c: LinSrgb = GammaRgb::new_u8(128, 64, 32, 2.2).into();
 ///assert_eq!((128, 64, 32), GammaRgb::linear_to_pixel(c, 2.2));
 ///```
 #[derive(Debug, PartialEq)]
