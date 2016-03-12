@@ -11,7 +11,7 @@ use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use {clamp, flt};
 use pixel::{RgbPixel, GammaRgb};
 use blend::PreAlpha;
-use rgb::{Rgb, Rgba, RgbSpace, RgbStandard};
+use rgb::RgbSpace;
 use rgb::standards::Srgb;
 
 ///Linear RGB with an alpha component. See the [`LinRgba` implementation in `Alpha`](../struct.Alpha.html#LinRgba).
@@ -550,30 +550,12 @@ impl<S, T> From<Alpha<LinRgb<S, T>, T>> for LinRgb<S, T>
     }
 }
 
-impl<S, T> From<Rgb<S, T>> for LinRgb<S::Space, T>
-    where T: Float,
-        S: RgbStandard,
-{
-    fn from(srgb: Rgb<S, T>) -> LinRgb<S::Space, T> {
-        srgb.into_linear().into()
-    }
-}
-
 impl<S, T> From<GammaRgb<S::WhitePoint, T>> for LinRgb<S, T>
     where T: Float,
         S: RgbSpace,
 {
     fn from(gamma_rgb: GammaRgb<S::WhitePoint, T>) -> LinRgb<S, T> {
         gamma_rgb.to_linear().into()
-    }
-}
-
-impl<S, T> From<Rgba<S, T>> for Alpha<LinRgb<S::Space, T>, T>
-    where T: Float,
-        S: RgbStandard,
-{
-    fn from(srgb: Rgba<S, T>) -> Alpha<LinRgb<S::Space, T>, T> {
-        srgb.into_linear()
     }
 }
 

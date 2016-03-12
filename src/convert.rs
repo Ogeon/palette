@@ -2,7 +2,7 @@ use num_traits::Float;
 
 use {Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
 use white_point::{WhitePoint, D65};
-use rgb::{RgbSpace, LinRgb};
+use rgb::{RgbSpace, RgbStandard, LinRgb, Rgb};
 
 ///FromColor provides conversion between the colors.
 ///
@@ -241,6 +241,15 @@ macro_rules! impl_from_trait {
             }
         }
 
+        impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for $self_ty
+            where $t: Float,
+                $s: RgbSpace
+        {
+            fn from(color: Alpha<Color<$s, $t>, $t>) -> $self_ty {
+                color.color.into()
+            }
+        }
+
         impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for Alpha<$self_ty,$t>
             where $t: Float,
                 $s: RgbSpace
@@ -300,25 +309,27 @@ macro_rules! impl_from_trait {
     )
 }
 
-macro_rules! impl_from_non_rgb {
-    (<$s:ident, $t:ident>($self_ty: ty, $into_fn: ident) => {$($other: ty),+}) => (
+macro_rules! impl_from_trait_other {
+    (<$s:ident : $s_ty:ident, $t:ident>($self_ty: ty, |$into_ident:ident| $into_expr:expr) => {$($other: ty),+}) => (
         $(
             impl<$s, $t> From<$other> for $self_ty
                 where $t: Float,
-                    $s: WhitePoint
+                    $s: $s_ty
             {
                 fn from(other: $other) -> $self_ty {
-                    other.$into_fn()
+                    let $into_ident = other;
+                    $into_expr
                 }
             }
 
             impl<$s, $t> From<Alpha<$other, $t>> for Alpha<$self_ty, $t>
                 where $t: Float,
-                    $s: WhitePoint
+                    $s: $s_ty
             {
                 fn from(other: Alpha<$other, $t>) -> Alpha<$self_ty, $t> {
+                    let $into_ident = other.color;
                     Alpha {
-                        color: other.color.$into_fn(),
+                        color: $into_expr,
                         alpha: other.alpha,
                     }
                 }
@@ -326,11 +337,12 @@ macro_rules! impl_from_non_rgb {
 
             impl<$s, $t> From<$other> for Alpha<$self_ty, $t>
                 where $t: Float,
-                    $s: WhitePoint
+                    $s: $s_ty
             {
                 fn from(color: $other) -> Alpha<$self_ty, $t> {
+                    let $into_ident = color;
                     Alpha {
-                        color: color.$into_fn(),
+                        color: $into_expr,
                         alpha: $t::one(),
                     }
                 }
@@ -338,15 +350,21 @@ macro_rules! impl_from_non_rgb {
 
             impl<$s, $t> From<Alpha<$other, $t>> for $self_ty
                 where $t: Float,
-                    $s: WhitePoint
+                    $s: $s_ty
             {
                 fn from(other: Alpha<$other, $t>) -> $self_ty {
-                    other.color.$into_fn()
+                    let $into_ident = other.color;
+                    $into_expr
                 }
             }
 
         )+
-    )
+    );
+
+
+    (<$s:ident : $s_ty:ident, $t:ident>($self_ty: ty, $into_fn: ident) => {$($other: ty),+}) => (
+        impl_from_trait_other!(<$s: $s_ty, $t>($self_ty, |a| a.$into_fn()) => {$($other),+});
+    );
 }
 
 impl_into_color!(Xyz, from_xyz);
@@ -371,11 +389,32 @@ impl_from_trait!(<S, T> (Luma<S::WhitePoint, T>, into_luma) => {LinRgb<S, T>});
 
 impl_from_trait!(<S, T> (LinRgb<S, T>, into_rgb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S::WhitePoint, T>, Hsv<S::WhitePoint, T>, Hwb<S::WhitePoint, T>, Luma<S::WhitePoint, T>});
 
-impl_from_non_rgb!(<Wp, T> (Xyz<Wp, T>, into_xyz) => {Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Yxy<Wp, T>, into_yxy) => {Xyz<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Lab<Wp, T>, into_lab) => {Xyz<Wp, T>, Yxy<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Lch<Wp, T>, into_lch) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Hsl<Wp, T>, into_hsl) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Hsv<Wp, T>, into_hsv) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Hwb<Wp, T>, into_hwb) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Luma<Wp, T>});
-impl_from_non_rgb!(<Wp, T> (Luma<Wp, T>, into_luma) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Xyz<Wp, T>, into_xyz) => {Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Yxy<Wp, T>, into_yxy) => {Xyz<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Lab<Wp, T>, into_lab) => {Xyz<Wp, T>, Yxy<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Lch<Wp, T>, into_lch) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Hsl<Wp, T>, into_hsl) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Hsv<Wp, T>, into_hsv) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hwb<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Hwb<Wp, T>, into_hwb) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Luma<Wp, T>});
+impl_from_trait_other!(<Wp: WhitePoint, T> (Luma<Wp, T>, into_luma) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>, Hsl<Wp, T>, Hsv<Wp, T>, Hwb<Wp, T>});
+
+impl_from_trait_other!(<S: RgbStandard, T> (Xyz<<S::Space as RgbSpace>::WhitePoint, T>, into_xyz) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Yxy<<S::Space as RgbSpace>::WhitePoint, T>, into_yxy) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Lab<<S::Space as RgbSpace>::WhitePoint, T>, into_lab) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Lch<<S::Space as RgbSpace>::WhitePoint, T>, into_lch) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (LinRgb<S::Space, T>, into_rgb) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Hsl<<S::Space as RgbSpace>::WhitePoint, T>, into_hsl) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Hsv<<S::Space as RgbSpace>::WhitePoint, T>, into_hsv) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Hwb<<S::Space as RgbSpace>::WhitePoint, T>, into_hwb) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Luma<<S::Space as RgbSpace>::WhitePoint, T>, into_luma) => {Rgb<S, T>});
+impl_from_trait_other!(<S: RgbStandard, T> (Rgb<S, T>, |c| Rgb::from_linear(c.into_rgb())) => {
+    LinRgb<S::Space, T>,
+    Xyz<<S::Space as RgbSpace>::WhitePoint, T>,
+    Yxy<<S::Space as RgbSpace>::WhitePoint, T>,
+    Lab<<S::Space as RgbSpace>::WhitePoint, T>,
+    Lch<<S::Space as RgbSpace>::WhitePoint, T>,
+    Hsl<<S::Space as RgbSpace>::WhitePoint, T>,
+    Hsv<<S::Space as RgbSpace>::WhitePoint, T>,
+    Hwb<<S::Space as RgbSpace>::WhitePoint, T>,
+    Luma<<S::Space as RgbSpace>::WhitePoint, T>
+});

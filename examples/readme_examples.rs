@@ -11,7 +11,7 @@ mod color_spaces {
     use display_colors;
 
     pub fn run() {
-        let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_linear().into();
+        let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
         let new_color = LinSrgb::from(lch_color.shift_hue(180.0.into()));
 
         display_colors("examples/readme_color_spaces.png", &[

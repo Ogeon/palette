@@ -9,7 +9,7 @@ use alpha::Alpha;
 use pixel::{TransferFn, RgbPixel};
 use convert::{FromColor, IntoColor};
 use white_point::WhitePoint;
-use {Xyz, Yxy, Luma, Hsl, Hsv, Hwb, Lab, Lch};
+use {Color, Xyz, Yxy, Luma, Hsl, Hsv, Hwb, Lab, Lch};
 use {flt, clamp};
 
 ///Nonlinear RGB with an alpha component. See the [`Rgba` implementation in `Alpha`](../struct.Alpha.html#Rgba).
@@ -283,5 +283,56 @@ impl<S, T> ApproxEq for Rgb<S, T>
         self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
         self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
         self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
+    }
+}
+
+impl<S, T> From<Alpha<Rgb<S, T>, T>> for Rgb<S, T>
+    where T: Float,
+        S: RgbStandard
+{
+    fn from(color: Alpha<Rgb<S, T>, T>) -> Rgb<S, T> {
+        color.color
+    }
+}
+
+impl<S, T> From<Color<S::Space, T>> for Rgb<S, T>
+    where T: Float,
+        S: RgbStandard
+{
+    fn from(color: Color<S::Space, T>) -> Rgb<S, T> {
+        Rgb::from_linear(LinRgb::from(color))
+    }
+}
+
+impl<S, T> From<Color<S::Space, T>> for Alpha<Rgb<S, T>, T>
+    where T: Float,
+        S: RgbStandard
+{
+    fn from(color: Color<S::Space, T>) -> Rgba<S, T> {
+        Alpha {
+            color: color.into(),
+            alpha: T::one(),
+        }
+    }
+}
+
+impl<S, T> From<Alpha<Color<S::Space, T>, T>> for Rgb<S, T>
+    where T: Float,
+        S: RgbStandard
+{
+    fn from(color: Alpha<Color<S::Space, T>, T>) -> Rgb<S, T> {
+        color.color.into()
+    }
+}
+
+impl<S, T> From<Alpha<Color<S::Space, T>, T>> for Alpha<Rgb<S, T>, T>
+    where T: Float,
+        S: RgbStandard
+{
+    fn from(color: Alpha<Color<S::Space, T>, T>) -> Rgba<S, T> {
+        Alpha {
+            color: color.color.into(),
+            alpha: color.alpha,
+        }
     }
 }

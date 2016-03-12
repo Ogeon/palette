@@ -63,7 +63,7 @@ This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue b
 extern crate palette;
 use palette::{Srgb, LinSrgb, Lch, Hue};
 
-let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_linear().into();
+let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
 let new_color = LinSrgb::from(lch_color.shift_hue(180.0.into()));
 ```
 
