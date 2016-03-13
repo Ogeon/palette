@@ -1,7 +1,7 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use {Xyz, Yxy, Lab, Lch, Hsl, Hwb, Luma, LabHue, RgbHue, flt};
+use {Xyz, Yxy, Lab, Lch, Hwb, Luma, LabHue, RgbHue, flt};
 use pixel::GammaRgb;
 use white_point::WhitePoint;
 
@@ -46,7 +46,6 @@ impl_eq!( Yxy, [y, x, luma] );
 impl_eq!( Lab, [l, a, b] );
 impl_eq!( Luma, [luma] );
 impl_eq!( Lch, [l, chroma, hue] );
-impl_eq!( Hsl, [hue, saturation, lightness] );
 impl_eq!( Hwb, [hue, whiteness, blackness] );
 impl_eq!( GammaRgb, [red, blue, green, alpha, gamma] );
 

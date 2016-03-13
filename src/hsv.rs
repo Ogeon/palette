@@ -131,7 +131,7 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: LinRgb<(::rgb::standards::Srgb, Wp), T> = LinRgb::from_xyz(xyz);
+        let rgb: LinRgb<S, T> = LinRgb::from_xyz(xyz);
         Self::from_rgb(rgb)
     }
 
@@ -170,7 +170,9 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         }
     }
 
-    fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
+    fn from_hsl<Sp: RgbSpace<WhitePoint=Wp>>(hsl: Hsl<Sp, T>) -> Self {
+        let hsl = Hsl::<S, T>::from_hsl(hsl);
+
         let x = hsl.saturation * if hsl.lightness < flt(0.5) {
             hsl.lightness
         } else {

@@ -197,7 +197,7 @@ impl<S, T, Wp> FromColor<Wp, T> for Rgb<S, T> where
         Self::from_linear(LinRgb::from_rgb(inp))
     }
 
-    fn from_hsl(inp: Hsl<Wp, T>) -> Self {
+    fn from_hsl<Sp: RgbSpace<WhitePoint=Wp>>(inp: Hsl<Sp, T>) -> Self {
         Self::from_linear(LinRgb::from_hsl(inp))
     }
 
@@ -240,7 +240,7 @@ impl<S, T, Wp> IntoColor<Wp, T> for Rgb<S, T> where
         self.into_linear().into_rgb()
     }
 
-    fn into_hsl(self) -> Hsl<Wp, T> {
+    fn into_hsl<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Hsl<Sp, T> {
         self.into_linear().into_hsl()
     }
 

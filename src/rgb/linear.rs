@@ -235,7 +235,9 @@ impl<S, Wp, T> FromColor<Wp, T> for LinRgb<S, T>
         }
     }
 
-    fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
+    fn from_hsl<Sp: RgbSpace<WhitePoint=Wp>>(hsl: Hsl<Sp, T>) -> Self {
+        let hsl = Hsl::<S, T>::from_hsl(hsl);
+
         let c = (T::one() - ( hsl.lightness * flt(2.0) - T::one()).abs()) * hsl.saturation;
         let h = hsl.hue.to_positive_degrees() / flt(60.0);
         let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());

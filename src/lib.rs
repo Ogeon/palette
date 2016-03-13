@@ -570,7 +570,7 @@ make_color! {
     }
 
     ///Linear HSL, a cylindrical version of RGB.
-    Hsl<S::WhitePoint> {
+    Hsl<S> {
         ///Linear HSL.
         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
     }
