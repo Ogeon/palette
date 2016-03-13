@@ -254,12 +254,12 @@ pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
 
-use white_point::{WhitePoint, D65};
+use white_point::WhitePoint;
 
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
-        $variant: ident $(and $($representations:ident),+ )* {$(
+        $variant: ident < $variant_ty_param:ty > $(and $($representations:ident),+ )* {$(
             #[$ctor_comment:meta]
             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
         )+}
@@ -288,9 +288,7 @@ macro_rules! make_color {
             where T: Float,
                 S: RgbSpace,
         {
-            ///Linear RGB.
-            Rgb(LinRgb<S, T>),
-            $(#[$variant_comment] $variant($variant<S::WhitePoint, T>)),+
+            $(#[$variant_comment] $variant($variant<$variant_ty_param, T>)),+
         }
 
         impl<S, T> Copy for Color<S, T>
@@ -306,16 +304,6 @@ macro_rules! make_color {
         }
 
         impl<T: Float> Color<rgb::standards::Srgb, T> {
-            ///Linear RGB.
-            pub fn linear_rgb(red: T, green: T, blue: T) -> Color<rgb::standards::Srgb, T> {
-                Color::Rgb(LinRgb::new(red, green, blue))
-            }
-
-            ///Linear RGB from 8 bit values.
-            pub fn linear_rgb_u8(red: u8, green: u8, blue: u8) -> Color<rgb::standards::Srgb, T> {
-                Color::Rgb(LinRgb::new_u8(red, green, blue))
-            }
-
             $(
                 $(
                     #[$ctor_comment]
@@ -328,21 +316,11 @@ macro_rules! make_color {
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
         impl<T: Float> Alpha<Color<rgb::standards::Srgb, T>, T> {
-            ///Linear RGB.
-            pub fn linear_rgb(red: T, green: T, blue: T, alpha: T) -> Colora<rgb::standards::Srgb, T> {
-                LinRgba::new(red, green, blue, alpha).into()
-            }
-
-            ///Linear RGB from 8 bit values.
-            pub fn linear_rgb_u8(red: u8, green: u8, blue: u8, alpha: u8) -> Colora<rgb::standards::Srgb, T> {
-                LinRgba::new_u8(red, green, blue, alpha).into()
-            }
-
             $(
                 $(
                     #[$ctor_comment]
                     pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<rgb::standards::Srgb, T> {
-                        Alpha::<$variant<D65, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+                        Alpha::<$variant<_, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
@@ -455,29 +433,29 @@ macro_rules! make_color {
         }
 
         $(
-            impl<S, T> From<$variant<S::WhitePoint, T>> for Color<S, T>
+            impl<S, T> From<$variant<$variant_ty_param, T>> for Color<S, T>
                 where T: Float,
                     S: RgbSpace,
             {
-                fn from(color: $variant<S::WhitePoint, T>) -> Color<S, T> {
+                fn from(color: $variant<$variant_ty_param, T>) -> Color<S, T> {
                     Color::$variant(color)
                 }
             }
 
-            impl<S, T> From<Alpha<$variant<S::WhitePoint, T>, T>> for Color<S, T>
+            impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Color<S, T>
                 where T: Float,
                     S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<S::WhitePoint, T>,T>) -> Color<S, T> {
+                fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Color<S, T> {
                     Color::$variant(color.color)
                 }
             }
 
-            impl<S, T> From<Alpha<$variant<S::WhitePoint, T>, T>> for Alpha<Color<S, T>,T>
+            impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Alpha<Color<S, T>,T>
                 where T: Float,
                     S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<S::WhitePoint, T>,T>) -> Alpha<Color<S, T>,T> {
+                fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Alpha<Color<S, T>,T> {
                     Alpha {
                         color: Color::$variant(color.color),
                         alpha: color.alpha,
@@ -486,42 +464,12 @@ macro_rules! make_color {
             }
         )+
 
-        impl<S, T> From<LinRgb<S, T>> for Color<S, T>
-            where T: Float,
-                S: RgbSpace,
-        {
-            fn from(color: LinRgb<S, T>) -> Color<S, T> {
-                Color::Rgb(color)
-            }
-        }
-
-        impl<S, T> From<Alpha<LinRgb<S, T>, T>> for Color<S, T>
-            where T: Float,
-                S: RgbSpace,
-        {
-            fn from(color: Alpha<LinRgb<S, T>,T>) -> Color<S, T> {
-                Color::Rgb(color.color)
-            }
-        }
-
-        impl<S, T> From<Alpha<LinRgb<S, T>, T>> for Alpha<Color<S, T>,T>
-            where T: Float,
-                S: RgbSpace,
-        {
-            fn from(color: Alpha<LinRgb<S, T>,T>) -> Alpha<Color<S, T>,T> {
-                Alpha {
-                    color: Color::Rgb(color.color),
-                    alpha: color.alpha,
-                }
-            }
-        }
-
         impl<S, T> From<Rgb<S, T>> for Color<S::Space, T>
             where T: Float,
                 S: RgbStandard,
         {
             fn from(color: Rgb<S, T>) -> Color<S::Space, T> {
-                Color::Rgb(color.into_linear())
+                Color::LinRgb(color.into_linear())
             }
         }
 
@@ -530,7 +478,7 @@ macro_rules! make_color {
                 S: RgbStandard,
         {
             fn from(color: Rgba<S, T>) -> Color<S::Space, T> {
-                Color::Rgb(color.color.into_linear())
+                Color::LinRgb(color.color.into_linear())
             }
         }
 
@@ -540,7 +488,7 @@ macro_rules! make_color {
         {
             fn from(color: Rgba<S, T>) -> Alpha<Color<S::Space, T>,T> {
                 Alpha {
-                    color: Color::Rgb(color.color.into_linear()),
+                    color: Color::LinRgb(color.color.into_linear()),
                     alpha: color.alpha,
                 }
             }
@@ -552,7 +500,7 @@ macro_rules! make_color {
             T: Float
         {
             fn from(color: GammaRgb<Wp, T>) -> Color<S, T> {
-                Color::Rgb(color.into())
+                Color::LinRgb(color.into())
             }
         }
     )
@@ -574,7 +522,7 @@ fn clamp<T: Float>(v: T, min: T, max: T) -> T {
 
 make_color! {
     ///Linear luminance.
-    Luma {
+    Luma<S::WhitePoint> {
         ///Linear luminance.
         y(luma: T)[alpha: T] => new;
 
@@ -582,44 +530,53 @@ make_color! {
         y_u8(luma: u8)[alpha: u8] => new_u8;
     }
 
+    ///Linear RGB.
+    LinRgb<S> {
+        ///Linear RGB.
+        linear_rgb(red: T, green: T, blue: T)[alpha: T] => new;
+
+        ///Linear RGB from an 8 bit value.
+        linear_rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
+    }
+
     ///CIE 1931 XYZ.
-    Xyz {
+    Xyz<S::WhitePoint> {
         ///CIE XYZ.
         xyz(x: T, y: T, z: T)[alpha: T] => new;
     }
 
     ///CIE 1931 Yxy.
-    Yxy {
+    Yxy<S::WhitePoint> {
         ///CIE Yxy.
         yxy(x: T, y: T, luma: T)[alpha: T] => new;
     }
 
     ///CIE L*a*b* (CIELAB).
-    Lab {
+    Lab<S::WhitePoint> {
         ///CIE L*a*b*.
         lab(l: T, a: T, b: T)[alpha: T] => new;
     }
 
     ///CIE L*C*h°, a polar version of CIE L*a*b*.
-    Lch {
+    Lch<S::WhitePoint> {
         ///CIE L*C*h°.
         lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
     }
 
     ///Linear HSV, a cylindrical version of RGB.
-    Hsv {
+    Hsv<S> {
         ///Linear HSV.
         hsv(hue: RgbHue<T>, saturation: T, value: T)[alpha: T] => new;
     }
 
     ///Linear HSL, a cylindrical version of RGB.
-    Hsl {
+    Hsl<S::WhitePoint> {
         ///Linear HSL.
         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
     }
 
     ///Linear HWB, an intuitive cylindrical version of RGB.
-    Hwb {
+    Hwb<S::WhitePoint> {
         ///Linear HWB.
         hwb(hue: RgbHue<T>, whiteness: T, balckness: T)[alpha: T] => new;
     }

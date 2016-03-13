@@ -122,6 +122,8 @@ impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
     }
 
     fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<S, T>) -> Self {
+        let rgb = LinRgb::<(::rgb::standards::Srgb, Wp), T>::from_rgb(rgb);
+
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
@@ -159,7 +161,9 @@ impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
         hsl
     }
 
-    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
+    fn from_hsv<S: RgbSpace<WhitePoint=Wp>>(hsv: Hsv<S, T>) -> Self {
+        let hsv = Hsv::<(::rgb::standards::Srgb, Wp), T>::from_hsv(hsv);
+
         let x = (flt::<T,_>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
             T::zero()

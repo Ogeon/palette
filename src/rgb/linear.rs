@@ -3,6 +3,7 @@ use approx::ApproxEq;
 
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
+use std::any::TypeId;
 
 use {Alpha, Luma, Xyz, Hsv, Hsl, RgbHue};
 use {Limited, Mix, Shade, GetHue, FromColor, Blend, ComponentWise};
@@ -134,6 +135,16 @@ impl<S, T> LinRgb<S, T>
             T::one(),
         )
     }
+
+    #[inline]
+    fn reinterpret_as<Sp: RgbSpace>(self) -> LinRgb<Sp, T> {
+        LinRgb {
+            red: self.red,
+            green: self.green,
+            blue: self.blue,
+            space: PhantomData,
+        }
+    }
 }
 
 ///<span id="LinRgba"></span>[`LinRgba`](rgb/type.LinRgba.html) implementations.
@@ -217,7 +228,11 @@ impl<S, Wp, T> FromColor<Wp, T> for LinRgb<S, T>
 
 
     fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<Sp, T>) -> Self {
-        Self::from_xyz(Xyz::from_rgb(rgb))
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+            rgb.reinterpret_as()
+        } else {
+            Self::from_xyz(Xyz::from_rgb(rgb))
+        }
     }
 
     fn from_hsl(hsl: Hsl<Wp, T>) -> Self {
@@ -249,7 +264,9 @@ impl<S, Wp, T> FromColor<Wp, T> for LinRgb<S, T>
         }
     }
 
-    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
+    fn from_hsv<Sp: RgbSpace<WhitePoint=Wp>>(hsv: Hsv<Sp, T>) -> Self {
+        let hsv = Hsv::<S, T>::from_hsv(hsv);
+
         let c = hsv.value * hsv.saturation;
         let h = hsv.hue.to_positive_degrees() / flt(60.0);
         let x = c * (T::one() - (h % flt(2.0) - T::one()).abs());

@@ -5,6 +5,7 @@ use num_traits::Float;
 use Yxy;
 use white_point::WhitePoint;
 use pixel::TransferFn;
+use std::any::Any;
 
 pub use self::linear::{LinRgb, LinRgba};
 pub use self::nonlinear::{Rgb, Rgba};
@@ -57,7 +58,7 @@ impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
 }
 
 ///Represents the red, green and blue primaries of an RGB space.
-pub trait Primaries {
+pub trait Primaries: Any {
     ///Primary red.
     fn red<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
     ///Primary green.

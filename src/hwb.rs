@@ -5,6 +5,7 @@ use std::marker::PhantomData;
 
 use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, RgbHue, FromColor, IntoColor, clamp};
 use white_point::{WhitePoint, D65};
+use rgb::RgbSpace;
 
 ///Linear HWB with an alpha component. See the [`Hwba` implementation in `Alpha`](struct.Alpha.html#Hwba).
 pub type Hwba<Wp = D65, T = f32> = Alpha<Hwb<Wp, T>, T>;
@@ -116,11 +117,12 @@ impl<Wp, T> FromColor<Wp, T> for Hwb<Wp, T>
         Wp: WhitePoint
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let hsv = xyz.into_hsv();
+        let hsv: Hsv<(::rgb::standards::Srgb, Wp), T> = xyz.into_hsv();
         Self::from_hsv(hsv)
     }
 
-    fn from_hsv(hsv: Hsv<Wp, T>) -> Self {
+    fn from_hsv<S: RgbSpace<WhitePoint=Wp>>(hsv: Hsv<S, T>) -> Self {
+        let hsv = Hsv::<(::rgb::standards::Srgb, Wp), T>::from_hsv(hsv);
         Hwb {
             hue: hsv.hue,
             whiteness: (T::one() - hsv.saturation) * hsv.value,
