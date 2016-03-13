@@ -576,7 +576,7 @@ make_color! {
     }
 
     ///Linear HWB, an intuitive cylindrical version of RGB.
-    Hwb<S::WhitePoint> {
+    Hwb<S> {
         ///Linear HWB.
         hwb(hue: RgbHue<T>, whiteness: T, balckness: T)[alpha: T] => new;
     }

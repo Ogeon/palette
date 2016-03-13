@@ -62,7 +62,7 @@ pub struct ColorMine {
     linear_rgb: LinSrgb<f32>,
     hsl: Hsl<::palette::rgb::standards::Srgb, f32>,
     hsv: Hsv<::palette::rgb::standards::Srgb, f32>,
-    hwb: Hwb<D65, f32>,
+    hwb: Hwb<::palette::rgb::standards::Srgb, f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {
@@ -105,7 +105,7 @@ impl_from_color!(Lab<D65, f32>);
 impl_from_color!(Lch<D65, f32>);
 impl_from_color!(Hsl<::palette::rgb::standards::Srgb, f32>);
 impl_from_color!(Hsv<::palette::rgb::standards::Srgb, f32>);
-impl_from_color!(Hwb<D65, f32>);
+impl_from_color!(Hwb<::palette::rgb::standards::Srgb, f32>);
 
 
 

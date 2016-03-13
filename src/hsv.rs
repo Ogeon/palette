@@ -201,7 +201,9 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         }
     }
 
-    fn from_hwb(hwb: Hwb<Wp, T>) -> Self {
+    fn from_hwb<Sp: RgbSpace<WhitePoint=Wp>>(hwb: Hwb<Sp, T>) -> Self {
+        let hwb = Hwb::<S, T>::from_hwb(hwb);
+
         let inv = T::one() - hwb.blackness;
         // avoid divide by zero
         let s = if inv.is_normal() {
