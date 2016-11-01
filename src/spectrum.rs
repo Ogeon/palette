@@ -2,6 +2,7 @@
 ///
 
 use xyz::Xyz;
+use num::{Float,Zero};
 
 
 /// Data from http://www.cvrl.org/cmfs.htm, CIE 1931 2-deg, XYZ CMFs
@@ -112,11 +113,17 @@ pub struct Spectrum {
 }
 
 impl Spectrum {
-    pub fn new(data: [f32; SPECTRUM_SAMPLES]) -> Result<Self, ()> {
-        if data.iter().any(|&intensity| intensity < 0.) {
+    pub fn new<T: Float+Zero>(data: [T; SPECTRUM_SAMPLES]) -> Result<Self, ()> {
+        if data.iter().any(|&intensity| intensity < T::zero()) {
             Err(())
         } else {
-            Ok(Spectrum { data: data})
+            // convert input (f32 or f64) to f32 array
+            let mut data_f32 = [0.; SPECTRUM_SAMPLES];
+            for (idx, val) in data.iter().enumerate() {
+                data_f32[idx] = val.to_f32().unwrap();
+            }
+
+            Ok(Spectrum { data: data_f32})
         }
     }
 
@@ -132,6 +139,5 @@ impl Spectrum {
         }
 
         Xyz::new(x, y, z)
-
     }
 }
