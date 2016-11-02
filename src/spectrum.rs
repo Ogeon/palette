@@ -2,7 +2,6 @@
 ///
 
 use xyz::Xyz;
-use num;
 use num::{Float,Zero};
 
 
@@ -129,9 +128,9 @@ impl<T: Float+Zero+AddAssign> Spectrum<T> {
         let mut z : T = T::zero();
 
         for (intensity, xyz) in self.data.iter().zip(SPECTRUM_TO_XYZ_MAP.iter()) {
-            x += *intensity * num::cast(xyz[0]).unwrap();
-            y += *intensity * num::cast(xyz[1]).unwrap();
-            z += *intensity * num::cast(xyz[2]).unwrap();
+            x += *intensity * ::flt(xyz[0]);
+            y += *intensity * ::flt(xyz[1]);
+            z += *intensity * ::flt(xyz[2]);
         }
 
         Xyz::new(x, y, z)
