@@ -2,6 +2,7 @@
 ///
 
 use xyz::Xyz;
+use num;
 use num::{Float,Zero};
 
 
@@ -108,34 +109,29 @@ const SPECTRUM_TO_XYZ_MAP: [[f32; 3]; 95] = [
 pub const SPECTRUM_SAMPLES: usize = 95;
 
 /// ! Spectrum from 360 nm to 830 nm, increment by 5 nm
-pub struct Spectrum {
-    data: [f32; SPECTRUM_SAMPLES],
+pub struct Spectrum<T: Float> {
+    data: [T; SPECTRUM_SAMPLES],
 }
 
-impl Spectrum {
-    pub fn new<T: Float+Zero>(data: [T; SPECTRUM_SAMPLES]) -> Result<Self, ()> {
+use std::ops::AddAssign;
+impl<T: Float+Zero+AddAssign> Spectrum<T> {
+    pub fn new(data: [T; SPECTRUM_SAMPLES]) -> Result<Self, ()> {
         if data.iter().any(|&intensity| intensity < T::zero()) {
             Err(())
         } else {
-            // convert input (f32 or f64) to f32 array
-            let mut data_f32 = [0.; SPECTRUM_SAMPLES];
-            for (idx, val) in data.iter().enumerate() {
-                data_f32[idx] = val.to_f32().unwrap();
-            }
-
-            Ok(Spectrum { data: data_f32})
+            Ok(Spectrum { data: data})
         }
     }
 
-    pub fn to_xyz(&self) -> Xyz {
-        let mut x = 0.;
-        let mut y = 0.;
-        let mut z = 0.;
+    pub fn to_xyz(&self) -> Xyz<::white_point::D65, T> {
+        let mut x : T = T::zero();
+        let mut y : T = T::zero();
+        let mut z : T = T::zero();
 
         for (intensity, xyz) in self.data.iter().zip(SPECTRUM_TO_XYZ_MAP.iter()) {
-            x += intensity * xyz[0];
-            y += intensity * xyz[1];
-            z += intensity * xyz[2];
+            x += *intensity * num::cast(xyz[0]).unwrap();
+            y += *intensity * num::cast(xyz[1]).unwrap();
+            z += *intensity * num::cast(xyz[2]).unwrap();
         }
 
         Xyz::new(x, y, z)
