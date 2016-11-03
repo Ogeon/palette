@@ -3,6 +3,7 @@
 
 use xyz::Xyz;
 use num::{Float,Zero};
+use flt;
 
 
 /// Data from http://www.cvrl.org/cmfs.htm, CIE 1931 2-deg, XYZ CMFs
@@ -112,8 +113,9 @@ pub struct Spectrum<T: Float> {
     data: [T; SPECTRUM_SAMPLES],
 }
 
-use std::ops::AddAssign;
-impl<T: Float+Zero+AddAssign> Spectrum<T> {
+impl<T: Float+Zero> Spectrum<T> {
+    /// Construct a new `Spectrum` from an array
+    /// Fails if some value of data is less than zero
     pub fn new(data: [T; SPECTRUM_SAMPLES]) -> Result<Self, ()> {
         if data.iter().any(|&intensity| intensity < T::zero()) {
             Err(())
@@ -122,15 +124,16 @@ impl<T: Float+Zero+AddAssign> Spectrum<T> {
         }
     }
 
+    /// Converts a `Spectrum` to `Xyz` tristimulis values
     pub fn to_xyz(&self) -> Xyz<::white_point::D65, T> {
         let mut x : T = T::zero();
         let mut y : T = T::zero();
         let mut z : T = T::zero();
 
         for (intensity, xyz) in self.data.iter().zip(SPECTRUM_TO_XYZ_MAP.iter()) {
-            x += *intensity * ::flt(xyz[0]);
-            y += *intensity * ::flt(xyz[1]);
-            z += *intensity * ::flt(xyz[2]);
+            x = x + *intensity * flt(xyz[0]);
+            y = y + *intensity * flt(xyz[1]);
+            z = z + *intensity * flt(xyz[2]);
         }
 
         Xyz::new(x, y, z)
