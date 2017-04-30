@@ -19,7 +19,7 @@ Add the following lines to your `Cargo.toml` file:
 palette = "0.2"
 ```
 
-###Optional Features
+### Optional Features
 
 These features are enabled by default:
 
