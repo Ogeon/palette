@@ -26,7 +26,7 @@ pub trait Blend: Sized {
     ///acceptable, including functions and closures.
     ///
     ///```
-    ///use palette::{Rgb, Rgba, Blend};
+    ///use palette::{Rgb, RgbaLinear, Blend};
     ///use palette::blend::PreAlpha;
     ///use palette::white_point::D65;
     ///

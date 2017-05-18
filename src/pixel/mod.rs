@@ -2,13 +2,13 @@
 
 use num::Float;
 
-use {clamp, flt};
+use {Rgb, clamp, flt};
 
-pub use self::srgb::Srgb;
-pub use self::gamma_rgb::GammaRgb;
-
-mod srgb;
-mod gamma_rgb;
+// pub use self::srgb::Srgb;
+// pub use self::gamma_rgb::GammaRgb;
+//
+// mod srgb;
+// mod gamma_rgb;
 
 ///A conversion trait for RGB pixel formats.
 ///

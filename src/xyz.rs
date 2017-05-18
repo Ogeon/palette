@@ -3,10 +3,10 @@ use num::Float;
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;
 
-use {Alpha, Yxy, Rgb, Luma, Lab};
+use {Alpha, Yxy, RgbLinear, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
-use ::rgb_primaries::rgb_to_xyz_matrix;
+use profile::Primaries;
 use matrix::multiply_rgb_to_xyz;
 use {clamp, flt};
 
@@ -119,9 +119,9 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
         xyz
     }
 
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<Wp, T>();
-        multiply_rgb_to_xyz::<Wp, Wp, T>(&transform_matrix, &rgb)
+    fn from_rgb<P: Primaries<Wp, T>>(rgb: RgbLinear<P, Wp, T>) -> Self {
+        let transform_matrix = P::rgb_to_xyz_matrix();
+        multiply_rgb_to_xyz::<P, Wp, Wp, T>(&transform_matrix, &rgb)
     }
 
     fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
@@ -395,7 +395,7 @@ impl<Wp, T> Div<T> for Xyz<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use Rgb;
+    use RgbLinear;
     use Luma;
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
@@ -410,21 +410,21 @@ mod test {
 
     #[test]
     fn red() {
-        let a = Xyz::from(Rgb::new(1.0, 0.0, 0.0));
+        let a = Xyz::from(RgbLinear::new(1.0, 0.0, 0.0));
         let b = Xyz::new(0.41240, 0.21260, 0.01930);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn green() {
-        let a = Xyz::from(Rgb::new(0.0, 1.0, 0.0));
+        let a = Xyz::from(RgbLinear::new(0.0, 1.0, 0.0));
         let b = Xyz::new(0.35760, 0.71520, 0.11920);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn blue() {
-        let a = Xyz::from(Rgb::new(0.0, 0.0, 1.0));
+        let a = Xyz::from(RgbLinear::new(0.0, 0.0, 1.0));
         let b = Xyz::new(0.18050, 0.07220, 0.95030);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }

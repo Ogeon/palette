@@ -3,8 +3,9 @@ use num::Float;
 use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Rgb, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use {Alpha, RgbLinear, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::{WhitePoint, D65};
+use profile::{Primaries, SrgbProfile};
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<Wp = D65, T = f32> = Alpha<Hsl<Wp, T>, T>;
@@ -116,11 +117,11 @@ impl<Wp, T> FromColor<Wp, T> for Hsl<Wp, T>
         Wp: WhitePoint<T>
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<Wp, T> = xyz.into_rgb();
+        let rgb: RgbLinear<SrgbProfile, Wp, T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb(rgb: Rgb<Wp, T>) -> Self {
+    fn from_rgb<P: Primaries<Wp, T>>(rgb: RgbLinear<P, Wp, T>) -> Self {
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )

@@ -1,4 +1,4 @@
-use {Color, Colora, Rgb, Rgba, Blend, ComponentWise};
+use {Color, Colora, RgbLinear, RgbaLinear, Blend, ComponentWise};
 use blend::PreAlpha;
 
 #[test]

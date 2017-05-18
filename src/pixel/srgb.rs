@@ -2,7 +2,7 @@ use num::Float;
 
 use std::marker::PhantomData;
 
-use {Color, Alpha, Rgb, Rgba, clamp, flt};
+use {Color, Alpha, RgbLinear, RgbaLinear, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};
@@ -148,7 +148,7 @@ impl<Wp, T> Srgb<Wp, T>
     }
 
     ///Convert linear color components to sRGB encoding.
-    pub fn from_linear<C: Into<Rgba<Wp, T>>>(color: C) -> Srgb<Wp, T> {
+    pub fn from_linear<C: Into<RgbaLinear<Wp, T>>>(color: C) -> Srgb<Wp, T> {
         let rgb = color.into();
         Srgb {
             red: to_srgb(rgb.red),
@@ -160,9 +160,9 @@ impl<Wp, T> Srgb<Wp, T>
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear(&self) -> Rgba<Wp, T> {
+    pub fn to_linear(&self) -> RgbaLinear<Wp, T> {
         Alpha {
-            color: Rgb::with_wp(
+            color: RgbaLinear::with_wp(
                 from_srgb(self.red),
                 from_srgb(self.green),
                 from_srgb(self.blue),
@@ -172,25 +172,25 @@ impl<Wp, T> Srgb<Wp, T>
     }
 
     ///Shortcut to convert a linear color to an sRGB encoded pixel.
-    pub fn linear_to_pixel<C: Into<Rgba<Wp, T>>, P: RgbPixel<T>>(color: C) -> P {
+    pub fn linear_to_pixel<C: Into<RgbaLinear<Wp, T>>, P: RgbPixel<T>>(color: C) -> P {
         Srgb::from_linear(color).to_pixel()
     }
 }
 
-impl<Wp, T> From<Rgb<Wp, T>> for Srgb<Wp, T>
+impl<Wp, T> From<RgbLinear<Wp, T>> for Srgb<Wp, T>
     where T: Float,
         Wp: WhitePoint<T>
 {
-    fn from(rgb: Rgb<Wp, T>) -> Srgb<Wp, T> {
-        Rgba::from(rgb).into()
+    fn from(rgb: RgbLinear<Wp, T>) -> Srgb<Wp, T> {
+        RgbaLinear::from(rgb).into()
     }
 }
 
-impl<Wp, T> From<Rgba<Wp, T>> for Srgb<Wp, T>
+impl<Wp, T> From<RgbaLinear<Wp, T>> for Srgb<Wp, T>
     where T: Float,
         Wp: WhitePoint<T>
 {
-    fn from(rgba: Rgba<Wp, T>) -> Srgb<Wp, T> {
+    fn from(rgba: RgbaLinear<Wp, T>) -> Srgb<Wp, T> {
         Srgb::from_linear(rgba)
     }
 }
@@ -200,7 +200,7 @@ impl<Wp, T> From<Color<Wp, T>> for Srgb<Wp, T>
         Wp: WhitePoint<T>
 {
     fn from(color: Color<Wp, T>) -> Srgb<Wp, T> {
-        Rgb::from(color).into()
+        RgbaLinear::from(color).into()
     }
 }
 

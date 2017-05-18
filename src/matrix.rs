@@ -5,14 +5,19 @@ use num::Float;
 
 use std::marker::PhantomData;
 
-use {Xyz, Rgb};
+use {Xyz, RgbLinear};
 use white_point::WhitePoint;
+use profile::Primaries;
 
 ///A 9 element array representing a 3x3 matrix
 pub type Mat3<T> = [T;9];
 
 ///Multiply the 3x3 matrix with the XYZ color
-pub fn multiply_xyz<Swp: WhitePoint<T>, Dwp: WhitePoint<T>, T: Float>(c: &Mat3<T>, f: &Xyz<Swp, T>) -> Xyz<Dwp, T> {
+pub fn multiply_xyz<Swp, Dwp, T>(c: &Mat3<T>, f: &Xyz<Swp, T>) -> Xyz<Dwp, T>
+    where T: Float,
+        Swp: WhitePoint<T>,
+        Dwp: WhitePoint<T>,
+{
     Xyz {
         x: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         y: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
@@ -21,16 +26,27 @@ pub fn multiply_xyz<Swp: WhitePoint<T>, Dwp: WhitePoint<T>, T: Float>(c: &Mat3<T
     }
 }
 ///Multiply the 3x3 matrix with the XYZ color into RGB color
-pub fn multiply_xyz_to_rgb<Swp: WhitePoint<T>, Dwp: WhitePoint<T>, T: Float>(c: &Mat3<T>, f: &Xyz<Swp, T>) -> Rgb<Dwp, T> {
-    Rgb {
+pub fn multiply_xyz_to_rgb<C, Swp, Dwp, T>(c: &Mat3<T>, f: &Xyz<Swp, T>) -> RgbLinear<C, Dwp, T>
+    where T: Float,
+        Swp: WhitePoint<T>,
+        Dwp: WhitePoint<T>,
+        C: Primaries<Dwp, T>
+{
+    RgbLinear {
         red: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         green: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
         blue: (c[6] * f.x) + (c[7] * f.y) + (c[8] * f.z),
         white_point: PhantomData,
+        primaries: PhantomData,
     }
 }
 ///Multiply the 3x3 matrix with the  RGB into XYZ color
-pub fn multiply_rgb_to_xyz<Swp: WhitePoint<T>, Dwp: WhitePoint<T>, T: Float>(c: &Mat3<T>, f: &Rgb<Swp, T>) -> Xyz<Dwp, T> {
+pub fn multiply_rgb_to_xyz<P, Swp, Dwp, T>(c: &Mat3<T>, f: &RgbLinear<P, Swp, T>) -> Xyz<Dwp, T>
+    where T: Float,
+        Swp: WhitePoint<T>,
+        Dwp: WhitePoint<T>,
+        P: Primaries<Swp, T>
+{
     Xyz {
         x: (c[0] * f.red) + (c[1] * f.green) + (c[2] * f.blue),
         y: (c[3] * f.red) + (c[4] * f.green) + (c[5] * f.blue),

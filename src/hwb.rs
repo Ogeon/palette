@@ -311,7 +311,7 @@ impl<Wp, T> Sub<T> for Hwb<Wp, T>
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use ::{Rgb, Limited};
+    use {Rgb, Limited};
 
     #[test]
     fn red() {
