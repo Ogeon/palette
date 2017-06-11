@@ -3,7 +3,7 @@ use csv;
 use super::babel::BabelData;
 use super::color_checker::ColorCheckerData;
 
-#[derive(RustcDecodable, PartialEq)]
+#[derive(Deserialize, PartialEq)]
 pub struct ColorCheckerRaw {
     pub color_name: String,
     pub yxy_x: f64,
@@ -77,9 +77,9 @@ pub struct ColorCheckerRaw {
 
 pub fn load_babel() -> Vec<BabelData> {
     let file_name = "tests/color_checker_data/babel.csv";
-    let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for pointer data");
+    let mut rdr = csv::Reader::from_path(file_name).expect("csv file could not be loaded in tests for pointer data");
     let mut color_data: Vec<BabelData> = Vec::new();
-    for record in rdr.decode() {
+    for record in rdr.deserialize() {
         let r: ColorCheckerRaw = record.expect("color data could not be decoded in tests for cie 2004 data");
         color_data.push(r.into())
     }
@@ -88,9 +88,9 @@ pub fn load_babel() -> Vec<BabelData> {
 
 pub fn load_color_checker() -> Vec<ColorCheckerData> {
     let file_name = "tests/color_checker_data/color_checker.csv";
-    let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for pointer data");
+    let mut rdr = csv::Reader::from_path(file_name).expect("csv file could not be loaded in tests for pointer data");
     let mut color_data: Vec<ColorCheckerData> = Vec::new();
-    for record in rdr.decode() {
+    for record in rdr.deserialize() {
         let r: ColorCheckerRaw = record.expect("color data could not be decoded in tests for cie 2004 data");
         color_data.push(r.into())
     }

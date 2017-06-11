@@ -3,7 +3,9 @@ extern crate approx;
 #[macro_use]
 extern crate lazy_static;
 extern crate num;
-extern crate rustc_serialize;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 extern crate csv;
 extern crate palette;
 

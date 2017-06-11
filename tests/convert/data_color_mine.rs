@@ -6,7 +6,7 @@ use palette::{Lch, Lab, Xyz, Yxy, Rgb, Hsl, Hsv, Hwb, IntoColor};
 use palette::pixel::Srgb;
 use palette::white_point::D65;
 
-#[derive(RustcDecodable, PartialEq)]
+#[derive(Deserialize, PartialEq)]
 pub struct ColorMineRaw {
     pub color: String,
     pub hex: String,
@@ -116,10 +116,10 @@ lazy_static! {
 
 
 pub fn load_data() -> Vec<ColorMine> {
-    let mut rdr = csv::Reader::from_file("tests/convert/data_color_mine.csv")
+    let mut rdr = csv::Reader::from_path("tests/convert/data_color_mine.csv")
         .expect("csv file could not be loaded in tests for color mine data");
     let mut color_data: Vec<ColorMine> = Vec::new();
-    for record in rdr.decode() {
+    for record in rdr.deserialize() {
         let r: ColorMineRaw = record.expect("color data could not be decoded in tests for color mine data");
         color_data.push(r.into())
     }
