@@ -7,14 +7,14 @@ use palette::pixel::Srgb;
 
 use image::{RgbImage, GenericImage, SubImage};
 
-use clap::{App, Arg, SubCommand};
+use clap::{App, AppSettings, Arg, SubCommand};
 
 const SWATCH_SIZE: u32 = 128;
 
 fn main() {
     let matches = App::new("color_scheme")
         .about("Generates a very simple color scheme from an RGB8 color.")
-        .arg_required_else_help(true)
+        .setting(AppSettings::ArgRequiredElseHelp)
         .arg(
             Arg::with_name("red")
                 .required(true)
