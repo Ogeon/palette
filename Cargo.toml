@@ -29,11 +29,11 @@ version = "0.7"
 optional = true
 
 [dev-dependencies]
-image = "0.7"
+image = "0.13.0"
 clap = "2.24.0"
 csv = "0.15.0"
 rustc-serialize  = "0.3"
-lazy_static = "0.1"
+lazy_static = "0.2.0"
 
 [build-dependencies.phf_codegen]
 version = "0.7"
