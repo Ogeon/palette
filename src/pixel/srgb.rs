@@ -15,11 +15,18 @@ use white_point::{WhitePoint, D65};
 ///to assume that an image or pixel with unknown gamma is sRGB encoded.
 ///
 ///```
-///use palette::Rgb;
-///use palette::pixel::Srgb;
+/// #[macro_use] extern crate approx;
+/// # extern crate palette;
+/// # use palette::Rgb;
+/// # use palette::pixel::Srgb;
 ///
-///let c: Rgb = Srgb::new(0.5, 0.3, 0.1).into();
-///assert_eq!((0.5f32, 0.3, 0.1), Srgb::from(c).to_pixel());
+/// # fn main() {
+/// let c: Rgb = Srgb::new(0.5, 0.3, 0.1).into();
+/// let (r, g, b) = Srgb::from(c).to_pixel();
+/// assert_relative_eq!(0.5f32, r);
+/// assert_relative_eq!(0.3f32, g);
+/// assert_relative_eq!(0.1f32, b);
+/// # }
 ///```
 #[derive(Debug, PartialEq)]
 pub struct Srgb<Wp = D65, T = f32>

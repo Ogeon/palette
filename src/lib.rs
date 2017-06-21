@@ -43,7 +43,7 @@
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
-#[macro_use]
+#[cfg_attr(test, macro_use)]
 extern crate approx;
 
 extern crate num;
