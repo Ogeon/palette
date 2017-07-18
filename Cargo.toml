@@ -29,12 +29,12 @@ version = "0.7"
 optional = true
 
 [dev-dependencies]
-image = "0.14.0"
-clap = "2.24.0"
+image = "0.14"
+clap = "2"
 csv = "1.0.0-beta.3"
-serde = "1.0.0"
-serde_derive = "1.0.0"
-lazy_static = "0.2.0"
+serde = "1"
+serde_derive = "1"
+lazy_static = "0.2"
 
 [build-dependencies.phf_codegen]
 version = "0.7"
