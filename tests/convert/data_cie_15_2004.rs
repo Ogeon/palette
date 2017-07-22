@@ -11,7 +11,7 @@ use csv;
 use palette::{Xyz, Yxy,IntoColor};
 use palette::white_point::D65;
 
-#[derive(RustcDecodable, PartialEq)]
+#[derive(Deserialize, PartialEq)]
 struct Cie2004Raw{
     xyz_x: f32,
     xyz_y: f32,
@@ -55,9 +55,9 @@ impl_from_color_pointer!(Yxy);
 
 fn load_data() -> Vec<Cie2004> {
     let file_name = "tests/convert/data_cie_15_2004.csv";
-    let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for cie 2004 data");
+    let mut rdr = csv::Reader::from_path(file_name).expect("csv file could not be loaded in tests for cie 2004 data");
     let mut color_data: Vec<Cie2004> = Vec::new();
-    for record in rdr.decode() {
+    for record in rdr.deserialize() {
         let r: Cie2004Raw = record.expect("color data could not be decoded in tests for cie 2004 data");
         color_data.push(r.into())
     }

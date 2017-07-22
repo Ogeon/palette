@@ -29,7 +29,7 @@ fn flt<T: Float, P: ToPrimitive>(prim: P) -> T {
     NumCast::from(prim).unwrap()
 }
 
-#[derive(RustcDecodable, PartialEq)]
+#[derive(Deserialize, PartialEq)]
 struct PointerDataRaw{
     lch_l: f64,
     lch_c: f64,
@@ -81,9 +81,9 @@ lazy_static! {
 
 fn load_data() -> Vec<PointerData> {
     let file_name = "tests/pointer_dataset/pointer_data.csv";
-    let mut rdr = csv::Reader::from_file(file_name).expect("csv file could not be loaded in tests for pointer data");
+    let mut rdr = csv::Reader::from_path(file_name).expect("csv file could not be loaded in tests for pointer data");
     let mut color_data: Vec<PointerData> = Vec::new();
-    for record in rdr.decode() {
+    for record in rdr.deserialize() {
         let r: PointerDataRaw = record.expect("color data could not be decoded in tests for cie 2004 data");
         color_data.push(r.into())
     }
