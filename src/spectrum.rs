@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops::{Add, Sub, Mul, Div};
 
+use IntoColor;
 use flt;
 use num::{Float, FromPrimitive, Zero};
 use ordered_float::OrderedFloat;
@@ -129,7 +130,32 @@ fn lerp<T: Float>(a: T, b: T, t: T) -> T {
     a + (b - a) * t
 }
 
-/// Spectrum representing the relative intensity of 
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct Sample<T: Float>(OrderedFloat<f32>, T);
+
+impl<T: Float> Sample<T> {
+
+    /// Create a new Sample.
+    ///
+    /// # Panics
+    /// If the intensity is less than zero.
+    pub fn new(wavelength: f32, intensity: T) -> Sample<T> {
+        assert!(intensity >= T::zero(), "Intensity must be >= 0.");
+        Sample(OrderedFloat(wavelength), intensity)
+    }
+
+    #[inline(always)]
+    pub fn wavelength(&self) -> f32 {
+        self.0.into_inner()
+    }
+
+    #[inline(always)]
+    pub fn intensity(&self) -> T {
+        self.1
+    }
+}
+
+/// Spectrum representing the relative intensity of
 /// wavelengths from 360 nm to 830 nm.
 pub struct Spectrum<T: Float> {
     data: [T; N_SAMPLES],
@@ -161,7 +187,7 @@ impl<T> Spectrum<T>
         Spectrum { data: data }
     }
 
-    /// Create a `Spectrum` from a slice of (f32, Float) tuples
+    /// Create a `Spectrum` from a slice of (`f32`, `Float`) tuples
     /// representing a (wavelength, intensity) mapping.
     /// 
     /// The more data points there are the more accurate the 
@@ -170,47 +196,38 @@ impl<T> Spectrum<T>
     /// The intensity values must be greater than or equal to
     /// zero and not NaN.
     ///
-    /// # Panics
-    /// If an intensity value is less than zero.
-    pub fn from_samples(data: &[(f32, T)]) -> Spectrum<T> {
+    pub fn from_samples(data: &[Sample<T>]) -> Spectrum<T> {
         // TODO: replace this with sort_unstable_by() when stabilised.
-        assert!(data.iter().all(|&(_, intensity)| intensity >= T::zero()));
-        let mut data: Vec<(OrderedFloat<f32>, T)> = data
-            .iter()
-            .map(|&(l, i)| (OrderedFloat(l), i))
-            .collect();
-        data.sort_by(|a, b| a.0.cmp(&b.0));
-        let data: Vec<(f32, T)> = data
-            .into_iter()
-            .map(|(l, i)| (l.into_inner(), i))
-            .collect();
+        assert!(data.iter().all(|&sample| sample.intensity() >= T::zero()));
         if data.len() == 0 {
             return Spectrum { data: [T::zero(); N_SAMPLES] };
         }
-        // If there is only one data point we just have a constant
-        // intensity for the entire spectrum.
         if data.len() == 1 {
-            return Spectrum { data: [data[0].1; N_SAMPLES] };
+            return Spectrum { data: [data[0].intensity(); N_SAMPLES] };
         }
+
+        let mut data: Vec<Sample<T>> = data.iter().cloned().collect();
+        data.sort_by(|a, b| a.0.cmp(&b.0));
+
         let mut sampled: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
         for (lambda, sample) in (0..N_SAMPLES)
             .map(|i| (MIN_LAMBDA + (i * SAMPLE_STEP)) as f32)
             .zip(sampled.iter_mut())
         {
-            if lambda >= data.last().unwrap().0 {
-                *sample = data.last().unwrap().1;
-            } else if lambda <= data.first().unwrap().0 {
-                *sample = data.first().unwrap().1;
+            if lambda >= data.last().unwrap().wavelength() {
+                *sample = data.last().unwrap().intensity();
+            } else if lambda <= data.first().unwrap().wavelength() {
+                *sample = data.first().unwrap().intensity();
             } else {
                 // Find the upper and lower wavelengths bounding `lambda`
                 // and interpolate between them to find the intensity.
                 for patch in data.windows(2) {
-                    let (lo_lambda, lo_intensity) = patch[0];
-                    let (hi_lambda, hi_intensity) = patch[1];
-                    if lambda >= lo_lambda && lambda < hi_lambda {
-                        let t = T::from_f32((lambda - lo_lambda) / (hi_lambda - lo_lambda))
+                    let lo = patch[0];
+                    let hi = patch[1];
+                    if lambda >= lo.wavelength() && lambda < hi.wavelength() {
+                        let t = T::from_f32((lambda - lo.wavelength()) / (hi.wavelength() - lo.wavelength()))
                             .expect("Failed to convert f32 to Float.");
-                        *sample = lerp(lo_intensity, hi_intensity, t);
+                        *sample = lerp(lo.intensity(), hi.intensity(), t);
                         break;
                     }
                 }
@@ -218,13 +235,18 @@ impl<T> Spectrum<T>
         }
         Spectrum { data: sampled }
     }
+}
+
+impl<Wp, T> IntoColor<Wp, T> for Spectrum<T> 
+    where T: Float,
+        Wp: WhitePoint<T> {
 
     /// Converts a `Spectrum` to `Xyz` tristimulis values.
-    pub fn to_xyz<Wp: WhitePoint<T>>(&self) -> Xyz<Wp, T> {
-        let xyz = self.data.iter().zip(spectrum_to_xyz_map().iter())
+    fn into_xyz(self) -> Xyz<Wp, T> {
+        let xyz = self.data.into_iter().zip(spectrum_to_xyz_map().iter())
             .fold((T::zero(), T::zero(), T::zero()), |xyz, (intensity, value)| {
-                (xyz.0 + *intensity * value.0, 
-                 xyz.1 + *intensity * value.1, 
+                (xyz.0 + *intensity * value.0,
+                 xyz.1 + *intensity * value.1,
                  xyz.2 + *intensity * value.2)
             });
         Xyz::with_wp(xyz.0, xyz.1, xyz.2)
@@ -337,7 +359,7 @@ impl<T: Float> Div<T> for Spectrum<T> {
 
 #[cfg(test)]
 mod test {
-    use spectrum::Spectrum;
+    use spectrum::{Sample, Spectrum};
     use spectrum::N_SAMPLES;
 
     #[test]
@@ -349,7 +371,7 @@ mod test {
 
     #[test]
     fn test_from_samples_empty_slice() {
-        let data: &[(f32, f32)] = &[];
+        let data: &[Sample<f32>] = &[];
         let expected_data: [f32; N_SAMPLES] = [0.0; N_SAMPLES];
         let result = Spectrum::from_samples(data);
         assert!(result == Spectrum { data: expected_data });
@@ -357,7 +379,7 @@ mod test {
 
     #[test]
     fn test_from_samples_single_intensity() {
-        let data: &[(f32, f32)] = &[(360.0, 0.5)];
+        let data: &[Sample<f32>] = &[Sample::new(360.0, 0.5)];
         let expected_data: [f32; N_SAMPLES] = [0.5; N_SAMPLES];
         let result = Spectrum::from_samples(data);
         assert!(result == Spectrum { data: expected_data });
@@ -365,7 +387,7 @@ mod test {
 
     #[test]
     fn test_from_samples_interpolate() {
-        let data: &[(f32, f32)] = &[(355.0, 0.0), (365.0, 1.0)];
+        let data: &[Sample<f32>] = &[Sample::new(355.0, 0.0), Sample::new(365.0, 1.0)];
         let mut expected_data: [f32; N_SAMPLES] = [1.0; N_SAMPLES];
         // The first value (360) will be interpolated between 355 and 365.
         expected_data[0] = 0.5;

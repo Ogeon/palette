@@ -1,6 +1,6 @@
 use num::Float;
 
-use {Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
+use {Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Spectrum, Color};
 use white_point::{WhitePoint, D65};
 
 ///FromColor provides conversion between the colors.
@@ -55,6 +55,11 @@ pub trait FromColor<Wp = D65, T = f32>: Sized
 
     ///Convert from Luma
     fn from_luma(inp: Luma<Wp, T>) -> Self {
+        Self::from_xyz(inp.into_xyz())
+    }
+
+    /// Convert from Spectrum
+    fn from_spectrum(inp: Spectrum<T>) -> Self {
         Self::from_xyz(inp.into_xyz())
     }
 
