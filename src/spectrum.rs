@@ -1,5 +1,3 @@
-
-
 use std::fmt;
 use std::ops::{Add, Sub, Mul, Div};
 
@@ -140,9 +138,7 @@ pub struct Spectrum<T: Float> {
 impl<T: Float> Clone for Spectrum<T> {
     fn clone(&self) -> Spectrum<T> {
         let mut data: [T; SPECTRUM_SAMPLES] = [T::zero(); SPECTRUM_SAMPLES];
-        for (sample, cloned) in self.data.iter().zip(data.iter_mut()) {
-            *cloned = *sample;
-        }
+        data.copy_from_slice(&self.data);
         Spectrum {
             data: data,
         }
