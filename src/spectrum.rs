@@ -172,7 +172,7 @@ impl<T> Spectrum<T>
     ///
     /// # Panics
     /// If an intensity value is less than zero.
-    pub fn from_sparse(data: &[(f32, T)]) -> Spectrum<T> {
+    pub fn from_samples(data: &[(f32, T)]) -> Spectrum<T> {
         // TODO: replace this with sort_unstable_by() when stabilised.
         assert!(data.iter().all(|&(_, intensity)| intensity >= T::zero()));
         let mut data: Vec<(OrderedFloat<f32>, T)> = data
@@ -348,28 +348,28 @@ mod test {
     }
 
     #[test]
-    fn test_sparse_empty_slice() {
+    fn test_from_samples_empty_slice() {
         let data: &[(f32, f32)] = &[];
         let expected_data: [f32; N_SAMPLES] = [0.0; N_SAMPLES];
-        let result = Spectrum::from_sparse(data);
+        let result = Spectrum::from_samples(data);
         assert!(result == Spectrum { data: expected_data });
     }
 
     #[test]
-    fn test_sparse_single_intensity() {
+    fn test_from_samples_single_intensity() {
         let data: &[(f32, f32)] = &[(360.0, 0.5)];
         let expected_data: [f32; N_SAMPLES] = [0.5; N_SAMPLES];
-        let result = Spectrum::from_sparse(data);
+        let result = Spectrum::from_samples(data);
         assert!(result == Spectrum { data: expected_data });
     }
 
     #[test]
-    fn test_sparse_interpolate() {
+    fn test_from_samples_interpolate() {
         let data: &[(f32, f32)] = &[(355.0, 0.0), (365.0, 1.0)];
         let mut expected_data: [f32; N_SAMPLES] = [1.0; N_SAMPLES];
         // The first value (360) will be interpolated between 355 and 365.
         expected_data[0] = 0.5;
-        let result = Spectrum::from_sparse(data);
+        let result = Spectrum::from_samples(data);
         assert!(result == Spectrum { data: expected_data });
     }
 }
