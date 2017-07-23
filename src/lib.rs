@@ -49,9 +49,6 @@
 #[cfg_attr(test, macro_use)]
 extern crate approx;
 
-#[macro_use]
-extern crate error_chain;
-
 extern crate num;
 extern crate ordered_float;
 
@@ -237,7 +234,6 @@ macro_rules! assert_ranges {
     );
 }
 
-pub mod errors;
 pub mod gradient;
 pub mod pixel;
 pub mod blend;

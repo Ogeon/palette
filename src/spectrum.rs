@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::{Add, Sub, Mul, Div};
 
-use errors::*;
 use flt;
 use num::{Float, FromPrimitive, Zero};
 use ordered_float::OrderedFloat;
@@ -151,12 +150,12 @@ impl<T> Spectrum<T>
 {
     /// Create a Spectrum from an array of spectral intensity
     /// values assumed to be in the range 360 nm to 830 nm.
-    pub fn new(data: [T; N_SAMPLES]) -> Result<Self> {
-        if data.iter().any(|&intensity| intensity < T::zero()) {
-            Err(ErrorKind::SpectrumIntensityOutOfRange.into())
-        } else {
-            Ok(Spectrum { data: data })
-        }
+    ///
+    /// The intensity values must be greater than or equal to
+    /// zero and not NaN.
+    pub fn new(data: [T; N_SAMPLES]) -> Spectrum<T> {
+        assert!(data.iter().all(|&intensity| intensity >= T::zero()));
+        Spectrum { data: data }
     }
 
     /// Create a `Spectrum` from a slice of (f32, Float) tuples
@@ -164,8 +163,12 @@ impl<T> Spectrum<T>
     /// 
     /// The more data points there are the more accurate the 
     /// `Spectrum`'s internal representation will be.
-    pub fn from_sparse(data: &[(f32, T)]) -> Result<Self> {
+    ///
+    /// The intensity values must be greater than or equal to
+    /// zero and not NaN.
+    pub fn from_sparse(data: &[(f32, T)]) -> Spectrum<T> {
         // TODO: replace this with sort_unstable_by() when stabilised.
+        assert!(data.iter().all(|&(_, intensity)| intensity >= T::zero()));
         let mut data: Vec<(OrderedFloat<f32>, T)> = data
             .iter()
             .map(|&(l, i)| (OrderedFloat(l), i))
@@ -176,15 +179,12 @@ impl<T> Spectrum<T>
             .map(|(l, i)| (l.into_inner(), i))
             .collect();
         if data.len() == 0 {
-            return Ok(Spectrum { data: [T::zero(); N_SAMPLES] });
-        }
-        if data.iter().any(|&(_, intensity)| intensity < T::zero()) {
-            return Err(ErrorKind::SpectrumIntensityOutOfRange.into());
+            return Spectrum { data: [T::zero(); N_SAMPLES] };
         }
         // If there is only one data point we just have a constant
         // intensity for the entire spectrum.
         if data.len() == 1 {
-            return Ok(Spectrum { data: [data[0].1; N_SAMPLES] });
+            return Spectrum { data: [data[0].1; N_SAMPLES] };
         }
         let mut sampled: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
         for (lambda, sample) in (0..N_SAMPLES)
@@ -210,7 +210,7 @@ impl<T> Spectrum<T>
                 }
             }
         }
-        Ok(Spectrum { data: sampled })
+        Spectrum { data: sampled }
     }
 
     /// Converts a `Spectrum` to `Xyz` tristimulis values.
@@ -335,10 +335,10 @@ mod test {
     use spectrum::N_SAMPLES;
 
     #[test]
+    #[should_panic]
     fn test_new_invalid_spectral_data_errors() {
         let data: [f32; N_SAMPLES] = [-1.0; N_SAMPLES];
-        let result = Spectrum::new(data);
-        assert!(result.is_err());
+        Spectrum::new(data);
     }
 
     #[test]
@@ -346,8 +346,7 @@ mod test {
         let data: &[(f32, f32)] = &[];
         let expected_data: [f32; N_SAMPLES] = [0.0; N_SAMPLES];
         let result = Spectrum::from_sparse(data);
-        assert!(result.is_ok());
-        assert!(result.unwrap() == Spectrum { data: expected_data });
+        assert!(result == Spectrum { data: expected_data });
     }
 
     #[test]
@@ -355,8 +354,7 @@ mod test {
         let data: &[(f32, f32)] = &[(360.0, 0.5)];
         let expected_data: [f32; N_SAMPLES] = [0.5; N_SAMPLES];
         let result = Spectrum::from_sparse(data);
-        assert!(result.is_ok());
-        assert!(result.unwrap() == Spectrum { data: expected_data });
+        assert!(result == Spectrum { data: expected_data });
     }
 
     #[test]
@@ -366,7 +364,6 @@ mod test {
         // The first value (360) will be interpolated between 355 and 365.
         expected_data[0] = 0.5;
         let result = Spectrum::from_sparse(data);
-        assert!(result.is_ok());
-        assert!(result.unwrap() == Spectrum { data: expected_data });
+        assert!(result == Spectrum { data: expected_data });
     }
 }
