@@ -153,6 +153,9 @@ impl<T> Spectrum<T>
     ///
     /// The intensity values must be greater than or equal to
     /// zero and not NaN.
+    ///
+    /// # Panics
+    /// If an intensity value is less than zero.
     pub fn new(data: [T; N_SAMPLES]) -> Spectrum<T> {
         assert!(data.iter().all(|&intensity| intensity >= T::zero()));
         Spectrum { data: data }
@@ -166,6 +169,9 @@ impl<T> Spectrum<T>
     ///
     /// The intensity values must be greater than or equal to
     /// zero and not NaN.
+    ///
+    /// # Panics
+    /// If an intensity value is less than zero.
     pub fn from_sparse(data: &[(f32, T)]) -> Spectrum<T> {
         // TODO: replace this with sort_unstable_by() when stabilised.
         assert!(data.iter().all(|&(_, intensity)| intensity >= T::zero()));
