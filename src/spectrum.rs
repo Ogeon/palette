@@ -11,20 +11,21 @@ use xyz::Xyz;
 /// The smallest wavelength represented in the `Spectrum`
 /// data structure. This is the first value in the
 /// map's wavelength.
-pub const SPECTRUM_MIN_LAMBDA: f32 = 360.0;
+pub const MIN_LAMBDA: usize = 360;
 
 /// The largest wavelength represented in the `Spectrum`
-/// data structure. This is the last value in the
-/// map's wavelength.
+/// data structure. This is the last value in the map's
+/// wavelength.
 #[allow(dead_code)]
-pub const SPECTRUM_MAX_LAMBDA: f32 = 830.0;
+pub const MAX_LAMBDA: usize = 830;
 
-pub const SPECTRUM_SAMPLES: usize = 95;
-const SPECTRUM_SAMPLE_STEP: usize = 5;
+const SAMPLE_STEP: usize = 5;
+
+pub const N_SAMPLES: usize = (MAX_LAMBDA - MIN_LAMBDA) / SAMPLE_STEP + 1;
 
 /// Lookup table for converting a wavelength in the range
 /// [360, 830] nm into XYZ tristimulus values.
-fn spectrum_to_xyz_map<T: Float>() -> [(T, T, T); SPECTRUM_SAMPLES] {
+fn spectrum_to_xyz_map<T: Float>() -> [(T, T, T); N_SAMPLES] {
     [
         (flt(0.000129900000),flt(0.000003917000),flt(0.000606100000)),
         (flt(0.000232100000),flt(0.000006965000),flt(0.001086000000)),
@@ -132,12 +133,12 @@ fn lerp<T: Float>(a: T, b: T, t: T) -> T {
 /// Spectrum representing the relative intensity of 
 /// wavelengths from 360 nm to 830 nm.
 pub struct Spectrum<T: Float> {
-    data: [T; SPECTRUM_SAMPLES],
+    data: [T; N_SAMPLES],
 }
 
 impl<T: Float> Clone for Spectrum<T> {
     fn clone(&self) -> Spectrum<T> {
-        let mut data: [T; SPECTRUM_SAMPLES] = [T::zero(); SPECTRUM_SAMPLES];
+        let mut data: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
         data.copy_from_slice(&self.data);
         Spectrum {
             data: data,
@@ -150,7 +151,7 @@ impl<T> Spectrum<T>
 {
     /// Create a Spectrum from an array of spectral intensity
     /// values assumed to be in the range 360 nm to 830 nm.
-    pub fn new(data: [T; SPECTRUM_SAMPLES]) -> Result<Self> {
+    pub fn new(data: [T; N_SAMPLES]) -> Result<Self> {
         if data.iter().any(|&intensity| intensity < T::zero()) {
             Err(ErrorKind::SpectrumIntensityOutOfRange.into())
         } else {
@@ -175,7 +176,7 @@ impl<T> Spectrum<T>
             .map(|(l, i)| (l.into_inner(), i))
             .collect();
         if data.len() == 0 {
-            return Ok(Spectrum { data: [T::zero(); SPECTRUM_SAMPLES] });
+            return Ok(Spectrum { data: [T::zero(); N_SAMPLES] });
         }
         if data.iter().any(|&(_, intensity)| intensity < T::zero()) {
             return Err(ErrorKind::SpectrumIntensityOutOfRange.into());
@@ -183,11 +184,11 @@ impl<T> Spectrum<T>
         // If there is only one data point we just have a constant
         // intensity for the entire spectrum.
         if data.len() == 1 {
-            return Ok(Spectrum { data: [data[0].1; SPECTRUM_SAMPLES] });
+            return Ok(Spectrum { data: [data[0].1; N_SAMPLES] });
         }
-        let mut sampled: [T; SPECTRUM_SAMPLES] = [T::zero(); SPECTRUM_SAMPLES];
-        for (lambda, sample) in (0..SPECTRUM_SAMPLES)
-            .map(|i| SPECTRUM_MIN_LAMBDA + (i * SPECTRUM_SAMPLE_STEP) as f32)
+        let mut sampled: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
+        for (lambda, sample) in (0..N_SAMPLES)
+            .map(|i| (MIN_LAMBDA + (i * SAMPLE_STEP)) as f32)
             .zip(sampled.iter_mut())
         {
             if lambda >= data.last().unwrap().0 {
@@ -331,11 +332,11 @@ impl<T: Float> Div<T> for Spectrum<T> {
 #[cfg(test)]
 mod test {
     use spectrum::Spectrum;
-    use spectrum::SPECTRUM_SAMPLES;
+    use spectrum::N_SAMPLES;
 
     #[test]
     fn test_new_invalid_spectral_data_errors() {
-        let data: [f32; SPECTRUM_SAMPLES] = [-1.0; SPECTRUM_SAMPLES];
+        let data: [f32; N_SAMPLES] = [-1.0; N_SAMPLES];
         let result = Spectrum::new(data);
         assert!(result.is_err());
     }
@@ -343,7 +344,7 @@ mod test {
     #[test]
     fn test_sparse_empty_slice() {
         let data: &[(f32, f32)] = &[];
-        let expected_data: [f32; SPECTRUM_SAMPLES] = [0.0; SPECTRUM_SAMPLES];
+        let expected_data: [f32; N_SAMPLES] = [0.0; N_SAMPLES];
         let result = Spectrum::from_sparse(data);
         assert!(result.is_ok());
         assert!(result.unwrap() == Spectrum { data: expected_data });
@@ -352,7 +353,7 @@ mod test {
     #[test]
     fn test_sparse_single_intensity() {
         let data: &[(f32, f32)] = &[(360.0, 0.5)];
-        let expected_data: [f32; SPECTRUM_SAMPLES] = [0.5; SPECTRUM_SAMPLES];
+        let expected_data: [f32; N_SAMPLES] = [0.5; N_SAMPLES];
         let result = Spectrum::from_sparse(data);
         assert!(result.is_ok());
         assert!(result.unwrap() == Spectrum { data: expected_data });
@@ -361,7 +362,7 @@ mod test {
     #[test]
     fn test_sparse_interpolate() {
         let data: &[(f32, f32)] = &[(355.0, 0.0), (365.0, 1.0)];
-        let mut expected_data: [f32; SPECTRUM_SAMPLES] = [1.0; SPECTRUM_SAMPLES];
+        let mut expected_data: [f32; N_SAMPLES] = [1.0; N_SAMPLES];
         // The first value (360) will be interpolated between 355 and 365.
         expected_data[0] = 0.5;
         let result = Spectrum::from_sparse(data);
