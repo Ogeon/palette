@@ -174,7 +174,7 @@ impl<T: Float> Clone for Spectrum<T> {
 }
 
 impl<T> Spectrum<T>
-    where T: Float + Zero + FromPrimitive + ::std::fmt::Debug
+    where T: Float + Zero + FromPrimitive
 {
     /// Create a `Spectrum` from an array of spectral intensity
     /// values assumed to be in the range 360 nm to 830 nm.
