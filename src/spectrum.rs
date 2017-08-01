@@ -21,11 +21,11 @@ pub const MAX_WAVELENGTH: usize = 830;
 
 const SAMPLE_STEP: usize = 5;
 
-pub const N_SAMPLES: usize = (MAX_WAVELENGTH - MIN_WAVELENGTH) / SAMPLE_STEP + 1;
+pub const SAMPLE_COUNT: usize = (MAX_WAVELENGTH - MIN_WAVELENGTH) / SAMPLE_STEP + 1;
 
 /// Lookup table for converting a wavelength in the range
 /// [360, 830] nm into XYZ tristimulus values.
-fn spectrum_to_xyz_map<T: Float>() -> [(T, T, T); N_SAMPLES] {
+fn spectrum_to_xyz_map<T: Float>() -> [(T, T, T); SAMPLE_COUNT] {
     [
         (flt(0.000129900000),flt(0.000003917000),flt(0.000606100000)),
         (flt(0.000232100000),flt(0.000006965000),flt(0.001086000000)),
@@ -160,12 +160,12 @@ impl<T: Float> Sample<T> {
 /// Represents the relative intensity of
 /// light at wavelengths from 360 nm to 830 nm.
 pub struct Spectrum<T: Float> {
-    data: [T; N_SAMPLES],
+    data: [T; SAMPLE_COUNT],
 }
 
 impl<T: Float> Clone for Spectrum<T> {
     fn clone(&self) -> Spectrum<T> {
-        let mut data: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
+        let mut data: [T; SAMPLE_COUNT] = [T::zero(); SAMPLE_COUNT];
         data.copy_from_slice(&self.data);
         Spectrum {
             data: data,
@@ -184,7 +184,7 @@ impl<T> Spectrum<T>
     ///
     /// # Panics
     /// If an intensity value is less than zero.
-    pub fn new(data: [T; N_SAMPLES]) -> Spectrum<T> {
+    pub fn new(data: [T; SAMPLE_COUNT]) -> Spectrum<T> {
         assert!(data.iter().all(|&intensity| intensity >= T::zero()));
         Spectrum { data: data }
     }
@@ -202,15 +202,15 @@ impl<T> Spectrum<T>
         if data.is_empty() {
             let intensity = data.first().unwrap_or(&Sample::new(0.0, T::zero())).intensity();
             return Spectrum {
-                data: [intensity; N_SAMPLES]
+                data: [intensity; SAMPLE_COUNT]
             };
         }
 
         let mut data: Vec<Sample<T>> = data.iter().cloned().collect();
         data.sort_by(|a, b| a.0.cmp(&b.0));
 
-        let mut sampled: [T; N_SAMPLES] = [T::zero(); N_SAMPLES];
-        for ((segment_lo, segment_hi), sample) in (0..N_SAMPLES).map(|i| {
+        let mut sampled: [T; SAMPLE_COUNT] = [T::zero(); SAMPLE_COUNT];
+        for ((segment_lo, segment_hi), sample) in (0..SAMPLE_COUNT).map(|i| {
                 let lambda = (MIN_WAVELENGTH + (i * SAMPLE_STEP)) as f32;
                 (lambda, lambda + SAMPLE_STEP as f32)
             }).zip(sampled.iter_mut())
@@ -372,19 +372,19 @@ impl<T: Float> Div<T> for Spectrum<T> {
 #[cfg(test)]
 mod test {
     use spectrum::{Sample, Spectrum};
-    use spectrum::N_SAMPLES;
+    use spectrum::SAMPLE_COUNT;
 
     #[test]
     #[should_panic]
     fn test_new_invalid_spectral_data_errors() {
-        let data: [f32; N_SAMPLES] = [-1.0; N_SAMPLES];
+        let data: [f32; SAMPLE_COUNT] = [-1.0; SAMPLE_COUNT];
         Spectrum::new(data);
     }
 
     #[test]
     fn test_from_samples_empty_slice() {
         let data: &[Sample<f32>] = &[];
-        let expected_data: [f32; N_SAMPLES] = [0.0; N_SAMPLES];
+        let expected_data: [f32; SAMPLE_COUNT] = [0.0; SAMPLE_COUNT];
         let result = Spectrum::from_samples(data);
         let expected = Spectrum { data: expected_data };
         assert!(
@@ -395,7 +395,7 @@ mod test {
     #[test]
     fn test_from_samples_single_intensity() {
         let data: &[Sample<f32>] = &[Sample::new(360.0, 0.5)];
-        let expected_data: [f32; N_SAMPLES] = [0.5; N_SAMPLES];
+        let expected_data: [f32; SAMPLE_COUNT] = [0.5; SAMPLE_COUNT];
         let result = Spectrum::from_samples(data);
         let expected = Spectrum { data: expected_data };
         assert!(
@@ -406,7 +406,7 @@ mod test {
     #[test]
     fn test_from_samples_interpolate() {
         let data: &[Sample<f32>] = &[Sample::new(355.0, 0.0), Sample::new(365.0, 1.0)];
-        let mut expected_data: [f32; N_SAMPLES] = [1.0; N_SAMPLES];
+        let mut expected_data: [f32; SAMPLE_COUNT] = [1.0; SAMPLE_COUNT];
         expected_data[0] = 0.75;
         let result = Spectrum::from_samples(data);
         let expected = Spectrum { data: expected_data };
