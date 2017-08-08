@@ -47,6 +47,7 @@
 extern crate approx;
 
 extern crate num;
+extern crate ordered_float;
 
 #[cfg(feature = "phf")]
 extern crate phf;
@@ -71,6 +72,7 @@ pub use hsv::{Hsv, Hsva};
 pub use hsl::{Hsl, Hsla};
 pub use yxy::{Yxy, Yxya};
 pub use hwb::{Hwb, Hwba};
+pub use spectrum::Spectrum;
 
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
@@ -246,6 +248,7 @@ mod lch;
 mod hsv;
 mod hsl;
 mod hwb;
+mod spectrum;
 
 mod hues;
 
