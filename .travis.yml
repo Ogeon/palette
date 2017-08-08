@@ -13,7 +13,8 @@ os:
 branches:
   only:
     - master
-    - auto
+    - staging
+    - trying
 script:
   - cargo build -v --features strict
   - cargo test -v --features strict
