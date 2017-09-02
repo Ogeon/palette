@@ -71,7 +71,7 @@ impl From<ColorMineRaw> for ColorMine {
             xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
             rgb: LinSrgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
-            linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into(),
+            linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into_linear(),
             hsl: Hsl::new(src.hsl_h.into(), src.hsl_s, src.hsl_l),
             hsv: Hsv::new(src.hsv_h.into(), src.hsv_s, src.hsv_v),
             hwb: Hwb::new(src.hwb_h.into(), src.hwb_w, src.hwb_b),

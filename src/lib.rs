@@ -1,41 +1,66 @@
-//!A library that makes linear color calculations and conversion easy and
-//!accessible for anyone. It provides both precision tools that lets you work
-//!in exactly the color space you want to, as well as a general color type
-//!that abstracts away some of the technical details.
+//! A library that makes linear color calculations and conversion easy and
+//! accessible for anyone. It provides both precision tools that lets you work
+//! in exactly the color space you want to, as well as a general color type
+//! that abstracts away some of the technical details.
 //!
-//!# Linear?
+//! # Linear?
 //!
-//!Colors in, for example, images are often "gamma corrected" or stored in
-//!sRGB format as a compression method and to prevent banding. This is also a
-//!bit of a legacy from the ages of the CRT monitors, where the output from
-//!the electron guns was nonlinear. The problem is that these formats doesn't
-//!represent the actual intensities, and the compression has to be reverted to
-//!make sure that any operations on the colors are accurate. This library uses
-//!a completely linear work flow, and comes with the tools for transitioning
-//!between linear and non-linear RGB.
+//! Colors in, for example, images are often "gamma corrected" or stored in
+//! sRGB format as a compression method and to prevent banding. This is also a
+//! bit of a legacy from the ages of the CRT monitors, where the output from
+//! the electron guns was nonlinear. The problem is that these formats doesn't
+//! represent the actual intensities, and the compression has to be reverted to
+//! make sure that any operations on the colors are accurate. This library uses
+//! a completely linear work flow, and comes with the tools for transitioning
+//! between linear and non-linear RGB.
 //!
-//!# Transparency
+//! For example, this does not work:
 //!
-//!There are many cases where pixel transparency is important, but there are
-//!also many cases where it becomes a dead weight, if it's always stored
-//!together with the color, but not used. Palette has therefore adopted a
-//!structure where the transparency component (alpha) is attachable using the
-//![`Alpha`](struct.Alpha.html) type, instead of having copies of each color
-//!space.
+//! ```rust
+//! // An alias for Rgb<Srgb>, which is what most pictures store.
+//! use palette::Srgb;
 //!
-//!This approach comes with the extra benefit of allowing operations to
-//!selectively affect the alpha component:
+//! let orangeish = Srgb::new(1.0, 0.6, 0.0);
+//! let blueish = Srgb::new(0.0, 0.2, 1.0);
+//! // let whateve_it_becomes = orangeish + blueish;
+//! ```
 //!
-//!```
-//!use palette::{LinSrgb, LinSrgba};
+//! Instead, they have to be made linear before adding:
 //!
-//!let mut c1 = LinSrgba::new(1.0, 0.5, 0.5, 0.8);
-//!let c2 = LinSrgb::new(0.5, 1.0, 1.0);
+//! ```rust
+//! // An alias for Rgb<Srgb>, which is what most pictures store.
+//! use palette::Srgb;
 //!
-//!c1.color = c1.color * c2; //Leave the alpha as it is
-//!c1.blue += 0.2; //The color components can easily be accessed
-//!c1 = c1 * 0.5; //Scale both the color and the alpha
-//!```
+//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
+//! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
+//! let whateve_it_becomes = orangeish + blueish;
+//!
+//! // Encode the result back into sRGB and create a byte array
+//! let pixel: [u8;3] = Srgb::linear_to_pixel(whateve_it_becomes);
+//! ```
+//!
+//! # Transparency
+//!
+//! There are many cases where pixel transparency is important, but there are
+//! also many cases where it becomes a dead weight, if it's always stored
+//! together with the color, but not used. Palette has therefore adopted a
+//! structure where the transparency component (alpha) is attachable using the
+//! [`Alpha`](struct.Alpha.html) type, instead of having copies of each color
+//! space.
+//!
+//! This approach comes with the extra benefit of allowing operations to
+//! selectively affect the alpha component:
+//!
+//! ```
+//! use palette::{LinSrgb, LinSrgba};
+//!
+//! let mut c1 = LinSrgba::new(1.0, 0.5, 0.5, 0.8);
+//! let c2 = LinSrgb::new(0.5, 1.0, 1.0);
+//!
+//! c1.color = c1.color * c2; //Leave the alpha as it is
+//! c1.blue += 0.2; //The color components can easily be accessed
+//! c1 = c1 * 0.5; //Scale both the color and the alpha
+//! ```
 
 
 #![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
@@ -57,7 +82,7 @@ use approx::ApproxEq;
 
 use pixel::GammaRgb;
 use blend::PreAlpha;
-use rgb::{RgbSpace, RgbStandard, LinRgb, LinRgba, Rgb, Rgba};
+use rgb::{RgbSpace, Rgb, Rgba, Lin};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -333,7 +358,7 @@ macro_rules! make_color {
             type Scalar = T;
 
             fn mix(&self, other: &Color<S, T>, factor: T) -> Color<S, T> {
-                LinRgb::from(*self).mix(&LinRgb::from(*other), factor).into()
+                Rgb::<Lin<S>, T>::from(*self).mix(&Rgb::<Lin<S>, T>::from(*other), factor).into()
             }
         }
 
@@ -387,14 +412,14 @@ macro_rules! make_color {
             where T: Float,
                 S: RgbSpace,
         {
-            type Color = LinRgb<S, T>;
+            type Color = Rgb<Lin<S>, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<LinRgb<S, T>, T> {
-                LinRgba::from(self).into()
+            fn into_premultiplied(self) -> PreAlpha<Rgb<Lin<S>, T>, T> {
+                Rgba::<Lin<S>, T>::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<LinRgb<S, T>, T>) -> Self {
-                LinRgba::from(color).into()
+            fn from_premultiplied(color: PreAlpha<Rgb<Lin<S>, T>, T>) -> Self {
+                Rgba::<Lin<S>, T>::from(color).into()
             }
         }
 
@@ -464,43 +489,13 @@ macro_rules! make_color {
             }
         )+
 
-        impl<S, T> From<Rgb<S, T>> for Color<S::Space, T>
-            where T: Float,
-                S: RgbStandard,
-        {
-            fn from(color: Rgb<S, T>) -> Color<S::Space, T> {
-                Color::LinRgb(color.into_linear())
-            }
-        }
-
-        impl<S, T> From<Rgba<S, T>> for Color<S::Space, T>
-            where T: Float,
-                S: RgbStandard,
-        {
-            fn from(color: Rgba<S, T>) -> Color<S::Space, T> {
-                Color::LinRgb(color.color.into_linear())
-            }
-        }
-
-        impl<S, T> From<Rgba<S, T>> for Alpha<Color<S::Space, T>,T>
-            where T: Float,
-                S: RgbStandard,
-        {
-            fn from(color: Rgba<S, T>) -> Alpha<Color<S::Space, T>,T> {
-                Alpha {
-                    color: Color::LinRgb(color.color.into_linear()),
-                    alpha: color.alpha,
-                }
-            }
-        }
-
         impl<S, Wp, T> From<GammaRgb<Wp, T>> for Color<S, T> where
             S: RgbSpace<WhitePoint=Wp>,
             Wp: WhitePoint,
             T: Float
         {
             fn from(color: GammaRgb<Wp, T>) -> Color<S, T> {
-                Color::LinRgb(color.into())
+                Color::Rgb(color.into())
             }
         }
     )
@@ -531,7 +526,7 @@ make_color! {
     }
 
     ///Linear RGB.
-    LinRgb<S> {
+    Rgb<Lin<S>> {
         ///Linear RGB.
         linear_rgb(red: T, green: T, blue: T)[alpha: T] => new;
 

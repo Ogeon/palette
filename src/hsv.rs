@@ -9,7 +9,7 @@ use {Alpha, Xyz, Hsl, Hwb};
 use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
 use {clamp, flt};
 use white_point::WhitePoint;
-use rgb::{RgbSpace, LinRgb};
+use rgb::{RgbSpace, Rgb, Lin};
 use rgb::standards::Srgb;
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
@@ -131,21 +131,21 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: LinRgb<S, T> = LinRgb::from_xyz(xyz);
+        let rgb: Rgb<Lin<S>, T> = Rgb::from_xyz(xyz);
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<Sp, T>) -> Self {
-        let rgb = LinRgb::<S, T>::from_rgb(rgb);
+    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Lin<Sp>, T>) -> Self {
+        let rgb = Rgb::<Lin<S>, T>::from_rgb(rgb);
 
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
             } else {
-                (rgb.green, rgb.red, rgb.blue - rgb.red , flt(2.0))
+                (rgb.green, rgb.red, rgb.blue - rgb.red, flt(2.0))
             };
             if rgb.blue > max {
-                ( rgb.blue, min , rgb.red - rgb.green , flt(4.0))
+                ( rgb.blue, min, rgb.red - rgb.green, flt(4.0))
             } else {
                 let min_val = if rgb.blue < min { rgb.blue } else { min };
                 (max , min_val , sep, coeff)
@@ -197,7 +197,7 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsv.reinterpret_as()
         } else {
-            Self::from_rgb(LinRgb::<Sp, T>::from_hsv(hsv))
+            Self::from_rgb(Rgb::<Lin<Sp>, T>::from_hsv(hsv))
         }
     }
 

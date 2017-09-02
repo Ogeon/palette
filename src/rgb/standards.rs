@@ -1,4 +1,5 @@
 //!Various RGB standards.
+use std::marker::PhantomData;
 
 use num_traits::Float;
 use Yxy;
@@ -48,5 +49,30 @@ impl TransferFn for Srgb {
         } else {
             x.powf(T::one() / flt(2.4)) * flt(1.055) - flt(0.055)
         }
+    }
+}
+
+/// A generic RGB standard with linear components.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Lin<S = Srgb>(PhantomData<S>);
+
+impl<S: RgbSpace> RgbStandard for Lin<S> {
+    type Space = S;
+    type TransferFn = Linear;
+}
+
+///Linear color component encoding.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Linear;
+
+impl TransferFn for Linear {
+    #[inline(always)]
+    fn into_linear<T: Float>(x: T) -> T {
+        x
+    }
+
+    #[inline(always)]
+    fn from_linear<T: Float>(x: T) -> T {
+        x
     }
 }

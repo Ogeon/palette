@@ -7,7 +7,7 @@ use std::any::TypeId;
 
 use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
 use white_point::WhitePoint;
-use rgb::{LinRgb, RgbSpace};
+use rgb::{Rgb, RgbSpace, Lin};
 use rgb::standards::Srgb;
 
 ///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
@@ -131,12 +131,12 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
         Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: LinRgb<S, T> = xyz.into_rgb();
+        let rgb: Rgb<Lin<S>, T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<Sp, T>) -> Self {
-        let rgb = LinRgb::<S, T>::from_rgb(rgb);
+    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Lin<Sp>, T>) -> Self {
+        let rgb = Rgb::<Lin<S>, T>::from_rgb(rgb);
 
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
@@ -175,7 +175,7 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsl.reinterpret_as()
         } else {
-            Self::from_rgb(LinRgb::<Sp, T>::from_hsl(hsl))
+            Self::from_rgb(Rgb::<Lin<Sp>, T>::from_hsl(hsl))
         }
     }
 

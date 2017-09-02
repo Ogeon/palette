@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 
 use Xyz;
 use white_point::WhitePoint;
-use rgb::{Primaries, RgbSpace, LinRgb};
+use rgb::{Primaries, RgbSpace, Rgb, Lin};
 use convert::IntoColor;
 
 ///A 9 element array representing a 3x3 matrix
@@ -23,16 +23,16 @@ pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Float>(c: &Mat3<T>, f: 
     }
 }
 ///Multiply the 3x3 matrix with the XYZ color into RGB color
-pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Xyz<S::WhitePoint, T>) -> LinRgb<S, T> {
-    LinRgb {
+pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Xyz<S::WhitePoint, T>) -> Rgb<Lin<S>, T> {
+    Rgb {
         red: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         green: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
         blue: (c[6] * f.x) + (c[7] * f.y) + (c[8] * f.z),
-        space: PhantomData,
+        standard: PhantomData,
     }
 }
 ///Multiply the 3x3 matrix with the  RGB into XYZ color
-pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &LinRgb<S, T>) -> Xyz<S::WhitePoint, T> {
+pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Rgb<Lin<S>, T>) -> Xyz<S::WhitePoint, T> {
     Xyz {
         x: (c[0] * f.red) + (c[1] * f.green) + (c[2] * f.blue),
         y: (c[3] * f.red) + (c[4] * f.green) + (c[5] * f.blue),
@@ -86,7 +86,7 @@ pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Float>() -> Mat3<T> {
 
     let mut transform_matrix = mat3_from_primaries(r, g, b);
 
-    let s_matrix: LinRgb<S, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &S::WhitePoint::get_xyz());
+    let s_matrix: Rgb<Lin<S>, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &S::WhitePoint::get_xyz());
     transform_matrix[0] = transform_matrix[0] * s_matrix.red;
     transform_matrix[1] = transform_matrix[1] * s_matrix.green;
     transform_matrix[2] = transform_matrix[2] * s_matrix.blue;
@@ -113,7 +113,7 @@ fn mat3_from_primaries<T: Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b
 #[cfg(test)]
 mod test {
     use Xyz;
-    use rgb::LinRgb;
+    use rgb::{Rgb, Lin};
     use rgb::standards::Srgb;
     use chromatic_adaptation::AdaptInto;
     use white_point::D50;
@@ -179,10 +179,10 @@ mod test {
 
     #[test]
     fn d65_to_d50() {
-        let input: LinRgb<Srgb> = LinRgb::new(1.0, 1.0, 1.0);
-        let expected: LinRgb<(Srgb, D50)> = LinRgb::with_wp(1.0, 1.0, 1.0);
+        let input: Rgb<Lin<Srgb>> = Rgb::new(1.0, 1.0, 1.0);
+        let expected: Rgb<Lin<(Srgb, D50)>> = Rgb::new(1.0, 1.0, 1.0);
 
-        let computed: LinRgb<(Srgb, D50)> = input.adapt_into();
+        let computed: Rgb<Lin<(Srgb, D50)>> = input.adapt_into();
         assert_relative_eq!(expected, computed, epsilon = 0.000001);
     }
 }

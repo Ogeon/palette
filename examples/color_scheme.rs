@@ -84,7 +84,7 @@ fn main() {
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary: Color = Srgb::new_u8(red, green, blue).into();
+    let primary: Color = Srgb::new_u8(red, green, blue).into_linear().into();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {

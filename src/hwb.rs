@@ -355,15 +355,31 @@ impl<S, T> ApproxEq for Hwb<S, T>
         T::default_max_ulps()
     }
     fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-        self.hue.relative_eq(&other.hue, epsilon, max_relative) &&
-        self.whiteness.relative_eq(&other.whiteness, epsilon, max_relative) &&
-        self.blackness.relative_eq(&other.blackness, epsilon, max_relative)
+        let equal_shade = self.whiteness.relative_eq(&other.whiteness, epsilon, max_relative) &&
+        self.blackness.relative_eq(&other.blackness, epsilon, max_relative);
+
+        // The hue doesn't matter that much when the color is gray, and may fluctuate due to precision errors.
+        // This is a blunt tool, but works for now.
+        let is_gray = self.blackness + self.whiteness >= T::one() || other.blackness + other.whiteness >= T::one();
+        if is_gray {
+            equal_shade
+        } else {
+            self.hue.relative_eq(&other.hue, epsilon, max_relative) && equal_shade
+        }
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
-        self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
-        self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps) &&
-        self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps)
+        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps) &&
+        self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps);
+
+        // The hue doesn't matter that much when the color is gray, and may fluctuate due to precision errors.
+        // This is a blunt tool, but works for now.
+        let is_gray = self.blackness + self.whiteness >= T::one() || other.blackness + other.whiteness >= T::one();
+        if is_gray {
+            equal_shade
+        } else {
+            self.hue.ulps_eq(&other.hue, epsilon, max_ulps) && equal_shade
+        }
     }
 }
 
@@ -376,14 +392,14 @@ mod test {
     fn red() {
         let a = Hwb::from(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hwb::new(0.0.into(), 0.0, 0.0);
-        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn orange() {
         let a = Hwb::from(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hwb::new(30.0.into(), 0.0, 0.0);
-        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
@@ -404,7 +420,7 @@ mod test {
     fn purple() {
         let a = Hwb::from(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hwb::new(270.0.into(), 0.0, 0.0);
-        assert_relative_eq!(a, b);
+        assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]

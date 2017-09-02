@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use {Alpha, Yxy, Luma, Lab};
 use {Limited, Mix, Shade, FromColor, ComponentWise};
 use white_point::{WhitePoint, D65};
-use rgb::{RgbSpace, LinRgb};
+use rgb::{RgbSpace, Rgb, Lin};
 use matrix::{rgb_to_xyz_matrix, multiply_rgb_to_xyz};
 use {clamp, flt};
 
@@ -119,7 +119,7 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
         xyz
     }
 
-    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: LinRgb<S, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Lin<S>, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S, T>();
         multiply_rgb_to_xyz(&transform_matrix, &rgb)
     }

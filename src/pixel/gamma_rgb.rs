@@ -6,7 +6,8 @@ use {Alpha, clamp, flt};
 
 use pixel::RgbPixel;
 use white_point::{WhitePoint, D65};
-use rgb::{RgbSpace, LinRgb, LinRgba};
+use rgb::{RgbSpace, Rgb, Rgba, RgbStandard};
+use rgb::standards::Linear;
 
 ///A gamma encoded color.
 ///
@@ -162,7 +163,11 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Convert linear color components to gamma encoding.
-    pub fn from_linear<C: Into<LinRgba<S, T>>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> GammaRgb<Wp, T> {
+    pub fn from_linear<S, C>(color: C, gamma: T) -> GammaRgb<Wp, T> where
+        C: Into<Rgba<S, T>>,
+        S: RgbStandard<TransferFn=Linear>,
+        S::Space: RgbSpace<WhitePoint=Wp>
+    {
         let rgb = color.into();
         GammaRgb {
             red: to_gamma(rgb.red, gamma),
@@ -175,9 +180,12 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Decode this color to a linear representation.
-    pub fn to_linear<S: RgbSpace<WhitePoint=Wp>>(&self) -> LinRgba<S, T> {
+    pub fn to_linear<S>(&self) -> Rgba<S, T> where
+        S: RgbStandard<TransferFn=Linear>,
+        S::Space: RgbSpace<WhitePoint=Wp>
+    {
         Alpha {
-            color: LinRgb::with_wp (
+            color: Rgb::new (
                 from_gamma(self.red, self.gamma),
                 from_gamma(self.green, self.gamma),
                 from_gamma(self.blue, self.gamma),
@@ -187,7 +195,12 @@ impl<Wp, T> GammaRgb<Wp, T>
     }
 
     ///Shortcut to convert a linear color to a gamma encoded pixel.
-    pub fn linear_to_pixel<C: Into<LinRgba<S, T>>, P: RgbPixel<T>, S: RgbSpace<WhitePoint=Wp>>(color: C, gamma: T) -> P {
+    pub fn linear_to_pixel<S, P, C>(color: C, gamma: T) -> P where
+        C: Into<Rgba<S, T>>,
+        P: RgbPixel<T>,
+        S: RgbStandard<TransferFn=Linear>,
+        S::Space: RgbSpace<WhitePoint=Wp>
+    {
         GammaRgb::from_linear(color, gamma).to_pixel()
     }
 }

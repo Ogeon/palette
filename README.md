@@ -91,7 +91,7 @@ a desaturated version of the original.
 extern crate palette;
 use palette::{Color, Srgb, Shade, Saturate};
 
-let color: Color = Srgb::new(0.8, 0.2, 0.1).into();
+let color: Color = Srgb::new(0.8, 0.2, 0.1).into_linear().into();
 let lighter = color.lighten(0.1);
 let desaturated = color.desaturate(0.5);
 ```
