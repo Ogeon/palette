@@ -9,7 +9,7 @@ use {Alpha, Xyz, Hsl, Hwb};
 use {Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor};
 use {clamp, flt};
 use white_point::WhitePoint;
-use rgb::{RgbSpace, Rgb, Lin};
+use rgb::{RgbSpace, Rgb, Linear};
 use rgb::standards::Srgb;
 
 ///Linear HSV with an alpha component. See the [`Hsva` implementation in `Alpha`](struct.Alpha.html#Hsva).
@@ -131,12 +131,12 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<Lin<S>, T> = Rgb::from_xyz(xyz);
+        let rgb: Rgb<Linear<S>, T> = Rgb::from_xyz(xyz);
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Lin<Sp>, T>) -> Self {
-        let rgb = Rgb::<Lin<S>, T>::from_rgb(rgb);
+    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Linear<Sp>, T>) -> Self {
+        let rgb = Rgb::<Linear<S>, T>::from_rgb(rgb);
 
         let ( max, min, sep , coeff) = {
             let (max, min , sep, coeff) = if rgb.red > rgb.green {
@@ -197,7 +197,7 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsv.reinterpret_as()
         } else {
-            Self::from_rgb(Rgb::<Lin<Sp>, T>::from_hsv(hsv))
+            Self::from_rgb(Rgb::<Linear<Sp>, T>::from_hsv(hsv))
         }
     }
 

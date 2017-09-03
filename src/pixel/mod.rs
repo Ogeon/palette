@@ -4,10 +4,6 @@ use num_traits::Float;
 
 use {clamp, flt};
 
-pub use self::gamma_rgb::GammaRgb;
-
-mod gamma_rgb;
-
 ///A transfer function to and from linear space.
 pub trait TransferFn {
     ///Convert the color component `x` from linear space.

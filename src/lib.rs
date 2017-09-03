@@ -80,9 +80,8 @@ use num_traits::{Float, ToPrimitive, NumCast};
 
 use approx::ApproxEq;
 
-use pixel::GammaRgb;
 use blend::PreAlpha;
-use rgb::{RgbSpace, Rgb, Rgba, Lin};
+use rgb::{RgbSpace, Rgb, Rgba, Linear};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -279,8 +278,6 @@ pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
 
-use white_point::WhitePoint;
-
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
@@ -358,7 +355,7 @@ macro_rules! make_color {
             type Scalar = T;
 
             fn mix(&self, other: &Color<S, T>, factor: T) -> Color<S, T> {
-                Rgb::<Lin<S>, T>::from(*self).mix(&Rgb::<Lin<S>, T>::from(*other), factor).into()
+                Rgb::<Linear<S>, T>::from(*self).mix(&Rgb::<Linear<S>, T>::from(*other), factor).into()
             }
         }
 
@@ -412,14 +409,14 @@ macro_rules! make_color {
             where T: Float,
                 S: RgbSpace,
         {
-            type Color = Rgb<Lin<S>, T>;
+            type Color = Rgb<Linear<S>, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<Lin<S>, T>, T> {
-                Rgba::<Lin<S>, T>::from(self).into()
+            fn into_premultiplied(self) -> PreAlpha<Rgb<Linear<S>, T>, T> {
+                Rgba::<Linear<S>, T>::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<Lin<S>, T>, T>) -> Self {
-                Rgba::<Lin<S>, T>::from(color).into()
+            fn from_premultiplied(color: PreAlpha<Rgb<Linear<S>, T>, T>) -> Self {
+                Rgba::<Linear<S>, T>::from(color).into()
             }
         }
 
@@ -488,16 +485,6 @@ macro_rules! make_color {
                 }
             }
         )+
-
-        impl<S, Wp, T> From<GammaRgb<Wp, T>> for Color<S, T> where
-            S: RgbSpace<WhitePoint=Wp>,
-            Wp: WhitePoint,
-            T: Float
-        {
-            fn from(color: GammaRgb<Wp, T>) -> Color<S, T> {
-                Color::Rgb(color.into())
-            }
-        }
     )
 }
 
@@ -526,7 +513,7 @@ make_color! {
     }
 
     ///Linear RGB.
-    Rgb<Lin<S>> {
+    Rgb<Linear<S>> {
         ///Linear RGB.
         linear_rgb(red: T, green: T, blue: T)[alpha: T] => new;
 

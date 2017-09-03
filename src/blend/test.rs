@@ -1,5 +1,5 @@
 use {Color, Colora, LinSrgb, LinSrgba, Blend, ComponentWise};
-use rgb::{Rgb, Lin};
+use rgb::{Rgb, Linear};
 use blend::PreAlpha;
 
 #[test]
@@ -7,7 +7,7 @@ fn blend_color() {
     let a = Color::linear_rgb(1.0, 0.0, 0.0);
     let b = Color::linear_rgb(0.0, 0.0, 1.0);
 
-    let c: LinSrgb = a.blend(b, |a: PreAlpha<Rgb<Lin<_>>, _>, b: PreAlpha<Rgb<Lin<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: LinSrgb = a.blend(b, |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
     assert_relative_eq!(LinSrgb::new(1.0, 0.0, 1.0), c);
 }
 
@@ -16,7 +16,7 @@ fn blend_alpha_color() {
     let a = Colora::linear_rgb(1.0, 0.0, 0.0, 0.2);
     let b = Colora::linear_rgb(0.0, 0.0, 1.0, 0.2);
 
-    let c: LinSrgba = a.blend(b, |a: PreAlpha<Rgb<Lin<_>>, _>, b: PreAlpha<Rgb<Lin<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: LinSrgba = a.blend(b, |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
     assert_relative_eq!(LinSrgba::new(0.2 / 0.4, 0.0, 0.2 / 0.4, 0.4), c);
 }
 

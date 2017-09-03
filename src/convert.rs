@@ -2,7 +2,7 @@ use num_traits::Float;
 
 use {Alpha, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
 use white_point::{WhitePoint, D65};
-use rgb::{RgbSpace, RgbStandard, Rgb, Lin};
+use rgb::{RgbSpace, RgbStandard, Rgb, Linear};
 
 ///FromColor provides conversion between the colors.
 ///
@@ -35,18 +35,18 @@ pub trait FromColor<Wp = D65, T = f32>: Sized
     }
 
     ///Convert from RGB color space
-    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(inp: Rgb<Lin<S>, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(inp: Rgb<Linear<S>, T>) -> Self {
         Self::from_xyz(inp.into_xyz())
     }
 
     ///Convert from HSL color space
     fn from_hsl<S: RgbSpace<WhitePoint=Wp>>(inp: Hsl<S, T>) -> Self {
-        Self::from_rgb(Rgb::<Lin<S>, T>::from_hsl(inp))
+        Self::from_rgb(Rgb::<Linear<S>, T>::from_hsl(inp))
     }
 
     ///Convert from HSV color space
     fn from_hsv<S: RgbSpace<WhitePoint=Wp>>(inp: Hsv<S, T>) -> Self {
-        Self::from_rgb(Rgb::<Lin<S>, T>::from_hsv(inp))
+        Self::from_rgb(Rgb::<Linear<S>, T>::from_hsv(inp))
     }
 
     ///Convert from HWB color space
@@ -90,19 +90,19 @@ pub trait IntoColor<Wp = D65, T = f32>: Sized
     }
 
     ///Convert into RGB color space.
-    fn into_rgb<S: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Lin<S>, T> {
+    fn into_rgb<S: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Linear<S>, T> {
         Rgb::from_xyz(self.into_xyz())
     }
 
     ///Convert into HSL color space
     fn into_hsl<S: RgbSpace<WhitePoint=Wp>>(self) -> Hsl<S, T> {
-        let rgb: Rgb<Lin<S>, T> = self.into_rgb();
+        let rgb: Rgb<Linear<S>, T> = self.into_rgb();
         Hsl::from_rgb(rgb)
     }
 
     ///Convert into HSV color space
     fn into_hsv<S: RgbSpace<WhitePoint=Wp>>(self) -> Hsv<S, T> {
-        let rgb: Rgb<Lin<S>, T> = self.into_rgb();
+        let rgb: Rgb<Linear<S>, T> = self.into_rgb();
         Hsv::from_rgb(rgb)
     }
 
@@ -142,7 +142,7 @@ macro_rules! impl_into_color {
                 Lch::$from_fn(self)
             }
 
-            fn into_rgb<S: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Lin<S>, T> {
+            fn into_rgb<S: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Linear<S>, T> {
                 Rgb::$from_fn(self)
             }
 
@@ -187,7 +187,7 @@ macro_rules! impl_into_color_rgb {
                 Lch::$from_fn(self)
             }
 
-            fn into_rgb<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Lin<Sp>, T> {
+            fn into_rgb<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Linear<Sp>, T> {
                 Rgb::$from_fn(self)
             }
 
@@ -384,7 +384,7 @@ impl_from_trait!(<S, T> (Lab<S::WhitePoint, T>, into_lab) => {Hsl<S, T>, Hsv<S, 
 impl_from_trait!(<S, T> (Lch<S::WhitePoint, T>, into_lch) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
 impl_from_trait!(<S, T> (Luma<S::WhitePoint, T>, into_luma) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
 
-impl_from_trait!(<S, T> (Rgb<Lin<S>, T>, into_rgb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hsv<S, T>, Hwb<S, T>, Luma<S::WhitePoint, T>});
+impl_from_trait!(<S, T> (Rgb<Linear<S>, T>, into_rgb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hsv<S, T>, Hwb<S, T>, Luma<S::WhitePoint, T>});
 impl_from_trait!(<S, T> (Hsl<S, T>, into_hsl) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsv<S, T>, Hwb<S, T>, Luma<S::WhitePoint, T>});
 impl_from_trait!(<S, T> (Hsv<S, T>, into_hsv) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hwb<S, T>, Luma<S::WhitePoint, T>});
 impl_from_trait!(<S, T> (Hwb<S, T>, into_hwb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hsv<S, T>, Luma<S::WhitePoint, T>});
