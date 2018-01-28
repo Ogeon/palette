@@ -1,4 +1,4 @@
-use num::{Float, One, Zero};
+use num_traits::{Float, One, Zero};
 
 use {ComponentWise, clamp, flt};
 use blend::{PreAlpha, BlendFunction};

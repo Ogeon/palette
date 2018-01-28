@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut, Add, Sub, Mul, Div};
 
-use num::Float;
+use num_traits::Float;
 
 use approx::ApproxEq;
 
@@ -34,7 +34,7 @@ impl<C, T: Float> DerefMut for Alpha<C, T> {
 
 impl<C: Mix> Mix for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
-    
+
     fn mix(&self, other: &Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.mix(&other.color, factor),

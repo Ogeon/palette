@@ -1,5 +1,5 @@
 //!This module defines the red, blue and green primaries for the common Rgb color spaces
-use num::Float;
+use num_traits::Float;
 
 
 use {Yxy, Xyz, Rgb, IntoColor};

@@ -1,6 +1,6 @@
 //!Types for interpolation between multiple colors.
 
-use num::{Float, One, Zero};
+use num_traits::{Float, One, Zero};
 use std::cmp::max;
 use approx::ApproxEq;
 

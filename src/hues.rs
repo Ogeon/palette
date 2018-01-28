@@ -1,4 +1,4 @@
-use num::Float;
+use num_traits::Float;
 
 use std::f64::consts::PI;
 use std::cmp::PartialEq;

@@ -1,4 +1,4 @@
-use num::Float;
+use num_traits::Float;
 
 use {Alpha, Rgb, Luma, Xyz, Yxy, Lab, Lch, Hsv, Hwb, Hsl, Color};
 use white_point::{WhitePoint, D65};

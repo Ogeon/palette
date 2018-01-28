@@ -6,7 +6,7 @@
 //!unacceptable results when attempting to color-correct a photograph taken with incandescent lighting.
 
 
-use num::Float;
+use num_traits::Float;
 
 use {Xyz, flt};
 
@@ -17,7 +17,7 @@ use {Xyz, flt};
 ///"white" in image capture, encoding, or reproduction.
 ///
 ///Custom white points can be easily defined on an empty struct with the tristimulus values
-///and can be used in place of the ones defined in this library. 
+///and can be used in place of the ones defined in this library.
 pub trait WhitePoint<T: Float>: Sized {
     ///Get the Xyz chromacity co-ordinates for the white point.
     fn get_xyz() -> Xyz<Self, T>;

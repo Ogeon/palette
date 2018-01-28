@@ -21,7 +21,7 @@ named = []
 strict = []
 
 [dependencies]
-num = "0.1"
+num-traits = "0.1"
 approx = "0.1"
 
 [dependencies.phf]

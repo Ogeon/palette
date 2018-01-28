@@ -1,4 +1,4 @@
-use num::Float;
+use num_traits::Float;
 use approx::ApproxEq;
 
 use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};

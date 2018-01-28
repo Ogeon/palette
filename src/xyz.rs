@@ -1,4 +1,4 @@
-use num::Float;
+use num_traits::Float;
 
 use std::ops::{Add, Sub, Mul, Div};
 use std::marker::PhantomData;

@@ -1,6 +1,6 @@
 extern crate image;
 extern crate palette;
-extern crate num;
+extern crate num_traits;
 
 use image::{RgbImage, GenericImage};
 

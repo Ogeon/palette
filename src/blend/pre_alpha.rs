@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
 use approx::ApproxEq;
-use num::Float;
+use num_traits::Float;
 
 use {Alpha, ComponentWise, Mix, Blend, clamp};
 
@@ -86,7 +86,7 @@ impl<C, T> Blend for PreAlpha<C, T> where
 
 impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
     type Scalar = C::Scalar;
-    
+
     fn mix(&self, other: &PreAlpha<C, C::Scalar>, factor: C::Scalar) -> PreAlpha<C, C::Scalar> {
         PreAlpha {
             color: self.color.mix(&other.color, factor),
