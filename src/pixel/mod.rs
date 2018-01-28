@@ -1,6 +1,6 @@
 //!Pixel encodings and pixel format conversion.
 
-use num::Float;
+use num_traits::Float;
 
 use {clamp, flt};
 

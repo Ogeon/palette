@@ -46,12 +46,12 @@
 #[cfg_attr(test, macro_use)]
 extern crate approx;
 
-extern crate num;
+extern crate num_traits;
 
 #[cfg(feature = "phf")]
 extern crate phf;
 
-use num::{Float, ToPrimitive, NumCast};
+use num_traits::{Float, ToPrimitive, NumCast};
 
 use approx::ApproxEq;
 
@@ -692,6 +692,6 @@ pub trait ComponentWise {
 }
 
 ///A convenience function to convert a constant number to Float Type
-fn flt<T: num::Float, P: ToPrimitive>(prim: P) -> T {
+fn flt<T: num_traits::Float, P: ToPrimitive>(prim: P) -> T {
     NumCast::from(prim).unwrap()
 }

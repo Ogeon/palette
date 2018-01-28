@@ -1,7 +1,7 @@
 //!This module provides simple matrix operations on 3x3 matrix to aid in chromatic adaptation and
 //!conversion calculations.
 
-use num::Float;
+use num_traits::Float;
 
 use std::marker::PhantomData;
 
