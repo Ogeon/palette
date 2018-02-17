@@ -26,21 +26,20 @@ pub trait Blend: Sized {
     ///acceptable, including functions and closures.
     ///
     ///```
-    ///use palette::{Rgb, Rgba, Blend};
+    ///use palette::{LinSrgb, LinSrgba, Blend};
     ///use palette::blend::PreAlpha;
-    ///use palette::white_point::D65;
     ///
-    ///type PreRgba = PreAlpha<Rgb<D65, f32>, f32>;
+    ///type PreRgba = PreAlpha<LinSrgb<f32>, f32>;
     ///
     ///fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
     ///    PreAlpha {
-    ///        color: Rgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),
+    ///        color: LinSrgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),
     ///        alpha: a.alpha * b.alpha,
     ///    }
     ///}
     ///
-    ///let a = Rgba::new(0.2, 0.5, 0.1, 0.8);
-    ///let b = Rgba::new(0.6, 0.3, 0.5, 0.1);
+    ///let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+    ///let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
     ///let c = a.blend(b, blend_mode);
     ///```
     fn blend<F>(self, destination: Self, blend_function: F) -> Self where F: BlendFunction<Self::Color> {

@@ -11,15 +11,15 @@ u', v'		0.2008907213	0.4608888395
 Note: The xyz and yxy conversions do not use the updated conversion formula. So they are not used.
 */
 
-use num_traits::{Float, ToPrimitive, NumCast};
+use num_traits::{Float, NumCast, ToPrimitive};
 use csv;
-use palette::{Xyz, Lch, Lab, IntoColor};
+use palette::{IntoColor, Lab, Lch, Xyz};
 use palette::white_point::WhitePoint;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
-impl<T: Float> WhitePoint<T> for PointerWP {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for PointerWP {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.980722647624), T::one(), flt(1.182254189827))
     }
 }
@@ -30,7 +30,7 @@ fn flt<T: Float, P: ToPrimitive>(prim: P) -> T {
 }
 
 #[derive(Deserialize, PartialEq)]
-struct PointerDataRaw{
+struct PointerDataRaw {
     lch_l: f64,
     lch_c: f64,
     lch_h: f64,
@@ -78,13 +78,14 @@ lazy_static! {
     static ref TEST_DATA: Vec<PointerData> = load_data();
 }
 
-
 fn load_data() -> Vec<PointerData> {
     let file_name = "tests/pointer_dataset/pointer_data.csv";
-    let mut rdr = csv::Reader::from_path(file_name).expect("csv file could not be loaded in tests for pointer data");
+    let mut rdr = csv::Reader::from_path(file_name)
+        .expect("csv file could not be loaded in tests for pointer data");
     let mut color_data: Vec<PointerData> = Vec::new();
     for record in rdr.deserialize() {
-        let r: PointerDataRaw = record.expect("color data could not be decoded in tests for cie 2004 data");
+        let r: PointerDataRaw =
+            record.expect("color data could not be decoded in tests for cie 2004 data");
         color_data.push(r.into())
     }
     color_data

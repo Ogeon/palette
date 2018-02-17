@@ -6,16 +6,15 @@
 //!CSS3) and they can be used as if they were pixel values:
 //!
 //!```
-//!use palette::Rgb;
-//!use palette::pixel::Srgb;
+//!use palette::Srgb;
 //!use palette::named;
 //!
 //!//From constant
-//!let from_const: Rgb = Srgb::from_pixel(&named::OLIVE).into();
+//!let from_const = Srgb::<f32>::from_pixel(&named::OLIVE).into_linear();
 //!
 //!//From name string
 //!let olive = named::from_str("olive").expect("unknown color");
-//!let from_str: Rgb = Srgb::from_pixel(&olive).into();
+//!let from_str = Srgb::from_pixel(&olive).into_linear();
 //!
 //!assert_eq!(from_const, from_str);
 //!```

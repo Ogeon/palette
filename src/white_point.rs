@@ -18,9 +18,9 @@ use {Xyz, flt};
 ///
 ///Custom white points can be easily defined on an empty struct with the tristimulus values
 ///and can be used in place of the ones defined in this library.
-pub trait WhitePoint<T: Float>: Sized {
+pub trait WhitePoint {
     ///Get the Xyz chromacity co-ordinates for the white point.
-    fn get_xyz() -> Xyz<Self, T>;
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T>;
 }
 
 ///CIE standard illuminant A
@@ -30,8 +30,8 @@ pub trait WhitePoint<T: Float>: Sized {
 ///Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct A;
-impl<T: Float> WhitePoint<T> for A {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for A {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(1.09850), T::one(), flt(0.35585))
     }
 }
@@ -41,8 +41,8 @@ impl<T: Float> WhitePoint<T> for A {
 ///Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct B;
-impl<T: Float> WhitePoint<T> for B {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for B {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.99072), T::one(), flt(0.85223))
     }
 }
@@ -52,8 +52,8 @@ impl<T: Float> WhitePoint<T> for B {
 ///Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct C;
-impl<T: Float> WhitePoint<T> for C {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for C {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.98074), T::one(), flt(1.18232))
     }
 }
@@ -63,8 +63,8 @@ impl<T: Float> WhitePoint<T> for C {
 ///for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50;
-impl<T: Float> WhitePoint<T> for D50 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D50 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.96422), T::one(), flt(0.82521))
     }
 }
@@ -74,8 +74,8 @@ impl<T: Float> WhitePoint<T> for D50 {
 ///for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55;
-impl<T: Float> WhitePoint<T> for D55 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D55 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.95682), T::one(), flt(0.92149))
     }
 }
@@ -85,8 +85,8 @@ impl<T: Float> WhitePoint<T> for D55 {
 ///for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65;
-impl<T: Float> WhitePoint<T> for D65 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D65 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.95047), T::one(), flt(1.08883))
     }
 }
@@ -96,8 +96,8 @@ impl<T: Float> WhitePoint<T> for D65 {
 ///for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75;
-impl<T: Float> WhitePoint<T> for D75 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D75 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.94972), T::one(), flt(1.22638))
     }
 }
@@ -107,8 +107,8 @@ impl<T: Float> WhitePoint<T> for D75 {
 ///Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct E;
-impl<T: Float> WhitePoint<T> for E {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for E {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(T::one(), T::one(),  T::one())
     }
 }
@@ -117,8 +117,8 @@ impl<T: Float> WhitePoint<T> for E {
 ///F2 represents a semi-broadband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F2;
-impl<T: Float> WhitePoint<T> for F2 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for F2 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.99186), T::one(), flt(0.67393))
     }
 }
@@ -127,8 +127,8 @@ impl<T: Float> WhitePoint<T> for F2 {
 ///F7 represents a broadband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F7;
-impl<T: Float> WhitePoint<T> for F7 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for F7 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.95041), T::one(), flt(1.08747))
     }
 }
@@ -137,8 +137,8 @@ impl<T: Float> WhitePoint<T> for F7 {
 ///F11 represents a narrowband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F11;
-impl<T: Float> WhitePoint<T> for F11 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for F11 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(1.00962), T::one(), flt(0.64350))
     }
 }
@@ -148,8 +148,8 @@ impl<T: Float> WhitePoint<T> for F11 {
 ///for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50Degree10;
-impl<T: Float> WhitePoint<T> for D50Degree10 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D50Degree10 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.9672), T::one(), flt(0.8143))
     }
 }
@@ -159,8 +159,8 @@ impl<T: Float> WhitePoint<T> for D50Degree10 {
 ///for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55Degree10;
-impl<T: Float> WhitePoint<T> for D55Degree10 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D55Degree10 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.958), T::one(), flt(0.9093))
     }
 }
@@ -170,8 +170,8 @@ impl<T: Float> WhitePoint<T> for D55Degree10 {
 ///for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65Degree10;
-impl<T: Float> WhitePoint<T> for D65Degree10 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D65Degree10 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.9481), T::one(), flt(1.073))
     }
 }
@@ -181,8 +181,8 @@ impl<T: Float> WhitePoint<T> for D65Degree10 {
 ///for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75Degree10;
-impl<T: Float> WhitePoint<T> for D75Degree10 {
-    fn get_xyz() -> Xyz<Self, T> {
+impl WhitePoint for D75Degree10 {
+    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.94416), T::one(), flt(1.2064))
     }
 }

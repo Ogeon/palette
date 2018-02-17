@@ -1,45 +1,68 @@
-//!A library that makes linear color calculations and conversion easy and
-//!accessible for anyone. It provides both precision tools that lets you work
-//!in exactly the color space you want to, as well as a general color type
-//!that abstracts away some of the technical details.
+//! A library that makes linear color calculations and conversion easy and
+//! accessible for anyone. It provides both precision tools that lets you work
+//! in exactly the color space you want to, as well as a general color type
+//! that abstracts away some of the technical details.
 //!
-//!# Linear?
+//! # Linear?
 //!
-//!Colors in, for example, images are often "gamma corrected" or stored in
-//!sRGB format as a compression method and to prevent banding. This is also a
-//!bit of a legacy from the ages of the CRT monitors, where the output from
-//!the electron guns was nonlinear. The problem is that these formats doesn't
-//!represent the actual intensities, and the compression has to be reverted to
-//!make sure that any operations on the colors are accurate. This library uses
-//!a completely linear work flow, and comes with the tools for transitioning
-//!between linear and non-linear RGB.
+//! Colors in, for example, images are often "gamma corrected" or stored in
+//! sRGB format as a compression method and to prevent banding. This is also a
+//! bit of a legacy from the ages of the CRT monitors, where the output from
+//! the electron guns was nonlinear. The problem is that these formats doesn't
+//! represent the actual intensities, and the compression has to be reverted to
+//! make sure that any operations on the colors are accurate. This library uses
+//! a completely linear work flow, and comes with the tools for transitioning
+//! between linear and non-linear RGB.
 //!
-//!# Transparency
+//! For example, this does not work:
 //!
-//!There are many cases where pixel transparency is important, but there are
-//!also many cases where it becomes a dead weight, if it's always stored
-//!together with the color, but not used. Palette has therefore adopted a
-//!structure where the transparency component (alpha) is attachable using the
-//![`Alpha`](struct.Alpha.html) type, instead of having copies of each color
-//!space.
+//! ```rust
+//! // An alias for Rgb<Srgb>, which is what most pictures store.
+//! use palette::Srgb;
 //!
-//!This approach comes with the extra benefit of allowing operations to
-//!selectively affect the alpha component:
+//! let orangeish = Srgb::new(1.0, 0.6, 0.0);
+//! let blueish = Srgb::new(0.0, 0.2, 1.0);
+//! // let whateve_it_becomes = orangeish + blueish;
+//! ```
 //!
-//!```
-//!use palette::{Rgb, Rgba};
+//! Instead, they have to be made linear before adding:
 //!
-//!let mut c1 = Rgba::new(1.0, 0.5, 0.5, 0.8);
-//!let c2 = Rgb::new(0.5, 1.0, 1.0);
+//! ```rust
+//! // An alias for Rgb<Srgb>, which is what most pictures store.
+//! use palette::Srgb;
 //!
-//!c1.color = c1.color * c2; //Leave the alpha as it is
-//!c1.blue += 0.2; //The color components can easily be accessed
-//!c1 = c1 * 0.5; //Scale both the color and the alpha
-//!```
-
+//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
+//! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
+//! let whateve_it_becomes = orangeish + blueish;
+//!
+//! // Encode the result back into sRGB and create a byte array
+//! let pixel: [u8;3] = Srgb::linear_to_pixel(whateve_it_becomes);
+//! ```
+//!
+//! # Transparency
+//!
+//! There are many cases where pixel transparency is important, but there are
+//! also many cases where it becomes a dead weight, if it's always stored
+//! together with the color, but not used. Palette has therefore adopted a
+//! structure where the transparency component (alpha) is attachable using the
+//! [`Alpha`](struct.Alpha.html) type, instead of having copies of each color
+//! space.
+//!
+//! This approach comes with the extra benefit of allowing operations to
+//! selectively affect the alpha component:
+//!
+//! ```
+//! use palette::{LinSrgb, LinSrgba};
+//!
+//! let mut c1 = LinSrgba::new(1.0, 0.5, 0.5, 0.8);
+//! let c2 = LinSrgb::new(0.5, 1.0, 1.0);
+//!
+//! c1.color = c1.color * c2; //Leave the alpha as it is
+//! c1.blue += 0.2; //The color components can easily be accessed
+//! c1 = c1 * 0.5; //Scale both the color and the alpha
+//! ```
 
 #![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
-
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
@@ -51,18 +74,18 @@ extern crate num_traits;
 #[cfg(feature = "phf")]
 extern crate phf;
 
-use num_traits::{Float, ToPrimitive, NumCast};
+use num_traits::{Float, NumCast, ToPrimitive};
 
 use approx::ApproxEq;
 
-use pixel::{Srgb, GammaRgb};
 use blend::PreAlpha;
+use rgb::{Linear, Rgb, RgbSpace, Rgba};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
-pub use rgb::{Rgb, Rgba};
+pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
@@ -86,16 +109,14 @@ macro_rules! assert_ranges {
     );
 
     (
-        $ty:ident;
+        $ty:ident < $($ty_params:ty),+ >;
         limited {$($limited:ident: $limited_from:expr => $limited_to:expr),+}
         limited_min {$($limited_min:ident: $limited_min_from:expr => $limited_min_to:expr),*}
         unlimited {$($unlimited:ident: $unlimited_from:expr => $unlimited_to:expr),*}
     ) => (
         {
             use std::iter::repeat;
-            use std::marker::PhantomData;
             use Limited;
-            use white_point::D65;
 
             {
                 print!("checking below limits ... ");
@@ -121,18 +142,18 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
-                    let expected = $ty::<D65, f64> {
+                    let expected: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited_from.into(),)+
                         $($limited_min: $limited_min_from.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
 
                     assert!(!c.is_valid());
@@ -166,11 +187,11 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
 
@@ -205,18 +226,18 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
-                    let c = $ty::<D65, f64> {
+                    let c: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
-                    let expected = $ty::<D65, _> {
+                    let expected: $ty<$($ty_params),+> = $ty {
                         $($limited: $limited_to.into(),)+
                         $($limited_min: $limited_min.into(),)*
                         $($unlimited: $unlimited.into(),)*
-                        white_point: PhantomData,
+                        ..$ty::default() //This prevents exhaustiveness checking
                     };
 
                     assert!(!c.is_valid());
@@ -237,7 +258,7 @@ pub mod blend;
 pub mod named;
 
 mod alpha;
-mod rgb;
+pub mod rgb;
 mod luma;
 mod yxy;
 mod xyz;
@@ -254,21 +275,18 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
-mod rgb_primaries;
-
-use white_point::{WhitePoint, D65};
 
 macro_rules! make_color {
     ($(
         #[$variant_comment:meta]
-        $variant: ident $(and $($representations:ident),+ )* {$(
+        $variant: ident < $variant_ty_param:ty > $(and $($representations:ident),+ )* {$(
             #[$ctor_comment:meta]
             $ctor_name:ident $( <$( $ty_params:ident: $ty_param_traits:ident $( <$( $ty_inner_traits:ident ),*> )*),*> )* ($($ctor_field:ident : $ctor_ty:ty),*) [alpha: $alpha_ty:ty] => $ctor_original:ident;
         )+}
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<Wp = D65, T = f32> = Alpha<Color<Wp, T>, T>;
+        pub type Colora<S = rgb::standards::Srgb, T = f32> = Alpha<Color<S, T>, T>;
 
         ///A generic color type.
         ///
@@ -278,38 +296,38 @@ macro_rules! make_color {
         ///color spaces are selected as follows:
         ///
         /// * `Mix`: RGB for no particular reason, except that it's intuitive.
-        /// * `Shade`: CIE L*a*b* for its luminance component.
-        /// * `Hue` and `GetHue`: CIE L*C*h° for its hue component and how it preserves the apparent lightness.
-        /// * `Saturate`: CIE L*C*h° for its chromaticity component and how it preserves the apparent lightness.
+        /// * `Shade`: CIE L\*a\*b\* for its luminance component.
+        /// * `Hue` and `GetHue`: CIE L\*C\*h° for its hue component and how it preserves the apparent lightness.
+        /// * `Saturate`: CIE L\*C\*h° for its chromaticity component and how it preserves the apparent lightness.
         ///
         ///It's not recommended to use `Color` when full control is necessary,
         ///but it can easily be converted to a fixed color space in those
         ///cases.
         #[derive(Debug)]
-        pub enum Color<Wp = D65, T = f32>
+        pub enum Color<S = rgb::standards::Srgb, T = f32>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
-            $(#[$variant_comment] $variant($variant<Wp, T>)),+
+            $(#[$variant_comment] $variant($variant<$variant_ty_param, T>)),+
         }
 
-        impl<Wp, T> Copy for Color<Wp, T>
+        impl<S, T> Copy for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {}
 
-        impl<Wp, T> Clone for Color<Wp, T>
+        impl<S, T> Clone for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
-            fn clone(&self) -> Color<Wp, T> { *self }
+            fn clone(&self) -> Color<S, T> { *self }
         }
 
-        impl<T: Float> Color<D65, T> {
+        impl<T: Float> Color<rgb::standards::Srgb, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<D65, T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<rgb::standards::Srgb, T> {
                         Color::$variant($variant::$ctor_original($($ctor_field),*))
                     }
                 )+
@@ -317,42 +335,42 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T: Float> Alpha<Color<D65, T>, T> {
+        impl<T: Float> Alpha<Color<rgb::standards::Srgb, T>, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<D65, T> {
-                        Alpha::<$variant<D65, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<rgb::standards::Srgb, T> {
+                        Alpha::<$variant<_, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+
             )+
         }
 
-        impl<Wp, T> Mix for Color<Wp, T>
+        impl<S, T> Mix for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn mix(&self, other: &Color<Wp, T>, factor: T) -> Color<Wp, T> {
-                Rgb::from(*self).mix(&Rgb::from(*other), factor).into()
+            fn mix(&self, other: &Color<S, T>, factor: T) -> Color<S, T> {
+                Rgb::<Linear<S>, T>::from(*self).mix(&Rgb::<Linear<S>, T>::from(*other), factor).into()
             }
         }
 
-        impl<Wp, T> Shade for Color<Wp, T>
+        impl<S, T> Shade for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn lighten(&self, amount: T) -> Color<Wp, T> {
+            fn lighten(&self, amount: T) -> Color<S, T> {
                 Lab::from(*self).lighten(amount).into()
             }
         }
 
-        impl<Wp, T> GetHue for Color<Wp, T>
+        impl<S, T> GetHue for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
             type Hue = LabHue<T>;
 
@@ -361,49 +379,49 @@ macro_rules! make_color {
             }
         }
 
-        impl<Wp, T> Hue for Color<Wp, T>
+        impl<S, T> Hue for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<Wp, T> {
+            fn with_hue(&self, hue: LabHue<T>) -> Color<S, T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<Wp, T> {
+            fn shift_hue(&self, amount: LabHue<T>) -> Color<S, T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
 
-        impl<Wp, T> Saturate for Color<Wp, T>
+        impl<S, T> Saturate for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
             type Scalar = T;
 
-            fn saturate(&self, factor: T) -> Color<Wp, T> {
+            fn saturate(&self, factor: T) -> Color<S, T> {
                 Lch::from(*self).saturate(factor).into()
             }
         }
 
-        impl<Wp, T> Blend for Color<Wp, T>
+        impl<S, T> Blend for Color<S, T>
             where T: Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
-            type Color = Rgb<Wp, T>;
+            type Color = Rgb<Linear<S>, T>;
 
-            fn into_premultiplied(self) -> PreAlpha<Rgb<Wp, T>, T> {
-                Rgba::from(self).into()
+            fn into_premultiplied(self) -> PreAlpha<Rgb<Linear<S>, T>, T> {
+                Rgba::<Linear<S>, T>::from(self).into()
             }
 
-            fn from_premultiplied(color: PreAlpha<Rgb<Wp, T>, T>) -> Self {
-                Rgba::from(color).into()
+            fn from_premultiplied(color: PreAlpha<Rgb<Linear<S>, T>, T>) -> Self {
+                Rgba::<Linear<S>, T>::from(color).into()
             }
         }
 
-        impl<Wp, T> ApproxEq for Color<Wp, T>
+        impl<S, T> ApproxEq for Color<S, T>
             where T: Float + ApproxEq,
                 T::Epsilon: Copy + Float,
-                Wp: WhitePoint<T>
+                S: RgbSpace,
         {
             type Epsilon = T::Epsilon;
 
@@ -435,53 +453,38 @@ macro_rules! make_color {
         }
 
         $(
-            impl<Wp, T> From<$variant<Wp, T>> for Color<Wp, T>
+            impl<S, T> From<$variant<$variant_ty_param, T>> for Color<S, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    S: RgbSpace,
             {
-                fn from(color: $variant<Wp, T>) -> Color<Wp, T> {
+                fn from(color: $variant<$variant_ty_param, T>) -> Color<S, T> {
                     Color::$variant(color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Color<Wp, T>
+            impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Color<S, T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Color<Wp, T> {
+                fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Color<S, T> {
                     Color::$variant(color.color)
                 }
             }
 
-            impl<Wp, T> From<Alpha<$variant<Wp, T>, T>> for Alpha<Color<Wp, T>,T>
+            impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Alpha<Color<S, T>,T>
                 where T: Float,
-                    Wp: WhitePoint<T>
+                    S: RgbSpace,
             {
-                fn from(color: Alpha<$variant<Wp, T>,T>) -> Alpha<Color<Wp, T>,T> {
+                fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Alpha<Color<S, T>,T> {
                     Alpha {
                         color: Color::$variant(color.color),
                         alpha: color.alpha,
                     }
                 }
             }
-
-            $($(
-                impl<Wp, T> From<$representations<Wp, T>> for Color<Wp, T>
-                    where T: Float,
-                        Wp: WhitePoint<T>
-                {
-                    fn from(color: $representations<Wp, T>) -> Color<Wp, T> {
-                        Color::$variant(color.into())
-                    }
-                }
-            )+)*
         )+
     )
 }
-
-
-
-
 
 fn clamp<T: Float>(v: T, min: T, max: T) -> T {
     if v < min {
@@ -495,7 +498,7 @@ fn clamp<T: Float>(v: T, min: T, max: T) -> T {
 
 make_color! {
     ///Linear luminance.
-    Luma {
+    Luma<S::WhitePoint> {
         ///Linear luminance.
         y(luma: T)[alpha: T] => new;
 
@@ -504,52 +507,52 @@ make_color! {
     }
 
     ///Linear RGB.
-    Rgb and Srgb, GammaRgb {
+    Rgb<Linear<S>> {
         ///Linear RGB.
-        rgb(red: T, green: T, blue: T)[alpha: T] => new;
+        linear_rgb(red: T, green: T, blue: T)[alpha: T] => new;
 
-        ///Linear RGB from 8 bit values.
-        rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
+        ///Linear RGB from an 8 bit value.
+        linear_rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
     }
 
     ///CIE 1931 XYZ.
-    Xyz {
+    Xyz<S::WhitePoint> {
         ///CIE XYZ.
         xyz(x: T, y: T, z: T)[alpha: T] => new;
     }
 
     ///CIE 1931 Yxy.
-    Yxy {
+    Yxy<S::WhitePoint> {
         ///CIE Yxy.
         yxy(x: T, y: T, luma: T)[alpha: T] => new;
     }
 
-    ///CIE L*a*b* (CIELAB).
-    Lab {
-        ///CIE L*a*b*.
+    ///CIE L\*a\*b\* (CIELAB).
+    Lab<S::WhitePoint> {
+        ///CIE L\*a\*b\*.
         lab(l: T, a: T, b: T)[alpha: T] => new;
     }
 
-    ///CIE L*C*h°, a polar version of CIE L*a*b*.
-    Lch {
-        ///CIE L*C*h°.
+    ///CIE L\*C\*h°, a polar version of CIE L\*a\*b\*.
+    Lch<S::WhitePoint> {
+        ///CIE L\*C\*h°.
         lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
     }
 
     ///Linear HSV, a cylindrical version of RGB.
-    Hsv {
+    Hsv<S> {
         ///Linear HSV.
         hsv(hue: RgbHue<T>, saturation: T, value: T)[alpha: T] => new;
     }
 
     ///Linear HSL, a cylindrical version of RGB.
-    Hsl {
+    Hsl<S> {
         ///Linear HSL.
         hsl(hue: RgbHue<T>, saturation: T, lightness: T)[alpha: T] => new;
     }
 
     ///Linear HWB, an intuitive cylindrical version of RGB.
-    Hwb {
+    Hwb<S> {
         ///Linear HWB.
         hwb(hue: RgbHue<T>, whiteness: T, balckness: T)[alpha: T] => new;
     }
@@ -571,13 +574,13 @@ pub trait Limited {
 ///A trait for linear color interpolation.
 ///
 ///```
-///use palette::{Rgb, Mix};
+///use palette::{LinSrgb, Mix};
 ///
-///let a = Rgb::new(0.0, 0.5, 1.0);
-///let b = Rgb::new(1.0, 0.5, 0.0);
+///let a = LinSrgb::new(0.0, 0.5, 1.0);
+///let b = LinSrgb::new(1.0, 0.5, 0.0);
 ///
 ///assert_eq!(a.mix(&b, 0.0), a);
-///assert_eq!(a.mix(&b, 0.5), Rgb::new(0.5, 0.5, 0.5));
+///assert_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
 ///assert_eq!(a.mix(&b, 1.0), b);
 ///```
 pub trait Mix {
@@ -595,10 +598,10 @@ pub trait Mix {
 ///The `Shade` trait allows a color to be lightened or darkened.
 ///
 ///```
-///use palette::{Rgb, Shade};
+///use palette::{LinSrgb, Shade};
 ///
-///let a = Rgb::new(0.4, 0.4, 0.4);
-///let b = Rgb::new(0.6, 0.6, 0.6);
+///let a = LinSrgb::new(0.4, 0.4, 0.4);
+///let b = LinSrgb::new(0.6, 0.6, 0.6);
 ///
 ///assert_eq!(a.lighten(0.1), b.darken(0.1));
 ///```
@@ -618,12 +621,12 @@ pub trait Shade: Sized {
 ///A trait for colors where a hue may be calculated.
 ///
 ///```
-///use palette::{Rgb, GetHue};
+///use palette::{LinSrgb, GetHue};
 ///
-///let red = Rgb::new(1.0f32, 0.0, 0.0);
-///let green = Rgb::new(0.0f32, 1.0, 0.0);
-///let blue = Rgb::new(0.0f32, 0.0, 1.0);
-///let gray = Rgb::new(0.5f32, 0.5, 0.5);
+///let red = LinSrgb::new(1.0f32, 0.0, 0.0);
+///let green = LinSrgb::new(0.0f32, 1.0, 0.0);
+///let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
+///let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
 ///assert_eq!(red.get_hue(), Some(0.0.into()));
 ///assert_eq!(green.get_hue(), Some(120.0.into()));
@@ -685,7 +688,11 @@ pub trait ComponentWise {
     type Scalar: Float;
 
     ///Perform a binary operation on this and an other color.
-    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(&self, other: &Self, f: F) -> Self;
+    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
+        &self,
+        other: &Self,
+        f: F,
+    ) -> Self;
 
     ///Perform a unary operation on this color.
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;

@@ -4,11 +4,14 @@ use num_traits::Float;
 
 use {clamp, flt};
 
-pub use self::srgb::Srgb;
-pub use self::gamma_rgb::GammaRgb;
+///A transfer function to and from linear space.
+pub trait TransferFn {
+    ///Convert the color component `x` from linear space.
+    fn from_linear<T: Float>(x: T) -> T;
 
-mod srgb;
-mod gamma_rgb;
+    ///Convert the color component `x` into linear space.
+    fn into_linear<T: Float>(x: T) -> T;
+}
 
 ///A conversion trait for RGB pixel formats.
 ///

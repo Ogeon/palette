@@ -1,8 +1,7 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use {Xyz, Yxy, Lab, Lch, Rgb, Hsl, Hsv, Hwb, Luma, LabHue, RgbHue, flt};
-use pixel::{Srgb, GammaRgb};
+use {Xyz, Yxy, Lab, Lch, Luma, LabHue, RgbHue, flt};
 use white_point::WhitePoint;
 
 
@@ -11,7 +10,7 @@ macro_rules! impl_eq {
         impl<Wp, T> ApproxEq for $self_ty<Wp, T>
         where T: Float + ApproxEq,
             T::Epsilon: Copy + Float,
-            Wp: WhitePoint<T>
+            Wp: WhitePoint
         {
             type Epsilon = <T as ApproxEq>::Epsilon;
 
@@ -44,14 +43,8 @@ macro_rules! impl_eq {
 impl_eq!( Xyz, [x, y, z] );
 impl_eq!( Yxy, [y, x, luma] );
 impl_eq!( Lab, [l, a, b] );
-impl_eq!( Rgb, [red, blue, green] );
 impl_eq!( Luma, [luma] );
 impl_eq!( Lch, [l, chroma, hue] );
-impl_eq!( Hsl, [hue, saturation, lightness] );
-impl_eq!( Hsv, [hue, saturation, value] );
-impl_eq!( Hwb, [hue, whiteness, blackness] );
-impl_eq!( Srgb, [red, blue, green, alpha] );
-impl_eq!( GammaRgb, [red, blue, green, alpha, gamma] );
 
 // For hues diffence is calculated and compared to zero. However due to the way floating point's
 // work this is not so simple
