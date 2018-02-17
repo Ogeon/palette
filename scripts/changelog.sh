@@ -10,10 +10,15 @@ issues=()
 git log --pretty="%an<%ae>;%H;%ad;%s" --date=short |
 {
 	while read line; do
-		if [[ $line =~ Homu\<homu@barosl.com\>\;.* ]]; then
-			parts="$(echo "$line" | sed 's/.*;\([^;]*\);.*;Auto merge of #\([0-9]*\)*/\1 \2/g')"
+		if [[ $line =~ Homu\<homu@barosl.com\>\;.* ]] || [[ $line =~ ^bors\[bot\].* ]]; then
+			parts="$(echo "$line" | sed 's/.*;\([^;]*\);.*;.*#\([0-9]*\)*/\1 \2/g')"
 			parts=($parts)
 			description="$(git log -1 --pretty=format:%b ${parts[0]})"
+
+			if [[ $line =~ ^bors\[bot\].* ]]; then
+				description="$(echo "$description" | sed 's/[0-9]*: \(\[.*\]\s*\)\?\(.*\) r=.* a=.*/\2/g')"
+			fi
+
 			header="$(echo "$description" | head -n 1)"
 
 			fixes="$(echo "$description" | grep -iEo "(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved) #[0-9]+" | sed 's/.* #\([0-9]*\)/\1/g')"

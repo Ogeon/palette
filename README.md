@@ -8,7 +8,11 @@ accessible for anyone. It provides both precision tools that lets you work in
 exactly the color space you want to, as well as a general color type that
 abstracts away some of the technical details.
 
-[Online documentation](https://ogeon.github.io/docs/palette/master/palette/index.html).
+## Online Documentation
+
+[Released](https://docs.rs/palette/0.3.0/palette/)
+
+[Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html).
 
 ## Cargo.toml Entries
 
@@ -16,7 +20,7 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette = "0.2"
+palette = "0.3"
 ```
 
 ### Optional Features

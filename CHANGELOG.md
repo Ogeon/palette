@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.3.0 - 2018-02-17
+
+ * [#78][78]: Upgrade dependencies.
+ * [#60][60]: Generalize the RGB types over RGB standards. Closes [#66][66], [#31][31], [#58][58].
+ * [#76][76]: Change dependency `num` to `num_traits` to shrink dependency tree.
+ * [#63][63]: Add rebeccapurple.
+ * [#61][61]: Restore the proper scale of Lab and Lch. Closes [#49][49].
+ * [#56][56]: Make color spaces white point aware. Closes [#14][14].
+
 ## Version 0.2.1 - 2016-02-23
 
  * [#39][39]: Implement color blending. Closes [#3][3].
@@ -31,6 +40,12 @@
 
 ## Version 0.1.0 - 2016-01-12
 
+[78]: https://github.com/Ogeon/palette/pull/78
+[60]: https://github.com/Ogeon/palette/pull/60
+[76]: https://github.com/Ogeon/palette/pull/76
+[63]: https://github.com/Ogeon/palette/pull/63
+[61]: https://github.com/Ogeon/palette/pull/61
+[56]: https://github.com/Ogeon/palette/pull/56
 [39]: https://github.com/Ogeon/palette/pull/39
 [54]: https://github.com/Ogeon/palette/pull/54
 [52]: https://github.com/Ogeon/palette/pull/52
@@ -51,6 +66,11 @@
 [18]: https://github.com/Ogeon/palette/pull/18
 [12]: https://github.com/Ogeon/palette/pull/12
 [9]: https://github.com/Ogeon/palette/pull/9
+[66]: https://github.com/Ogeon/palette/issues/66
+[31]: https://github.com/Ogeon/palette/issues/31
+[58]: https://github.com/Ogeon/palette/issues/58
+[49]: https://github.com/Ogeon/palette/issues/49
+[14]: https://github.com/Ogeon/palette/issues/14
 [3]: https://github.com/Ogeon/palette/issues/3
 [32]: https://github.com/Ogeon/palette/issues/32
 [44]: https://github.com/Ogeon/palette/issues/44

@@ -12,6 +12,8 @@ new_short_version="$(echo "$1" | sed 's/\([^.]\+\.[^.]\+\)\..*/\1/g')"
 echo "updating from $current_version to $1"
 
 sed -i 's/version = "'$current_version'" #automatically updated/version = "'$1'" #automatically updated/' Cargo.toml
+sed -i 's/documentation\s*=\s*"https:\/\/docs.rs\/palette\/'$current_version'\/palette\/"/documentation = "https:\/\/docs.rs\/palette\/'$1'\/palette\/"/' Cargo.toml
+sed -i 's/\[Released\](https:\/\/docs.rs\/palette\/'$current_version'\/palette\/)/[Released](https:\/\/docs.rs\/palette\/'$1'\/palette\/)/' README.md
 sed -i 's/palette = "'$current_short_version'"/palette = "'$new_short_version'"/' README.md
 
 bash scripts/changelog.sh
