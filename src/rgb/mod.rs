@@ -8,7 +8,7 @@ use pixel::TransferFn;
 use std::any::Any;
 
 pub use self::rgb::{Rgb, Rgba};
-pub use self::standards::{Linear, LinearFn};
+pub use self::standards::{Linear};
 
 pub mod standards;
 //mod linear;
@@ -23,6 +23,11 @@ pub type Srgba<T = f32> = Rgba<standards::Srgb, T>;
 pub type LinSrgb<T = f32> = Rgb<Linear, T>;
 ///Linear sRGB with an alpha component.
 pub type LinSrgba<T = f32> = Rgba<Linear, T>;
+
+/// Gamma 2.2 encoded sRGB.
+pub type GammaSrgb<T = f32> = Rgb<standards::Gamma, T>;
+/// Gamma 2.2 encoded sRGB with an alpha component.
+pub type GammaSrgba<T = f32> = Rgba<standards::Gamma, T>;
 
 ///An RGB space and a transfer function.
 pub trait RgbStandard {

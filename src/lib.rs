@@ -87,7 +87,7 @@ pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
-pub use rgb::{Srgb, Srgba, LinSrgb, LinSrgba};
+pub use rgb::{Srgb, Srgba, LinSrgb, LinSrgba, GammaSrgb, GammaSrgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};

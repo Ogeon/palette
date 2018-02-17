@@ -6,7 +6,8 @@ use num_traits::Float;
 use approx::ApproxEq;
 
 use rgb::{RgbSpace, RgbStandard};
-use rgb::standards::{Srgb, LinearFn, Linear};
+use rgb::standards::{Srgb, Linear};
+use rgb::standards::linear::LinearFn;
 use alpha::Alpha;
 use pixel::{TransferFn, RgbPixel};
 use convert::{FromColor, IntoColor};
