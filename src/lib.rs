@@ -62,9 +62,7 @@
 //! c1 = c1 * 0.5; //Scale both the color and the alpha
 //! ```
 
-
 #![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
-
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
@@ -76,18 +74,18 @@ extern crate num_traits;
 #[cfg(feature = "phf")]
 extern crate phf;
 
-use num_traits::{Float, ToPrimitive, NumCast};
+use num_traits::{Float, NumCast, ToPrimitive};
 
 use approx::ApproxEq;
 
 use blend::PreAlpha;
-use rgb::{RgbSpace, Rgb, Rgba, Linear};
+use rgb::{Linear, Rgb, RgbSpace, Rgba};
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
-pub use rgb::{Srgb, Srgba, LinSrgb, LinSrgba, GammaSrgb, GammaSrgba};
+pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use luma::{Luma, Lumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
@@ -298,9 +296,9 @@ macro_rules! make_color {
         ///color spaces are selected as follows:
         ///
         /// * `Mix`: RGB for no particular reason, except that it's intuitive.
-        /// * `Shade`: CIE L*a*b* for its luminance component.
-        /// * `Hue` and `GetHue`: CIE L*C*h° for its hue component and how it preserves the apparent lightness.
-        /// * `Saturate`: CIE L*C*h° for its chromaticity component and how it preserves the apparent lightness.
+        /// * `Shade`: CIE L\*a\*b\* for its luminance component.
+        /// * `Hue` and `GetHue`: CIE L\*C\*h° for its hue component and how it preserves the apparent lightness.
+        /// * `Saturate`: CIE L\*C\*h° for its chromaticity component and how it preserves the apparent lightness.
         ///
         ///It's not recommended to use `Color` when full control is necessary,
         ///but it can easily be converted to a fixed color space in those
@@ -488,10 +486,6 @@ macro_rules! make_color {
     )
 }
 
-
-
-
-
 fn clamp<T: Float>(v: T, min: T, max: T) -> T {
     if v < min {
         min
@@ -533,15 +527,15 @@ make_color! {
         yxy(x: T, y: T, luma: T)[alpha: T] => new;
     }
 
-    ///CIE L*a*b* (CIELAB).
+    ///CIE L\*a\*b\* (CIELAB).
     Lab<S::WhitePoint> {
-        ///CIE L*a*b*.
+        ///CIE L\*a\*b\*.
         lab(l: T, a: T, b: T)[alpha: T] => new;
     }
 
-    ///CIE L*C*h°, a polar version of CIE L*a*b*.
+    ///CIE L\*C\*h°, a polar version of CIE L\*a\*b\*.
     Lch<S::WhitePoint> {
-        ///CIE L*C*h°.
+        ///CIE L\*C\*h°.
         lch(l: T, chroma: T, hue: LabHue<T>)[alpha: T] => new;
     }
 
@@ -694,7 +688,11 @@ pub trait ComponentWise {
     type Scalar: Float;
 
     ///Perform a binary operation on this and an other color.
-    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(&self, other: &Self, f: F) -> Self;
+    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
+        &self,
+        other: &Self,
+        f: F,
+    ) -> Self;
 
     ///Perform a unary operation on this color.
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;

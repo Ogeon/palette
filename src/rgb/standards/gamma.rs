@@ -14,7 +14,7 @@ use rgb::standards::Srgb;
 /// values to either match a non-linear display, like CRT, or to prevent
 /// banding among the darker colors. `GammaRgb` represents a gamma corrected
 /// RGB color, where the intensities are encoded using the following power-law
-/// expression: _V ^γ_ (where _V_ is the intensity value an _γ_ is the encoding
+/// expression: _V<sup> γ</sup>_ (where _V_ is the intensity value an _γ_ is the encoding
 /// gamma).
 ///
 /// The gamma value is stored as a simple type that represents an `f32` constant.

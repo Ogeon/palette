@@ -1,40 +1,41 @@
 use num_traits::Float;
 
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Xyz, Lch, LabHue};
-use {Limited, Mix, Shade, GetHue, FromColor, ComponentWise};
+use {Alpha, LabHue, Lch, Xyz};
+use {ComponentWise, FromColor, GetHue, Limited, Mix, Shade};
 use {clamp, flt};
-use white_point::{WhitePoint, D65};
+use white_point::{D65, WhitePoint};
 
-///CIE L*a*b* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
+///CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
 pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 
-///The CIE L*a*b* (CIELAB) color space.
+///The CIE L\*a\*b\* (CIELAB) color space.
 ///
-///CIE L*a*b* is a device independent color space which includes all
+///CIE L\*a\*b\* is a device independent color space which includes all
 ///perceivable colors. It's sometimes used to convert between other color
 ///spaces, because of its ability to represent all of their colors, and
 ///sometimes in color manipulation, because of its perceptual uniformity. This
 ///means that the perceptual difference between two colors is equal to their
 ///numerical difference.
 ///
-///The parameters of L*a*b* are quite different, compared to many other color
+///The parameters of L\*a\*b\* are quite different, compared to many other color
 ///spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq)]
 pub struct Lab<Wp = D65, T = f32>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
-    ///L* is the lightness of the color. 0.0 gives absolute black and 100
+    ///L\* is the lightness of the color. 0.0 gives absolute black and 100
     ///give the brightest white.
     pub l: T,
 
-    ///a* goes from red at -128 to green at 127.
+    ///a\* goes from red at -128 to green at 127.
     pub a: T,
 
-    ///b* goes from yellow at -128 to blue at 127.
+    ///b\* goes from yellow at -128 to blue at 127.
     pub b: T,
 
     ///The white point associated with the color's illuminant and observer.
@@ -43,21 +44,27 @@ pub struct Lab<Wp = D65, T = f32>
 }
 
 impl<Wp, T> Copy for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
-{}
+where
+    T: Float,
+    Wp: WhitePoint,
+{
+}
 
 impl<Wp, T> Clone for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
-    fn clone(&self) -> Lab<Wp, T> { *self }
+    fn clone(&self) -> Lab<Wp, T> {
+        *self
+    }
 }
 
 impl<T> Lab<D65, T>
-    where T: Float,
+where
+    T: Float,
 {
-    ///CIE L*a*b* with white point D65.
+    ///CIE L\*a\*b\* with white point D65.
     pub fn new(l: T, a: T, b: T) -> Lab<D65, T> {
         Lab {
             l: l,
@@ -69,10 +76,11 @@ impl<T> Lab<D65, T>
 }
 
 impl<Wp, T> Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
-    ///CIE L*a*b*.
+    ///CIE L\*a\*b\*.
     pub fn with_wp(l: T, a: T, b: T) -> Lab<Wp, T> {
         Lab {
             l: l,
@@ -85,9 +93,10 @@ impl<Wp, T> Lab<Wp, T>
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
 impl<T> Alpha<Lab<D65, T>, T>
-    where T: Float,
+where
+    T: Float,
 {
-    ///CIE L*a*b* and transparency and white point D65.
+    ///CIE L\*a\*b\* and transparency and white point D65.
     pub fn new(l: T, a: T, b: T, alpha: T) -> Laba<D65, T> {
         Alpha {
             color: Lab::new(l, a, b),
@@ -98,10 +107,11 @@ impl<T> Alpha<Lab<D65, T>, T>
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
 impl<Wp, T> Alpha<Lab<Wp, T>, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
-    ///CIE L*a*b* and transparency.
+    ///CIE L\*a\*b\* and transparency.
     pub fn with_wp(l: T, a: T, b: T, alpha: T) -> Laba<Wp, T> {
         Alpha {
             color: Lab::with_wp(l, a, b),
@@ -111,20 +121,26 @@ impl<Wp, T> Alpha<Lab<Wp, T>, T>
 }
 
 impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let Xyz { mut x, mut y, mut z, .. } = xyz / Wp::get_xyz();
+        let Xyz {
+            mut x,
+            mut y,
+            mut z,
+            ..
+        } = xyz / Wp::get_xyz();
 
         fn convert<T: Float>(c: T) -> T {
-            let epsilon: T = (flt::<T,_>(6.0 / 29.0)).powi(3);
+            let epsilon: T = (flt::<T, _>(6.0 / 29.0)).powi(3);
             let kappa: T = flt(841.0 / 108.0);
             let delta: T = flt(4.0 / 29.0);
             if c > epsilon {
                 c.powf(T::one() / flt(3.0))
             } else {
-                (kappa * c ) + delta
+                (kappa * c) + delta
             }
         }
 
@@ -133,9 +149,9 @@ impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
         z = convert(z);
 
         Lab {
-            l: ( (y * flt(116.0)) - flt(16.0) ),
-            a: ( (x - y) * flt(500.0) ),
-            b: ( (y - z) * flt(200.0) ),
+            l: ((y * flt(116.0)) - flt(16.0)),
+            a: ((x - y) * flt(500.0)),
+            b: ((y - z) * flt(200.0)),
             white_point: PhantomData,
         }
     }
@@ -152,18 +168,16 @@ impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
             white_point: PhantomData,
         }
     }
-
-
 }
 
 impl<Wp, T> Limited for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= flt(100.0) &&
-        self.a >= flt(-128) && self.a <= flt(127.0) &&
-        self.b >= flt(-128) && self.b <= flt(127.0)
+        self.l >= T::zero() && self.l <= flt(100.0) && self.a >= flt(-128) && self.a <= flt(127.0)
+            && self.b >= flt(-128) && self.b <= flt(127.0)
     }
 
     fn clamp(&self) -> Lab<Wp, T> {
@@ -180,8 +194,9 @@ impl<Wp, T> Limited for Lab<Wp, T>
 }
 
 impl<Wp, T> Mix for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -198,8 +213,9 @@ impl<Wp, T> Mix for Lab<Wp, T>
 }
 
 impl<Wp, T> Shade for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -214,8 +230,9 @@ impl<Wp, T> Shade for Lab<Wp, T>
 }
 
 impl<Wp, T> GetHue for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Hue = LabHue<T>;
 
@@ -229,8 +246,9 @@ impl<Wp, T> GetHue for Lab<Wp, T>
 }
 
 impl<Wp, T> ComponentWise for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -254,8 +272,9 @@ impl<Wp, T> ComponentWise for Lab<Wp, T>
 }
 
 impl<Wp, T> Default for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn default() -> Lab<Wp, T> {
         Lab::with_wp(T::zero(), T::zero(), T::zero())
@@ -263,8 +282,9 @@ impl<Wp, T> Default for Lab<Wp, T>
 }
 
 impl<Wp, T> Add<Lab<Wp, T>> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -279,8 +299,9 @@ impl<Wp, T> Add<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> Add<T> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -295,8 +316,9 @@ impl<Wp, T> Add<T> for Lab<Wp, T>
 }
 
 impl<Wp, T> Sub<Lab<Wp, T>> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -311,8 +333,9 @@ impl<Wp, T> Sub<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> Sub<T> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -327,8 +350,9 @@ impl<Wp, T> Sub<T> for Lab<Wp, T>
 }
 
 impl<Wp, T> Mul<Lab<Wp, T>> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -343,8 +367,9 @@ impl<Wp, T> Mul<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> Mul<T> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -359,8 +384,9 @@ impl<Wp, T> Mul<T> for Lab<Wp, T>
 }
 
 impl<Wp, T> Div<Lab<Wp, T>> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -375,8 +401,9 @@ impl<Wp, T> Div<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> Div<T> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
 
@@ -391,8 +418,9 @@ impl<Wp, T> Div<T> for Lab<Wp, T>
 }
 
 impl<Wp, T> From<Alpha<Lab<Wp, T>, T>> for Lab<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn from(color: Alpha<Lab<Wp, T>, T>) -> Lab<Wp, T> {
         color.color
