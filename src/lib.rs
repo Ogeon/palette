@@ -29,14 +29,16 @@
 //!
 //! ```rust
 //! // An alias for Rgb<Srgb>, which is what most pictures store.
-//! use palette::Srgb;
+//! use palette::{Srgb, Pixel};
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
 //! let whateve_it_becomes = orangeish + blueish;
 //!
 //! // Encode the result back into sRGB and create a byte array
-//! let pixel: [u8;3] = Srgb::linear_to_pixel(whateve_it_becomes);
+//! let pixel: [u8;3] = Srgb::from_linear(whateve_it_becomes)
+//!     .into_uint()
+//!     .into_raw();
 //! ```
 //!
 //! # Transparency
@@ -98,6 +100,7 @@ pub use hwb::{Hwb, Hwba};
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
 pub use matrix::Mat3;
+pub use pixel::Pixel;
 
 //Helper macro for checking ranges and clamping.
 #[cfg(test)]
@@ -250,6 +253,9 @@ macro_rules! assert_ranges {
     );
 }
 
+#[macro_use]
+mod macros;
+
 pub mod gradient;
 pub mod pixel;
 pub mod blend;
@@ -383,11 +389,11 @@ macro_rules! make_color {
             where T: Float,
                 S: RgbSpace,
         {
-            fn with_hue(&self, hue: LabHue<T>) -> Color<S, T> {
+            fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Color<S, T> {
                 Lch::from(*self).with_hue(hue).into()
             }
 
-            fn shift_hue(&self, amount: LabHue<T>) -> Color<S, T> {
+            fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Color<S, T> {
                 Lch::from(*self).shift_hue(amount).into()
             }
         }
@@ -510,9 +516,6 @@ make_color! {
     Rgb<Linear<S>> {
         ///Linear RGB.
         linear_rgb(red: T, green: T, blue: T)[alpha: T] => new;
-
-        ///Linear RGB from an 8 bit value.
-        linear_rgb_u8(red: u8, green: u8, blue: u8)[alpha: u8] => new_u8;
     }
 
     ///CIE 1931 XYZ.
@@ -652,10 +655,10 @@ pub trait GetHue {
 ///A trait for colors where the hue can be manipulated without conversion.
 pub trait Hue: GetHue {
     ///Return a new copy of `self`, but with a specific hue.
-    fn with_hue(&self, hue: Self::Hue) -> Self;
+    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Self;
 
     ///Return a new copy of `self`, but with the hue shifted by `amount`.
-    fn shift_hue(&self, amount: Self::Hue) -> Self;
+    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Self;
 }
 
 ///A trait for colors where the saturation (or chroma) can be manipulated
@@ -664,8 +667,8 @@ pub trait Hue: GetHue {
 ///```
 ///use palette::{Hsv, Saturate};
 ///
-///let a = Hsv::new(0.0.into(), 0.25, 1.0);
-///let b = Hsv::new(0.0.into(), 1.0, 1.0);
+///let a = Hsv::new(0.0, 0.25, 1.0);
+///let b = Hsv::new(0.0, 1.0, 1.0);
 ///
 ///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
 ///```
@@ -699,6 +702,6 @@ pub trait ComponentWise {
 }
 
 ///A convenience function to convert a constant number to Float Type
-fn flt<T: num_traits::Float, P: ToPrimitive>(prim: P) -> T {
+fn cast<T: NumCast, P: ToPrimitive>(prim: P) -> T {
     NumCast::from(prim).unwrap()
 }

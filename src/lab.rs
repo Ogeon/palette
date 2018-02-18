@@ -4,11 +4,12 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, LabHue, Lch, Xyz};
-use {ComponentWise, FromColor, GetHue, Limited, Mix, Shade};
-use {clamp, flt};
+use {ComponentWise, FromColor, GetHue, Limited, Mix, Pixel, Shade};
+use {cast, clamp};
 use white_point::{D65, WhitePoint};
 
-///CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba` implementation in `Alpha`](struct.Alpha.html#Laba).
+/// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
+/// implementation in `Alpha`](struct.Alpha.html#Laba).
 pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 
 ///The CIE L\*a\*b\* (CIELAB) color space.
@@ -23,6 +24,7 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///The parameters of L\*a\*b\* are quite different, compared to many other color
 ///spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Lab<Wp = D65, T = f32>
 where
     T: Float,
@@ -58,6 +60,10 @@ where
     fn clone(&self) -> Lab<Wp, T> {
         *self
     }
+}
+
+unsafe impl<Wp: WhitePoint, T: Float> Pixel<T> for Lab<Wp, T> {
+    const CHANNELS: usize = 3;
 }
 
 impl<T> Lab<D65, T>
@@ -134,11 +140,11 @@ where
         } = xyz / Wp::get_xyz();
 
         fn convert<T: Float>(c: T) -> T {
-            let epsilon: T = (flt::<T, _>(6.0 / 29.0)).powi(3);
-            let kappa: T = flt(841.0 / 108.0);
-            let delta: T = flt(4.0 / 29.0);
+            let epsilon: T = (cast::<T, _>(6.0 / 29.0)).powi(3);
+            let kappa: T = cast(841.0 / 108.0);
+            let delta: T = cast(4.0 / 29.0);
             if c > epsilon {
-                c.powf(T::one() / flt(3.0))
+                c.powf(T::one() / cast(3.0))
             } else {
                 (kappa * c) + delta
             }
@@ -149,9 +155,9 @@ where
         z = convert(z);
 
         Lab {
-            l: ((y * flt(116.0)) - flt(16.0)),
-            a: ((x - y) * flt(500.0)),
-            b: ((y - z) * flt(200.0)),
+            l: ((y * cast(116.0)) - cast(16.0)),
+            a: ((x - y) * cast(500.0)),
+            b: ((y - z) * cast(200.0)),
             white_point: PhantomData,
         }
     }
@@ -175,9 +181,11 @@ where
     T: Float,
     Wp: WhitePoint,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= flt(100.0) && self.a >= flt(-128) && self.a <= flt(127.0)
-            && self.b >= flt(-128) && self.b <= flt(127.0)
+        self.l >= T::zero() && self.l <= cast(100.0) &&
+        self.a >= cast(-128) && self.a <= cast(127.0) &&
+        self.b >= cast(-128) && self.b <= cast(127.0)
     }
 
     fn clamp(&self) -> Lab<Wp, T> {
@@ -187,9 +195,9 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), flt(100.0));
-        self.a = clamp(self.a, flt(-128.0), flt(127.0));
-        self.b = clamp(self.b, flt(-128.0), flt(127.0));
+        self.l = clamp(self.l, T::zero(), cast(100.0));
+        self.a = clamp(self.a, cast(-128.0), cast(127.0));
+        self.b = clamp(self.b, cast(-128.0), cast(127.0));
     }
 }
 
@@ -221,7 +229,7 @@ where
 
     fn lighten(&self, amount: T) -> Lab<Wp, T> {
         Lab {
-            l: self.l + amount * flt(100.0),
+            l: self.l + amount * cast(100.0),
             a: self.a,
             b: self.b,
             white_point: PhantomData,
@@ -467,4 +475,7 @@ mod test {
             unlimited {}
         }
     }
+
+    raw_pixel_conversion_tests!(Lab<D65>: l, a, b);
+    raw_pixel_conversion_fail_tests!(Lab<D65>: l, a, b);
 }

@@ -4,11 +4,12 @@ use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Hue, Lab, LabHue, Xyz};
-use {FromColor, GetHue, IntoColor, Limited, Mix, Saturate, Shade};
-use {clamp, flt};
+use {FromColor, GetHue, IntoColor, Limited, Mix, Pixel, Saturate, Shade};
+use {cast, clamp};
 use white_point::{D65, WhitePoint};
 
-///CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in `Alpha`](struct.Alpha.html#Lcha).
+/// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
+/// `Alpha`](struct.Alpha.html#Lcha).
 pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 
 ///CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](struct.Lab.html).
@@ -18,6 +19,7 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Lch<Wp = D65, T: Float = f32>
 where
     T: Float,
@@ -59,16 +61,20 @@ where
     }
 }
 
+unsafe impl<Wp: WhitePoint, T: Float> Pixel<T> for Lch<Wp, T> {
+    const CHANNELS: usize = 3;
+}
+
 impl<T> Lch<D65, T>
 where
     T: Float,
 {
     ///CIE L\*C\*h° with white point D65.
-    pub fn new(l: T, chroma: T, hue: LabHue<T>) -> Lch<D65, T> {
+    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<D65, T> {
         Lch {
             l: l,
             chroma: chroma,
-            hue: hue,
+            hue: hue.into(),
             white_point: PhantomData,
         }
     }
@@ -80,11 +86,11 @@ where
     Wp: WhitePoint,
 {
     ///CIE L\*C\*h°.
-    pub fn with_wp(l: T, chroma: T, hue: LabHue<T>) -> Lch<Wp, T> {
+    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<Wp, T> {
         Lch {
             l: l,
             chroma: chroma,
-            hue: hue,
+            hue: hue.into(),
             white_point: PhantomData,
         }
     }
@@ -96,7 +102,7 @@ where
     T: Float,
 {
     ///CIE L\*C\*h° and transparency with white point D65.
-    pub fn new(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<D65, T> {
+    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: T) -> Lcha<D65, T> {
         Alpha {
             color: Lch::new(l, chroma, hue),
             alpha: alpha,
@@ -111,7 +117,7 @@ where
     Wp: WhitePoint,
 {
     ///CIE L\*C\*h° and transparency.
-    pub fn with_wp(l: T, chroma: T, hue: LabHue<T>, alpha: T) -> Lcha<Wp, T> {
+    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: T) -> Lcha<Wp, T> {
         Alpha {
             color: Lch::with_wp(l, chroma, hue),
             alpha: alpha,
@@ -149,7 +155,7 @@ where
     Wp: WhitePoint,
 {
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= flt(100.0) && self.chroma >= T::zero()
+        self.l >= T::zero() && self.l <= cast(100.0) && self.chroma >= T::zero()
     }
 
     fn clamp(&self) -> Lch<Wp, T> {
@@ -159,7 +165,7 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), flt(100.0));
+        self.l = clamp(self.l, T::zero(), cast(100.0));
         self.chroma = self.chroma.max(T::zero())
     }
 }
@@ -192,7 +198,7 @@ where
 
     fn lighten(&self, amount: T) -> Lch<Wp, T> {
         Lch {
-            l: self.l + amount * flt(100.0),
+            l: self.l + amount * cast(100.0),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
@@ -221,20 +227,20 @@ where
     T: Float,
     Wp: WhitePoint,
 {
-    fn with_hue(&self, hue: LabHue<T>) -> Lch<Wp, T> {
+    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
-            hue: hue,
+            hue: hue.into(),
             white_point: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: LabHue<T>) -> Lch<Wp, T> {
+    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: self.chroma,
-            hue: self.hue + amount,
+            hue: self.hue + amount.into(),
             white_point: PhantomData,
         }
     }
@@ -365,4 +371,7 @@ mod test {
             }
         }
     }
+
+    raw_pixel_conversion_tests!(Lch<D65>: l, chroma, hue);
+    raw_pixel_conversion_fail_tests!(Lch<D65>: l, chroma, hue);
 }

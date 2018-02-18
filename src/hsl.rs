@@ -5,12 +5,14 @@ use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 use std::any::TypeId;
 
-use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, Saturate, RgbHue, FromColor, IntoColor, clamp, flt};
+use {cast, clamp, Alpha, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
+     Saturate, Shade, Xyz};
 use white_point::WhitePoint;
-use rgb::{Rgb, RgbSpace, Linear};
+use rgb::{Linear, Rgb, RgbSpace};
 use rgb::standards::Srgb;
 
-///Linear HSL with an alpha component. See the [`Hsla` implementation in `Alpha`](struct.Alpha.html#Hsla).
+/// Linear HSL with an alpha component. See the [`Hsla` implementation in
+/// `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 
 ///Linear HSL color space.
@@ -24,9 +26,11 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
@@ -43,29 +47,37 @@ pub struct Hsl<S = Srgb, T = f32>
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
     pub space: PhantomData<S>,
-
 }
 
 impl<S, T> Copy for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
-{}
-
-impl<S, T> Clone for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
-    fn clone(&self) -> Hsl<S, T> { *self }
 }
 
+impl<S, T> Clone for Hsl<S, T>
+where
+    T: Float,
+    S: RgbSpace,
+{
+    fn clone(&self) -> Hsl<S, T> {
+        *self
+    }
+}
+
+unsafe impl<S: RgbSpace, T: Float> Pixel<T> for Hsl<S, T> {
+    const CHANNELS: usize = 3;
+}
 
 impl<T> Hsl<Srgb, T>
-    where T: Float,
+where
+    T: Float,
 {
     ///HSL for linear sRGB.
-    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<Srgb, T> {
         Hsl {
-            hue: hue,
+            hue: hue.into(),
             saturation: saturation,
             lightness: lightness,
             space: PhantomData,
@@ -74,13 +86,14 @@ impl<T> Hsl<Srgb, T>
 }
 
 impl<S, T> Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     ///Linear HSL.
-    pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T) -> Hsl<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<S, T> {
         Hsl {
-            hue: hue,
+            hue: hue.into(),
             saturation: saturation,
             lightness: lightness,
             space: PhantomData,
@@ -100,10 +113,11 @@ impl<S, T> Hsl<S, T>
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<T> Alpha<Hsl<Srgb, T>, T>
-    where T: Float,
+where
+    T: Float,
 {
     ///HSL and transparency for linear sRGB.
-    pub fn new(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: T) -> Hsla<Srgb, T> {
         Alpha {
             color: Hsl::new(hue, saturation, lightness),
             alpha: alpha,
@@ -113,11 +127,17 @@ impl<T> Alpha<Hsl<Srgb, T>, T>
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<S, T> Alpha<Hsl<S, T>, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     ///Linear HSL and transparency.
-    pub fn with_wp(hue: RgbHue<T>, saturation: T, lightness: T, alpha: T) -> Hsla<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(
+        hue: H,
+        saturation: T,
+        lightness: T,
+        alpha: T,
+    ) -> Hsla<S, T> {
         Alpha {
             color: Hsl::with_wp(hue, saturation, lightness),
             alpha: alpha,
@@ -126,29 +146,34 @@ impl<S, T> Alpha<Hsl<S, T>, T>
 }
 
 impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace<WhitePoint=Wp>,
-        Wp: WhitePoint,
+where
+    T: Float,
+    S: RgbSpace<WhitePoint = Wp>,
+    Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let rgb: Rgb<Linear<S>, T> = xyz.into_rgb();
         Self::from_rgb(rgb)
     }
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Linear<Sp>, T>) -> Self {
+    fn from_rgb<Sp: RgbSpace<WhitePoint = Wp>>(rgb: Rgb<Linear<Sp>, T>) -> Self {
         let rgb = Rgb::<Linear<S>, T>::from_rgb(rgb);
 
-        let ( max, min, sep , coeff) = {
-            let (max, min , sep, coeff) = if rgb.red > rgb.green {
-                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero() )
+        let (max, min, sep, coeff) = {
+            let (max, min, sep, coeff) = if rgb.red > rgb.green {
+                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
             } else {
-                (rgb.green, rgb.red, rgb.blue - rgb.red , flt(2.0))
+                (rgb.green, rgb.red, rgb.blue - rgb.red, cast(2.0))
             };
             if rgb.blue > max {
-                ( rgb.blue, min , rgb.red - rgb.green , flt(4.0))
+                (rgb.blue, min, rgb.red - rgb.green, cast(4.0))
             } else {
-                let min_val = if rgb.blue < min { rgb.blue } else { min };
-                (max , min_val , sep, coeff)
+                let min_val = if rgb.blue < min {
+                    rgb.blue
+                } else {
+                    min
+                };
+                (max, min_val, sep, coeff)
             }
         };
 
@@ -156,11 +181,15 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
         let mut s = T::zero();
 
         let sum = max + min;
-        let l = sum / flt(2.0);
+        let l = sum / cast(2.0);
         if max != min {
             let d = max - min;
-            s = if sum > T::one() { d /( flt::<T,_>(2.0) - sum) } else { d / sum };
-            h = (( sep / d ) + coeff) *  flt(60.0);
+            s = if sum > T::one() {
+                d / (cast::<T, _>(2.0) - sum)
+            } else {
+                d / sum
+            };
+            h = ((sep / d) + coeff) * cast(60.0);
         };
 
         Hsl {
@@ -171,7 +200,7 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
         }
     }
 
-    fn from_hsl<Sp: RgbSpace<WhitePoint=Wp>>(hsl: Hsl<Sp, T>) -> Self {
+    fn from_hsl<Sp: RgbSpace<WhitePoint = Wp>>(hsl: Hsl<Sp, T>) -> Self {
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsl.reinterpret_as()
         } else {
@@ -179,33 +208,42 @@ impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
         }
     }
 
-    fn from_hsv<Sp: RgbSpace<WhitePoint=Wp>>(hsv: Hsv<Sp, T>) -> Self {
+    fn from_hsv<Sp: RgbSpace<WhitePoint = Wp>>(hsv: Hsv<Sp, T>) -> Self {
         let hsv = Hsv::<S, T>::from_hsv(hsv);
 
-        let x = (flt::<T,_>(2.0) - hsv.saturation) * hsv.value;
+        let x = (cast::<T, _>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
             T::zero()
         } else if x < T::one() {
-            if x.is_normal() { hsv.saturation * hsv.value / x } else { T::zero() }
+            if x.is_normal() {
+                hsv.saturation * hsv.value / x
+            } else {
+                T::zero()
+            }
         } else {
-            let denom = flt::<T,_>(2.0) - x;
-            if denom.is_normal() { hsv.saturation * hsv.value / denom } else { T::zero() }
+            let denom = cast::<T, _>(2.0) - x;
+            if denom.is_normal() {
+                hsv.saturation * hsv.value / denom
+            } else {
+                T::zero()
+            }
         };
 
         Hsl {
             hue: hsv.hue,
             saturation: saturation,
-            lightness: x / flt(2.0),
+            lightness: x / cast(2.0),
             space: PhantomData,
         }
     }
-
 }
 
 impl<S, T> Limited for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
@@ -224,8 +262,9 @@ impl<S, T> Limited for Hsl<S, T>
 }
 
 impl<S, T> Mix for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Scalar = T;
 
@@ -243,8 +282,9 @@ impl<S, T> Mix for Hsl<S, T>
 }
 
 impl<S, T> Shade for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Scalar = T;
 
@@ -259,8 +299,9 @@ impl<S, T> Shade for Hsl<S, T>
 }
 
 impl<S, T> GetHue for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Hue = RgbHue<T>;
 
@@ -274,21 +315,22 @@ impl<S, T> GetHue for Hsl<S, T>
 }
 
 impl<S, T> Hue for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
-    fn with_hue(&self, hue: RgbHue<T>) -> Hsl<S, T> {
+    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
         Hsl {
-            hue: hue,
+            hue: hue.into(),
             saturation: self.saturation,
             lightness: self.lightness,
             space: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: RgbHue<T>) -> Hsl<S, T> {
+    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsl<S, T> {
         Hsl {
-            hue: self.hue + amount,
+            hue: self.hue + amount.into(),
             saturation: self.saturation,
             lightness: self.lightness,
             space: PhantomData,
@@ -297,8 +339,9 @@ impl<S, T> Hue for Hsl<S, T>
 }
 
 impl<S, T> Saturate for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Scalar = T;
 
@@ -313,8 +356,9 @@ impl<S, T> Saturate for Hsl<S, T>
 }
 
 impl<S, T> Default for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     fn default() -> Hsl<S, T> {
         Hsl::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
@@ -322,8 +366,9 @@ impl<S, T> Default for Hsl<S, T>
 }
 
 impl<S, T> Add<Hsl<S, T>> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Output = Hsl<S, T>;
 
@@ -338,8 +383,9 @@ impl<S, T> Add<Hsl<S, T>> for Hsl<S, T>
 }
 
 impl<S, T> Add<T> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Output = Hsl<S, T>;
 
@@ -354,8 +400,9 @@ impl<S, T> Add<T> for Hsl<S, T>
 }
 
 impl<S, T> Sub<Hsl<S, T>> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Output = Hsl<S, T>;
 
@@ -370,8 +417,9 @@ impl<S, T> Sub<Hsl<S, T>> for Hsl<S, T>
 }
 
 impl<S, T> Sub<T> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     type Output = Hsl<S, T>;
 
@@ -386,8 +434,9 @@ impl<S, T> Sub<T> for Hsl<S, T>
 }
 
 impl<S, T> From<Alpha<Hsl<S, T>, T>> for Hsl<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Float,
+    S: RgbSpace,
 {
     fn from(color: Alpha<Hsl<S, T>, T>) -> Hsl<S, T> {
         color.color
@@ -395,9 +444,10 @@ impl<S, T> From<Alpha<Hsl<S, T>, T>> for Hsl<S, T>
 }
 
 impl<S, T> ApproxEq for Hsl<S, T>
-    where T: Float + ApproxEq,
-        T::Epsilon: Copy + Float,
-        S: RgbSpace,
+where
+    T: Float + ApproxEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace,
 {
     type Epsilon = <T as ApproxEq>::Epsilon;
 
@@ -410,13 +460,20 @@ impl<S, T> ApproxEq for Hsl<S, T>
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
-    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
         self.hue.relative_eq(&other.hue, epsilon, max_relative) &&
         self.saturation.relative_eq(&other.saturation, epsilon, max_relative) &&
         self.lightness.relative_eq(&other.lightness, epsilon, max_relative)
     }
 
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
         self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
         self.lightness.ulps_eq(&other.lightness, epsilon, max_ulps)
@@ -426,25 +483,24 @@ impl<S, T> ApproxEq for Hsl<S, T>
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use {LinSrgb, Hsv};
+    use {Hsv, LinSrgb};
     use rgb::standards::Srgb;
 
     #[test]
     fn red() {
         let a = Hsl::from(LinSrgb::new(1.0, 0.0, 0.0));
-        let b = Hsl::new(0.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(0.0.into(), 1.0, 1.0));
+        let b = Hsl::new(0.0, 1.0, 0.5);
+        let c = Hsl::from(Hsv::new(0.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
-
     }
 
     #[test]
     fn orange() {
         let a = Hsl::from(LinSrgb::new(1.0, 0.5, 0.0));
-        let b = Hsl::new(30.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(30.0.into(), 1.0, 1.0));
+        let b = Hsl::new(30.0, 1.0, 0.5);
+        let c = Hsl::from(Hsv::new(30.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -453,8 +509,8 @@ mod test {
     #[test]
     fn green() {
         let a = Hsl::from(LinSrgb::new(0.0, 1.0, 0.0));
-        let b = Hsl::new(120.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(120.0.into(), 1.0, 1.0));
+        let b = Hsl::new(120.0, 1.0, 0.5);
+        let c = Hsl::from(Hsv::new(120.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -463,8 +519,8 @@ mod test {
     #[test]
     fn blue() {
         let a = Hsl::from(LinSrgb::new(0.0, 0.0, 1.0));
-        let b = Hsl::new(240.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(240.0.into(), 1.0, 1.0));
+        let b = Hsl::new(240.0, 1.0, 0.5);
+        let c = Hsl::from(Hsv::new(240.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -473,8 +529,8 @@ mod test {
     #[test]
     fn purple() {
         let a = Hsl::from(LinSrgb::new(0.5, 0.0, 1.0));
-        let b = Hsl::new(270.0.into(), 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(270.0.into(), 1.0, 1.0));
+        let b = Hsl::new(270.0, 1.0, 0.5);
+        let c = Hsl::from(Hsv::new(270.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -494,4 +550,7 @@ mod test {
             }
         }
     }
+
+    raw_pixel_conversion_tests!(Hsl<Srgb>: hue, saturation, lightness);
+    raw_pixel_conversion_fail_tests!(Hsl<Srgb>: hue, saturation, lightness);
 }

@@ -3,9 +3,8 @@
 use std::marker::PhantomData;
 
 use num_traits::Float;
-use rgb::{RgbSpace, RgbStandard};
+use rgb::{RgbSpace, RgbStandard, TransferFn};
 use rgb::standards::Srgb;
-use pixel::TransferFn;
 
 /// A generic RGB standard with linear components.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

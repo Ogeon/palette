@@ -5,10 +5,9 @@
 //!which are relatively orange compared to daylight. Defining "white" as daylight will give
 //!unacceptable results when attempting to color-correct a photograph taken with incandescent lighting.
 
-
 use num_traits::Float;
 
-use {Xyz, flt};
+use {cast, Xyz};
 
 ///WhitePoint defines the Xyz color co-ordinates for a given white point.
 ///
@@ -32,7 +31,7 @@ pub trait WhitePoint {
 pub struct A;
 impl WhitePoint for A {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(1.09850), T::one(), flt(0.35585))
+        Xyz::with_wp(cast(1.09850), T::one(), cast(0.35585))
     }
 }
 ///CIE standard illuminant B
@@ -43,7 +42,7 @@ impl WhitePoint for A {
 pub struct B;
 impl WhitePoint for B {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.99072), T::one(), flt(0.85223))
+        Xyz::with_wp(cast(0.99072), T::one(), cast(0.85223))
     }
 }
 ///CIE standard illuminant C
@@ -54,7 +53,7 @@ impl WhitePoint for B {
 pub struct C;
 impl WhitePoint for C {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.98074), T::one(), flt(1.18232))
+        Xyz::with_wp(cast(0.98074), T::one(), cast(1.18232))
     }
 }
 ///CIE D series standard illuminant - D50
@@ -65,7 +64,7 @@ impl WhitePoint for C {
 pub struct D50;
 impl WhitePoint for D50 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.96422), T::one(), flt(0.82521))
+        Xyz::with_wp(cast(0.96422), T::one(), cast(0.82521))
     }
 }
 ///CIE D series standard illuminant - D55
@@ -76,7 +75,7 @@ impl WhitePoint for D50 {
 pub struct D55;
 impl WhitePoint for D55 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.95682), T::one(), flt(0.92149))
+        Xyz::with_wp(cast(0.95682), T::one(), cast(0.92149))
     }
 }
 ///CIE D series standard illuminant - D65
@@ -87,7 +86,7 @@ impl WhitePoint for D55 {
 pub struct D65;
 impl WhitePoint for D65 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.95047), T::one(), flt(1.08883))
+        Xyz::with_wp(cast(0.95047), T::one(), cast(1.08883))
     }
 }
 ///CIE D series standard illuminant - D75
@@ -98,7 +97,7 @@ impl WhitePoint for D65 {
 pub struct D75;
 impl WhitePoint for D75 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.94972), T::one(), flt(1.22638))
+        Xyz::with_wp(cast(0.94972), T::one(), cast(1.22638))
     }
 }
 ///CIE standard illuminant E
@@ -109,7 +108,7 @@ impl WhitePoint for D75 {
 pub struct E;
 impl WhitePoint for E {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(T::one(), T::one(),  T::one())
+        Xyz::with_wp(T::one(), T::one(), T::one())
     }
 }
 ///CIE fluorescent illuminant series - F2
@@ -119,7 +118,7 @@ impl WhitePoint for E {
 pub struct F2;
 impl WhitePoint for F2 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.99186), T::one(), flt(0.67393))
+        Xyz::with_wp(cast(0.99186), T::one(), cast(0.67393))
     }
 }
 ///CIE fluorescent illuminant series - F7
@@ -129,7 +128,7 @@ impl WhitePoint for F2 {
 pub struct F7;
 impl WhitePoint for F7 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.95041), T::one(), flt(1.08747))
+        Xyz::with_wp(cast(0.95041), T::one(), cast(1.08747))
     }
 }
 ///CIE fluorescent illuminant series - F11
@@ -139,7 +138,7 @@ impl WhitePoint for F7 {
 pub struct F11;
 impl WhitePoint for F11 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(1.00962), T::one(), flt(0.64350))
+        Xyz::with_wp(cast(1.00962), T::one(), cast(0.64350))
     }
 }
 ///CIE D series standard illuminant - D50
@@ -150,7 +149,7 @@ impl WhitePoint for F11 {
 pub struct D50Degree10;
 impl WhitePoint for D50Degree10 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.9672), T::one(), flt(0.8143))
+        Xyz::with_wp(cast(0.9672), T::one(), cast(0.8143))
     }
 }
 ///CIE D series standard illuminant - D55
@@ -161,7 +160,7 @@ impl WhitePoint for D50Degree10 {
 pub struct D55Degree10;
 impl WhitePoint for D55Degree10 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.958), T::one(), flt(0.9093))
+        Xyz::with_wp(cast(0.958), T::one(), cast(0.9093))
     }
 }
 ///CIE D series standard illuminant - D65
@@ -172,7 +171,7 @@ impl WhitePoint for D55Degree10 {
 pub struct D65Degree10;
 impl WhitePoint for D65Degree10 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.9481), T::one(), flt(1.073))
+        Xyz::with_wp(cast(0.9481), T::one(), cast(1.073))
     }
 }
 ///CIE D series standard illuminant - D75
@@ -183,6 +182,6 @@ impl WhitePoint for D65Degree10 {
 pub struct D75Degree10;
 impl WhitePoint for D75Degree10 {
     fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.94416), T::one(), flt(1.2064))
+        Xyz::with_wp(cast(0.94416), T::one(), cast(1.2064))
     }
 }

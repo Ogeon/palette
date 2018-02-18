@@ -4,7 +4,7 @@ use std::f64::consts::PI;
 use std::cmp::PartialEq;
 use std::ops::{Add, Sub};
 
-use flt;
+use cast;
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -16,12 +16,13 @@ macro_rules! make_hues {
         ///also have some surprising effects if it's expected to act as a
         ///linear number.
         #[derive(Clone, Copy, Debug, Default)]
+        #[repr(C)]
         pub struct $name<T: Float = f32>(T);
 
         impl<T: Float> $name<T> {
             ///Create a new hue from radians, instead of degrees.
             pub fn from_radians(radians: T) -> $name<T> {
-                $name(radians * flt(180.0) / flt(PI))
+                $name(radians * cast(180.0) / cast(PI))
             }
 
             ///Get the hue as degrees, in the range `(-180, 180]`.
@@ -31,7 +32,7 @@ macro_rules! make_hues {
 
             ///Convert the hue to radians, in the range `(-π, π]`.
             pub fn to_radians(self) -> T {
-                normalize_angle(self.0) * flt(PI) / flt(180.0)
+                normalize_angle(self.0) * cast(PI) / cast(180.0)
             }
 
             ///Convert the hue to positive degrees, in the range `[0, 360)`.
@@ -41,7 +42,7 @@ macro_rules! make_hues {
 
             ///Convert the hue to positive radians, in the range `[0, 2π)`.
             pub fn to_positive_radians(self) -> T {
-                normalize_angle_positive(self.0) * flt(PI) / flt(180.0)
+                normalize_angle_positive(self.0) * cast(PI) / cast(180.0)
             }
         }
 
@@ -133,13 +134,13 @@ make_hues! {
 }
 
 fn normalize_angle<T: Float>(deg: T) -> T {
-    let c360 = flt(360.0);
-    let c180 = flt(180.0);
+    let c360 = cast(360.0);
+    let c180 = cast(180.0);
     deg - (((deg + c180) / c360) - T::one()).ceil() * c360
 }
 
 fn normalize_angle_positive<T: Float>(deg: T) -> T {
-    let c360 = flt(360.0);
+    let c360 = cast(360.0);
     deg - ((deg / c360).floor() * c360)
 }
 

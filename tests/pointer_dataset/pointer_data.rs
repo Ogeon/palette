@@ -51,7 +51,7 @@ struct PointerData {
 impl From<PointerDataRaw> for PointerData {
     fn from(src: PointerDataRaw) -> PointerData {
         PointerData {
-            lch: Lch::with_wp(src.lch_l, src.lch_c, src.lch_h.into()),
+            lch: Lch::with_wp(src.lch_l, src.lch_c, src.lch_h),
             lab: Lab::with_wp(src.lab_l, src.lab_a, src.lab_b),
         }
     }

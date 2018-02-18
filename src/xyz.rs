@@ -1,16 +1,17 @@
 use num_traits::Float;
 
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
-use {Alpha, Yxy, Luma, Lab};
-use {Limited, Mix, Shade, FromColor, ComponentWise};
-use white_point::{WhitePoint, D65};
-use rgb::{RgbSpace, Rgb, Linear};
-use matrix::{rgb_to_xyz_matrix, multiply_rgb_to_xyz};
-use {clamp, flt};
+use {Alpha, Lab, Luma, Yxy};
+use {ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
+use white_point::{D65, WhitePoint};
+use rgb::{Linear, Rgb, RgbSpace};
+use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
+use {cast, clamp};
 
-///CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in `Alpha`](struct.Alpha.html#Xyza).
+/// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
+/// `Alpha`](struct.Alpha.html#Xyza).
 pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 
 ///The CIE 1931 XYZ color space.
@@ -22,9 +23,11 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 ///Conversions and operations on this color space depend on the defined white point
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     ///X is the scale of what can be seen as a response curve for the cone
     ///cells in the human eye. Its range depends
@@ -44,19 +47,29 @@ pub struct Xyz<Wp = D65, T = f32>
 }
 
 impl<Wp, T> Copy for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
-{}
+where
+    T: Float,
+    Wp: WhitePoint,
+{
+}
 
 impl<Wp, T> Clone for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
-    fn clone(&self) -> Xyz<Wp, T> { *self }
+    fn clone(&self) -> Xyz<Wp, T> {
+        *self
+    }
+}
+
+unsafe impl<Wp: WhitePoint, T: Float> Pixel<T> for Xyz<Wp, T> {
+    const CHANNELS: usize = 3;
 }
 
 impl<T> Xyz<D65, T>
-    where T: Float,
+where
+    T: Float,
 {
     ///CIE XYZ with whtie point D65.
     pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
@@ -70,8 +83,9 @@ impl<T> Xyz<D65, T>
 }
 
 impl<Wp, T> Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     ///CIE XYZ.
     pub fn with_wp(x: T, y: T, z: T) -> Xyz<Wp, T> {
@@ -86,7 +100,8 @@ impl<Wp, T> Xyz<Wp, T>
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
 impl<T> Alpha<Xyz<D65, T>, T>
-    where T: Float,
+where
+    T: Float,
 {
     ///CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: T) -> Xyza<D65, T> {
@@ -99,8 +114,9 @@ impl<T> Alpha<Xyz<D65, T>, T>
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
 impl<Wp, T> Alpha<Xyz<Wp, T>, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     ///CIE XYZ and transparency.
     pub fn with_wp(x: T, y: T, z: T, alpha: T) -> Xyza<Wp, T> {
@@ -112,38 +128,41 @@ impl<Wp, T> Alpha<Xyz<Wp, T>, T>
 }
 
 impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         xyz
     }
 
-    fn from_rgb<S: RgbSpace<WhitePoint=Wp>>(rgb: Rgb<Linear<S>, T>) -> Self {
+    fn from_rgb<S: RgbSpace<WhitePoint = Wp>>(rgb: Rgb<Linear<S>, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S, T>();
         multiply_rgb_to_xyz(&transform_matrix, &rgb)
     }
 
     fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
-        let mut xyz = Xyz { y: yxy.luma, ..Default::default() };
+        let mut xyz = Xyz {
+            y: yxy.luma,
+            ..Default::default()
+        };
         // If denominator is zero, NAN or INFINITE leave x and z at the default 0
         if yxy.y.is_normal() {
             xyz.x = yxy.luma * yxy.x / yxy.y;
-            xyz.z = yxy.luma * ( T::one() - yxy.x - yxy.y ) / yxy.y;
+            xyz.z = yxy.luma * (T::one() - yxy.x - yxy.y) / yxy.y;
         }
         xyz
     }
 
     fn from_lab(lab: Lab<Wp, T>) -> Self {
-        let y = (lab.l + flt(16.0)) / flt(116.0);
-        let x = y + (lab.a / flt(500.0));
-        let z = y - (lab.b / flt(200.0));
-
+        let y = (lab.l + cast(16.0)) / cast(116.0);
+        let x = y + (lab.a / cast(500.0));
+        let z = y - (lab.b / cast(200.0));
 
         fn convert<T: Float>(c: T) -> T {
-            let epsilon: T = flt(6.0 / 29.0);
-            let kappa: T = flt(108.0 / 841.0);
-            let delta: T = flt(4.0 / 29.0);
+            let epsilon: T = cast(6.0 / 29.0);
+            let kappa: T = cast(108.0 / 841.0);
+            let delta: T = cast(4.0 / 29.0);
 
             if c > epsilon {
                 c.powi(3)
@@ -156,14 +175,16 @@ impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
     }
 
     fn from_luma(luma: Luma<Wp, T>) -> Self {
-       Wp::get_xyz() * luma.luma
+        Wp::get_xyz() * luma.luma
     }
 }
 
 impl<Wp, T> Limited for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
         let xyz_ref: Self = Wp::get_xyz();
         self.x >= T::zero() && self.x <= xyz_ref.x &&
@@ -186,8 +207,9 @@ impl<Wp, T> Limited for Xyz<Wp, T>
 }
 
 impl<Wp, T> Mix for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -204,8 +226,9 @@ impl<Wp, T> Mix for Xyz<Wp, T>
 }
 
 impl<Wp, T> Shade for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -220,8 +243,9 @@ impl<Wp, T> Shade for Xyz<Wp, T>
 }
 
 impl<Wp, T> ComponentWise for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -245,8 +269,9 @@ impl<Wp, T> ComponentWise for Xyz<Wp, T>
 }
 
 impl<Wp, T> Default for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn default() -> Xyz<Wp, T> {
         Xyz::with_wp(T::zero(), T::zero(), T::zero())
@@ -254,8 +279,9 @@ impl<Wp, T> Default for Xyz<Wp, T>
 }
 
 impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -270,8 +296,9 @@ impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Add<T> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -286,8 +313,9 @@ impl<Wp, T> Add<T> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -302,8 +330,9 @@ impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Sub<T> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -318,8 +347,9 @@ impl<Wp, T> Sub<T> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -334,8 +364,9 @@ impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Mul<T> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -350,8 +381,9 @@ impl<Wp, T> Mul<T> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -366,8 +398,9 @@ impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
 }
 
 impl<Wp, T> Div<T> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
 
@@ -382,8 +415,9 @@ impl<Wp, T> Div<T> for Xyz<Wp, T>
 }
 
 impl<Wp, T> From<Alpha<Xyz<Wp, T>, T>> for Xyz<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Float,
+    Wp: WhitePoint,
 {
     fn from(color: Alpha<Xyz<Wp, T>, T>) -> Xyz<Wp, T> {
         color.color
@@ -441,4 +475,7 @@ mod test {
             unlimited {}
         }
     }
+
+    raw_pixel_conversion_tests!(Xyz<D65>: x, y, z);
+    raw_pixel_conversion_fail_tests!(Xyz<D65>: x, y, z);
 }

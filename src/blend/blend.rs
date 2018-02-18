@@ -1,7 +1,7 @@
 use num_traits::{Float, One, Zero};
 
-use {ComponentWise, clamp, flt};
-use blend::{PreAlpha, BlendFunction};
+use {cast, clamp, ComponentWise};
+use blend::{BlendFunction, PreAlpha};
 
 ///A trait for colors that can be blended together.
 ///
@@ -13,13 +13,15 @@ use blend::{PreAlpha, BlendFunction};
 ///results._
 pub trait Blend: Sized {
     ///The core color type. Typically `Self` for color types without alpha.
-    type Color: Blend<Color=Self::Color> + ComponentWise;
+    type Color: Blend<Color = Self::Color> + ComponentWise;
 
     ///Convert the color to premultiplied alpha.
     fn into_premultiplied(self) -> PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>;
 
     ///Convert the color from premultiplied alpha.
-    fn from_premultiplied(color: PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>) -> Self;
+    fn from_premultiplied(
+        color: PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>,
+    ) -> Self;
 
     ///Blend self, as the source color, with `destination`, using
     ///`blend_function`. Anything that implements `BlendFunction` is
@@ -42,8 +44,13 @@ pub trait Blend: Sized {
     ///let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
     ///let c = a.blend(b, blend_mode);
     ///```
-    fn blend<F>(self, destination: Self, blend_function: F) -> Self where F: BlendFunction<Self::Color> {
-        Self::from_premultiplied(blend_function.apply_to(self.into_premultiplied(), destination.into_premultiplied()))
+    fn blend<F>(self, destination: Self, blend_function: F) -> Self
+    where
+        F: BlendFunction<Self::Color>,
+    {
+        Self::from_premultiplied(
+            blend_function.apply_to(self.into_premultiplied(), destination.into_premultiplied()),
+        )
     }
 
     ///Place `self` over `other`. This is the good old common alpha
@@ -56,7 +63,8 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a + b * (one - src.alpha)),
+            color: src.color
+                .component_wise(&dst.color, |a, b| a + b * (one - src.alpha)),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
 
@@ -106,7 +114,8 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a * dst.alpha + b * (one - src.alpha)),
+            color: src.color
+                .component_wise(&dst.color, |a, b| a * dst.alpha + b * (one - src.alpha)),
             alpha: clamp(dst.alpha, zero, one),
         };
 
@@ -123,13 +132,18 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a * (one - dst.alpha) + b * (one - src.alpha)),
-            alpha: clamp(src.alpha + dst.alpha - two * src.alpha * dst.alpha, zero, one),
+            color: src.color.component_wise(&dst.color, |a, b| {
+                a * (one - dst.alpha) + b * (one - src.alpha)
+            }),
+            alpha: clamp(
+                src.alpha + dst.alpha - two * src.alpha * dst.alpha,
+                zero,
+                one,
+            ),
         };
 
         Self::from_premultiplied(result)
     }
-
 
     ///Add `self` and `other`. This uses the alpha component to regulate the
     ///effect, so it's not just plain component wise addition.
@@ -194,10 +208,13 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| if b * two <= dst.alpha {
-                two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
-            } else {
-                a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b - src.alpha * dst.alpha
+            color: src.color.component_wise(&dst.color, |a, b| {
+                if b * two <= dst.alpha {
+                    two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
+                } else {
+                    a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b
+                        - src.alpha * dst.alpha
+                }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
@@ -214,7 +231,9 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| (a * dst.alpha).min(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)),
+            color: src.color.component_wise(&dst.color, |a, b| {
+                (a * dst.alpha).min(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)
+            }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
 
@@ -230,7 +249,9 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| (a * dst.alpha).max(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)),
+            color: src.color.component_wise(&dst.color, |a, b| {
+                (a * dst.alpha).max(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)
+            }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
 
@@ -247,12 +268,15 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| if a == src.alpha && !b.is_normal() {
-                a * (one - dst.alpha)
-            } else if a == src.alpha {
-                src.alpha * dst.alpha + a * (one - dst.alpha) + b * (one - src.alpha)
-            } else {
-                src.alpha * dst.alpha * one.min((b/dst.alpha) * src.alpha / (src.alpha - a)) + a * (one - dst.alpha) + b * (one - src.alpha)
+            color: src.color.component_wise(&dst.color, |a, b| {
+                if a == src.alpha && !b.is_normal() {
+                    a * (one - dst.alpha)
+                } else if a == src.alpha {
+                    src.alpha * dst.alpha + a * (one - dst.alpha) + b * (one - src.alpha)
+                } else {
+                    src.alpha * dst.alpha * one.min((b / dst.alpha) * src.alpha / (src.alpha - a))
+                        + a * (one - dst.alpha) + b * (one - src.alpha)
+                }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
@@ -270,12 +294,15 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| if !a.is_normal() && b == dst.alpha {
-                src.alpha * dst.alpha + b * (one - src.alpha)
-            } else if !a.is_normal() {
-                b * (one - src.alpha)
-            } else {
-                src.alpha * dst.alpha * (one - one.min((one - b/dst.alpha) * src.alpha/a)) + a * (one - dst.alpha) + b * (one - src.alpha)
+            color: src.color.component_wise(&dst.color, |a, b| {
+                if !a.is_normal() && b == dst.alpha {
+                    src.alpha * dst.alpha + b * (one - src.alpha)
+                } else if !a.is_normal() {
+                    b * (one - src.alpha)
+                } else {
+                    src.alpha * dst.alpha * (one - one.min((one - b / dst.alpha) * src.alpha / a))
+                        + a * (one - dst.alpha) + b * (one - src.alpha)
+                }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
@@ -295,10 +322,13 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| if a * two <= src.alpha {
-                two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
-            } else {
-                a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b - src.alpha * dst.alpha
+            color: src.color.component_wise(&dst.color, |a, b| {
+                if a * two <= src.alpha {
+                    two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
+                } else {
+                    a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b
+                        - src.alpha * dst.alpha
+                }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
@@ -319,15 +349,22 @@ pub trait Blend: Sized {
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                let m = if dst.alpha.is_normal() { b / dst.alpha } else { zero };
+                let m = if dst.alpha.is_normal() {
+                    b / dst.alpha
+                } else {
+                    zero
+                };
 
                 if a * two <= src.alpha {
-                    b * (src.alpha + (two * a - src.alpha) * (one - m)) + a * (one - dst.alpha) + b * (one - src.alpha)
-                } else if b * flt(4.0) <= dst.alpha {
+                    b * (src.alpha + (two * a - src.alpha) * (one - m)) + a * (one - dst.alpha)
+                        + b * (one - src.alpha)
+                } else if b * cast(4.0) <= dst.alpha {
                     let m2 = m * m;
                     let m3 = m2 * m;
 
-                    dst.alpha * (two * a - src.alpha) * (m3 * flt(16.0) - m2 * flt(12.0) - m * flt(3.0)) + a - a * dst.alpha + b
+                    dst.alpha * (two * a - src.alpha)
+                        * (m3 * cast(16.0) - m2 * cast(12.0) - m * cast(3.0))
+                        + a - a * dst.alpha + b
                 } else {
                     dst.alpha * (two * a - src.alpha) * (m.sqrt() - m) + a - a * dst.alpha + b
                 }
@@ -349,7 +386,9 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a + b - two * (a * dst.alpha).min(b * src.alpha)),
+            color: src.color.component_wise(&dst.color, |a, b| {
+                a + b - two * (a * dst.alpha).min(b * src.alpha)
+            }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
 
@@ -368,7 +407,8 @@ pub trait Blend: Sized {
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a + b - two * a * b),
+            color: src.color
+                .component_wise(&dst.color, |a, b| a + b - two * a * b),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
 

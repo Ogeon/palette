@@ -1,9 +1,8 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use {Xyz, Yxy, Lab, Lch, Luma, LabHue, RgbHue, flt};
+use {cast, Lab, LabHue, Lch, Luma, RgbHue, Xyz, Yxy};
 use white_point::WhitePoint;
-
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
@@ -40,11 +39,11 @@ macro_rules! impl_eq {
     }
 }
 
-impl_eq!( Xyz, [x, y, z] );
-impl_eq!( Yxy, [y, x, luma] );
-impl_eq!( Lab, [l, a, b] );
-impl_eq!( Luma, [luma] );
-impl_eq!( Lch, [l, chroma, hue] );
+impl_eq!(Xyz, [x, y, z]);
+impl_eq!(Yxy, [y, x, luma]);
+impl_eq!(Lab, [l, a, b]);
+impl_eq!(Luma, [luma]);
+impl_eq!(Lch, [l, chroma, hue]);
 
 // For hues diffence is calculated and compared to zero. However due to the way floating point's
 // work this is not so simple
@@ -61,10 +60,10 @@ macro_rules! impl_eq_hue {
             type Epsilon = <T as ApproxEq>::Epsilon;
 
             fn default_epsilon() -> Self::Epsilon {
-                T::default_epsilon() * flt(180.0)
+                T::default_epsilon() * cast(180.0)
             }
             fn default_max_relative() -> Self::Epsilon {
-                T::default_max_relative() * flt(180.0)
+                T::default_max_relative() * cast(180.0)
             }
             fn default_max_ulps() -> u32 {
                 T::default_max_ulps() * 180
@@ -91,5 +90,5 @@ macro_rules! impl_eq_hue {
     }
 }
 
-impl_eq_hue!( LabHue);
-impl_eq_hue!( RgbHue);
+impl_eq_hue!(LabHue);
+impl_eq_hue!(RgbHue);

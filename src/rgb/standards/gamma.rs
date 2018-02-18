@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use num_traits::Float;
 
-use flt;
+use cast;
 use rgb::{RgbSpace, RgbStandard, TransferFn};
 use rgb::standards::Srgb;
 
@@ -34,11 +34,11 @@ pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 
 impl<N: Number> TransferFn for GammaFn<N> {
     fn into_linear<T: Float>(x: T) -> T {
-        x.powf(T::one() / flt(N::VALUE))
+        x.powf(T::one() / cast(N::VALUE))
     }
 
     fn from_linear<T: Float>(x: T) -> T {
-        x.powf(flt(N::VALUE))
+        x.powf(cast(N::VALUE))
     }
 }
 

@@ -4,11 +4,10 @@ use num_traits::Float;
 
 use Yxy;
 use white_point::WhitePoint;
-use pixel::TransferFn;
 use std::any::Any;
 
 pub use self::rgb::{Rgb, Rgba};
-pub use self::standards::{Linear};
+pub use self::standards::Linear;
 
 pub mod standards;
 //mod linear;
@@ -70,4 +69,13 @@ pub trait Primaries: Any {
     fn green<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
     ///Primary blue.
     fn blue<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+}
+
+///A transfer function to and from linear space.
+pub trait TransferFn {
+    ///Convert the color component `x` from linear space.
+    fn from_linear<T: Float>(x: T) -> T;
+
+    ///Convert the color component `x` into linear space.
+    fn into_linear<T: Float>(x: T) -> T;
 }
