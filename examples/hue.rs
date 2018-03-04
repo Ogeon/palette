@@ -12,14 +12,14 @@ fn main() {
     //right part. Notice how LCh manages to preserve the apparent lightness of
     //of the colors, compared to the original.
     for (x, y, pixel) in image.enumerate_pixels_mut() {
-        let color = Srgb::from_raw(&pixel.data).into_float();
+        let color = Srgb::from_raw(&pixel.data).into_format();
 
         pixel.data = if x < y {
             let saturated = Hsl::from(color).shift_hue(180.0);
-            Srgb::from_linear(saturated.into()).into_uint().into_raw()
+            Srgb::from_linear(saturated.into()).into_format().into_raw()
         } else {
             let saturated = Lch::from(color).shift_hue(180.0);
-            Srgb::from_linear(saturated.into()).into_uint().into_raw()
+            Srgb::from_linear(saturated.into()).into_format().into_raw()
         };
     }
 

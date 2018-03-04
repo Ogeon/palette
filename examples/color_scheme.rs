@@ -94,7 +94,7 @@ fn main() {
         .expect("the blue channel must be a number in the range [0-255]");
 
     let primary: Color = Srgb::new(red, green, blue)
-        .into_float()
+        .into_format()
         .into_linear()
         .into();
 
@@ -177,17 +177,17 @@ fn blit_shades<I: GenericImage<Pixel = image::Rgb<u8>> + 'static>(
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Srgb::from_linear(color.into()).into_uint().into_raw();
+    let primary = Srgb::from_linear(color.into()).into_format().into_raw();
 
     //Generate one lighter and two darker versions of the color
     let light = Srgb::from_linear(color.lighten(0.1).into())
-        .into_uint()
+        .into_format()
         .into_raw();
     let dark1 = Srgb::from_linear(color.darken(0.1).into())
-        .into_uint()
+        .into_format()
         .into_raw();
     let dark2 = Srgb::from_linear(color.darken(0.2).into())
-        .into_uint()
+        .into_format()
         .into_raw();
 
     for (x, y, pixel) in canvas.pixels_mut() {

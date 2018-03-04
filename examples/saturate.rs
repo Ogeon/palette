@@ -17,12 +17,12 @@ fn main() {
     //in the right half. Notice the strong yellow tone in the HSL part.
     for (_, _, pixel) in image.sub_image(0, 0, width / 2, height).pixels_mut() {
         let color: Hsl = Srgb::from_raw(&pixel.data)
-            .into_float()
+            .into_format()
             .into_linear()
             .into();
 
         let saturated = color.saturate(0.8);
-        pixel.data = Srgb::from_linear(saturated.into()).into_uint().into_raw();
+        pixel.data = Srgb::from_linear(saturated.into()).into_format().into_raw();
     }
 
     for (_, _, pixel) in image
@@ -30,12 +30,12 @@ fn main() {
         .pixels_mut()
     {
         let color: Lch = Srgb::from_raw(&pixel.data)
-            .into_float()
+            .into_format()
             .into_linear()
             .into();
 
         let saturated = color.saturate(0.8);
-        pixel.data = Srgb::from_linear(saturated.into()).into_uint().into_raw();
+        pixel.data = Srgb::from_linear(saturated.into()).into_format().into_raw();
     }
 
     match image.save("examples/saturate.png") {

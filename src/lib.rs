@@ -37,7 +37,7 @@
 //!
 //! // Encode the result back into sRGB and create a byte array
 //! let pixel: [u8;3] = Srgb::from_linear(whateve_it_becomes)
-//!     .into_uint()
+//!     .into_format()
 //!     .into_raw();
 //! ```
 //!
@@ -703,44 +703,127 @@ pub trait ComponentWise {
 
 /// Common trait for color components.
 pub trait Component: Copy + Zero + PartialOrd + NumCast {
+    /// True if the max intensity is also the highest possible value of the
+    /// type. Conversion to limited types requires clamping.
+    const LIMITED: bool;
+
     /// The highest displayable value this component type can reach. Higher values are allowed,
     /// but they may be lowered to this before converting to another format.
     fn max_intensity() -> Self;
+
+    /// Convert into another color component type, including scaling.
+    fn convert<T: Component>(&self) -> T;
 }
 
 impl Component for f32 {
+    const LIMITED: bool = false;
+
     fn max_intensity() -> Self {
         1.0
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = *self * cast::<f32, _>(T::max_intensity());
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 
 impl Component for f64 {
+    const LIMITED: bool = false;
+
     fn max_intensity() -> Self {
         1.0
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = *self * cast::<f64, _>(T::max_intensity());
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 
 impl Component for u8 {
+    const LIMITED: bool = true;
+
     fn max_intensity() -> Self {
         std::u8::MAX
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = cast::<f64, _>(T::max_intensity())
+            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 
 impl Component for u16 {
+    const LIMITED: bool = true;
+
     fn max_intensity() -> Self {
         std::u16::MAX
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = cast::<f64, _>(T::max_intensity())
+            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 
 impl Component for u32 {
+    const LIMITED: bool = true;
+
     fn max_intensity() -> Self {
         std::u32::MAX
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = cast::<f64, _>(T::max_intensity())
+            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 
 impl Component for u64 {
+    const LIMITED: bool = true;
+
     fn max_intensity() -> Self {
         std::u64::MAX
+    }
+
+    fn convert<T: Component>(&self) -> T {
+        let scaled = cast::<f64, _>(T::max_intensity())
+            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
+
+        if T::LIMITED {
+            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+        } else {
+            cast(scaled)
+        }
     }
 }
 

@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Sub};
 use std::any::TypeId;
 
-use num_traits::{Float, Unsigned};
+use num_traits::Float;
 use approx::ApproxEq;
 
 use rgb::{RgbSpace, RgbStandard, TransferFn};
@@ -69,56 +69,28 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
             standard: PhantomData,
         }
     }
+
+    /// Convert into another component type.
+    pub fn into_format<U: Component>(self) -> Rgb<S, U> {
+        Rgb {
+            red: self.red.convert(),
+            green: self.green.convert(),
+            blue: self.blue.convert(),
+            standard: PhantomData,
+        }
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self {
+        color.into_format()
+    }
 }
 
 unsafe impl<S: RgbStandard, T: Component> Pixel<T> for Rgb<S, T> {
     const CHANNELS: usize = 3;
 }
 
-impl<S: RgbStandard, T: Component + Unsigned> Rgb<S, T> {
-    /// Convert an unsigned integer based RGB color into a float based one.
-    pub fn into_float<F: Component + Float>(self) -> Rgb<S, F> {
-        Rgb {
-            red: cast::<F, _>(self.red) / cast(T::max_intensity()),
-            green: cast::<F, _>(self.green) / cast(T::max_intensity()),
-            blue: cast::<F, _>(self.blue) / cast(T::max_intensity()),
-            standard: PhantomData,
-        }
-    }
-
-    /// Convert a float based RGB color into a unsigned integer based one.
-    pub fn from_float<F: Component + Float>(color: Rgb<S, F>) -> Self {
-        Rgb::new(
-            cast(clamp(
-                color.red * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-            cast(clamp(
-                color.green * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-            cast(clamp(
-                color.blue * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-        )
-    }
-}
-
 impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {
-    /// Convert a float based RGB color into a unsigned integer based one.
-    pub fn into_uint<U: Component + Unsigned>(self) -> Rgb<S, U> {
-        Rgb::from_float(self)
-    }
-
-    /// Convert an unsigned integer based RGB color into a float based one.
-    pub fn from_uint<U: Component + Unsigned>(color: Rgb<S, U>) -> Rgb<S, T> {
-        color.into_float()
-    }
-
     /// Convert the color to linear RGB.
     pub fn into_linear(self) -> Rgb<Linear<S::Space>, T> {
         Rgb::new(
@@ -162,58 +134,25 @@ impl<S: RgbStandard, T: Component> Alpha<Rgb<S, T>, T> {
             alpha: alpha,
         }
     }
-}
 
-impl<S: RgbStandard, T: Component + Unsigned> Alpha<Rgb<S, T>, T> {
-    /// Convert an unsigned integer based RGBA color into a float based one.
-    pub fn into_float<F: Component + Float>(self) -> Alpha<Rgb<S, F>, F> {
+    /// Convert into another component type.
+    pub fn into_format<U: Component>(self) -> Alpha<Rgb<S, U>, U> {
         Rgba::new(
-            cast::<F, _>(self.red) / cast(T::max_intensity()),
-            cast::<F, _>(self.green) / cast(T::max_intensity()),
-            cast::<F, _>(self.blue) / cast(T::max_intensity()),
-            cast::<F, _>(self.alpha) / cast(T::max_intensity()),
+            self.red.convert(),
+            self.green.convert(),
+            self.blue.convert(),
+            self.alpha.convert(),
         )
     }
 
-    /// Convert a float based RGBA color into a unsigned integer based one.
-    pub fn from_float<F: Component + Float>(color: Alpha<Rgb<S, F>, F>) -> Self {
-        Rgba::new(
-            cast(clamp(
-                color.red * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-            cast(clamp(
-                color.green * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-            cast(clamp(
-                color.blue * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-            cast(clamp(
-                color.alpha * cast(T::max_intensity()),
-                F::zero(),
-                cast(T::max_intensity()),
-            )),
-        )
+    /// Convert from another component type.
+    pub fn from_format<U: Component>(color: Alpha<Rgb<S, U>, U>) -> Self {
+        color.into_format()
     }
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
 impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
-    /// Convert a float based RGBA color into a unsigned integer based one.
-    pub fn into_uint<U: Component + Unsigned>(self) -> Alpha<Rgb<S, U>, U> {
-        Rgba::from_float(self)
-    }
-
-    /// Convert an unsigned integer based RGBA color into a float based one.
-    pub fn from_uint<U: Component + Unsigned>(color: Alpha<Rgb<S, U>, U>) -> Rgba<S, T> {
-        color.into_float()
-    }
-
     /// Convert the color to linear RGB with transparency.
     pub fn into_linear(self) -> Rgba<Linear<S::Space>, T> {
         Rgba::new(

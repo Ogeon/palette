@@ -10,11 +10,11 @@
 //!use palette::named;
 //!
 //!//From constant
-//!let from_const = Srgb::<f32>::from_uint(named::OLIVE).into_linear();
+//!let from_const = Srgb::<f32>::from_format(named::OLIVE).into_linear();
 //!
 //!//From name string
 //!let olive = named::from_str("olive").expect("unknown color");
-//!let from_str = Srgb::<f32>::from_uint(olive).into_linear();
+//!let from_str = Srgb::<f32>::from_format(olive).into_linear();
 //!
 //!assert_eq!(from_const, from_str);
 //!```

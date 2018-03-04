@@ -44,10 +44,10 @@ fn main() {
         .zip(grad3.take(256).zip(grad4.take(256)))
         .enumerate()
     {
-        let c1 = Srgb::from_linear(c1).into_uint().into_raw();
-        let c2 = Srgb::from_linear(c2).into_uint().into_raw();
-        let c3 = Srgb::from_linear(c3.into()).into_uint().into_raw();
-        let c4 = Srgb::from_linear(c4.into()).into_uint().into_raw();
+        let c1 = Srgb::from_linear(c1).into_format().into_raw();
+        let c2 = Srgb::from_linear(c2).into_format().into_raw();
+        let c3 = Srgb::from_linear(c3.into()).into_format().into_raw();
+        let c4 = Srgb::from_linear(c4.into()).into_format().into_raw();
 
         for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
             pixel.data = c1

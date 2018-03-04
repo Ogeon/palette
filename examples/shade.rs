@@ -15,10 +15,10 @@ fn main() {
 
     for i in 0..11 {
         let rgb1 = Srgb::from_linear(rgb.darken(0.05 * i as f32))
-            .into_uint()
+            .into_format()
             .into_raw();
         let rgb2 = Srgb::from_linear(rgb.lighten(0.05 * i as f32))
-            .into_uint()
+            .into_format()
             .into_raw();
 
         for (_, _, pixel) in image.sub_image(i as u32 * 20, 0, 20, 31).pixels_mut() {
@@ -30,10 +30,10 @@ fn main() {
         }
 
         let lab1 = Srgb::from_linear(lab.darken(0.05 * i as f32).into())
-            .into_uint()
+            .into_format()
             .into_raw();
         let lab2 = Srgb::from_linear(lab.lighten(0.05 * i as f32).into())
-            .into_uint()
+            .into_format()
             .into_raw();
 
         for (_, _, pixel) in image.sub_image(i as u32 * 20, 65, 20, 31).pixels_mut() {
@@ -45,10 +45,10 @@ fn main() {
         }
 
         let hsv1 = Srgb::from_linear(hsv.darken(0.05 * i as f32).into())
-            .into_uint()
+            .into_format()
             .into_raw();
         let hsv2 = Srgb::from_linear(hsv.lighten(0.05 * i as f32).into())
-            .into_uint()
+            .into_format()
             .into_raw();
 
         for (_, _, pixel) in image.sub_image(i as u32 * 20, 130, 20, 31).pixels_mut() {

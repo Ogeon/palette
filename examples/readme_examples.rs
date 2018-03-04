@@ -17,8 +17,8 @@ mod color_spaces {
         display_colors(
             "examples/readme_color_spaces.png",
             &[
-                ::palette::Srgb::new(0.8, 0.2, 0.1).into_uint(),
-                Srgb::from_linear(new_color.into()).into_uint(),
+                ::palette::Srgb::new(0.8, 0.2, 0.1).into_format(),
+                Srgb::from_linear(new_color.into()).into_format(),
             ],
         );
     }
@@ -36,9 +36,9 @@ mod manipulation {
         display_colors(
             "examples/readme_manipulation.png",
             &[
-                Srgb::from_linear(color.into()).into_uint(),
-                Srgb::from_linear(lighter.into()).into_uint(),
-                Srgb::from_linear(desaturated.into()).into_uint(),
+                Srgb::from_linear(color.into()).into_format(),
+                Srgb::from_linear(lighter.into()).into_format(),
+                Srgb::from_linear(desaturated.into()).into_format(),
             ],
         );
     }
@@ -89,13 +89,13 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
 
     for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
         pixel.data = Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
-            .into_uint()
+            .into_format()
             .into_raw();
     }
 
     for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
         pixel.data = Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
-            .into_uint()
+            .into_format()
             .into_raw();
     }
 
