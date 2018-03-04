@@ -4,7 +4,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Luma, Xyz};
-use {ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
 use clamp;
 
@@ -23,7 +23,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 #[repr(C)]
 pub struct Yxy<Wp = D65, T = f32>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
@@ -46,14 +46,14 @@ where
 
 impl<Wp, T> Copy for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
 }
 
 impl<Wp, T> Clone for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn clone(&self) -> Yxy<Wp, T> {
@@ -61,13 +61,13 @@ where
     }
 }
 
-unsafe impl<Wp: WhitePoint, T: Float> Pixel<T> for Yxy<Wp, T> {
+unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Yxy<Wp, T> {
     const CHANNELS: usize = 3;
 }
 
 impl<T> Yxy<D65, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///CIE Yxy with white point D65.
     pub fn new(x: T, y: T, luma: T) -> Yxy<D65, T> {
@@ -82,7 +82,7 @@ where
 
 impl<Wp, T> Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///CIE Yxy.
@@ -99,7 +99,7 @@ where
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
 impl<T> Alpha<Yxy<D65, T>, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: T) -> Yxya<D65, T> {
@@ -112,7 +112,7 @@ where
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
 impl<Wp, T> Alpha<Yxy<Wp, T>, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///CIE Yxy and transparency.
@@ -126,7 +126,7 @@ where
 
 impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
@@ -160,7 +160,7 @@ where
 
 impl<Wp, T> Limited for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -185,7 +185,7 @@ where
 
 impl<Wp, T> Mix for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -204,7 +204,7 @@ where
 
 impl<Wp, T> Shade for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -221,7 +221,7 @@ where
 
 impl<Wp, T> ComponentWise for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -247,7 +247,7 @@ where
 
 impl<Wp, T> Default for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn default() -> Yxy<Wp, T> {
@@ -264,7 +264,7 @@ where
 
 impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -281,7 +281,7 @@ where
 
 impl<Wp, T> Add<T> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -298,7 +298,7 @@ where
 
 impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -315,7 +315,7 @@ where
 
 impl<Wp, T> Sub<T> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -332,7 +332,7 @@ where
 
 impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -349,7 +349,7 @@ where
 
 impl<Wp, T> Mul<T> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -366,7 +366,7 @@ where
 
 impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -383,7 +383,7 @@ where
 
 impl<Wp, T> Div<T> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
@@ -400,7 +400,7 @@ where
 
 impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn from(color: Alpha<Yxy<Wp, T>, T>) -> Yxy<Wp, T> {

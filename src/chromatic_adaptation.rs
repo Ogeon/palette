@@ -24,7 +24,7 @@
 //!```
 use num_traits::Float;
 
-use {cast, FromColor, IntoColor, Xyz};
+use {cast, Component, FromColor, IntoColor, Xyz};
 use white_point::WhitePoint;
 use matrix::{multiply_xyz, Mat3, multiply_3x3};
 
@@ -50,7 +50,7 @@ pub struct ConeResponseMatrices<T: Float> {
 ///one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -86,7 +86,7 @@ where
 
 impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -139,21 +139,23 @@ where
 ///Uses the bradford method for conversion by default.
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford method by default
+    ///Convert the source color to the destination color using the bradford
+    /// method by default
     fn adapt_from(color: S) -> Self {
         Self::adapt_from_using(color, Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified method
+    ///Convert the source color to the destination color using the specified
+    /// method
     fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> Self;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
     S: IntoColor<Swp, T>,
@@ -173,21 +175,23 @@ where
 ///Uses the bradford method for conversion by default.
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford method by default
+    ///Convert the source color to the destination color using the bradford
+    /// method by default
     fn adapt_into(self) -> D {
         self.adapt_into_using(Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified method
+    ///Convert the source color to the destination color using the specified
+    /// method
     fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptInto<D, Swp, Dwp, T> for S
 where
-    T: Float,
+    T: Component + Float,
     Swp: WhitePoint,
     Dwp: WhitePoint,
     D: AdaptFrom<S, Swp, Dwp, T>,

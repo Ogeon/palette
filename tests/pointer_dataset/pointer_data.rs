@@ -13,13 +13,13 @@ Note: The xyz and yxy conversions do not use the updated conversion formula. So 
 
 use num_traits::{Float, NumCast, ToPrimitive};
 use csv;
-use palette::{IntoColor, Lab, Lch, Xyz};
+use palette::{Component, IntoColor, Lab, Lch, Xyz};
 use palette::white_point::WhitePoint;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
 impl WhitePoint for PointerWP {
-    fn get_xyz<Wp: WhitePoint, T: Float>() -> Xyz<Wp, T> {
+    fn get_xyz<Wp: WhitePoint, T: Component + Float>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.980722647624), T::one(), flt(1.182254189827))
     }
 }

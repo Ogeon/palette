@@ -5,16 +5,19 @@ use num_traits::Float;
 
 use std::marker::PhantomData;
 
-use Xyz;
+use {Component, Xyz};
 use white_point::WhitePoint;
-use rgb::{Primaries, RgbSpace, Rgb, Linear};
+use rgb::{Linear, Primaries, Rgb, RgbSpace};
 use convert::IntoColor;
 
 ///A 9 element array representing a 3x3 matrix
-pub type Mat3<T> = [T;9];
+pub type Mat3<T> = [T; 9];
 
 ///Multiply the 3x3 matrix with the XYZ color
-pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Float>(c: &Mat3<T>, f: &Xyz<Swp, T>) -> Xyz<Dwp, T> {
+pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Component + Float>(
+    c: &Mat3<T>,
+    f: &Xyz<Swp, T>,
+) -> Xyz<Dwp, T> {
     Xyz {
         x: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         y: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
@@ -23,7 +26,10 @@ pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Float>(c: &Mat3<T>, f: 
     }
 }
 ///Multiply the 3x3 matrix with the XYZ color into RGB color
-pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Xyz<S::WhitePoint, T>) -> Rgb<Linear<S>, T> {
+pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Component + Float>(
+    c: &Mat3<T>,
+    f: &Xyz<S::WhitePoint, T>,
+) -> Rgb<Linear<S>, T> {
     Rgb {
         red: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
         green: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
@@ -32,7 +38,10 @@ pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Xyz<S::WhiteP
     }
 }
 ///Multiply the 3x3 matrix with the  RGB into XYZ color
-pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Rgb<Linear<S>, T>) -> Xyz<S::WhitePoint, T> {
+pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Component + Float>(
+    c: &Mat3<T>,
+    f: &Rgb<Linear<S>, T>,
+) -> Xyz<S::WhitePoint, T> {
     Xyz {
         x: (c[0] * f.red) + (c[1] * f.green) + (c[2] * f.blue),
         y: (c[3] * f.red) + (c[4] * f.green) + (c[5] * f.blue),
@@ -43,7 +52,7 @@ pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Float>(c: &Mat3<T>, f: &Rgb<Linear<S>
 
 ///Multiply a 3x3 matrix with another 3x3 matrix
 pub fn multiply_3x3<T: Float>(c: &Mat3<T>, f: &Mat3<T>) -> Mat3<T> {
-    let mut out = [T::zero();9];
+    let mut out = [T::zero(); 9];
     out[0] = c[0] * f[0] + c[1] * f[3] + c[2] * f[6];
     out[1] = c[0] * f[1] + c[1] * f[4] + c[2] * f[7];
     out[2] = c[0] * f[2] + c[1] * f[5] + c[2] * f[8];
@@ -64,9 +73,9 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
     let d0 = a[4] * a[8] - a[5] * a[7];
     let d1 = a[3] * a[8] - a[5] * a[6];
     let d2 = a[3] * a[7] - a[4] * a[6];
-    let det =  a[0] * d0 - a[1] * d1 + a[2] * d2;
+    let det = a[0] * d0 - a[1] * d1 + a[2] * d2;
     if !det.is_normal() {
-        panic!("The given matrix is not invertable")
+        panic!("The given matrix is not invertible")
     }
     let d3 = a[1] * a[8] - a[2] * a[7];
     let d4 = a[0] * a[8] - a[2] * a[6];
@@ -75,18 +84,31 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
     let d7 = a[0] * a[5] - a[2] * a[3];
     let d8 = a[0] * a[4] - a[1] * a[3];
 
-    [d0/det, -d3/det, d6/det, -d1/det, d4/det, -d7/det, d2/det, -d5/det, d8/det]
+    [
+        d0 / det,
+        -d3 / det,
+        d6 / det,
+        -d1 / det,
+        d4 / det,
+        -d7 / det,
+        d2 / det,
+        -d5 / det,
+        d8 / det,
+    ]
 }
 
 ///Geneartes to Srgb to Xyz transformation matrix for the given white point
-pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Float>() -> Mat3<T> {
+pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Component + Float>() -> Mat3<T> {
     let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_xyz();
     let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_xyz();
     let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_xyz();
 
     let mut transform_matrix = mat3_from_primaries(r, g, b);
 
-    let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(&matrix_inverse(&transform_matrix), &S::WhitePoint::get_xyz());
+    let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(
+        &matrix_inverse(&transform_matrix),
+        &S::WhitePoint::get_xyz(),
+    );
     transform_matrix[0] = transform_matrix[0] * s_matrix.red;
     transform_matrix[1] = transform_matrix[1] * s_matrix.green;
     transform_matrix[2] = transform_matrix[2] * s_matrix.blue;
@@ -98,10 +120,10 @@ pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Float>() -> Mat3<T> {
     transform_matrix[8] = transform_matrix[8] * s_matrix.blue;
 
     transform_matrix
-
 }
 
-fn mat3_from_primaries<T: Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
+#[cfg_attr(rustfmt, rustfmt_skip)]
+fn mat3_from_primaries<T: Component + Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
     [
         r.x, g.x, b.x,
         r.y, g.y, b.y,
@@ -109,15 +131,14 @@ fn mat3_from_primaries<T: Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b
     ]
 }
 
-
 #[cfg(test)]
 mod test {
     use Xyz;
-    use rgb::{Rgb, Linear};
+    use rgb::{Linear, Rgb};
     use rgb::standards::Srgb;
     use chromatic_adaptation::AdaptInto;
     use white_point::D50;
-    use super::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
+    use super::{matrix_inverse, multiply_xyz, rgb_to_xyz_matrix, multiply_3x3};
 
     #[test]
     fn matrix_multiply_3x3() {
@@ -163,7 +184,7 @@ mod test {
         matrix_inverse(&input);
     }
 
-
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     #[test]
     fn d65_rgb_conversion_matrix() {
         let expected = [

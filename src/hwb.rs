@@ -5,7 +5,8 @@ use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 use std::any::TypeId;
 
-use {clamp, Alpha, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue, Shade, Xyz};
+use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
+     Shade, Xyz};
 use white_point::WhitePoint;
 use rgb::RgbSpace;
 use rgb::standards::Srgb;
@@ -25,7 +26,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 #[repr(C)]
 pub struct Hwb<S = Srgb, T = f32>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -51,14 +52,14 @@ where
 
 impl<S, T> Copy for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
 }
 
 impl<S, T> Clone for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn clone(&self) -> Hwb<S, T> {
@@ -66,13 +67,13 @@ where
     }
 }
 
-unsafe impl<S: RgbSpace, T: Float> Pixel<T> for Hwb<S, T> {
+unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hwb<S, T> {
     const CHANNELS: usize = 3;
 }
 
 impl<T> Hwb<Srgb, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HWB for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
@@ -87,7 +88,7 @@ where
 
 impl<S, T> Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HWB.
@@ -114,7 +115,7 @@ where
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
 impl<T> Alpha<Hwb<Srgb, T>, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HWB and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: T) -> Hwba<Srgb, T> {
@@ -128,7 +129,7 @@ where
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
 impl<S, T> Alpha<Hwb<S, T>, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HWB and transparency.
@@ -142,7 +143,7 @@ where
 
 impl<S, Wp, T> FromColor<Wp, T> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace<WhitePoint = Wp>,
     Wp: WhitePoint,
 {
@@ -173,7 +174,7 @@ where
 
 impl<S, T> Limited for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -202,7 +203,7 @@ where
 
 impl<S, T> Mix for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -222,7 +223,7 @@ where
 
 impl<S, T> Shade for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -239,7 +240,7 @@ where
 
 impl<S, T> GetHue for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Hue = RgbHue<T>;
@@ -255,7 +256,7 @@ where
 
 impl<S, T> Hue for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hwb<S, T> {
@@ -279,7 +280,7 @@ where
 
 impl<S, T> Default for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn default() -> Hwb<S, T> {
@@ -289,7 +290,7 @@ where
 
 impl<S, T> Add<Hwb<S, T>> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hwb<S, T>;
@@ -306,7 +307,7 @@ where
 
 impl<S, T> Add<T> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hwb<S, T>;
@@ -323,7 +324,7 @@ where
 
 impl<S, T> Sub<Hwb<S, T>> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hwb<S, T>;
@@ -340,7 +341,7 @@ where
 
 impl<S, T> Sub<T> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hwb<S, T>;
@@ -357,7 +358,7 @@ where
 
 impl<S, T> From<Alpha<Hwb<S, T>, T>> for Hwb<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn from(color: Alpha<Hwb<S, T>, T>) -> Hwb<S, T> {
@@ -367,7 +368,7 @@ where
 
 impl<S, T> ApproxEq for Hwb<S, T>
 where
-    T: Float + ApproxEq,
+    T: Component + Float + ApproxEq,
     T::Epsilon: Copy + Float,
     S: RgbSpace,
 {

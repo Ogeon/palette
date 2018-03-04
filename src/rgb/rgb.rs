@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Sub};
 use std::any::TypeId;
 
-use num_traits::{Float, PrimInt, Unsigned};
+use num_traits::{Float, Unsigned};
 use approx::ApproxEq;
 
 use rgb::{RgbSpace, RgbStandard, TransferFn};
@@ -14,7 +14,7 @@ use white_point::WhitePoint;
 use blend::PreAlpha;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
-use {Blend, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use {Blend, Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
 use {cast, clamp};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
@@ -34,7 +34,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// for encoding formats.
 #[derive(Debug, PartialEq)]
 #[repr(C)]
-pub struct Rgb<S: RgbStandard = Srgb, T: Copy = f32> {
+pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8) is the
     /// highest displayable amount.
     pub red: T,
@@ -51,15 +51,15 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Copy = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S: RgbStandard, T: Copy> Copy for Rgb<S, T> {}
+impl<S: RgbStandard, T: Component> Copy for Rgb<S, T> {}
 
-impl<S: RgbStandard, T: Copy> Clone for Rgb<S, T> {
+impl<S: RgbStandard, T: Component> Clone for Rgb<S, T> {
     fn clone(&self) -> Rgb<S, T> {
         *self
     }
 }
 
-impl<S: RgbStandard, T: Copy> Rgb<S, T> {
+impl<S: RgbStandard, T: Component> Rgb<S, T> {
     /// Create an RGB color.
     pub fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
         Rgb {
@@ -71,51 +71,51 @@ impl<S: RgbStandard, T: Copy> Rgb<S, T> {
     }
 }
 
-unsafe impl<S: RgbStandard, T: Copy> Pixel<T> for Rgb<S, T> {
+unsafe impl<S: RgbStandard, T: Component> Pixel<T> for Rgb<S, T> {
     const CHANNELS: usize = 3;
 }
 
-impl<S: RgbStandard, T: Unsigned + PrimInt> Rgb<S, T> {
+impl<S: RgbStandard, T: Component + Unsigned> Rgb<S, T> {
     /// Convert an unsigned integer based RGB color into a float based one.
-    pub fn into_float<F: Float>(self) -> Rgb<S, F> {
+    pub fn into_float<F: Component + Float>(self) -> Rgb<S, F> {
         Rgb {
-            red: cast::<F, _>(self.red) / cast(T::max_value()),
-            green: cast::<F, _>(self.green) / cast(T::max_value()),
-            blue: cast::<F, _>(self.blue) / cast(T::max_value()),
+            red: cast::<F, _>(self.red) / cast(T::max_intensity()),
+            green: cast::<F, _>(self.green) / cast(T::max_intensity()),
+            blue: cast::<F, _>(self.blue) / cast(T::max_intensity()),
             standard: PhantomData,
         }
     }
 
     /// Convert a float based RGB color into a unsigned integer based one.
-    pub fn from_float<F: Float>(color: Rgb<S, F>) -> Self {
+    pub fn from_float<F: Component + Float>(color: Rgb<S, F>) -> Self {
         Rgb::new(
             cast(clamp(
-                color.red * cast(T::max_value()),
+                color.red * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
             cast(clamp(
-                color.green * cast(T::max_value()),
+                color.green * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
             cast(clamp(
-                color.blue * cast(T::max_value()),
+                color.blue * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
         )
     }
 }
 
-impl<S: RgbStandard, T: Float> Rgb<S, T> {
+impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {
     /// Convert a float based RGB color into a unsigned integer based one.
-    pub fn into_uint<U: Unsigned + PrimInt>(self) -> Rgb<S, U> {
+    pub fn into_uint<U: Component + Unsigned>(self) -> Rgb<S, U> {
         Rgb::from_float(self)
     }
 
     /// Convert an unsigned integer based RGB color into a float based one.
-    pub fn from_uint<U: Unsigned + PrimInt>(color: Rgb<S, U>) -> Rgb<S, T> {
+    pub fn from_uint<U: Component + Unsigned>(color: Rgb<S, U>) -> Rgb<S, T> {
         color.into_float()
     }
 
@@ -138,7 +138,7 @@ impl<S: RgbStandard, T: Float> Rgb<S, T> {
     }
 }
 
-impl<S: RgbStandard<TransferFn = LinearFn>, T: Float> Rgb<S, T> {
+impl<S: RgbStandard<TransferFn = LinearFn>, T: Component> Rgb<S, T> {
     #[inline]
     fn reinterpret_as<St: RgbStandard<TransferFn = LinearFn>>(self) -> Rgb<St, T>
     where
@@ -154,7 +154,7 @@ impl<S: RgbStandard<TransferFn = LinearFn>, T: Float> Rgb<S, T> {
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
-impl<S: RgbStandard, T: Copy> Alpha<Rgb<S, T>, T> {
+impl<S: RgbStandard, T: Component> Alpha<Rgb<S, T>, T> {
     /// Nonlinear RGB.
     pub fn new(red: T, green: T, blue: T, alpha: T) -> Rgba<S, T> {
         Alpha {
@@ -164,53 +164,53 @@ impl<S: RgbStandard, T: Copy> Alpha<Rgb<S, T>, T> {
     }
 }
 
-impl<S: RgbStandard, T: Unsigned + PrimInt> Alpha<Rgb<S, T>, T> {
+impl<S: RgbStandard, T: Component + Unsigned> Alpha<Rgb<S, T>, T> {
     /// Convert an unsigned integer based RGBA color into a float based one.
-    pub fn into_float<F: Float>(self) -> Alpha<Rgb<S, F>, F> {
+    pub fn into_float<F: Component + Float>(self) -> Alpha<Rgb<S, F>, F> {
         Rgba::new(
-            cast::<F, _>(self.red) / cast(T::max_value()),
-            cast::<F, _>(self.green) / cast(T::max_value()),
-            cast::<F, _>(self.blue) / cast(T::max_value()),
-            cast::<F, _>(self.alpha) / cast(T::max_value()),
+            cast::<F, _>(self.red) / cast(T::max_intensity()),
+            cast::<F, _>(self.green) / cast(T::max_intensity()),
+            cast::<F, _>(self.blue) / cast(T::max_intensity()),
+            cast::<F, _>(self.alpha) / cast(T::max_intensity()),
         )
     }
 
     /// Convert a float based RGBA color into a unsigned integer based one.
-    pub fn from_float<F: Float>(color: Alpha<Rgb<S, F>, F>) -> Self {
+    pub fn from_float<F: Component + Float>(color: Alpha<Rgb<S, F>, F>) -> Self {
         Rgba::new(
             cast(clamp(
-                color.red * cast(T::max_value()),
+                color.red * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
             cast(clamp(
-                color.green * cast(T::max_value()),
+                color.green * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
             cast(clamp(
-                color.blue * cast(T::max_value()),
+                color.blue * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
             cast(clamp(
-                color.alpha * cast(T::max_value()),
+                color.alpha * cast(T::max_intensity()),
                 F::zero(),
-                cast(T::max_value()),
+                cast(T::max_intensity()),
             )),
         )
     }
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
-impl<S: RgbStandard, T: Float> Alpha<Rgb<S, T>, T> {
+impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
     /// Convert a float based RGBA color into a unsigned integer based one.
-    pub fn into_uint<U: Unsigned + PrimInt>(self) -> Alpha<Rgb<S, U>, U> {
+    pub fn into_uint<U: Component + Unsigned>(self) -> Alpha<Rgb<S, U>, U> {
         Rgba::from_float(self)
     }
 
     /// Convert an unsigned integer based RGBA color into a float based one.
-    pub fn from_uint<U: Unsigned + PrimInt>(color: Alpha<Rgb<S, U>, U>) -> Rgba<S, T> {
+    pub fn from_uint<U: Component + Unsigned>(color: Alpha<Rgb<S, U>, U>) -> Rgba<S, T> {
         color.into_float()
     }
 
@@ -238,13 +238,13 @@ impl<S: RgbStandard, T: Float> Alpha<Rgb<S, T>, T> {
 impl<S, T> Limited for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Float,
+    T: Component,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
-        self.red >= T::zero() && self.red <= T::one() &&
-        self.green >= T::zero() && self.green <= T::one() &&
-        self.blue >= T::zero() && self.blue <= T::one()
+        self.red >= T::zero() && self.red <= T::max_intensity() &&
+        self.green >= T::zero() && self.green <= T::max_intensity() &&
+        self.blue >= T::zero() && self.blue <= T::max_intensity()
     }
 
     fn clamp(&self) -> Rgb<S, T> {
@@ -254,16 +254,16 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.red = clamp(self.red, T::zero(), T::one());
-        self.green = clamp(self.green, T::zero(), T::one());
-        self.blue = clamp(self.blue, T::zero(), T::one());
+        self.red = clamp(self.red, T::zero(), T::max_intensity());
+        self.green = clamp(self.green, T::zero(), T::max_intensity());
+        self.blue = clamp(self.blue, T::zero(), T::max_intensity());
     }
 }
 
 impl<S, T> Mix for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Float,
 {
     type Scalar = T;
 
@@ -282,7 +282,7 @@ where
 impl<S, T> Shade for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Float,
 {
     type Scalar = T;
 
@@ -299,7 +299,7 @@ where
 impl<S, T> GetHue for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Float,
 {
     type Hue = RgbHue<T>;
 
@@ -320,7 +320,7 @@ where
 impl<S, T> Blend for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Float,
 {
     type Color = Rgb<S, T>;
 
@@ -335,8 +335,8 @@ where
 
 impl<S, T> ComponentWise for Rgb<S, T>
 where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    S: RgbStandard,
+    T: Component,
 {
     type Scalar = T;
 
@@ -361,7 +361,7 @@ where
 
 impl<S, T> Default for Rgb<S, T>
 where
-    T: Float,
+    T: Component,
     S: RgbStandard,
 {
     fn default() -> Rgb<S, T> {
@@ -372,11 +372,12 @@ where
 impl<S, T> Add<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Add,
+    <T as Add>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Add>::Output>;
 
-    fn add(self, other: Rgb<S, T>) -> Rgb<S, T> {
+    fn add(self, other: Rgb<S, T>) -> Self::Output {
         Rgb {
             red: self.red + other.red,
             green: self.green + other.green,
@@ -389,11 +390,12 @@ where
 impl<S, T> Add<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Add,
+    <T as Add>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Add>::Output>;
 
-    fn add(self, c: T) -> Rgb<S, T> {
+    fn add(self, c: T) -> Self::Output {
         Rgb {
             red: self.red + c,
             green: self.green + c,
@@ -406,11 +408,12 @@ where
 impl<S, T> Sub<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Sub,
+    <T as Sub>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Sub>::Output>;
 
-    fn sub(self, other: Rgb<S, T>) -> Rgb<S, T> {
+    fn sub(self, other: Rgb<S, T>) -> Self::Output {
         Rgb {
             red: self.red - other.red,
             green: self.green - other.green,
@@ -423,11 +426,12 @@ where
 impl<S, T> Sub<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Sub,
+    <T as Sub>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Sub>::Output>;
 
-    fn sub(self, c: T) -> Rgb<S, T> {
+    fn sub(self, c: T) -> Self::Output {
         Rgb {
             red: self.red - c,
             green: self.green - c,
@@ -440,11 +444,12 @@ where
 impl<S, T> Mul<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Mul,
+    <T as Mul>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Mul>::Output>;
 
-    fn mul(self, other: Rgb<S, T>) -> Rgb<S, T> {
+    fn mul(self, other: Rgb<S, T>) -> Self::Output {
         Rgb {
             red: self.red * other.red,
             green: self.green * other.green,
@@ -457,11 +462,12 @@ where
 impl<S, T> Mul<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Mul,
+    <T as Mul>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Mul>::Output>;
 
-    fn mul(self, c: T) -> Rgb<S, T> {
+    fn mul(self, c: T) -> Self::Output {
         Rgb {
             red: self.red * c,
             green: self.green * c,
@@ -474,11 +480,12 @@ where
 impl<S, T> Div<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Div,
+    <T as Div>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Div>::Output>;
 
-    fn div(self, other: Rgb<S, T>) -> Rgb<S, T> {
+    fn div(self, other: Rgb<S, T>) -> Self::Output {
         Rgb {
             red: self.red / other.red,
             green: self.green / other.green,
@@ -491,11 +498,12 @@ where
 impl<S, T> Div<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Float,
+    T: Component + Div,
+    <T as Div>::Output: Component,
 {
-    type Output = Rgb<S, T>;
+    type Output = Rgb<S, <T as Div>::Output>;
 
-    fn div(self, c: T) -> Rgb<S, T> {
+    fn div(self, c: T) -> Self::Output {
         Rgb {
             red: self.red / c,
             green: self.green / c,
@@ -508,7 +516,7 @@ where
 impl<S, Wp, T> FromColor<Wp, T> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
@@ -598,7 +606,7 @@ where
 impl<S, T, Wp> IntoColor<Wp, T> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
@@ -650,8 +658,8 @@ where
 
 impl<S, T> ApproxEq for Rgb<S, T>
 where
-    T: Float + ApproxEq,
-    T::Epsilon: Copy + Float,
+    T: Component + ApproxEq,
+    T::Epsilon: Copy,
     S: RgbStandard,
 {
     type Epsilon = <T as ApproxEq>::Epsilon;
@@ -687,7 +695,7 @@ where
 
 impl<S, T> From<Alpha<Rgb<S, T>, T>> for Rgb<S, T>
 where
-    T: Float,
+    T: Component,
     S: RgbStandard,
 {
     fn from(color: Alpha<Rgb<S, T>, T>) -> Rgb<S, T> {

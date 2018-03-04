@@ -4,7 +4,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Lab, Luma, Yxy};
-use {ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
 use rgb::{Linear, Rgb, RgbSpace};
 use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
@@ -26,7 +26,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///X is the scale of what can be seen as a response curve for the cone
@@ -48,14 +48,14 @@ where
 
 impl<Wp, T> Copy for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
 }
 
 impl<Wp, T> Clone for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn clone(&self) -> Xyz<Wp, T> {
@@ -63,13 +63,13 @@ where
     }
 }
 
-unsafe impl<Wp: WhitePoint, T: Float> Pixel<T> for Xyz<Wp, T> {
+unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Xyz<Wp, T> {
     const CHANNELS: usize = 3;
 }
 
 impl<T> Xyz<D65, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///CIE XYZ with whtie point D65.
     pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
@@ -84,7 +84,7 @@ where
 
 impl<Wp, T> Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///CIE XYZ.
@@ -101,7 +101,7 @@ where
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
 impl<T> Alpha<Xyz<D65, T>, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: T) -> Xyza<D65, T> {
@@ -115,7 +115,7 @@ where
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
 impl<Wp, T> Alpha<Xyz<Wp, T>, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///CIE XYZ and transparency.
@@ -129,7 +129,7 @@ where
 
 impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
@@ -159,7 +159,7 @@ where
         let x = y + (lab.a / cast(500.0));
         let z = y - (lab.b / cast(200.0));
 
-        fn convert<T: Float>(c: T) -> T {
+        fn convert<T: Component + Float>(c: T) -> T {
             let epsilon: T = cast(6.0 / 29.0);
             let kappa: T = cast(108.0 / 841.0);
             let delta: T = cast(4.0 / 29.0);
@@ -181,7 +181,7 @@ where
 
 impl<Wp, T> Limited for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -208,7 +208,7 @@ where
 
 impl<Wp, T> Mix for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -227,7 +227,7 @@ where
 
 impl<Wp, T> Shade for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -244,7 +244,7 @@ where
 
 impl<Wp, T> ComponentWise for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -270,7 +270,7 @@ where
 
 impl<Wp, T> Default for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn default() -> Xyz<Wp, T> {
@@ -280,7 +280,7 @@ where
 
 impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -297,7 +297,7 @@ where
 
 impl<Wp, T> Add<T> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -314,7 +314,7 @@ where
 
 impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -331,7 +331,7 @@ where
 
 impl<Wp, T> Sub<T> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -348,7 +348,7 @@ where
 
 impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -365,7 +365,7 @@ where
 
 impl<Wp, T> Mul<T> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -382,7 +382,7 @@ where
 
 impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -399,7 +399,7 @@ where
 
 impl<Wp, T> Div<T> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     type Output = Xyz<Wp, T>;
@@ -416,7 +416,7 @@ where
 
 impl<Wp, T> From<Alpha<Xyz<Wp, T>, T>> for Xyz<Wp, T>
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     fn from(color: Alpha<Xyz<Wp, T>, T>) -> Xyz<Wp, T> {

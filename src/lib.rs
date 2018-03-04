@@ -76,7 +76,7 @@ extern crate num_traits;
 #[cfg(feature = "phf")]
 extern crate phf;
 
-use num_traits::{Float, NumCast, ToPrimitive};
+use num_traits::{Float, NumCast, ToPrimitive, Zero};
 
 use approx::ApproxEq;
 
@@ -311,25 +311,25 @@ macro_rules! make_color {
         ///cases.
         #[derive(Debug)]
         pub enum Color<S = rgb::standards::Srgb, T = f32>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             $(#[$variant_comment] $variant($variant<$variant_ty_param, T>)),+
         }
 
         impl<S, T> Copy for Color<S, T>
-            where T: Float,
-                S: RgbSpace,
+            where S: RgbSpace,
+                T: Float + Component,
         {}
 
         impl<S, T> Clone for Color<S, T>
-            where T: Float,
-                S: RgbSpace,
+            where S: RgbSpace,
+                T: Float + Component,
         {
             fn clone(&self) -> Color<S, T> { *self }
         }
 
-        impl<T: Float> Color<rgb::standards::Srgb, T> {
+        impl<T: Float + Component> Color<rgb::standards::Srgb, T> {
             $(
                 $(
                     #[$ctor_comment]
@@ -341,7 +341,7 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T: Float> Alpha<Color<rgb::standards::Srgb, T>, T> {
+        impl<T: Float + Component> Alpha<Color<rgb::standards::Srgb, T>, T> {
             $(
                 $(
                     #[$ctor_comment]
@@ -353,7 +353,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> Mix for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             type Scalar = T;
@@ -364,7 +364,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> Shade for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             type Scalar = T;
@@ -375,7 +375,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> GetHue for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             type Hue = LabHue<T>;
@@ -386,7 +386,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> Hue for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Color<S, T> {
@@ -399,7 +399,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> Saturate for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             type Scalar = T;
@@ -410,7 +410,7 @@ macro_rules! make_color {
         }
 
         impl<S, T> Blend for Color<S, T>
-            where T: Float,
+            where T: Float + Component,
                 S: RgbSpace,
         {
             type Color = Rgb<Linear<S>, T>;
@@ -425,8 +425,8 @@ macro_rules! make_color {
         }
 
         impl<S, T> ApproxEq for Color<S, T>
-            where T: Float + ApproxEq,
-                T::Epsilon: Copy + Float,
+            where T: Float + Component + ApproxEq,
+                T::Epsilon: Float,
                 S: RgbSpace,
         {
             type Epsilon = T::Epsilon;
@@ -460,7 +460,7 @@ macro_rules! make_color {
 
         $(
             impl<S, T> From<$variant<$variant_ty_param, T>> for Color<S, T>
-                where T: Float,
+                where T: Float + Component,
                     S: RgbSpace,
             {
                 fn from(color: $variant<$variant_ty_param, T>) -> Color<S, T> {
@@ -469,7 +469,7 @@ macro_rules! make_color {
             }
 
             impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Color<S, T>
-                where T: Float,
+                where T: Float + Component,
                     S: RgbSpace,
             {
                 fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Color<S, T> {
@@ -478,7 +478,7 @@ macro_rules! make_color {
             }
 
             impl<S, T> From<Alpha<$variant<$variant_ty_param, T>, T>> for Alpha<Color<S, T>,T>
-                where T: Float,
+                where T: Float + Component,
                     S: RgbSpace,
             {
                 fn from(color: Alpha<$variant<$variant_ty_param, T>,T>) -> Alpha<Color<S, T>,T> {
@@ -492,7 +492,7 @@ macro_rules! make_color {
     )
 }
 
-fn clamp<T: Float>(v: T, min: T, max: T) -> T {
+fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
     if v < min {
         min
     } else if v > max {
@@ -688,7 +688,7 @@ pub trait Saturate: Sized {
 ///Perform a unary or binary operation on each component of a color.
 pub trait ComponentWise {
     ///The scalar type for color components.
-    type Scalar: Float;
+    type Scalar;
 
     ///Perform a binary operation on this and an other color.
     fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
@@ -699,6 +699,49 @@ pub trait ComponentWise {
 
     ///Perform a unary operation on this color.
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
+}
+
+/// Common trait for color components.
+pub trait Component: Copy + Zero + PartialOrd + NumCast {
+    /// The highest displayable value this component type can reach. Higher values are allowed,
+    /// but they may be lowered to this before converting to another format.
+    fn max_intensity() -> Self;
+}
+
+impl Component for f32 {
+    fn max_intensity() -> Self {
+        1.0
+    }
+}
+
+impl Component for f64 {
+    fn max_intensity() -> Self {
+        1.0
+    }
+}
+
+impl Component for u8 {
+    fn max_intensity() -> Self {
+        std::u8::MAX
+    }
+}
+
+impl Component for u16 {
+    fn max_intensity() -> Self {
+        std::u16::MAX
+    }
+}
+
+impl Component for u32 {
+    fn max_intensity() -> Self {
+        std::u32::MAX
+    }
+}
+
+impl Component for u64 {
+    fn max_intensity() -> Self {
+        std::u64::MAX
+    }
 }
 
 ///A convenience function to convert a constant number to Float Type

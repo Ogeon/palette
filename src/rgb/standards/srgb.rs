@@ -4,21 +4,20 @@ use num_traits::Float;
 
 use rgb::{Primaries, RgbSpace, RgbStandard, TransferFn};
 use white_point::{D65, WhitePoint};
-use cast;
-use Yxy;
+use {cast, Component, Yxy};
 
 ///The sRGB color space.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Srgb;
 
 impl Primaries for Srgb {
-    fn red<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T> {
+    fn red<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T> {
         Yxy::with_wp(cast(0.6400), cast(0.3300), cast(0.212656))
     }
-    fn green<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T> {
+    fn green<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T> {
         Yxy::with_wp(cast(0.3000), cast(0.6000), cast(0.715158))
     }
-    fn blue<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T> {
+    fn blue<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T> {
         Yxy::with_wp(cast(0.1500), cast(0.0600), cast(0.072186))
     }
 }

@@ -1,6 +1,6 @@
 use num_traits::Float;
 
-use {Alpha, Color, Hsl, Hsv, Hwb, Lab, Lch, Luma, Xyz, Yxy};
+use {Alpha, Color, Component, Hsl, Hsv, Hwb, Lab, Lch, Luma, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
 use rgb::{Linear, Rgb, RgbSpace, RgbStandard};
 
@@ -14,7 +14,7 @@ use rgb::{Linear, Rgb, RgbSpace, RgbStandard};
 ///with self to avoid the unnecessary converison.
 pub trait FromColor<Wp = D65, T = f32>: Sized
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///Convert from XYZ color space
@@ -67,7 +67,7 @@ where
 ///These defaults must be overridden when direct conversion exists between colors.
 pub trait IntoColor<Wp = D65, T = f32>: Sized
 where
-    T: Float,
+    T: Component + Float,
     Wp: WhitePoint,
 {
     ///Convert into XYZ space
@@ -120,7 +120,7 @@ where
 macro_rules! impl_into_color {
     ($self_ty:ident, $from_fn: ident) => {
         impl<Wp, T> IntoColor<Wp, T> for $self_ty<Wp, T>
-            where T: Float,
+            where T: Component + Float,
              Wp: WhitePoint
         {
 
@@ -164,7 +164,7 @@ macro_rules! impl_into_color {
 macro_rules! impl_into_color_rgb {
     ($self_ty:ident, $from_fn: ident) => {
         impl<S, Wp, T> IntoColor<Wp, T> for $self_ty<S, T> where
-            T: Float,
+            T: Component + Float,
             Wp: WhitePoint,
             S: RgbSpace<WhitePoint=Wp>,
         {
@@ -209,7 +209,7 @@ macro_rules! impl_into_color_rgb {
 macro_rules! impl_from_trait {
     (<$s:ident, $t:ident>($self_ty: ty, $into_fn: ident) => {$($other: ty),+}) => (
         impl<$s, $t> From<Color<$s, $t>> for $self_ty
-            where $t: Float,
+            where $t: Component + Float,
                 $s: RgbSpace
         {
             fn from(color: Color<$s, $t>) -> $self_ty {
@@ -228,7 +228,7 @@ macro_rules! impl_from_trait {
         }
 
         impl<$s, $t> From<Color<$s, $t>> for Alpha<$self_ty,$t>
-            where $t: Float,
+            where $t: Component + Float,
                 $s: RgbSpace
         {
             fn from(color: Color<$s, $t>) -> Alpha<$self_ty,$t> {
@@ -240,7 +240,7 @@ macro_rules! impl_from_trait {
         }
 
         impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for $self_ty
-            where $t: Float,
+            where $t: Component + Float,
                 $s: RgbSpace
         {
             fn from(color: Alpha<Color<$s, $t>, $t>) -> $self_ty {
@@ -249,7 +249,7 @@ macro_rules! impl_from_trait {
         }
 
         impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for Alpha<$self_ty,$t>
-            where $t: Float,
+            where $t: Component + Float,
                 $s: RgbSpace
         {
             fn from(color: Alpha<Color<$s, $t>, $t>) -> Alpha<$self_ty,$t> {
@@ -262,7 +262,7 @@ macro_rules! impl_from_trait {
 
         $(
             impl<$s, $t> From<$other> for $self_ty
-                where $t: Float,
+                where $t: Component + Float,
                     $s: RgbSpace
             {
                 fn from(other: $other) -> $self_ty {
@@ -271,7 +271,7 @@ macro_rules! impl_from_trait {
             }
 
             impl<$s, $t> From<Alpha<$other, $t>> for Alpha<$self_ty, $t>
-                where $t: Float,
+                where $t: Component + Float,
                     $s: RgbSpace
             {
                 fn from(other: Alpha<$other, $t>) -> Alpha<$self_ty, $t> {
@@ -283,7 +283,7 @@ macro_rules! impl_from_trait {
             }
 
             impl<$s, $t> From<$other> for Alpha<$self_ty, $t>
-                where $t: Float,
+                where $t: Component + Float,
                     $s: RgbSpace
             {
                 fn from(color: $other) -> Alpha<$self_ty, $t> {
@@ -295,7 +295,7 @@ macro_rules! impl_from_trait {
             }
 
             impl<$s, $t> From<Alpha<$other, $t>> for $self_ty
-                where $t: Float,
+                where $t: Component + Float,
                     $s: RgbSpace
             {
                 fn from(other: Alpha<$other, $t>) -> $self_ty {
@@ -311,7 +311,7 @@ macro_rules! impl_from_trait_other {
     (<$s:ident : $s_ty:ident, $t:ident>($self_ty: ty, |$into_ident:ident| $into_expr:expr) => {$($other: ty),+}) => (
         $(
             impl<$s, $t> From<$other> for $self_ty
-                where $t: Float,
+                where $t: Component + Float,
                     $s: $s_ty
             {
                 fn from(other: $other) -> $self_ty {
@@ -321,7 +321,7 @@ macro_rules! impl_from_trait_other {
             }
 
             impl<$s, $t> From<Alpha<$other, $t>> for Alpha<$self_ty, $t>
-                where $t: Float,
+                where $t: Component + Float,
                     $s: $s_ty
             {
                 fn from(other: Alpha<$other, $t>) -> Alpha<$self_ty, $t> {
@@ -334,7 +334,7 @@ macro_rules! impl_from_trait_other {
             }
 
             impl<$s, $t> From<$other> for Alpha<$self_ty, $t>
-                where $t: Float,
+                where $t: Component + Float,
                     $s: $s_ty
             {
                 fn from(color: $other) -> Alpha<$self_ty, $t> {
@@ -347,7 +347,7 @@ macro_rules! impl_from_trait_other {
             }
 
             impl<$s, $t> From<Alpha<$other, $t>> for $self_ty
-                where $t: Float,
+                where $t: Component + Float,
                     $s: $s_ty
             {
                 fn from(other: Alpha<$other, $t>) -> $self_ty {

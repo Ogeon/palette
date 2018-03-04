@@ -5,8 +5,8 @@ use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 use std::any::TypeId;
 
-use {cast, clamp, Alpha, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
-     Saturate, Shade, Xyz};
+use {cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
+     RgbHue, Saturate, Shade, Xyz};
 use white_point::WhitePoint;
 use rgb::{Linear, Rgb, RgbSpace};
 use rgb::standards::Srgb;
@@ -29,7 +29,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -51,14 +51,14 @@ where
 
 impl<S, T> Copy for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
 }
 
 impl<S, T> Clone for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn clone(&self) -> Hsl<S, T> {
@@ -66,13 +66,13 @@ where
     }
 }
 
-unsafe impl<S: RgbSpace, T: Float> Pixel<T> for Hsl<S, T> {
+unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hsl<S, T> {
     const CHANNELS: usize = 3;
 }
 
 impl<T> Hsl<Srgb, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HSL for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<Srgb, T> {
@@ -87,7 +87,7 @@ where
 
 impl<S, T> Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HSL.
@@ -114,7 +114,7 @@ where
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<T> Alpha<Hsl<Srgb, T>, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HSL and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: T) -> Hsla<Srgb, T> {
@@ -128,7 +128,7 @@ where
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<S, T> Alpha<Hsl<S, T>, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HSL and transparency.
@@ -147,7 +147,7 @@ where
 
 impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace<WhitePoint = Wp>,
     Wp: WhitePoint,
 {
@@ -240,7 +240,7 @@ where
 
 impl<S, T> Limited for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -263,7 +263,7 @@ where
 
 impl<S, T> Mix for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -283,7 +283,7 @@ where
 
 impl<S, T> Shade for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -300,7 +300,7 @@ where
 
 impl<S, T> GetHue for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Hue = RgbHue<T>;
@@ -316,7 +316,7 @@ where
 
 impl<S, T> Hue for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
@@ -340,7 +340,7 @@ where
 
 impl<S, T> Saturate for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -357,7 +357,7 @@ where
 
 impl<S, T> Default for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn default() -> Hsl<S, T> {
@@ -367,7 +367,7 @@ where
 
 impl<S, T> Add<Hsl<S, T>> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -384,7 +384,7 @@ where
 
 impl<S, T> Add<T> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -401,7 +401,7 @@ where
 
 impl<S, T> Sub<Hsl<S, T>> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -418,7 +418,7 @@ where
 
 impl<S, T> Sub<T> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -435,7 +435,7 @@ where
 
 impl<S, T> From<Alpha<Hsl<S, T>, T>> for Hsl<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn from(color: Alpha<Hsl<S, T>, T>) -> Hsl<S, T> {
@@ -445,7 +445,7 @@ where
 
 impl<S, T> ApproxEq for Hsl<S, T>
 where
-    T: Float + ApproxEq,
+    T: Component + Float + ApproxEq,
     T::Epsilon: Copy + Float,
     S: RgbSpace,
 {

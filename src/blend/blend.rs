@@ -11,7 +11,10 @@ use blend::{BlendFunction, PreAlpha};
 ///_Note: The default implementations of the blend modes are meant for color
 ///components in the range [0.0, 1.0] and may otherwise produce strange
 ///results._
-pub trait Blend: Sized {
+pub trait Blend: Sized
+where
+    <Self::Color as ComponentWise>::Scalar: Float,
+{
     ///The core color type. Typically `Self` for color types without alpha.
     type Color: Blend<Color = Self::Color> + ComponentWise;
 

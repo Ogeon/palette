@@ -2,7 +2,7 @@
 
 use num_traits::Float;
 
-use Yxy;
+use {Component, Yxy};
 use white_point::WhitePoint;
 use std::any::Any;
 
@@ -64,11 +64,11 @@ impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
 ///Represents the red, green and blue primaries of an RGB space.
 pub trait Primaries: Any {
     ///Primary red.
-    fn red<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+    fn red<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
     ///Primary green.
-    fn green<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+    fn green<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
     ///Primary blue.
-    fn blue<Wp: WhitePoint, T: Float>() -> Yxy<Wp, T>;
+    fn blue<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
 }
 
 ///A transfer function to and from linear space.

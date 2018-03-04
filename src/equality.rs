@@ -1,13 +1,13 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use {cast, Lab, LabHue, Lch, Luma, RgbHue, Xyz, Yxy};
+use {cast, Component, Lab, LabHue, Lch, Luma, RgbHue, Xyz, Yxy};
 use white_point::WhitePoint;
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
         impl<Wp, T> ApproxEq for $self_ty<Wp, T>
-        where T: Float + ApproxEq,
+        where T: Component + Float + ApproxEq,
             T::Epsilon: Copy + Float,
             Wp: WhitePoint
         {
@@ -45,13 +45,14 @@ impl_eq!(Lab, [l, a, b]);
 impl_eq!(Luma, [luma]);
 impl_eq!(Lch, [l, chroma, hue]);
 
-// For hues diffence is calculated and compared to zero. However due to the way floating point's
-// work this is not so simple
-// reference
+// For hues, the difference is calculated and compared to zero. However due to
+// the way floating point's work this is not so simple.
+//
+// Reference:
 // https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 //
-// The recommendation is use 180 * epsilon as the epsilon and do not compare by ulps.
-// Because of this we loose some precision for values close to 0.0.
+// The recommendation is use 180 * epsilon as the epsilon and do not compare by
+// ulps. Because of this we loose some precision for values close to 0.0.
 macro_rules! impl_eq_hue {
     (  $self_ty: ident ) => {
         impl<T: Float + ApproxEq> ApproxEq for $self_ty<T>

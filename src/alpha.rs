@@ -4,7 +4,7 @@ use num_traits::Float;
 
 use approx::ApproxEq;
 
-use {clamp, Blend, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
+use {clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
 use blend::PreAlpha;
 
 ///An alpha component wrapper for colors.
@@ -63,18 +63,18 @@ impl<C: GetHue, T> GetHue for Alpha<C, T> {
     }
 }
 
-impl<C: Hue, T: Float> Hue for Alpha<C, T> {
+impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
     fn with_hue<H: Into<C::Hue>>(&self, hue: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.with_hue(hue),
-            alpha: self.alpha,
+            alpha: self.alpha.clone(),
         }
     }
 
     fn shift_hue<H: Into<C::Hue>>(&self, amount: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.shift_hue(amount),
-            alpha: self.alpha,
+            alpha: self.alpha.clone(),
         }
     }
 }
@@ -90,21 +90,21 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     }
 }
 
-impl<C: Limited, T: Float> Limited for Alpha<C, T> {
+impl<C: Limited, T: Component> Limited for Alpha<C, T> {
     fn is_valid(&self) -> bool {
-        self.color.is_valid() && self.alpha >= T::zero() && self.alpha <= T::one()
+        self.color.is_valid() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
     }
 
     fn clamp(&self) -> Alpha<C, T> {
         Alpha {
             color: self.color.clamp(),
-            alpha: clamp(self.alpha, T::zero(), T::one()),
+            alpha: clamp(self.alpha, T::zero(), T::max_intensity()),
         }
     }
 
     fn clamp_self(&mut self) {
         self.color.clamp_self();
-        self.alpha = clamp(self.alpha, T::zero(), T::one());
+        self.alpha = clamp(self.alpha, T::zero(), T::max_intensity());
     }
 }
 
@@ -124,20 +124,20 @@ where
     }
 }
 
-impl<C: ComponentWise<Scalar = T>, T: Float> ComponentWise for Alpha<C, T> {
+impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for Alpha<C, T> {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Alpha<C, T>, mut f: F) -> Alpha<C, T> {
         Alpha {
-            alpha: f(self.alpha, other.alpha),
-            color: self.color.component_wise(&other.color, f),
+            color: self.color.component_wise(&other.color, &mut f),
+            alpha: f(self.alpha.clone(), other.alpha.clone()),
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Alpha<C, T> {
         Alpha {
-            alpha: f(self.alpha),
-            color: self.color.component_wise_self(f),
+            color: self.color.component_wise_self(&mut f),
+            alpha: f(self.alpha.clone()),
         }
     }
 }
@@ -146,11 +146,11 @@ unsafe impl<T, C: Pixel<T>> Pixel<T> for Alpha<C, T> {
     const CHANNELS: usize = C::CHANNELS + 1;
 }
 
-impl<C: Default, T: Float> Default for Alpha<C, T> {
+impl<C: Default, T: Component> Default for Alpha<C, T> {
     fn default() -> Alpha<C, T> {
         Alpha {
             color: C::default(),
-            alpha: T::one(),
+            alpha: T::max_intensity(),
         }
     }
 }
@@ -158,8 +158,8 @@ impl<C: Default, T: Float> Default for Alpha<C, T> {
 impl<C, T> ApproxEq for Alpha<C, T>
 where
     C: ApproxEq<Epsilon = T::Epsilon>,
-    T: ApproxEq + Float,
-    T::Epsilon: Copy,
+    T: ApproxEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -181,20 +181,21 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.color.relative_eq(&other.color, epsilon, max_relative)
+        self.color
+            .relative_eq(&other.color, epsilon.clone(), max_relative.clone())
             && self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
     }
 
     fn ulps_eq(&self, other: &Alpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.color.ulps_eq(&other.color, epsilon, max_ulps)
+        self.color.ulps_eq(&other.color, epsilon.clone(), max_ulps)
             && self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
 impl<C: Add, T: Float> Add for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+    type Output = Alpha<C::Output, <T as Add>::Output>;
 
-    fn add(self, other: Alpha<C, T>) -> Alpha<C::Output, T> {
+    fn add(self, other: Alpha<C, T>) -> Self::Output {
         Alpha {
             color: self.color + other.color,
             alpha: self.alpha + other.alpha,
@@ -202,10 +203,10 @@ impl<C: Add, T: Float> Add for Alpha<C, T> {
     }
 }
 
-impl<T: Float + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+impl<T: Add + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
+    type Output = Alpha<C::Output, <T as Add>::Output>;
 
-    fn add(self, c: T) -> Alpha<C::Output, T> {
+    fn add(self, c: T) -> Self::Output {
         Alpha {
             color: self.color + c.clone(),
             alpha: self.alpha + c,
@@ -214,9 +215,9 @@ impl<T: Float + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
 }
 
 impl<C: Sub, T: Float> Sub for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+    type Output = Alpha<C::Output, <T as Sub>::Output>;
 
-    fn sub(self, other: Alpha<C, T>) -> Alpha<C::Output, T> {
+    fn sub(self, other: Alpha<C, T>) -> Self::Output {
         Alpha {
             color: self.color - other.color,
             alpha: self.alpha - other.alpha,
@@ -224,10 +225,10 @@ impl<C: Sub, T: Float> Sub for Alpha<C, T> {
     }
 }
 
-impl<T: Float + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+impl<T: Sub + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
+    type Output = Alpha<C::Output, <T as Sub>::Output>;
 
-    fn sub(self, c: T) -> Alpha<C::Output, T> {
+    fn sub(self, c: T) -> Self::Output {
         Alpha {
             color: self.color - c.clone(),
             alpha: self.alpha - c,
@@ -236,9 +237,9 @@ impl<T: Float + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
 }
 
 impl<C: Mul, T: Float> Mul for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+    type Output = Alpha<C::Output, <T as Mul>::Output>;
 
-    fn mul(self, other: Alpha<C, T>) -> Alpha<C::Output, T> {
+    fn mul(self, other: Alpha<C, T>) -> Self::Output {
         Alpha {
             color: self.color * other.color,
             alpha: self.alpha * other.alpha,
@@ -246,10 +247,10 @@ impl<C: Mul, T: Float> Mul for Alpha<C, T> {
     }
 }
 
-impl<T: Float + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+impl<T: Mul + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
+    type Output = Alpha<C::Output, <T as Mul>::Output>;
 
-    fn mul(self, c: T) -> Alpha<C::Output, T> {
+    fn mul(self, c: T) -> Self::Output {
         Alpha {
             color: self.color * c.clone(),
             alpha: self.alpha * c,
@@ -258,9 +259,9 @@ impl<T: Float + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
 }
 
 impl<C: Div, T: Float> Div for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+    type Output = Alpha<C::Output, <T as Div>::Output>;
 
-    fn div(self, other: Alpha<C, T>) -> Alpha<C::Output, T> {
+    fn div(self, other: Alpha<C, T>) -> Self::Output {
         Alpha {
             color: self.color / other.color,
             alpha: self.alpha / other.alpha,
@@ -268,10 +269,10 @@ impl<C: Div, T: Float> Div for Alpha<C, T> {
     }
 }
 
-impl<T: Float + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
-    type Output = Alpha<C::Output, T>;
+impl<T: Div + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
+    type Output = Alpha<C::Output, <T as Div>::Output>;
 
-    fn div(self, c: T) -> Alpha<C::Output, T> {
+    fn div(self, c: T) -> Self::Output {
         Alpha {
             color: self.color / c.clone(),
             alpha: self.alpha / c,
@@ -279,11 +280,11 @@ impl<T: Float + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
     }
 }
 
-impl<C, T: Float> From<C> for Alpha<C, T> {
+impl<C, T: Component> From<C> for Alpha<C, T> {
     fn from(color: C) -> Alpha<C, T> {
         Alpha {
             color: color,
-            alpha: T::one(),
+            alpha: T::max_intensity(),
         }
     }
 }

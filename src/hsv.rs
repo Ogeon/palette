@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::any::TypeId;
 
 use {Alpha, Hsl, Hwb, Xyz};
-use {FromColor, GetHue, Hue, Limited, Mix, Pixel, RgbHue, Saturate, Shade};
+use {Component, FromColor, GetHue, Hue, Limited, Mix, Pixel, RgbHue, Saturate, Shade};
 use {cast, clamp};
 use white_point::WhitePoint;
 use rgb::{Linear, Rgb, RgbSpace};
@@ -28,7 +28,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 #[repr(C)]
 pub struct Hsv<S = Srgb, T = f32>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -51,14 +51,14 @@ where
 
 impl<S, T> Copy for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
 }
 
 impl<S, T> Clone for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn clone(&self) -> Hsv<S, T> {
@@ -66,13 +66,13 @@ where
     }
 }
 
-unsafe impl<S: RgbSpace, T: Float> Pixel<T> for Hsv<S, T> {
+unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hsv<S, T> {
     const CHANNELS: usize = 3;
 }
 
 impl<T> Hsv<Srgb, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HSV for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T) -> Hsv<Srgb, T> {
@@ -87,7 +87,7 @@ where
 
 impl<S, T> Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HSV.
@@ -114,7 +114,7 @@ where
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
 impl<T> Alpha<Hsv<Srgb, T>, T>
 where
-    T: Float,
+    T: Component + Float,
 {
     ///HSV and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: T) -> Hsva<Srgb, T> {
@@ -128,7 +128,7 @@ where
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
 impl<S, T> Alpha<Hsv<S, T>, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     ///Linear HSV and transparency.
@@ -142,7 +142,7 @@ where
 
 impl<S, Wp, T> FromColor<Wp, T> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace<WhitePoint = Wp>,
     Wp: WhitePoint,
 {
@@ -242,7 +242,7 @@ where
 
 impl<S, T> Limited for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -265,7 +265,7 @@ where
 
 impl<S, T> Mix for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -285,7 +285,7 @@ where
 
 impl<S, T> Shade for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -302,7 +302,7 @@ where
 
 impl<S, T> GetHue for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Hue = RgbHue<T>;
@@ -318,7 +318,7 @@ where
 
 impl<S, T> Hue for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsv<S, T> {
@@ -342,7 +342,7 @@ where
 
 impl<S, T> Saturate for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -359,7 +359,7 @@ where
 
 impl<S, T> Default for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn default() -> Hsv<S, T> {
@@ -369,7 +369,7 @@ where
 
 impl<S, T> Add<Hsv<S, T>> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsv<S, T>;
@@ -386,7 +386,7 @@ where
 
 impl<S, T> Add<T> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsv<S, T>;
@@ -403,7 +403,7 @@ where
 
 impl<S, T> Sub<Hsv<S, T>> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsv<S, T>;
@@ -420,7 +420,7 @@ where
 
 impl<S, T> Sub<T> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     type Output = Hsv<S, T>;
@@ -437,7 +437,7 @@ where
 
 impl<S, T> From<Alpha<Hsv<S, T>, T>> for Hsv<S, T>
 where
-    T: Float,
+    T: Component + Float,
     S: RgbSpace,
 {
     fn from(color: Alpha<Hsv<S, T>, T>) -> Hsv<S, T> {
@@ -447,7 +447,7 @@ where
 
 impl<S, T> ApproxEq for Hsv<S, T>
 where
-    T: Float + ApproxEq,
+    T: Component + Float + ApproxEq,
     T::Epsilon: Copy + Float,
     S: RgbSpace,
 {
