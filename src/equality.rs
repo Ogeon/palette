@@ -1,7 +1,7 @@
 use num_traits::Float;
 use approx::ApproxEq;
 
-use {cast, Component, Lab, LabHue, Lch, Luma, RgbHue, Xyz, Yxy};
+use {cast, Component, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
 use white_point::WhitePoint;
 
 macro_rules! impl_eq {
@@ -42,7 +42,6 @@ macro_rules! impl_eq {
 impl_eq!(Xyz, [x, y, z]);
 impl_eq!(Yxy, [y, x, luma]);
 impl_eq!(Lab, [l, a, b]);
-impl_eq!(Luma, [luma]);
 impl_eq!(Lch, [l, chroma, hue]);
 
 // For hues, the difference is calculated and compared to zero. However due to

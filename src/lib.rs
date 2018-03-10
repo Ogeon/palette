@@ -82,13 +82,14 @@ use approx::ApproxEq;
 
 use blend::PreAlpha;
 use rgb::{Linear, Rgb, RgbSpace, Rgba};
+use luma::Luma;
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
 
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
-pub use luma::{Luma, Lumaa};
+pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use xyz::{Xyz, Xyza};
 pub use lab::{Lab, Laba};
 pub use lch::{Lch, Lcha};
@@ -265,7 +266,7 @@ pub mod named;
 
 mod alpha;
 pub mod rgb;
-mod luma;
+pub mod luma;
 mod yxy;
 mod xyz;
 mod lab;
@@ -504,12 +505,9 @@ fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
 
 make_color! {
     ///Linear luminance.
-    Luma<S::WhitePoint> {
+    Luma<Linear<S::WhitePoint>> {
         ///Linear luminance.
-        y(luma: T)[alpha: T] => new;
-
-        ///Linear luminance from an 8 bit value.
-        y_u8(luma: u8)[alpha: u8] => new_u8;
+        linear_y(luma: T)[alpha: T] => new;
     }
 
     ///Linear RGB.

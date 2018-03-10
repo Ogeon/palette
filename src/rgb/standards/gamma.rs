@@ -6,7 +6,8 @@ use num_traits::Float;
 
 use cast;
 use rgb::{RgbSpace, RgbStandard, TransferFn};
-use rgb::standards::Srgb;
+use luma::LumaStandard;
+use white_point::WhitePoint;
 
 /// Gamma encoding.
 ///
@@ -19,10 +20,15 @@ use rgb::standards::Srgb;
 ///
 /// The gamma value is stored as a simple type that represents an `f32` constant.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Gamma<S: RgbSpace = Srgb, N: Number = F2p2>(PhantomData<(S, N)>);
+pub struct Gamma<S, N: Number = F2p2>(PhantomData<(S, N)>);
 
 impl<S: RgbSpace, N: Number> RgbStandard for Gamma<S, N> {
     type Space = S;
+    type TransferFn = GammaFn<N>;
+}
+
+impl<Wp: WhitePoint, N: Number> LumaStandard for Gamma<Wp, N> {
+    type WhitePoint = Wp;
     type TransferFn = GammaFn<N>;
 }
 

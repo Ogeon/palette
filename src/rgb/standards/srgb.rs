@@ -3,6 +3,7 @@
 use num_traits::Float;
 
 use rgb::{Primaries, RgbSpace, RgbStandard, TransferFn};
+use luma::LumaStandard;
 use white_point::{D65, WhitePoint};
 use {cast, Component, Yxy};
 
@@ -29,6 +30,11 @@ impl RgbSpace for Srgb {
 
 impl RgbStandard for Srgb {
     type Space = Srgb;
+    type TransferFn = Srgb;
+}
+
+impl LumaStandard for Srgb {
+    type WhitePoint = D65;
     type TransferFn = Srgb;
 }
 

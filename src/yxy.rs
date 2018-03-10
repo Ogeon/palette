@@ -4,7 +4,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Luma, Xyz};
-use {Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, FromColor, IntoColor, Limited, Linear, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
 use clamp;
 
@@ -150,7 +150,7 @@ where
     }
 
     // direct conversion implemented in Luma
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
+    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
         Yxy {
             luma: luma.luma,
             ..Default::default()
@@ -412,12 +412,12 @@ where
 mod test {
     use super::Yxy;
     use LinSrgb;
-    use Luma;
+    use LinLuma;
     use white_point::D65;
 
     #[test]
     fn luma() {
-        let a = Yxy::from(Luma::new(0.5));
+        let a = Yxy::from(LinLuma::new(0.5));
         let b = Yxy::new(0.312727, 0.329023, 0.5);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }

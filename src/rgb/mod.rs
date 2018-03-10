@@ -19,14 +19,14 @@ pub type Srgb<T = f32> = Rgb<standards::Srgb, T>;
 pub type Srgba<T = f32> = Rgba<standards::Srgb, T>;
 
 ///Linear sRGB.
-pub type LinSrgb<T = f32> = Rgb<Linear, T>;
+pub type LinSrgb<T = f32> = Rgb<Linear<standards::Srgb>, T>;
 ///Linear sRGB with an alpha component.
-pub type LinSrgba<T = f32> = Rgba<Linear, T>;
+pub type LinSrgba<T = f32> = Rgba<Linear<standards::Srgb>, T>;
 
 /// Gamma 2.2 encoded sRGB.
-pub type GammaSrgb<T = f32> = Rgb<standards::Gamma, T>;
+pub type GammaSrgb<T = f32> = Rgb<standards::Gamma<standards::Srgb>, T>;
 /// Gamma 2.2 encoded sRGB with an alpha component.
-pub type GammaSrgba<T = f32> = Rgba<standards::Gamma, T>;
+pub type GammaSrgba<T = f32> = Rgba<standards::Gamma<standards::Srgb>, T>;
 
 ///An RGB space and a transfer function.
 pub trait RgbStandard {

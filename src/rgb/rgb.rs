@@ -532,7 +532,7 @@ where
         })
     }
 
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
+    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
         Self::from_linear(Rgb {
             red: luma.luma,
             green: luma.luma,
@@ -590,7 +590,7 @@ where
     }
 
     #[inline(always)]
-    fn into_luma(self) -> Luma<Wp, T> {
+    fn into_luma(self) -> Luma<Linear<Wp>, T> {
         Luma::from_rgb(self.into_linear())
     }
 }

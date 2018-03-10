@@ -174,7 +174,7 @@ where
         Xyz::with_wp(convert(x), convert(y), convert(z)) * Wp::get_xyz()
     }
 
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
+    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
         Wp::get_xyz() * luma.luma
     }
 }
@@ -428,7 +428,7 @@ where
 mod test {
     use super::Xyz;
     use LinSrgb;
-    use Luma;
+    use LinLuma;
     use white_point::D65;
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
@@ -436,7 +436,7 @@ mod test {
 
     #[test]
     fn luma() {
-        let a = Xyz::from(Luma::new(0.5));
+        let a = Xyz::from(LinLuma::new(0.5));
         let b = Xyz::new(0.475235, 0.5, 0.544415);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
