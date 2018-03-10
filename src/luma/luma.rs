@@ -102,6 +102,22 @@ where
     pub fn from_linear(color: Luma<Linear<S::WhitePoint>, T>) -> Luma<S, T> {
         Luma::new(S::TransferFn::from_linear(color.luma))
     }
+
+    /// Convert the color to a different encoding.
+    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(self) -> Luma<St, T> {
+        Luma::new(St::TransferFn::from_linear(S::TransferFn::into_linear(
+            self.luma,
+        )))
+    }
+
+    /// Convert luminance from a different encoding.
+    pub fn from_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
+        color: Luma<St, T>,
+    ) -> Luma<S, T> {
+        Luma::new(S::TransferFn::from_linear(St::TransferFn::into_linear(
+            color.luma,
+        )))
+    }
 }
 
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
@@ -143,6 +159,24 @@ where
     /// Convert linear luminance to nonlinear luminance with transparency.
     pub fn from_linear(color: Lumaa<Linear<S::WhitePoint>, T>) -> Lumaa<S, T> {
         Lumaa::new(S::TransferFn::from_linear(color.luma), color.alpha)
+    }
+
+    /// Convert the color to a different encoding with transparency.
+    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(self) -> Lumaa<St, T> {
+        Lumaa::new(
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.luma)),
+            self.alpha,
+        )
+    }
+
+    /// Convert luminance from a different encoding with transparency.
+    pub fn from_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
+        color: Lumaa<St, T>,
+    ) -> Lumaa<S, T> {
+        Lumaa::new(
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.luma)),
+            color.alpha,
+        )
     }
 }
 

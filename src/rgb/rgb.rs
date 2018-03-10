@@ -109,6 +109,24 @@ impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {
             S::TransferFn::from_linear(color.blue),
         )
     }
+
+    /// Convert the color to a different encoding.
+    pub fn into_encoding<St: RgbStandard<Space = S::Space>>(self) -> Rgb<St, T> {
+        Rgb::new(
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.red)),
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.green)),
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.blue)),
+        )
+    }
+
+    /// Convert RGB from a different encoding.
+    pub fn from_encoding<St: RgbStandard<Space = S::Space>>(color: Rgb<St, T>) -> Rgb<S, T> {
+        Rgb::new(
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.red)),
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
+        )
+    }
 }
 
 impl<S: RgbStandard<TransferFn = LinearFn>, T: Component> Rgb<S, T> {
@@ -170,6 +188,26 @@ impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
             S::TransferFn::from_linear(color.red),
             S::TransferFn::from_linear(color.green),
             S::TransferFn::from_linear(color.blue),
+            color.alpha,
+        )
+    }
+
+    /// Convert the color to a different encoding with transparency.
+    pub fn into_encoding<St: RgbStandard<Space = S::Space>>(self) -> Rgba<St, T> {
+        Rgba::new(
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.red)),
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.green)),
+            St::TransferFn::from_linear(S::TransferFn::into_linear(self.blue)),
+            self.alpha,
+        )
+    }
+
+    /// Convert RGB from a different encoding with transparency.
+    pub fn from_encoding<St: RgbStandard<Space = S::Space>>(color: Rgba<St, T>) -> Rgba<S, T> {
+        Rgba::new(
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.red)),
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
+            S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
             color.alpha,
         )
     }
