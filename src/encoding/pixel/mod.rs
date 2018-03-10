@@ -3,7 +3,7 @@
 pub use self::raw::*;
 mod raw;
 
-/// Represents colors that can be serialized and deserialized from raw color values.
+/// Represents colors that can be serialized and deserialized from raw color components.
 ///
 /// This uses bit by bit conversion, so make sure that anything that implements it can be
 /// represented as a contiguous sequence of a single type `T`.
@@ -11,19 +11,19 @@ pub unsafe trait Pixel<T>: Sized {
     /// The number of color channels.
     const CHANNELS: usize;
 
-    /// Cast as a reference to raw color values.
+    /// Cast as a reference to raw color components.
     #[inline]
     fn as_raw<P: RawPixel<T> + ?Sized>(&self) -> &P {
         unsafe { P::from_raw_parts(self as *const Self as *const T, Self::CHANNELS) }
     }
 
-    /// Cast as a mutable reference to raw color values.
+    /// Cast as a mutable reference to raw color components.
     #[inline]
     fn as_raw_mut<P: RawPixel<T> + ?Sized>(&mut self) -> &mut P {
         unsafe { P::from_raw_parts_mut(self as *mut Self as *mut T, Self::CHANNELS) }
     }
 
-    /// Convert from raw color values.
+    /// Convert from raw color components.
     #[inline]
     fn into_raw<P: RawPixelSized<T>>(self) -> P {
         assert_eq!(P::CHANNELS, Self::CHANNELS);
@@ -38,7 +38,7 @@ pub unsafe trait Pixel<T>: Sized {
         converted
     }
 
-    /// Cast from a reference to raw color values.
+    /// Cast from a reference to raw color components.
     #[inline]
     fn from_raw<P: RawPixel<T> + ?Sized>(pixel: &P) -> &Self {
         assert!(
@@ -48,14 +48,14 @@ pub unsafe trait Pixel<T>: Sized {
         unsafe { &*(pixel.as_ptr() as *const Self) }
     }
 
-    /// Cast from a mutable reference to raw color values.
+    /// Cast from a mutable reference to raw color components.
     #[inline]
     fn from_raw_mut<P: RawPixel<T> + ?Sized>(pixel: &mut P) -> &mut Self {
         assert!(pixel.channels() >= Self::CHANNELS);
         unsafe { &mut *(pixel.as_mut_ptr() as *mut Self) }
     }
 
-    /// Cast a slice of raw color values to a slice of colors.
+    /// Cast a slice of raw color components to a slice of colors.
     ///
     /// ```rust
     /// use palette::{Srgb, Pixel};
@@ -74,7 +74,7 @@ pub unsafe trait Pixel<T>: Sized {
         unsafe { ::std::slice::from_raw_parts(slice.as_ptr() as *const Self, new_length) }
     }
 
-    /// Cast a mutable slice of raw color values to a mutable slice of colors.
+    /// Cast a mutable slice of raw color components to a mutable slice of colors.
     ///
     /// ```rust
     /// use palette::{Srgb, Pixel};
@@ -97,5 +97,47 @@ pub unsafe trait Pixel<T>: Sized {
         assert_eq!(slice.len() % Self::CHANNELS, 0);
         let new_length = slice.len() / Self::CHANNELS;
         unsafe { ::std::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut Self, new_length) }
+    }
+
+    /// Cast a slice of colors to a slice of raw color components.
+    ///
+    /// ```rust
+    /// use palette::{Srgb, Pixel};
+    ///
+    /// let colors = &[Srgb::new(255u8, 128, 64), Srgb::new(10, 20, 30)];
+    /// let raw = Srgb::into_raw_slice(colors);
+    ///
+    /// assert_eq!(raw.len(), 6);
+    /// assert_eq!(raw, &[255u8, 128, 64, 10, 20, 30]);
+    /// ```
+    #[inline]
+    fn into_raw_slice(slice: &[Self]) -> &[T] {
+        let new_length = slice.len() * Self::CHANNELS;
+        unsafe { ::std::slice::from_raw_parts(slice.as_ptr() as *const T, new_length) }
+    }
+
+    /// Cast a mutable slice of colors to a mutable slice of raw color components.
+    ///
+    /// ```rust
+    /// use palette::{Srgb, Pixel};
+    ///
+    /// let colors = &mut [Srgb::new(255u8, 128, 64), Srgb::new(10, 20, 30)];
+    /// {
+    ///     let raw = Srgb::into_raw_slice_mut(colors);
+    ///     assert_eq!(raw.len(), 6);
+    ///
+    ///     // These changes affects the color slice, since they are the same data
+    ///     raw[2] = 100;
+    ///     raw[3] = 200;
+    /// }
+    ///
+    ///
+    /// assert_eq!(colors[0].blue, 100);
+    /// assert_eq!(colors[1].red, 200);
+    /// ```
+    #[inline]
+    fn into_raw_slice_mut(slice: &mut [Self]) -> &mut [T] {
+        let new_length = slice.len() * Self::CHANNELS;
+        unsafe { ::std::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut T, new_length) }
     }
 }

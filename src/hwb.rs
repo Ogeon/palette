@@ -10,6 +10,7 @@ use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, M
 use white_point::WhitePoint;
 use rgb::RgbSpace;
 use encoding::Srgb;
+use encoding::pixel::RawPixel;
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
 /// `Alpha`](struct.Alpha.html#Hwba).
@@ -353,6 +354,28 @@ where
             blackness: self.blackness - c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T, P> AsRef<P> for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

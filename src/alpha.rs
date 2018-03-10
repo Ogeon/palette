@@ -6,6 +6,7 @@ use approx::ApproxEq;
 
 use {clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
 use blend::PreAlpha;
+use encoding::pixel::RawPixel;
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -277,6 +278,26 @@ impl<T: Div + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
             color: self.color / c.clone(),
             alpha: self.alpha / c,
         }
+    }
+}
+
+impl<C, T, P> AsRef<P> for Alpha<C, T>
+where
+    C: Pixel<T>,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<C, T, P> AsMut<P> for Alpha<C, T>
+where
+    C: Pixel<T>,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

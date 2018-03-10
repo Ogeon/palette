@@ -11,6 +11,7 @@ use {cast, clamp};
 use white_point::WhitePoint;
 use rgb::{Rgb, RgbSpace};
 use encoding::{Linear, Srgb};
+use encoding::pixel::RawPixel;
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
 /// `Alpha`](struct.Alpha.html#Hsva).
@@ -432,6 +433,28 @@ where
             value: self.value - c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T, P> AsRef<P> for Hsv<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Hsv<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

@@ -10,6 +10,7 @@ use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel,
 use luma::LumaStandard;
 use encoding::{Linear, Srgb, TransferFn};
 use encoding::linear::LinearFn;
+use encoding::pixel::RawPixel;
 use white_point::WhitePoint;
 use clamp;
 use blend::PreAlpha;
@@ -414,6 +415,51 @@ where
             luma: self.luma / c,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T, P> AsRef<P> for Luma<S, T>
+where
+    T: Component,
+    S: LumaStandard,
+    P: RawPixel<T> + ?Sized,
+{
+    /// Convert to a raw pixel format.
+    ///
+    /// ```rust
+    /// use palette::SrgbLuma;
+    ///
+    /// let luma = SrgbLuma::new(100);
+    /// let raw: &[u8] = luma.as_ref();
+    ///
+    /// assert_eq!(raw[0], 100);
+    /// ```
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Luma<S, T>
+where
+    T: Component,
+    S: LumaStandard,
+    P: RawPixel<T> + ?Sized,
+{
+    /// Convert to a raw pixel format.
+    ///
+    /// ```rust
+    /// use palette::SrgbLuma;
+    ///
+    /// let mut luma = SrgbLuma::new(100);
+    /// {
+    ///     let raw: &mut [u8] = luma.as_mut();
+    ///     raw[0] = 5;
+    /// }
+    ///
+    /// assert_eq!(luma.luma, 5);
+    /// ```
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

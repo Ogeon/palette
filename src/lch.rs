@@ -7,6 +7,7 @@ use {Alpha, Hue, Lab, LabHue, Xyz};
 use {Component, FromColor, GetHue, IntoColor, Limited, Mix, Pixel, Saturate, Shade};
 use {cast, clamp};
 use white_point::{D65, WhitePoint};
+use encoding::pixel::RawPixel;
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
 /// `Alpha`](struct.Alpha.html#Lcha).
@@ -338,6 +339,28 @@ where
             hue: self.hue - c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T, P> AsRef<P> for Lch<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<Wp, T, P> AsMut<P> for Lch<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

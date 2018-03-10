@@ -6,6 +6,7 @@ use std::marker::PhantomData;
 use {Alpha, Luma, Xyz};
 use {Component, ComponentWise, FromColor, IntoColor, Limited, Linear, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
+use encoding::pixel::RawPixel;
 use clamp;
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -395,6 +396,28 @@ where
             luma: self.luma / c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T, P> AsRef<P> for Yxy<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<Wp, T, P> AsMut<P> for Yxy<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

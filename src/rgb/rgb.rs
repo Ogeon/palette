@@ -8,6 +8,7 @@ use approx::ApproxEq;
 use rgb::{RgbSpace, RgbStandard, TransferFn};
 use encoding::{Linear, Srgb};
 use encoding::linear::LinearFn;
+use encoding::pixel::RawPixel;
 use alpha::Alpha;
 use convert::{FromColor, IntoColor};
 use white_point::WhitePoint;
@@ -629,6 +630,51 @@ where
         self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
         self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
         self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
+    }
+}
+
+impl<S, T, P> AsRef<P> for Rgb<S, T>
+where
+    T: Component,
+    S: RgbStandard,
+    P: RawPixel<T> + ?Sized,
+{
+    /// Convert to a raw pixel format.
+    ///
+    /// ```rust
+    /// use palette::Srgb;
+    ///
+    /// let mut rgb = Srgb::new(38, 42, 19);
+    /// let raw: &[u8] = rgb.as_ref();
+    ///
+    /// assert_eq!(raw[1], 42);
+    /// ```
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Rgb<S, T>
+where
+    T: Component,
+    S: RgbStandard,
+    P: RawPixel<T> + ?Sized,
+{
+    /// Convert to a raw pixel format.
+    ///
+    /// ```rust
+    /// use palette::Srgb;
+    ///
+    /// let mut rgb = Srgb::new(38, 42, 19);
+    /// {
+    ///     let raw: &mut [u8] = rgb.as_mut();
+    ///     raw[1] = 5;
+    /// }
+    ///
+    /// assert_eq!(rgb.green, 5);
+    /// ```
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

@@ -8,6 +8,7 @@ use {Component, ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
 use rgb::{Rgb, RgbSpace};
 use encoding::Linear;
+use encoding::pixel::RawPixel;
 use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use {cast, clamp};
 
@@ -412,6 +413,28 @@ where
             z: self.z / c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T, P> AsRef<P> for Xyz<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<Wp, T, P> AsMut<P> for Xyz<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 

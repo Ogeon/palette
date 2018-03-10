@@ -10,6 +10,7 @@ use {cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limi
 use white_point::WhitePoint;
 use rgb::{Rgb, RgbSpace};
 use encoding::{Linear, Srgb};
+use encoding::pixel::RawPixel;
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
 /// `Alpha`](struct.Alpha.html#Hsla).
@@ -430,6 +431,28 @@ where
             lightness: self.lightness - c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T, P> AsRef<P> for Hsl<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Hsl<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 
