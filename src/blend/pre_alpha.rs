@@ -1,8 +1,9 @@
-use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
+use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
 use approx::ApproxEq;
 use num_traits::Float;
 
-use {Alpha, ComponentWise, Mix, Blend, clamp};
+use {clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
+use encoding::pixel::RawPixel;
 
 ///Premultiplied alpha wrapper.
 ///
@@ -26,6 +27,7 @@ use {Alpha, ComponentWise, Mix, Blend, clamp};
 ///Note that converting to and from premultiplied alpha will cause the alpha
 ///component to be clamped to [0.0, 1.0].
 #[derive(Clone, Copy, PartialEq, Debug)]
+#[repr(C)]
 pub struct PreAlpha<C, T: Float> {
     ///The premultiplied color components (`original.color * original.alpha`).
     pub color: C,
@@ -35,31 +37,35 @@ pub struct PreAlpha<C, T: Float> {
     pub alpha: T,
 }
 
-impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T> where
-    C: ComponentWise<Scalar=T>,
+impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T>
+where
+    C: ComponentWise<Scalar = T>,
     T: Float,
 {
     fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
-        PreAlpha{
+        PreAlpha {
             color: color.color.component_wise_self(|a| a * alpha),
-            alpha: alpha
+            alpha: alpha,
         }
     }
 }
 
-impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T> where
-    C: ComponentWise<Scalar=T>,
+impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T>
+where
+    C: ComponentWise<Scalar = T>,
     T: Float,
 {
     fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
-        let color = color.color.component_wise_self(|a| if alpha.is_normal() {
-            a / alpha
-        } else {
-            T::zero()
+        let color = color.color.component_wise_self(|a| {
+            if alpha.is_normal() {
+                a / alpha
+            } else {
+                T::zero()
+            }
         });
 
         Alpha {
@@ -69,8 +75,9 @@ impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T> where
     }
 }
 
-impl<C, T> Blend for PreAlpha<C, T> where
-    C: Blend<Color=C> + ComponentWise<Scalar=T>,
+impl<C, T> Blend for PreAlpha<C, T>
+where
+    C: Blend<Color = C> + ComponentWise<Scalar = T>,
     T: Float,
 {
     type Color = C;
@@ -95,10 +102,14 @@ impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
     }
 }
 
-impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for PreAlpha<C, T> {
+impl<C: ComponentWise<Scalar = T>, T: Float> ComponentWise for PreAlpha<C, T> {
     type Scalar = T;
 
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &PreAlpha<C, T>, mut f: F) -> PreAlpha<C, T> {
+    fn component_wise<F: FnMut(T, T) -> T>(
+        &self,
+        other: &PreAlpha<C, T>,
+        mut f: F,
+    ) -> PreAlpha<C, T> {
         PreAlpha {
             alpha: f(self.alpha, other.alpha),
             color: self.color.component_wise(&other.color, f),
@@ -111,8 +122,24 @@ impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for PreAlpha<C, T> {
             color: self.color.component_wise_self(f),
         }
     }
-}impl<C, T> ApproxEq for PreAlpha<C, T> where
-    C: ApproxEq<Epsilon=T::Epsilon>,
+}
+
+unsafe impl<T: Float, C: Pixel<T>> Pixel<T> for PreAlpha<C, T> {
+    const CHANNELS: usize = C::CHANNELS + 1;
+}
+
+impl<C: Default, T: Float> Default for PreAlpha<C, T> {
+    fn default() -> PreAlpha<C, T> {
+        PreAlpha {
+            color: C::default(),
+            alpha: T::one(),
+        }
+    }
+}
+
+impl<C, T> ApproxEq for PreAlpha<C, T>
+where
+    C: ApproxEq<Epsilon = T::Epsilon>,
     T: ApproxEq + Float,
     T::Epsilon: Copy,
 {
@@ -130,14 +157,19 @@ impl<C: ComponentWise<Scalar=T>, T: Float> ComponentWise for PreAlpha<C, T> {
         T::default_max_ulps()
     }
 
-    fn relative_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-        self.color.relative_eq(&other.color, epsilon, max_relative) &&
-        self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
+    fn relative_eq(
+        &self,
+        other: &PreAlpha<C, T>,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.color.relative_eq(&other.color, epsilon, max_relative)
+            && self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
     }
 
-    fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
-        self.color.ulps_eq(&other.color, epsilon, max_ulps) &&
-        self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
+    fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.color.ulps_eq(&other.color, epsilon, max_ulps)
+            && self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
@@ -226,6 +258,28 @@ impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
             color: self.color / c,
             alpha: self.alpha / c,
         }
+    }
+}
+
+impl<C, T, P> AsRef<P> for PreAlpha<C, T>
+where
+    C: Pixel<T>,
+    T: Float,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<C, T, P> AsMut<P> for PreAlpha<C, T>
+where
+    C: Pixel<T>,
+    T: Float,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
     }
 }
 
