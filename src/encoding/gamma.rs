@@ -1,12 +1,13 @@
-//! Gamma encoded RGB.
+//! Gamma encoding.
 
 use std::marker::PhantomData;
 
 use num_traits::Float;
 
 use cast;
-use rgb::{RgbSpace, RgbStandard, TransferFn};
+use rgb::{RgbSpace, RgbStandard};
 use luma::LumaStandard;
+use encoding::TransferFn;
 use white_point::WhitePoint;
 
 /// Gamma encoding.

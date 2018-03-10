@@ -9,7 +9,7 @@ use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, M
      Shade, Xyz};
 use white_point::WhitePoint;
 use rgb::RgbSpace;
-use rgb::standards::Srgb;
+use encoding::Srgb;
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
 /// `Alpha`](struct.Alpha.html#Hwba).
@@ -425,7 +425,7 @@ where
 mod test {
     use super::Hwb;
     use {Limited, LinSrgb};
-    use rgb::standards::Srgb;
+    use encoding::Srgb;
 
     #[test]
     fn red() {

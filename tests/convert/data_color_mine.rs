@@ -60,9 +60,9 @@ pub struct ColorMine {
     yxy: Yxy<D65, f32>,
     rgb: LinSrgb<f32>,
     linear_rgb: LinSrgb<f32>,
-    hsl: Hsl<::palette::rgb::standards::Srgb, f32>,
-    hsv: Hsv<::palette::rgb::standards::Srgb, f32>,
-    hwb: Hwb<::palette::rgb::standards::Srgb, f32>,
+    hsl: Hsl<::palette::encoding::Srgb, f32>,
+    hsv: Hsv<::palette::encoding::Srgb, f32>,
+    hwb: Hwb<::palette::encoding::Srgb, f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {
@@ -103,9 +103,9 @@ impl_from_color!(Xyz<D65, f32>);
 impl_from_color!(Yxy<D65, f32>);
 impl_from_color!(Lab<D65, f32>);
 impl_from_color!(Lch<D65, f32>);
-impl_from_color!(Hsl<::palette::rgb::standards::Srgb, f32>);
-impl_from_color!(Hsv<::palette::rgb::standards::Srgb, f32>);
-impl_from_color!(Hwb<::palette::rgb::standards::Srgb, f32>);
+impl_from_color!(Hsl<::palette::encoding::Srgb, f32>);
+impl_from_color!(Hsv<::palette::encoding::Srgb, f32>);
+impl_from_color!(Hwb<::palette::encoding::Srgb, f32>);
 
 lazy_static! {
     static ref TEST_DATA: Vec<ColorMine> = load_data();

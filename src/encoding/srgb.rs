@@ -2,8 +2,9 @@
 
 use num_traits::Float;
 
-use rgb::{Primaries, RgbSpace, RgbStandard, TransferFn};
+use rgb::{Primaries, RgbSpace, RgbStandard};
 use luma::LumaStandard;
+use encoding::TransferFn;
 use white_point::{D65, WhitePoint};
 use {cast, Component, Yxy};
 

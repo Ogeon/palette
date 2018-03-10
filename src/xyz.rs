@@ -6,7 +6,8 @@ use std::marker::PhantomData;
 use {Alpha, Lab, Luma, Yxy};
 use {Component, ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
-use rgb::{Linear, Rgb, RgbSpace};
+use rgb::{Rgb, RgbSpace};
+use encoding::Linear;
 use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use {cast, clamp};
 

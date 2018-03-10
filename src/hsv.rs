@@ -9,8 +9,8 @@ use {Alpha, Hsl, Hwb, Xyz};
 use {Component, FromColor, GetHue, Hue, Limited, Mix, Pixel, RgbHue, Saturate, Shade};
 use {cast, clamp};
 use white_point::WhitePoint;
-use rgb::{Linear, Rgb, RgbSpace};
-use rgb::standards::Srgb;
+use rgb::{Rgb, RgbSpace};
+use encoding::{Linear, Srgb};
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
 /// `Alpha`](struct.Alpha.html#Hsva).
@@ -486,7 +486,7 @@ where
 mod test {
     use super::Hsv;
     use {Hsl, LinSrgb};
-    use rgb::standards::Srgb;
+    use encoding::Srgb;
 
     #[test]
     fn red() {

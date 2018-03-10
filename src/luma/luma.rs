@@ -8,9 +8,8 @@ use std::marker::PhantomData;
 use {Alpha, Xyz, Yxy};
 use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
 use luma::LumaStandard;
-use rgb::TransferFn;
-use rgb::standards::{Linear, Srgb};
-use rgb::standards::linear::LinearFn;
+use encoding::{Linear, Srgb, TransferFn};
+use encoding::linear::LinearFn;
 use white_point::WhitePoint;
 use clamp;
 use blend::PreAlpha;
@@ -463,7 +462,7 @@ where
 #[cfg(test)]
 mod test {
     use Luma;
-    use rgb::standards::Srgb;
+    use encoding::Srgb;
 
     #[test]
     fn ranges() {

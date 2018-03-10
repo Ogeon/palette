@@ -6,8 +6,8 @@ use num_traits::Float;
 use approx::ApproxEq;
 
 use rgb::{RgbSpace, RgbStandard, TransferFn};
-use rgb::standards::{Linear, Srgb};
-use rgb::standards::linear::LinearFn;
+use encoding::{Linear, Srgb};
+use encoding::linear::LinearFn;
 use alpha::Alpha;
 use convert::{FromColor, IntoColor};
 use white_point::WhitePoint;
@@ -645,7 +645,7 @@ where
 #[cfg(test)]
 mod test {
     use super::Rgb;
-    use rgb::standards::Srgb;
+    use encoding::Srgb;
 
     #[test]
     fn ranges() {

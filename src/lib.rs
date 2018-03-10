@@ -81,8 +81,9 @@ use num_traits::{Float, NumCast, ToPrimitive, Zero};
 use approx::ApproxEq;
 
 use blend::PreAlpha;
-use rgb::{Linear, Rgb, RgbSpace, Rgba};
+use rgb::{Rgb, RgbSpace, Rgba};
 use luma::Luma;
+use encoding::Linear;
 
 pub use gradient::Gradient;
 pub use alpha::Alpha;
@@ -101,7 +102,7 @@ pub use hwb::{Hwb, Hwba};
 pub use hues::{LabHue, RgbHue};
 pub use convert::{FromColor, IntoColor};
 pub use matrix::Mat3;
-pub use pixel::Pixel;
+pub use encoding::pixel::Pixel;
 
 //Helper macro for checking ranges and clamping.
 #[cfg(test)]
@@ -258,7 +259,6 @@ macro_rules! assert_ranges {
 mod macros;
 
 pub mod gradient;
-pub mod pixel;
 pub mod blend;
 
 #[cfg(feature = "named")]
@@ -282,6 +282,7 @@ mod equality;
 pub mod chromatic_adaptation;
 pub mod white_point;
 mod matrix;
+pub mod encoding;
 
 macro_rules! make_color {
     ($(
@@ -293,7 +294,7 @@ macro_rules! make_color {
     )+) => (
 
         ///Generic color with an alpha component. See the [`Colora` implementation in `Alpha`](struct.Alpha.html#Colora).
-        pub type Colora<S = rgb::standards::Srgb, T = f32> = Alpha<Color<S, T>, T>;
+        pub type Colora<S = encoding::Srgb, T = f32> = Alpha<Color<S, T>, T>;
 
         ///A generic color type.
         ///
@@ -311,7 +312,7 @@ macro_rules! make_color {
         ///but it can easily be converted to a fixed color space in those
         ///cases.
         #[derive(Debug)]
-        pub enum Color<S = rgb::standards::Srgb, T = f32>
+        pub enum Color<S = encoding::Srgb, T = f32>
             where T: Float + Component,
                 S: RgbSpace,
         {
@@ -330,11 +331,11 @@ macro_rules! make_color {
             fn clone(&self) -> Color<S, T> { *self }
         }
 
-        impl<T: Float + Component> Color<rgb::standards::Srgb, T> {
+        impl<T: Float + Component> Color<encoding::Srgb, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<rgb::standards::Srgb, T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty),*) -> Color<encoding::Srgb, T> {
                         Color::$variant($variant::$ctor_original($($ctor_field),*))
                     }
                 )+
@@ -342,11 +343,11 @@ macro_rules! make_color {
         }
 
         ///<span id="Colora"></span>[`Colora`](type.Colora.html) implementations.
-        impl<T: Float + Component> Alpha<Color<rgb::standards::Srgb, T>, T> {
+        impl<T: Float + Component> Alpha<Color<encoding::Srgb, T>, T> {
             $(
                 $(
                     #[$ctor_comment]
-                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<rgb::standards::Srgb, T> {
+                    pub fn $ctor_name$(<$($ty_params : $ty_param_traits$( <$( $ty_inner_traits ),*> )*),*>)*($($ctor_field: $ctor_ty,)* alpha: $alpha_ty) -> Colora<encoding::Srgb, T> {
                         Alpha::<$variant<_, T>, T>::$ctor_original($($ctor_field,)* alpha).into()
                     }
                 )+

@@ -7,7 +7,8 @@ use std::marker::PhantomData;
 
 use {Component, Xyz};
 use white_point::WhitePoint;
-use rgb::{Linear, Primaries, Rgb, RgbSpace};
+use rgb::{Primaries, Rgb, RgbSpace};
+use encoding::Linear;
 use convert::IntoColor;
 
 ///A 9 element array representing a 3x3 matrix
@@ -134,8 +135,8 @@ fn mat3_from_primaries<T: Component + Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: X
 #[cfg(test)]
 mod test {
     use Xyz;
-    use rgb::{Linear, Rgb};
-    use rgb::standards::Srgb;
+    use rgb::Rgb;
+    use encoding::{Linear, Srgb};
     use chromatic_adaptation::AdaptInto;
     use white_point::D50;
     use super::{matrix_inverse, multiply_xyz, rgb_to_xyz_matrix, multiply_3x3};

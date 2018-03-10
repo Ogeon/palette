@@ -8,8 +8,8 @@ use std::any::TypeId;
 use {cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
      RgbHue, Saturate, Shade, Xyz};
 use white_point::WhitePoint;
-use rgb::{Linear, Rgb, RgbSpace};
-use rgb::standards::Srgb;
+use rgb::{Rgb, RgbSpace};
+use encoding::{Linear, Srgb};
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
 /// `Alpha`](struct.Alpha.html#Hsla).
@@ -484,7 +484,7 @@ where
 mod test {
     use super::Hsl;
     use {Hsv, LinSrgb};
-    use rgb::standards::Srgb;
+    use encoding::Srgb;
 
     #[test]
     fn red() {

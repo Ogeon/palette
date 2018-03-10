@@ -2,8 +2,9 @@ use num_traits::Float;
 
 use {Alpha, Color, Component, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
-use rgb::{Linear, Rgb, RgbSpace, RgbStandard};
+use rgb::{Rgb, RgbSpace, RgbStandard};
 use luma::{Luma, LumaStandard};
+use encoding::Linear;
 
 ///FromColor provides conversion between the colors.
 ///
