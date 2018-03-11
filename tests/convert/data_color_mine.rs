@@ -2,7 +2,7 @@
 List of color from www.colormine.org
 */
 use csv;
-use palette::{Lch, Lab, Xyz, Yxy, Hsl, Hsv, Hwb, IntoColor, Srgb, LinSrgb};
+use palette::{Hsl, Hsv, Hwb, IntoColor, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 use palette::white_point::D65;
 
 #[derive(Deserialize, PartialEq)]
@@ -60,9 +60,9 @@ pub struct ColorMine {
     yxy: Yxy<D65, f32>,
     rgb: LinSrgb<f32>,
     linear_rgb: LinSrgb<f32>,
-    hsl: Hsl<::palette::rgb::standards::Srgb, f32>,
-    hsv: Hsv<::palette::rgb::standards::Srgb, f32>,
-    hwb: Hwb<::palette::rgb::standards::Srgb, f32>,
+    hsl: Hsl<::palette::encoding::Srgb, f32>,
+    hsv: Hsv<::palette::encoding::Srgb, f32>,
+    hwb: Hwb<::palette::encoding::Srgb, f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {
@@ -72,9 +72,9 @@ impl From<ColorMineRaw> for ColorMine {
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
             rgb: LinSrgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into_linear(),
-            hsl: Hsl::new(src.hsl_h.into(), src.hsl_s, src.hsl_l),
-            hsv: Hsv::new(src.hsv_h.into(), src.hsv_s, src.hsv_v),
-            hwb: Hwb::new(src.hwb_h.into(), src.hwb_w, src.hwb_b),
+            hsl: Hsl::new(src.hsl_h, src.hsl_s, src.hsl_l),
+            hsv: Hsv::new(src.hsv_h, src.hsv_s, src.hsv_v),
+            hwb: Hwb::new(src.hwb_h, src.hwb_w, src.hwb_b),
         }
     }
 }
@@ -103,36 +103,33 @@ impl_from_color!(Xyz<D65, f32>);
 impl_from_color!(Yxy<D65, f32>);
 impl_from_color!(Lab<D65, f32>);
 impl_from_color!(Lch<D65, f32>);
-impl_from_color!(Hsl<::palette::rgb::standards::Srgb, f32>);
-impl_from_color!(Hsv<::palette::rgb::standards::Srgb, f32>);
-impl_from_color!(Hwb<::palette::rgb::standards::Srgb, f32>);
-
-
+impl_from_color!(Hsl<::palette::encoding::Srgb, f32>);
+impl_from_color!(Hsv<::palette::encoding::Srgb, f32>);
+impl_from_color!(Hwb<::palette::encoding::Srgb, f32>);
 
 lazy_static! {
     static ref TEST_DATA: Vec<ColorMine> = load_data();
 }
-
 
 pub fn load_data() -> Vec<ColorMine> {
     let mut rdr = csv::Reader::from_path("tests/convert/data_color_mine.csv")
         .expect("csv file could not be loaded in tests for color mine data");
     let mut color_data: Vec<ColorMine> = Vec::new();
     for record in rdr.deserialize() {
-        let r: ColorMineRaw = record.expect("color data could not be decoded in tests for color mine data");
+        let r: ColorMineRaw =
+            record.expect("color data could not be decoded in tests for color mine data");
         color_data.push(r.into())
     }
     color_data
 }
 
 fn check_equal_cie(src: &ColorMine, tgt: &ColorMine) {
-
     assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.05);
     assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.05);
 
-    // hue values are not passing for from_yxy conversion. Check github #48 for more information
-    // assert_relative_eq!(src.lch.hue, tgt.lch.hue, epsilon = 0.05);
-
+    // hue values are not passing for from_yxy conversion. Check github #48 for
+    // more information assert_relative_eq!(src.lch.hue, tgt.lch.hue, epsilon =
+    // 0.05);
 }
 fn check_equal_rgb(src: &ColorMine, tgt: &ColorMine) {
     assert_relative_eq!(src.rgb, tgt.rgb, epsilon = 0.05);

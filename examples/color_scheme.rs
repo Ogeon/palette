@@ -1,10 +1,10 @@
-extern crate palette;
-extern crate image;
 extern crate clap;
+extern crate image;
+extern crate palette;
 
-use palette::{Color, Hue, Shade, Srgb};
+use palette::{Color, Hue, Pixel, Shade, Srgb};
 
-use image::{RgbImage, GenericImage, SubImage};
+use image::{GenericImage, RgbImage, SubImage};
 
 use clap::{App, AppSettings, Arg, SubCommand};
 
@@ -19,20 +19,23 @@ fn main() {
                 .required(true)
                 .empty_values(false)
                 .index(1)
-                .help("[0-255] The red channel of the primary color.")
-        ).arg(
+                .help("[0-255] The red channel of the primary color."),
+        )
+        .arg(
             Arg::with_name("green")
                 .required(true)
                 .empty_values(false)
                 .index(2)
-                .help("[0-255] The green channel of the primary color.")
-        ).arg(
+                .help("[0-255] The green channel of the primary color."),
+        )
+        .arg(
             Arg::with_name("blue")
                 .required(true)
                 .empty_values(false)
                 .index(3)
-                .help("[0-255] The blue channel of the primary color.")
-        ).subcommand(
+                .help("[0-255] The blue channel of the primary color."),
+        )
+        .subcommand(
             SubCommand::with_name("triad")
                 .about("A three point scheme, centered around the complementary.")
                 .arg(
@@ -42,9 +45,10 @@ fn main() {
                         .short("d")
                         .value_name("degrees")
                         .takes_value(true)
-                        .empty_values(false)
-                )
-        ).subcommand(
+                        .empty_values(false),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("analogous")
                 .about("Like triad, but centered around the primary.")
                 .arg(
@@ -54,9 +58,10 @@ fn main() {
                         .short("d")
                         .value_name("degrees")
                         .takes_value(true)
-                        .empty_values(false)
-                )
-        ).subcommand(
+                        .empty_values(false),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("rectangle")
                 .about("A four point scheme.")
                 .arg(
@@ -66,57 +71,68 @@ fn main() {
                         .short("d")
                         .value_name("degrees")
                         .takes_value(true)
-                        .empty_values(false)
-                )
-        ).subcommand(
-            SubCommand::with_name("complementary")
-                .about("A simple two point color scheme.")
-        ).get_matches();
+                        .empty_values(false),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("complementary").about("A simple two point color scheme."),
+        )
+        .get_matches();
 
     //Get the components of the primary color
-    let red = matches.value_of("red")
+    let red: u8 = matches
+        .value_of("red")
         .and_then(|r| r.parse().ok())
         .expect("the red channel must be a number in the range [0-255]");
-    let green = matches.value_of("green")
+    let green: u8 = matches
+        .value_of("green")
         .and_then(|r| r.parse().ok())
         .expect("the green channel must be a number in the range [0-255]");
-    let blue = matches.value_of("blue")
+    let blue: u8 = matches
+        .value_of("blue")
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary: Color = Srgb::new_u8(red, green, blue).into_linear().into();
+    let primary: Color = Srgb::new(red, green, blue)
+        .into_format()
+        .into_linear()
+        .into();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {
         ("triad", matches) | ("", matches) => {
             //Two secondary colors that are close to the complementary, or evenly spaced
-            let distance: f32 = matches.and_then(|m| m.value_of("distance"))
+            let distance: f32 = matches
+                .and_then(|m| m.value_of("distance"))
                 .and_then(|d| d.parse().ok())
                 .unwrap_or(120.0);
 
             let shift = 180.0 - (distance / 2.0);
 
             vec![
-                primary.shift_hue(shift.into()),
-                primary.shift_hue((-shift).into()),
+                primary.shift_hue(shift),
+                primary.shift_hue((-shift)),
             ]
-        },
+        }
         ("analogous", matches) => {
             //Two secondary colors that are close to the primary
-            let distance: f32 = matches.and_then(|m| m.value_of("distance"))
+            let distance: f32 = matches
+                .and_then(|m| m.value_of("distance"))
                 .and_then(|d| d.parse().ok())
                 .unwrap_or(60.0);
 
             let shift = distance / 2.0;
 
             vec![
-                primary.shift_hue(shift.into()),
-                primary.shift_hue((-shift).into()),
+                primary.shift_hue(shift),
+                primary.shift_hue((-shift)),
             ]
-        },
+        }
         ("rectangle", matches) => {
-            //Three secondary colors that forms a rectangle or a square, together with the primary
-            let distance: f32 = matches.and_then(|m| m.value_of("distance"))
+            //Three secondary colors that forms a rectangle or a square, together with the
+            // primary
+            let distance: f32 = matches
+                .and_then(|m| m.value_of("distance"))
                 .and_then(|d| d.parse().ok())
                 .unwrap_or(90.0);
 
@@ -124,13 +140,14 @@ fn main() {
             let shift2 = 180.0 + distance;
 
             vec![
-                primary.shift_hue(shift1.into()),
-                primary.shift_hue(180.0.into()),
-                primary.shift_hue(shift2.into()),
+                primary.shift_hue(shift1),
+                primary.shift_hue(180.0),
+                primary.shift_hue(shift2),
             ]
-        },
-        ("complementary", _) => vec![primary.shift_hue(180.0.into())], //Simply the complementary color
-        (name, _) => panic!("unknown subcommand: {}", name)
+        }
+        ("complementary", _) => vec![primary.shift_hue(180.0)], /* Simply the
+                                                                         * complementary color */
+        (name, _) => panic!("unknown subcommand: {}", name),
     };
 
     //Create an image for the swatches
@@ -141,7 +158,10 @@ fn main() {
 
     //Draw the secondary swatches
     for (n, color) in secondary.into_iter().enumerate() {
-        blit_shades(color, image.sub_image((n as u32 + 1) * SWATCH_SIZE, 0, SWATCH_SIZE, SWATCH_SIZE));
+        blit_shades(
+            color,
+            image.sub_image((n as u32 + 1) * SWATCH_SIZE, 0, SWATCH_SIZE, SWATCH_SIZE),
+        );
     }
 
     match image.save("examples/color_scheme.png") {
@@ -150,16 +170,25 @@ fn main() {
     }
 }
 
-fn blit_shades<I: GenericImage<Pixel=image::Rgb<u8>> + 'static>(color: Color, mut canvas: SubImage<I>) {
+fn blit_shades<I: GenericImage<Pixel = image::Rgb<u8>> + 'static>(
+    color: Color,
+    mut canvas: SubImage<I>,
+) {
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Srgb::linear_to_pixel(color);
+    let primary = Srgb::from_linear(color.into()).into_format().into_raw();
 
     //Generate one lighter and two darker versions of the color
-    let light = Srgb::linear_to_pixel(color.lighten(0.1));
-    let dark1 = Srgb::linear_to_pixel(color.darken(0.1));
-    let dark2 = Srgb::linear_to_pixel(color.darken(0.2));
+    let light = Srgb::from_linear(color.lighten(0.1).into())
+        .into_format()
+        .into_raw();
+    let dark1 = Srgb::from_linear(color.darken(0.1).into())
+        .into_format()
+        .into_raw();
+    let dark2 = Srgb::from_linear(color.darken(0.2).into())
+        .into_format()
+        .into_raw();
 
     for (x, y, pixel) in canvas.pixels_mut() {
         if y < height / 2 {

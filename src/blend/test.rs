@@ -1,5 +1,6 @@
-use {Color, Colora, LinSrgb, LinSrgba, Blend, ComponentWise};
-use rgb::{Rgb, Linear};
+use {Blend, Color, Colora, ComponentWise, LinSrgb, LinSrgba};
+use rgb::Rgb;
+use encoding::Linear;
 use blend::PreAlpha;
 
 #[test]
@@ -7,7 +8,12 @@ fn blend_color() {
     let a = Color::linear_rgb(1.0, 0.0, 0.0);
     let b = Color::linear_rgb(0.0, 0.0, 1.0);
 
-    let c: LinSrgb = a.blend(b, |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: LinSrgb = a.blend(
+        b,
+        |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
+            a.component_wise(&b, |a, b| a + b)
+        },
+    ).into();
     assert_relative_eq!(LinSrgb::new(1.0, 0.0, 1.0), c);
 }
 
@@ -16,7 +22,12 @@ fn blend_alpha_color() {
     let a = Colora::linear_rgb(1.0, 0.0, 0.0, 0.2);
     let b = Colora::linear_rgb(0.0, 0.0, 1.0, 0.2);
 
-    let c: LinSrgba = a.blend(b, |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| a.component_wise(&b, |a, b| a + b)).into();
+    let c: LinSrgba = a.blend(
+        b,
+        |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
+            a.component_wise(&b, |a, b| a + b)
+        },
+    ).into();
     assert_relative_eq!(LinSrgba::new(0.2 / 0.4, 0.0, 0.2 / 0.4, 0.4), c);
 }
 
@@ -35,7 +46,10 @@ fn over() {
     let a = LinSrgba::new(0.5, 0.0, 0.3, 0.5);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.5);
 
-    assert_relative_eq!(LinSrgba::new(0.5 / 0.75, 0.05 / 0.75, 0.15 / 0.75, 0.75), a.over(b));
+    assert_relative_eq!(
+        LinSrgba::new(0.5 / 0.75, 0.05 / 0.75, 0.15 / 0.75, 0.75),
+        a.over(b)
+    );
 
     let a = LinSrgba::new(0.5, 0.0, 0.3, 1.0);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.0);
@@ -222,7 +236,10 @@ fn darken() {
     let a = LinSrgba::new(0.5, 0.0, 0.3, 0.5);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.5);
 
-    assert_relative_eq!(LinSrgba::new(0.5 / 0.75, 0.05 / 0.75, 0.075 / 0.75, 0.75), a.darken(b));
+    assert_relative_eq!(
+        LinSrgba::new(0.5 / 0.75, 0.05 / 0.75, 0.075 / 0.75, 0.75),
+        a.darken(b)
+    );
 
     let a = LinSrgba::new(0.5, 0.0, 0.3, 1.0);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.0);
@@ -245,7 +262,10 @@ fn lighten() {
     let a = LinSrgba::new(0.5, 0.0, 0.3, 0.5);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.5);
 
-    assert_relative_eq!(LinSrgba::new(0.625 / 0.75, 0.1 / 0.75, 0.15 / 0.75, 0.75), a.lighten(b));
+    assert_relative_eq!(
+        LinSrgba::new(0.625 / 0.75, 0.1 / 0.75, 0.15 / 0.75, 0.75),
+        a.lighten(b)
+    );
 
     let a = LinSrgba::new(0.5, 0.0, 0.3, 1.0);
     let b = LinSrgba::new(1.0, 0.2, 0.0, 0.0);

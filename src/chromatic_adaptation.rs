@@ -24,13 +24,12 @@
 //!```
 use num_traits::Float;
 
-use {Xyz, FromColor, IntoColor, flt};
+use {cast, Component, FromColor, IntoColor, Xyz};
 use white_point::WhitePoint;
-use matrix::{Mat3, multiply_xyz, multiply_3x3};
-
+use matrix::{multiply_xyz, Mat3, multiply_3x3};
 
 ///Chromatic adaptation methods implemented in the library
-pub enum  Method {
+pub enum Method {
     ///Bradford chromatic adaptation method
     Bradford,
     ///VonKries chromatic adaptation method
@@ -50,9 +49,10 @@ pub struct ConeResponseMatrices<T: Float> {
 ///Generates a conversion matrix to convert the Xyz trisitmilus values from
 ///one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
-    where T: Float,
-        Swp: WhitePoint,
-        Dwp: WhitePoint,
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
 {
     ///Get the cone response functions for the chromatic adaptation method
     fn get_cone_response(&self) -> ConeResponseMatrices<T>;
@@ -64,57 +64,68 @@ pub trait TransformMatrix<Swp, Dwp, T>
         let t_wp: Xyz<Dwp, T> = Dwp::get_xyz();
         let adapt = self.get_cone_response();
 
-        let resp_src: Xyz<Swp,_> = multiply_xyz(&adapt.ma, &s_wp);
-        let resp_dst: Xyz<Dwp,_> = multiply_xyz(&adapt.ma, &t_wp);
+        let resp_src: Xyz<Swp, _> = multiply_xyz(&adapt.ma, &s_wp);
+        let resp_dst: Xyz<Dwp, _> = multiply_xyz(&adapt.ma, &t_wp);
         let z = T::zero();
-        let resp = [resp_dst.x/resp_src.x, z , z , z, resp_dst.y/resp_src.y, z, z, z, resp_dst.z/ resp_src.z];
+        let resp = [
+            resp_dst.x / resp_src.x,
+            z,
+            z,
+            z,
+            resp_dst.y / resp_src.y,
+            z,
+            z,
+            z,
+            resp_dst.z / resp_src.z,
+        ];
 
         let tmp = multiply_3x3(&resp, &adapt.ma);
         multiply_3x3(&adapt.inv_ma, &tmp)
     }
 }
 
-
 impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
-    where T: Float,
-        Swp: WhitePoint,
-        Dwp: WhitePoint,
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn get_cone_response(&self) -> ConeResponseMatrices<T> {
         match *self {
              Method::Bradford => {
                 ConeResponseMatrices::<T> {
-                    ma: [flt(0.8951000), flt(0.2664000), flt(-0.1614000),
-                         flt(-0.7502000), flt(1.7135000), flt(0.0367000),
-                         flt(0.0389000), flt(-0.0685000), flt(1.0296000)
+                    ma: [cast(0.8951000), cast(0.2664000), cast(-0.1614000),
+                         cast(-0.7502000), cast(1.7135000), cast(0.0367000),
+                         cast(0.0389000), cast(-0.0685000), cast(1.0296000)
                          ],
-                    inv_ma: [flt(0.9869929), flt(-0.1470543), flt(0.1599627),
-                             flt(0.4323053), flt(0.5183603), flt(0.0492912),
-                             flt(-0.0085287), flt(0.0400428), flt(0.9684867)
+                    inv_ma: [cast(0.9869929), cast(-0.1470543), cast(0.1599627),
+                             cast(0.4323053), cast(0.5183603), cast(0.0492912),
+                             cast(-0.0085287), cast(0.0400428), cast(0.9684867)
                             ],
                 }
             }
              Method::VonKries => {
                 ConeResponseMatrices::<T> {
-                    ma: [flt(0.4002400), flt(0.7076000), flt(-0.0808100),
-                         flt(-0.2263000), flt(1.1653200), flt(0.0457000),
-                         flt(0.0000000), flt(0.0000000), flt(0.9182200)
+                    ma: [cast(0.4002400), cast(0.7076000), cast(-0.0808100),
+                         cast(-0.2263000), cast(1.1653200), cast(0.0457000),
+                         cast(0.0000000), cast(0.0000000), cast(0.9182200)
                          ],
-                    inv_ma: [flt(1.8599364), flt(-1.1293816), flt(0.2198974),
-                             flt(0.3611914), flt(0.6388125), flt(-0.0000064),
-                             flt(0.0000000), flt(0.0000000), flt(1.0890636)
+                    inv_ma: [cast(1.8599364), cast(-1.1293816), cast(0.2198974),
+                             cast(0.3611914), cast(0.6388125), cast(-0.0000064),
+                             cast(0.0000000), cast(0.0000000), cast(1.0890636)
                              ],
                 }
             }
              Method::XyzScaling => {
                 ConeResponseMatrices::<T> {
-                    ma: [flt(1.0000000), flt(0.0000000), flt(0.0000000),
-                         flt(0.0000000), flt(1.0000000), flt(0.0000000),
-                         flt(0.0000000), flt(0.0000000), flt(1.0000000)
+                    ma: [cast(1.0000000), cast(0.0000000), cast(0.0000000),
+                         cast(0.0000000), cast(1.0000000), cast(0.0000000),
+                         cast(0.0000000), cast(0.0000000), cast(1.0000000)
                          ],
-                    inv_ma: [flt(1.0000000), flt(0.0000000), flt(0.0000000),
-                             flt(0.0000000), flt(1.0000000), flt(0.0000000),
-                             flt(0.0000000), flt(0.0000000), flt(1.0000000)
+                    inv_ma: [cast(1.0000000), cast(0.0000000), cast(0.0000000),
+                             cast(0.0000000), cast(1.0000000), cast(0.0000000),
+                             cast(0.0000000), cast(0.0000000), cast(1.0000000)
                              ],
                 }
             }
@@ -122,33 +133,35 @@ impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
     }
 }
 
-
 ///Trait to convert color from one reference white point to another
 ///
 ///Converts a color from the source white point (Swp) to the destination white point (Dwp).
 ///Uses the bradford method for conversion by default.
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
-    where T: Float,
-          Swp: WhitePoint,
-          Dwp: WhitePoint,
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford method by default
+    ///Convert the source color to the destination color using the bradford
+    /// method by default
     fn adapt_from(color: S) -> Self {
         Self::adapt_from_using(color, Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified method
+    ///Convert the source color to the destination color using the specified
+    /// method
     fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> Self;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
-    where T: Float,
-          Swp: WhitePoint,
-          Dwp: WhitePoint,
-          S: IntoColor<Swp, T>,
-          D: FromColor<Dwp, T>,
-
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
+    S: IntoColor<Swp, T>,
+    D: FromColor<Dwp, T>,
 {
-    fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color:S, method: M) -> D {
+    fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> D {
         let src_xyz: Xyz<Swp, T> = color.into_xyz();
         let transform_matrix = method.generate_transform_matrix();
         let dst_xyz: Xyz<Dwp, T> = multiply_xyz(&transform_matrix, &src_xyz);
@@ -161,44 +174,47 @@ impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
 ///Converts a color with the source white point (Swp) into the destination white point (Dwp).
 ///Uses the bradford method for conversion by default.
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
-    where T: Float,
-          Swp: WhitePoint,
-          Dwp: WhitePoint,
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford method by default
+    ///Convert the source color to the destination color using the bradford
+    /// method by default
     fn adapt_into(self) -> D {
         self.adapt_into_using(Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified method
+    ///Convert the source color to the destination color using the specified
+    /// method
     fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptInto<D, Swp, Dwp, T> for S
-    where T: Float,
-          Swp: WhitePoint,
-          Dwp: WhitePoint,
-          D: AdaptFrom<S, Swp, Dwp, T>
-
+where
+    T: Component + Float,
+    Swp: WhitePoint,
+    Dwp: WhitePoint,
+    D: AdaptFrom<S, Swp, Dwp, T>,
 {
     fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D {
         D::adapt_from_using(self, method)
     }
 }
 
-
-
-
 #[cfg(test)]
 mod test {
 
-    use {Xyz};
-    use white_point::{D65, D50, A, C};
-    use super::{Method, TransformMatrix, AdaptInto, AdaptFrom};
+    use Xyz;
+    use white_point::{D50, D65, A, C};
+    use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};
 
     #[test]
     fn d65_to_d50_matrix_xyz_scaling() {
-        let expected = [1.0144665, 0.0000000, 0.0000000, 0.0000000, 1.0000000, 0.0000000, 0.0000000, 0.0000000, 0.7578869];
-        let xyz_scaling =  Method::XyzScaling;
+        let expected = [
+            1.0144665, 0.0000000, 0.0000000, 0.0000000, 1.0000000, 0.0000000, 0.0000000, 0.0000000,
+            0.7578869,
+        ];
+        let xyz_scaling = Method::XyzScaling;
         let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&xyz_scaling);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
@@ -206,8 +222,11 @@ mod test {
     }
     #[test]
     fn d65_to_d50_matrix_von_kries() {
-        let expected = [1.0160803, 0.0552297, -0.0521326, 0.0060666, 0.9955661, -0.0012235, 0.0000000, 0.0000000, 0.7578869];
-        let von_kries =  Method::VonKries;
+        let expected = [
+            1.0160803, 0.0552297, -0.0521326, 0.0060666, 0.9955661, -0.0012235, 0.0000000,
+            0.0000000, 0.7578869,
+        ];
+        let von_kries = Method::VonKries;
         let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&von_kries);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
@@ -215,8 +234,11 @@ mod test {
     }
     #[test]
     fn d65_to_d50_matrix_bradford() {
-        let expected = [1.0478112, 0.0228866, -0.0501270, 0.0295424, 0.9904844, -0.0170491, -0.0092345, 0.0150436, 0.7521316];
-        let bradford =  Method::Bradford;
+        let expected = [
+            1.0478112, 0.0228866, -0.0501270, 0.0295424, 0.9904844, -0.0170491, -0.0092345,
+            0.0150436, 0.7521316,
+        ];
+        let bradford = Method::Bradford;
         let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&bradford);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
@@ -237,7 +259,7 @@ mod test {
         let computed_vonkries: Xyz<C, f32> = Xyz::adapt_from_using(input_a, Method::VonKries);
         assert_relative_eq!(expected_vonkries, computed_vonkries, epsilon = 0.0001);
 
-        let computed_xyz_scaling: Xyz<C,_> = Xyz::adapt_from_using(input_a, Method::XyzScaling);
+        let computed_xyz_scaling: Xyz<C, _> = Xyz::adapt_from_using(input_a, Method::XyzScaling);
         assert_relative_eq!(expected_xyz_scaling, computed_xyz_scaling, epsilon = 0.0001);
     }
 
@@ -255,7 +277,7 @@ mod test {
         let computed_vonkries: Xyz<C, f32> = input_a.adapt_into_using(Method::VonKries);
         assert_relative_eq!(expected_vonkries, computed_vonkries, epsilon = 0.0001);
 
-        let computed_xyz_scaling: Xyz<C,_> = input_a.adapt_into_using(Method::XyzScaling);
+        let computed_xyz_scaling: Xyz<C, _> = input_a.adapt_into_using(Method::XyzScaling);
         assert_relative_eq!(expected_xyz_scaling, computed_xyz_scaling, epsilon = 0.0001);
     }
 }

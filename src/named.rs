@@ -10,11 +10,11 @@
 //!use palette::named;
 //!
 //!//From constant
-//!let from_const = Srgb::<f32>::from_pixel(&named::OLIVE).into_linear();
+//!let from_const = Srgb::<f32>::from_format(named::OLIVE).into_linear();
 //!
 //!//From name string
 //!let olive = named::from_str("olive").expect("unknown color");
-//!let from_str = Srgb::from_pixel(&olive).into_linear();
+//!let from_str = Srgb::<f32>::from_format(olive).into_linear();
 //!
 //!assert_eq!(from_const, from_str);
 //!```
@@ -26,6 +26,6 @@ include!(concat!(env!("OUT_DIR"), "/named.rs"));
 ///
 ///The names are the same as the constants, but lower case.
 #[cfg(feature = "named_from_str")]
-pub fn from_str(name: &str) -> Option<(u8, u8, u8)> {
+pub fn from_str(name: &str) -> Option<::Srgb<u8>> {
     COLORS.get(name).cloned()
 }

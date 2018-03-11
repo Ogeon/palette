@@ -5,12 +5,15 @@ use std::ops::{Add, Sub};
 use std::marker::PhantomData;
 use std::any::TypeId;
 
-use {Alpha, Xyz, Hsv, Limited, Mix, Shade, GetHue, Hue, RgbHue, FromColor, IntoColor, clamp};
+use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
+     Shade, Xyz};
 use white_point::WhitePoint;
 use rgb::RgbSpace;
-use rgb::standards::Srgb;
+use encoding::Srgb;
+use encoding::pixel::RawPixel;
 
-///Linear HWB with an alpha component. See the [`Hwba` implementation in `Alpha`](struct.Alpha.html#Hwba).
+/// Linear HWB with an alpha component. See the [`Hwba` implementation in
+/// `Alpha`](struct.Alpha.html#Hwba).
 pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 
 ///Linear HWB color space.
@@ -21,9 +24,11 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///
 ///It is very intuitive for humans to use and many color-pickers are based on the HWB color system
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Hwb<S = Srgb, T = f32>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc. Same as the hue for HSL and HSV.
@@ -47,25 +52,34 @@ pub struct Hwb<S = Srgb, T = f32>
 }
 
 impl<S, T> Copy for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
-{}
-
-impl<S, T> Clone for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
-    fn clone(&self) -> Hwb<S, T> { *self }
 }
 
+impl<S, T> Clone for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+{
+    fn clone(&self) -> Hwb<S, T> {
+        *self
+    }
+}
+
+unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hwb<S, T> {
+    const CHANNELS: usize = 3;
+}
 
 impl<T> Hwb<Srgb, T>
-    where T: Float,
+where
+    T: Component + Float,
 {
     ///HWB for linear sRGB.
-    pub fn new(hue: RgbHue<T>, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
         Hwb {
-            hue: hue,
+            hue: hue.into(),
             whiteness: whiteness,
             blackness: blackness,
             space: PhantomData,
@@ -74,13 +88,14 @@ impl<T> Hwb<Srgb, T>
 }
 
 impl<S, T> Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     ///Linear HWB.
-    pub fn with_wp(hue: RgbHue<T>, whiteness: T, blackness: T) -> Hwb<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<S, T> {
         Hwb {
-            hue: hue,
+            hue: hue.into(),
             whiteness: whiteness,
             blackness: blackness,
             space: PhantomData,
@@ -100,10 +115,11 @@ impl<S, T> Hwb<S, T>
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
 impl<T> Alpha<Hwb<Srgb, T>, T>
-    where T: Float,
+where
+    T: Component + Float,
 {
     ///HWB and transparency for linear sRGB.
-    pub fn new(hue: RgbHue<T>, whiteness: T, blackness: T, alpha: T) -> Hwba<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: T) -> Hwba<Srgb, T> {
         Alpha {
             color: Hwb::new(hue, whiteness, blackness),
             alpha: alpha,
@@ -113,11 +129,12 @@ impl<T> Alpha<Hwb<Srgb, T>, T>
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
 impl<S, T> Alpha<Hwb<S, T>, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     ///Linear HWB and transparency.
-    pub fn with_wp(hue: RgbHue<T>, whiteness: T, blackness: T, alpha: T) -> Hwba<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: T) -> Hwba<S, T> {
         Alpha {
             color: Hwb::with_wp(hue, whiteness, blackness),
             alpha: alpha,
@@ -126,16 +143,17 @@ impl<S, T> Alpha<Hwb<S, T>, T>
 }
 
 impl<S, Wp, T> FromColor<Wp, T> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace<WhitePoint=Wp>,
-        Wp: WhitePoint,
+where
+    T: Component + Float,
+    S: RgbSpace<WhitePoint = Wp>,
+    Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
         let hsv: Hsv<S, T> = xyz.into_hsv();
         Self::from_hsv(hsv)
     }
 
-    fn from_hsv<Sp: RgbSpace<WhitePoint=Wp>>(hsv: Hsv<Sp, T>) -> Self {
+    fn from_hsv<Sp: RgbSpace<WhitePoint = Wp>>(hsv: Hsv<Sp, T>) -> Self {
         let hsv = Hsv::<S, T>::from_hsv(hsv);
 
         Hwb {
@@ -146,24 +164,25 @@ impl<S, Wp, T> FromColor<Wp, T> for Hwb<S, T>
         }
     }
 
-    fn from_hwb<Sp: RgbSpace<WhitePoint=Wp>>(hwb: Hwb<Sp, T>) -> Self {
+    fn from_hwb<Sp: RgbSpace<WhitePoint = Wp>>(hwb: Hwb<Sp, T>) -> Self {
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hwb.reinterpret_as()
         } else {
             Self::from_hsv(Hsv::<Sp, T>::from_hwb(hwb))
         }
     }
-
 }
 
 impl<S, T> Limited for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
         self.blackness >= T::zero() && self.blackness <= T::one() &&
         self.whiteness >= T::zero() && self.whiteness <= T::one() &&
-        (self.whiteness + self.blackness) <= T::one()
+        self.whiteness + self.blackness <= T::one()
     }
 
     fn clamp(&self) -> Hwb<S, T> {
@@ -184,8 +203,9 @@ impl<S, T> Limited for Hwb<S, T>
 }
 
 impl<S, T> Mix for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Scalar = T;
 
@@ -203,8 +223,9 @@ impl<S, T> Mix for Hwb<S, T>
 }
 
 impl<S, T> Shade for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Scalar = T;
 
@@ -219,8 +240,9 @@ impl<S, T> Shade for Hwb<S, T>
 }
 
 impl<S, T> GetHue for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Hue = RgbHue<T>;
 
@@ -234,21 +256,22 @@ impl<S, T> GetHue for Hwb<S, T>
 }
 
 impl<S, T> Hue for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
-    fn with_hue(&self, hue: RgbHue<T>) -> Hwb<S, T> {
+    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hwb<S, T> {
         Hwb {
-            hue: hue,
+            hue: hue.into(),
             whiteness: self.whiteness,
             blackness: self.blackness,
             space: PhantomData,
         }
     }
 
-    fn shift_hue(&self, amount: RgbHue<T>) -> Hwb<S, T> {
+    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hwb<S, T> {
         Hwb {
-            hue: self.hue + amount,
+            hue: self.hue + amount.into(),
             whiteness: self.whiteness,
             blackness: self.blackness,
             space: PhantomData,
@@ -257,8 +280,9 @@ impl<S, T> Hue for Hwb<S, T>
 }
 
 impl<S, T> Default for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     fn default() -> Hwb<S, T> {
         Hwb::with_wp(RgbHue::from(T::zero()), T::zero(), T::one())
@@ -266,8 +290,9 @@ impl<S, T> Default for Hwb<S, T>
 }
 
 impl<S, T> Add<Hwb<S, T>> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Output = Hwb<S, T>;
 
@@ -282,8 +307,9 @@ impl<S, T> Add<Hwb<S, T>> for Hwb<S, T>
 }
 
 impl<S, T> Add<T> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Output = Hwb<S, T>;
 
@@ -298,8 +324,9 @@ impl<S, T> Add<T> for Hwb<S, T>
 }
 
 impl<S, T> Sub<Hwb<S, T>> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Output = Hwb<S, T>;
 
@@ -314,8 +341,9 @@ impl<S, T> Sub<Hwb<S, T>> for Hwb<S, T>
 }
 
 impl<S, T> Sub<T> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     type Output = Hwb<S, T>;
 
@@ -329,9 +357,32 @@ impl<S, T> Sub<T> for Hwb<S, T>
     }
 }
 
+impl<S, T, P> AsRef<P> for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<S, T, P> AsMut<P> for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
+    }
+}
+
 impl<S, T> From<Alpha<Hwb<S, T>, T>> for Hwb<S, T>
-    where T: Float,
-        S: RgbSpace
+where
+    T: Component + Float,
+    S: RgbSpace,
 {
     fn from(color: Alpha<Hwb<S, T>, T>) -> Hwb<S, T> {
         color.color
@@ -339,9 +390,10 @@ impl<S, T> From<Alpha<Hwb<S, T>, T>> for Hwb<S, T>
 }
 
 impl<S, T> ApproxEq for Hwb<S, T>
-    where T: Float + ApproxEq,
-        T::Epsilon: Copy + Float,
-        S: RgbSpace,
+where
+    T: Component + Float + ApproxEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace,
 {
     type Epsilon = <T as ApproxEq>::Epsilon;
 
@@ -354,13 +406,21 @@ impl<S, T> ApproxEq for Hwb<S, T>
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
-    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-        let equal_shade = self.whiteness.relative_eq(&other.whiteness, epsilon, max_relative) &&
-        self.blackness.relative_eq(&other.blackness, epsilon, max_relative);
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        let equal_shade = self.whiteness
+            .relative_eq(&other.whiteness, epsilon, max_relative)
+            && self.blackness
+                .relative_eq(&other.blackness, epsilon, max_relative);
 
-        // The hue doesn't matter that much when the color is gray, and may fluctuate due to precision errors.
-        // This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::one() || other.blackness + other.whiteness >= T::one();
+        // The hue doesn't matter that much when the color is gray, and may fluctuate
+        // due to precision errors. This is a blunt tool, but works for now.
+        let is_gray = self.blackness + self.whiteness >= T::one()
+            || other.blackness + other.whiteness >= T::one();
         if is_gray {
             equal_shade
         } else {
@@ -368,13 +428,14 @@ impl<S, T> ApproxEq for Hwb<S, T>
         }
     }
 
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps) &&
-        self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps);
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps)
+            && self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps);
 
-        // The hue doesn't matter that much when the color is gray, and may fluctuate due to precision errors.
-        // This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::one() || other.blackness + other.whiteness >= T::one();
+        // The hue doesn't matter that much when the color is gray, and may fluctuate
+        // due to precision errors. This is a blunt tool, but works for now.
+        let is_gray = self.blackness + self.whiteness >= T::one()
+            || other.blackness + other.whiteness >= T::one();
         if is_gray {
             equal_shade
         } else {
@@ -386,76 +447,78 @@ impl<S, T> ApproxEq for Hwb<S, T>
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use ::{LinSrgb, Limited};
+    use {Limited, LinSrgb};
+    use encoding::Srgb;
 
     #[test]
     fn red() {
         let a = Hwb::from(LinSrgb::new(1.0, 0.0, 0.0));
-        let b = Hwb::new(0.0.into(), 0.0, 0.0);
+        let b = Hwb::new(0.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn orange() {
         let a = Hwb::from(LinSrgb::new(1.0, 0.5, 0.0));
-        let b = Hwb::new(30.0.into(), 0.0, 0.0);
+        let b = Hwb::new(30.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
         let a = Hwb::from(LinSrgb::new(0.0, 1.0, 0.0));
-        let b = Hwb::new(120.0.into(), 0.0, 0.0);
+        let b = Hwb::new(120.0, 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn blue() {
         let a = Hwb::from(LinSrgb::new(0.0, 0.0, 1.0));
-        let b = Hwb::new(240.0.into(), 0.0, 0.0);
+        let b = Hwb::new(240.0, 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn purple() {
         let a = Hwb::from(LinSrgb::new(0.5, 0.0, 1.0));
-        let b = Hwb::new(270.0.into(), 0.0, 0.0);
+        let b = Hwb::new(270.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn clamp_invalid() {
-        let expected = Hwb::new((240.0).into(), 0.0, 0.0);
+        let expected = Hwb::new(240.0, 0.0, 0.0);
 
-        let a = Hwb::new((240.0).into(), -3.0, -4.0);
+        let a = Hwb::new(240.0, -3.0, -4.0);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
-
     }
 
     #[test]
     fn clamp_none() {
-        let expected = Hwb::new((240.0).into(), 0.3, 0.7);
+        let expected = Hwb::new(240.0, 0.3, 0.7);
 
-        let a = Hwb::new((240.0).into(), 0.3, 0.7);
+        let a = Hwb::new(240.0, 0.3, 0.7);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
     #[test]
     fn clamp_over_one() {
-        let expected = Hwb::new((240.0).into(), 0.2, 0.8);
+        let expected = Hwb::new(240.0, 0.2, 0.8);
 
-        let a = Hwb::new((240.0).into(), 5.0, 20.0);
+        let a = Hwb::new(240.0, 5.0, 20.0);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
-
     }
     #[test]
     fn clamp_under_one() {
-        let expected = Hwb::new((240.0).into(), 0.3, 0.1);
+        let expected = Hwb::new(240.0, 0.3, 0.1);
 
-        let a = Hwb::new((240.0).into(), 0.3, 0.1);
+        let a = Hwb::new(240.0, 0.3, 0.1);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
+
+    raw_pixel_conversion_tests!(Hwb<Srgb>: hue, whiteness, blackness);
+    raw_pixel_conversion_fail_tests!(Hwb<Srgb>: hue, whiteness, blackness);
 }

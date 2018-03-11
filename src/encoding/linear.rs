@@ -1,18 +1,24 @@
-//! Linear RGB
+//! Linear encoding
 
 use std::marker::PhantomData;
 
 use num_traits::Float;
 use rgb::{RgbSpace, RgbStandard};
-use rgb::standards::Srgb;
-use pixel::TransferFn;
+use luma::LumaStandard;
+use encoding::TransferFn;
+use white_point::WhitePoint;
 
-/// A generic RGB standard with linear components.
+/// A generic standard with linear components.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Linear<S: RgbSpace = Srgb>(PhantomData<S>);
+pub struct Linear<S>(PhantomData<S>);
 
 impl<S: RgbSpace> RgbStandard for Linear<S> {
     type Space = S;
+    type TransferFn = LinearFn;
+}
+
+impl<Wp: WhitePoint> LumaStandard for Linear<Wp> {
+    type WhitePoint = Wp;
     type TransferFn = LinearFn;
 }
 

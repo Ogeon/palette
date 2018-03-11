@@ -4,7 +4,7 @@ use num_traits::{Float, One, Zero};
 use std::cmp::max;
 use approx::ApproxEq;
 
-use flt;
+use cast;
 
 use Mix;
 
@@ -25,10 +25,10 @@ impl<C: Mix + Clone> Gradient<C> {
     pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C> {
         let mut points: Vec<_> = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
         assert!(points.len() > 0);
-        let step_size = C::Scalar::one() / flt(max(points.len() - 1, 1) as f64);
+        let step_size = C::Scalar::one() / cast(max(points.len() - 1, 1) as f64);
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = flt::<C::Scalar, _>(i) * step_size;
+            *p = cast::<C::Scalar, _>(i) * step_size;
         }
 
         Gradient(points)
@@ -47,7 +47,9 @@ impl<C: Mix + Clone> Gradient<C> {
     ///Get a color from the gradient. The color of the closest control point
     ///will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C {
-        let &(mut min, ref min_color) = self.0.get(0).expect("a Gradient must contain at least one color");
+        let &(mut min, ref min_color) = self.0
+            .get(0)
+            .expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
         let mut min_index = 0;
 
@@ -55,7 +57,9 @@ impl<C: Mix + Clone> Gradient<C> {
             return min_color.clone();
         }
 
-        let &(mut max, ref max_color) = self.0.last().expect("a Gradient must contain at least one color");
+        let &(mut max, ref max_color) = self.0
+            .last()
+            .expect("a Gradient must contain at least one color");
         let mut max_color = max_color;
         let mut max_index = self.0.len() - 1;
 
@@ -107,8 +111,12 @@ impl<C: Mix + Clone> Gradient<C> {
 
     ///Get the limits of this gradient's domain.
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
-        let &(min, _) = self.0.get(0).expect("a Gradient must contain at least one color");
-        let &(max, _) = self.0.last().expect("a Gradient must contain at least one color");
+        let &(min, _) = self.0
+            .get(0)
+            .expect("a Gradient must contain at least one color");
+        let &(max, _) = self.0
+            .last()
+            .expect("a Gradient must contain at least one color");
         (min, max)
     }
 }
@@ -128,7 +136,7 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
 
     fn next(&mut self) -> Option<C> {
         if self.current < self.len {
-            let i = self.from + (self.diff / flt(self.len)) * flt(self.current);
+            let i = self.from + (self.diff / cast(self.len)) * cast(self.current);
             self.current += 1;
             Some(self.gradient.get(i))
         } else {
@@ -142,7 +150,6 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
 }
 
 impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> {}
-
 
 ///A slice of a Gradient that limits its domain.
 #[derive(Clone, Debug)]
@@ -176,13 +183,17 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
     pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C> {
         Slice {
             gradient: self.gradient,
-            range: self.range.constrain(&range.into())
+            range: self.range.constrain(&range.into()),
         }
     }
 
     ///Get the limits of this gradient slice's domain.
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
-        if let Range { from: Some(from), to: Some(to) } = self.range {
+        if let Range {
+            from: Some(from),
+            to: Some(to),
+        } = self.range
+        {
             (from, to)
         } else {
             let (from, to) = self.gradient.domain();
@@ -213,7 +224,6 @@ impl<T: Float> Range<T> {
                 };
             }
         }
-
 
         if let (Some(t), Some(f)) = (other.to, self.from) {
             if t <= f {
@@ -277,7 +287,8 @@ impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
     }
 }
 
-impl<T> ApproxEq for Range<T> where
+impl<T> ApproxEq for Range<T>
+where
     T: ApproxEq + Float,
     T::Epsilon: Copy,
 {
@@ -295,7 +306,12 @@ impl<T> ApproxEq for Range<T> where
         T::default_max_ulps()
     }
 
-    fn relative_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+    fn relative_eq(
+        &self,
+        other: &Range<T>,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
         let from = match (self.from, other.from) {
             (Some(s), Some(o)) => s.relative_eq(&o, epsilon, max_relative),
             (None, None) => true,
@@ -311,7 +327,7 @@ impl<T> ApproxEq for Range<T> where
         from && to
     }
 
-    fn ulps_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+    fn ulps_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         let from = match (self.from, other.from) {
             (Some(s), Some(o)) => s.ulps_eq(&o, epsilon, max_ulps),
             (None, None) => true,
@@ -345,7 +361,7 @@ impl<'a, C: Mix + Clone> MaybeSlice<'a, C> {
 
 #[cfg(test)]
 mod test {
-    use super::{Range, Gradient};
+    use super::{Gradient, Range};
     use LinSrgb;
 
     #[test]
@@ -370,12 +386,15 @@ mod test {
 
     #[test]
     fn simple_slice() {
-        let g1 = Gradient::new(vec![LinSrgb::new(1.0, 0.0, 0.0), LinSrgb::new(0.0, 0.0, 1.0)]);
+        let g1 = Gradient::new(vec![
+            LinSrgb::new(1.0, 0.0, 0.0),
+            LinSrgb::new(0.0, 0.0, 1.0),
+        ]);
         let g2 = g1.slice(..0.5);
 
         let v1: Vec<_> = g1.take(10).take(5).collect();
         let v2: Vec<_> = g2.take(5).collect();
-        for (t1, t2) in v1.iter().zip(v2.iter()){
+        for (t1, t2) in v1.iter().zip(v2.iter()) {
             assert_relative_eq!(t1, t2);
         }
     }

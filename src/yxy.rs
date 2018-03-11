@@ -1,14 +1,16 @@
 use num_traits::Float;
 
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Luma, Xyz};
-use {Limited, Mix, Shade, FromColor, IntoColor, ComponentWise};
-use white_point::{WhitePoint, D65};
+use {Component, ComponentWise, FromColor, IntoColor, Limited, Linear, Mix, Pixel, Shade};
+use white_point::{D65, WhitePoint};
+use encoding::pixel::RawPixel;
 use clamp;
 
-///CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation in `Alpha`](struct.Alpha.html#Yxya).
+/// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
+/// in `Alpha`](struct.Alpha.html#Yxya).
 pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 
 ///The CIE 1931 Yxy (xyY)  color space.
@@ -19,11 +21,12 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 ///
 ///Conversions and operations on this color space depend on the white point.
 #[derive(Debug, PartialEq)]
+#[repr(C)]
 pub struct Yxy<Wp = D65, T = f32>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
-
     ///x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
     ///Typical range is between 0 and 1
     pub x: T,
@@ -43,22 +46,32 @@ pub struct Yxy<Wp = D65, T = f32>
 }
 
 impl<Wp, T> Copy for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
-{}
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+{
+}
 
 impl<Wp, T> Clone for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
-    fn clone(&self) -> Yxy<Wp, T> { *self }
+    fn clone(&self) -> Yxy<Wp, T> {
+        *self
+    }
+}
+
+unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Yxy<Wp, T> {
+    const CHANNELS: usize = 3;
 }
 
 impl<T> Yxy<D65, T>
-    where T: Float,
+where
+    T: Component + Float,
 {
     ///CIE Yxy with white point D65.
-    pub fn new(x: T, y: T, luma: T,) -> Yxy<D65, T> {
+    pub fn new(x: T, y: T, luma: T) -> Yxy<D65, T> {
         Yxy {
             x: x,
             y: y,
@@ -69,11 +82,12 @@ impl<T> Yxy<D65, T>
 }
 
 impl<Wp, T> Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     ///CIE Yxy.
-    pub fn with_wp(x: T, y: T, luma: T,) -> Yxy<Wp, T> {
+    pub fn with_wp(x: T, y: T, luma: T) -> Yxy<Wp, T> {
         Yxy {
             x: x,
             y: y,
@@ -85,7 +99,8 @@ impl<Wp, T> Yxy<Wp, T>
 
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
 impl<T> Alpha<Yxy<D65, T>, T>
-    where T: Float,
+where
+    T: Component + Float,
 {
     ///CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: T) -> Yxya<D65, T> {
@@ -97,8 +112,9 @@ impl<T> Alpha<Yxy<D65, T>, T>
 }
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
 impl<Wp, T> Alpha<Yxy<Wp, T>, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     ///CIE Yxy and transparency.
     pub fn with_wp(x: T, y: T, luma: T, alpha: T) -> Yxya<Wp, T> {
@@ -110,11 +126,17 @@ impl<Wp, T> Alpha<Yxy<Wp, T>, T>
 }
 
 impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let mut yxy = Yxy{ x: T::zero(), y: T::zero(), luma: xyz.y, white_point: PhantomData };
+        let mut yxy = Yxy {
+            x: T::zero(),
+            y: T::zero(),
+            luma: xyz.y,
+            white_point: PhantomData,
+        };
         let sum = xyz.x + xyz.y + xyz.z;
         // If denominator is zero, NAN or INFINITE leave x and y at the default 0
         if sum.is_normal() {
@@ -129,16 +151,20 @@ impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
     }
 
     // direct conversion implemented in Luma
-    fn from_luma(luma: Luma<Wp, T>) -> Self {
-        Yxy { luma: luma.luma, ..Default::default() }
+    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
+        Yxy {
+            luma: luma.luma,
+            ..Default::default()
+        }
     }
-
 }
 
 impl<Wp, T> Limited for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
         self.x >= T::zero() && self.x <= T::one() &&
         self.y >= T::zero() && self.y <= T::one() &&
@@ -152,15 +178,16 @@ impl<Wp, T> Limited for Yxy<Wp, T>
     }
 
     fn clamp_self(&mut self) {
-        self.x= clamp(self.x, T::zero(), T::one());
+        self.x = clamp(self.x, T::zero(), T::one());
         self.y = clamp(self.y, T::zero(), T::one());
         self.luma = clamp(self.luma, T::zero(), T::one());
     }
 }
 
 impl<Wp, T> Mix for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -177,8 +204,9 @@ impl<Wp, T> Mix for Yxy<Wp, T>
 }
 
 impl<Wp, T> Shade for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -193,8 +221,9 @@ impl<Wp, T> Shade for Yxy<Wp, T>
 }
 
 impl<Wp, T> ComponentWise for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -218,14 +247,15 @@ impl<Wp, T> ComponentWise for Yxy<Wp, T>
 }
 
 impl<Wp, T> Default for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     fn default() -> Yxy<Wp, T> {
         // The default for x and y are the white point x and y ( from the default D65).
-        // Since Y (luma) is 0.0, this makes the default color black just like for other colors.
-        // The reason for not using 0 for x and y is that this outside the usual color gamut and might
-        // cause scaling issues.
+        // Since Y (luma) is 0.0, this makes the default color black just like for
+        // other colors. The reason for not using 0 for x and y is that this
+        // outside the usual color gamut and might cause scaling issues.
         Yxy {
             luma: T::zero(),
             ..Wp::get_xyz().into_yxy()
@@ -234,8 +264,9 @@ impl<Wp, T> Default for Yxy<Wp, T>
 }
 
 impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -250,8 +281,9 @@ impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Add<T> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -266,8 +298,9 @@ impl<Wp, T> Add<T> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -282,8 +315,9 @@ impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Sub<T> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -298,8 +332,9 @@ impl<Wp, T> Sub<T> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -314,8 +349,9 @@ impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Mul<T> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -330,8 +366,9 @@ impl<Wp, T> Mul<T> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -346,8 +383,9 @@ impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
 }
 
 impl<Wp, T> Div<T> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     type Output = Yxy<Wp, T>;
 
@@ -361,9 +399,32 @@ impl<Wp, T> Div<T> for Yxy<Wp, T>
     }
 }
 
+impl<Wp, T, P> AsRef<P> for Yxy<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_ref(&self) -> &P {
+        self.as_raw()
+    }
+}
+
+impl<Wp, T, P> AsMut<P> for Yxy<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    P: RawPixel<T> + ?Sized,
+{
+    fn as_mut(&mut self) -> &mut P {
+        self.as_raw_mut()
+    }
+}
+
 impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
-    where T: Float,
-        Wp: WhitePoint
+where
+    T: Component + Float,
+    Wp: WhitePoint,
 {
     fn from(color: Alpha<Yxy<Wp, T>, T>) -> Yxy<Wp, T> {
         color.color
@@ -374,12 +435,12 @@ impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
 mod test {
     use super::Yxy;
     use LinSrgb;
-    use Luma;
+    use LinLuma;
     use white_point::D65;
 
     #[test]
     fn luma() {
-        let a = Yxy::from(Luma::new(0.5));
+        let a = Yxy::from(LinLuma::new(0.5));
         let b = Yxy::new(0.312727, 0.329023, 0.5);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
@@ -418,4 +479,7 @@ mod test {
             unlimited {}
         }
     }
+
+    raw_pixel_conversion_tests!(Yxy<D65>: x, y, luma);
+    raw_pixel_conversion_fail_tests!(Yxy<D65>: x, y, luma);
 }

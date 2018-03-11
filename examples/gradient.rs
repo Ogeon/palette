@@ -1,46 +1,53 @@
-extern crate palette;
 extern crate image;
+extern crate palette;
 
-use palette::{Gradient, LinSrgb, Srgb, Lch};
+use palette::{Gradient, Lch, LinSrgb, Pixel, Srgb};
 
-use image::{RgbImage, GenericImage};
+use image::{GenericImage, RgbImage};
 
 fn main() {
     //A gradient of evenly spaced colors
     let grad1 = Gradient::new(vec![
         LinSrgb::new(1.0, 0.1, 0.1),
         LinSrgb::new(0.1, 0.1, 1.0),
-        LinSrgb::new(0.1, 1.0, 0.1)
+        LinSrgb::new(0.1, 1.0, 0.1),
     ]);
 
     //The same colors as in grad1, but with the blue point shifted down
     let grad2 = Gradient::with_domain(vec![
         (0.0, LinSrgb::new(1.0, 0.1, 0.1)),
         (0.25, LinSrgb::new(0.1, 0.1, 1.0)),
-        (1.0, LinSrgb::new(0.1, 1.0, 0.1))
+        (1.0, LinSrgb::new(0.1, 1.0, 0.1)),
     ]);
 
-    //The same colors and offsets as in grad1, but in a color space where the hue is a component
+    //The same colors and offsets as in grad1, but in a color space where the hue
+    // is a component
     let grad3 = Gradient::new(vec![
         Lch::from(LinSrgb::new(1.0, 0.1, 0.1)),
         Lch::from(LinSrgb::new(0.1, 0.1, 1.0)),
-        Lch::from(LinSrgb::new(0.1, 1.0, 0.1))
+        Lch::from(LinSrgb::new(0.1, 1.0, 0.1)),
     ]);
 
-    //The same colors and and color space as in grad3, but with the blue point shifted down
+    //The same colors and and color space as in grad3, but with the blue point
+    // shifted down
     let grad4 = Gradient::with_domain(vec![
         (0.0, Lch::from(LinSrgb::new(1.0, 0.1, 0.1))),
         (0.25, Lch::from(LinSrgb::new(0.1, 0.1, 1.0))),
-        (1.0, Lch::from(LinSrgb::new(0.1, 1.0, 0.1)))
+        (1.0, Lch::from(LinSrgb::new(0.1, 1.0, 0.1))),
     ]);
 
     let mut image = RgbImage::new(256, 128);
 
-    for (i, ((c1, c2), (c3, c4))) in grad1.take(256).zip(grad2.take(256)).zip(grad3.take(256).zip(grad4.take(256))).enumerate() {
-        let c1 = Srgb::linear_to_pixel(c1);
-        let c2 = Srgb::linear_to_pixel(c2);
-        let c3 = Srgb::linear_to_pixel(c3);
-        let c4 = Srgb::linear_to_pixel(c4);
+    for (i, ((c1, c2), (c3, c4))) in grad1
+        .take(256)
+        .zip(grad2.take(256))
+        .zip(grad3.take(256).zip(grad4.take(256)))
+        .enumerate()
+    {
+        let c1 = Srgb::from_linear(c1).into_format().into_raw();
+        let c2 = Srgb::from_linear(c2).into_format().into_raw();
+        let c3 = Srgb::from_linear(c3.into()).into_format().into_raw();
+        let c4 = Srgb::from_linear(c4.into()).into_format().into_raw();
 
         for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
             pixel.data = c1

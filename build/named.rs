@@ -3,12 +3,13 @@ use std::fs::File;
 #[cfg(feature = "named")]
 pub fn build() {
     use std::path::Path;
-    use std::io::{Write, BufRead, BufReader};
+    use std::io::{BufRead, BufReader, Write};
 
     let out_dir = ::std::env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("named.rs");
 
-    let reader = BufReader::new(File::open("build/svg_colors.txt").expect("could not open svg_colors.txt"));
+    let reader =
+        BufReader::new(File::open("build/svg_colors.txt").expect("could not open svg_colors.txt"));
     let mut writer = File::create(dest_path).expect("couldn't create named.rs");
     let mut entries = vec![];
 
@@ -16,13 +17,22 @@ pub fn build() {
         let line = line.unwrap();
         let mut parts = line.split('\t');
         let name = parts.next().expect("couldn't get the color name");
-        let mut rgb = parts.next().expect(&format!("couldn't get color for {}", name)).split(", ");
-        let red: u8 = rgb.next().and_then(|r| r.trim().parse().ok()).expect(&format!("couldn't get red for {}", name));
-        let green: u8 = rgb.next().and_then(|r| r.trim().parse().ok()).expect(&format!("couldn't get green for {}", name));
-        let blue: u8 = rgb.next().and_then(|r| r.trim().parse().ok()).expect(&format!("couldn't get blue for {}", name));
+        let mut rgb = parts
+            .next()
+            .expect(&format!("couldn't get color for {}", name))
+            .split(", ");
+        let red: u8 = rgb.next()
+            .and_then(|r| r.trim().parse().ok())
+            .expect(&format!("couldn't get red for {}", name));
+        let green: u8 = rgb.next()
+            .and_then(|r| r.trim().parse().ok())
+            .expect(&format!("couldn't get green for {}", name));
+        let blue: u8 = rgb.next()
+            .and_then(|r| r.trim().parse().ok())
+            .expect(&format!("couldn't get blue for {}", name));
 
         writeln!(writer, "\n///<div style=\"display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: {0};\"></div>", name).unwrap();
-        writeln!(writer, "pub const {}: (u8, u8, u8) = ({}, {}, {});", name.to_uppercase(), red, green, blue).unwrap();
+        writeln!(writer, "pub const {}: ::rgb::Srgb<u8> = ::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::std::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
 
         entries.push((name.to_owned(), name.to_uppercase()));
     }
@@ -34,7 +44,10 @@ pub fn build() {
 fn gen_from_str(writer: &mut File, entries: &[(String, String)]) {
     use std::io::Write;
 
-    write!(writer, "static COLORS: ::phf::Map<&'static str, (u8, u8, u8)> = ").unwrap();
+    write!(
+        writer,
+        "static COLORS: ::phf::Map<&'static str, ::rgb::Srgb<u8>> = "
+    ).unwrap();
     let mut map = ::phf_codegen::Map::new();
     for &(ref key, ref value) in entries {
         map.entry(&**key, value);
@@ -42,9 +55,6 @@ fn gen_from_str(writer: &mut File, entries: &[(String, String)]) {
     map.build(writer).unwrap();
     writeln!(writer, ";").unwrap();
 }
-
-
-
 
 #[cfg(not(feature = "named"))]
 pub fn build() {}

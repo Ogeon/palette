@@ -36,9 +36,11 @@
 //!which may result in loss of some color information in some cases. One such
 //!case is that a completely transparent resultant color will become black.
 
+use num_traits::Float;
+
 use ComponentWise;
 
-pub use self::equations::{Equations, Equation, Parameters, Parameter};
+pub use self::equations::{Equation, Equations, Parameter, Parameters};
 pub use self::pre_alpha::PreAlpha;
 pub use self::blend::Blend;
 
@@ -50,16 +52,29 @@ mod blend;
 mod test;
 
 ///A trait for custom blend functions.
-pub trait BlendFunction<C: Blend<Color=C> + ComponentWise> {
+pub trait BlendFunction<C: Blend<Color = C> + ComponentWise>
+where
+    C::Scalar: Float,
+{
     ///Apply this blend function to a pair of colors.
-    fn apply_to(self, source: PreAlpha<C, C::Scalar>, destination: PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>;
+    fn apply_to(
+        self,
+        source: PreAlpha<C, C::Scalar>,
+        destination: PreAlpha<C, C::Scalar>,
+    ) -> PreAlpha<C, C::Scalar>;
 }
 
-impl<C, F> BlendFunction<C> for F where
-    C: Blend<Color=C> + ComponentWise,
+impl<C, F> BlendFunction<C> for F
+where
+    C: Blend<Color = C> + ComponentWise,
+    C::Scalar: Float,
     F: FnOnce(PreAlpha<C, C::Scalar>, PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>,
 {
-    fn apply_to(self, source: PreAlpha<C, C::Scalar>, destination: PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar> {
+    fn apply_to(
+        self,
+        source: PreAlpha<C, C::Scalar>,
+        destination: PreAlpha<C, C::Scalar>,
+    ) -> PreAlpha<C, C::Scalar> {
         (self)(source, destination)
     }
 }
