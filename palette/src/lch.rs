@@ -19,7 +19,11 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_white_point = "Wp"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Lab, Lch)]
 #[repr(C)]
 pub struct Lch<Wp = D65, T = f32>
 where
@@ -126,27 +130,29 @@ where
     }
 }
 
-impl<Wp, T> FromColor<Wp, T> for Lch<Wp, T>
+impl<Wp, T> From<Xyz<Wp, T>> for Lch<Wp, T>
 where
     T: Component + Float,
     Wp: WhitePoint,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let lab: Lab<Wp, T> = xyz.into_lab();
+    fn from(color: Xyz<Wp, T>) -> Self {
+        let lab: Lab<Wp, T> = color.into_lab();
         Self::from_lab(lab)
     }
+}
 
-    fn from_lab(lab: Lab<Wp, T>) -> Self {
+impl<Wp, T> From<Lab<Wp, T>> for Lch<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+{
+    fn from(color: Lab<Wp, T>) -> Self {
         Lch {
-            l: lab.l,
-            chroma: (lab.a * lab.a + lab.b * lab.b).sqrt(),
-            hue: lab.get_hue().unwrap_or(LabHue::from(T::zero())),
+            l: color.l,
+            chroma: (color.a * color.a + color.b * color.b).sqrt(),
+            hue: color.get_hue().unwrap_or(LabHue::from(T::zero())),
             white_point: PhantomData,
         }
-    }
-
-    fn from_lch(lch: Lch<Wp, T>) -> Self {
-        lch
     }
 }
 
@@ -361,16 +367,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<Wp, T> From<Alpha<Lch<Wp, T>, T>> for Lch<Wp, T>
-where
-    T: Component + Float,
-    Wp: WhitePoint,
-{
-    fn from(color: Alpha<Lch<Wp, T>, T>) -> Lch<Wp, T> {
-        color.color
     }
 }
 

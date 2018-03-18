@@ -1,4 +1,5 @@
 [workspace]
 members = [
     "palette",
+    "palette_derive"
 ]

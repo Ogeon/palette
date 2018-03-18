@@ -21,6 +21,7 @@ named = []
 strict = []
 
 [dependencies]
+palette_derive = {version = "0.3.0", path = "../palette_derive"}
 num-traits = "0.2"
 approx = "0.1"
 

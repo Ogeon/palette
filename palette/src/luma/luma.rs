@@ -26,7 +26,11 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 ///perceived to be. It's basically the `Y` component of [CIE
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_white_point = "S::WhitePoint"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Yxy, Luma = "from_linear")]
 #[repr(C)]
 pub struct Luma<S = Srgb, T = f32>
 where
@@ -180,28 +184,29 @@ where
     }
 }
 
-impl<S, Wp, T> FromColor<Wp, T> for Luma<S, T>
+impl<S, T> From<Xyz<S::WhitePoint, T>> for Luma<S, T>
 where
-    S: LumaStandard<WhitePoint = Wp>,
+    S: LumaStandard,
     T: Component + Float,
-    Wp: WhitePoint,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
-            luma: xyz.y,
+            luma: color.y,
             standard: PhantomData,
         })
     }
+}
 
-    fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
+impl<S, T> From<Yxy<S::WhitePoint, T>> for Luma<S, T>
+where
+    S: LumaStandard,
+    T: Component + Float,
+{
+    fn from(color: Yxy<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
-            luma: yxy.luma,
+            luma: color.luma,
             standard: PhantomData,
         })
-    }
-
-    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
-        Self::from_linear(luma)
     }
 }
 
@@ -494,16 +499,6 @@ where
     /// ```
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<S, T> From<Alpha<Luma<S, T>, T>> for Luma<S, T>
-where
-    T: Component,
-    S: LumaStandard,
-{
-    fn from(color: Alpha<Luma<S, T>, T>) -> Luma<S, T> {
-        color.color
     }
 }
 

@@ -64,12 +64,15 @@
 //! c1 = c1 * 0.5; //Scale both the color and the alpha
 //! ```
 
-#![doc(html_root_url = "http://ogeon.github.io/docs/palette/master/")]
+#![doc(html_root_url = "https://docs.rs/palette/0.3.0/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
 #[cfg_attr(test, macro_use)]
 extern crate approx;
+
+#[macro_use]
+extern crate palette_derive;
 
 extern crate num_traits;
 

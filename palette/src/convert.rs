@@ -1,19 +1,159 @@
 use num_traits::Float;
 
-use {Alpha, Color, Component, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+use {Component, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
-use rgb::{Rgb, RgbSpace, RgbStandard};
-use luma::{Luma, LumaStandard};
+use rgb::{Rgb, RgbSpace};
+use luma::Luma;
 use encoding::Linear;
 
-///FromColor provides conversion between the colors.
+/// FromColor provides conversion between the colors.
 ///
-///It requires from_xyz and derives conversion to other colors as a default from this.
-///These defaults must be overridden when direct conversion exists between colors.
-///For example, Luma has direct conversion to LinRgb. So from_rgb conversion for Luma and
-///from_luma for LinRgb is implemented directly. The from for the same color must override
-///the default. For example, from_rgb for LinRgb will convert via Xyz which needs to be overridden
-///with self to avoid the unnecessary converison.
+/// It requires from_xyz, when implemented manually, and derives conversion to other colors as a
+/// default from this. These defaults must be overridden when direct conversion exists between
+/// colors. For example, Luma has direct conversion to LinRgb. So from_rgb conversion for Luma and
+/// from_luma for LinRgb is implemented directly. The from for the same color must override
+/// the default. For example, from_rgb for LinRgb will convert via Xyz which needs to be overridden
+/// with self to avoid the unnecessary converison.
+///
+/// # Deriving
+///
+/// `FromColor` can be derived in a mostly automatic way. The strength of deriving it is that it
+/// will also derive `From` implementations from all of the `palette` color types. The minimum
+/// requirement is to implement `From<Xyz>`, but it can also be customized to make use of generics
+/// and have other manual implementations.
+///
+/// ## Attributes
+///
+///  * `#[palette_manual_from(Luma, Rgb = "from_rgb_internal")]`: Specifies the color types that
+/// the the custom color type already has `From` implementations for. Adding `= "function_name"`
+/// tells it to use that function instead of a `From` implementation. The default, when omitted,
+/// is to require `From<Xyz>` to be implemented.
+///
+///  * `#[palette_white_point = "some::white_point::Type"]`: Sets the white point type that should
+/// be used when deriving. The default is `D65`, but it may be any other type, including
+/// type parameters.
+///
+///  * `#[palette_component = "some::component::Type"]`: Sets the color component type that should
+/// be used when deriving. The default is `f32`, but it may be any other type, including
+/// type parameters.
+///
+///  * `#[palette_rgb_space = "some::rgb_space::Type"]`: Sets the RGB space type that should
+/// be used when deriving. The default is a best effort to convert between, so sometimes it has to
+/// be set to a specific type. This does also accept type parameters.
+///
+///
+/// ## Examples
+///
+/// Minimum requirements implementation:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+///
+/// use palette::{Xyz, Srgb};
+///
+/// /// A custom version of Xyz that stores integer values from 0 to 100.
+/// #[derive(PartialEq, Debug, FromColor)]
+/// struct Xyz100 {
+///     x: u8,
+///     y: u8,
+///     z: u8,
+/// }
+///
+/// // We have to at least implement conversion from Xyz if we don't
+/// // specify anything else, using the `palette_manual_from` attribute.
+/// impl From<Xyz> for Xyz100 {
+///     fn from(color: Xyz) -> Self {
+///         let scaled = color * 100.0;
+///         Xyz100 {
+///             x: scaled.x.max(0.0).min(100.0) as u8,
+///             y: scaled.y.max(0.0).min(100.0) as u8,
+///             z: scaled.z.max(0.0).min(100.0) as u8,
+///         }
+///     }
+/// }
+///
+///
+/// fn main() {
+///     // Start with an sRGB color and convert it from u8 to f32,
+///     // which is the default component type.
+///     let rgb = Srgb::new(100u8, 23, 59).into_format();
+///
+///     // Convert the rgb color to our own format.
+///     let xyz = Xyz100::from(rgb);
+///
+///     assert_eq!(xyz, Xyz100 {x: 6, y: 3, z: 4});
+/// }
+/// ```
+///
+/// With generic components:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+/// extern crate num_traits;
+/// #[macro_use]
+/// extern crate approx;
+///
+/// use palette::{Srgb, Hsv, Pixel, Component, FromColor};
+/// use palette::rgb::{Rgb, RgbSpace};
+/// use palette::encoding::Linear;
+/// use palette::white_point::D65;
+/// use num_traits::Float;
+///
+/// /// sRGB, but with a reversed memory layout.
+/// #[derive(PartialEq, Debug, FromColor)]
+/// #[palette_manual_from(Rgb = "from_rgb_internal")]
+/// #[palette_component = "T"]
+/// #[repr(C)] // Makes sure the memory layout is as we want it.
+/// struct Bgr<T> {
+///     blue: T,
+///     green: T,
+///     red: T,
+/// }
+///
+/// // Careful with this one! It requires `#[repr(C)]`.
+/// unsafe impl<T> Pixel<T> for Bgr<T> {
+///     const CHANNELS: usize = 3;
+/// }
+///
+/// // Rgb is a bit more complex than other colors, so we are
+/// // implementing a private conversion function and letting it
+/// // derive `From` automatically. It will take a round trip
+/// // through linear format, but that's fine in this case.
+/// impl<T: Component + Float> Bgr<T> {
+///
+///     // It converts from any linear Rgb type that has the D65
+///     // white point, which is the default if we don't specify
+///     // anything else with the `palette_white_point` attribute.
+///     fn from_rgb_internal<S>(color: Rgb<Linear<S>, T>) -> Self
+///     where
+///         S: RgbSpace<WhitePoint = D65>,
+///     {
+///         let srgb = Srgb::from_rgb(color);
+///
+///         Bgr {
+///             blue: srgb.blue,
+///             green: srgb.green,
+///             red: srgb.red
+///         }
+///     }
+/// }
+///
+/// fn main() {
+///     let mut buffer = vec![0.0f64, 0.0, 0.0, 0.0, 0.0, 0.0];
+///     {
+///         let bgr_buffer = Bgr::from_raw_slice_mut(&mut buffer);
+///         bgr_buffer[1] = Hsv::new(90.0, 1.0, 0.5).into();
+///     }
+///
+///     assert_relative_eq!(buffer[3], 0.0);
+///     assert_relative_eq!(buffer[4], 0.7353569830524495);
+///     assert_relative_eq!(buffer[5], 0.5370987304831942);
+/// }
+/// ```
 pub trait FromColor<Wp = D65, T = f32>: Sized
 where
     T: Component + Float,
@@ -206,172 +346,6 @@ macro_rules! impl_into_color_rgb {
     }
 }
 
-macro_rules! impl_from_trait {
-    (<$s:ident, $t:ident>($self_ty: ty, $into_fn: ident) => {$($other: ty),+}) => (
-        impl<$s, $t> From<Color<$s, $t>> for $self_ty
-            where $t: Component + Float,
-                $s: RgbSpace
-        {
-            fn from(color: Color<$s, $t>) -> $self_ty {
-                match color {
-                    Color::Luma(c) => c.$into_fn(),
-                    Color::Rgb(c) => c.$into_fn(),
-                    Color::Xyz(c) => c.$into_fn(),
-                    Color::Yxy(c) => c.$into_fn(),
-                    Color::Lab(c) => c.$into_fn(),
-                    Color::Lch(c) => c.$into_fn(),
-                    Color::Hsv(c) => c.$into_fn(),
-                    Color::Hsl(c) => c.$into_fn(),
-                    Color::Hwb(c) => c.$into_fn(),
-                }
-            }
-        }
-
-        impl<$s, $t> From<Color<$s, $t>> for Alpha<$self_ty,$t>
-            where $t: Component + Float,
-                $s: RgbSpace
-        {
-            fn from(color: Color<$s, $t>) -> Alpha<$self_ty,$t> {
-                Alpha {
-                    color: color.into(),
-                    alpha: $t::one(),
-                }
-            }
-        }
-
-        impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for $self_ty
-            where $t: Component + Float,
-                $s: RgbSpace
-        {
-            fn from(color: Alpha<Color<$s, $t>, $t>) -> $self_ty {
-                color.color.into()
-            }
-        }
-
-        impl<$s, $t> From<Alpha<Color<$s, $t>, $t>> for Alpha<$self_ty,$t>
-            where $t: Component + Float,
-                $s: RgbSpace
-        {
-            fn from(color: Alpha<Color<$s, $t>, $t>) -> Alpha<$self_ty,$t> {
-                Alpha {
-                    color: color.color.into(),
-                    alpha: color.alpha,
-                }
-            }
-        }
-
-        $(
-            impl<$s, $t> From<$other> for $self_ty
-                where $t: Component + Float,
-                    $s: RgbSpace
-            {
-                fn from(other: $other) -> $self_ty {
-                    other.$into_fn()
-                }
-            }
-
-            impl<$s, $t> From<Alpha<$other, $t>> for Alpha<$self_ty, $t>
-                where $t: Component + Float,
-                    $s: RgbSpace
-            {
-                fn from(other: Alpha<$other, $t>) -> Alpha<$self_ty, $t> {
-                    Alpha {
-                        color: other.color.$into_fn(),
-                        alpha: other.alpha,
-                    }
-                }
-            }
-
-            impl<$s, $t> From<$other> for Alpha<$self_ty, $t>
-                where $t: Component + Float,
-                    $s: RgbSpace
-            {
-                fn from(color: $other) -> Alpha<$self_ty, $t> {
-                    Alpha {
-                        color: color.$into_fn(),
-                        alpha: $t::one(),
-                    }
-                }
-            }
-
-            impl<$s, $t> From<Alpha<$other, $t>> for $self_ty
-                where $t: Component + Float,
-                    $s: RgbSpace
-            {
-                fn from(other: Alpha<$other, $t>) -> $self_ty {
-                    other.color.$into_fn()
-                }
-            }
-
-        )+
-    )
-}
-
-macro_rules! impl_from_trait_other {
-    (<$t:ident, $($s:ident: $s_ty:ident $(<$($s_lhs:ident = $s_rhs:path),+>)*),+> ($self_ty: ty, |$into_ident:ident| $into_expr:expr) => {$($other: ty),+}) => (
-        impl_from_trait_other!(@tmp ($t, $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*),+) ($self_ty, |$into_ident| $into_expr) => {$($other),+});
-    );
-
-
-    (<$t:ident, $($s:ident: $s_ty:ident $(<$($s_lhs:ident = $s_rhs:path),+>)*),+>($self_ty: ty, $into_fn: ident) => {$($other: ty),+}) => (
-        impl_from_trait_other!(@tmp ($t, $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*),+)($self_ty, |a| a.$into_fn()) => {$($other),+});
-    );
-
-    (@tmp $types:tt ($self_ty: ty, |$into_ident:ident| $into_expr:expr) => {$($other: ty),+}) => (
-        $(
-            impl_from_trait_other!(@impl $types ($self_ty, |$into_ident| $into_expr) => $other);
-        )+
-    );
-
-    (@impl ($t:ident, $($s:ident: $s_ty:ident $(<$($s_lhs:ident = $s_rhs:path),+>)*),+) ($self_ty: ty, |$into_ident:ident| $into_expr:expr) => $other: ty) => (
-        impl<$($s,)+ $t> From<$other> for $self_ty
-            where $t: Component + Float,
-                $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*,)+
-        {
-            fn from(other: $other) -> $self_ty {
-                let $into_ident = other;
-                $into_expr
-            }
-        }
-
-        impl<$($s,)+ $t> From<Alpha<$other, $t>> for Alpha<$self_ty, $t>
-            where $t: Component + Float,
-                $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*,)+
-        {
-            fn from(other: Alpha<$other, $t>) -> Alpha<$self_ty, $t> {
-                let $into_ident = other.color;
-                Alpha {
-                    color: $into_expr,
-                    alpha: other.alpha,
-                }
-            }
-        }
-
-        impl<$($s,)+ $t> From<$other> for Alpha<$self_ty, $t>
-            where $t: Component + Float,
-                $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*,)+
-        {
-            fn from(color: $other) -> Alpha<$self_ty, $t> {
-                let $into_ident = color;
-                Alpha {
-                    color: $into_expr,
-                    alpha: $t::one(),
-                }
-            }
-        }
-
-        impl<$($s,)+ $t> From<Alpha<$other, $t>> for $self_ty
-            where $t: Component + Float,
-                $($s: $s_ty$(<$($s_lhs = $s_rhs),+>)*,)+
-        {
-            fn from(other: Alpha<$other, $t>) -> $self_ty {
-                let $into_ident = other.color;
-                $into_expr
-            }
-        }
-    );
-}
-
 impl_into_color!(Xyz, from_xyz);
 impl_into_color!(Yxy, from_yxy);
 impl_into_color!(Lab, from_lab);
@@ -379,39 +353,3 @@ impl_into_color!(Lch, from_lch);
 impl_into_color_rgb!(Hsl, from_hsl);
 impl_into_color_rgb!(Hsv, from_hsv);
 impl_into_color_rgb!(Hwb, from_hwb);
-
-impl_from_trait!(<S, T> (Xyz<S::WhitePoint, T>, into_xyz) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Yxy<S::WhitePoint, T>, into_yxy) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Lab<S::WhitePoint, T>, into_lab) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Lch<S::WhitePoint, T>, into_lch) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-
-impl_from_trait!(<S, T> (Luma<Linear<S::WhitePoint>, T>, into_luma) => {Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Rgb<Linear<S>, T>, into_rgb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Hsl<S, T>, into_hsl) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsv<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Hsv<S, T>, into_hsv) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hwb<S, T>});
-impl_from_trait!(<S, T> (Hwb<S, T>, into_hwb) => {Xyz<S::WhitePoint, T>, Yxy<S::WhitePoint, T>, Lab<S::WhitePoint, T>, Lch<S::WhitePoint, T>, Hsl<S, T>, Hsv<S, T>});
-
-impl_from_trait_other!(<T, Wp: WhitePoint> (Xyz<Wp, T>, into_xyz) => {Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>});
-impl_from_trait_other!(<T, Wp: WhitePoint> (Yxy<Wp, T>, into_yxy) => {Xyz<Wp, T>, Lab<Wp, T>, Lch<Wp, T>});
-impl_from_trait_other!(<T, Wp: WhitePoint> (Lab<Wp, T>, into_lab) => {Xyz<Wp, T>, Yxy<Wp, T>, Lch<Wp, T>});
-impl_from_trait_other!(<T, Wp: WhitePoint> (Lch<Wp, T>, into_lch) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>});
-
-impl_from_trait_other!(<T, S: RgbStandard> (Xyz<<S::Space as RgbSpace>::WhitePoint, T>, into_xyz) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Yxy<<S::Space as RgbSpace>::WhitePoint, T>, into_yxy) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Lab<<S::Space as RgbSpace>::WhitePoint, T>, into_lab) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Lch<<S::Space as RgbSpace>::WhitePoint, T>, into_lch) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Hsl<S::Space, T>, into_hsl) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Hsv<S::Space, T>, into_hsv) => {Rgb<S, T>});
-impl_from_trait_other!(<T, S: RgbStandard> (Hwb<S::Space, T>, into_hwb) => {Rgb<S, T>});
-impl_from_trait_other!(<T, LumaS: LumaStandard, RgbS: RgbStandard<Space=Sp>, Sp: RgbSpace<WhitePoint=LumaS::WhitePoint> > (Luma<LumaS, T>, |rgb| Luma::from_linear(rgb.into_luma())) => {Rgb<RgbS, T>});
-
-impl_from_trait_other!(<T, S: LumaStandard> (Xyz<S::WhitePoint, T>, into_xyz) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard> (Yxy<S::WhitePoint, T>, into_yxy) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard> (Lab<S::WhitePoint, T>, into_lab) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard> (Lch<S::WhitePoint, T>, into_lch) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard, Sp: RgbSpace<WhitePoint=S::WhitePoint> > (Hsl<Sp, T>, into_hsl) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard, Sp: RgbSpace<WhitePoint=S::WhitePoint> > (Hsv<Sp, T>, into_hsv) => {Luma<S, T>});
-impl_from_trait_other!(<T, S: LumaStandard, Sp: RgbSpace<WhitePoint=S::WhitePoint> > (Hwb<Sp, T>, into_hwb) => {Luma<S, T>});
-impl_from_trait_other!(<T, LumaS: LumaStandard, RgbS: RgbStandard<Space=Sp>, Sp: RgbSpace<WhitePoint=LumaS::WhitePoint> > (Rgb<RgbS, T>, |luma| Rgb::from_linear(luma.into_rgb())) => {Luma<LumaS, T>});
-
-impl_from_trait_other!(<T, Wp: WhitePoint> (Luma<Linear<Wp>, T>, into_luma) => {Xyz<Wp, T>, Yxy<Wp, T>, Lab<Wp, T>, Lch<Wp, T>});

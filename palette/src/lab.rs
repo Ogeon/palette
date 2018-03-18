@@ -4,7 +4,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, LabHue, Lch, Xyz};
-use {Component, ComponentWise, FromColor, GetHue, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
 use {cast, clamp};
 use white_point::{D65, WhitePoint};
 use encoding::pixel::RawPixel;
@@ -24,7 +24,11 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///
 ///The parameters of L\*a\*b\* are quite different, compared to many other color
 ///spaces, so manipulating them manually may be unintuitive.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_white_point = "Wp"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Lab, Lch)]
 #[repr(C)]
 pub struct Lab<Wp = D65, T = f32>
 where
@@ -127,18 +131,18 @@ where
     }
 }
 
-impl<Wp, T> FromColor<Wp, T> for Lab<Wp, T>
+impl<Wp, T> From<Xyz<Wp, T>> for Lab<Wp, T>
 where
     T: Component + Float,
     Wp: WhitePoint,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+    fn from(color: Xyz<Wp, T>) -> Self {
         let Xyz {
             mut x,
             mut y,
             mut z,
             ..
-        } = xyz / Wp::get_xyz();
+        } = color / Wp::get_xyz();
 
         fn convert<T: Component + Float>(c: T) -> T {
             let epsilon: T = (cast::<T, _>(6.0 / 29.0)).powi(3);
@@ -162,16 +166,18 @@ where
             white_point: PhantomData,
         }
     }
+}
 
-    fn from_lab(lab: Lab<Wp, T>) -> Self {
-        lab
-    }
-
-    fn from_lch(lch: Lch<Wp, T>) -> Self {
+impl<Wp, T> From<Lch<Wp, T>> for Lab<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+{
+    fn from(color: Lch<Wp, T>) -> Self {
         Lab {
-            l: lch.l,
-            a: lch.chroma.max(T::zero()) * lch.hue.to_radians().cos(),
-            b: lch.chroma.max(T::zero()) * lch.hue.to_radians().sin(),
+            l: color.l,
+            a: color.chroma.max(T::zero()) * color.hue.to_radians().cos(),
+            b: color.chroma.max(T::zero()) * color.hue.to_radians().sin(),
             white_point: PhantomData,
         }
     }
@@ -445,16 +451,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<Wp, T> From<Alpha<Lab<Wp, T>, T>> for Lab<Wp, T>
-where
-    T: Component + Float,
-    Wp: WhitePoint,
-{
-    fn from(color: Alpha<Lab<Wp, T>, T>) -> Lab<Wp, T> {
-        color.color
     }
 }
 
