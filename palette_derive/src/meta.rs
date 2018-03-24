@@ -2,11 +2,11 @@ use syn::{Attribute, Ident, LitStr};
 use syn::token::{Comma, Eq};
 use syn::punctuated::Punctuated;
 use syn::synom::Synom;
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 
-pub fn parse_attributes<P: MetaParser>(attributes: Vec<Attribute>) -> P::Output {
-    let mut result = P::Output::default();
+pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
+    let mut result = T::default();
 
     for attribute in attributes {
         let attribute_name = attribute.path.segments.first().unwrap().into_value().ident;
@@ -32,7 +32,7 @@ pub fn parse_attributes<P: MetaParser>(attributes: Vec<Attribute>) -> P::Output 
                 );
             }
         } else {
-            P::parse_attribute(&mut result, attribute_name, attribute.tts);
+            result.parse_attribute(attribute_name, attribute.tts);
         }
     }
 
@@ -106,16 +106,34 @@ pub fn parse_equal_attribute<T: Synom>(attribute_name: &Ident, tts: TokenStream)
     }
 }
 
-pub trait MetaParser {
-    type Output: MetaOutput;
-
-    fn parse_attribute(
-        output: &mut Self::Output,
-        attribute_name: Ident,
-        attribute_tts: TokenStream,
-    );
+#[derive(PartialEq)]
+pub struct KeyValuePair {
+    pub key: Ident,
+    pub value: Option<Ident>,
 }
 
-pub trait MetaOutput: Default {
+impl ::syn::synom::Synom for KeyValuePair {
+    named!(parse -> Self, do_parse!(
+        key: syn!(Ident) >>
+        value: option!(do_parse!(
+            _eq: syn!(Eq) >>
+            value: syn!(LitStr) >>
+            (Ident::new(&value.value(), Span::call_site()))
+        )) >>
+        (KeyValuePair {
+            key,
+            value
+        })
+    ));
+}
+
+impl PartialEq<str> for KeyValuePair {
+    fn eq(&self, other: &str) -> bool {
+        self.key == other
+    }
+}
+
+pub trait MetaParser: Default {
     fn internal(&mut self);
+    fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream);
 }

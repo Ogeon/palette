@@ -334,6 +334,13 @@ macro_rules! make_color {
             fn clone(&self) -> Color<S, T> { *self }
         }
 
+        impl<S, T> Default for Color<S, T>
+            where S: RgbSpace,
+                T: Float + Component,
+        {
+            fn default() -> Color<S, T> { Color::Rgb(Default::default()) }
+        }
+
         impl<T: Float + Component> Color<encoding::Srgb, T> {
             $(
                 $(

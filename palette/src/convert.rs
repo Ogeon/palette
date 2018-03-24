@@ -6,19 +6,19 @@ use rgb::{Rgb, RgbSpace};
 use luma::Luma;
 use encoding::Linear;
 
-/// FromColor provides conversion between the colors.
+/// FromColor provides conversion from the colors.
 ///
 /// It requires from_xyz, when implemented manually, and derives conversion to other colors as a
 /// default from this. These defaults must be overridden when direct conversion exists between
 /// colors. For example, Luma has direct conversion to LinRgb. So from_rgb conversion for Luma and
 /// from_luma for LinRgb is implemented directly. The from for the same color must override
 /// the default. For example, from_rgb for LinRgb will convert via Xyz which needs to be overridden
-/// with self to avoid the unnecessary converison.
+/// with self to avoid the unnecessary conversion.
 ///
 /// # Deriving
 ///
 /// `FromColor` can be derived in a mostly automatic way. The strength of deriving it is that it
-/// will also derive `From` implementations from all of the `palette` color types. The minimum
+/// will also derive `From` implementations for all of the `palette` color types. The minimum
 /// requirement is to implement `From<Xyz>`, but it can also be customized to make use of generics
 /// and have other manual implementations.
 ///
@@ -38,9 +38,8 @@ use encoding::Linear;
 /// type parameters.
 ///
 ///  * `#[palette_rgb_space = "some::rgb_space::Type"]`: Sets the RGB space type that should
-/// be used when deriving. The default is a best effort to convert between, so sometimes it has to
-/// be set to a specific type. This does also accept type parameters.
-///
+/// be used when deriving. The default is to either use `Srgb` or a best effort to convert between
+/// spaces, so sometimes it has to be set to a specific type. This does also accept type parameters.
 ///
 /// ## Examples
 ///
@@ -78,12 +77,12 @@ use encoding::Linear;
 /// fn main() {
 ///     // Start with an sRGB color and convert it from u8 to f32,
 ///     // which is the default component type.
-///     let rgb = Srgb::new(100u8, 23, 59).into_format();
+///     let rgb = Srgb::new(196u8, 238, 155).into_format();
 ///
 ///     // Convert the rgb color to our own format.
 ///     let xyz = Xyz100::from(rgb);
 ///
-///     assert_eq!(xyz, Xyz100 {x: 6, y: 3, z: 4});
+///     assert_eq!(xyz, Xyz100 {x: 59, y: 75, z: 42});
 /// }
 /// ```
 ///
@@ -203,10 +202,136 @@ where
     }
 }
 
-///IntoColor provides conversion between the colors.
+/// IntoColor provides conversion to the colors.
 ///
-///It requires into into_xyz and derives conversion to other colors as a default from this.
-///These defaults must be overridden when direct conversion exists between colors.
+/// It requires into_xyz, when implemented manually, and derives conversion to other colors as a
+/// default from this. These defaults must be overridden when direct conversion exists between
+/// colors.
+///
+/// # Deriving
+///
+/// `IntoColor` can be derived in a mostly automatic way. The strength of deriving it is that it
+/// will also derive `Into` implementations for all of the `palette` color types. The minimum
+/// requirement is to implement `Into<Xyz>`, but it can also be customized to make use of generics
+/// and have other manual implementations.
+///
+/// ## Attributes
+///
+///  * `#[palette_manual_into(Luma, Rgb = "into_rgb_internal")]`: Specifies the color types that
+/// the the custom color type already has `Into` implementations for. Adding `= "function_name"`
+/// tells it to use that function instead of an `Into` implementation. The default, when omitted,
+/// is to require `Into<Xyz>` to be implemented.
+///
+///  * `#[palette_white_point = "some::white_point::Type"]`: Sets the white point type that should
+/// be used when deriving. The default is `D65`, but it may be any other type, including
+/// type parameters.
+///
+///  * `#[palette_component = "some::component::Type"]`: Sets the color component type that should
+/// be used when deriving. The default is `f32`, but it may be any other type, including
+/// type parameters.
+///
+///  * `#[palette_rgb_space = "some::rgb_space::Type"]`: Sets the RGB space type that should
+/// be used when deriving. The default is to either use `Srgb` or a best effort to convert between
+/// spaces, so sometimes it has to be set to a specific type. This does also accept type parameters.
+///
+/// ## Examples
+///
+/// Minimum requirements implementation:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+///
+/// use palette::{Xyz, Srgb};
+///
+/// /// A custom version of Xyz that stores integer values from 0 to 100.
+/// #[derive(PartialEq, Debug, IntoColor)]
+/// struct Xyz100 {
+///     x: u8,
+///     y: u8,
+///     z: u8,
+/// }
+///
+/// // We have to at least implement conversion into Xyz if we don't
+/// // specify anything else, using the `palette_manual_into` attribute.
+/// impl Into<Xyz> for Xyz100 {
+///     fn into(self) -> Xyz {
+///         Xyz::new(
+///             self.x as f32 / 100.0,
+///             self.y as f32 / 100.0,
+///             self.z as f32 / 100.0,
+///         )
+///     }
+/// }
+///
+///
+/// fn main() {
+///     // Start with an Xyz100 color.
+///     let xyz = Xyz100 {x: 59, y: 75, z: 42};
+///
+///     // Convert the color to sRGB.
+///     let rgb: Srgb = xyz.into();
+///
+///     assert_eq!(rgb.into_format(), Srgb::new(195u8, 237, 154));
+/// }
+/// ```
+///
+/// With generic components:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+/// extern crate num_traits;
+/// #[macro_use]
+/// extern crate approx;
+///
+/// use palette::{Srgb, Hsv, Pixel, Component, IntoColor};
+/// use palette::rgb::{Rgb, RgbSpace};
+/// use palette::encoding::Linear;
+/// use palette::white_point::D65;
+/// use num_traits::Float;
+///
+/// /// sRGB, but with a reversed memory layout.
+/// #[derive(Copy, Clone, IntoColor)]
+/// #[palette_manual_into(Rgb = "into_rgb_internal")]
+/// #[palette_component = "T"]
+/// #[repr(C)] // Makes sure the memory layout is as we want it.
+/// struct Bgr<T> {
+///     blue: T,
+///     green: T,
+///     red: T,
+/// }
+///
+/// // Careful with this one! It requires `#[repr(C)]`.
+/// unsafe impl<T> Pixel<T> for Bgr<T> {
+///     const CHANNELS: usize = 3;
+/// }
+///
+/// // Rgb is a bit more complex than other colors, so we are
+/// // implementing a private conversion function and letting it
+/// // derive `Into` automatically.
+/// impl<T: Component + Float> Bgr<T> {
+///
+///     // It converts from any linear Rgb type that has the D65
+///     // white point, which is the default if we don't specify
+///     // anything else with the `palette_white_point` attribute.
+///     fn into_rgb_internal<S>(self) -> Rgb<Linear<S>, T>
+///     where
+///         S: RgbSpace<WhitePoint = D65>,
+///     {
+///         Srgb::new(self.red, self.green, self.blue).into_rgb()
+///     }
+/// }
+///
+/// fn main() {
+///     let buffer = vec![0.0f64, 0.0, 0.0, 0.0, 0.7353569830524495, 0.5370987304831942];
+///     let hsv = Bgr::from_raw_slice(&buffer)[1].into();
+///
+///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
+/// }
+/// ```
 pub trait IntoColor<Wp = D65, T = f32>: Sized
 where
     T: Component + Float,
@@ -353,3 +478,174 @@ impl_into_color!(Lch, from_lch);
 impl_into_color_rgb!(Hsl, from_hsl);
 impl_into_color_rgb!(Hsv, from_hsv);
 impl_into_color_rgb!(Hwb, from_hwb);
+
+#[cfg(test)]
+mod tests {
+    use std::marker::PhantomData;
+    use num_traits::Float;
+    use Component;
+    use Linear;
+    use rgb::{Rgb, RgbSpace};
+    use luma::Luma;
+    use {Color, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+
+    #[derive(Copy, Clone, FromColor, IntoColor)]
+    #[palette_manual_from(Xyz, Luma = "from_luma_internal")]
+    #[palette_manual_into(Xyz, Luma = "into_luma_internal")]
+    #[palette_white_point = "S::WhitePoint"]
+    #[palette_component = "f64"]
+    #[palette_rgb_space = "S"]
+    #[palette_internal]
+    struct WithXyz<S: RgbSpace>(PhantomData<S>);
+
+    impl<S: RgbSpace> WithXyz<S> {
+        fn from_luma_internal(_color: Luma<Linear<S::WhitePoint>, f64>) -> Self {
+            WithXyz(PhantomData)
+        }
+
+        fn into_luma_internal(self) -> Luma<Linear<S::WhitePoint>, f64> {
+            Luma::new(1.0)
+        }
+    }
+
+    impl<S: RgbSpace> From<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
+        fn from(_color: Xyz<S::WhitePoint, f64>) -> Self {
+            WithXyz(PhantomData)
+        }
+    }
+
+    impl<S: RgbSpace> Into<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
+        fn into(self) -> Xyz<S::WhitePoint, f64> {
+            Xyz::with_wp(0.0, 1.0, 0.0)
+        }
+    }
+
+    #[derive(Copy, Clone, FromColor, IntoColor)]
+    #[palette_manual_from(Lch, Luma = "from_luma_internal")]
+    #[palette_manual_into(Lch, Luma = "into_luma_internal")]
+    #[palette_white_point = "::white_point::E"]
+    #[palette_component = "T"]
+    #[palette_rgb_space = "(::encoding::Srgb, ::white_point::E)"]
+    #[palette_internal]
+    struct WithoutXyz<T: Component + Float>(PhantomData<T>);
+
+    impl<T: Component + Float> WithoutXyz<T> {
+        fn from_luma_internal(_color: Luma<Linear<::white_point::E>, T>) -> Self {
+            WithoutXyz(PhantomData)
+        }
+
+        fn into_luma_internal(self) -> Luma<Linear<::white_point::E>, T> {
+            Luma::new(T::one())
+        }
+    }
+
+    impl<T: Component + Float> From<Lch<::white_point::E, T>> for WithoutXyz<T> {
+        fn from(_color: Lch<::white_point::E, T>) -> Self {
+            WithoutXyz(PhantomData)
+        }
+    }
+
+    impl<T: Component + Float> Into<Lch<::white_point::E, T>> for WithoutXyz<T> {
+        fn into(self) -> Lch<::white_point::E, T> {
+            Lch::with_wp(T::one(), T::zero(), T::zero())
+        }
+    }
+
+    #[test]
+    fn from_with_xyz() {
+        let xyz: Xyz<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(xyz);
+
+        let yxy: Yxy<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(yxy);
+
+        let lab: Lab<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(lab);
+
+        let lch: Lch<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(lch);
+
+        let rgb: Rgb<::encoding::Srgb, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(rgb);
+
+        let hsl: Hsl<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(hsl);
+
+        let hsv: Hsv<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(hsv);
+
+        let hwb: Hwb<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(hwb);
+
+        let luma: Luma<::encoding::Srgb, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(luma);
+
+        let color: Color<_, f64> = Default::default();
+        WithXyz::<::encoding::Srgb>::from(color);
+    }
+
+    #[test]
+    fn into_with_xyz() {
+        let color = WithXyz::<::encoding::Srgb>(PhantomData);
+
+        let _xyz: Xyz<_, f64> = color.into();
+        let _yxy: Yxy<_, f64> = color.into();
+        let _lab: Lab<_, f64> = color.into();
+        let _lch: Lch<_, f64> = color.into();
+        let _rgb: Rgb<::encoding::Srgb, f64> = color.into();
+        let _hsl: Hsl<_, f64> = color.into();
+        let _hsv: Hsv<_, f64> = color.into();
+        let _hwb: Hwb<_, f64> = color.into();
+        let _luma: Luma<::encoding::Srgb, f64> = color.into();
+        let _color: Color<::encoding::Srgb, f64> = color.into();
+    }
+
+    #[test]
+    fn from_without_xyz() {
+        let xyz: Xyz<::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from(xyz);
+
+        let yxy: Yxy<::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from(yxy);
+
+        let lab: Lab<::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from(lab);
+
+        let lch: Lch<::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from(lch);
+
+        let rgb: Rgb<(_, ::encoding::Srgb), f64> = Default::default();
+        WithoutXyz::<f64>::from(rgb);
+
+        let hsl: Hsl<_, f64> = Default::default();
+        WithoutXyz::<f64>::from(hsl);
+
+        let hsv: Hsv<_, f64> = Default::default();
+        WithoutXyz::<f64>::from(hsv);
+
+        let hwb: Hwb<_, f64> = Default::default();
+        WithoutXyz::<f64>::from(hwb);
+
+        let luma: Luma<Linear<::white_point::E>, f64> = Default::default();
+        WithoutXyz::<f64>::from(luma);
+
+        let color: Color<_, f64> = Default::default();
+        WithoutXyz::<f64>::from(color);
+    }
+
+    #[test]
+    fn into_without_xyz() {
+        let color = WithoutXyz::<f64>(PhantomData);
+
+        let _xyz: Xyz<::white_point::E, f64> = color.into();
+        let _yxy: Yxy<::white_point::E, f64> = color.into();
+        let _lab: Lab<::white_point::E, f64> = color.into();
+        let _lch: Lch<::white_point::E, f64> = color.into();
+        let _rgb: Rgb<(_, ::encoding::Srgb), f64> = color.into();
+        let _hsl: Hsl<_, f64> = color.into();
+        let _hsv: Hsv<_, f64> = color.into();
+        let _hwb: Hwb<_, f64> = color.into();
+        let _luma: Luma<Linear<::white_point::E>, f64> = color.into();
+        let _color: Color<_, f64> = color.into();
+    }
+}

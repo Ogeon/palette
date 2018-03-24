@@ -14,7 +14,7 @@ use proc_macro::TokenStream;
 
 mod util;
 mod meta;
-mod from_color;
+mod convert;
 
 const COLOR_TYPES: &[&str] = &[
     "Rgb", "Luma", "Hsl", "Hsv", "Hwb", "Lab", "Lch", "Xyz", "Yxy"
@@ -24,5 +24,12 @@ const COLOR_TYPES: &[&str] = &[
                     attributes(palette_internal, palette_white_point, palette_component,
                                palette_manual_from, palette_rgb_space))]
 pub fn derive_from_color(tokens: TokenStream) -> TokenStream {
-    from_color::derive(tokens)
+    convert::derive_from_color(tokens)
+}
+
+#[proc_macro_derive(IntoColor,
+                    attributes(palette_internal, palette_white_point, palette_component,
+                               palette_manual_into, palette_rgb_space))]
+pub fn derive_into_color(tokens: TokenStream) -> TokenStream {
+    convert::derive_into_color(tokens)
 }

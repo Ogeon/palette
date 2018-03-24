@@ -1,0 +1,438 @@
+use proc_macro::TokenStream;
+use proc_macro2::{Span, TokenStream as TokenStream2};
+use syn::{self, DeriveInput, Generics, Ident, Type};
+use quote::Tokens;
+
+use meta::{self, KeyValuePair, MetaParser};
+use util;
+
+use super::shared::{self, ConvertDirection};
+
+use COLOR_TYPES;
+
+pub fn derive(tokens: TokenStream) -> TokenStream {
+    let DeriveInput {
+        ident,
+        attrs,
+        generics: original_generics,
+        ..
+    } = syn::parse(tokens).expect("could not parse tokens");
+    let mut generics = original_generics.clone();
+    let mut meta: FromColorMeta = meta::parse_attributes(attrs);
+
+    let (generic_component, generic_white_point) = shared::find_in_generics(
+        meta.component.as_ref(),
+        meta.white_point.as_ref(),
+        &original_generics,
+    );
+
+    let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
+    let component = shared::component_type(meta.component.clone());
+
+    if generic_component {
+        shared::add_component_where_clause(&component, &mut generics, meta.internal);
+    }
+
+    if generic_white_point {
+        shared::add_white_point_where_clause(&white_point, &mut generics, meta.internal);
+    }
+
+    let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
+
+    // Assume conversion from Xyz by default
+    if meta.manual_implementations.is_empty() {
+        meta.manual_implementations.push(KeyValuePair {
+            key: "Xyz".into(),
+            value: None,
+        });
+    }
+
+    let methods = shared::generate_methods(
+        &ident,
+        ConvertDirection::From,
+        &meta.manual_implementations,
+        &component,
+        &white_point,
+        &shared::rgb_space_type(meta.rgb_space.clone(), &white_point, meta.internal),
+        &type_generics.as_turbofish(),
+        meta.internal,
+    );
+
+    let from_impls: Vec<_> = COLOR_TYPES
+        .into_iter()
+        .map(|&color| {
+            let skip_regular_from = (meta.internal && color == ident.as_ref())
+                || meta.manual_implementations
+                    .iter()
+                    .any(|color_impl| color_impl.key == color && color_impl.value.is_none());
+
+            let regular_from = if skip_regular_from {
+                None
+            } else {
+                Some(impl_from(
+                    &ident,
+                    color,
+                    &meta,
+                    &original_generics,
+                    generic_component,
+                    false,
+                    false,
+                ))
+            };
+
+            let self_alpha = if meta.internal && ident != color {
+                Some(impl_from(
+                    &ident,
+                    color,
+                    &meta,
+                    &original_generics,
+                    generic_component,
+                    true,
+                    false,
+                ))
+            } else {
+                None
+            };
+
+            let other_alpha = impl_from(
+                &ident,
+                color,
+                &meta,
+                &original_generics,
+                generic_component,
+                false,
+                true,
+            );
+
+            let both_alpha = if meta.internal && ident != color {
+                Some(impl_from(
+                    &ident,
+                    color,
+                    &meta,
+                    &original_generics,
+                    generic_component,
+                    true,
+                    true,
+                ))
+            } else {
+                None
+            };
+
+            quote!{
+                #regular_from
+                #self_alpha
+                #other_alpha
+                #both_alpha
+            }
+        })
+        .collect();
+
+    let from_color_ty = impl_from_color_type(
+        &ident,
+        &meta,
+        &original_generics,
+        generic_component,
+        false,
+        false,
+    );
+
+    let from_color_ty_self_alpha = if meta.internal {
+        Some(impl_from_color_type(
+            &ident,
+            &meta,
+            &original_generics,
+            generic_component,
+            true,
+            false,
+        ))
+    } else {
+        None
+    };
+
+    let from_color_ty_other_alpha = impl_from_color_type(
+        &ident,
+        &meta,
+        &original_generics,
+        generic_component,
+        false,
+        true,
+    );
+
+    let from_color_ty_both_alpha = if meta.internal {
+        Some(impl_from_color_type(
+            &ident,
+            &meta,
+            &original_generics,
+            generic_component,
+            true,
+            true,
+        ))
+    } else {
+        None
+    };
+
+    let trait_path = util::path(&["FromColor"], meta.internal);
+    let from_color_impl = quote!{
+        #[automatically_derived]
+        impl #impl_generics #trait_path<#white_point, #component> for #ident #type_generics #where_clause {
+            #(#methods)*
+        }
+    };
+
+    let result = util::bundle_impl(
+        "FromColor",
+        ident,
+        meta.internal,
+        quote! {
+            #from_color_impl
+            #(#from_impls)*
+            #from_color_ty
+            #from_color_ty_self_alpha
+            #from_color_ty_other_alpha
+            #from_color_ty_both_alpha
+        },
+    );
+
+    result.into()
+}
+
+fn impl_from(
+    ident: &Ident,
+    color: &str,
+    meta: &FromColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+    self_alpha: bool,
+    other_alpha: bool,
+) -> Tokens {
+    let (_, type_generics, _) = generics.split_for_impl();
+    let turbofish_generics = type_generics.as_turbofish();
+    let mut generics = generics.clone();
+
+    let method_name = Ident::new(&format!("from_{}", color.to_lowercase()), Span::call_site());
+
+    let trait_path = util::path(&["FromColor"], meta.internal);
+    let alpha_path = util::path(&["Alpha"], meta.internal);
+
+    let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
+    let component = shared::component_type(meta.component.clone());
+
+    if generic_component {
+        shared::add_component_where_clause(&component, &mut generics, meta.internal)
+    }
+
+    let color_ty = shared::get_convert_color_type(
+        color,
+        &white_point,
+        &component,
+        meta.rgb_space.as_ref(),
+        &mut generics,
+        meta.internal,
+    );
+
+    let method_call = match color {
+        "Rgb" | "Luma" => quote! {
+            #ident #turbofish_generics::#method_name(color.into_linear())
+        },
+        _ => quote! {
+            #ident #turbofish_generics::#method_name(color)
+        },
+    };
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    match (self_alpha, other_alpha) {
+        (true, true) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#alpha_path<#color_ty, #component>> for #alpha_path<#ident #type_generics, #component> #where_clause {
+                fn from(color: #alpha_path<#color_ty, #component>) -> Self {
+                    use #trait_path;
+                    let #alpha_path {color, alpha} = color;
+                    #alpha_path {
+                        color: #method_call,
+                        alpha
+                    }
+                }
+            }
+        },
+        (true, false) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#color_ty> for #alpha_path<#ident #type_generics, #component> #where_clause {
+                fn from(color: #color_ty) -> Self {
+                    use #trait_path;
+                    #method_call.into()
+                }
+            }
+        },
+        (false, true) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#alpha_path<#color_ty, #component>> for #ident #type_generics #where_clause {
+                fn from(color: #alpha_path<#color_ty, #component>) -> Self {
+                    use #trait_path;
+                    let color = color.color;
+                    #method_call
+                }
+            }
+        },
+        (false, false) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#color_ty> for #ident #type_generics #where_clause {
+                fn from(color: #color_ty) -> Self {
+                    use #trait_path;
+                    #method_call
+                }
+            }
+        },
+    }
+}
+
+fn impl_from_color_type(
+    ident: &Ident,
+    meta: &FromColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+    self_alpha: bool,
+    other_alpha: bool,
+) -> Tokens {
+    let (_, type_generics, _) = generics.split_for_impl();
+    let turbofish_generics = type_generics.as_turbofish();
+    let mut generics = generics.clone();
+
+    let color_path = util::path(&["Color"], meta.internal);
+    let alpha_path = util::path(&["Alpha"], meta.internal);
+
+    let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
+    let component = shared::component_type(meta.component.clone());
+
+    if meta.rgb_space.is_none() {
+        generics.params.push(parse_quote!(_S));
+    }
+
+    if generic_component {
+        shared::add_component_where_clause(&component, &mut generics, meta.internal);
+    }
+
+    let color_ty = {
+        let rgb_space_type = if let Some(ref rgb_space) = meta.rgb_space {
+            rgb_space.clone()
+        } else {
+            let rgb_space_path = util::path(&["rgb", "RgbSpace"], meta.internal);
+            util::add_missing_where_clause(&mut generics);
+            let where_clause = generics.where_clause.as_mut().unwrap();
+            where_clause
+                .predicates
+                .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
+
+            parse_quote!(_S)
+        };
+
+        quote!(#color_path<#rgb_space_type, #component>)
+    };
+
+    let match_arms = COLOR_TYPES.into_iter().map(|&color| {
+        let color_ident = Ident::new(color, Span::call_site());
+        if meta.internal && color == ident.as_ref() {
+            let convert_function = meta.manual_implementations
+                .iter()
+                .find(|color_impl| color_impl.key == color)
+                .and_then(|color_impl| color_impl.value.as_ref());
+
+            if let Some(convert_function) = convert_function {
+                quote!(#color_path::#color_ident(c) => #ident #turbofish_generics::#convert_function(c))
+            } else {
+                quote!(#color_path::#color_ident(c) => c)
+            }
+        } else {
+            quote!(#color_path::#color_ident(c) => Self::from(c))
+        }
+    });
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    match (self_alpha, other_alpha) {
+        (true, true) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#alpha_path<#color_ty, #component>> for #alpha_path<#ident #type_generics, #component> #where_clause {
+                fn from(color: #alpha_path<#color_ty, #component>) -> Self {
+                    let #alpha_path {color, alpha} = color;
+                    #alpha_path {
+                        color: #ident #turbofish_generics::from(color),
+                        alpha
+                    }
+                }
+            }
+        },
+        (true, false) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#color_ty> for #alpha_path<#ident #type_generics, #component> #where_clause {
+                fn from(color: #color_ty) -> Self {
+                    #ident #turbofish_generics::from(color).into()
+                }
+            }
+        },
+        (false, true) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#alpha_path<#color_ty, #component>> for #ident #type_generics #where_clause {
+                fn from(color: #alpha_path<#color_ty, #component>) -> Self {
+                    Self::from(color.color)
+                }
+            }
+        },
+        (false, false) => quote!{
+            #[automatically_derived]
+            impl #impl_generics From<#color_ty> for #ident #type_generics #where_clause {
+                fn from(color: #color_ty) -> Self {
+                    match color {
+                        #(#match_arms),*
+                    }
+                }
+            }
+        },
+    }
+}
+
+#[derive(Default)]
+struct FromColorMeta {
+    manual_implementations: Vec<KeyValuePair>,
+    internal: bool,
+    component: Option<Type>,
+    white_point: Option<Type>,
+    rgb_space: Option<Type>,
+}
+
+impl MetaParser for FromColorMeta {
+    fn internal(&mut self) {
+        self.internal = true;
+    }
+
+    fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream2) {
+        match attribute_name.as_ref() {
+            "palette_manual_from" => {
+                let impls = meta::parse_type_tuple_attribute::<KeyValuePair>(
+                    &attribute_name,
+                    attribute_tts,
+                );
+                self.manual_implementations.extend(impls)
+            }
+            "palette_component" => {
+                if self.component.is_none() {
+                    let component = meta::parse_equal_attribute(&attribute_name, attribute_tts);
+                    self.component = Some(component);
+                }
+            }
+            "palette_white_point" => {
+                if self.white_point.is_none() {
+                    let white_point = meta::parse_equal_attribute(&attribute_name, attribute_tts);
+                    self.white_point = Some(white_point);
+                }
+            }
+            "palette_rgb_space" => {
+                if self.rgb_space.is_none() {
+                    let rgb_space = meta::parse_equal_attribute(&attribute_name, attribute_tts);
+                    self.rgb_space = Some(rgb_space);
+                }
+            }
+            _ => {}
+        }
+    }
+}
