@@ -7,7 +7,6 @@ use std::any::TypeId;
 
 use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
      Shade, Xyz};
-use white_point::WhitePoint;
 use rgb::RgbSpace;
 use encoding::Srgb;
 use encoding::pixel::RawPixel;
@@ -23,7 +22,12 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///then a degree of whiteness and blackness to mix into that base hue.
 ///
 ///It is very intuitive for humans to use and many color-pickers are based on the HWB color system
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_rgb_space = "S"]
+#[palette_white_point = "S::WhitePoint"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Hsv, Hwb = "from_hwb_internal")]
 #[repr(C)]
 pub struct Hwb<S = Srgb, T = f32>
 where
@@ -102,6 +106,14 @@ where
         }
     }
 
+    fn from_hwb_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(color: Hwb<Sp, T>) -> Self {
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+            color.reinterpret_as()
+        } else {
+            Self::from_hsv(Hsv::<Sp, T>::from_hwb(color))
+        }
+    }
+
     #[inline]
     fn reinterpret_as<Sp: RgbSpace>(self) -> Hwb<Sp, T> {
         Hwb {
@@ -142,33 +154,31 @@ where
     }
 }
 
-impl<S, Wp, T> FromColor<Wp, T> for Hwb<S, T>
+impl<S, T> From<Xyz<S::WhitePoint, T>> for Hwb<S, T>
 where
     T: Component + Float,
-    S: RgbSpace<WhitePoint = Wp>,
-    Wp: WhitePoint,
+    S: RgbSpace,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let hsv: Hsv<S, T> = xyz.into_hsv();
+    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
+        let hsv: Hsv<S, T> = color.into_hsv();
         Self::from_hsv(hsv)
     }
+}
 
-    fn from_hsv<Sp: RgbSpace<WhitePoint = Wp>>(hsv: Hsv<Sp, T>) -> Self {
-        let hsv = Hsv::<S, T>::from_hsv(hsv);
+impl<S, T, Sp> From<Hsv<Sp, T>> for Hwb<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
+{
+    fn from(color: Hsv<Sp, T>) -> Self {
+        let color = Hsv::<S, T>::from_hsv(color);
 
         Hwb {
-            hue: hsv.hue,
-            whiteness: (T::one() - hsv.saturation) * hsv.value,
-            blackness: (T::one() - hsv.value),
+            hue: color.hue,
+            whiteness: (T::one() - color.saturation) * color.value,
+            blackness: (T::one() - color.value),
             space: PhantomData,
-        }
-    }
-
-    fn from_hwb<Sp: RgbSpace<WhitePoint = Wp>>(hwb: Hwb<Sp, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
-            hwb.reinterpret_as()
-        } else {
-            Self::from_hsv(Hsv::<Sp, T>::from_hwb(hwb))
         }
     }
 }
@@ -376,16 +386,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<S, T> From<Alpha<Hwb<S, T>, T>> for Hwb<S, T>
-where
-    T: Component + Float,
-    S: RgbSpace,
-{
-    fn from(color: Alpha<Hwb<S, T>, T>) -> Hwb<S, T> {
-        color.color
     }
 }
 

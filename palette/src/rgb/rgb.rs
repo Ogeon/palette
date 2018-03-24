@@ -6,6 +6,7 @@ use num_traits::Float;
 use approx::ApproxEq;
 
 use rgb::{RgbSpace, RgbStandard, TransferFn};
+use luma::LumaStandard;
 use encoding::{Linear, Srgb};
 use encoding::linear::LinearFn;
 use encoding::pixel::RawPixel;
@@ -33,7 +34,12 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// meaning that gamma correction is required when converting to and from a
 /// displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
 /// for encoding formats.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_rgb_space = "S::Space"]
+#[palette_white_point = "<S::Space as RgbSpace>::WhitePoint"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Hsv, Hsl, Luma, Rgb = "from_rgb_internal")]
 #[repr(C)]
 pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8) is the
@@ -126,6 +132,17 @@ impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
         )
+    }
+
+    fn from_rgb_internal<Sp>(rgb: Rgb<Linear<Sp>, T>) -> Self
+    where
+        Sp: RgbSpace<WhitePoint = <S::Space as RgbSpace>::WhitePoint>,
+    {
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<<S::Space as RgbSpace>::Primaries>() {
+            Self::from_linear(rgb.reinterpret_as())
+        } else {
+            Self::from_xyz(Xyz::from_rgb(rgb))
+        }
     }
 }
 
@@ -491,28 +508,29 @@ where
     }
 }
 
-impl<S, Wp, T> FromColor<Wp, T> for Rgb<S, T>
+impl<S, Wp, T> From<Xyz<Wp, T>> for Rgb<S, T>
 where
     S: RgbStandard,
     T: Component + Float,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+    fn from(color: Xyz<Wp, T>) -> Self {
         let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<S::Space, T>());
-        Self::from_linear(multiply_xyz_to_rgb(&transform_matrix, &xyz))
+        Self::from_linear(multiply_xyz_to_rgb(&transform_matrix, &color))
     }
+}
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint = Wp>>(rgb: Rgb<Linear<Sp>, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<<S::Space as RgbSpace>::Primaries>() {
-            Self::from_linear(rgb.reinterpret_as())
-        } else {
-            Self::from_xyz(Xyz::from_rgb(rgb))
-        }
-    }
-
-    fn from_hsl<Sp: RgbSpace<WhitePoint = Wp>>(hsl: Hsl<Sp, T>) -> Self {
-        let hsl = Hsl::<S::Space, T>::from_hsl(hsl);
+impl<S, T, Sp, Wp> From<Hsl<Sp, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: Component + Float,
+    Wp: WhitePoint,
+    S::Space: RgbSpace<WhitePoint = Wp>,
+    Sp: RgbSpace<WhitePoint = Wp>,
+{
+    fn from(color: Hsl<Sp, T>) -> Self {
+        let hsl = Hsl::<S::Space, T>::from_hsl(color);
 
         let c = (T::one() - (hsl.lightness * cast(2.0) - T::one()).abs()) * hsl.saturation;
         let h = hsl.hue.to_positive_degrees() / cast(60.0);
@@ -540,9 +558,18 @@ where
             standard: PhantomData,
         })
     }
+}
 
-    fn from_hsv<Sp: RgbSpace<WhitePoint = Wp>>(hsv: Hsv<Sp, T>) -> Self {
-        let hsv = Hsv::<S::Space, T>::from_hsv(hsv);
+impl<S, T, Sp, Wp> From<Hsv<Sp, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: Component + Float,
+    Wp: WhitePoint,
+    S::Space: RgbSpace<WhitePoint = Wp>,
+    Sp: RgbSpace<WhitePoint = Wp>,
+{
+    fn from(color: Hsv<Sp, T>) -> Self {
+        let hsv = Hsv::<S::Space, T>::from_hsv(color);
 
         let c = hsv.value * hsv.saturation;
         let h = hsv.hue.to_positive_degrees() / cast(60.0);
@@ -570,8 +597,19 @@ where
             standard: PhantomData,
         })
     }
+}
 
-    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
+impl<S, T, St, Wp> From<Luma<St, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: Component + Float,
+    Wp: WhitePoint,
+    S::Space: RgbSpace<WhitePoint = Wp>,
+    St: LumaStandard<WhitePoint = Wp>,
+{
+    fn from(color: Luma<St, T>) -> Self {
+        let luma = color.into_linear();
+
         Self::from_linear(Rgb {
             red: luma.luma,
             green: luma.luma,
@@ -713,16 +751,6 @@ where
     /// ```
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<S, T> From<Alpha<Rgb<S, T>, T>> for Rgb<S, T>
-where
-    T: Component,
-    S: RgbStandard,
-{
-    fn from(color: Alpha<Rgb<S, T>, T>) -> Rgb<S, T> {
-        color.color
     }
 }
 

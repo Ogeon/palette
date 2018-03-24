@@ -1,0 +1,42 @@
+[package]
+name = "palette"
+version = "0.3.0" #automatically updated
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = ["scripts/*", "examples/*", "tests/*", "res/*", ".travis.yml", ".gitignore", "CHANGELOG.md", "CONTRIBUTING.md", "version.sh"]
+description = "Makes linear color calculations and conversion easy and accessible for anyone."
+documentation = "https://docs.rs/palette/0.3.0/palette/"
+repository = "https://github.com/Ogeon/palette"
+readme = "README.md"
+keywords = ["color", "colour", "space", "linear"]
+license = "MIT OR Apache-2.0"
+
+build = "build/main.rs"
+
+[features]
+default = ["named_from_str"]
+named_from_str = ["named", "phf", "phf_codegen"]
+named = []
+
+#internal
+strict = []
+
+[dependencies]
+palette_derive = {version = "0.3.0", path = "../palette_derive"}
+num-traits = "0.2"
+approx = "0.1"
+
+[dependencies.phf]
+version = "0.7"
+optional = true
+
+[dev-dependencies]
+image = "0.18"
+clap = "2"
+csv = "1.0.0-beta.3"
+serde = "1"
+serde_derive = "1"
+lazy_static = "1"
+
+[build-dependencies.phf_codegen]
+version = "0.7"
+optional = true

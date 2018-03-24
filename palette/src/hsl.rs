@@ -7,7 +7,6 @@ use std::any::TypeId;
 
 use {cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
      RgbHue, Saturate, Shade, Xyz};
-use white_point::WhitePoint;
 use rgb::{Rgb, RgbSpace};
 use encoding::{Linear, Srgb};
 use encoding::pixel::RawPixel;
@@ -26,7 +25,12 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///more gray, or making it darker.
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_rgb_space = "S"]
+#[palette_white_point = "S::WhitePoint"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Rgb = "from_rgb_internal", Hsv, Hsl = "from_hsl_internal")]
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
 where
@@ -101,6 +105,60 @@ where
         }
     }
 
+    fn from_hsl_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(hsl: Hsl<Sp, T>) -> Self {
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+            hsl.reinterpret_as()
+        } else {
+            Self::from_rgb(Rgb::<Linear<Sp>, T>::from_hsl(hsl))
+        }
+    }
+
+    fn from_rgb_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(
+        color: Rgb<Linear<Sp>, T>,
+    ) -> Self {
+        let rgb = Rgb::<Linear<S>, T>::from_rgb(color);
+
+        let (max, min, sep, coeff) = {
+            let (max, min, sep, coeff) = if rgb.red > rgb.green {
+                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
+            } else {
+                (rgb.green, rgb.red, rgb.blue - rgb.red, cast(2.0))
+            };
+            if rgb.blue > max {
+                (rgb.blue, min, rgb.red - rgb.green, cast(4.0))
+            } else {
+                let min_val = if rgb.blue < min {
+                    rgb.blue
+                } else {
+                    min
+                };
+                (max, min_val, sep, coeff)
+            }
+        };
+
+        let mut h = T::zero();
+        let mut s = T::zero();
+
+        let sum = max + min;
+        let l = sum / cast(2.0);
+        if max != min {
+            let d = max - min;
+            s = if sum > T::one() {
+                d / (cast::<T, _>(2.0) - sum)
+            } else {
+                d / sum
+            };
+            h = ((sep / d) + coeff) * cast(60.0);
+        };
+
+        Hsl {
+            hue: h.into(),
+            saturation: s,
+            lightness: l,
+            space: PhantomData,
+        }
+    }
+
     #[inline]
     fn reinterpret_as<Sp: RgbSpace>(self) -> Hsl<Sp, T> {
         Hsl {
@@ -146,71 +204,25 @@ where
     }
 }
 
-impl<S, Wp, T> FromColor<Wp, T> for Hsl<S, T>
+impl<S, T> From<Xyz<S::WhitePoint, T>> for Hsl<S, T>
 where
     T: Component + Float,
-    S: RgbSpace<WhitePoint = Wp>,
-    Wp: WhitePoint,
+    S: RgbSpace,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        let rgb: Rgb<Linear<S>, T> = xyz.into_rgb();
+    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
+        let rgb: Rgb<Linear<S>, T> = color.into_rgb();
         Self::from_rgb(rgb)
     }
+}
 
-    fn from_rgb<Sp: RgbSpace<WhitePoint = Wp>>(rgb: Rgb<Linear<Sp>, T>) -> Self {
-        let rgb = Rgb::<Linear<S>, T>::from_rgb(rgb);
-
-        let (max, min, sep, coeff) = {
-            let (max, min, sep, coeff) = if rgb.red > rgb.green {
-                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
-            } else {
-                (rgb.green, rgb.red, rgb.blue - rgb.red, cast(2.0))
-            };
-            if rgb.blue > max {
-                (rgb.blue, min, rgb.red - rgb.green, cast(4.0))
-            } else {
-                let min_val = if rgb.blue < min {
-                    rgb.blue
-                } else {
-                    min
-                };
-                (max, min_val, sep, coeff)
-            }
-        };
-
-        let mut h = T::zero();
-        let mut s = T::zero();
-
-        let sum = max + min;
-        let l = sum / cast(2.0);
-        if max != min {
-            let d = max - min;
-            s = if sum > T::one() {
-                d / (cast::<T, _>(2.0) - sum)
-            } else {
-                d / sum
-            };
-            h = ((sep / d) + coeff) * cast(60.0);
-        };
-
-        Hsl {
-            hue: h.into(),
-            saturation: s,
-            lightness: l,
-            space: PhantomData,
-        }
-    }
-
-    fn from_hsl<Sp: RgbSpace<WhitePoint = Wp>>(hsl: Hsl<Sp, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
-            hsl.reinterpret_as()
-        } else {
-            Self::from_rgb(Rgb::<Linear<Sp>, T>::from_hsl(hsl))
-        }
-    }
-
-    fn from_hsv<Sp: RgbSpace<WhitePoint = Wp>>(hsv: Hsv<Sp, T>) -> Self {
-        let hsv = Hsv::<S, T>::from_hsv(hsv);
+impl<S, Sp, T> From<Hsv<Sp, T>> for Hsl<S, T>
+where
+    T: Component + Float,
+    S: RgbSpace,
+    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
+{
+    fn from(color: Hsv<Sp, T>) -> Self {
+        let hsv = Hsv::<S, T>::from_hsv(color);
 
         let x = (cast::<T, _>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
@@ -453,16 +465,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<S, T> From<Alpha<Hsl<S, T>, T>> for Hsl<S, T>
-where
-    T: Component + Float,
-    S: RgbSpace,
-{
-    fn from(color: Alpha<Hsl<S, T>, T>) -> Hsl<S, T> {
-        color.color
     }
 }
 

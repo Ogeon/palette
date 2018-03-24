@@ -4,10 +4,10 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Lab, Luma, Yxy};
-use {Component, ComponentWise, FromColor, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
-use rgb::{Rgb, RgbSpace};
-use encoding::Linear;
+use rgb::{Rgb, RgbSpace, RgbStandard};
+use luma::LumaStandard;
 use encoding::pixel::RawPixel;
 use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use {cast, clamp};
@@ -24,7 +24,11 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///illuminant and a standard observer to be defined.
 ///
 ///Conversions and operations on this color space depend on the defined white point
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_white_point = "Wp"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Rgb, Lab, Yxy, Luma)]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
 where
@@ -129,37 +133,47 @@ where
     }
 }
 
-impl<Wp, T> FromColor<Wp, T> for Xyz<Wp, T>
+impl<Wp, T, S> From<Rgb<S, T>> for Xyz<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    S: RgbStandard,
+    S::Space: RgbSpace<WhitePoint = Wp>,
+{
+    fn from(color: Rgb<S, T>) -> Self {
+        let transform_matrix = rgb_to_xyz_matrix::<S::Space, T>();
+        multiply_rgb_to_xyz(&transform_matrix, &color.into_linear())
+    }
+}
+
+impl<Wp, T> From<Yxy<Wp, T>> for Xyz<Wp, T>
 where
     T: Component + Float,
     Wp: WhitePoint,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
-        xyz
-    }
-
-    fn from_rgb<S: RgbSpace<WhitePoint = Wp>>(rgb: Rgb<Linear<S>, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<S, T>();
-        multiply_rgb_to_xyz(&transform_matrix, &rgb)
-    }
-
-    fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
+    fn from(color: Yxy<Wp, T>) -> Self {
         let mut xyz = Xyz {
-            y: yxy.luma,
+            y: color.luma,
             ..Default::default()
         };
         // If denominator is zero, NAN or INFINITE leave x and z at the default 0
-        if yxy.y.is_normal() {
-            xyz.x = yxy.luma * yxy.x / yxy.y;
-            xyz.z = yxy.luma * (T::one() - yxy.x - yxy.y) / yxy.y;
+        if color.y.is_normal() {
+            xyz.x = color.luma * color.x / color.y;
+            xyz.z = color.luma * (T::one() - color.x - color.y) / color.y;
         }
         xyz
     }
+}
 
-    fn from_lab(lab: Lab<Wp, T>) -> Self {
-        let y = (lab.l + cast(16.0)) / cast(116.0);
-        let x = y + (lab.a / cast(500.0));
-        let z = y - (lab.b / cast(200.0));
+impl<Wp, T> From<Lab<Wp, T>> for Xyz<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+{
+    fn from(color: Lab<Wp, T>) -> Self {
+        let y = (color.l + cast(16.0)) / cast(116.0);
+        let x = y + (color.a / cast(500.0));
+        let z = y - (color.b / cast(200.0));
 
         fn convert<T: Component + Float>(c: T) -> T {
             let epsilon: T = cast(6.0 / 29.0);
@@ -175,9 +189,16 @@ where
 
         Xyz::with_wp(convert(x), convert(y), convert(z)) * Wp::get_xyz()
     }
+}
 
-    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
-        Wp::get_xyz() * luma.luma
+impl<Wp, T, S> From<Luma<S, T>> for Xyz<Wp, T>
+where
+    T: Component + Float,
+    Wp: WhitePoint,
+    S: LumaStandard<WhitePoint = Wp>,
+{
+    fn from(color: Luma<S, T>) -> Self {
+        Wp::get_xyz() * color.luma
     }
 }
 
@@ -435,16 +456,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<Wp, T> From<Alpha<Xyz<Wp, T>, T>> for Xyz<Wp, T>
-where
-    T: Component + Float,
-    Wp: WhitePoint,
-{
-    fn from(color: Alpha<Xyz<Wp, T>, T>) -> Xyz<Wp, T> {
-        color.color
     }
 }
 

@@ -4,7 +4,8 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
 
 use {Alpha, Luma, Xyz};
-use {Component, ComponentWise, FromColor, IntoColor, Limited, Linear, Mix, Pixel, Shade};
+use luma::LumaStandard;
+use {Component, ComponentWise, IntoColor, Limited, Mix, Pixel, Shade};
 use white_point::{D65, WhitePoint};
 use encoding::pixel::RawPixel;
 use clamp;
@@ -20,7 +21,11 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 ///for the color spaces are a plot of this color space's x and y coordiantes.
 ///
 ///Conversions and operations on this color space depend on the white point.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromColor)]
+#[palette_internal]
+#[palette_white_point = "Wp"]
+#[palette_component = "T"]
+#[palette_manual_from(Xyz, Yxy, Luma)]
 #[repr(C)]
 pub struct Yxy<Wp = D65, T = f32>
 where
@@ -125,12 +130,12 @@ where
     }
 }
 
-impl<Wp, T> FromColor<Wp, T> for Yxy<Wp, T>
+impl<Wp, T> From<Xyz<Wp, T>> for Yxy<Wp, T>
 where
     T: Component + Float,
     Wp: WhitePoint,
 {
-    fn from_xyz(xyz: Xyz<Wp, T>) -> Self {
+    fn from(xyz: Xyz<Wp, T>) -> Self {
         let mut yxy = Yxy {
             x: T::zero(),
             y: T::zero(),
@@ -145,15 +150,16 @@ where
         }
         yxy
     }
+}
 
-    fn from_yxy(yxy: Yxy<Wp, T>) -> Self {
-        yxy
-    }
-
-    // direct conversion implemented in Luma
-    fn from_luma(luma: Luma<Linear<Wp>, T>) -> Self {
+impl<S, T> From<Luma<S, T>> for Yxy<S::WhitePoint, T>
+where
+    T: Component + Float,
+    S: LumaStandard,
+{
+    fn from(luma: Luma<S, T>) -> Self {
         Yxy {
-            luma: luma.luma,
+            luma: luma.into_linear().luma,
             ..Default::default()
         }
     }
@@ -418,16 +424,6 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
-    }
-}
-
-impl<Wp, T> From<Alpha<Yxy<Wp, T>, T>> for Yxy<Wp, T>
-where
-    T: Component + Float,
-    Wp: WhitePoint,
-{
-    fn from(color: Alpha<Yxy<Wp, T>, T>) -> Yxy<Wp, T> {
-        color.color
     }
 }
 
