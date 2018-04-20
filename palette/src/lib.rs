@@ -29,14 +29,14 @@
 //!
 //! ```rust
 //! // An alias for Rgb<Srgb>, which is what most pictures store.
-//! use palette::{Srgb, Pixel};
+//! use palette::{Pixel, Srgb};
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
 //! let whateve_it_becomes = orangeish + blueish;
 //!
 //! // Encode the result back into sRGB and create a byte array
-//! let pixel: [u8;3] = Srgb::from_linear(whateve_it_becomes)
+//! let pixel: [u8; 3] = Srgb::from_linear(whateve_it_becomes)
 //!     .into_format()
 //!     .into_raw();
 //! ```
@@ -53,7 +53,7 @@
 //! This approach comes with the extra benefit of allowing operations to
 //! selectively affect the alpha component:
 //!
-//! ```
+//! ```rust
 //! use palette::{LinSrgb, LinSrgba};
 //!
 //! let mut c1 = LinSrgba::new(1.0, 0.5, 0.5, 0.8);
@@ -63,6 +63,7 @@
 //! c1.blue += 0.2; //The color components can easily be accessed
 //! c1 = c1 * 0.5; //Scale both the color and the alpha
 //! ```
+//!
 
 #![doc(html_root_url = "https://docs.rs/palette/0.3.0/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
@@ -583,18 +584,18 @@ pub trait Limited {
     fn clamp_self(&mut self);
 }
 
-///A trait for linear color interpolation.
+/// A trait for linear color interpolation.
 ///
-///```
-///use palette::{LinSrgb, Mix};
+/// ```
+/// use palette::{LinSrgb, Mix};
 ///
-///let a = LinSrgb::new(0.0, 0.5, 1.0);
-///let b = LinSrgb::new(1.0, 0.5, 0.0);
+/// let a = LinSrgb::new(0.0, 0.5, 1.0);
+/// let b = LinSrgb::new(1.0, 0.5, 0.0);
 ///
-///assert_eq!(a.mix(&b, 0.0), a);
-///assert_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
-///assert_eq!(a.mix(&b, 1.0), b);
-///```
+/// assert_eq!(a.mix(&b, 0.0), a);
+/// assert_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
+/// assert_eq!(a.mix(&b, 1.0), b);
+/// ```
 pub trait Mix {
     ///The type of the mixing factor.
     type Scalar: Float;
@@ -607,16 +608,16 @@ pub trait Mix {
     fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
 }
 
-///The `Shade` trait allows a color to be lightened or darkened.
+/// The `Shade` trait allows a color to be lightened or darkened.
 ///
-///```
-///use palette::{LinSrgb, Shade};
+/// ```
+/// use palette::{LinSrgb, Shade};
 ///
-///let a = LinSrgb::new(0.4, 0.4, 0.4);
-///let b = LinSrgb::new(0.6, 0.6, 0.6);
+/// let a = LinSrgb::new(0.4, 0.4, 0.4);
+/// let b = LinSrgb::new(0.6, 0.6, 0.6);
 ///
-///assert_eq!(a.lighten(0.1), b.darken(0.1));
-///```
+/// assert_eq!(a.lighten(0.1), b.darken(0.1));
+/// ```
 pub trait Shade: Sized {
     ///The type of the lighten/darken amount.
     type Scalar: Float;
@@ -630,21 +631,21 @@ pub trait Shade: Sized {
     }
 }
 
-///A trait for colors where a hue may be calculated.
+/// A trait for colors where a hue may be calculated.
 ///
-///```
-///use palette::{LinSrgb, GetHue};
+/// ```
+/// use palette::{GetHue, LinSrgb};
 ///
-///let red = LinSrgb::new(1.0f32, 0.0, 0.0);
-///let green = LinSrgb::new(0.0f32, 1.0, 0.0);
-///let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
-///let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
+/// let red = LinSrgb::new(1.0f32, 0.0, 0.0);
+/// let green = LinSrgb::new(0.0f32, 1.0, 0.0);
+/// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
+/// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
-///assert_eq!(red.get_hue(), Some(0.0.into()));
-///assert_eq!(green.get_hue(), Some(120.0.into()));
-///assert_eq!(blue.get_hue(), Some(240.0.into()));
-///assert_eq!(gray.get_hue(), None);
-///```
+/// assert_eq!(red.get_hue(), Some(0.0.into()));
+/// assert_eq!(green.get_hue(), Some(120.0.into()));
+/// assert_eq!(blue.get_hue(), Some(240.0.into()));
+/// assert_eq!(gray.get_hue(), None);
+/// ```
 pub trait GetHue {
     ///The kind of hue unit this color space uses.
     ///
@@ -670,17 +671,17 @@ pub trait Hue: GetHue {
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Self;
 }
 
-///A trait for colors where the saturation (or chroma) can be manipulated
-///without conversion.
+/// A trait for colors where the saturation (or chroma) can be manipulated
+/// without conversion.
 ///
-///```
-///use palette::{Hsv, Saturate};
+/// ```
+/// use palette::{Hsv, Saturate};
 ///
-///let a = Hsv::new(0.0, 0.25, 1.0);
-///let b = Hsv::new(0.0, 1.0, 1.0);
+/// let a = Hsv::new(0.0, 0.25, 1.0);
+/// let b = Hsv::new(0.0, 1.0, 1.0);
 ///
-///assert_eq!(a.saturate(1.0), b.desaturate(0.5));
-///```
+/// assert_eq!(a.saturate(1.0), b.desaturate(0.5));
+/// ```
 pub trait Saturate: Sized {
     ///The type of the (de)saturation factor.
     type Scalar: Float;
@@ -836,7 +837,8 @@ impl Component for u64 {
     }
 }
 
-///A convenience function to convert a constant number to Float Type
+/// A convenience function to convert a constant number to Float Type
+#[inline]
 fn cast<T: NumCast, P: ToPrimitive>(prim: P) -> T {
     NumCast::from(prim).unwrap()
 }

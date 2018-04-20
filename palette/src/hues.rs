@@ -10,66 +10,94 @@ macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
         $(#[$doc])+
         ///
-        ///The hue is a circular type, where `0` and `360` is the same, and
-        ///it's normalized to `(-180, 180]` when it's converted to a linear
-        ///number (like `f32`). This makes many calculations easier, but may
-        ///also have some surprising effects if it's expected to act as a
-        ///linear number.
+        /// The hue is a circular type, where `0` and `360` is the same, and
+        /// it's normalized to `(-180, 180]` when it's converted to a linear
+        /// number (like `f32`). This makes many calculations easier, but may
+        /// also have some surprising effects if it's expected to act as a
+        /// linear number.
         #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $name<T: Float = f32>(T);
 
         impl<T: Float> $name<T> {
-            ///Create a new hue from radians, instead of degrees.
+            /// Create a new hue from degrees.
+            #[inline]
+            pub fn from_degrees(degrees: T) -> $name<T> {
+                $name(degrees)
+            }
+
+            /// Create a new hue from radians, instead of degrees.
+            #[inline]
             pub fn from_radians(radians: T) -> $name<T> {
                 $name(radians * cast(180.0) / cast(PI))
             }
 
-            ///Get the hue as degrees, in the range `(-180, 180]`.
+            /// Get the hue as degrees, in the range `(-180, 180]`.
+            #[inline]
             pub fn to_degrees(self) -> T {
                 normalize_angle(self.0)
             }
 
-            ///Convert the hue to radians, in the range `(-π, π]`.
+            /// Convert the hue to radians, in the range `(-π, π]`.
+            #[inline]
             pub fn to_radians(self) -> T {
                 normalize_angle(self.0) * cast(PI) / cast(180.0)
             }
 
-            ///Convert the hue to positive degrees, in the range `[0, 360)`.
+            /// Convert the hue to positive degrees, in the range `[0, 360)`.
+            #[inline]
             pub fn to_positive_degrees(self) -> T {
                 normalize_angle_positive(self.0)
             }
 
-            ///Convert the hue to positive radians, in the range `[0, 2π)`.
+            /// Convert the hue to positive radians, in the range `[0, 2π)`.
+            #[inline]
             pub fn to_positive_radians(self) -> T {
                 normalize_angle_positive(self.0) * cast(PI) / cast(180.0)
+            }
+
+            /// Get the internal representation, without normalizing it.
+            #[inline]
+            pub fn to_raw_degrees(self) -> T {
+                self.0
+            }
+
+            /// Get the internal representation as radians, without normalizing it.
+            #[inline]
+            pub fn to_raw_radians(self) -> T {
+                self.0 * cast(PI) / cast(180.0)
             }
         }
 
         impl<T: Float> From<T> for $name<T> {
+            #[inline]
             fn from(degrees: T) -> $name<T> {
                 $name(degrees)
             }
         }
 
         impl Into<f64> for $name<f64> {
+            #[inline]
             fn into(self) -> f64 {
                 normalize_angle(self.0)
             }
         }
 
         impl Into<f32> for $name<f32> {
+            #[inline]
             fn into(self) -> f32 {
                 normalize_angle(self.0)
             }
         }
         impl Into<f32> for $name<f64> {
+            #[inline]
             fn into(self) -> f32 {
                 normalize_angle(self.0) as f32
             }
         }
 
         impl<T: Float> PartialEq for $name<T> {
+            #[inline]
             fn eq(&self, other: &$name<T>) -> bool {
                 let hue_s: T = (*self).to_degrees();
                 let hue_o: T = (*other).to_degrees();
@@ -78,6 +106,7 @@ macro_rules! make_hues {
         }
 
         impl<T: Float> PartialEq<T> for $name<T> {
+            #[inline]
             fn eq(&self, other: &T) -> bool {
                 let hue: T = (*self).to_degrees();
                 hue.eq(&normalize_angle(*other))
@@ -87,6 +116,7 @@ macro_rules! make_hues {
         impl<T: Float> Add<$name<T>> for $name<T> {
             type Output = $name<T>;
 
+            #[inline]
             fn add(self, other: $name<T>) -> $name<T> {
                 $name(self.0 + other.0)
             }
@@ -95,14 +125,34 @@ macro_rules! make_hues {
         impl<T: Float> Add<T> for $name<T> {
             type Output = $name<T>;
 
+            #[inline]
             fn add(self, other: T) -> $name<T> {
                 $name(self.0 + other)
+            }
+        }
+
+        impl Add<$name<f32>> for f32 {
+            type Output = $name<f32>;
+
+            #[inline]
+            fn add(self, other: $name<f32>) -> $name<f32> {
+                $name(self + other.0)
+            }
+        }
+
+        impl Add<$name<f64>> for f64 {
+            type Output = $name<f64>;
+
+            #[inline]
+            fn add(self, other: $name<f64>) -> $name<f64> {
+                $name(self + other.0)
             }
         }
 
         impl<T: Float> Sub<$name<T>> for $name<T> {
             type Output = $name<T>;
 
+            #[inline]
             fn sub(self, other: $name<T>) -> $name<T> {
                 $name(self.0 - other.0)
             }
@@ -111,34 +161,55 @@ macro_rules! make_hues {
         impl<T: Float> Sub<T> for $name<T> {
             type Output = $name<T>;
 
+            #[inline]
             fn sub(self, other: T) -> $name<T> {
                 $name(self.0 - other)
+            }
+        }
+
+        impl Sub<$name<f32>> for f32 {
+            type Output = $name<f32>;
+
+            #[inline]
+            fn sub(self, other: $name<f32>) -> $name<f32> {
+                $name(self - other.0)
+            }
+        }
+
+        impl Sub<$name<f64>> for f64 {
+            type Output = $name<f64>;
+
+            #[inline]
+            fn sub(self, other: $name<f64>) -> $name<f64> {
+                $name(self - other.0)
             }
         }
     )+)
 }
 
 make_hues! {
-    ///A hue type for the CIE L\*a\*b\* family of color spaces.
+    /// A hue type for the CIE L\*a\*b\* family of color spaces.
     ///
-    ///It's measured in degrees and it's based on the four physiological
-    ///elementary colors _red_, _yellow_, _green_ and _blue_. This makes it
-    ///different from the hue of RGB based color spaces.
+    /// It's measured in degrees and it's based on the four physiological
+    /// elementary colors _red_, _yellow_, _green_ and _blue_. This makes it
+    /// different from the hue of RGB based color spaces.
     struct LabHue;
 
-    ///A hue type for the RGB family of color spaces.
+    /// A hue type for the RGB family of color spaces.
     ///
-    ///It's measured in degrees and uses the three additive primaries _red_,
-    ///_green_ and _blue_.
+    /// It's measured in degrees and uses the three additive primaries _red_,
+    /// _green_ and _blue_.
     struct RgbHue;
 }
 
+#[inline]
 fn normalize_angle<T: Float>(deg: T) -> T {
     let c360 = cast(360.0);
     let c180 = cast(180.0);
     deg - (((deg + c180) / c360) - T::one()).ceil() * c360
 }
 
+#[inline]
 fn normalize_angle_positive<T: Float>(deg: T) -> T {
     let c360 = cast(360.0);
     deg - ((deg / c360).floor() * c360)
