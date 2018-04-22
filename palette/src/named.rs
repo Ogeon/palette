@@ -1,5 +1,5 @@
-//!A collection of named color constants. Can be toggled with the `"named"`
-//!Cargo feature.
+//!A collection of named color constants. Can be toggled with the `"named"` and `"named_from_str"`
+//!Cargo features.
 //!
 //!They are taken from the [SVG keyword
 //!colors](https://www.w3.org/TR/SVG/types.html#ColorKeywords) (same as in
@@ -11,12 +11,12 @@
 //!
 //!//From constant
 //!let from_const = Srgb::<f32>::from_format(named::OLIVE).into_linear();
-//!
-//!//From name string
-//!let olive = named::from_str("olive").expect("unknown color");
-//!let from_str = Srgb::<f32>::from_format(olive).into_linear();
-//!
-//!assert_eq!(from_const, from_str);
+#![cfg_attr(feature = "named_from_str", doc = "")]
+#![cfg_attr(feature = "named_from_str", doc = "//From name string")]
+#![cfg_attr(feature = "named_from_str", doc = "let olive = named::from_str(\"olive\").expect(\"unknown color\");")]
+#![cfg_attr(feature = "named_from_str", doc = "let from_str = Srgb::<f32>::from_format(olive).into_linear();")]
+#![cfg_attr(feature = "named_from_str", doc = "")]
+#![cfg_attr(feature = "named_from_str", doc = "assert_eq!(from_const, from_str);")]
 //!```
 
 include!(concat!(env!("OUT_DIR"), "/named.rs"));

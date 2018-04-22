@@ -35,11 +35,11 @@ done < "Cargo.toml"
 echo -e "features: $features\n"
 
 #Test without any optional feature
-echo compiling with --no-default-features --features "$required_features"
-cargo build --no-default-features --features "$required_features"
+echo testing with --no-default-features --features "$required_features"
+cargo test --no-default-features --features "$required_features"
 
 #Isolated test of each optional feature
 for feature in $features; do
-	echo compiling with --no-default-features --features "\"$feature $required_features\""
-	cargo build --no-default-features --features "$feature $required_features"
+	echo testing with --no-default-features --features "\"$feature $required_features\""
+	cargo test --no-default-features --features "$feature $required_features"
 done

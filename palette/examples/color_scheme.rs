@@ -111,7 +111,7 @@ fn main() {
 
             vec![
                 primary.shift_hue(shift),
-                primary.shift_hue((-shift)),
+                primary.shift_hue(-shift),
             ]
         }
         ("analogous", matches) => {
@@ -125,7 +125,7 @@ fn main() {
 
             vec![
                 primary.shift_hue(shift),
-                primary.shift_hue((-shift)),
+                primary.shift_hue(-shift),
             ]
         }
         ("rectangle", matches) => {
