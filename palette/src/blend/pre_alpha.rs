@@ -27,9 +27,11 @@ use encoding::pixel::RawPixel;
 ///Note that converting to and from premultiplied alpha will cause the alpha
 ///component to be clamped to [0.0, 1.0].
 #[derive(Clone, Copy, PartialEq, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C, T: Float> {
     ///The premultiplied color components (`original.color * original.alpha`).
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub color: C,
 
     ///The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -294,5 +296,39 @@ impl<C, T: Float> Deref for PreAlpha<C, T> {
 impl<C, T: Float> DerefMut for PreAlpha<C, T> {
     fn deref_mut(&mut self) -> &mut C {
         &mut self.color
+    }
+}
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod test {
+    use super::PreAlpha;
+    use rgb::Rgb;
+    use encoding::Srgb;
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let color = PreAlpha {
+            color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
+            alpha: 0.5
+        };
+
+        let serialized = ::serde_json::to_string(&color).unwrap();
+
+        assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let expected = PreAlpha {
+            color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
+            alpha: 0.5
+        };
+
+        let deserialized: PreAlpha<_, _> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+
+        assert_eq!(deserialized, expected);
     }
 }

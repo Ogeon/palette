@@ -10,9 +10,11 @@ use encoding::pixel::RawPixel;
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
     ///The color.
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub color: C,
 
     ///The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -307,5 +309,28 @@ impl<C, T: Component> From<C> for Alpha<C, T> {
             color: color,
             alpha: T::max_intensity(),
         }
+    }
+}
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod test {
+    use rgb::Rgba;
+    use encoding::Srgb;
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5)).unwrap();
+
+        assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Rgba<Srgb> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+
+        assert_eq!(deserialized, Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5));
     }
 }

@@ -27,10 +27,14 @@ palette = "0.3"
 
 These features are enabled by default:
 
- * `"named"` - Enables color constants, located in the `named` module.
- * `"named_from_str"` - Enables the `named::from_str`, which maps name string to colors.
+* `"named"` - Enables color constants, located in the `named` module.
+* `"named_from_str"` - Enables the `named::from_str`, which maps name string to colors.
 
-# Linear?
+These features are disabled by default:
+
+* `"serde"` - Enables color serializing and deserializing.
+
+## Linear?
 
 Colors in, for example, images are often "gamma corrected" or stored in sRGB
 format as a compression method and to prevent banding. This is also a bit of a
@@ -41,12 +45,12 @@ any operations on the colors are accurate. This library uses a completely
 linear work flow, and comes with the tools for transitioning between linear
 and non-linear RGB.
 
-# What Can It Do?
+## What Can It Do?
 
 Palette provides tools for both color manipulation and conversion between
 color spaces. These are some highlights.
 
-## Color Spaces
+### Color Spaces
 
 RGB is probably the most widely known color space, but it's not the only one.
 You have probably used a color picker with a rainbow wheel and a brightness
@@ -75,7 +79,7 @@ This results in the following two colors:
 
 ![Hue Shift Comparison](gfx/readme_color_spaces.png)
 
-## Manipulation
+### Manipulation
 
 Palette comes with a number of color manipulation tools, that are implemented
 as traits. These includes lighten/darken, saturate/desaturate and hue shift.
@@ -104,8 +108,7 @@ This results in the following three colors:
 
 ![Manipulation Comparison](gfx/readme_manipulation.png)
 
-
-## Gradients
+### Gradients
 
 There is also a linear gradient type which makes it easy to interpolate
 between a series of colors. This gradient can be used in any color space and
@@ -134,12 +137,12 @@ hue:
 
 ![Gradient Comparison](gfx/readme_gradients.png)
 
-# What It Isn't
+## What It Isn't
 
 This library is only meant for color manipulation and conversion. It's not...
 
- * ...an image manipulation library. It will only handle colors, and not whole images.
- * ...an optimal pixel storage format. The colors are represented by linear floats, which is not a compact format and not meant to be displayed.
+* ...an image manipulation library. It will only handle colors, and not whole images.
+* ...an optimal pixel storage format. The colors are represented by linear floats, which is not a compact format and not meant to be displayed.
 
 You will have to look elsewhere for those particular features. There are,
 however, tools and traits in the [`pixel`][pixel_module] module for converting
@@ -148,18 +151,18 @@ Palette and other graphical libraries.
 
 [pixel_module]: https://ogeon.github.io/docs/palette/master/palette/pixel/index.html
 
-# Contributing
+## Contributing
 
 All sorts of contributions are welcome, no matter how huge or tiny, so take a
 look at [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, if you are
 interested.
 
-# License
+## License
 
 Licensed under either of
 
- * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 
