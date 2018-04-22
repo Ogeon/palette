@@ -27,6 +27,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
 #[derive(Debug, PartialEq, FromColor)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "S::WhitePoint"]
 #[palette_component = "T"]
@@ -41,6 +42,7 @@ where
     pub luma: T,
 
     /// The kind of RGB standard. sRGB is the default.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub standard: PhantomData<S>,
 }
 
@@ -552,4 +554,20 @@ mod test {
     }
 
     raw_pixel_conversion_tests!(Luma<Srgb>: luma);
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Luma::<Srgb>::new(0.3)).unwrap();
+
+        assert_eq!(serialized, r#"{"luma":0.3}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Luma<Srgb> = ::serde_json::from_str(r#"{"luma":0.3}"#).unwrap();
+
+        assert_eq!(deserialized, Luma::<Srgb>::new(0.3));
+    }
 }

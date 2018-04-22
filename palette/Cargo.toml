@@ -29,6 +29,12 @@ approx = "0.1"
 version = "0.7"
 optional = true
 
+[dependencies.serde]
+#feature
+version = "1"
+features = ["serde_derive"]
+optional = true
+
 [dev-dependencies]
 image = "0.18"
 clap = "2"
@@ -36,6 +42,7 @@ csv = "1.0.0-beta.3"
 serde = "1"
 serde_derive = "1"
 lazy_static = "1"
+serde_json = "1"
 
 [build-dependencies.phf_codegen]
 version = "0.7"

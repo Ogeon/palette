@@ -25,6 +25,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 ///and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 ///not the same lightness.
 #[derive(Debug, PartialEq, FromColor)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "S::WhitePoint"]
 #[palette_rgb_space = "S"]
@@ -51,6 +52,7 @@ where
 
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub space: PhantomData<S>,
 }
 
@@ -587,4 +589,20 @@ mod test {
 
     raw_pixel_conversion_tests!(Hsv<Srgb>: hue, saturation, value);
     raw_pixel_conversion_fail_tests!(Hsv<Srgb>: hue, saturation, value);
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Hsv::new(0.3, 0.8, 0.1)).unwrap();
+
+        assert_eq!(serialized, r#"{"hue":0.3,"saturation":0.8,"value":0.1}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Hsv = ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"value":0.1}"#).unwrap();
+
+        assert_eq!(deserialized, Hsv::new(0.3, 0.8, 0.1));
+    }
 }

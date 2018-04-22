@@ -16,6 +16,7 @@ macro_rules! make_hues {
         /// also have some surprising effects if it's expected to act as a
         /// linear number.
         #[derive(Clone, Copy, Debug, Default)]
+        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
         #[repr(C)]
         pub struct $name<T: Float = f32>(T);
 
@@ -311,5 +312,21 @@ mod test {
 
             assert_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
         }
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&RgbHue::from_degrees(10.2)).unwrap();
+
+        assert_eq!(serialized, "10.2");
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: RgbHue = ::serde_json::from_str("10.2").unwrap();
+
+        assert_eq!(deserialized, RgbHue::from_degrees(10.2));
     }
 }

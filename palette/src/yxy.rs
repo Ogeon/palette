@@ -22,6 +22,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 ///
 ///Conversions and operations on this color space depend on the white point.
 #[derive(Debug, PartialEq, FromColor)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
 #[palette_component = "T"]
@@ -47,6 +48,7 @@ where
 
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -478,4 +480,20 @@ mod test {
 
     raw_pixel_conversion_tests!(Yxy<D65>: x, y, luma);
     raw_pixel_conversion_fail_tests!(Yxy<D65>: x, y, luma);
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Yxy::new(0.3, 0.8, 0.1)).unwrap();
+
+        assert_eq!(serialized, r#"{"x":0.3,"y":0.8,"luma":0.1}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Yxy = ::serde_json::from_str(r#"{"x":0.3,"y":0.8,"luma":0.1}"#).unwrap();
+
+        assert_eq!(deserialized, Yxy::new(0.3, 0.8, 0.1));
+    }
 }

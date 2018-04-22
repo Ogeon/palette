@@ -35,6 +35,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
 /// for encoding formats.
 #[derive(Debug, PartialEq, FromColor)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S::Space"]
 #[palette_white_point = "<S::Space as RgbSpace>::WhitePoint"]
@@ -55,6 +56,7 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     pub blue: T,
 
     /// The kind of RGB standard. sRGB is the default.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub standard: PhantomData<S>,
 }
 
@@ -775,4 +777,20 @@ mod test {
 
     raw_pixel_conversion_tests!(Rgb<Srgb>: red, green, blue);
     raw_pixel_conversion_fail_tests!(Rgb<Srgb>: red, green, blue);
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Rgb::<Srgb>::new(0.3, 0.8, 0.1)).unwrap();
+
+        assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Rgb<Srgb> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1}"#).unwrap();
+
+        assert_eq!(deserialized, Rgb::<Srgb>::new(0.3, 0.8, 0.1));
+    }
 }

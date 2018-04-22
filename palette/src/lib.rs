@@ -80,6 +80,12 @@ extern crate num_traits;
 #[cfg(feature = "phf")]
 extern crate phf;
 
+#[cfg(feature = "serde")]
+#[macro_use]
+extern crate serde;
+#[cfg(all(test, feature = "serde"))]
+extern crate serde_json;
+
 use num_traits::{Float, NumCast, ToPrimitive, Zero};
 
 use approx::ApproxEq;
