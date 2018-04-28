@@ -24,7 +24,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///illuminant and a standard observer to be defined.
 ///
 ///Conversions and operations on this color space depend on the defined white point
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
@@ -51,6 +51,7 @@ where
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -69,10 +70,6 @@ where
     fn clone(&self) -> Xyz<Wp, T> {
         *self
     }
-}
-
-unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Xyz<Wp, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Xyz<D65, T>

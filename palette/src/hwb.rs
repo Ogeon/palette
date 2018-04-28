@@ -22,7 +22,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///then a degree of whiteness and blackness to mix into that base hue.
 ///
 ///It is very intuitive for humans to use and many color-pickers are based on the HWB color system
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S"]
@@ -37,6 +37,7 @@ where
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc. Same as the hue for HSL and HSV.
+    #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
     ///The whiteness of the color. It specifies the amount white to mix into the hue.
@@ -54,6 +55,7 @@ where
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
 }
 
@@ -72,10 +74,6 @@ where
     fn clone(&self) -> Hwb<S, T> {
         *self
     }
-}
-
-unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hwb<S, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Hwb<Srgb, T>

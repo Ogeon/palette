@@ -10,16 +10,18 @@ pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
 
     for attribute in attributes {
         let attribute_name = attribute.path.segments.first().unwrap().into_value().ident;
-        if !attribute_name.as_ref().starts_with("palette_") {
-            continue;
-        }
+        let is_palette_attribute = attribute_name.as_ref().starts_with("palette_");
 
         if attribute.path.segments.len() > 1 {
-            panic!(
-                "expected `{}`, but found `{}`",
-                attribute_name,
-                attribute.path.into_tokens()
-            );
+            if is_palette_attribute {
+                panic!(
+                    "expected `{}`, but found `{}`",
+                    attribute_name,
+                    attribute.path.into_tokens()
+                );
+            } else {
+                continue;
+            }
         }
 
         if attribute_name == "palette_internal" {
@@ -97,7 +99,7 @@ pub fn assert_empty_attribute(attribute_name: &Ident, tts: TokenStream) {
     }
 }
 
-pub fn parse_type_tuple_attribute<T: Synom>(
+pub fn parse_tuple_attribute<T: Synom>(
     attribute_name: &Ident,
     tts: TokenStream,
 ) -> Punctuated<T, Comma> {
@@ -195,6 +197,31 @@ impl PartialEq<str> for KeyValuePair {
 pub enum IdentOrIndex {
     Index(Index),
     Ident(Ident),
+}
+
+impl PartialEq for IdentOrIndex {
+    fn eq(&self, other: &IdentOrIndex) -> bool {
+        match (self, other) {
+            (&IdentOrIndex::Index(ref this), &IdentOrIndex::Index(ref other)) => {
+                this.index == other.index
+            }
+            (&IdentOrIndex::Ident(ref this), &IdentOrIndex::Ident(ref other)) => this == other,
+            _ => false,
+        }
+    }
+}
+
+impl ::std::cmp::Eq for IdentOrIndex {}
+
+impl ::std::hash::Hash for IdentOrIndex {
+    fn hash<H: ::std::hash::Hasher>(&self, hasher: &mut H) {
+        ::std::mem::discriminant(self).hash(hasher);
+
+        match *self {
+            IdentOrIndex::Index(ref index) => index.index.hash(hasher),
+            IdentOrIndex::Ident(ref ident) => ident.hash(hasher),
+        }
+    }
 }
 
 impl ::quote::ToTokens for IdentOrIndex {

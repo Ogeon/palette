@@ -617,10 +617,8 @@ impl MetaParser for FromColorMeta {
     fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream2) {
         match attribute_name.as_ref() {
             "palette_manual_from" => {
-                let impls = meta::parse_type_tuple_attribute::<KeyValuePair>(
-                    &attribute_name,
-                    attribute_tts,
-                );
+                let impls =
+                    meta::parse_tuple_attribute::<KeyValuePair>(&attribute_name, attribute_tts);
                 self.manual_implementations.extend(impls)
             }
             "palette_component" => {

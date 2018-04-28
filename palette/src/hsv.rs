@@ -24,7 +24,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 ///_lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
 ///and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 ///not the same lightness.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "S::WhitePoint"]
@@ -39,6 +39,7 @@ where
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
+    #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
     ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
@@ -53,6 +54,7 @@ where
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
 }
 
@@ -71,10 +73,6 @@ where
     fn clone(&self) -> Hsv<S, T> {
         *self
     }
-}
-
-unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hsv<S, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Hsv<Srgb, T>
