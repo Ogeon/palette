@@ -1,4 +1,4 @@
-use syn::{Attribute, Ident, LitStr};
+use syn::{Attribute, Data, Field, Fields, Ident, Index, LitStr, Type};
 use syn::token::{Comma, Eq};
 use syn::punctuated::Punctuated;
 use syn::synom::Synom;
@@ -23,20 +23,78 @@ pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
         }
 
         if attribute_name == "palette_internal" {
-            if attribute.tts.is_empty() {
-                result.internal()
-            } else {
-                panic!(
-                    "expected the attribute to be on the form `#[palette_internal]`, but found `{}`",
-                    attribute.into_tokens()
-                );
-            }
+            assert_empty_attribute(&attribute_name, attribute.tts);
+            result.internal();
         } else {
             result.parse_attribute(attribute_name, attribute.tts);
         }
     }
 
     result
+}
+
+pub fn parse_data_attributes<T: DataMetaParser>(data: Data) -> T {
+    let mut result = T::default();
+
+    match data {
+        Data::Struct(struct_item) => {
+            let fields = match struct_item.fields {
+                Fields::Named(fields) => fields.named,
+                Fields::Unnamed(fields) => fields.unnamed,
+                Fields::Unit => Default::default(),
+            };
+
+            parse_struct_field_attributes(&mut result, fields)
+        }
+        Data::Enum(_) => {}
+        Data::Union(_) => {}
+    }
+
+    result
+}
+
+pub fn parse_struct_field_attributes<T: DataMetaParser>(
+    parser: &mut T,
+    fields: Punctuated<Field, Comma>,
+) {
+    for (index, field) in fields.into_iter().enumerate() {
+        let identifier = field
+            .ident
+            .map(IdentOrIndex::Ident)
+            .unwrap_or_else(|| IdentOrIndex::Index(index.into()));
+
+        for attribute in field.attrs {
+            let attribute_name = attribute.path.segments.first().unwrap().into_value().ident;
+            if !attribute_name.as_ref().starts_with("palette_") {
+                continue;
+            }
+
+            if attribute.path.segments.len() > 1 {
+                panic!(
+                    "expected `{}`, but found `{}`",
+                    attribute_name,
+                    attribute.path.into_tokens()
+                );
+            }
+
+            parser.parse_struct_field_attribute(
+                identifier.clone(),
+                field.ty.clone(),
+                attribute_name,
+                attribute.tts,
+            );
+        }
+    }
+}
+
+pub fn assert_empty_attribute(attribute_name: &Ident, tts: TokenStream) {
+    if !tts.is_empty() {
+        panic!(
+            "expected the attribute to be on the form `#[{name}]`, but found `#[{name}{tts}]`",
+            name = attribute_name,
+            tts = tts
+        );
+    }
 }
 
 pub fn parse_type_tuple_attribute<T: Synom>(
@@ -133,7 +191,32 @@ impl PartialEq<str> for KeyValuePair {
     }
 }
 
+#[derive(Clone)]
+pub enum IdentOrIndex {
+    Index(Index),
+    Ident(Ident),
+}
+
+impl ::quote::ToTokens for IdentOrIndex {
+    fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+        match *self {
+            IdentOrIndex::Index(ref index) => index.to_tokens(tokens),
+            IdentOrIndex::Ident(ref ident) => ident.to_tokens(tokens),
+        }
+    }
+}
+
 pub trait MetaParser: Default {
     fn internal(&mut self);
     fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream);
+}
+
+pub trait DataMetaParser: Default {
+    fn parse_struct_field_attribute(
+        &mut self,
+        field_name: IdentOrIndex,
+        ty: Type,
+        attribute_name: Ident,
+        attribute_tts: TokenStream,
+    );
 }

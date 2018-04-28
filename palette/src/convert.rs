@@ -22,7 +22,7 @@ use encoding::Linear;
 /// requirement is to implement `From<Xyz>`, but it can also be customized to make use of generics
 /// and have other manual implementations.
 ///
-/// ## Attributes
+/// ## Item Attributes
 ///
 ///  * `#[palette_manual_from(Luma, Rgb = "from_rgb_internal")]`: Specifies the color types that
 /// the the custom color type already has `From` implementations for. Adding `= "function_name"`
@@ -41,6 +41,10 @@ use encoding::Linear;
 /// be used when deriving. The default is to either use `Srgb` or a best effort to convert between
 /// spaces, so sometimes it has to be set to a specific type. This does also accept type parameters.
 ///
+/// ## Field Attributes
+///
+///  * `#[palette_alpha]`: Specifies that the field is the color's transparency value.
+///
 /// ## Examples
 ///
 /// Minimum requirements implementation:
@@ -50,7 +54,7 @@ use encoding::Linear;
 /// extern crate palette_derive;
 /// extern crate palette;
 ///
-/// use palette::{Xyz, Srgb};
+/// use palette::{Srgb, Xyz};
 ///
 /// /// A custom version of Xyz that stores integer values from 0 to 100.
 /// #[derive(PartialEq, Debug, FromColor)]
@@ -73,7 +77,6 @@ use encoding::Linear;
 ///     }
 /// }
 ///
-///
 /// fn main() {
 ///     // Start with an sRGB color and convert it from u8 to f32,
 ///     // which is the default component type.
@@ -82,7 +85,14 @@ use encoding::Linear;
 ///     // Convert the rgb color to our own format.
 ///     let xyz = Xyz100::from(rgb);
 ///
-///     assert_eq!(xyz, Xyz100 {x: 59, y: 75, z: 42});
+///     assert_eq!(
+///         xyz,
+///         Xyz100 {
+///             x: 59,
+///             y: 75,
+///             z: 42,
+///         }
+///     );
 /// }
 /// ```
 ///
@@ -96,7 +106,7 @@ use encoding::Linear;
 /// #[macro_use]
 /// extern crate approx;
 ///
-/// use palette::{Srgb, Hsv, Pixel, Component, FromColor};
+/// use palette::{Component, FromColor, Hsv, Pixel, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
@@ -123,7 +133,6 @@ use encoding::Linear;
 /// // derive `From` automatically. It will take a round trip
 /// // through linear format, but that's fine in this case.
 /// impl<T: Component + Float> Bgr<T> {
-///
 ///     // It converts from any linear Rgb type that has the D65
 ///     // white point, which is the default if we don't specify
 ///     // anything else with the `palette_white_point` attribute.
@@ -136,7 +145,7 @@ use encoding::Linear;
 ///         Bgr {
 ///             blue: srgb.blue,
 ///             green: srgb.green,
-///             red: srgb.red
+///             red: srgb.red,
 ///         }
 ///     }
 /// }
@@ -151,6 +160,64 @@ use encoding::Linear;
 ///     assert_relative_eq!(buffer[3], 0.0);
 ///     assert_relative_eq!(buffer[4], 0.7353569830524495);
 ///     assert_relative_eq!(buffer[5], 0.5370987304831942);
+/// }
+/// ```
+///
+/// With alpha component:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+///
+/// use palette::{FromColor, LinSrgba, Srgb};
+/// use palette::rgb::{Rgb, RgbSpace};
+/// use palette::encoding::Linear;
+/// use palette::white_point::D65;
+///
+/// /// CSS style sRGB.
+/// #[derive(PartialEq, Debug, FromColor)]
+/// #[palette_manual_from(Rgb = "from_rgb_internal")]
+/// struct CssRgb {
+///     red: u8,
+///     green: u8,
+///     blue: u8,
+///     #[palette_alpha]
+///     alpha: f32,
+/// }
+///
+/// // We will write a conversion function for opaque RGB and derive
+/// // will take care of preserving the transparency for us.
+/// impl CssRgb {
+///     fn from_rgb_internal<S>(color: Rgb<Linear<S>, f32>) -> Self
+///     where
+///         S: RgbSpace<WhitePoint = D65>,
+///     {
+///         // Convert to u8 sRGB
+///         let srgb = Srgb::from_rgb(color).into_format();
+///
+///         CssRgb {
+///             red: srgb.red,
+///             green: srgb.green,
+///             blue: srgb.blue,
+///             alpha: 1.0,
+///         }
+///     }
+/// }
+///
+/// fn main() {
+///     let color = LinSrgba::new(0.5, 0.0, 1.0, 0.3);
+///     let css_color = CssRgb::from(color);
+///
+///     assert_eq!(
+///         css_color,
+///         CssRgb {
+///             red: 187,
+///             green: 0,
+///             blue: 254,
+///             alpha: 0.3,
+///         }
+///     );
 /// }
 /// ```
 pub trait FromColor<Wp = D65, T = f32>: Sized
@@ -215,7 +282,7 @@ where
 /// requirement is to implement `Into<Xyz>`, but it can also be customized to make use of generics
 /// and have other manual implementations.
 ///
-/// ## Attributes
+/// ## Item Attributes
 ///
 ///  * `#[palette_manual_into(Luma, Rgb = "into_rgb_internal")]`: Specifies the color types that
 /// the the custom color type already has `Into` implementations for. Adding `= "function_name"`
@@ -234,6 +301,10 @@ where
 /// be used when deriving. The default is to either use `Srgb` or a best effort to convert between
 /// spaces, so sometimes it has to be set to a specific type. This does also accept type parameters.
 ///
+/// ## Field Attributes
+///
+///  * `#[palette_alpha]`: Specifies that the field is the color's transparency value.
+///
 /// ## Examples
 ///
 /// Minimum requirements implementation:
@@ -243,7 +314,7 @@ where
 /// extern crate palette_derive;
 /// extern crate palette;
 ///
-/// use palette::{Xyz, Srgb};
+/// use palette::{Srgb, Xyz};
 ///
 /// /// A custom version of Xyz that stores integer values from 0 to 100.
 /// #[derive(PartialEq, Debug, IntoColor)]
@@ -265,10 +336,13 @@ where
 ///     }
 /// }
 ///
-///
 /// fn main() {
 ///     // Start with an Xyz100 color.
-///     let xyz = Xyz100 {x: 59, y: 75, z: 42};
+///     let xyz = Xyz100 {
+///         x: 59,
+///         y: 75,
+///         z: 42,
+///     };
 ///
 ///     // Convert the color to sRGB.
 ///     let rgb: Srgb = xyz.into();
@@ -287,7 +361,7 @@ where
 /// #[macro_use]
 /// extern crate approx;
 ///
-/// use palette::{Srgb, Hsv, Pixel, Component, IntoColor};
+/// use palette::{Component, Hsv, IntoColor, Pixel, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
@@ -313,7 +387,6 @@ where
 /// // implementing a private conversion function and letting it
 /// // derive `Into` automatically.
 /// impl<T: Component + Float> Bgr<T> {
-///
 ///     // It converts from any linear Rgb type that has the D65
 ///     // white point, which is the default if we don't specify
 ///     // anything else with the `palette_white_point` attribute.
@@ -326,10 +399,68 @@ where
 /// }
 ///
 /// fn main() {
-///     let buffer = vec![0.0f64, 0.0, 0.0, 0.0, 0.7353569830524495, 0.5370987304831942];
+///     let buffer = vec![
+///         0.0f64,
+///         0.0,
+///         0.0,
+///         0.0,
+///         0.7353569830524495,
+///         0.5370987304831942,
+///     ];
 ///     let hsv = Bgr::from_raw_slice(&buffer)[1].into();
 ///
 ///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
+/// }
+/// ```
+///
+/// With alpha component:
+///
+/// ```rust
+/// #[macro_use]
+/// extern crate palette_derive;
+/// extern crate palette;
+/// #[macro_use]
+/// extern crate approx;
+///
+/// use palette::{IntoColor, LinSrgba, Srgb};
+/// use palette::rgb::{Rgb, RgbSpace};
+/// use palette::encoding::Linear;
+/// use palette::white_point::D65;
+///
+/// /// CSS style sRGB.
+/// #[derive(PartialEq, Debug, IntoColor)]
+/// #[palette_manual_into(Rgb = "into_rgb_internal")]
+/// struct CssRgb {
+///     red: u8,
+///     green: u8,
+///     blue: u8,
+///     #[palette_alpha]
+///     alpha: f32,
+/// }
+///
+/// // We will write a conversion function for opaque RGB and derive
+/// // will take care of preserving the transparency for us.
+/// impl CssRgb {
+///     fn into_rgb_internal<S>(self) -> Rgb<Linear<S>, f32>
+///     where
+///         S: RgbSpace<WhitePoint = D65>,
+///     {
+///         Srgb::new(self.red, self.green, self.blue)
+///             .into_format()
+///             .into_rgb()
+///     }
+/// }
+///
+/// fn main() {
+///     let css_color = CssRgb {
+///         red: 187,
+///         green: 0,
+///         blue: 255,
+///         alpha: 0.3,
+///     };
+///     let color = css_color.into();
+///
+///     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
 /// }
 /// ```
 pub trait IntoColor<Wp = D65, T = f32>: Sized
@@ -385,12 +516,12 @@ where
 }
 
 macro_rules! impl_into_color {
-    ($self_ty:ident, $from_fn: ident) => {
+    ($self_ty: ident, $from_fn: ident) => {
         impl<Wp, T> IntoColor<Wp, T> for $self_ty<Wp, T>
-            where T: Component + Float,
-             Wp: WhitePoint
+        where
+            T: Component + Float,
+            Wp: WhitePoint,
         {
-
             fn into_xyz(self) -> Xyz<Wp, T> {
                 Xyz::$from_fn(self)
             }
@@ -407,15 +538,15 @@ macro_rules! impl_into_color {
                 Lch::$from_fn(self)
             }
 
-            fn into_rgb<S: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Linear<S>, T> {
+            fn into_rgb<S: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<S>, T> {
                 Rgb::$from_fn(self)
             }
 
-            fn into_hsl<S: RgbSpace<WhitePoint=Wp>>(self) -> Hsl<S, T> {
+            fn into_hsl<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<S, T> {
                 Hsl::$from_fn(self)
             }
 
-            fn into_hsv<S: RgbSpace<WhitePoint=Wp>>(self) -> Hsv<S, T> {
+            fn into_hsv<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<S, T> {
                 Hsv::$from_fn(self)
             }
 
@@ -423,17 +554,17 @@ macro_rules! impl_into_color {
                 Luma::$from_fn(self)
             }
         }
-    }
+    };
 }
 
 macro_rules! impl_into_color_rgb {
-    ($self_ty:ident, $from_fn: ident) => {
-        impl<S, Wp, T> IntoColor<Wp, T> for $self_ty<S, T> where
+    ($self_ty: ident, $from_fn: ident) => {
+        impl<S, Wp, T> IntoColor<Wp, T> for $self_ty<S, T>
+        where
             T: Component + Float,
             Wp: WhitePoint,
-            S: RgbSpace<WhitePoint=Wp>,
+            S: RgbSpace<WhitePoint = Wp>,
         {
-
             fn into_xyz(self) -> Xyz<Wp, T> {
                 Xyz::$from_fn(self)
             }
@@ -450,25 +581,23 @@ macro_rules! impl_into_color_rgb {
                 Lch::$from_fn(self)
             }
 
-            fn into_rgb<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Rgb<Linear<Sp>, T> {
+            fn into_rgb<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<Sp>, T> {
                 Rgb::$from_fn(self)
             }
 
-            fn into_hsl<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Hsl<Sp, T> {
+            fn into_hsl<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<Sp, T> {
                 Hsl::$from_fn(self)
             }
 
-            fn into_hsv<Sp: RgbSpace<WhitePoint=Wp>>(self) -> Hsv<Sp, T> {
+            fn into_hsv<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<Sp, T> {
                 Hsv::$from_fn(self)
             }
 
             fn into_luma(self) -> Luma<Linear<Wp>, T> {
                 Luma::$from_fn(self)
             }
-
         }
-
-    }
+    };
 }
 
 impl_into_color!(Xyz, from_xyz);
