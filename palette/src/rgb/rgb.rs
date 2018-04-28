@@ -34,7 +34,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// meaning that gamma correction is required when converting to and from a
 /// displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
 /// for encoding formats.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S::Space"]
@@ -57,6 +57,7 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub standard: PhantomData<S>,
 }
 
@@ -93,10 +94,6 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self {
         color.into_format()
     }
-}
-
-unsafe impl<S: RgbStandard, T: Component> Pixel<T> for Rgb<S, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {

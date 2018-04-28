@@ -24,7 +24,7 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///
 ///The parameters of L\*a\*b\* are quite different, compared to many other color
 ///spaces, so manipulating them manually may be unintuitive.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
@@ -49,6 +49,7 @@ where
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -67,10 +68,6 @@ where
     fn clone(&self) -> Lab<Wp, T> {
         *self
     }
-}
-
-unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Lab<Wp, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Lab<D65, T>

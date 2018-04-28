@@ -113,7 +113,7 @@ use encoding::Linear;
 /// use num_traits::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
-/// #[derive(PartialEq, Debug, FromColor)]
+/// #[derive(PartialEq, Debug, FromColor, Pixel)]
 /// #[palette_manual_from(Rgb = "from_rgb_internal")]
 /// #[palette_component = "T"]
 /// #[repr(C)] // Makes sure the memory layout is as we want it.
@@ -121,11 +121,6 @@ use encoding::Linear;
 ///     blue: T,
 ///     green: T,
 ///     red: T,
-/// }
-///
-/// // Careful with this one! It requires `#[repr(C)]`.
-/// unsafe impl<T> Pixel<T> for Bgr<T> {
-///     const CHANNELS: usize = 3;
 /// }
 ///
 /// // Rgb is a bit more complex than other colors, so we are
@@ -368,7 +363,7 @@ where
 /// use num_traits::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
-/// #[derive(Copy, Clone, IntoColor)]
+/// #[derive(Copy, Clone, IntoColor, Pixel)]
 /// #[palette_manual_into(Rgb = "into_rgb_internal")]
 /// #[palette_component = "T"]
 /// #[repr(C)] // Makes sure the memory layout is as we want it.
@@ -376,11 +371,6 @@ where
 ///     blue: T,
 ///     green: T,
 ///     red: T,
-/// }
-///
-/// // Careful with this one! It requires `#[repr(C)]`.
-/// unsafe impl<T> Pixel<T> for Bgr<T> {
-///     const CHANNELS: usize = 3;
 /// }
 ///
 /// // Rgb is a bit more complex than other colors, so we are

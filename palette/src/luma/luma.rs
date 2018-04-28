@@ -26,7 +26,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 ///perceived to be. It's basically the `Y` component of [CIE
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "S::WhitePoint"]
@@ -43,6 +43,7 @@ where
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub standard: PhantomData<S>,
 }
 
@@ -61,10 +62,6 @@ where
     fn clone(&self) -> Luma<S, T> {
         *self
     }
-}
-
-unsafe impl<S: LumaStandard, T: Component> Pixel<T> for Luma<S, T> {
-    const CHANNELS: usize = 1;
 }
 
 impl<S, T> Luma<S, T>

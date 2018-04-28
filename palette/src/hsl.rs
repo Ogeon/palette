@@ -25,7 +25,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///more gray, or making it darker.
 ///
 ///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S"]
@@ -40,6 +40,7 @@ where
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
+    #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
     ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
@@ -53,6 +54,7 @@ where
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
 }
 
@@ -71,10 +73,6 @@ where
     fn clone(&self) -> Hsl<S, T> {
         *self
     }
-}
-
-unsafe impl<S: RgbSpace, T: Component + Float> Pixel<T> for Hsl<S, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Hsl<Srgb, T>
@@ -586,13 +584,17 @@ mod test {
     fn serialize() {
         let serialized = ::serde_json::to_string(&Hsl::new(0.3, 0.8, 0.1)).unwrap();
 
-        assert_eq!(serialized, r#"{"hue":0.3,"saturation":0.8,"lightness":0.1}"#);
+        assert_eq!(
+            serialized,
+            r#"{"hue":0.3,"saturation":0.8,"lightness":0.1}"#
+        );
     }
 
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Hsl = ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"lightness":0.1}"#).unwrap();
+        let deserialized: Hsl =
+            ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"lightness":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hsl::new(0.3, 0.8, 0.1));
     }

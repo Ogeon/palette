@@ -15,6 +15,7 @@ use proc_macro::TokenStream;
 mod util;
 mod meta;
 mod convert;
+mod encoding;
 
 const COLOR_TYPES: &[&str] = &[
     "Rgb", "Luma", "Hsl", "Hsv", "Hwb", "Lab", "Lch", "Xyz", "Yxy"
@@ -32,4 +33,11 @@ pub fn derive_from_color(tokens: TokenStream) -> TokenStream {
                                palette_manual_into, palette_rgb_space, palette_alpha))]
 pub fn derive_into_color(tokens: TokenStream) -> TokenStream {
     convert::derive_into_color(tokens)
+}
+
+#[proc_macro_derive(Pixel,
+                    attributes(palette_internal, palette_unsafe_same_layout_as,
+                               palette_unsafe_zero_sized))]
+pub fn derive_pixel(tokens: TokenStream) -> TokenStream {
+    encoding::derive_pixel(tokens)
 }

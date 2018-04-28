@@ -19,7 +19,7 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 ///cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, PartialEq, FromColor)]
+#[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
@@ -43,11 +43,13 @@ where
 
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
     ///etc.
+    #[palette_unsafe_same_layout_as = "T"]
     pub hue: LabHue<T>,
 
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serde", serde(skip))]
+    #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -66,10 +68,6 @@ where
     fn clone(&self) -> Lch<Wp, T> {
         *self
     }
-}
-
-unsafe impl<Wp: WhitePoint, T: Component + Float> Pixel<T> for Lch<Wp, T> {
-    const CHANNELS: usize = 3;
 }
 
 impl<T> Lch<D65, T>
