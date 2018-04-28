@@ -3,7 +3,7 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 use syn::{self, DeriveInput, Generics, Ident, Type};
 use quote::Tokens;
 
-use meta::{self, KeyValuePair, MetaParser};
+use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
 use util;
 use COLOR_TYPES;
 
@@ -14,10 +14,13 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         ident,
         attrs,
         generics: original_generics,
+        data,
         ..
     } = syn::parse(tokens).expect("could not parse tokens");
     let mut generics = original_generics.clone();
+
     let mut meta: IntoColorMeta = meta::parse_attributes(attrs);
+    let item_meta: IntoColorItemMeta = meta::parse_data_attributes(data);
 
     let (generic_component, generic_white_point) = shared::find_in_generics(
         meta.component.as_ref(),
@@ -27,6 +30,11 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
 
     let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
     let component = shared::component_type(meta.component.clone());
+
+    let (alpha_property, alpha_type) = item_meta
+        .alpha_property
+        .map(|(property, ty)| (Some(property), ty))
+        .unwrap_or_else(|| (None, component.clone()));
 
     if generic_component {
         shared::add_component_where_clause(&component, &mut generics, meta.internal);
@@ -80,17 +88,17 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
                 &meta,
                 &original_generics,
                 generic_component,
-                false,
             ))
         };
 
-        let with_alpha = impl_into(
+        let with_alpha = impl_into_alpha(
             &ident,
             color,
             &meta,
             &original_generics,
             generic_component,
-            true,
+            alpha_property.as_ref(),
+            &alpha_type,
         );
 
         quote! {
@@ -99,10 +107,15 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         }
     });
 
-    let into_color_ty =
-        impl_into_color_type(&ident, &meta, &original_generics, generic_component, false);
-    let from_color_ty_other_alpha =
-        impl_into_color_type(&ident, &meta, &original_generics, generic_component, true);
+    let into_color_ty = impl_into_color_type(&ident, &meta, &original_generics, generic_component);
+    let from_color_ty_other_alpha = impl_into_color_type_alpha(
+        &ident,
+        &meta,
+        &original_generics,
+        generic_component,
+        alpha_property.as_ref(),
+        &alpha_type,
+    );
 
     let result = util::bundle_impl(
         "IntoColor",
@@ -125,8 +138,88 @@ fn impl_into(
     meta: &IntoColorMeta,
     generics: &Generics,
     generic_component: bool,
-    other_alpha: bool,
 ) -> Tokens {
+    let (_, type_generics, _) = generics.split_for_impl();
+
+    let IntoImplParameters {
+        generics,
+        trait_path,
+        color_ty,
+        method_call,
+        ..
+    } = prepare_into_impl(ident, color, meta, generics, generic_component);
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    quote!{
+        #[automatically_derived]
+        impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
+            fn into(self) -> #color_ty {
+                use #trait_path;
+                let color = self;
+                #method_call
+            }
+        }
+    }
+}
+
+fn impl_into_alpha(
+    ident: &Ident,
+    color: &str,
+    meta: &IntoColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+    alpha_property: Option<&IdentOrIndex>,
+    alpha_type: &Type,
+) -> Tokens {
+    let (_, type_generics, _) = generics.split_for_impl();
+
+    let IntoImplParameters {
+        generics,
+        alpha_path,
+        trait_path,
+        color_ty,
+        method_call,
+        ..
+    } = prepare_into_impl(ident, color, meta, generics, generic_component);
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    if let Some(alpha_property) = alpha_property {
+        quote!{
+            #[automatically_derived]
+            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
+                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
+                    use #trait_path;
+                    let color = self;
+                    #alpha_path {
+                        alpha: color.#alpha_property.clone(),
+                        color: #method_call,
+                    }
+                }
+            }
+        }
+    } else {
+        quote!{
+            #[automatically_derived]
+            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
+                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
+                    use #trait_path;
+                    let color = self;
+                    #method_call.into()
+                }
+            }
+        }
+    }
+}
+
+fn prepare_into_impl(
+    ident: &Ident,
+    color: &str,
+    meta: &IntoColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+) -> IntoImplParameters {
     let (_, type_generics, _) = generics.split_for_impl();
     let turbofish_generics = type_generics.as_turbofish();
     let mut generics = generics.clone();
@@ -161,31 +254,21 @@ fn impl_into(
         },
     };
 
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    if other_alpha {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#alpha_path<#color_ty, #component>> for #ident #type_generics #where_clause {
-                fn into(self) -> #alpha_path<#color_ty, #component> {
-                    use #trait_path;
-                    let color = self;
-                    #method_call.into()
-                }
-            }
-        }
-    } else {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
-                fn into(self) -> #color_ty {
-                    use #trait_path;
-                    let color = self;
-                    #method_call
-                }
-            }
-        }
+    IntoImplParameters {
+        generics,
+        alpha_path,
+        trait_path,
+        color_ty,
+        method_call,
     }
+}
+
+struct IntoImplParameters {
+    generics: Generics,
+    alpha_path: Tokens,
+    trait_path: Tokens,
+    color_ty: Type,
+    method_call: Tokens,
 }
 
 fn impl_into_color_type(
@@ -193,13 +276,78 @@ fn impl_into_color_type(
     meta: &IntoColorMeta,
     generics: &Generics,
     generic_component: bool,
-    other_alpha: bool,
 ) -> Tokens {
     let (_, type_generics, _) = generics.split_for_impl();
+
+    let IntoColorTypeImplParameters {
+        generics,
+        color_path,
+        color_ty,
+    } = prepare_into_color_type_impl(meta, generics, generic_component);
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    quote!{
+        #[automatically_derived]
+        impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
+            fn into(self) -> #color_ty {
+                #color_path::Rgb(self.into())
+            }
+        }
+    }
+}
+
+fn impl_into_color_type_alpha(
+    ident: &Ident,
+    meta: &IntoColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+    alpha_property: Option<&IdentOrIndex>,
+    alpha_type: &Type,
+) -> Tokens {
+    let (_, type_generics, _) = generics.split_for_impl();
+    let alpha_path = util::path(&["Alpha"], meta.internal);
+
+    let IntoColorTypeImplParameters {
+        generics,
+        color_path,
+        color_ty,
+    } = prepare_into_color_type_impl(meta, generics, generic_component);
+
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+    if let Some(alpha_property) = alpha_property {
+        quote!{
+            #[automatically_derived]
+            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
+                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
+                    #alpha_path {
+                        alpha: self.#alpha_property.clone(),
+                        color: #color_path::Rgb(self.into()).into(),
+                    }
+                }
+            }
+        }
+    } else {
+        quote!{
+            #[automatically_derived]
+            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
+                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
+                    #color_path::Rgb(self.into()).into()
+                }
+            }
+        }
+    }
+}
+
+fn prepare_into_color_type_impl(
+    meta: &IntoColorMeta,
+    generics: &Generics,
+    generic_component: bool,
+) -> IntoColorTypeImplParameters {
     let mut generics = generics.clone();
 
     let color_path = util::path(&["Color"], meta.internal);
-    let alpha_path = util::path(&["Alpha"], meta.internal);
 
     let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
     let component = shared::component_type(meta.component.clone());
@@ -229,27 +377,17 @@ fn impl_into_color_type(
         quote!(#color_path<#rgb_space_type, #component>)
     };
 
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    if other_alpha {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#alpha_path<#color_ty, #component>> for #ident #type_generics #where_clause {
-                fn into(self) -> #alpha_path<#color_ty, #component> {
-                    #color_path::Rgb(self.into()).into()
-                }
-            }
-        }
-    } else {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
-                fn into(self) -> #color_ty {
-                    #color_path::Rgb(self.into())
-                }
-            }
-        }
+    IntoColorTypeImplParameters {
+        generics,
+        color_path,
+        color_ty,
     }
+}
+
+struct IntoColorTypeImplParameters {
+    generics: Generics,
+    color_path: Tokens,
+    color_ty: Tokens,
 }
 
 #[derive(Default)]
@@ -292,6 +430,29 @@ impl MetaParser for IntoColorMeta {
                     let rgb_space = meta::parse_equal_attribute(&attribute_name, attribute_tts);
                     self.rgb_space = Some(rgb_space);
                 }
+            }
+            _ => {}
+        }
+    }
+}
+
+#[derive(Default)]
+struct IntoColorItemMeta {
+    alpha_property: Option<(IdentOrIndex, Type)>,
+}
+
+impl DataMetaParser for IntoColorItemMeta {
+    fn parse_struct_field_attribute(
+        &mut self,
+        field_name: IdentOrIndex,
+        ty: Type,
+        attribute_name: Ident,
+        attribute_tts: TokenStream2,
+    ) {
+        match attribute_name.as_ref() {
+            "palette_alpha" => {
+                meta::assert_empty_attribute(&attribute_name, attribute_tts);
+                self.alpha_property = Some((field_name, ty));
             }
             _ => {}
         }
