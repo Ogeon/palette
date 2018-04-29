@@ -95,6 +95,9 @@ use rgb::{Rgb, RgbSpace, Rgba};
 use luma::Luma;
 use encoding::Linear;
 
+#[doc(hidden)]
+pub use palette_derive::*;
+
 pub use gradient::Gradient;
 pub use alpha::Alpha;
 pub use blend::Blend;
