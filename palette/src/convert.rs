@@ -51,7 +51,6 @@ use encoding::Linear;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 ///
 /// use palette::{Srgb, Xyz};
@@ -100,7 +99,6 @@ use encoding::Linear;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 /// extern crate num_traits;
 /// #[macro_use]
@@ -162,7 +160,6 @@ use encoding::Linear;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 ///
 /// use palette::{FromColor, LinSrgba, Srgb};
@@ -306,7 +303,6 @@ where
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 ///
 /// use palette::{Srgb, Xyz};
@@ -350,7 +346,6 @@ where
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 /// extern crate num_traits;
 /// #[macro_use]
@@ -407,7 +402,6 @@ where
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 /// #[macro_use]
 /// extern crate approx;

@@ -35,7 +35,6 @@ mod raw;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 ///
 /// use palette::Pixel;
@@ -69,7 +68,6 @@ mod raw;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette_derive;
 /// extern crate palette;
 ///
 /// use std::marker::PhantomData;
