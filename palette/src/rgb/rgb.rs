@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Sub};
 use std::any::TypeId;
+use std::fmt;
 
 use num_traits::Float;
 use approx::ApproxEq;
@@ -753,6 +754,42 @@ where
     }
 }
 
+impl<S, T> fmt::LowerHex for Rgb<S, T>
+where
+    T: Component + fmt::LowerHex,
+    S: RgbStandard,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(
+            f,
+            "{:0width$x}{:0width$x}{:0width$x}",
+            self.red,
+            self.green,
+            self.blue,
+            width = size
+        )
+    }
+}
+
+impl<S, T> fmt::UpperHex for Rgb<S, T>
+where
+    T: Component + fmt::UpperHex,
+    S: RgbStandard,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(
+            f,
+            "{:0width$X}{:0width$X}{:0width$X}",
+            self.red,
+            self.green,
+            self.blue,
+            width = size
+        )
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Rgb;
@@ -775,6 +812,96 @@ mod test {
     raw_pixel_conversion_tests!(Rgb<Srgb>: red, green, blue);
     raw_pixel_conversion_fail_tests!(Rgb<Srgb>: red, green, blue);
 
+    #[test]
+    fn lower_hex() {
+        assert_eq!(
+            format!("{:x}", Rgb::<Srgb, u8>::new(171, 193, 35)),
+            "abc123"
+        );
+    }
+
+    #[test]
+    fn lower_hex_small_numbers() {
+        assert_eq!(format!("{:x}", Rgb::<Srgb, u8>::new(1, 2, 3)), "010203");
+        assert_eq!(
+            format!("{:x}", Rgb::<Srgb, u16>::new(1, 2, 3)),
+            "000100020003"
+        );
+        assert_eq!(
+            format!("{:x}", Rgb::<Srgb, u32>::new(1, 2, 3)),
+            "000000010000000200000003"
+        );
+        assert_eq!(
+            format!("{:x}", Rgb::<Srgb, u64>::new(1, 2, 3)),
+            "000000000000000100000000000000020000000000000003"
+        );
+    }
+
+    #[test]
+    fn lower_hex_custom_width() {
+        assert_eq!(
+            format!("{:03x}", Rgb::<Srgb, u8>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgb::<Srgb, u16>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgb::<Srgb, u32>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgb::<Srgb, u64>::new(1, 2, 3)),
+            "001002003"
+        );
+    }
+
+    #[test]
+    fn upper_hex() {
+        assert_eq!(
+            format!("{:X}", Rgb::<Srgb, u8>::new(171, 193, 35)),
+            "ABC123"
+        );
+    }
+
+    #[test]
+    fn upper_hex_small_numbers() {
+        assert_eq!(format!("{:X}", Rgb::<Srgb, u8>::new(1, 2, 3)), "010203");
+        assert_eq!(
+            format!("{:X}", Rgb::<Srgb, u16>::new(1, 2, 3)),
+            "000100020003"
+        );
+        assert_eq!(
+            format!("{:X}", Rgb::<Srgb, u32>::new(1, 2, 3)),
+            "000000010000000200000003"
+        );
+        assert_eq!(
+            format!("{:X}", Rgb::<Srgb, u64>::new(1, 2, 3)),
+            "000000000000000100000000000000020000000000000003"
+        );
+    }
+
+    #[test]
+    fn upper_hex_custom_width() {
+        assert_eq!(
+            format!("{:03X}", Rgb::<Srgb, u8>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgb::<Srgb, u16>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgb::<Srgb, u32>::new(1, 2, 3)),
+            "001002003"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgb::<Srgb, u64>::new(1, 2, 3)),
+            "001002003"
+        );
+    }
+
     #[cfg(feature = "serde")]
     #[test]
     fn serialize() {
@@ -786,7 +913,8 @@ mod test {
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Rgb<Srgb> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1}"#).unwrap();
+        let deserialized: Rgb<Srgb> =
+            ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Rgb::<Srgb>::new(0.3, 0.8, 0.1));
     }

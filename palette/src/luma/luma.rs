@@ -1,9 +1,10 @@
+use std::ops::{Add, Div, Mul, Sub};
+use std::marker::PhantomData;
+use std::fmt;
+
 use approx::ApproxEq;
 
 use num_traits::Float;
-
-use std::ops::{Add, Div, Mul, Sub};
-use std::marker::PhantomData;
 
 use {Alpha, Xyz, Yxy};
 use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
@@ -533,6 +534,28 @@ where
     }
 }
 
+impl<S, T> fmt::LowerHex for Luma<S, T>
+where
+    T: Component + fmt::LowerHex,
+    S: LumaStandard,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(f, "{:0width$x}", self.luma, width = size)
+    }
+}
+
+impl<S, T> fmt::UpperHex for Luma<S, T>
+where
+    T: Component + fmt::UpperHex,
+    S: LumaStandard,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(f, "{:0width$X}", self.luma, width = size)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use Luma;
@@ -551,6 +574,54 @@ mod test {
     }
 
     raw_pixel_conversion_tests!(Luma<Srgb>: luma);
+
+    #[test]
+    fn lower_hex() {
+        assert_eq!(format!("{:x}", Luma::<Srgb, u8>::new(161)), "a1");
+    }
+
+    #[test]
+    fn lower_hex_small_numbers() {
+        assert_eq!(format!("{:x}", Luma::<Srgb, u8>::new(1)), "01");
+        assert_eq!(format!("{:x}", Luma::<Srgb, u16>::new(1)), "0001");
+        assert_eq!(format!("{:x}", Luma::<Srgb, u32>::new(1)), "00000001");
+        assert_eq!(
+            format!("{:x}", Luma::<Srgb, u64>::new(1)),
+            "0000000000000001"
+        );
+    }
+
+    #[test]
+    fn lower_hex_custom_width() {
+        assert_eq!(format!("{:03x}", Luma::<Srgb, u8>::new(1)), "001");
+        assert_eq!(format!("{:03x}", Luma::<Srgb, u16>::new(1)), "001");
+        assert_eq!(format!("{:03x}", Luma::<Srgb, u32>::new(1)), "001");
+        assert_eq!(format!("{:03x}", Luma::<Srgb, u64>::new(1)), "001");
+    }
+
+    #[test]
+    fn upper_hex() {
+        assert_eq!(format!("{:X}", Luma::<Srgb, u8>::new(161)), "A1");
+    }
+
+    #[test]
+    fn upper_hex_small_numbers() {
+        assert_eq!(format!("{:X}", Luma::<Srgb, u8>::new(1)), "01");
+        assert_eq!(format!("{:X}", Luma::<Srgb, u16>::new(1)), "0001");
+        assert_eq!(format!("{:X}", Luma::<Srgb, u32>::new(1)), "00000001");
+        assert_eq!(
+            format!("{:X}", Luma::<Srgb, u64>::new(1)),
+            "0000000000000001"
+        );
+    }
+
+    #[test]
+    fn upper_hex_custom_width() {
+        assert_eq!(format!("{:03X}", Luma::<Srgb, u8>::new(1)), "001");
+        assert_eq!(format!("{:03X}", Luma::<Srgb, u16>::new(1)), "001");
+        assert_eq!(format!("{:03X}", Luma::<Srgb, u32>::new(1)), "001");
+        assert_eq!(format!("{:03X}", Luma::<Srgb, u64>::new(1)), "001");
+    }
 
     #[cfg(feature = "serde")]
     #[test]
