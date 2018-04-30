@@ -1,4 +1,5 @@
 use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use std::fmt;
 
 use num_traits::Float;
 
@@ -312,24 +313,157 @@ impl<C, T: Component> From<C> for Alpha<C, T> {
     }
 }
 
+impl<C, T> fmt::LowerHex for Alpha<C, T>
+where
+    T: fmt::LowerHex,
+    C: fmt::LowerHex,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(
+            f,
+            "{:0width$x}{:0width$x}",
+            self.color,
+            self.alpha,
+            width = size
+        )
+    }
+}
+
+impl<C, T> fmt::UpperHex for Alpha<C, T>
+where
+    T: fmt::UpperHex,
+    C: fmt::UpperHex,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        write!(
+            f,
+            "{:0width$X}{:0width$X}",
+            self.color,
+            self.alpha,
+            width = size
+        )
+    }
+}
+
 #[cfg(test)]
-#[cfg(feature = "serde")]
 mod test {
     use rgb::Rgba;
     use encoding::Srgb;
+
+    #[test]
+    fn lower_hex() {
+        assert_eq!(
+            format!("{:x}", Rgba::<Srgb, u8>::new(171, 193, 35, 161)),
+            "abc123a1"
+        );
+    }
+
+    #[test]
+    fn lower_hex_small_numbers() {
+        assert_eq!(
+            format!("{:x}", Rgba::<Srgb, u8>::new(1, 2, 3, 4)),
+            "01020304"
+        );
+        assert_eq!(
+            format!("{:x}", Rgba::<Srgb, u16>::new(1, 2, 3, 4)),
+            "0001000200030004"
+        );
+        assert_eq!(
+            format!("{:x}", Rgba::<Srgb, u32>::new(1, 2, 3, 4)),
+            "00000001000000020000000300000004"
+        );
+        assert_eq!(
+            format!("{:x}", Rgba::<Srgb, u64>::new(1, 2, 3, 4)),
+            "0000000000000001000000000000000200000000000000030000000000000004"
+        );
+    }
+
+    #[test]
+    fn lower_hex_custom_width() {
+        assert_eq!(
+            format!("{:03x}", Rgba::<Srgb, u8>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgba::<Srgb, u16>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgba::<Srgb, u32>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03x}", Rgba::<Srgb, u64>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+    }
+
+    #[test]
+    fn upper_hex() {
+        assert_eq!(
+            format!("{:X}", Rgba::<Srgb, u8>::new(171, 193, 35, 161)),
+            "ABC123A1"
+        );
+    }
+
+    #[test]
+    fn upper_hex_small_numbers() {
+        assert_eq!(
+            format!("{:X}", Rgba::<Srgb, u8>::new(1, 2, 3, 4)),
+            "01020304"
+        );
+        assert_eq!(
+            format!("{:X}", Rgba::<Srgb, u16>::new(1, 2, 3, 4)),
+            "0001000200030004"
+        );
+        assert_eq!(
+            format!("{:X}", Rgba::<Srgb, u32>::new(1, 2, 3, 4)),
+            "00000001000000020000000300000004"
+        );
+        assert_eq!(
+            format!("{:X}", Rgba::<Srgb, u64>::new(1, 2, 3, 4)),
+            "0000000000000001000000000000000200000000000000030000000000000004"
+        );
+    }
+
+    #[test]
+    fn upper_hex_custom_width() {
+        assert_eq!(
+            format!("{:03X}", Rgba::<Srgb, u8>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgba::<Srgb, u16>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgba::<Srgb, u32>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+        assert_eq!(
+            format!("{:03X}", Rgba::<Srgb, u64>::new(1, 2, 3, 4)),
+            "001002003004"
+        );
+    }
 
     #[cfg(feature = "serde")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5)).unwrap();
 
-        assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#);
+        assert_eq!(
+            serialized,
+            r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
+        );
     }
 
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Rgba<Srgb> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+        let deserialized: Rgba<Srgb> =
+            ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
 
         assert_eq!(deserialized, Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5));
     }
