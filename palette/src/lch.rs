@@ -1,13 +1,13 @@
 use num_traits::Float;
 
-use std::ops::{Add, Sub};
 use std::marker::PhantomData;
+use std::ops::{Add, Sub};
 
+use encoding::pixel::RawPixel;
+use white_point::{D65, WhitePoint};
+use {cast, clamp};
 use {Alpha, Hue, Lab, LabHue, Xyz};
 use {Component, FromColor, GetHue, IntoColor, Limited, Mix, Pixel, Saturate, Shade};
-use {cast, clamp};
-use white_point::{D65, WhitePoint};
-use encoding::pixel::RawPixel;
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
 /// `Alpha`](struct.Alpha.html#Lcha).
@@ -15,8 +15,8 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 
 ///CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](struct.Lab.html).
 ///
-///L\*C\*h° shares its range and perceptual uniformity with L\*a\*b\*, but it's a
-///cylindrical color space, like [HSL](struct.Hsl.html) and
+///L\*C\*h° shares its range and perceptual uniformity with L\*a\*b\*, but
+/// it's a cylindrical color space, like [HSL](struct.Hsl.html) and
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
@@ -99,15 +99,26 @@ where
             white_point: PhantomData,
         }
     }
+
+    /// Convert to a `(L\*, C\*, h°)` tuple.
+    pub fn into_components(self) -> (T, T, LabHue<T>) {
+        (self.l, self.chroma, self.hue)
+    }
+
+    /// Convert from a `(L\*, C\*, h°)` tuple.
+    pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
+        Self::with_wp(l, chroma, hue)
+    }
 }
 
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
-impl<T> Alpha<Lch<D65, T>, T>
+impl<T, A> Alpha<Lch<D65, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///CIE L\*C\*h° and transparency with white point D65.
-    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: T) -> Lcha<D65, T> {
+    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
             color: Lch::new(l, chroma, hue),
             alpha: alpha,
@@ -116,17 +127,28 @@ where
 }
 
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
-impl<Wp, T> Alpha<Lch<Wp, T>, T>
+impl<Wp, T, A> Alpha<Lch<Wp, T>, A>
 where
     T: Component + Float,
+    A: Component,
     Wp: WhitePoint,
 {
     ///CIE L\*C\*h° and transparency.
-    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: T) -> Lcha<Wp, T> {
+    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
             color: Lch::with_wp(l, chroma, hue),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(L\*, C\*, h°, alpha)` tuple.
+    pub fn into_components(self) -> (T, T, LabHue<T>, A) {
+        (self.l, self.chroma, self.hue, self.alpha)
+    }
+
+    /// Convert from a `(L\*, C\*, h°, alpha)` tuple.
+    pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue, alpha): (T, T, H, A)) -> Self {
+        Self::with_wp(l, chroma, hue, alpha)
     }
 }
 
@@ -153,6 +175,34 @@ where
             hue: color.get_hue().unwrap_or(LabHue::from(T::zero())),
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, H: Into<LabHue<T>>> From<(T, T, H)> for Lch<Wp, T> {
+    fn from(components: (T, T, H)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> Into<(T, T, LabHue<T>)> for Lch<Wp, T> {
+    fn into(self) -> (T, T, LabHue<T>) {
+        self.into_components()
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, H: Into<LabHue<T>>, A: Component> From<(T, T, H, A)>
+    for Alpha<Lch<Wp, T>, A>
+{
+    fn from(components: (T, T, H, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, LabHue<T>, A)>
+    for Alpha<Lch<Wp, T>, A>
+{
+    fn into(self) -> (T, T, LabHue<T>, A) {
+        self.into_components()
     }
 }
 
@@ -372,8 +422,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use Lch;
     use white_point::D65;
+    use Lch;
 
     #[test]
     fn ranges() {
@@ -405,7 +455,8 @@ mod test {
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Lch = ::serde_json::from_str(r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#).unwrap();
+        let deserialized: Lch =
+            ::serde_json::from_str(r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Lch::new(0.3, 0.8, 0.1));
     }

@@ -1,20 +1,20 @@
-use std::ops::{Add, Div, Mul, Sub};
-use std::marker::PhantomData;
 use std::fmt;
+use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
 use approx::ApproxEq;
 
 use num_traits::Float;
 
-use {Alpha, Xyz, Yxy};
-use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
-use luma::LumaStandard;
-use encoding::{Linear, Srgb, TransferFn};
+use blend::PreAlpha;
+use clamp;
 use encoding::linear::LinearFn;
 use encoding::pixel::RawPixel;
+use encoding::{Linear, Srgb, TransferFn};
+use luma::LumaStandard;
 use white_point::WhitePoint;
-use clamp;
-use blend::PreAlpha;
+use {Alpha, Xyz, Yxy};
+use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
 /// in `Alpha`](struct.Alpha.html#Lumaa).
@@ -90,6 +90,16 @@ where
     pub fn from_format<U: Component>(color: Luma<S, U>) -> Self {
         color.into_format()
     }
+
+    /// Convert to a `(luma,)` tuple.
+    pub fn into_components(self) -> (T,) {
+        (self.luma,)
+    }
+
+    /// Convert from a `(luma,)` tuple.
+    pub fn from_components((luma,): (T,)) -> Self {
+        Self::new(luma)
+    }
 }
 
 impl<S, T> Luma<S, T>
@@ -125,13 +135,14 @@ where
 }
 
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
-impl<S, T> Alpha<Luma<S, T>, T>
+impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: Component,
+    A: Component,
     S: LumaStandard,
 {
     /// Create a luminance color with transparency.
-    pub fn new(luma: T, alpha: T) -> Self {
+    pub fn new(luma: T, alpha: A) -> Self {
         Alpha {
             color: Luma::new(luma),
             alpha: alpha,
@@ -139,35 +150,51 @@ where
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Lumaa<S, U> {
-        Lumaa::new(self.luma.convert(), self.alpha.convert())
+    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Luma<S, U>, B> {
+        Alpha::<Luma<S, U>, B>::new(self.luma.convert(), self.alpha.convert())
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Lumaa<S, U>) -> Self {
+    pub fn from_format<U: Component, B: Component>(color: Alpha<Luma<S, U>, B>) -> Self {
         color.into_format()
+    }
+
+    /// Convert to a `(luma, alpha)` tuple.
+    pub fn into_components(self) -> (T, A) {
+        (self.luma, self.alpha)
+    }
+
+    /// Convert from a `(luma, alpha)` tuple.
+    pub fn from_components((luma, alpha): (T, A)) -> Self {
+        Self::new(luma, alpha)
     }
 }
 
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
-impl<S, T> Alpha<Luma<S, T>, T>
+impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: Component + Float,
+    A: Component,
     S: LumaStandard,
 {
     /// Convert the color to linear luminance with transparency.
-    pub fn into_linear(self) -> Lumaa<Linear<S::WhitePoint>, T> {
-        Lumaa::new(S::TransferFn::into_linear(self.luma), self.alpha)
+    pub fn into_linear(self) -> Alpha<Luma<Linear<S::WhitePoint>, T>, A> {
+        Alpha::<Luma<Linear<S::WhitePoint>, T>, A>::new(
+            S::TransferFn::into_linear(self.luma),
+            self.alpha,
+        )
     }
 
     /// Convert linear luminance to nonlinear luminance with transparency.
-    pub fn from_linear(color: Lumaa<Linear<S::WhitePoint>, T>) -> Lumaa<S, T> {
-        Lumaa::new(S::TransferFn::from_linear(color.luma), color.alpha)
+    pub fn from_linear(color: Alpha<Luma<Linear<S::WhitePoint>, T>, A>) -> Alpha<Luma<S, T>, A> {
+        Alpha::<Luma<S, T>, A>::new(S::TransferFn::from_linear(color.luma), color.alpha)
     }
 
     /// Convert the color to a different encoding with transparency.
-    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(self) -> Lumaa<St, T> {
-        Lumaa::new(
+    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
+        self,
+    ) -> Alpha<Luma<St, T>, A> {
+        Alpha::<Luma<St, T>, A>::new(
             St::TransferFn::from_linear(S::TransferFn::into_linear(self.luma)),
             self.alpha,
         )
@@ -175,9 +202,9 @@ where
 
     /// Convert luminance from a different encoding with transparency.
     pub fn from_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
-        color: Lumaa<St, T>,
-    ) -> Lumaa<S, T> {
-        Lumaa::new(
+        color: Alpha<Luma<St, T>, A>,
+    ) -> Alpha<Luma<S, T>, A> {
+        Alpha::<Luma<S, T>, A>::new(
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.luma)),
             color.alpha,
         )
@@ -207,6 +234,30 @@ where
             luma: color.luma,
             standard: PhantomData,
         })
+    }
+}
+
+impl<S: LumaStandard, T: Component> From<(T,)> for Luma<S, T> {
+    fn from(components: (T,)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: LumaStandard, T: Component> Into<(T,)> for Luma<S, T> {
+    fn into(self) -> (T,) {
+        self.into_components()
+    }
+}
+
+impl<S: LumaStandard, T: Component, A: Component> From<(T, A)> for Alpha<Luma<S, T>, A> {
+    fn from(components: (T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: LumaStandard, T: Component, A: Component> Into<(T, A)> for Alpha<Luma<S, T>, A> {
+    fn into(self) -> (T, A) {
+        self.into_components()
     }
 }
 
@@ -558,8 +609,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use Luma;
     use encoding::Srgb;
+    use Luma;
 
     #[test]
     fn ranges() {

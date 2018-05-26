@@ -1,13 +1,13 @@
 use num_traits::Float;
 
-use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
+use encoding::pixel::RawPixel;
+use white_point::{D65, WhitePoint};
+use {cast, clamp};
 use {Alpha, LabHue, Lch, Xyz};
 use {Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
-use {cast, clamp};
-use white_point::{D65, WhitePoint};
-use encoding::pixel::RawPixel;
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
 /// implementation in `Alpha`](struct.Alpha.html#Laba).
@@ -22,8 +22,8 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///means that the perceptual difference between two colors is equal to their
 ///numerical difference.
 ///
-///The parameters of L\*a\*b\* are quite different, compared to many other color
-///spaces, so manipulating them manually may be unintuitive.
+///The parameters of L\*a\*b\* are quite different, compared to many other
+/// color spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -99,15 +99,26 @@ where
             white_point: PhantomData,
         }
     }
+
+    /// Convert to a `(L\*, a\*, b\*)` tuple.
+    pub fn into_components(self) -> (T, T, T) {
+        (self.l, self.a, self.b)
+    }
+
+    /// Convert from a `(L\*, a\*, b\*)` tuple.
+    pub fn from_components((l, a, b): (T, T, T)) -> Self {
+        Self::with_wp(l, a, b)
+    }
 }
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
-impl<T> Alpha<Lab<D65, T>, T>
+impl<T, A> Alpha<Lab<D65, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///CIE L\*a\*b\* and transparency and white point D65.
-    pub fn new(l: T, a: T, b: T, alpha: T) -> Laba<D65, T> {
+    pub fn new(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Lab::new(l, a, b),
             alpha: alpha,
@@ -116,17 +127,28 @@ where
 }
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
-impl<Wp, T> Alpha<Lab<Wp, T>, T>
+impl<Wp, T, A> Alpha<Lab<Wp, T>, A>
 where
     T: Component + Float,
+    A: Component,
     Wp: WhitePoint,
 {
     ///CIE L\*a\*b\* and transparency.
-    pub fn with_wp(l: T, a: T, b: T, alpha: T) -> Laba<Wp, T> {
+    pub fn with_wp(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Lab::with_wp(l, a, b),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(L\*, a\*, b\*, alpha)` tuple.
+    pub fn into_components(self) -> (T, T, T, A) {
+        (self.l, self.a, self.b, self.alpha)
+    }
+
+    /// Convert from a `(L\*, a\*, b\*, alpha)` tuple.
+    pub fn from_components((l, a, b, alpha): (T, T, T, A)) -> Self {
+        Self::with_wp(l, a, b, alpha)
     }
 }
 
@@ -179,6 +201,34 @@ where
             b: color.chroma.max(T::zero()) * color.hue.to_radians().sin(),
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> From<(T, T, T)> for Lab<Wp, T> {
+    fn from(components: (T, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> Into<(T, T, T)> for Lab<Wp, T> {
+    fn into(self) -> (T, T, T) {
+        self.into_components()
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> From<(T, T, T, A)>
+    for Alpha<Lab<Wp, T>, A>
+{
+    fn from(components: (T, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, T, A)>
+    for Alpha<Lab<Wp, T>, A>
+{
+    fn into(self) -> (T, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -456,8 +506,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use LinSrgb;
     use white_point::D65;
+    use LinSrgb;
 
     #[test]
     fn red() {

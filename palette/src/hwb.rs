@@ -1,15 +1,17 @@
-use num_traits::Float;
 use approx::ApproxEq;
+use num_traits::Float;
 
-use std::ops::{Add, Sub};
-use std::marker::PhantomData;
 use std::any::TypeId;
+use std::marker::PhantomData;
+use std::ops::{Add, Sub};
 
-use {clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
-     Shade, Xyz};
-use rgb::RgbSpace;
-use encoding::Srgb;
 use encoding::pixel::RawPixel;
+use encoding::Srgb;
+use rgb::RgbSpace;
+use {
+    clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel, RgbHue,
+    Shade, Xyz,
+};
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
 /// `Alpha`](struct.Alpha.html#Hwba).
@@ -18,10 +20,12 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///Linear HWB color space.
 ///
 ///HWB is a cylindrical version of [RGB](rgb/struct.LinRgb.html) and it's very
-///closely related to [HSV](struct.Hsv.html).  It describes colors with a starting hue,
-///then a degree of whiteness and blackness to mix into that base hue.
+///closely related to [HSV](struct.Hsv.html).  It describes colors with a
+/// starting hue, then a degree of whiteness and blackness to mix into that
+/// base hue.
 ///
-///It is very intuitive for humans to use and many color-pickers are based on the HWB color system
+///It is very intuitive for humans to use and many color-pickers are based on
+/// the HWB color system
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -40,15 +44,16 @@ where
     #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
-    ///The whiteness of the color. It specifies the amount white to mix into the hue.
-    ///It varies from 0 to 1, with 1 being always full white and 0
-    ///always being the color shade (a mixture of a pure hue with black) chosen with the other two
-    ///controls.
+    ///The whiteness of the color. It specifies the amount white to mix into
+    /// the hue. It varies from 0 to 1, with 1 being always full white and 0
+    ///always being the color shade (a mixture of a pure hue with black)
+    /// chosen with the other two controls.
     pub whiteness: T,
 
-    ///The blackness of the color. It specifies the amount black to mix into the hue.
-    ///It varies from 0 to 1, with 1 being always full black and 0 always
-    ///being the color tint (a mixture of a pure hue with white) chosen with the other two
+    ///The blackness of the color. It specifies the amount black to mix into
+    /// the hue. It varies from 0 to 1, with 1 being always full black and
+    /// 0 always being the color tint (a mixture of a pure hue with white)
+    /// chosen with the other two
     //controls.
     pub blackness: T,
 
@@ -106,6 +111,16 @@ where
         }
     }
 
+    /// Convert to a `(hue, whiteness, blackness)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T) {
+        (self.hue, self.whiteness, self.blackness)
+    }
+
+    /// Convert from a `(hue, whiteness, blackness)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>((hue, whiteness, blackness): (H, T, T)) -> Self {
+        Self::with_wp(hue, whiteness, blackness)
+    }
+
     fn from_hwb_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(color: Hwb<Sp, T>) -> Self {
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             color.reinterpret_as()
@@ -126,12 +141,13 @@ where
 }
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
-impl<T> Alpha<Hwb<Srgb, T>, T>
+impl<T, A> Alpha<Hwb<Srgb, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///HWB and transparency for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: T) -> Hwba<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
             color: Hwb::new(hue, whiteness, blackness),
             alpha: alpha,
@@ -140,17 +156,30 @@ where
 }
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
-impl<S, T> Alpha<Hwb<S, T>, T>
+impl<S, T, A> Alpha<Hwb<S, T>, A>
 where
     T: Component + Float,
+    A: Component,
     S: RgbSpace,
 {
     ///Linear HWB and transparency.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: T) -> Hwba<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
             color: Hwb::with_wp(hue, whiteness, blackness),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(hue, whiteness, blackness, alpha)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
+        (self.hue, self.whiteness, self.blackness, self.alpha)
+    }
+
+    /// Convert from a `(hue, whiteness, blackness, alpha)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>(
+        (hue, whiteness, blackness, alpha): (H, T, T, A),
+    ) -> Self {
+        Self::with_wp(hue, whiteness, blackness, alpha)
     }
 }
 
@@ -180,6 +209,34 @@ where
             blackness: (T::one() - color.value),
             space: PhantomData,
         }
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>> From<(H, T, T)> for Hwb<S, T> {
+    fn from(components: (H, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float> Into<(RgbHue<T>, T, T)> for Hwb<S, T> {
+    fn into(self) -> (RgbHue<T>, T, T) {
+        self.into_components()
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
+    for Alpha<Hwb<S, T>, A>
+{
+    fn from(components: (H, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, A: Component> Into<(RgbHue<T>, T, T, A)>
+    for Alpha<Hwb<S, T>, A>
+{
+    fn into(self) -> (RgbHue<T>, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -412,9 +469,11 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        let equal_shade = self.whiteness
+        let equal_shade = self
+            .whiteness
             .relative_eq(&other.whiteness, epsilon, max_relative)
-            && self.blackness
+            && self
+                .blackness
                 .relative_eq(&other.blackness, epsilon, max_relative);
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
@@ -447,8 +506,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use {Limited, LinSrgb};
     use encoding::Srgb;
+    use {Limited, LinSrgb};
 
     #[test]
     fn red() {
@@ -533,7 +592,8 @@ mod test {
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Hwb = ::serde_json::from_str(r#"{"hue":0.3,"whiteness":0.8,"blackness":0.1}"#).unwrap();
+        let deserialized: Hwb =
+            ::serde_json::from_str(r#"{"hue":0.3,"whiteness":0.8,"blackness":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hwb::new(0.3, 0.8, 0.1));
     }
