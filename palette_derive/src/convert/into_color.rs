@@ -365,9 +365,8 @@ fn prepare_into_color_type_impl(
             rgb_space.clone()
         } else {
             let rgb_space_path = util::path(&["rgb", "RgbSpace"], meta.internal);
-            util::add_missing_where_clause(&mut generics);
-            let where_clause = generics.where_clause.as_mut().unwrap();
-            where_clause
+            generics
+                .make_where_clause()
                 .predicates
                 .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
 

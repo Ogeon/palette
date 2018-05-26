@@ -1,6 +1,5 @@
 use proc_macro2::{Span, TokenStream};
-use syn::punctuated::Punctuated;
-use syn::{Generics, Ident, Type, WhereClause};
+use syn::{Ident, Type};
 
 pub fn bundle_impl(
     trait_name: &str,
@@ -64,14 +63,5 @@ pub fn color_path(color: &str, internal: bool) -> TokenStream {
         "Luma" => path(&["luma", "Luma"], internal),
         "Rgb" => path(&["rgb", "Rgb"], internal),
         _ => path(&[color], internal),
-    }
-}
-
-pub fn add_missing_where_clause(generics: &mut Generics) {
-    if generics.where_clause.is_none() {
-        generics.where_clause = Some(WhereClause {
-            where_token: Token![where](Span::call_site()),
-            predicates: Punctuated::new(),
-        })
     }
 }
