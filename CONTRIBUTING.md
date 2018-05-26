@@ -105,8 +105,9 @@ Here is an example PR:
 
 >### Translate the library to British English
 >
->The whole library is translated to the one and only Queen's English. This
->closes #123, by changing `Color` to `Colour`.
+>The whole library is translated to the one and only Queen's English.
+>
+>This closes #123, by changing `Color` to `Colour`.
 >
 >This is a breaking change, since it changes the name of a number of
 >identifiers.
@@ -117,18 +118,7 @@ It's not much harder than that, depending on the size of the contribution.
 
 ## Code Style
 
-The code style is generally in line with the common guidelines for Rust. There
-are, however, a few things that differs, so here's a summary of the
-essentials. You are always allowed to fix non-conforming code if you happen to
-see any. This library is written and reviewed by humans, and humans makes
-mistakes.
-
-One thing to always be aware of is that `rustfmt` is _not_ used here. That's
-because it has, so far, been unable to replicate this style. This may change
-in the future.
-
-Is there something here you don't agree with? Post an issue or a PR and
-propose a change, but be prepared for a discussion.
+The code style is generally in line with the common guidelines for Rust. There is a `rustfmt.toml` in the project, so feel free to use automatic formatting. If you prefer not to, the following sections can be used as a style guide.
 
 ### Braces
 
