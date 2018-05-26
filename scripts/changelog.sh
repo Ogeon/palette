@@ -1,5 +1,7 @@
+cd palette
 current_version="$(cargo read-manifest | sed 's/.*"version":"\([^"]\+\)".*/\1/g')"
 current_date=
+cd ..
 
 echo -e "# Changelog\n" > CHANGELOG.md
 echo -e "## Version $current_version - $(date +%F)\n" >> CHANGELOG.md
@@ -10,7 +12,13 @@ issues=()
 git log --pretty="%an<%ae>;%H;%ad;%s" --date=short |
 {
 	while read line; do
-		if [[ $line =~ Homu\<homu@barosl.com\>\;.* ]] || [[ $line =~ ^bors\[bot\].* ]]; then
+		hash="$(echo "$line" | sed 's/.*;\([^;]*\);.*;.*/\1/g')"
+		tags="$(git tag -l --column --points-at "$hash")"
+		if [[ $tags =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+			date="$(echo "$line" | sed 's/.*;.*;\(.\+\);.*/\1/g')"
+			version="$(echo "$tags" | sed 's/\(.*\s\)?\([0-9]+\.[0-9]+\.[0-9]+\)\(\s.*\)?/\1/g')"
+			echo -e "\n## Version ${version} - ${date}\n" >> CHANGELOG.md
+		elif [[ $line =~ Homu\<homu@barosl.com\>\;.* ]] || [[ $line =~ ^bors\[bot\].* ]]; then
 			parts="$(echo "$line" | sed 's/.*;\([^;]*\);.*;.*#\([0-9]*\)*/\1 \2/g')"
 			parts=($parts)
 			description="$(git log -1 --pretty=format:%b ${parts[0]})"
@@ -28,19 +36,17 @@ git log --pretty="%an<%ae>;%H;%ad;%s" --date=short |
 
 			fixes="$(echo "$fixes" | sed ':a;N;$!ba;s/\n/, /g' | sed 's/\([0-9]\+\)/[#\1][\1]/g')"
 
-			entry=" * [#${parts[1]}][${parts[1]}]: $header."
+			entry="* [#${parts[1]}][${parts[1]}]: $header."
 
 			if [[ "$fixes" != "" ]]; then
 				echo "$entry Closes $fixes." >> CHANGELOG.md
 			else
 				echo "$entry"  >> CHANGELOG.md
 			fi
-		elif [[ $line =~ .*\;.*\;.*\;Version\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-			parts="$(echo "$line" | sed 's/.*;.*;\(.\+\);Version \(.*\)/\1 \2/g')"
-			parts=($parts)
-			echo -e "\n## Version ${parts[1]} - ${parts[0]}\n" >> CHANGELOG.md
 		fi
 	done
+
+	echo -e "The first published version.\n" >> CHANGELOG.md
 
 	for id in ${pulls[@]}; do
 		echo "[$id]: https://github.com/Ogeon/palette/pull/$id" >> CHANGELOG.md

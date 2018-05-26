@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{self, Data, DeriveInput, Fields, Ident, Type};
 use quote::ToTokens;
+use syn::{self, Data, DeriveInput, Fields, Ident, Type};
 
 use meta::{self, DataMetaParser, IdentOrIndex, MetaParser};
 use util;
@@ -56,15 +56,12 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         number_of_channels += 1;
 
         if let Some(field_type) = field_type.clone() {
-            let ty = ty.into_tokens();
-            let field_type = field_type.into_tokens();
-
             if field_type != ty {
                 panic!(
                     "expected fields to be of type `{}`, but `{}` is of type `{}`",
-                    field_type,
-                    field.into_tokens(),
-                    ty
+                    field_type.into_token_stream(),
+                    field.into_token_stream(),
+                    ty.into_token_stream()
                 );
             }
         } else {
@@ -110,13 +107,10 @@ impl MetaParser for PixelMeta {
     }
 
     fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream2) {
-        match attribute_name.as_ref() {
+        match &*attribute_name.to_string() {
             "repr" => {
                 let items = meta::parse_tuple_attribute(&attribute_name, attribute_tts);
-                let contains_c = items
-                    .into_iter()
-                    .find(|item: &Ident| item.as_ref() == "C")
-                    .is_some();
+                let contains_c = items.into_iter().find(|item: &Ident| item == "C").is_some();
 
                 if contains_c {
                     self.repr_c = true;
@@ -141,7 +135,7 @@ impl DataMetaParser for PixelItemMeta {
         attribute_name: Ident,
         attribute_tts: TokenStream2,
     ) {
-        match attribute_name.as_ref() {
+        match &*attribute_name.to_string() {
             "palette_unsafe_same_layout_as" => {
                 let substitute = meta::parse_equal_attribute(&attribute_name, attribute_tts);
                 self.type_substitutes.insert(field_name, substitute);

@@ -1,10 +1,10 @@
 [package]
 name = "palette_derive"
-version = "0.3.0" #automatically updated
+version = "0.4.0" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = []
 description = "Automatically implement traits from the palette crate."
-documentation = "https://docs.rs/palette/0.3.0/palette/"
+documentation = "https://docs.rs/palette/0.4.0/palette/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["palette", "derive", "macros"]
@@ -14,9 +14,9 @@ license = "MIT OR Apache-2.0"
 proc-macro = true
 
 [dependencies]
-syn = { version = "0.12", features = ["visit"] }
-quote = "0.4"
-proc-macro2 = "0.2"
+syn = { version = "0.14", features = ["visit", "extra-traits"] }
+quote = "0.6"
+proc-macro2 = "0.4"
 
 [features]
 

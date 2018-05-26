@@ -1,9 +1,13 @@
-use syn::{Generics, Ident, Type, WhereClause};
+use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
-use quote::Tokens;
-use proc_macro2::Span;
+use syn::{Generics, Ident, Type, WhereClause};
 
-pub fn bundle_impl(trait_name: &str, type_name: Ident, internal: bool, block: Tokens) -> Tokens {
+pub fn bundle_impl(
+    trait_name: &str,
+    type_name: Ident,
+    internal: bool,
+    block: TokenStream,
+) -> TokenStream {
     let const_name = Ident::new(
         &format!("_palette_derive_{}_for_{}", trait_name, type_name),
         Span::call_site(),
@@ -31,8 +35,9 @@ pub fn bundle_impl(trait_name: &str, type_name: Ident, internal: bool, block: To
     }
 }
 
-pub fn path(path: &[&str], internal: bool) -> Tokens {
-    let path = path.into_iter()
+pub fn path(path: &[&str], internal: bool) -> TokenStream {
+    let path = path
+        .into_iter()
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
@@ -43,7 +48,8 @@ pub fn path(path: &[&str], internal: bool) -> Tokens {
 }
 
 pub fn path_type(path: &[&str], internal: bool) -> Type {
-    let path = path.into_iter()
+    let path = path
+        .into_iter()
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
@@ -53,7 +59,7 @@ pub fn path_type(path: &[&str], internal: bool) -> Type {
     }
 }
 
-pub fn color_path(color: &str, internal: bool) -> Tokens {
+pub fn color_path(color: &str, internal: bool) -> TokenStream {
     match color {
         "Luma" => path(&["luma", "Luma"], internal),
         "Rgb" => path(&["rgb", "Rgb"], internal),

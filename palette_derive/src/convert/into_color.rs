@@ -1,7 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use syn::{self, DeriveInput, Generics, Ident, Type};
-use quote::Tokens;
 
 use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
 use util;
@@ -49,7 +48,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
     // Assume conversion into Xyz by default
     if meta.manual_implementations.is_empty() {
         meta.manual_implementations.push(KeyValuePair {
-            key: "Xyz".into(),
+            key: Ident::new("Xyz", Span::call_site()),
             value: None,
         });
     }
@@ -74,8 +73,9 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
     };
 
     let into_impls = COLOR_TYPES.into_iter().map(|&color| {
-        let skip_regular_into = (meta.internal && color == ident.as_ref())
-            || meta.manual_implementations
+        let skip_regular_into = (meta.internal && ident == color)
+            || meta
+                .manual_implementations
                 .iter()
                 .any(|color_impl| color_impl.key == color && color_impl.value.is_none());
 
@@ -119,7 +119,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
 
     let result = util::bundle_impl(
         "IntoColor",
-        ident,
+        ident.clone(),
         meta.internal,
         quote! {
             #into_color_impl
@@ -138,7 +138,7 @@ fn impl_into(
     meta: &IntoColorMeta,
     generics: &Generics,
     generic_component: bool,
-) -> Tokens {
+) -> TokenStream2 {
     let (_, type_generics, _) = generics.split_for_impl();
 
     let IntoImplParameters {
@@ -171,7 +171,7 @@ fn impl_into_alpha(
     generic_component: bool,
     alpha_property: Option<&IdentOrIndex>,
     alpha_type: &Type,
-) -> Tokens {
+) -> TokenStream2 {
     let (_, type_generics, _) = generics.split_for_impl();
 
     let IntoImplParameters {
@@ -265,10 +265,10 @@ fn prepare_into_impl(
 
 struct IntoImplParameters {
     generics: Generics,
-    alpha_path: Tokens,
-    trait_path: Tokens,
+    alpha_path: TokenStream2,
+    trait_path: TokenStream2,
     color_ty: Type,
-    method_call: Tokens,
+    method_call: TokenStream2,
 }
 
 fn impl_into_color_type(
@@ -276,7 +276,7 @@ fn impl_into_color_type(
     meta: &IntoColorMeta,
     generics: &Generics,
     generic_component: bool,
-) -> Tokens {
+) -> TokenStream2 {
     let (_, type_generics, _) = generics.split_for_impl();
 
     let IntoColorTypeImplParameters {
@@ -304,7 +304,7 @@ fn impl_into_color_type_alpha(
     generic_component: bool,
     alpha_property: Option<&IdentOrIndex>,
     alpha_type: &Type,
-) -> Tokens {
+) -> TokenStream2 {
     let (_, type_generics, _) = generics.split_for_impl();
     let alpha_path = util::path(&["Alpha"], meta.internal);
 
@@ -386,8 +386,8 @@ fn prepare_into_color_type_impl(
 
 struct IntoColorTypeImplParameters {
     generics: Generics,
-    color_path: Tokens,
-    color_ty: Tokens,
+    color_path: TokenStream2,
+    color_ty: TokenStream2,
 }
 
 #[derive(Default)]
@@ -405,7 +405,7 @@ impl MetaParser for IntoColorMeta {
     }
 
     fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream2) {
-        match attribute_name.as_ref() {
+        match &*attribute_name.to_string() {
             "palette_manual_into" => {
                 let impls =
                     meta::parse_tuple_attribute::<KeyValuePair>(&attribute_name, attribute_tts);
@@ -447,7 +447,7 @@ impl DataMetaParser for IntoColorItemMeta {
         attribute_name: Ident,
         attribute_tts: TokenStream2,
     ) {
-        match attribute_name.as_ref() {
+        match &*attribute_name.to_string() {
             "palette_alpha" => {
                 meta::assert_empty_attribute(&attribute_name, attribute_tts);
                 self.alpha_property = Some((field_name, ty));

@@ -1,23 +1,30 @@
-use syn::{Attribute, Data, Field, Fields, Ident, Index, LitStr, Type};
-use syn::token::{Comma, Eq};
-use syn::punctuated::Punctuated;
-use syn::synom::Synom;
 use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
+use syn::punctuated::Punctuated;
+use syn::synom::Synom;
+use syn::token::{Comma, Eq};
+use syn::{Attribute, Data, Field, Fields, Ident, Index, LitStr, Type};
 
 pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
     let mut result = T::default();
 
     for attribute in attributes {
-        let attribute_name = attribute.path.segments.first().unwrap().into_value().ident;
-        let is_palette_attribute = attribute_name.as_ref().starts_with("palette_");
+        let attribute_name = attribute
+            .path
+            .segments
+            .first()
+            .unwrap()
+            .into_value()
+            .ident
+            .clone();
+        let is_palette_attribute = attribute_name.to_string().starts_with("palette_");
 
         if attribute.path.segments.len() > 1 {
             if is_palette_attribute {
                 panic!(
                     "expected `{}`, but found `{}`",
                     attribute_name,
-                    attribute.path.into_tokens()
+                    attribute.path.into_token_stream()
                 );
             } else {
                 continue;
@@ -66,8 +73,15 @@ pub fn parse_struct_field_attributes<T: DataMetaParser>(
             .unwrap_or_else(|| IdentOrIndex::Index(index.into()));
 
         for attribute in field.attrs {
-            let attribute_name = attribute.path.segments.first().unwrap().into_value().ident;
-            if !attribute_name.as_ref().starts_with("palette_") {
+            let attribute_name = attribute
+                .path
+                .segments
+                .first()
+                .unwrap()
+                .into_value()
+                .ident
+                .clone();
+            if !attribute_name.to_string().starts_with("palette_") {
                 continue;
             }
 
@@ -75,7 +89,7 @@ pub fn parse_struct_field_attributes<T: DataMetaParser>(
                 panic!(
                     "expected `{}`, but found `{}`",
                     attribute_name,
-                    attribute.path.into_tokens()
+                    attribute.path.into_token_stream()
                 );
             }
 
@@ -225,7 +239,7 @@ impl ::std::hash::Hash for IdentOrIndex {
 }
 
 impl ::quote::ToTokens for IdentOrIndex {
-    fn to_tokens(&self, tokens: &mut ::quote::Tokens) {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         match *self {
             IdentOrIndex::Index(ref index) => index.to_tokens(tokens),
             IdentOrIndex::Ident(ref ident) => ident.to_tokens(tokens),

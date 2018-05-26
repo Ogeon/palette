@@ -1,8 +1,7 @@
 use std::fmt;
 
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
 use syn::{GenericParam, Generics, Ident, Path, Turbofish, Type, TypePath};
-use quote::Tokens;
 
 use meta::KeyValuePair;
 use util;
@@ -27,7 +26,8 @@ pub fn find_in_generics(
             })) = component
             {
                 let first = component.first().map(|s| s.into_value());
-                let is_ident_path = leading_colon.is_none() && component.len() == 1
+                let is_ident_path = leading_colon.is_none()
+                    && component.len() == 1
                     && first.unwrap().arguments.is_empty()
                     && first.unwrap().ident == param.ident;
 
@@ -46,7 +46,8 @@ pub fn find_in_generics(
             })) = white_point
             {
                 let first = white_point.first().map(|s| s.into_value());
-                let is_ident_path = leading_colon.is_none() && white_point.len() == 1
+                let is_ident_path = leading_colon.is_none()
+                    && white_point.len() == 1
                     && first.unwrap().arguments.is_empty()
                     && first.unwrap().ident == param.ident;
 
@@ -106,17 +107,17 @@ pub fn generate_methods(
     rgb_space: &Type,
     turbofish_generics: &Turbofish,
     internal: bool,
-) -> Vec<Tokens> {
+) -> Vec<TokenStream> {
     let mut xyz_convert = Some(XyzConvert::Luma);
     let mut methods = vec![];
 
     for color in implementations {
-        if color.key.as_ref() == "Xyz" {
+        if color.key == "Xyz" {
             xyz_convert = None;
         }
 
         xyz_convert = xyz_convert.map(|current| {
-            current.get_best(match color.key.as_ref() {
+            current.get_best(match &*color.key.to_string() {
                 "Rgb" | "Hsl" | "Hsv" | "Hwb" => XyzConvert::Rgb,
                 "Lab" => XyzConvert::Lab,
                 "Lch" => XyzConvert::Lch,
@@ -126,21 +127,19 @@ pub fn generate_methods(
             })
         });
 
+        let color_name = color.key.to_string();
+
         let method_name = Ident::new(
-            &format!(
-                "{}_{}",
-                convert_direction,
-                color.key.as_ref().to_lowercase()
-            ),
+            &format!("{}_{}", convert_direction, color_name.to_lowercase()),
             Span::call_site(),
         );
-        let color_path = util::color_path(color.key.as_ref(), internal);
+        let color_path = util::color_path(&*color_name, internal);
         let convert_function = color
             .value
             .clone()
             .unwrap_or_else(|| Ident::new(convert_direction.as_ref(), Span::call_site()));
 
-        let method = match color.key.as_ref() {
+        let method = match &*color_name {
             "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
                 let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
                 quote!(#method_name<_S: #rgb_space_path<WhitePoint = #white_point>>)
@@ -148,7 +147,7 @@ pub fn generate_methods(
             _ => quote!(#method_name),
         };
 
-        let color_ty = match color.key.as_ref() {
+        let color_ty = match &*color_name {
             "Rgb" => {
                 let linear_path = util::path(&["encoding", "Linear"], internal);
 
