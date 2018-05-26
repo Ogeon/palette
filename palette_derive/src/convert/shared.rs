@@ -77,23 +77,19 @@ pub fn rgb_space_type(rgb_space: Option<Type>, white_point: &Type, internal: boo
 }
 
 pub fn add_component_where_clause(component: &Type, generics: &mut Generics, internal: bool) {
-    util::add_missing_where_clause(generics);
-
-    let where_clause = generics.where_clause.as_mut().unwrap();
     let component_trait_path = util::path(&["Component"], internal);
 
-    where_clause
+    generics
+        .make_where_clause()
         .predicates
         .push(parse_quote!(#component: #component_trait_path + _num_traits::Float));
 }
 
 pub fn add_white_point_where_clause(white_point: &Type, generics: &mut Generics, internal: bool) {
-    util::add_missing_where_clause(generics);
-
-    let where_clause = generics.where_clause.as_mut().unwrap();
     let white_point_trait_path = util::path(&["white_point", "WhitePoint"], internal);
 
-    where_clause
+    generics
+        .make_where_clause()
         .predicates
         .push(parse_quote!(#white_point: #white_point_trait_path));
 }
@@ -235,8 +231,7 @@ pub fn get_convert_color_type(
                 Ident::new("_S", Span::call_site()).into(),
             ));
 
-            util::add_missing_where_clause(generics);
-            let where_clause = generics.where_clause.as_mut().unwrap();
+            let where_clause = generics.make_where_clause();
             if let Some(ref rgb_space) = rgb_space {
                 where_clause
                     .predicates
@@ -258,17 +253,14 @@ pub fn get_convert_color_type(
                 Ident::new("_S", Span::call_site()).into(),
             ));
 
-            util::add_missing_where_clause(generics);
-            let where_clause = generics.where_clause.as_mut().unwrap();
-            where_clause
+            generics
+                .make_where_clause()
                 .predicates
                 .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
             parse_quote!(#color_path<_S, #component>)
         }
         "Hsl" | "Hsv" | "Hwb" => {
             let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
-
-            util::add_missing_where_clause(generics);
 
             if let Some(ref rgb_space) = rgb_space {
                 parse_quote!(#color_path<#rgb_space, #component>)
@@ -277,8 +269,8 @@ pub fn get_convert_color_type(
                     Ident::new("_S", Span::call_site()).into(),
                 ));
 
-                let where_clause = generics.where_clause.as_mut().unwrap();
-                where_clause
+                generics
+                    .make_where_clause()
                     .predicates
                     .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
 
