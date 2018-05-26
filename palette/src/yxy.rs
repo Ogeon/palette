@@ -100,26 +100,14 @@ where
         }
     }
 
-    /// Convert to a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn into_components(self) -> (T, T, T) {
-        (self.y, self.x, self.luma)
-    }
-
-    /// Convert from a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
-    pub fn from_components((y, x, luma): (T, T, T)) -> Self {
-        Self::with_wp(y, x, luma)
-    }
-
-    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
-    /// more classical component order.
-    pub fn into_xyy_components(self) -> (T, T, T) {
         (self.x, self.y, self.luma)
     }
 
-    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
-    /// more classical component order.
-    pub fn from_xyy_components((x, y, luma): (T, T, T)) -> Self {
-        Self::with_wp(y, x, luma)
+    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    pub fn from_components((x, y, luma): (T, T, T)) -> Self {
+        Self::with_wp(x, y, luma)
     }
 }
 
@@ -152,26 +140,14 @@ where
         }
     }
 
-    /// Convert to a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.y, self.x, self.luma, self.alpha)
-    }
-
-    /// Convert from a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
-    pub fn from_components((y, x, luma, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(y, x, luma, alpha)
-    }
-
-    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
-    /// more classical component order.
-    pub fn into_xyy_components(self) -> (T, T, T, A) {
         (self.x, self.y, self.luma, self.alpha)
     }
 
-    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
-    /// more classical component order.
-    pub fn from_xyy_components((x, y, luma, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(y, x, luma, alpha)
+    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    pub fn from_components((x, y, luma, alpha): (T, T, T, A)) -> Self {
+        Self::with_wp(x, y, luma, alpha)
     }
 }
 
