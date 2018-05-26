@@ -1,15 +1,17 @@
-use num_traits::Float;
 use approx::ApproxEq;
+use num_traits::Float;
 
-use std::ops::{Add, Sub};
-use std::marker::PhantomData;
 use std::any::TypeId;
+use std::marker::PhantomData;
+use std::ops::{Add, Sub};
 
-use {cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
-     RgbHue, Saturate, Shade, Xyz};
-use rgb::{Rgb, RgbSpace};
-use encoding::{Linear, Srgb};
 use encoding::pixel::RawPixel;
+use encoding::{Linear, Srgb};
+use rgb::{Rgb, RgbSpace};
+use {
+    cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
+    RgbHue, Saturate, Shade, Xyz,
+};
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
 /// `Alpha`](struct.Alpha.html#Hsla).
@@ -24,7 +26,8 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///especially good for operations like changing green to red, making a color
 ///more gray, or making it darker.
 ///
-///See [HSV](struct.Hsv.html) for a very similar color space, with brightness instead of lightness.
+///See [HSV](struct.Hsv.html) for a very similar color space, with brightness
+/// instead of lightness.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -105,6 +108,16 @@ where
         }
     }
 
+    /// Convert to a `(hue, saturation, lightness)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T) {
+        (self.hue, self.saturation, self.lightness)
+    }
+
+    /// Convert from a `(hue, saturation, lightness)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>((hue, saturation, lightness): (H, T, T)) -> Self {
+        Self::with_wp(hue, saturation, lightness)
+    }
+
     fn from_hsl_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(hsl: Hsl<Sp, T>) -> Self {
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsl.reinterpret_as()
@@ -171,12 +184,13 @@ where
 }
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
-impl<T> Alpha<Hsl<Srgb, T>, T>
+impl<T, A> Alpha<Hsl<Srgb, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///HSL and transparency for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: T) -> Hsla<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
             color: Hsl::new(hue, saturation, lightness),
             alpha: alpha,
@@ -185,22 +199,30 @@ where
 }
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
-impl<S, T> Alpha<Hsl<S, T>, T>
+impl<S, T, A> Alpha<Hsl<S, T>, A>
 where
     T: Component + Float,
+    A: Component,
     S: RgbSpace,
 {
     ///Linear HSL and transparency.
-    pub fn with_wp<H: Into<RgbHue<T>>>(
-        hue: H,
-        saturation: T,
-        lightness: T,
-        alpha: T,
-    ) -> Hsla<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
             color: Hsl::with_wp(hue, saturation, lightness),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(hue, saturation, lightness, alpha)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
+        (self.hue, self.saturation, self.lightness, self.alpha)
+    }
+
+    /// Convert from a `(hue, saturation, lightness, alpha)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>(
+        (hue, saturation, lightness, alpha): (H, T, T, A),
+    ) -> Self {
+        Self::with_wp(hue, saturation, lightness, alpha)
     }
 }
 
@@ -248,6 +270,34 @@ where
             lightness: x / cast(2.0),
             space: PhantomData,
         }
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
+    fn from(components: (H, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float> Into<(RgbHue<T>, T, T)> for Hsl<S, T> {
+    fn into(self) -> (RgbHue<T>, T, T) {
+        self.into_components()
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
+    for Alpha<Hsl<S, T>, A>
+{
+    fn from(components: (H, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, A: Component> Into<(RgbHue<T>, T, T, A)>
+    for Alpha<Hsl<S, T>, A>
+{
+    fn into(self) -> (RgbHue<T>, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -508,8 +558,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use {Hsv, LinSrgb};
     use encoding::Srgb;
+    use {Hsv, LinSrgb};
 
     #[test]
     fn red() {

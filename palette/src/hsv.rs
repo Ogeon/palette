@@ -1,16 +1,16 @@
-use num_traits::Float;
 use approx::ApproxEq;
+use num_traits::Float;
 
-use std::ops::{Add, Sub};
-use std::marker::PhantomData;
 use std::any::TypeId;
+use std::marker::PhantomData;
+use std::ops::{Add, Sub};
 
+use encoding::pixel::RawPixel;
+use encoding::{Linear, Srgb};
+use rgb::{Rgb, RgbSpace};
+use {cast, clamp};
 use {Alpha, Hsl, Hwb, Xyz};
 use {Component, FromColor, GetHue, Hue, Limited, Mix, Pixel, RgbHue, Saturate, Shade};
-use {cast, clamp};
-use rgb::{Rgb, RgbSpace};
-use encoding::{Linear, Srgb};
-use encoding::pixel::RawPixel;
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
 /// `Alpha`](struct.Alpha.html#Hsva).
@@ -105,6 +105,16 @@ where
         }
     }
 
+    /// Convert to a `(hue, saturation, value)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T) {
+        (self.hue, self.saturation, self.value)
+    }
+
+    /// Convert from a `(hue, saturation, value)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>((hue, saturation, value): (H, T, T)) -> Self {
+        Self::with_wp(hue, saturation, value)
+    }
+
     fn from_hsv_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(hsv: Hsv<Sp, T>) -> Self {
         if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
             hsv.reinterpret_as()
@@ -166,12 +176,13 @@ where
 }
 
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
-impl<T> Alpha<Hsv<Srgb, T>, T>
+impl<T, A> Alpha<Hsv<Srgb, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///HSV and transparency for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: T) -> Hsva<Srgb, T> {
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
             color: Hsv::new(hue, saturation, value),
             alpha: alpha,
@@ -180,17 +191,30 @@ where
 }
 
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
-impl<S, T> Alpha<Hsv<S, T>, T>
+impl<S, T, A> Alpha<Hsv<S, T>, A>
 where
     T: Component + Float,
+    A: Component,
     S: RgbSpace,
 {
     ///Linear HSV and transparency.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: T) -> Hsva<S, T> {
+    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
             color: Hsv::with_wp(hue, saturation, value),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(hue, saturation, value, alpha)` tuple.
+    pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
+        (self.hue, self.saturation, self.value, self.alpha)
+    }
+
+    /// Convert from a `(hue, saturation, value, alpha)` tuple.
+    pub fn from_components<H: Into<RgbHue<T>>>(
+        (hue, saturation, value, alpha): (H, T, T, A),
+    ) -> Self {
+        Self::with_wp(hue, saturation, value, alpha)
     }
 }
 
@@ -257,6 +281,34 @@ where
             value: inv,
             space: PhantomData,
         }
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsv<S, T> {
+    fn from(components: (H, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float> Into<(RgbHue<T>, T, T)> for Hsv<S, T> {
+    fn into(self) -> (RgbHue<T>, T, T) {
+        self.into_components()
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
+    for Alpha<Hsv<S, T>, A>
+{
+    fn from(components: (H, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbSpace, T: Component + Float, A: Component> Into<(RgbHue<T>, T, T, A)>
+    for Alpha<Hsv<S, T>, A>
+{
+    fn into(self) -> (RgbHue<T>, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -517,8 +569,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Hsv;
-    use {Hsl, LinSrgb};
     use encoding::Srgb;
+    use {Hsl, LinSrgb};
 
     #[test]
     fn red() {
@@ -599,7 +651,8 @@ mod test {
     #[cfg(feature = "serde")]
     #[test]
     fn deserialize() {
-        let deserialized: Hsv = ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"value":0.1}"#).unwrap();
+        let deserialized: Hsv =
+            ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"value":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hsv::new(0.3, 0.8, 0.1));
     }

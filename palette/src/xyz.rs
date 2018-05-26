@@ -1,16 +1,16 @@
 use num_traits::Float;
 
-use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
+use encoding::pixel::RawPixel;
+use luma::LumaStandard;
+use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
+use rgb::{Rgb, RgbSpace, RgbStandard};
+use white_point::{D65, WhitePoint};
+use {cast, clamp};
 use {Alpha, Lab, Luma, Yxy};
 use {Component, ComponentWise, Limited, Mix, Pixel, Shade};
-use white_point::{D65, WhitePoint};
-use rgb::{Rgb, RgbSpace, RgbStandard};
-use luma::LumaStandard;
-use encoding::pixel::RawPixel;
-use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
-use {cast, clamp};
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
 /// `Alpha`](struct.Alpha.html#Xyza).
@@ -23,7 +23,8 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///converting from one color space to an other, and requires a standard
 ///illuminant and a standard observer to be defined.
 ///
-///Conversions and operations on this color space depend on the defined white point
+///Conversions and operations on this color space depend on the defined white
+/// point
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -44,8 +45,9 @@ where
     ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
     pub y: T,
 
-    ///Z is the scale of what can be seen as the blue stimulation. Its range depends
-    ///on the white point and goes from 0.0 to 1.08883 for the defautl D65.
+    ///Z is the scale of what can be seen as the blue stimulation. Its range
+    /// depends on the white point and goes from 0.0 to 1.08883 for the
+    /// defautl D65.
     pub z: T,
 
     ///The white point associated with the color's illuminant and observer.
@@ -101,15 +103,26 @@ where
             white_point: PhantomData,
         }
     }
+
+    /// Convert to a `(X, Y, Z)` tuple.
+    pub fn into_components(self) -> (T, T, T) {
+        (self.x, self.y, self.z)
+    }
+
+    /// Convert from a `(X, Y, Z)` tuple.
+    pub fn from_components((x, y, z): (T, T, T)) -> Self {
+        Self::with_wp(x, y, z)
+    }
 }
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
-impl<T> Alpha<Xyz<D65, T>, T>
+impl<T, A> Alpha<Xyz<D65, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///CIE Yxy and transparency with white point D65.
-    pub fn new(x: T, y: T, luma: T, alpha: T) -> Xyza<D65, T> {
+    pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Xyz::new(x, y, luma),
             alpha: alpha,
@@ -118,17 +131,28 @@ where
 }
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
-impl<Wp, T> Alpha<Xyz<Wp, T>, T>
+impl<Wp, T, A> Alpha<Xyz<Wp, T>, A>
 where
     T: Component + Float,
+    A: Component,
     Wp: WhitePoint,
 {
     ///CIE XYZ and transparency.
-    pub fn with_wp(x: T, y: T, z: T, alpha: T) -> Xyza<Wp, T> {
+    pub fn with_wp(x: T, y: T, z: T, alpha: A) -> Self {
         Alpha {
             color: Xyz::with_wp(x, y, z),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(X, Y, Z, alpha)` tuple.
+    pub fn into_components(self) -> (T, T, T, A) {
+        (self.x, self.y, self.z, self.alpha)
+    }
+
+    /// Convert from a `(X, Y, Z, alpha)` tuple.
+    pub fn from_components((x, y, z, alpha): (T, T, T, A)) -> Self {
+        Self::with_wp(x, y, z, alpha)
     }
 }
 
@@ -198,6 +222,34 @@ where
 {
     fn from(color: Luma<S, T>) -> Self {
         Wp::get_xyz() * color.luma
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> From<(T, T, T)> for Xyz<Wp, T> {
+    fn from(components: (T, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> Into<(T, T, T)> for Xyz<Wp, T> {
+    fn into(self) -> (T, T, T) {
+        self.into_components()
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> From<(T, T, T, A)>
+    for Alpha<Xyz<Wp, T>, A>
+{
+    fn from(components: (T, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, T, A)>
+    for Alpha<Xyz<Wp, T>, A>
+{
+    fn into(self) -> (T, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -461,9 +513,9 @@ where
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use LinSrgb;
-    use LinLuma;
     use white_point::D65;
+    use LinLuma;
+    use LinSrgb;
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;

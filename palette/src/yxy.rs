@@ -1,14 +1,14 @@
 use num_traits::Float;
 
-use std::ops::{Add, Div, Mul, Sub};
 use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
-use {Alpha, Luma, Xyz};
-use luma::LumaStandard;
-use {Component, ComponentWise, IntoColor, Limited, Mix, Pixel, Shade};
-use white_point::{D65, WhitePoint};
-use encoding::pixel::RawPixel;
 use clamp;
+use encoding::pixel::RawPixel;
+use luma::LumaStandard;
+use white_point::{D65, WhitePoint};
+use {Alpha, Luma, Xyz};
+use {Component, ComponentWise, IntoColor, Limited, Mix, Pixel, Shade};
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
 /// in `Alpha`](struct.Alpha.html#Yxya).
@@ -99,15 +99,38 @@ where
             white_point: PhantomData,
         }
     }
+
+    /// Convert to a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    pub fn into_components(self) -> (T, T, T) {
+        (self.y, self.x, self.luma)
+    }
+
+    /// Convert from a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    pub fn from_components((y, x, luma): (T, T, T)) -> Self {
+        Self::with_wp(y, x, luma)
+    }
+
+    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
+    /// more classical component order.
+    pub fn into_xyy_components(self) -> (T, T, T) {
+        (self.x, self.y, self.luma)
+    }
+
+    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
+    /// more classical component order.
+    pub fn from_xyy_components((x, y, luma): (T, T, T)) -> Self {
+        Self::with_wp(y, x, luma)
+    }
 }
 
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
-impl<T> Alpha<Yxy<D65, T>, T>
+impl<T, A> Alpha<Yxy<D65, T>, A>
 where
     T: Component + Float,
+    A: Component,
 {
     ///CIE Yxy and transparency with white point D65.
-    pub fn new(x: T, y: T, luma: T, alpha: T) -> Yxya<D65, T> {
+    pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Yxy::new(x, y, luma),
             alpha: alpha,
@@ -115,17 +138,40 @@ where
     }
 }
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
-impl<Wp, T> Alpha<Yxy<Wp, T>, T>
+impl<Wp, T, A> Alpha<Yxy<Wp, T>, A>
 where
     T: Component + Float,
+    A: Component,
     Wp: WhitePoint,
 {
     ///CIE Yxy and transparency.
-    pub fn with_wp(x: T, y: T, luma: T, alpha: T) -> Yxya<Wp, T> {
+    pub fn with_wp(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Yxy::with_wp(x, y, luma),
             alpha: alpha,
         }
+    }
+
+    /// Convert to a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    pub fn into_components(self) -> (T, T, T, A) {
+        (self.y, self.x, self.luma, self.alpha)
+    }
+
+    /// Convert from a `(y, x, luma)`, a.k.a. `(y, x, Y)` tuple.
+    pub fn from_components((y, x, luma, alpha): (T, T, T, A)) -> Self {
+        Self::with_wp(y, x, luma, alpha)
+    }
+
+    /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
+    /// more classical component order.
+    pub fn into_xyy_components(self) -> (T, T, T, A) {
+        (self.x, self.y, self.luma, self.alpha)
+    }
+
+    /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple, which is the
+    /// more classical component order.
+    pub fn from_xyy_components((x, y, luma, alpha): (T, T, T, A)) -> Self {
+        Self::with_wp(y, x, luma, alpha)
     }
 }
 
@@ -161,6 +207,34 @@ where
             luma: luma.into_linear().luma,
             ..Default::default()
         }
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> From<(T, T, T)> for Yxy<Wp, T> {
+    fn from(components: (T, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float> Into<(T, T, T)> for Yxy<Wp, T> {
+    fn into(self) -> (T, T, T) {
+        self.into_components()
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> From<(T, T, T, A)>
+    for Alpha<Yxy<Wp, T>, A>
+{
+    fn from(components: (T, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, T, A)>
+    for Alpha<Yxy<Wp, T>, A>
+{
+    fn into(self) -> (T, T, T, A) {
+        self.into_components()
     }
 }
 
@@ -429,9 +503,9 @@ where
 #[cfg(test)]
 mod test {
     use super::Yxy;
-    use LinSrgb;
-    use LinLuma;
     use white_point::D65;
+    use LinLuma;
+    use LinSrgb;
 
     #[test]
     fn luma() {

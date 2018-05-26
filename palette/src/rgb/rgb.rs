@@ -1,24 +1,24 @@
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
 use std::any::TypeId;
 use std::fmt;
+use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
-use num_traits::Float;
 use approx::ApproxEq;
+use num_traits::Float;
 
-use rgb::{RgbSpace, RgbStandard, TransferFn};
-use luma::LumaStandard;
-use encoding::{Linear, Srgb};
+use alpha::Alpha;
+use blend::PreAlpha;
+use convert::{FromColor, IntoColor};
 use encoding::linear::LinearFn;
 use encoding::pixel::RawPixel;
-use alpha::Alpha;
-use convert::{FromColor, IntoColor};
-use white_point::WhitePoint;
-use blend::PreAlpha;
+use encoding::{Linear, Srgb};
+use luma::LumaStandard;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
-use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
-use {Blend, Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use rgb::{RgbSpace, RgbStandard, TransferFn};
+use white_point::WhitePoint;
 use {cast, clamp};
+use {Blend, Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](../struct.Alpha.html#Rgba).
@@ -31,10 +31,10 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// light, where gray scale colors are created when these three channels are
 /// equal in strength.
 ///
-/// Many conversions and operations on this color space requires that it's linear,
-/// meaning that gamma correction is required when converting to and from a
-/// displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html) module
-/// for encoding formats.
+/// Many conversions and operations on this color space requires that it's
+/// linear, meaning that gamma correction is required when converting to and
+/// from a displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html)
+/// module for encoding formats.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -44,16 +44,16 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 #[palette_manual_from(Xyz, Hsv, Hsl, Luma, Rgb = "from_rgb_internal")]
 #[repr(C)]
 pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
-    /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8) is the
-    /// highest displayable amount.
+    /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8)
+    /// is the highest displayable amount.
     pub red: T,
 
-    /// The amount of green light, where 0.0 is no green light and 1.0f (or 255u8) is the
-    /// highest displayable amount.
+    /// The amount of green light, where 0.0 is no green light and 1.0f (or
+    /// 255u8) is the highest displayable amount.
     pub green: T,
 
-    /// The amount of blue light, where 0.0 is no blue light and 1.0f (or 255u8) is the
-    /// highest displayable amount.
+    /// The amount of blue light, where 0.0 is no blue light and 1.0f (or
+    /// 255u8) is the highest displayable amount.
     pub blue: T,
 
     /// The kind of RGB standard. sRGB is the default.
@@ -94,6 +94,16 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     /// Convert from another component type.
     pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self {
         color.into_format()
+    }
+
+    /// Convert to a `(red, green, blue)` tuple.
+    pub fn into_components(self) -> (T, T, T) {
+        (self.red, self.green, self.blue)
+    }
+
+    /// Convert from a `(red, green, blue)` tuple.
+    pub fn from_components((red, green, blue): (T, T, T)) -> Self {
+        Self::new(red, green, blue)
     }
 }
 
@@ -162,9 +172,9 @@ impl<S: RgbStandard<TransferFn = LinearFn>, T: Component> Rgb<S, T> {
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
-impl<S: RgbStandard, T: Component> Alpha<Rgb<S, T>, T> {
+impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     /// Nonlinear RGB.
-    pub fn new(red: T, green: T, blue: T, alpha: T) -> Rgba<S, T> {
+    pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
             color: Rgb::new(red, green, blue),
             alpha: alpha,
@@ -172,8 +182,8 @@ impl<S: RgbStandard, T: Component> Alpha<Rgb<S, T>, T> {
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Alpha<Rgb<S, U>, U> {
-        Rgba::new(
+    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Rgb<S, U>, B> {
+        Alpha::<Rgb<S, U>, B>::new(
             self.red.convert(),
             self.green.convert(),
             self.blue.convert(),
@@ -182,16 +192,26 @@ impl<S: RgbStandard, T: Component> Alpha<Rgb<S, T>, T> {
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Alpha<Rgb<S, U>, U>) -> Self {
+    pub fn from_format<U: Component, B: Component>(color: Alpha<Rgb<S, U>, B>) -> Self {
         color.into_format()
+    }
+
+    /// Convert to a `(red, green, blue, alpha)` tuple.
+    pub fn into_components(self) -> (T, T, T, A) {
+        (self.red, self.green, self.blue, self.alpha)
+    }
+
+    /// Convert from a `(red, green, blue, alpha)` tuple.
+    pub fn from_components((red, green, blue, alpha): (T, T, T, A)) -> Self {
+        Self::new(red, green, blue, alpha)
     }
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
-impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
+impl<S: RgbStandard, T: Component + Float, A: Component> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
-    pub fn into_linear(self) -> Rgba<Linear<S::Space>, T> {
-        Rgba::new(
+    pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
+        Alpha::<Rgb<Linear<S::Space>, T>, A>::new(
             S::TransferFn::into_linear(self.red),
             S::TransferFn::into_linear(self.green),
             S::TransferFn::into_linear(self.blue),
@@ -200,8 +220,8 @@ impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
     }
 
     /// Convert linear RGB to nonlinear RGB with transparency.
-    pub fn from_linear(color: Rgba<Linear<S::Space>, T>) -> Rgba<S, T> {
-        Rgba::new(
+    pub fn from_linear(color: Alpha<Rgb<Linear<S::Space>, T>, A>) -> Self {
+        Self::new(
             S::TransferFn::from_linear(color.red),
             S::TransferFn::from_linear(color.green),
             S::TransferFn::from_linear(color.blue),
@@ -210,8 +230,8 @@ impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
     }
 
     /// Convert the color to a different encoding with transparency.
-    pub fn into_encoding<St: RgbStandard<Space = S::Space>>(self) -> Rgba<St, T> {
-        Rgba::new(
+    pub fn into_encoding<St: RgbStandard<Space = S::Space>>(self) -> Alpha<Rgb<St, T>, A> {
+        Alpha::<Rgb<St, T>, A>::new(
             St::TransferFn::from_linear(S::TransferFn::into_linear(self.red)),
             St::TransferFn::from_linear(S::TransferFn::into_linear(self.green)),
             St::TransferFn::from_linear(S::TransferFn::into_linear(self.blue)),
@@ -220,8 +240,8 @@ impl<S: RgbStandard, T: Component + Float> Alpha<Rgb<S, T>, T> {
     }
 
     /// Convert RGB from a different encoding with transparency.
-    pub fn from_encoding<St: RgbStandard<Space = S::Space>>(color: Rgba<St, T>) -> Rgba<S, T> {
-        Rgba::new(
+    pub fn from_encoding<St: RgbStandard<Space = S::Space>>(color: Alpha<Rgb<St, T>, A>) -> Self {
+        Self::new(
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.red)),
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
@@ -616,6 +636,30 @@ where
             blue: luma.luma,
             standard: PhantomData,
         })
+    }
+}
+
+impl<S: RgbStandard, T: Component> From<(T, T, T)> for Rgb<S, T> {
+    fn from(components: (T, T, T)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbStandard, T: Component> Into<(T, T, T)> for Rgb<S, T> {
+    fn into(self) -> (T, T, T) {
+        self.into_components()
+    }
+}
+
+impl<S: RgbStandard, T: Component, A: Component> From<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
+    fn from(components: (T, T, T, A)) -> Self {
+        Self::from_components(components)
+    }
+}
+
+impl<S: RgbStandard, T: Component, A: Component> Into<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
+    fn into(self) -> (T, T, T, A) {
+        self.into_components()
     }
 }
 
