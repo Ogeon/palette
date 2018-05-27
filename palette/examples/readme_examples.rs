@@ -103,6 +103,7 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
             }
         }
     }
+
     {
         let mut sub_image = image.sub_image(0, 32, 256, 32);
         let (width, height) = sub_image.dimensions();

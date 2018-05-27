@@ -61,6 +61,7 @@ fn main() {
                 }
             }
         }
+
         {
             let mut sub_image = image.sub_image(i as u32, 32, 1, 31);
             let (width, height) = sub_image.dimensions();
@@ -72,6 +73,7 @@ fn main() {
                 }
             }
         }
+
         {
             let mut sub_image = image.sub_image(i as u32, 65, 1, 31);
             let (width, height) = sub_image.dimensions();
@@ -83,6 +85,7 @@ fn main() {
                 }
             }
         }
+
         {
             let mut sub_image = image.sub_image(i as u32, 97, 1, 31);
             let (width, height) = sub_image.dimensions();
