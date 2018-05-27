@@ -21,12 +21,24 @@ fn main() {
             .into_format()
             .into_raw();
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 0, 20, 31).pixels_mut() {
-            pixel.data = rgb1;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 0, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: rgb1 });
+                }
+            }
         }
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 32, 20, 31).pixels_mut() {
-            pixel.data = rgb2;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 32, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: rgb2 });
+                }
+            }
         }
 
         let lab1 = Srgb::from_linear(lab.darken(0.05 * i as f32).into())
@@ -36,12 +48,24 @@ fn main() {
             .into_format()
             .into_raw();
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 65, 20, 31).pixels_mut() {
-            pixel.data = lab1;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 65, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: lab1 });
+                }
+            }
         }
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 97, 20, 31).pixels_mut() {
-            pixel.data = lab2;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 97, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: lab2 });
+                }
+            }
         }
 
         let hsv1 = Srgb::from_linear(hsv.darken(0.05 * i as f32).into())
@@ -51,12 +75,24 @@ fn main() {
             .into_format()
             .into_raw();
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 130, 20, 31).pixels_mut() {
-            pixel.data = hsv1;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 130, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: hsv1 });
+                }
+            }
         }
 
-        for (_, _, pixel) in image.sub_image(i as u32 * 20, 162, 20, 31).pixels_mut() {
-            pixel.data = hsv2;
+        {
+            let mut sub_image = image.sub_image(i as u32 * 20, 162, 20, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb { data: hsv2 });
+                }
+            }
         }
     }
 

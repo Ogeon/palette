@@ -15,27 +15,40 @@ fn main() {
 
     //Increase the saturation by 80% (!) as HSL in the left half, and as LCh
     //in the right half. Notice the strong yellow tone in the HSL part.
-    for (_, _, pixel) in image.sub_image(0, 0, width / 2, height).pixels_mut() {
-        let color: Hsl = Srgb::from_raw(&pixel.data)
-            .into_format()
-            .into_linear()
-            .into();
+    {
+        let mut sub_image = image.sub_image(0, 0, width / 2, height);
+        let (width, height) = sub_image.dimensions();
+        for x in 0..width {
+            for y in 0..height {
+                let color: Hsl = Srgb::from_raw(&sub_image.get_pixel(x, y).data)
+                    .into_format()
+                    .into_linear()
+                    .into();
 
-        let saturated = color.saturate(0.8);
-        pixel.data = Srgb::from_linear(saturated.into()).into_format().into_raw();
+                let saturated = color.saturate(0.8);
+                sub_image.put_pixel(x, y, image::Rgb {
+                    data: Srgb::from_linear(saturated.into()).into_format().into_raw()
+                });
+            }
+        }
     }
 
-    for (_, _, pixel) in image
-        .sub_image(width / 2, 0, width / 2, height)
-        .pixels_mut()
     {
-        let color: Lch = Srgb::from_raw(&pixel.data)
-            .into_format()
-            .into_linear()
-            .into();
+        let mut sub_image = image.sub_image(width / 2, 0, width / 2, height);
+        let (width, height) = sub_image.dimensions();
+        for x in 0..width {
+            for y in 0..height {
+                let color: Lch = Srgb::from_raw(&sub_image.get_pixel(x, y).data)
+                    .into_format()
+                    .into_linear()
+                    .into();
 
-        let saturated = color.saturate(0.8);
-        pixel.data = Srgb::from_linear(saturated.into()).into_format().into_raw();
+                let saturated = color.saturate(0.8);
+                sub_image.put_pixel(x, y, image::Rgb {
+                    data: Srgb::from_linear(saturated.into()).into_format().into_raw()
+                });
+            }
+        }
     }
 
     match image.save("examples/saturate.png") {

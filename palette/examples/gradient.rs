@@ -49,20 +49,50 @@ fn main() {
         let c3 = Srgb::from_linear(c3.into()).into_format().into_raw();
         let c4 = Srgb::from_linear(c4.into()).into_format().into_raw();
 
-        for (_, _, pixel) in image.sub_image(i as u32, 0, 1, 31).pixels_mut() {
-            pixel.data = c1
-        }
 
-        for (_, _, pixel) in image.sub_image(i as u32, 32, 1, 31).pixels_mut() {
-            pixel.data = c2;
+        {
+            let mut sub_image = image.sub_image(i as u32, 0, 1, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb {
+                        data: c1
+                    });
+                }
+            }
         }
-
-        for (_, _, pixel) in image.sub_image(i as u32, 65, 1, 31).pixels_mut() {
-            pixel.data = c3;
+        {
+            let mut sub_image = image.sub_image(i as u32, 32, 1, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb {
+                        data: c2
+                    });
+                }
+            }
         }
-
-        for (_, _, pixel) in image.sub_image(i as u32, 97, 1, 31).pixels_mut() {
-            pixel.data = c4;
+        {
+            let mut sub_image = image.sub_image(i as u32, 65, 1, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb {
+                        data: c3
+                    });
+                }
+            }
+        }
+        {
+            let mut sub_image = image.sub_image(i as u32, 97, 1, 31);
+            let (width, height) = sub_image.dimensions();
+            for x in 0..width {
+                for y in 0..height {
+                    sub_image.put_pixel(x, y, image::Rgb {
+                        data: c4
+                    });
+                }
+            }
         }
     }
 

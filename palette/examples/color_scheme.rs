@@ -190,15 +190,21 @@ fn blit_shades<I: GenericImage<Pixel = image::Rgb<u8>> + 'static>(
         .into_format()
         .into_raw();
 
-    for (x, y, pixel) in canvas.pixels_mut() {
-        if y < height / 2 {
-            pixel.data = primary;
-        } else if x < width / 3 {
-            pixel.data = light;
-        } else if x < (width / 3) * 2 {
-            pixel.data = dark1;
-        } else {
-            pixel.data = dark2;
+
+    for x in 0..width {
+        for y in 0..height {
+            canvas.put_pixel(x, y, image::Rgb {
+                data:
+                if y < height / 2 {
+                    primary
+                } else if x < width / 3 {
+                    light
+                } else if x < (width / 3) * 2 {
+                    dark1
+                } else {
+                    dark2
+                }
+            });
         }
     }
 }
