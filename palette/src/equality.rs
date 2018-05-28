@@ -22,7 +22,7 @@ macro_rules! impl_eq {
                 $( self.$element.abs_diff_eq(&other.$element, epsilon) )&&+
             }
             fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-                $( self.$element.abs_diff_ne(&other.$element, epsilon) )&&+
+                $( self.$element.abs_diff_ne(&other.$element, epsilon) )||+
             }
         }
 
@@ -39,7 +39,7 @@ macro_rules! impl_eq {
                 $( self.$element.relative_eq(&other.$element, epsilon, max_relative) )&&+
             }
             fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )&&+
+                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )||+
             }
         }
 
@@ -56,7 +56,7 @@ macro_rules! impl_eq {
                 $( self.$element.ulps_eq(&other.$element, epsilon, max_ulps) )&&+
             }
             fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-                $( self.$element.ulps_ne(&other.$element, epsilon, max_ulps) )&&+
+                $( self.$element.ulps_ne(&other.$element, epsilon, max_ulps) )||+
             }
         }
     }
