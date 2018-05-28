@@ -23,7 +23,7 @@ strict = []
 [dependencies]
 palette_derive = {version = "0.4.0", path = "../palette_derive"}
 num-traits = "0.2"
-approx = "0.1"
+approx = "0.2"
 
 [dependencies.phf]
 version = "0.7"
@@ -36,7 +36,7 @@ features = ["serde_derive"]
 optional = true
 
 [dev-dependencies]
-image = "0.18"
+image = "0.19"
 clap = "2"
 csv = "1.0.0-beta.3"
 serde = "1"

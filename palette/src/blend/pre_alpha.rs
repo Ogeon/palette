@@ -1,5 +1,5 @@
 use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 
 use {clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
@@ -139,10 +139,10 @@ impl<C: Default, T: Float> Default for PreAlpha<C, T> {
     }
 }
 
-impl<C, T> ApproxEq for PreAlpha<C, T>
+impl<C, T> AbsDiffEq for PreAlpha<C, T>
 where
-    C: ApproxEq<Epsilon = T::Epsilon>,
-    T: ApproxEq + Float,
+    C: AbsDiffEq <Epsilon = T::Epsilon>,
+    T: AbsDiffEq  + Float,
     T::Epsilon: Copy,
 {
     type Epsilon = T::Epsilon;
@@ -151,12 +151,20 @@ where
         T::default_epsilon()
     }
 
+    fn abs_diff_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon) -> bool {
+        self.color.abs_diff_eq(&other.color, epsilon)
+            && self.alpha.abs_diff_eq(&other.alpha, epsilon)
+    }
+}
+
+impl<C, T> RelativeEq for PreAlpha<C, T>
+where
+    C: RelativeEq <Epsilon = T::Epsilon>,
+    T: RelativeEq  + Float,
+    T::Epsilon: Copy,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
-    }
-
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
     }
 
     fn relative_eq(
@@ -167,6 +175,17 @@ where
     ) -> bool {
         self.color.relative_eq(&other.color, epsilon, max_relative)
             && self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
+    }
+}
+
+impl<C, T> UlpsEq for PreAlpha<C, T>
+where
+    C: UlpsEq <Epsilon = T::Epsilon>,
+    T: UlpsEq  + Float,
+    T::Epsilon: Copy,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {

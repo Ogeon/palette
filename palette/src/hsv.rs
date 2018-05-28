@@ -1,4 +1,4 @@
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 
 use std::any::TypeId;
@@ -529,23 +529,35 @@ where
     }
 }
 
-impl<S, T> ApproxEq for Hsv<S, T>
+impl<S, T> AbsDiffEq for Hsv<S, T>
 where
-    T: Component + Float + ApproxEq,
+    T: Component + Float + AbsDiffEq,
     T::Epsilon: Copy + Float,
-    S: RgbSpace,
+    S: RgbSpace + PartialEq,
 {
-    type Epsilon = <T as ApproxEq>::Epsilon;
+    type Epsilon = T::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
         T::default_epsilon()
     }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        self.hue.abs_diff_eq(&other.hue, epsilon) &&
+            self.saturation.abs_diff_eq(&other.saturation, epsilon) &&
+            self.value.abs_diff_eq(&other.value, epsilon)
+    }
+}
+
+impl<S, T> RelativeEq for Hsv<S, T>
+where
+    T: Component + Float + RelativeEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
     }
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
+
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn relative_eq(
         &self,
@@ -554,15 +566,26 @@ where
         max_relative: Self::Epsilon,
     ) -> bool {
         self.hue.relative_eq(&other.hue, epsilon, max_relative) &&
-        self.saturation.relative_eq(&other.saturation, epsilon, max_relative) &&
-        self.value.relative_eq(&other.value, epsilon, max_relative)
+            self.saturation.relative_eq(&other.saturation, epsilon, max_relative) &&
+            self.value.relative_eq(&other.value, epsilon, max_relative)
+    }
+}
+
+impl<S, T> UlpsEq for Hsv<S, T>
+where
+    T: Component + Float + UlpsEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
     }
 
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
-        self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
-        self.value.ulps_eq(&other.value, epsilon, max_ulps)
+            self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
+            self.value.ulps_eq(&other.value, epsilon, max_ulps)
     }
 }
 

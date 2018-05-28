@@ -2,7 +2,7 @@
 
 use num_traits::{Float, One, Zero};
 use std::cmp::max;
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use cast;
 
@@ -287,9 +287,9 @@ impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
     }
 }
 
-impl<T> ApproxEq for Range<T>
+impl<T> AbsDiffEq for Range<T>
 where
-    T: ApproxEq + Float,
+    T: AbsDiffEq + Float,
     T::Epsilon: Copy,
 {
     type Epsilon = T::Epsilon;
@@ -298,12 +298,30 @@ where
         T::default_epsilon()
     }
 
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        let from = match (self.from, other.from) {
+            (Some(s), Some(o)) => s.abs_diff_eq(&o, epsilon),
+            (None, None) => true,
+            _ => false,
+        };
+
+        let to = match (self.to, other.to) {
+            (Some(s), Some(o)) => s.abs_diff_eq(&o, epsilon),
+            (None, None) => true,
+            _ => false,
+        };
+
+        from && to
+    }
+}
+
+impl<T> RelativeEq for Range<T>
+where
+    T: RelativeEq + Float,
+    T::Epsilon: Copy,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
-    }
-
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
     }
 
     fn relative_eq(
@@ -325,6 +343,16 @@ where
         };
 
         from && to
+    }
+}
+
+impl<T> UlpsEq for Range<T>
+where
+    T: UlpsEq + Float,
+    T::Epsilon: Copy,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {

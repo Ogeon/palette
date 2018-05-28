@@ -1,4 +1,4 @@
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 
 use std::any::TypeId;
@@ -446,23 +446,48 @@ where
     }
 }
 
-impl<S, T> ApproxEq for Hwb<S, T>
+impl<S, T> AbsDiffEq for Hwb<S, T>
 where
-    T: Component + Float + ApproxEq,
+    T: Component + Float + AbsDiffEq,
     T::Epsilon: Copy + Float,
-    S: RgbSpace,
+    S: RgbSpace + PartialEq,
 {
-    type Epsilon = <T as ApproxEq>::Epsilon;
+    type Epsilon = T::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
         T::default_epsilon()
     }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        let equal_shade = self
+            .whiteness
+            .abs_diff_eq(&other.whiteness, epsilon)
+            && self
+            .blackness
+            .abs_diff_eq(&other.blackness, epsilon);
+
+        // The hue doesn't matter that much when the color is gray, and may fluctuate
+        // due to precision errors. This is a blunt tool, but works for now.
+        let is_gray = self.blackness + self.whiteness >= T::one()
+            || other.blackness + other.whiteness >= T::one();
+        if is_gray {
+            equal_shade
+        } else {
+            self.hue.abs_diff_eq(&other.hue, epsilon) && equal_shade
+        }
+    }
+}
+
+impl<S, T> RelativeEq for Hwb<S, T>
+where
+    T: Component + Float + RelativeEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
     }
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
+
     fn relative_eq(
         &self,
         other: &Self,
@@ -473,8 +498,8 @@ where
             .whiteness
             .relative_eq(&other.whiteness, epsilon, max_relative)
             && self
-                .blackness
-                .relative_eq(&other.blackness, epsilon, max_relative);
+            .blackness
+            .relative_eq(&other.blackness, epsilon, max_relative);
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
@@ -486,10 +511,25 @@ where
             self.hue.relative_eq(&other.hue, epsilon, max_relative) && equal_shade
         }
     }
+}
+
+impl<S, T> UlpsEq for Hwb<S, T>
+where
+    T: Component + Float + UlpsEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps)
-            && self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps);
+        let equal_shade = self
+            .whiteness
+            .ulps_eq(&other.whiteness, epsilon, max_ulps)
+            && self
+            .blackness
+            .ulps_eq(&other.blackness, epsilon, max_ulps);
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.

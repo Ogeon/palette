@@ -66,8 +66,12 @@ mod gradients {
 fn display_colors(filename: &str, colors: &[Srgb<u8>]) {
     let mut image = RgbImage::new(colors.len() as u32 * 64, 64);
     for (i, &color) in colors.iter().enumerate() {
-        for (_, _, pixel) in image.sub_image(i as u32 * 64, 0, 64, 64).pixels_mut() {
-            pixel.data = *color.as_raw();
+        let mut sub_image = image.sub_image(i as u32 * 64, 0, 64, 64);
+        let (width, height) = sub_image.dimensions();
+        for x in 0..width {
+            for y in 0..height {
+                sub_image.put_pixel(x, y, image::Rgb { data: *color.as_raw() });
+            }
         }
     }
 
@@ -86,17 +90,32 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
     LinSrgb: From<B>,
 {
     let mut image = RgbImage::new(256, 64);
-
-    for (x, _, pixel) in image.sub_image(0, 0, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
-            .into_format()
-            .into_raw();
+    {
+        let mut sub_image = image.sub_image(0, 0, 256, 32);
+        let (width, height) = sub_image.dimensions();
+        for x in 0..width {
+            for y in 0..height {
+                sub_image.put_pixel(x, y, image::Rgb {
+                    data: Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
+                        .into_format()
+                        .into_raw()
+                });
+            }
+        }
     }
 
-    for (x, _, pixel) in image.sub_image(0, 32, 256, 32).pixels_mut() {
-        pixel.data = Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
-            .into_format()
-            .into_raw();
+    {
+        let mut sub_image = image.sub_image(0, 32, 256, 32);
+        let (width, height) = sub_image.dimensions();
+        for x in 0..width {
+            for y in 0..height {
+                sub_image.put_pixel(x, y, image::Rgb {
+                    data: Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
+                        .into_format()
+                        .into_raw()
+                });
+            }
+        }
     }
 
     match image.save(filename) {

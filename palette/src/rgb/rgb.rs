@@ -3,7 +3,7 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Sub};
 
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 
 use alpha::Alpha;
@@ -716,23 +716,35 @@ where
     }
 }
 
-impl<S, T> ApproxEq for Rgb<S, T>
+impl<S, T> AbsDiffEq for Rgb<S, T>
 where
-    T: Component + ApproxEq,
+    T: Component + AbsDiffEq,
     T::Epsilon: Copy,
-    S: RgbStandard,
+    S: RgbStandard + PartialEq,
 {
-    type Epsilon = <T as ApproxEq>::Epsilon;
+    type Epsilon = T::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
         T::default_epsilon()
     }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.red.abs_diff_eq(&other.red, epsilon) &&
+            self.green.abs_diff_eq(&other.green, epsilon) &&
+            self.blue.abs_diff_eq(&other.blue, epsilon)
+    }
+}
+
+impl<S, T> RelativeEq for Rgb<S, T>
+where
+    T: Component + RelativeEq,
+    T::Epsilon: Copy,
+    S: RgbStandard + PartialEq,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
     }
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
+
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn relative_eq(
         &self,
@@ -741,15 +753,26 @@ where
         max_relative: Self::Epsilon,
     ) -> bool {
         self.red.relative_eq(&other.red, epsilon, max_relative) &&
-        self.green.relative_eq(&other.green, epsilon, max_relative) &&
-        self.blue.relative_eq(&other.blue, epsilon, max_relative)
+            self.green.relative_eq(&other.green, epsilon, max_relative) &&
+            self.blue.relative_eq(&other.blue, epsilon, max_relative)
+    }
+}
+
+impl<S, T> UlpsEq for Rgb<S, T>
+where
+    T: Component + UlpsEq,
+    T::Epsilon: Copy,
+    S: RgbStandard + PartialEq,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
     }
 
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
-        self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
-        self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
+            self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
+            self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
     }
 }
 
