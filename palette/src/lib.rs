@@ -158,7 +158,7 @@ extern crate serde_json;
 
 use num_traits::{Float, NumCast, ToPrimitive, Zero};
 
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use blend::PreAlpha;
 use encoding::Linear;
@@ -394,7 +394,7 @@ macro_rules! make_color {
         ///It's not recommended to use `Color` when full control is necessary,
         ///but it can easily be converted to a fixed color space in those
         ///cases.
-        #[derive(Debug)]
+        #[derive(Debug, PartialEq)]
         pub enum Color<S = encoding::Srgb, T = f32>
             where T: Float + Component,
                 S: RgbSpace,
@@ -516,10 +516,11 @@ macro_rules! make_color {
             }
         }
 
-        impl<S, T> ApproxEq for Color<S, T>
-            where T: Float + Component + ApproxEq,
+        impl<S, T> AbsDiffEq for Color<S, T>
+            where T: Float + Component + AbsDiffEq,
                 T::Epsilon: Float,
-                S: RgbSpace,
+                S: RgbSpace + PartialEq,
+                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
         {
             type Epsilon = T::Epsilon;
 
@@ -527,12 +528,22 @@ macro_rules! make_color {
                 T::default_epsilon()
             }
 
+            fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                match (*self, *other) {
+                    $((Color::$variant(ref s), Color::$variant(ref o)) => s.abs_diff_eq(o, epsilon),)+
+                    _ => false
+                }
+            }
+        }
+
+        impl<S, T> RelativeEq for Color<S, T>
+            where T: Float + Component + RelativeEq,
+                T::Epsilon: Float,
+                S: RgbSpace + PartialEq,
+                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
+        {
             fn default_max_relative() -> Self::Epsilon {
                 T::default_max_relative()
-            }
-
-            fn default_max_ulps() -> u32 {
-                T::default_max_ulps()
             }
 
             fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
@@ -541,8 +552,19 @@ macro_rules! make_color {
                     _ => false
                 }
             }
+        }
 
-            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+        impl<S, T> UlpsEq for Color<S, T>
+            where T: Float + Component + UlpsEq,
+                T::Epsilon: Float,
+                S: RgbSpace + PartialEq,
+                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
+        {
+            fn default_max_ulps() -> u32 {
+                T::default_max_ulps()
+            }
+
+            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
                 match (*self, *other) {
                     $((Color::$variant(ref s), Color::$variant(ref o)) => s.ulps_eq(o, epsilon, max_ulps),)+
                     _ => false

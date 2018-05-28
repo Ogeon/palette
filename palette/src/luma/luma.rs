@@ -2,7 +2,7 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Sub};
 
-use approx::ApproxEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use num_traits::Float;
 
@@ -553,22 +553,31 @@ where
     }
 }
 
-impl<S, T> ApproxEq for Luma<S, T>
+impl<S, T> AbsDiffEq for Luma<S, T>
 where
-    T: Component + ApproxEq,
+    T: Component + AbsDiffEq,
     T::Epsilon: Copy,
-    S: LumaStandard,
+    S: LumaStandard + PartialEq,
 {
-    type Epsilon = <T as ApproxEq>::Epsilon;
+    type Epsilon = T::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
         T::default_epsilon()
     }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.luma.abs_diff_eq(&other.luma, epsilon)
+    }
+}
+
+impl<S, T> RelativeEq for Luma<S, T>
+    where
+        T: Component + RelativeEq,
+        T::Epsilon: Copy,
+        S: LumaStandard + PartialEq,
+{
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
-    }
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
     }
 
     fn relative_eq(
@@ -578,6 +587,17 @@ where
         max_relative: Self::Epsilon,
     ) -> bool {
         self.luma.relative_eq(&other.luma, epsilon, max_relative)
+    }
+}
+
+impl<S, T> UlpsEq for Luma<S, T>
+    where
+        T: Component + UlpsEq,
+        T::Epsilon: Copy,
+        S: LumaStandard + PartialEq,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {

@@ -1,38 +1,61 @@
 use num_traits::Float;
-use approx::ApproxEq;
+
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use {cast, Component, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
 use white_point::WhitePoint;
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
-        impl<Wp, T> ApproxEq for $self_ty<Wp, T>
-        where T: Component + Float + ApproxEq,
+        impl<Wp, T> AbsDiffEq for $self_ty<Wp, T>
+        where T: Component + Float + AbsDiffEq,
             T::Epsilon: Copy + Float,
-            Wp: WhitePoint
+            Wp: WhitePoint + PartialEq
         {
-            type Epsilon = <T as ApproxEq>::Epsilon;
+            type Epsilon = T::Epsilon;
 
             fn default_epsilon() -> Self::Epsilon {
                 T::default_epsilon()
             }
-            fn default_max_relative() -> Self::Epsilon {
+
+            fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                $( self.$element.abs_diff_eq(&other.$element, epsilon) )&&+
+            }
+            fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                $( self.$element.abs_diff_ne(&other.$element, epsilon) )&&+
+            }
+        }
+
+        impl<Wp, T> RelativeEq for $self_ty<Wp, T>
+        where T: Component + Float + RelativeEq,
+            T::Epsilon: Copy + Float,
+            Wp: WhitePoint + PartialEq
+        {
+            fn default_max_relative() -> T::Epsilon {
                 T::default_max_relative()
             }
+
+            fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
+                $( self.$element.relative_eq(&other.$element, epsilon, max_relative) )&&+
+            }
+            fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
+                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )&&+
+            }
+        }
+
+        impl<Wp, T> UlpsEq for $self_ty<Wp, T>
+        where T: Component + Float + UlpsEq,
+            T::Epsilon: Copy + Float,
+            Wp: WhitePoint + PartialEq
+        {
             fn default_max_ulps() -> u32 {
                 T::default_max_ulps()
             }
-            fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                $( self.$element.relative_eq(&other.$element, epsilon, max_relative) )&&+
-            }
-            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
+
+            fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
                 $( self.$element.ulps_eq(&other.$element, epsilon, max_ulps) )&&+
             }
-
-            fn relative_ne(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )&&+
-            }
-            fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+            fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
                 $( self.$element.ulps_ne(&other.$element, epsilon, max_ulps) )&&+
             }
         }
@@ -54,39 +77,58 @@ impl_eq!(Lch, [l, chroma, hue]);
 // ulps. Because of this we loose some precision for values close to 0.0.
 macro_rules! impl_eq_hue {
     (  $self_ty: ident ) => {
-        impl<T: Float + ApproxEq> ApproxEq for $self_ty<T>
-        where <T as ApproxEq>::Epsilon: Float
+        impl<T: Float + AbsDiffEq> AbsDiffEq for $self_ty<T>
+        where T::Epsilon: Float
         {
-            type Epsilon = <T as ApproxEq>::Epsilon;
+            type Epsilon = T::Epsilon;
 
             fn default_epsilon() -> Self::Epsilon {
                 T::default_epsilon() * cast(180.0)
             }
+
+            fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                let diff: T = (*self - *other).to_degrees();
+                T::abs_diff_eq(&diff, &T::zero(), epsilon)
+            }
+            fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                let diff: T = (*self - *other).to_degrees();
+                T::abs_diff_ne(&diff, &T::zero(), epsilon)
+            }
+        }
+
+        impl<T: Float + RelativeEq> RelativeEq for $self_ty<T>
+        where T::Epsilon: Float
+        {
             fn default_max_relative() -> Self::Epsilon {
                 T::default_max_relative() * cast(180.0)
             }
-            fn default_max_ulps() -> u32 {
-                T::default_max_ulps() * 180
-            }
-            fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+
+            fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
                 let diff: T = (*self - *other).to_degrees();
                 T::relative_eq(&diff, &T::zero(), epsilon, max_relative)
             }
-            fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool{
-                let diff: T = (*self - *other).to_degrees();
-                T::ulps_eq(&diff, &T::zero(), epsilon, max_ulps)
-            }
-
             fn relative_ne(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
                 let diff: T = (*self - *other).to_degrees();
                 T::relative_ne(&diff, &T::zero(), epsilon, max_relative)
+            }
+        }
+
+        impl<T: Float + UlpsEq> UlpsEq for $self_ty<T>
+        where T::Epsilon: Float
+        {
+            fn default_max_ulps() -> u32 {
+                T::default_max_ulps() * 180
+            }
+
+            fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
+                let diff: T = (*self - *other).to_degrees();
+                T::ulps_eq(&diff, &T::zero(), epsilon, max_ulps)
             }
             fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
                 let diff: T = (*self - *other).to_degrees();
                 T::ulps_ne(&diff, &T::zero(), epsilon, max_ulps)
             }
         }
-
     }
 }
 
