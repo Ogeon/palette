@@ -316,9 +316,9 @@ where
 }
 
 impl<T> RelativeEq for Range<T>
-    where
-        T: RelativeEq + Float,
-        T::Epsilon: Copy,
+where
+    T: RelativeEq + Float,
+    T::Epsilon: Copy,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -347,9 +347,9 @@ impl<T> RelativeEq for Range<T>
 }
 
 impl<T> UlpsEq for Range<T>
-    where
-        T: UlpsEq + Float,
-        T::Epsilon: Copy,
+where
+    T: UlpsEq + Float,
+    T::Epsilon: Copy,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()

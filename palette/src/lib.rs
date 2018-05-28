@@ -517,10 +517,10 @@ macro_rules! make_color {
         }
 
         impl<S, T> AbsDiffEq for Color<S, T>
-            where T: Float + Component + AbsDiffEq,
-                T::Epsilon: Float,
-                S: RgbSpace + PartialEq,
-                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
+        where T: Float + Component + AbsDiffEq,
+            T::Epsilon: Float,
+            S: RgbSpace + PartialEq,
+            <S as rgb::RgbSpace>::WhitePoint: PartialEq,
         {
             type Epsilon = T::Epsilon;
 
@@ -537,10 +537,10 @@ macro_rules! make_color {
         }
 
         impl<S, T> RelativeEq for Color<S, T>
-            where T: Float + Component + RelativeEq,
-                T::Epsilon: Float,
-                S: RgbSpace + PartialEq,
-                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
+        where T: Float + Component + RelativeEq,
+            T::Epsilon: Float,
+            S: RgbSpace + PartialEq,
+            <S as rgb::RgbSpace>::WhitePoint: PartialEq,
         {
             fn default_max_relative() -> Self::Epsilon {
                 T::default_max_relative()
@@ -555,10 +555,10 @@ macro_rules! make_color {
         }
 
         impl<S, T> UlpsEq for Color<S, T>
-            where T: Float + Component + UlpsEq,
-                T::Epsilon: Float,
-                S: RgbSpace + PartialEq,
-                <S as rgb::RgbSpace>::WhitePoint: PartialEq,
+        where T: Float + Component + UlpsEq,
+            T::Epsilon: Float,
+            S: RgbSpace + PartialEq,
+            <S as rgb::RgbSpace>::WhitePoint: PartialEq,
         {
             fn default_max_ulps() -> u32 {
                 T::default_max_ulps()

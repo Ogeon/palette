@@ -158,10 +158,10 @@ where
 }
 
 impl<C, T> RelativeEq for PreAlpha<C, T>
-    where
-        C: RelativeEq <Epsilon = T::Epsilon>,
-        T: RelativeEq  + Float,
-        T::Epsilon: Copy,
+where
+    C: RelativeEq <Epsilon = T::Epsilon>,
+    T: RelativeEq  + Float,
+    T::Epsilon: Copy,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -179,10 +179,10 @@ impl<C, T> RelativeEq for PreAlpha<C, T>
 }
 
 impl<C, T> UlpsEq for PreAlpha<C, T>
-    where
-        C: UlpsEq <Epsilon = T::Epsilon>,
-        T: UlpsEq  + Float,
-        T::Epsilon: Copy,
+where
+    C: UlpsEq <Epsilon = T::Epsilon>,
+    T: UlpsEq  + Float,
+    T::Epsilon: Copy,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()

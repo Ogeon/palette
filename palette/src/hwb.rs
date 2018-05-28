@@ -479,10 +479,10 @@ where
 }
 
 impl<S, T> RelativeEq for Hwb<S, T>
-    where
-        T: Component + Float + RelativeEq,
-        T::Epsilon: Copy + Float,
-        S: RgbSpace + PartialEq,
+where
+    T: Component + Float + RelativeEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -514,10 +514,10 @@ impl<S, T> RelativeEq for Hwb<S, T>
 }
 
 impl<S, T> UlpsEq for Hwb<S, T>
-    where
-        T: Component + Float + UlpsEq,
-        T::Epsilon: Copy + Float,
-        S: RgbSpace + PartialEq,
+where
+    T: Component + Float + UlpsEq,
+    T::Epsilon: Copy + Float,
+    S: RgbSpace + PartialEq,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()

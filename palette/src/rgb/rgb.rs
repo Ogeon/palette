@@ -736,10 +736,10 @@ where
 }
 
 impl<S, T> RelativeEq for Rgb<S, T>
-    where
-        T: Component + RelativeEq,
-        T::Epsilon: Copy,
-        S: RgbStandard + PartialEq,
+where
+    T: Component + RelativeEq,
+    T::Epsilon: Copy,
+    S: RgbStandard + PartialEq,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -759,10 +759,10 @@ impl<S, T> RelativeEq for Rgb<S, T>
 }
 
 impl<S, T> UlpsEq for Rgb<S, T>
-    where
-        T: Component + UlpsEq,
-        T::Epsilon: Copy,
-        S: RgbStandard + PartialEq,
+where
+    T: Component + UlpsEq,
+    T::Epsilon: Copy,
+    S: RgbStandard + PartialEq,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()

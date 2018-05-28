@@ -571,10 +571,10 @@ where
 }
 
 impl<S, T> RelativeEq for Luma<S, T>
-    where
-        T: Component + RelativeEq,
-        T::Epsilon: Copy,
-        S: LumaStandard + PartialEq,
+where
+    T: Component + RelativeEq,
+    T::Epsilon: Copy,
+    S: LumaStandard + PartialEq,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -591,10 +591,10 @@ impl<S, T> RelativeEq for Luma<S, T>
 }
 
 impl<S, T> UlpsEq for Luma<S, T>
-    where
-        T: Component + UlpsEq,
-        T::Epsilon: Copy,
-        S: LumaStandard + PartialEq,
+where
+    T: Component + UlpsEq,
+    T::Epsilon: Copy,
+    S: LumaStandard + PartialEq,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
