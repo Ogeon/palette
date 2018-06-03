@@ -182,7 +182,7 @@ pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
-pub use convert::{FromColor, IntoColor};
+pub use convert::{Convert, ConvertWith, FromColor, IntoColor};
 pub use encoding::pixel::Pixel;
 pub use hues::{LabHue, RgbHue};
 pub use matrix::Mat3;

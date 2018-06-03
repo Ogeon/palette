@@ -1,9 +1,11 @@
 use num_traits::Float;
 
-use {Component, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+use Pixel;
+use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
 use rgb::{Rgb, RgbSpace};
 use luma::Luma;
+use Alpha;
 use encoding::Linear;
 
 /// FromColor provides conversion from the colors.
@@ -498,6 +500,60 @@ where
         Luma::from_xyz(self.into_xyz())
     }
 }
+
+///A trait for converting from one color to another.
+///
+///This trait wraps the underlying `From` implementation.
+pub trait Convert: Sized {
+    ///Lossless, same as calling T::from(self)
+    #[inline]
+    fn convert<T: From<Self>>(self) -> T {
+        T::from(self)
+    }
+
+    ///Convert into T with values clamped to the color defined bounds
+    fn convert_clamped<T: From<Self> + Limited>(self) -> T {
+        let mut this: T = self.convert();
+        if !this.is_valid() {
+            this.clamp_self();
+        }
+        this
+    }
+
+    ///Convert into Option<T>, returning None if the resulting Color is outside of its defined range
+    fn try_convert<T: From<Self> + Limited>(self) -> Option<T> {
+        let this: T = self.convert();
+        if this.is_valid() {
+            Some(this)
+        } else {
+            None
+        }
+    }
+}
+
+impl Convert for Rgb {}
+impl Convert for Luma {}
+impl Convert for Hsl {}
+impl Convert for Hsv {}
+impl Convert for Hwb {}
+impl Convert for Lab {}
+impl Convert for Lch {}
+impl Convert for Xyz {}
+impl Convert for Yxy {}
+impl<C, T> Convert for Alpha<C, T> where C: Convert, T: Component {}
+
+///A trait for converting from one color to an arbitrary type by handing a closure the color's raw components.
+///
+///This trait makes use of the `Pixel` trait which can be unsafe depending on the implementator.
+pub trait ConvertWith<T>: Pixel<T> where T: Component
+{
+    ///Convert `self` to `T` by applying a function over its components
+    fn convert_with<F, Out>(self, f: F) -> Out where F: FnOnce(&[T]) -> Out, Out: Sized {
+        f(Pixel::into_raw_slice(&[self]))
+    }
+}
+
+impl<T, U> ConvertWith<T> for U where U: Pixel<T>, T: Component {}
 
 macro_rules! impl_into_color {
     ($self_ty: ident, $from_fn: ident) => {
