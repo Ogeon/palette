@@ -520,7 +520,11 @@ impl<T> OutOfBounds<T> {
     }
 }
 
-impl<T: Debug> error::Error for OutOfBounds<T> {}
+impl<T: Debug> error::Error for OutOfBounds<T> {
+    fn description(&self) -> &str {
+        "Color conversion is out of bounds"
+    }
+}
 
 impl<T> Display for OutOfBounds<T> {
     fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
