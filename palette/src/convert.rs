@@ -1,12 +1,11 @@
 use num_traits::Float;
 
-use std::error;
+use std::error::Error;
 use std::fmt::{self, Debug, Display, Formatter};
 use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
-use rgb::{Rgb, RgbSpace, RgbStandard};
-use luma::{Luma, LumaStandard};
-use Alpha;
+use rgb::{Rgb, RgbSpace};
+use luma::Luma;
 use encoding::Linear;
 
 /// FromColor provides conversion from the colors.
@@ -510,17 +509,19 @@ pub struct OutOfBounds<T> {
 
 impl<T> OutOfBounds<T> {
     ///Create a new error wrapping a color
+    #[inline]
     fn new(color: T) -> Self {
         OutOfBounds { color }
     }
 
     ///Consume this error and return the wrapped color
+    #[inline]
     pub fn color(self) -> T {
         self.color
     }
 }
 
-impl<T: Debug> error::Error for OutOfBounds<T> {
+impl<T: Debug> Error for OutOfBounds<T> {
     fn description(&self) -> &str {
         "Color conversion is out of bounds"
     }
@@ -532,52 +533,35 @@ impl<T> Display for OutOfBounds<T> {
     }
 }
 
-///An extension for `Result` that offers a method to take out the color of `try_convert` result.
-pub trait ResultExt<T> {
-    ///Take the color out of this `Result`.
-    fn take(self) -> T;
-}
-
-impl<T> ResultExt<T> for Result<T, OutOfBounds<T>> {
-    #[inline]
-    fn take(self) -> T {
-        match self {
-            Ok(color) => color,
-            Err(color) => color.color(),
-        }
-    }
-}
-
-///A trait for converting from one color to another.
+///A trait for converting a color into another.
 ///
 ///`convert_unclamped` currently wraps the underlying `Into` implementation.
-pub trait Convert<T>: Sized + Into<T> {
-
+pub trait ConvertInto<T>: Into<T> {
     ///Convert into T with values clamped to the color defined bounds
     ///
     ///```
-    ///use palette::Convert;
+    ///use palette::ConvertInto;
     ///use palette::Limited;
     ///use palette::{Srgb, Lch};
     ///
     ///
-    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert();
+    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_into();
     ///assert!(rgb.is_valid());
     ///```
-    fn convert(self) -> T;
+    fn convert_into(self) -> T;
 
-    ///Convert into T, the resulting color might be invalid in it's color space
+    ///Convert into T. The resulting color might be invalid in its color space
     ///
     ///```
-    ///use palette::Convert;
+    ///use palette::ConvertInto;
     ///use palette::Limited;
     ///use palette::{Srgb, Lch};
     ///
-    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_unclamped();
+    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_unclamped_into();
     ///assert!(!rgb.is_valid());
     ///```
     #[inline]
-    fn convert_unclamped(self) -> T {
+    fn convert_unclamped_into(self) -> T {
         self.into()
     }
 
@@ -585,10 +569,10 @@ pub trait Convert<T>: Sized + Into<T> {
     ///otherwise an `OutOfBounds` error is returned which contains the unclamped color.
     ///
     ///```
-    ///use palette::Convert;
+    ///use palette::ConvertInto;
     ///use palette::{Srgb, Hsl};
     ///
-    ///let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_convert() {
+    ///let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_convert_into() {
     ///    Ok(color) => color,
     ///    Err(err) => {
     ///        println!("Color is out of bounds");
@@ -596,69 +580,92 @@ pub trait Convert<T>: Sized + Into<T> {
     ///    },
     ///};
     ///```
-    fn try_convert(self) -> Result<T, OutOfBounds<T>>;
+    fn try_convert_into(self) -> Result<T, OutOfBounds<T>>;
 }
 
-macro_rules! expand_impl_convert {
-    (Alpha<$typ:ident<$gp:ident>>) => {
-        fn convert(self) -> Alpha<$typ<$gp, C>, C> {
-            let mut this = self.into();
-            if !this.is_valid() {
-                this.clamp_self();
-            }
-            this
-        }
+///A trait for converting one color from another.
+///
+///`convert_unclamped` currently wraps the underlying `Into` implementation.
+pub trait ConvertFrom<T>: From<T> {
+    ///Convert from T with values clamped to the color defined bounds
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///
+    ///let rgb = Srgb::convert_from(Lch::new(50.0, 100.0, -175.0));
+    ///assert!(rgb.is_valid());
+    ///```
+    fn convert_from(_: T) -> Self;
 
-        fn try_convert(self) -> Result<Alpha<$typ<$gp, C>, C>, OutOfBounds<Alpha<$typ<$gp, C>, C>>> {
-            let this = self.into();
-            if this.is_valid() {
-                Ok(this)
-            } else {
-                Err(OutOfBounds::new(this))
-            }
-        }
-    };
-    ($typ:ident<$gp:ident>) => {
-        fn convert(self) -> $typ<$gp, C> {
-            let mut this = self.into();
-            if !this.is_valid() {
-                this.clamp_self();
-            }
-            this
-        }
+    ///Convert from T. The resulting color might be invalid in its color space
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///let rgb = Srgb::convert_unclamped_from(Lch::new(50.0, 100.0, -175.0));
+    ///assert!(!rgb.is_valid());
+    ///```
+    #[inline]
+    fn convert_unclamped_from(val: T) -> Self {
+        Self::from(val)
+    }
 
-        fn try_convert(self) -> Result<$typ<$gp, C>, OutOfBounds<$typ<$gp, C>>> {
-            let this = self.into();
-            if this.is_valid() {
-                Ok(this)
-            } else {
-                Err(OutOfBounds::new(this))
-            }
-        }
-    };
+    ///Convert from T, returning ok if the color is inside of its defined range,
+    ///otherwise an `OutOfBounds` error is returned which contains the unclamped color.
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::{Srgb, Hsl};
+    ///
+    ///let rgb = match Srgb::try_convert_from(Hsl::new(150.0, 1.0, 1.1)) {
+    ///    Ok(color) => color,
+    ///    Err(err) => {
+    ///        println!("Color is out of bounds");
+    ///        err.color()
+    ///    },
+    ///};
+    ///```
+    fn try_convert_from(_: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
-macro_rules! impl_convert {
-    (impl<$gp:ident: $gt:ident> $typ:ident<$gt2:ident>) => {
-        impl<$gp: $gt, C: Component, T> Convert<$typ<$gp, C>> for T where T: Into<$typ<$gp, C>> {
-            expand_impl_convert!($typ<$gp>);
+impl<T, U> ConvertFrom<T> for U where U: From<T> + Limited {
+    fn convert_from(t: T) -> U {
+        let mut this = U::from(t);
+        if !this.is_valid() {
+            this.clamp_self();
         }
+        this
+    }
 
-        impl<$gp: $gt, C: Component, T> Convert<Alpha<$typ<$gp, C>, C>> for T where T: Into<Alpha<$typ<$gp, C>, C>> {
-            expand_impl_convert!(Alpha<$typ<$gp>>);
+    fn try_convert_from(t: T) -> Result<U, OutOfBounds<U>> {
+        let this = U::from(t);
+        if this.is_valid() {
+            Ok(this)
+        } else {
+            Err(OutOfBounds::new(this))
         }
-    };
-    (float_component impl<$gp:ident: $gt:ident> $typ:ident<$gt2:ident>) => {
-        impl<$gp: $gt, C: Float + Component, T> Convert<$typ<$gp, C>> for T where T: Into<$typ<$gp, C>> {
-            expand_impl_convert!($typ<$gp>);
-        }
-
-        impl<$gp: $gt, C: Float + Component, T> Convert<Alpha<$typ<$gp, C>, C>> for T where T: Into<Alpha<$typ<$gp, C>, C>> {
-            expand_impl_convert!(Alpha<$typ<$gp>>);
-        }
-    };
+    }
 }
 
+// ConvertFrom implies ConvertInto
+impl<T, U> ConvertInto<U> for T where U: ConvertFrom<T> {
+    #[inline]
+    fn convert_into(self) -> U {
+        U::convert_from(self)
+    }
+
+    #[inline]
+    fn try_convert_into(self) -> Result<U, OutOfBounds<U>> {
+        U::try_convert_from(self)
+    }
+}
+
+/*
 impl_convert!(impl<S: RgbStandard> Rgb<S>);
 impl_convert!(impl<S: LumaStandard> Luma<S>);
 impl_convert!(float_component impl<S: RgbSpace> Hsl<S>);
@@ -668,6 +675,7 @@ impl_convert!(float_component impl<Wp: WhitePoint> Lab<Wp>);
 impl_convert!(float_component impl<Wp: WhitePoint> Lch<Wp>);
 impl_convert!(float_component impl<Wp: WhitePoint> Xyz<Wp>);
 impl_convert!(float_component impl<Wp: WhitePoint> Yxy<Wp>);
+*/
 
 macro_rules! impl_into_color {
     ($self_ty: ident, $from_fn: ident) => {
