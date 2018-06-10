@@ -1,6 +1,8 @@
 use num_traits::Float;
 
-use {Component, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+use std::error::Error;
+use std::fmt::{self, Debug, Display, Formatter};
+use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
 use rgb::{Rgb, RgbSpace};
 use luma::Luma;
@@ -496,6 +498,171 @@ where
     ///Convert into Luma
     fn into_luma(self) -> Luma<Linear<Wp>, T> {
         Luma::from_xyz(self.into_xyz())
+    }
+}
+
+///The error type for a color conversion that converted a color into a color with invalid values.
+#[derive(Debug)]
+pub struct OutOfBounds<T> {
+    color: T,
+}
+
+impl<T> OutOfBounds<T> {
+    ///Create a new error wrapping a color
+    #[inline]
+    fn new(color: T) -> Self {
+        OutOfBounds { color }
+    }
+
+    ///Consume this error and return the wrapped color
+    #[inline]
+    pub fn color(self) -> T {
+        self.color
+    }
+}
+
+impl<T: Debug> Error for OutOfBounds<T> {
+    fn description(&self) -> &str {
+        "Color conversion is out of bounds"
+    }
+}
+
+impl<T> Display for OutOfBounds<T> {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        write!(fmt, "Color conversion is out of bounds")
+    }
+}
+
+///A trait for converting a color into another.
+pub trait ConvertInto<T>: Into<T> {
+    ///Convert into T with values clamped to the color defined bounds
+    ///
+    ///```
+    ///use palette::ConvertInto;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///
+    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_into();
+    ///assert!(rgb.is_valid());
+    ///```
+    fn convert_into(self) -> T;
+
+    ///Convert into T. The resulting color might be invalid in its color space
+    ///
+    ///```
+    ///use palette::ConvertInto;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_unclamped_into();
+    ///assert!(!rgb.is_valid());
+    ///```
+    #[inline]
+    fn convert_unclamped_into(self) -> T;
+
+    ///Convert into T, returning ok if the color is inside of its defined range,
+    ///otherwise an `OutOfBounds` error is returned which contains the unclamped color.
+    ///
+    ///```
+    ///use palette::ConvertInto;
+    ///use palette::{Srgb, Hsl};
+    ///
+    ///let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_convert_into() {
+    ///    Ok(color) => color,
+    ///    Err(err) => {
+    ///        println!("Color is out of bounds");
+    ///        err.color()
+    ///    },
+    ///};
+    ///```
+    fn try_convert_into(self) -> Result<T, OutOfBounds<T>>;
+}
+
+///A trait for converting one color from another.
+///
+///`convert_unclamped` currently wraps the underlying `From` implementation.
+pub trait ConvertFrom<T>: From<T> {
+    ///Convert from T with values clamped to the color defined bounds
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///
+    ///let rgb = Srgb::convert_from(Lch::new(50.0, 100.0, -175.0));
+    ///assert!(rgb.is_valid());
+    ///```
+    fn convert_from(_: T) -> Self;
+
+    ///Convert from T. The resulting color might be invalid in its color space
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::Limited;
+    ///use palette::{Srgb, Lch};
+    ///
+    ///let rgb = Srgb::convert_unclamped_from(Lch::new(50.0, 100.0, -175.0));
+    ///assert!(!rgb.is_valid());
+    ///```
+    #[inline]
+    fn convert_unclamped_from(val: T) -> Self {
+        Self::from(val)
+    }
+
+    ///Convert from T, returning ok if the color is inside of its defined range,
+    ///otherwise an `OutOfBounds` error is returned which contains the unclamped color.
+    ///
+    ///```
+    ///use palette::ConvertFrom;
+    ///use palette::{Srgb, Hsl};
+    ///
+    ///let rgb = match Srgb::try_convert_from(Hsl::new(150.0, 1.0, 1.1)) {
+    ///    Ok(color) => color,
+    ///    Err(err) => {
+    ///        println!("Color is out of bounds");
+    ///        err.color()
+    ///    },
+    ///};
+    ///```
+    fn try_convert_from(_: T) -> Result<Self, OutOfBounds<Self>>;
+}
+
+impl<T, U> ConvertFrom<T> for U where U: From<T> + Limited {
+    fn convert_from(t: T) -> U {
+        let mut this = U::from(t);
+        if !this.is_valid() {
+            this.clamp_self();
+        }
+        this
+    }
+
+    fn try_convert_from(t: T) -> Result<U, OutOfBounds<U>> {
+        let this = U::from(t);
+        if this.is_valid() {
+            Ok(this)
+        } else {
+            Err(OutOfBounds::new(this))
+        }
+    }
+}
+
+// ConvertFrom implies ConvertInto
+impl<T, U> ConvertInto<U> for T where U: ConvertFrom<T> {
+    #[inline]
+    fn convert_into(self) -> U {
+        U::convert_from(self)
+    }
+
+    #[inline]
+    fn convert_unclamped_into(self) -> U {
+        U::convert_unclamped_from(self)
+    }
+
+    #[inline]
+    fn try_convert_into(self) -> Result<U, OutOfBounds<U>> {
+        U::try_convert_from(self)
     }
 }
 
