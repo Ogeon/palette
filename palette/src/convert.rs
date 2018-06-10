@@ -534,8 +534,6 @@ impl<T> Display for OutOfBounds<T> {
 }
 
 ///A trait for converting a color into another.
-///
-///`convert_unclamped` currently wraps the underlying `Into` implementation.
 pub trait ConvertInto<T>: Into<T> {
     ///Convert into T with values clamped to the color defined bounds
     ///
@@ -561,9 +559,7 @@ pub trait ConvertInto<T>: Into<T> {
     ///assert!(!rgb.is_valid());
     ///```
     #[inline]
-    fn convert_unclamped_into(self) -> T {
-        self.into()
-    }
+    fn convert_unclamped_into(self) -> T;
 
     ///Convert into T, returning ok if the color is inside of its defined range,
     ///otherwise an `OutOfBounds` error is returned which contains the unclamped color.
@@ -585,7 +581,7 @@ pub trait ConvertInto<T>: Into<T> {
 
 ///A trait for converting one color from another.
 ///
-///`convert_unclamped` currently wraps the underlying `Into` implementation.
+///`convert_unclamped` currently wraps the underlying `From` implementation.
 pub trait ConvertFrom<T>: From<T> {
     ///Convert from T with values clamped to the color defined bounds
     ///
@@ -660,22 +656,15 @@ impl<T, U> ConvertInto<U> for T where U: ConvertFrom<T> {
     }
 
     #[inline]
+    fn convert_unclamped_into(self) -> U {
+        U::convert_unclamped_from(self)
+    }
+
+    #[inline]
     fn try_convert_into(self) -> Result<U, OutOfBounds<U>> {
         U::try_convert_from(self)
     }
 }
-
-/*
-impl_convert!(impl<S: RgbStandard> Rgb<S>);
-impl_convert!(impl<S: LumaStandard> Luma<S>);
-impl_convert!(float_component impl<S: RgbSpace> Hsl<S>);
-impl_convert!(float_component impl<S: RgbSpace> Hsv<S>);
-impl_convert!(float_component impl<S: RgbSpace> Hwb<S>);
-impl_convert!(float_component impl<Wp: WhitePoint> Lab<Wp>);
-impl_convert!(float_component impl<Wp: WhitePoint> Lch<Wp>);
-impl_convert!(float_component impl<Wp: WhitePoint> Xyz<Wp>);
-impl_convert!(float_component impl<Wp: WhitePoint> Yxy<Wp>);
-*/
 
 macro_rules! impl_into_color {
     ($self_ty: ident, $from_fn: ident) => {
