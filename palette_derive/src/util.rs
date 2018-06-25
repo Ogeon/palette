@@ -17,6 +17,7 @@ pub fn bundle_impl(
             #[allow(non_snake_case, unused_attributes, unused_qualifications)]
             mod #const_name {
                 extern crate num_traits as _num_traits;
+                use float::Float as _FloatTrait;
                 use super::#type_name;
                 #block
             }
@@ -27,6 +28,7 @@ pub fn bundle_impl(
             mod #const_name {
                 extern crate palette as _palette;
                 extern crate num_traits as _num_traits;
+                use _palette::float::Float as _FloatTrait;
                 use super::#type_name;
                 #block
             }

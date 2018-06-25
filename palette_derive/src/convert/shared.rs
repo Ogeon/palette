@@ -82,7 +82,7 @@ pub fn add_component_where_clause(component: &Type, generics: &mut Generics, int
     generics
         .make_where_clause()
         .predicates
-        .push(parse_quote!(#component: #component_trait_path + _num_traits::Float));
+        .push(parse_quote!(#component: #component_trait_path + _FloatTrait));
 }
 
 pub fn add_white_point_where_clause(white_point: &Type, generics: &mut Generics, internal: bool) {

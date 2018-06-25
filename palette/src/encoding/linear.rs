@@ -2,7 +2,7 @@
 
 use core::marker::PhantomData;
 
-use num_traits::Float;
+use float::Float;
 use rgb::{RgbSpace, RgbStandard};
 use luma::LumaStandard;
 use encoding::TransferFn;

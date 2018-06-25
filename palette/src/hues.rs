@@ -1,4 +1,4 @@
-use num_traits::Float;
+use float::Float;
 
 use core::f64::consts::PI;
 use core::cmp::PartialEq;

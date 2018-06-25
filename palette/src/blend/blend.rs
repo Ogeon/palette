@@ -1,4 +1,6 @@
-use num_traits::{Float, One, Zero};
+use num_traits::{One, Zero};
+use float::Float;
+use num_traits::float::FloatCore;
 
 use {cast, clamp, ComponentWise};
 use blend::{BlendFunction, PreAlpha};

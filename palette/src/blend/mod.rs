@@ -36,7 +36,7 @@
 //!which may result in loss of some color information in some cases. One such
 //!case is that a completely transparent resultant color will become black.
 
-use num_traits::Float;
+use float::Float;
 
 use ComponentWise;
 

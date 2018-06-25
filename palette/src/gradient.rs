@@ -3,7 +3,9 @@
 //!This module is only available if the `std` feature is enabled (this is the
 //!default).
 
-use num_traits::{Float, One, Zero};
+use num_traits::{One, Zero};
+use float::Float;
+use num_traits::float::FloatCore;
 use std::cmp::max;
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 

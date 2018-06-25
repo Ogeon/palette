@@ -1,4 +1,4 @@
-use num_traits::Float;
+use float::Float;
 
 use core::marker::PhantomData;
 use core::ops::{Add, Div, Mul, Sub};

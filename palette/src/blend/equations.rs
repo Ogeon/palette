@@ -1,4 +1,5 @@
-use num_traits::Float;
+use float::Float;
+use num_traits::float::FloatCore;
 
 use {Blend, ComponentWise};
 use blend::{BlendFunction, PreAlpha};

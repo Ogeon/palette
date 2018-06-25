@@ -16,7 +16,7 @@ build = "build/main.rs"
 default = ["named_from_str", "std"]
 named_from_str = ["named", "phf", "phf_codegen"]
 named = []
-std = ["num-traits/std", "serde/std"]
+std = ["num-traits/std", "serde/std", "approx/std"]
 
 #internal
 strict = []
@@ -24,7 +24,7 @@ strict = []
 [dependencies]
 palette_derive = {version = "0.4.0", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
-approx = "0.2"
+approx = {version = "0.2", default-features = false}
 
 [dependencies.phf]
 version = "0.7"

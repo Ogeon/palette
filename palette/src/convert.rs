@@ -1,4 +1,4 @@
-use num_traits::Float;
+use float::Float;
 
 use core::fmt::{self, Display, Formatter};
 use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
@@ -762,7 +762,7 @@ impl_into_color_rgb!(Hwb, from_hwb);
 #[cfg(test)]
 mod tests {
     use core::marker::PhantomData;
-    use num_traits::Float;
+    use num_traits::float::FloatCore as Float;
     use Component;
     use Linear;
     use rgb::{Rgb, RgbSpace};

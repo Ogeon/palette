@@ -1,5 +1,5 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::Float;
+use float::Float;
 
 use core::any::TypeId;
 use core::marker::PhantomData;

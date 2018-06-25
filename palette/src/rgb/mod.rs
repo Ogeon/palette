@@ -1,6 +1,6 @@
 //!RGB types, spaces and standards.
 
-use num_traits::Float;
+use float::Float;
 use core::any::Any;
 
 use {Component, Yxy};

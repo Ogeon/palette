@@ -4,7 +4,7 @@ use core::marker::PhantomData;
 use core::ops::{Add, Div, Mul, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::Float;
+use float::Float;
 
 use alpha::Alpha;
 use blend::PreAlpha;

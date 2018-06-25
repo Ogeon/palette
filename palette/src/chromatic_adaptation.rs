@@ -22,7 +22,7 @@
 //!//Should print {x: 0.257963, y: 0.139776,z: 0.058825}
 //!println!("{:?}", c)
 //!```
-use num_traits::Float;
+use float::Float;
 
 use {cast, Component, FromColor, IntoColor, Xyz};
 use white_point::WhitePoint;

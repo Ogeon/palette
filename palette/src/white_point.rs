@@ -6,7 +6,7 @@
 //! unacceptable results when attempting to color-correct a photograph taken with incandescent
 //! lighting.
 
-use num_traits::Float;
+use float::Float;
 
 use {cast, Component, Xyz};
 

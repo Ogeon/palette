@@ -161,7 +161,8 @@ extern crate serde;
 #[cfg(all(test, feature = "serde"))]
 extern crate serde_json;
 
-use num_traits::{Float, NumCast, ToPrimitive, Zero};
+use num_traits::{NumCast, ToPrimitive, Zero};
+use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -344,6 +345,7 @@ macro_rules! assert_ranges {
     );
 }
 
+
 #[macro_use]
 mod macros;
 
@@ -373,6 +375,8 @@ pub mod encoding;
 mod equality;
 mod matrix;
 pub mod white_point;
+
+pub mod float;
 
 macro_rules! make_color {
     ($(

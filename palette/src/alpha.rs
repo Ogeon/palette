@@ -1,7 +1,7 @@
 use core::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
 use core::fmt;
 
-use num_traits::Float;
+use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
