@@ -1,7 +1,7 @@
 use num_traits::Float;
 
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use core::marker::PhantomData;
+use core::ops::{Add, Div, Mul, Sub};
 
 use clamp;
 use encoding::pixel::RawPixel;

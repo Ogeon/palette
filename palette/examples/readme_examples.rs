@@ -4,7 +4,9 @@ extern crate palette;
 
 use image::{GenericImage, RgbImage};
 
-use palette::{Gradient, LinSrgb, Mix, Pixel, Srgb};
+use palette::{LinSrgb, Mix, Pixel, Srgb};
+#[cfg(feature = "std")]
+use palette::Gradient;
 
 mod color_spaces {
     use palette::{Hue, Lch, LinSrgb, Srgb};
@@ -44,6 +46,7 @@ mod manipulation {
     }
 }
 
+#[cfg(feature = "std")]
 mod gradients {
     use palette::{Gradient, Hsv, LinSrgb};
     use display_gradients;
@@ -81,6 +84,7 @@ fn display_colors(filename: &str, colors: &[Srgb<u8>]) {
     }
 }
 
+#[cfg(feature = "std")]
 fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>(
     filename: &str,
     grad1: Gradient<A>,
@@ -127,5 +131,6 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
 fn main() {
     color_spaces::run();
     manipulation::run();
+    #[cfg(feature = "std")]
     gradients::run();
 }

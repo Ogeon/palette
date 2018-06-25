@@ -81,12 +81,12 @@ unsafe impl<T> RawPixel<T> for [T] {
 
     #[inline]
     unsafe fn from_raw_parts<'a>(pointer: *const T, length: usize) -> &'a Self {
-        ::std::slice::from_raw_parts(pointer, length)
+        ::core::slice::from_raw_parts(pointer, length)
     }
 
     #[inline]
     unsafe fn from_raw_parts_mut<'a>(pointer: *mut T, length: usize) -> &'a mut Self {
-        ::std::slice::from_raw_parts_mut(pointer, length)
+        ::core::slice::from_raw_parts_mut(pointer, length)
     }
 
     #[inline]

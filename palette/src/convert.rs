@@ -1,7 +1,6 @@
 use num_traits::Float;
 
-use std::error::Error;
-use std::fmt::{self, Debug, Display, Formatter};
+use core::fmt::{self, Display, Formatter};
 use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
 use rgb::{Rgb, RgbSpace};
@@ -521,7 +520,8 @@ impl<T> OutOfBounds<T> {
     }
 }
 
-impl<T: Debug> Error for OutOfBounds<T> {
+#[cfg(feature = "std")]
+impl<T: ::std::fmt::Debug> ::std::error::Error for OutOfBounds<T> {
     fn description(&self) -> &str {
         "Color conversion is out of bounds"
     }
@@ -761,7 +761,7 @@ impl_into_color_rgb!(Hwb, from_hwb);
 
 #[cfg(test)]
 mod tests {
-    use std::marker::PhantomData;
+    use core::marker::PhantomData;
     use num_traits::Float;
     use Component;
     use Linear;

@@ -1,6 +1,6 @@
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::{Add, Div, Mul, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -611,7 +611,7 @@ where
     S: LumaStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(f, "{:0width$x}", self.luma, width = size)
     }
 }
@@ -622,7 +622,7 @@ where
     S: LumaStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(f, "{:0width$X}", self.luma, width = size)
     }
 }

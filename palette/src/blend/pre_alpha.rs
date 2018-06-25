@@ -1,4 +1,4 @@
-use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use core::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 

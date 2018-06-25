@@ -1,7 +1,7 @@
 //!RGB types, spaces and standards.
 
 use num_traits::Float;
-use std::any::Any;
+use core::any::Any;
 
 use {Component, Yxy};
 use white_point::WhitePoint;

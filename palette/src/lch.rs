@@ -1,7 +1,7 @@
 use num_traits::Float;
 
-use std::marker::PhantomData;
-use std::ops::{Add, Sub};
+use core::marker::PhantomData;
+use core::ops::{Add, Sub};
 
 use encoding::pixel::RawPixel;
 use white_point::{D65, WhitePoint};

@@ -1,8 +1,8 @@
 use num_traits::Float;
 
-use std::f64::consts::PI;
-use std::cmp::PartialEq;
-use std::ops::{Add, Sub};
+use core::f64::consts::PI;
+use core::cmp::PartialEq;
+use core::ops::{Add, Sub};
 
 use cast;
 

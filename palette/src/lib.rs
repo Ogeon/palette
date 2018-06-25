@@ -135,9 +135,14 @@
 //! process reversed.
 //!
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
 #![doc(html_root_url = "https://docs.rs/palette/0.4.0/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
+
+#[cfg(feature = "std")]
+extern crate core;
 
 #[cfg_attr(test, macro_use)]
 extern crate approx;
@@ -170,6 +175,7 @@ pub use palette_derive::*;
 
 pub use alpha::Alpha;
 pub use blend::Blend;
+#[cfg(feature = "std")]
 pub use gradient::Gradient;
 
 pub use hsl::{Hsl, Hsla};
@@ -203,7 +209,7 @@ macro_rules! assert_ranges {
         unlimited {$($unlimited:ident: $unlimited_from:expr => $unlimited_to:expr),*}
     ) => (
         {
-            use std::iter::repeat;
+            use core::iter::repeat;
             use Limited;
 
             {
@@ -342,6 +348,7 @@ macro_rules! assert_ranges {
 mod macros;
 
 pub mod blend;
+#[cfg(feature = "std")]
 pub mod gradient;
 
 #[cfg(feature = "named")]
@@ -867,7 +874,7 @@ impl Component for u8 {
     const LIMITED: bool = true;
 
     fn max_intensity() -> Self {
-        std::u8::MAX
+        core::u8::MAX
     }
 
     fn convert<T: Component>(&self) -> T {
@@ -886,7 +893,7 @@ impl Component for u16 {
     const LIMITED: bool = true;
 
     fn max_intensity() -> Self {
-        std::u16::MAX
+        core::u16::MAX
     }
 
     fn convert<T: Component>(&self) -> T {
@@ -905,7 +912,7 @@ impl Component for u32 {
     const LIMITED: bool = true;
 
     fn max_intensity() -> Self {
-        std::u32::MAX
+        core::u32::MAX
     }
 
     fn convert<T: Component>(&self) -> T {
@@ -924,7 +931,7 @@ impl Component for u64 {
     const LIMITED: bool = true;
 
     fn max_intensity() -> Self {
-        std::u64::MAX
+        core::u64::MAX
     }
 
     fn convert<T: Component>(&self) -> T {

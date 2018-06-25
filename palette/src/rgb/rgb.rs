@@ -1,7 +1,7 @@
-use std::any::TypeId;
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use core::any::TypeId;
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::{Add, Div, Mul, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
@@ -827,7 +827,7 @@ where
     S: RgbStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$x}{:0width$x}{:0width$x}",
@@ -845,7 +845,7 @@ where
     S: RgbStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$X}{:0width$X}{:0width$X}",

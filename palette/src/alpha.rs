@@ -1,5 +1,5 @@
-use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
-use std::fmt;
+use core::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use core::fmt;
 
 use num_traits::Float;
 
@@ -338,7 +338,7 @@ where
     C: fmt::LowerHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$x}{:0width$x}",
@@ -355,7 +355,7 @@ where
     C: fmt::UpperHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$X}{:0width$X}",

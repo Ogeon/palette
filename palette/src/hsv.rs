@@ -1,9 +1,9 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::Float;
 
-use std::any::TypeId;
-use std::marker::PhantomData;
-use std::ops::{Add, Sub};
+use core::any::TypeId;
+use core::marker::PhantomData;
+use core::ops::{Add, Sub};
 
 use encoding::pixel::RawPixel;
 use encoding::{Linear, Srgb};
