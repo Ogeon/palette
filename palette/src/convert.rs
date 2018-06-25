@@ -762,7 +762,7 @@ impl_into_color_rgb!(Hwb, from_hwb);
 #[cfg(test)]
 mod tests {
     use core::marker::PhantomData;
-    use num_traits::float::FloatCore as Float;
+    use float::Float;
     use Component;
     use Linear;
     use rgb::{Rgb, RgbSpace};

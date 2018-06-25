@@ -1,4 +1,5 @@
 use float::Float;
+#[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore;
 
 use {Blend, ComponentWise};

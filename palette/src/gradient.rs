@@ -5,7 +5,6 @@
 
 use num_traits::{One, Zero};
 use float::Float;
-use num_traits::float::FloatCore;
 use std::cmp::max;
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
