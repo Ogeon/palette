@@ -1,44 +1,13 @@
 //!Floating point traits
 //! 
 //!This module is work-around for the lack of floating point operations under `#![no_std]`. If you
-//!haven't disabled the `std` feature, it shouldn't affect you.
+//!haven't disabled the `std` feature, it just re-exports `num_traits::Float`.
 //!
-//!Because conversions between different color encodings requrire floating point functions such as
-//!`powf`, `sin`, `cos`, etc. which are unavailable without the standard library, it looks for
-//!externally linked symbols that implement these functions.
+//!However, without `std`, it's a custom trait that's implemented for `f32` and `f64` using the
+//!`mish` and `m` crates.
 //!
-//!These external functions are needed without the standard library:
-//!```rust
-//!extern "C" {
-//!    // The square root of `x`
-//!    // Should be compatible with `x.sqrt()` from the standard library
-//!    fn sqrtf32(x: f32) -> f32;
-//!    fn sqrtf64(x: f64) -> f64;
-//!    // `x` to the power of `y`
-//!    // Should be compatible with `x.powf(y)` from the standard library
-//!    fn powf32(x: f32, y: f32) -> f32;
-//!    fn powf64(x: f64, y: f64) -> f64;
-//!    // The sine of `x` radians
-//!    // Should be compatible with `x.sin()` from the standard library
-//!    fn sinf32(x: f32) -> f32;
-//!    fn sinf64(x: f64) -> f64;
-//!    // The cosine of `x` radians
-//!    // Should be compatible with `x.cos()` from the standard library
-//!    fn cosf32(x: f32) -> f32;
-//!    fn cosf64(x: f64) -> f64;
-//!    // Inverse tangent
-//!    // Should be compatible with `y.atan2(x)` from the standard library
-//!    fn atan2f32(y: f32, x: f32) -> f32;
-//!    fn atan2f64(y: f64, x: f64) -> f64;
-//!}
-//!```
-//!
-//!There are different ways to deal with it:
-//! * Implement it yourself
-//! * Use `core::intrinsics`
-//! * Provide interfaces to a different math library (e.g. Julia's `libm`)
-//! * Don't use the features that need these functions and enable LTO (this is not guaranteed to be
-//!   stable between patch releases)
+//!Because new floating point functions may be needed in patch releases, the specifics of which
+//!operations are included in the trait are semver-exempt on `no_std`.
 
 #[cfg(feature = "std")]
 pub use num_traits::Float;
@@ -48,6 +17,9 @@ pub use self::no_std_float_hack::Float;
 
 #[cfg(not(feature = "std"))]
 mod no_std_float_hack {
+    use m;
+    use mish;
+
     pub trait Float: ::num_traits::float::FloatCore {
         fn sqrt(self) -> Self;
         fn powf(self, other: Self) -> Self;
@@ -56,62 +28,39 @@ mod no_std_float_hack {
         fn atan2(self, other: Self) -> Self;
     }
 
-    extern "C" {
-        // The square root of `x`
-        // Should be compatible with `x.sqrt()` from the standard library
-        fn sqrtf32(x: f32) -> f32;
-        fn sqrtf64(x: f64) -> f64;
-        // `x` to the power of `y`
-        // Should be compatible with `x.powf(y)` from the standard library
-        fn powf32(x: f32, y: f32) -> f32;
-        fn powf64(x: f64, y: f64) -> f64;
-        // The sine of `x` radians
-        // Should be compatible with `x.sin()` from the standard library
-        fn sinf32(x: f32) -> f32;
-        fn sinf64(x: f64) -> f64;
-        // The cosine of `x` radians
-        // Should be compatible with `x.cos()` from the standard library
-        fn cosf32(x: f32) -> f32;
-        fn cosf64(x: f64) -> f64;
-        // Inverse tangent
-        // Should be compatible with `y.atan2(x)` from the standard library
-        fn atan2f32(y: f32, x: f32) -> f32;
-        fn atan2f64(y: f64, x: f64) -> f64;
-    }
-
     impl Float for f32 {
         fn sqrt(self) -> f32 {
-            unsafe { sqrtf32(self) }
+            mish::sqrt(self)
         }
         fn powf(self, other: f32) -> f32 {
-            unsafe { powf32(self, other) }
+            mish::powf(self, other)
         }
         fn sin(self) -> f32 {
-            unsafe { sinf32(self) }
+            mish::sin(self)
         }
         fn cos(self) -> f32 {
-            unsafe { cosf32(self) }
+            mish::cos(self)
         }
         fn atan2(self, other: f32) -> f32 {
-            unsafe { atan2f32(self, other) }
+            <f32 as m::Float>::atan2(self, other)
         }
     }
 
     impl Float for f64 {
         fn sqrt(self) -> f64 {
-            unsafe { sqrtf64(self) }
+            mish::sqrt(self)
         }
         fn powf(self, other: f64) -> f64 {
-            unsafe { powf64(self, other) }
+            mish::powf(self, other)
         }
         fn sin(self) -> f64 {
-            unsafe { sinf64(self) }
+            mish::sin(self)
         }
         fn cos(self) -> f64 {
-            unsafe { cosf64(self) }
+            mish::cos(self)
         }
         fn atan2(self, other: f64) -> f64 {
-            unsafe { atan2f64(self, other) }
+            <f64 as m::Float>::atan2(self, other)
         }
     }
 }

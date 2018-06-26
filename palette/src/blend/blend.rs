@@ -1,5 +1,6 @@
 use num_traits::{One, Zero};
 use float::Float;
+#[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore;
 
 use {cast, clamp, ComponentWise};
