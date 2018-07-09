@@ -4,7 +4,7 @@ set -e
 features=""
 
 #Features that will always be activated
-required_features="strict"
+required_features="strict soft_float"
 
 
 #Find features

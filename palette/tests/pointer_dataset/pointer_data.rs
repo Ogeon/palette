@@ -11,7 +11,8 @@ u', v'		0.2008907213	0.4608888395
 Note: The xyz and yxy conversions do not use the updated conversion formula. So they are not used.
 */
 
-use num_traits::{Float, NumCast, ToPrimitive};
+use num_traits::{NumCast, ToPrimitive};
+use palette::float::Float;
 use csv;
 use palette::{Component, IntoColor, Lab, Lch, Xyz};
 use palette::white_point::WhitePoint;

@@ -135,13 +135,14 @@
 //! process reversed.
 //!
 
-#![cfg_attr(not(feature = "std"), no_std)]
+// Keep the standard library when running tests, too
+#![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
 #![doc(html_root_url = "https://docs.rs/palette/0.4.0/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", test))]
 extern crate core;
 
 #[cfg_attr(test, macro_use)]

@@ -1,11 +1,17 @@
 extern crate image;
 extern crate palette;
 
-use palette::{Gradient, Lch, LinSrgb, Pixel, Srgb};
-
-use image::{GenericImage, RgbImage};
-
+#[cfg(not(feature = "std"))]
 fn main() {
+    println!("You can't use gradients without the standard library");
+}
+
+#[cfg(feature = "std")]
+fn main() {
+    use palette::{Gradient, Lch, LinSrgb, Pixel, Srgb};
+
+    use image::{GenericImage, RgbImage};
+
     //A gradient of evenly spaced colors
     let grad1 = Gradient::new(vec![
         LinSrgb::new(1.0, 0.1, 0.1),

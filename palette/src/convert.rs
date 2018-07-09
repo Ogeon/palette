@@ -101,7 +101,6 @@ use encoding::Linear;
 /// ```rust
 /// #[macro_use]
 /// extern crate palette;
-/// extern crate num_traits;
 /// #[macro_use]
 /// extern crate approx;
 ///
@@ -109,7 +108,7 @@ use encoding::Linear;
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
-/// use num_traits::Float;
+/// use palette::float::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(PartialEq, Debug, FromColor, Pixel)]
@@ -348,7 +347,6 @@ where
 /// ```rust
 /// #[macro_use]
 /// extern crate palette;
-/// extern crate num_traits;
 /// #[macro_use]
 /// extern crate approx;
 ///
@@ -356,7 +354,7 @@ where
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
-/// use num_traits::Float;
+/// use palette::float::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(Copy, Clone, IntoColor, Pixel)]
