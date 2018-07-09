@@ -170,7 +170,7 @@ where
             let kappa: T = cast(841.0 / 108.0);
             let delta: T = cast(4.0 / 29.0);
             if c > epsilon {
-                c.powf(T::one() / cast(3.0))
+                c.cbrt()
             } else {
                 (kappa * c) + delta
             }

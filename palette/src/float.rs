@@ -22,6 +22,10 @@
 //!       // Should be compatible with `x.sqrt()` from the standard library
 //!       fn sqrtf32(x: f32) -> f32;
 //!       fn sqrtf64(x: f64) -> f64;
+//!       // Computes the cube root of `x`
+//!       // Should be compatible with `x.cbrt()` from the standard library
+//!       fn cbrtf32(x: f32) -> f32;
+//!       fn cbrtf64(x: f64) -> f64;
 //!       // Computes `x` to the power of `y`
 //!       // Should be compatible with `x.powf(y)` from the standard library
 //!       fn powf32(x: f32, y: f32) -> f32;
@@ -79,6 +83,8 @@ mod no_std_float_trait {
     pub trait Float: FloatCore {
         /// `x.sqrt()` computes the square root of `x`.
         fn sqrt(self) -> Self;
+        /// `x.cbrt()` computes the cube root of `x`.
+        fn cbrt(self) -> Self;
         /// `x.powf(y)` computes `x` to the power of `y`.
         fn powf(self, other: Self) -> Self;
         /// `x.sin()` computes the sine of `x` radians.
@@ -94,7 +100,13 @@ mod no_std_float_trait {
         fn sqrt(self) -> f32 {
             mish::sqrt(self)
         }
+        fn cbrt(self) -> f32 {
+            mish::cbrt_f32(self)
+        }
         fn powf(self, other: f32) -> f32 {
+            if self < 0. { // Can't raise a negative number to a fractional power
+                return f32::nan();
+            }
             mish::powf(self, other)
         }
         fn sin(self) -> f32 {
@@ -113,7 +125,13 @@ mod no_std_float_trait {
         fn sqrt(self) -> f64 {
             mish::sqrt(self)
         }
+        fn cbrt(self) -> f64 {
+            mish::cbrt_f32(self)
+        }
         fn powf(self, other: f64) -> f64 {
+            if self < 0. { // Can't raise a negative number to a fractional power
+                return f64::nan();
+            }
             mish::powf(self, other)
         }
         fn sin(self) -> f64 {
@@ -134,6 +152,10 @@ mod no_std_float_trait {
         // Should be compatible with `x.sqrt()` from the standard library
         fn sqrtf32(x: f32) -> f32;
         fn sqrtf64(x: f64) -> f64;
+        // Computes the cube root of `x`
+        // Should be compatible with `x.cbrt()` from the standard library
+        fn cbrtf32(x: f32) -> f32;
+        fn cbrtf64(x: f64) -> f64;
         // Computes `x` to the power of `y`
         // Should be compatible with `x.powf(y)` from the standard library
         fn powf32(x: f32, y: f32) -> f32;
@@ -157,6 +179,9 @@ mod no_std_float_trait {
         fn sqrt(self) -> f32 {
             unsafe { sqrtf32(self) }
         }
+        fn cbrt(self) -> f32 {
+            unsafe { cbrtf32(self) }
+        }
         fn powf(self, other: f32) -> f32 {
             unsafe { powf32(self, other) }
         }
@@ -175,6 +200,9 @@ mod no_std_float_trait {
     impl Float for f64 {
         fn sqrt(self) -> f64 {
             unsafe { sqrtf64(self) }
+        }
+        fn cbrt(self) -> f64 {
+            unsafe { cbrtf64(self) }
         }
         fn powf(self, other: f64) -> f64 {
             unsafe { powf64(self, other) }
