@@ -152,11 +152,6 @@ extern crate palette_derive;
 
 extern crate num_traits;
 
-#[cfg(not(feature = "std"))]
-extern crate m;
-#[cfg(not(feature = "std"))]
-extern crate mish;
-
 #[cfg(feature = "phf")]
 extern crate phf;
 

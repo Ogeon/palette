@@ -20,16 +20,29 @@ Add the following lines to your `Cargo.toml` file:
 palette = "0.4"
 ```
 
-### Optional Features
+### Features
 
 These features are enabled by default:
 
 * `"named"` - Enables color constants, located in the `named` module.
-* `"named_from_str"` - Enables the `named::from_str`, which maps name string to colors.
+* `"named_from_str"` - Enables the `named::from_str`, which maps name string to colors. This requires the standard library.
+* `"std"` - Enables use of the standard library.
 
 These features are disabled by default:
 
 * `"serde"` - Enables color serializing and deserializing.
+* `"soft_float"` - Without the standard library, this enables use of software floating-point libraries for certain floating point operations.
+
+### Without the standard library
+
+Here is an example `Cargo.toml` entry for using palette on `#![no_std]`:
+
+```toml
+[dependencies.palette]
+version = "0.4"
+default-feature = false
+features = ["soft_float"]
+```
 
 ## It's Never "Just RGB"
 
@@ -112,6 +125,23 @@ The RGB gradient goes through gray, while the HSV gradients changes only the hue
 This library is only meant for color manipulation and conversion. It's not a fully features image manipulation library. It will only handle colors, and not whole images. There are features that are meant to work as bridges between Palette and other graphical libraries, but the main features are limited to only focus on single pixel operations, to keep the scope at a manageable size.
 
 [pixel_module]: https://ogeon.github.io/docs/palette/master/palette/pixel/index.html
+
+## Using palette in an embedded environment
+
+Palette supports `#![no_std]` environments by disabling the `"std"` feature. However, there are some things that are unavailable without the standard library:
+
+* Gradients are unavailable, because they depend heavily on Vectors
+* The `"named_from_str"` feature requires the standard library as well
+* Floating point operations must be provided by the library user
+
+### Floating-point operations
+
+Converting colors requires a lot of floating-point math on the colors, such as trigonometry for HSV, exponents for gamma-correction, etc. These operations are typically provided by the standard library, and aren't available in an embedded environment. Because of this, a library user has two options for supplying the necessary functions:
+
+* If you enable the `"soft_float"` feature, software implementations will be used. This comes with the caveat that it's potentially slower and less precise than otherwise.
+* Without the `"soft_float"` feature, palette expects to link to external definitions of the required operations. You'll need to provide these using `extern "C"` declarations.
+
+For more information, see the [`float` module docs](https://ogeon.github.io/docs/palette/master/palette/float/index.html).
 
 ## Contributing
 
