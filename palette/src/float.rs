@@ -77,10 +77,15 @@ mod no_std_float_trait {
     /// [num_traits]: https://docs.rs/num-traits/0.2.5/num_traits/float/trait.Float.html
     /// [module]: index.html
     pub trait Float: FloatCore {
+        /// `x.sqrt()` computes the square root of `x`.
         fn sqrt(self) -> Self;
+        /// `x.powf(y)` computes `x` to the power of `y`.
         fn powf(self, other: Self) -> Self;
+        /// `x.sin()` computes the sine of `x` radians.
         fn sin(self) -> Self;
+        /// `x.cos()` computes the cosine of `x` radians.
         fn cos(self) -> Self;
+        /// `y.atan2(x)` computes the inverse tangent of `y / x`, in the corresponding quadrant
         fn atan2(self, other: Self) -> Self;
     }
 
