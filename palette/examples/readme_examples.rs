@@ -4,9 +4,9 @@ extern crate palette;
 
 use image::{GenericImage, RgbImage};
 
-use palette::{LinSrgb, Mix, Pixel, Srgb};
+use palette::{Pixel, Srgb};
 #[cfg(feature = "std")]
-use palette::Gradient;
+use palette::{Gradient, LinSrgb, Mix};
 
 mod color_spaces {
     use palette::{Hue, Lch, LinSrgb, Srgb};
