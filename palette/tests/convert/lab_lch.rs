@@ -7,8 +7,8 @@ fn lab_lch_green() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.1);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.1);
 }
 
 #[test]
@@ -19,8 +19,8 @@ fn lab_lch_magenta() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.1);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.1);
 }
 
 #[test]
@@ -31,6 +31,6 @@ fn lab_lch_blue() {
     let expect_lab = lch.into_lab();
     let expect_lch = lab.into_lch();
 
-    assert_relative_eq!(lab, expect_lab, epsilon = 0.001);
-    assert_relative_eq!(lch, expect_lch, epsilon = 0.001);
+    assert_relative_eq!(lab, expect_lab, epsilon = 0.1);
+    assert_relative_eq!(lch, expect_lch, epsilon = 0.1);
 }

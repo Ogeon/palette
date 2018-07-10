@@ -63,6 +63,7 @@ mod no_std_float_trait {
     extern crate mish;
 
     use num_traits::float::FloatCore;
+    use core::{f32, f64};
 
     /// This is the trait that represents a floating-point number under `no_std`. It has a subset
     /// of the operations that are in `num_traits::Float`, including all of the 
@@ -98,22 +99,42 @@ mod no_std_float_trait {
     #[cfg(feature = "soft_float")]
     impl Float for f32 {
         fn sqrt(self) -> f32 {
-            mish::sqrt(self)
+            if self < 0. || self.is_nan() || self.is_infinite() {
+                f32::NAN
+            } else if self < 1. {
+                1. / mish::sqrt(1. / self)
+            } else {
+                mish::sqrt(self)
+            }
         }
         fn cbrt(self) -> f32 {
             mish::cbrt_f32(self)
         }
         fn powf(self, other: f32) -> f32 {
             if self < 0. { // Can't raise a negative number to a fractional power
-                return f32::nan();
+                return f32::NAN;
             }
-            mish::powf(self, other)
+            // mish::powf is more accurate with numbers larger than 1.0
+            if self > 1.0 {
+                mish::powf(self, other)
+            } else if self == 0. {
+                return 0.;
+            } else {
+                1. / mish::powf(1. / self, other)
+            }
         }
         fn sin(self) -> f32 {
-            mish::sin(self)
+            if self.is_nan() || self.is_infinite() {
+                return f32::NAN;
+            }
+            if self < 0. {
+                return -Float::sin(-self);
+            }
+            let x = self % (2.*f32::consts::PI);
+            mish::sin(f32::consts::PI - x)
         }
         fn cos(self) -> f32 {
-            mish::cos(self)
+            (f32::consts::FRAC_PI_2 - self).sin()
         }
         fn atan2(self, other: f32) -> f32 {
             m::Float::atan2(self, other)
@@ -123,22 +144,42 @@ mod no_std_float_trait {
     #[cfg(feature = "soft_float")]
     impl Float for f64 {
         fn sqrt(self) -> f64 {
-            mish::sqrt(self)
+            if self < 0. || self.is_nan() || self.is_infinite() {
+                f64::NAN
+            } else if self < 1. {
+                1. / mish::sqrt(1. / self)
+            } else {
+                mish::sqrt(self)
+            }
         }
         fn cbrt(self) -> f64 {
             mish::cbrt_f32(self)
         }
         fn powf(self, other: f64) -> f64 {
             if self < 0. { // Can't raise a negative number to a fractional power
-                return f64::nan();
+                return f64::NAN;
+            } else if self == 0. {
+                return 0.;
             }
-            mish::powf(self, other)
+            // mish::powf is more accurate with numbers larger than 1.0
+            if self > 1.0 {
+                mish::powf(self, other)
+            } else {
+                1. / mish::powf(1. / self, other)
+            }
         }
         fn sin(self) -> f64 {
-            mish::sin(self)
+            if self.is_nan() || self.is_infinite() {
+                return f64::NAN;
+            }
+            if self < 0. {
+                return -Float::sin(-self);
+            }
+            let x = self % (2.*f64::consts::PI);
+            mish::sin(f64::consts::PI - x)
         }
         fn cos(self) -> f64 {
-            mish::cos(self)
+            (f64::consts::FRAC_PI_2 - self).sin()
         }
         fn atan2(self, other: f64) -> f64 {
             // f64 atan2 isn't implemented in `m` yet
