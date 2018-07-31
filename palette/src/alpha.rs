@@ -11,11 +11,11 @@ use encoding::pixel::RawPixel;
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
     ///The color.
-    #[cfg_attr(feature = "serde", serde(flatten))]
+    #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
     ///The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -467,7 +467,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5)).unwrap();
@@ -478,7 +478,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Rgba<Srgb> =

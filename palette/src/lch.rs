@@ -20,7 +20,7 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 ///[HSV](struct.Hsv.html). This gives it the same ability to directly change
 ///the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
 #[palette_component = "T"]
@@ -48,7 +48,7 @@ where
 
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
 }
@@ -444,7 +444,7 @@ mod test {
     raw_pixel_conversion_tests!(Lch<D65>: l, chroma, hue);
     raw_pixel_conversion_fail_tests!(Lch<D65>: l, chroma, hue);
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Lch::new(0.3, 0.8, 0.1)).unwrap();
@@ -452,7 +452,7 @@ mod test {
         assert_eq!(serialized, r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Lch =

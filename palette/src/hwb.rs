@@ -27,7 +27,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
 #[derive(Debug, PartialEq, FromColor, Pixel)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S"]
 #[palette_white_point = "S::WhitePoint"]
@@ -59,7 +59,7 @@ where
 
     ///The white point and RGB primaries this color is adapted to. The default
     ///is the sRGB standard.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
 }
@@ -621,7 +621,7 @@ mod test {
     raw_pixel_conversion_tests!(Hwb<Srgb>: hue, whiteness, blackness);
     raw_pixel_conversion_fail_tests!(Hwb<Srgb>: hue, whiteness, blackness);
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Hwb::new(0.3, 0.8, 0.1)).unwrap();
@@ -629,7 +629,7 @@ mod test {
         assert_eq!(serialized, r#"{"hue":0.3,"whiteness":0.8,"blackness":0.1}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Hwb =

@@ -156,10 +156,10 @@ extern crate num_traits;
 #[cfg(feature = "phf")]
 extern crate phf;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serializing")]
 #[macro_use]
 extern crate serde;
-#[cfg(all(test, feature = "serde"))]
+#[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
 use num_traits::{NumCast, ToPrimitive, Zero};

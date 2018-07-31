@@ -27,11 +27,11 @@ use encoding::pixel::RawPixel;
 ///Note that converting to and from premultiplied alpha will cause the alpha
 ///component to be clamped to [0.0, 1.0].
 #[derive(Clone, Copy, PartialEq, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C, T: Float> {
     ///The premultiplied color components (`original.color * original.alpha`).
-    #[cfg_attr(feature = "serde", serde(flatten))]
+    #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
     ///The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -319,13 +319,13 @@ impl<C, T: Float> DerefMut for PreAlpha<C, T> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "serde")]
+#[cfg(feature = "serializing")]
 mod test {
     use super::PreAlpha;
     use rgb::Rgb;
     use encoding::Srgb;
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let color = PreAlpha {
@@ -338,7 +338,7 @@ mod test {
         assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let expected = PreAlpha {

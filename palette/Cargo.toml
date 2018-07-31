@@ -16,8 +16,8 @@ build = "build/main.rs"
 default = ["named_from_str", "std"]
 named_from_str = ["named", "phf", "phf_codegen", "std"]
 named = []
-std = ["num-traits/std", "serde/std", "approx/std"]
-soft_float = ["mish", "m"]
+std = ["num-traits/std", "approx/std"]
+serializing = ["serde", "std"]
 
 #internal
 strict = []
@@ -26,18 +26,14 @@ strict = []
 palette_derive = {version = "0.4.0", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
 approx = {version = "0.2", default-features = false}
-
-mish = {version = "0.2", optional = true}
-m = {version = "0.1", optional = true}
+libm = "0.1.2"
 
 [dependencies.phf]
 version = "0.7"
 optional = true
 
 [dependencies.serde]
-#feature
 version = "1"
-default-features = false
 features = ["serde_derive"]
 optional = true
 

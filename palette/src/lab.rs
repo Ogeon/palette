@@ -25,7 +25,7 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "Wp"]
 #[palette_component = "T"]
@@ -48,7 +48,7 @@ where
 
     ///The white point associated with the color's illuminant and observer.
     ///D65 for 2 degree observer is used by default.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
 }
@@ -547,7 +547,7 @@ mod test {
     raw_pixel_conversion_tests!(Lab<D65>: l, a, b);
     raw_pixel_conversion_fail_tests!(Lab<D65>: l, a, b);
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Lab::new(0.3, 0.8, 0.1)).unwrap();
@@ -555,7 +555,7 @@ mod test {
         assert_eq!(serialized, r#"{"l":0.3,"a":0.8,"b":0.1}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Lab = ::serde_json::from_str(r#"{"l":0.3,"a":0.8,"b":0.1}"#).unwrap();

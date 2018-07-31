@@ -30,8 +30,7 @@ These features are enabled by default:
 
 These features are disabled by default:
 
-* `"serde"` - Enables color serializing and deserializing.
-* `"soft_float"` - Without the standard library, this enables use of software floating-point libraries for certain floating point operations.
+* `"serializing"` - Enables color serializing and deserializing using `serde`.
 
 ### Without the standard library
 
@@ -40,8 +39,7 @@ Here is an example `Cargo.toml` entry for using palette on `#![no_std]`:
 ```toml
 [dependencies.palette]
 version = "0.4"
-default-feature = false
-features = ["soft_float"]
+default-features = false
 ```
 
 ## It's Never "Just RGB"
@@ -132,16 +130,11 @@ Palette supports `#![no_std]` environments by disabling the `"std"` feature. How
 
 * Gradients are unavailable, because they depend heavily on Vectors
 * The `"named_from_str"` feature requires the standard library as well
-* Floating point operations must be provided by the library user
+* Serialization using `serde` is unavailable
 
-### Floating-point operations
+It uses [`libm`] to provide the floating-point operations that are typically in `std`.
 
-Converting colors requires a lot of floating-point math on the colors, such as trigonometry for HSV, exponents for gamma-correction, etc. These operations are typically provided by the standard library, and aren't available in an embedded environment. Because of this, a library user has two options for supplying the necessary functions:
-
-* If you enable the `"soft_float"` feature, software implementations will be used. This comes with the caveat that it's potentially slower and less precise than otherwise.
-* Without the `"soft_float"` feature, palette expects to link to external definitions of the required operations. You'll need to provide these using `extern "C"` declarations.
-
-For more information, see the [`float` module docs](https://ogeon.github.io/docs/palette/master/palette/float/index.html).
+[`libm`]: https://github.com/japaric/libm
 
 ## Contributing
 
