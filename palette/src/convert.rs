@@ -393,7 +393,7 @@ where
 ///     ];
 ///     let hsv = Bgr::from_raw_slice(&buffer)[1].into();
 ///
-///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5), epsilon = 0.001);
+///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
 /// }
 /// ```
 ///

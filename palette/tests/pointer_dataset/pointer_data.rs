@@ -93,10 +93,7 @@ fn load_data() -> Vec<PointerData> {
 }
 
 fn check_equal(src: &PointerData, tgt: &PointerData) {
-    #[cfg(feature = "std")]
     const MAX_ERROR: f64 = 0.000000000001;
-    #[cfg(not(feature = "std"))]
-    const MAX_ERROR: f64 = 1.0;
     assert_relative_eq!(src.lch, tgt.lch, epsilon = MAX_ERROR);
     assert_relative_eq!(src.lab, tgt.lab, epsilon = MAX_ERROR);
 }
