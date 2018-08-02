@@ -7,7 +7,7 @@ A Rust library that makes linear color calculations and conversion easy and acce
 
 ## Online Documentation
 
-[Released](https://docs.rs/palette/0.4.0/palette/)
+[Released](https://docs.rs/palette/0.4.1/palette/)
 
 [Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html).
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.1 - 2018-08-02
+
+* [#113][113]: Import everything from the parent scope in derives.
+
 ## Version 0.4.0 - 2018-05-26
 
 * [#99][99]: Fix into and from component tuple conversion for Yxy.
@@ -55,6 +59,7 @@
 
 The first published version.
 
+[113]: https://github.com/Ogeon/palette/pull/113
 [99]: https://github.com/Ogeon/palette/pull/99
 [98]: https://github.com/Ogeon/palette/pull/98
 [97]: https://github.com/Ogeon/palette/pull/97
