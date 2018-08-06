@@ -1,10 +1,10 @@
 [package]
 name = "palette"
-version = "0.4.0" #automatically updated
+version = "0.4.1" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = ["scripts/*", "examples/*", "tests/*", "res/*", ".travis.yml", ".gitignore", "CHANGELOG.md", "CONTRIBUTING.md", "version.sh"]
 description = "Makes linear color calculations and conversion easy and accessible for anyone."
-documentation = "https://docs.rs/palette/0.4.0/palette/"
+documentation = "https://docs.rs/palette/0.4.1/palette/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "colour", "space", "linear"]
@@ -21,7 +21,7 @@ named = []
 strict = []
 
 [dependencies]
-palette_derive = {version = "0.4.0", path = "../palette_derive"}
+palette_derive = {version = "0.4.1", path = "../palette_derive"}
 num-traits = "0.2"
 approx = "0.2"
 
