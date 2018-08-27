@@ -138,7 +138,7 @@
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
-#![doc(html_root_url = "https://docs.rs/palette/0.4.0/palette/")]
+#![doc(html_root_url = "https://docs.rs/palette/0.4.1/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
