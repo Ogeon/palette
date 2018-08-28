@@ -1,7 +1,6 @@
-use num_traits::Float;
+use float::Float;
 
-use std::error::Error;
-use std::fmt::{self, Debug, Display, Formatter};
+use core::fmt::{self, Display, Formatter};
 use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use white_point::{D65, WhitePoint};
 use rgb::{Rgb, RgbSpace};
@@ -102,7 +101,6 @@ use encoding::Linear;
 /// ```rust
 /// #[macro_use]
 /// extern crate palette;
-/// extern crate num_traits;
 /// #[macro_use]
 /// extern crate approx;
 ///
@@ -110,7 +108,7 @@ use encoding::Linear;
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
-/// use num_traits::Float;
+/// use palette::float::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(PartialEq, Debug, FromColor, Pixel)]
@@ -349,7 +347,6 @@ where
 /// ```rust
 /// #[macro_use]
 /// extern crate palette;
-/// extern crate num_traits;
 /// #[macro_use]
 /// extern crate approx;
 ///
@@ -357,7 +354,7 @@ where
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
-/// use num_traits::Float;
+/// use palette::float::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(Copy, Clone, IntoColor, Pixel)]
@@ -521,7 +518,8 @@ impl<T> OutOfBounds<T> {
     }
 }
 
-impl<T: Debug> Error for OutOfBounds<T> {
+#[cfg(feature = "std")]
+impl<T: ::std::fmt::Debug> ::std::error::Error for OutOfBounds<T> {
     fn description(&self) -> &str {
         "Color conversion is out of bounds"
     }
@@ -761,8 +759,8 @@ impl_into_color_rgb!(Hwb, from_hwb);
 
 #[cfg(test)]
 mod tests {
-    use std::marker::PhantomData;
-    use num_traits::Float;
+    use core::marker::PhantomData;
+    use float::Float;
     use Component;
     use Linear;
     use rgb::{Rgb, RgbSpace};

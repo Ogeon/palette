@@ -1,4 +1,6 @@
-use num_traits::Float;
+use float::Float;
+#[cfg(feature = "libm_works")]
+use num_traits::float::FloatCore;
 
 use {Blend, ComponentWise};
 use blend::{BlendFunction, PreAlpha};

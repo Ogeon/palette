@@ -1,8 +1,8 @@
 //! Gamma encoding.
 
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
-use num_traits::Float;
+use float::Float;
 
 use cast;
 use rgb::{RgbSpace, RgbStandard};

@@ -1,10 +1,10 @@
-use std::any::TypeId;
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use core::any::TypeId;
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::{Add, Div, Mul, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::Float;
+use float::Float;
 
 use alpha::Alpha;
 use blend::PreAlpha;
@@ -36,7 +36,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// from a displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html)
 /// module for encoding formats.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_rgb_space = "S::Space"]
 #[palette_white_point = "<S::Space as RgbSpace>::WhitePoint"]
@@ -57,7 +57,7 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     pub blue: T,
 
     /// The kind of RGB standard. sRGB is the default.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub standard: PhantomData<S>,
 }
@@ -827,7 +827,7 @@ where
     S: RgbStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$x}{:0width$x}{:0width$x}",
@@ -845,7 +845,7 @@ where
     S: RgbStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(
             f,
             "{:0width$X}{:0width$X}{:0width$X}",
@@ -969,7 +969,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Rgb::<Srgb>::new(0.3, 0.8, 0.1)).unwrap();
@@ -977,7 +977,7 @@ mod test {
         assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Rgb<Srgb> =

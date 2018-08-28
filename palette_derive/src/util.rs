@@ -14,19 +14,19 @@ pub fn bundle_impl(
 
     if internal {
         quote!{
-            #[allow(non_snake_case, unused_attributes, unused_qualifications)]
+            #[allow(non_snake_case, unused_attributes, unused_qualifications, unused_imports)]
             mod #const_name {
-                extern crate num_traits as _num_traits;
+                use float::Float as _FloatTrait;
                 use super::*;
                 #block
             }
         }
     } else {
         quote!{
-            #[allow(non_snake_case, unused_attributes, unused_qualifications)]
+            #[allow(non_snake_case, unused_attributes, unused_qualifications, unused_imports)]
             mod #const_name {
                 extern crate palette as _palette;
-                extern crate num_traits as _num_traits;
+                use self::_palette::float::Float as _FloatTrait;
                 use super::*;
                 #block
             }

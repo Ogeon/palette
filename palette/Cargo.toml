@@ -13,24 +13,26 @@ license = "MIT OR Apache-2.0"
 build = "build/main.rs"
 
 [features]
-default = ["named_from_str"]
-named_from_str = ["named", "phf", "phf_codegen"]
+default = ["named_from_str", "std"]
+named_from_str = ["named", "phf", "phf_codegen", "std"]
 named = []
+std = ["approx/std", "num-traits/std"]
+serializing = ["serde", "std"]
 
 #internal
 strict = []
 
 [dependencies]
 palette_derive = {version = "0.4.1", path = "../palette_derive"}
-num-traits = "0.2"
-approx = "0.2"
+num-traits = {version = "0.2", default-features = false}
+approx = {version = "0.2", default-features = false}
+libm = "0.1.2"
 
 [dependencies.phf]
 version = "0.7"
 optional = true
 
 [dependencies.serde]
-#feature
 version = "1"
 features = ["serde_derive"]
 optional = true

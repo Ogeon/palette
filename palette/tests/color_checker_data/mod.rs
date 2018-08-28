@@ -2,6 +2,8 @@ mod babel;
 mod color_checker;
 mod load_data;
 
+const MAX_ERROR: f64 = 0.000000000001;
+
 #[test]
 pub fn babel_from_yxy() {
     babel::run_from_yxy_tests();

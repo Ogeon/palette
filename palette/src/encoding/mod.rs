@@ -1,6 +1,6 @@
 //! Various encoding traits, types and standards.
 
-use num_traits::Float;
+use float::Float;
 
 pub use self::srgb::Srgb;
 pub use self::gamma::{F2p2, Gamma};

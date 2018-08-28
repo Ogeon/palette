@@ -1,8 +1,8 @@
-use num_traits::Float;
+use float::Float;
 
-use std::f64::consts::PI;
-use std::cmp::PartialEq;
-use std::ops::{Add, Sub};
+use core::f64::consts::PI;
+use core::cmp::PartialEq;
+use core::ops::{Add, Sub};
 
 use cast;
 
@@ -16,7 +16,7 @@ macro_rules! make_hues {
         /// also have some surprising effects if it's expected to act as a
         /// linear number.
         #[derive(Clone, Copy, Debug, Default)]
-        #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+        #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
         #[repr(C)]
         pub struct $name<T: Float = f32>(T);
 
@@ -314,7 +314,7 @@ mod test {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&RgbHue::from_degrees(10.2)).unwrap();
@@ -322,7 +322,7 @@ mod test {
         assert_eq!(serialized, "10.2");
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: RgbHue = ::serde_json::from_str("10.2").unwrap();

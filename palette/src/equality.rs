@@ -1,4 +1,4 @@
-use num_traits::Float;
+use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 

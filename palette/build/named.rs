@@ -32,7 +32,7 @@ pub fn build() {
             .expect(&format!("couldn't get blue for {}", name));
 
         writeln!(writer, "\n///<div style=\"display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: {0};\"></div>", name).unwrap();
-        writeln!(writer, "pub const {}: ::rgb::Srgb<u8> = ::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::std::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
+        writeln!(writer, "pub const {}: ::rgb::Srgb<u8> = ::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
 
         entries.push((name.to_owned(), name.to_uppercase()));
     }

@@ -10,6 +10,7 @@ use palette::{Xyz, Yxy, Lab, IntoColor};
 use palette::white_point::D50;
 
 use super::load_data::{ColorCheckerRaw, load_babel};
+use super::MAX_ERROR;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct BabelData {
@@ -53,9 +54,9 @@ lazy_static! {
 }
 
 fn check_equal(src: &BabelData, tgt: &BabelData) {
-    assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.000000000001);
-    assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.000000000001);
-    assert_relative_eq!(src.lab, tgt.lab, epsilon = 0.000000000001);
+    assert_relative_eq!(src.xyz, tgt.xyz, epsilon = MAX_ERROR);
+    assert_relative_eq!(src.yxy, tgt.yxy, epsilon = MAX_ERROR);
+    assert_relative_eq!(src.lab, tgt.lab, epsilon = MAX_ERROR);
 }
 
 pub fn run_from_yxy_tests() {

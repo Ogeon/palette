@@ -1,10 +1,10 @@
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Sub};
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::{Add, Div, Mul, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use num_traits::Float;
+use float::Float;
 
 use blend::PreAlpha;
 use clamp;
@@ -28,7 +28,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 ///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 ///the set of operations that can be performed on it.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
 #[palette_white_point = "S::WhitePoint"]
 #[palette_component = "T"]
@@ -43,7 +43,7 @@ where
     pub luma: T,
 
     /// The kind of RGB standard. sRGB is the default.
-    #[cfg_attr(feature = "serde", serde(skip))]
+    #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub standard: PhantomData<S>,
 }
@@ -611,7 +611,7 @@ where
     S: LumaStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(f, "{:0width$x}", self.luma, width = size)
     }
 }
@@ -622,7 +622,7 @@ where
     S: LumaStandard,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let size = f.width().unwrap_or(::std::mem::size_of::<T>() * 2);
+        let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(f, "{:0width$X}", self.luma, width = size)
     }
 }
@@ -694,7 +694,7 @@ mod test {
         assert_eq!(format!("{:03X}", Luma::<Srgb, u64>::new(1)), "001");
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let serialized = ::serde_json::to_string(&Luma::<Srgb>::new(0.3)).unwrap();
@@ -702,7 +702,7 @@ mod test {
         assert_eq!(serialized, r#"{"luma":0.3}"#);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
         let deserialized: Luma<Srgb> = ::serde_json::from_str(r#"{"luma":0.3}"#).unwrap();

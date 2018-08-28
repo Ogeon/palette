@@ -1,6 +1,6 @@
 //! The sRGB standard.
 
-use num_traits::Float;
+use float::Float;
 
 use rgb::{Primaries, RgbSpace, RgbStandard};
 use luma::LumaStandard;

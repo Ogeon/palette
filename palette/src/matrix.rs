@@ -1,9 +1,9 @@
 //!This module provides simple matrix operations on 3x3 matrix to aid in chromatic adaptation and
 //!conversion calculations.
 
-use num_traits::Float;
+use float::Float;
 
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 use {Component, Xyz};
 use white_point::WhitePoint;
