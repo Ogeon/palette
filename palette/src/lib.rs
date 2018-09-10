@@ -850,7 +850,7 @@ impl Component for f32 {
         let scaled = *self * cast::<f32, _>(T::max_intensity());
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }
@@ -868,7 +868,7 @@ impl Component for f64 {
         let scaled = *self * cast::<f64, _>(T::max_intensity());
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }
@@ -887,7 +887,7 @@ impl Component for u8 {
             * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }
@@ -906,7 +906,7 @@ impl Component for u16 {
             * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }
@@ -925,7 +925,7 @@ impl Component for u32 {
             * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }
@@ -944,7 +944,7 @@ impl Component for u64 {
             * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
 
         if T::LIMITED {
-            cast(clamp(scaled, 0.0, cast(T::max_intensity())))
+            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
         } else {
             cast(scaled)
         }

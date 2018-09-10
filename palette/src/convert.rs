@@ -204,9 +204,9 @@ use encoding::Linear;
 ///     assert_eq!(
 ///         css_color,
 ///         CssRgb {
-///             red: 187,
+///             red: 188,
 ///             green: 0,
-///             blue: 254,
+///             blue: 255,
 ///             alpha: 0.3,
 ///         }
 ///     );
@@ -338,7 +338,7 @@ where
 ///     // Convert the color to sRGB.
 ///     let rgb: Srgb = xyz.into();
 ///
-///     assert_eq!(rgb.into_format(), Srgb::new(195u8, 237, 154));
+///     assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
 /// }
 /// ```
 ///
