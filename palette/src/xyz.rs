@@ -1,7 +1,7 @@
 use float::Float;
 
 use core::marker::PhantomData;
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use luma::LumaStandard;
@@ -359,7 +359,7 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn add(self, other: Xyz<Wp, T>) -> Xyz<Wp, T> {
+    fn add(self, other: Xyz<Wp, T>) -> Self::Output {
         Xyz {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -376,13 +376,37 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn add(self, c: T) -> Xyz<Wp, T> {
+    fn add(self, c: T) -> Self::Output {
         Xyz {
             x: self.x + c,
             y: self.y + c,
             z: self.z + c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> AddAssign<Xyz<Wp, T>> for Xyz<Wp, T>
+where
+    T: Component + Float + AddAssign,
+    Wp: WhitePoint,
+{
+    fn add_assign(&mut self, other: Xyz<Wp, T>) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
+}
+
+impl<Wp, T> AddAssign<T> for Xyz<Wp, T>
+where
+    T: Component + Float + AddAssign,
+    Wp: WhitePoint,
+{
+    fn add_assign(&mut self, c: T) {
+        self.x += c;
+        self.y += c;
+        self.z += c;
     }
 }
 
@@ -393,7 +417,7 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn sub(self, other: Xyz<Wp, T>) -> Xyz<Wp, T> {
+    fn sub(self, other: Xyz<Wp, T>) -> Self::Output {
         Xyz {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -410,13 +434,37 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn sub(self, c: T) -> Xyz<Wp, T> {
+    fn sub(self, c: T) -> Self::Output {
         Xyz {
             x: self.x - c,
             y: self.y - c,
             z: self.z - c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> SubAssign<Xyz<Wp, T>> for Xyz<Wp, T>
+where
+    T: Component + Float + SubAssign,
+    Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, other: Xyz<Wp, T>) {
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
+    }
+}
+
+impl<Wp, T> SubAssign<T> for Xyz<Wp, T>
+where
+    T: Component + Float + SubAssign,
+    Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.x -= c;
+        self.y -= c;
+        self.z -= c;
     }
 }
 
@@ -427,7 +475,7 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn mul(self, other: Xyz<Wp, T>) -> Xyz<Wp, T> {
+    fn mul(self, other: Xyz<Wp, T>) -> Self::Output {
         Xyz {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -444,13 +492,37 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn mul(self, c: T) -> Xyz<Wp, T> {
+    fn mul(self, c: T) -> Self::Output {
         Xyz {
             x: self.x * c,
             y: self.y * c,
             z: self.z * c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> MulAssign<Xyz<Wp, T>> for Xyz<Wp, T>
+where
+    T: Component + Float + MulAssign,
+    Wp: WhitePoint,
+{
+    fn mul_assign(&mut self, other: Xyz<Wp, T>) {
+        self.x *= other.x;
+        self.y *= other.y;
+        self.z *= other.z;
+    }
+}
+
+impl<Wp, T> MulAssign<T> for Xyz<Wp, T>
+where
+    T: Component + Float + MulAssign,
+    Wp: WhitePoint,
+{
+    fn mul_assign(&mut self, c: T) {
+        self.x *= c;
+        self.y *= c;
+        self.z *= c;
     }
 }
 
@@ -461,7 +533,7 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn div(self, other: Xyz<Wp, T>) -> Xyz<Wp, T> {
+    fn div(self, other: Xyz<Wp, T>) -> Self::Output {
         Xyz {
             x: self.x / other.x,
             y: self.y / other.y,
@@ -478,13 +550,37 @@ where
 {
     type Output = Xyz<Wp, T>;
 
-    fn div(self, c: T) -> Xyz<Wp, T> {
+    fn div(self, c: T) -> Self::Output {
         Xyz {
             x: self.x / c,
             y: self.y / c,
             z: self.z / c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> DivAssign<Xyz<Wp, T>> for Xyz<Wp, T>
+where
+    T: Component + Float + DivAssign,
+    Wp: WhitePoint,
+{
+    fn div_assign(&mut self, other: Xyz<Wp, T>) {
+        self.x /= other.x;
+        self.y /= other.y;
+        self.z /= other.z;
+    }
+}
+
+impl<Wp, T> DivAssign<T> for Xyz<Wp, T>
+where
+    T: Component + Float + DivAssign,
+    Wp: WhitePoint,
+{
+    fn div_assign(&mut self, c: T) {
+        self.x /= c;
+        self.y /= c;
+        self.z /= c;
     }
 }
 

@@ -1,7 +1,7 @@
 use float::Float;
 
 use core::marker::PhantomData;
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use white_point::{D65, WhitePoint};
@@ -352,7 +352,7 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn add(self, other: Lab<Wp, T>) -> Lab<Wp, T> {
+    fn add(self, other: Lab<Wp, T>) -> Self::Output {
         Lab {
             l: self.l + other.l,
             a: self.a + other.a,
@@ -369,13 +369,37 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn add(self, c: T) -> Lab<Wp, T> {
+    fn add(self, c: T) -> Self::Output {
         Lab {
             l: self.l + c,
             a: self.a + c,
             b: self.b + c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> AddAssign<Lab<Wp, T>> for Lab<Wp, T>
+    where
+        T: Component + Float + AddAssign,
+        Wp: WhitePoint,
+{
+    fn add_assign(&mut self, other: Lab<Wp, T>) {
+        self.l += other.l;
+        self.a += other.a;
+        self.b += other.b;
+    }
+}
+
+impl<Wp, T> AddAssign<T> for Lab<Wp, T>
+    where
+        T: Component + Float + AddAssign,
+        Wp: WhitePoint,
+{
+    fn add_assign(&mut self, c: T) {
+        self.l += c;
+        self.a += c;
+        self.b += c;
     }
 }
 
@@ -386,7 +410,7 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn sub(self, other: Lab<Wp, T>) -> Lab<Wp, T> {
+    fn sub(self, other: Lab<Wp, T>) -> Self::Output {
         Lab {
             l: self.l - other.l,
             a: self.a - other.a,
@@ -403,13 +427,37 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn sub(self, c: T) -> Lab<Wp, T> {
+    fn sub(self, c: T) -> Self::Output {
         Lab {
             l: self.l - c,
             a: self.a - c,
             b: self.b - c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> SubAssign<Lab<Wp, T>> for Lab<Wp, T>
+    where
+        T: Component + Float + SubAssign,
+        Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, other: Lab<Wp, T>) {
+         self.l -= other.l;
+         self.a -= other.a;
+         self.b -= other.b;
+    }
+}
+
+impl<Wp, T> SubAssign<T> for Lab<Wp, T>
+    where
+        T: Component + Float + SubAssign,
+        Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.l -= c;
+        self.a -= c;
+        self.b -= c;
     }
 }
 
@@ -420,7 +468,7 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn mul(self, other: Lab<Wp, T>) -> Lab<Wp, T> {
+    fn mul(self, other: Lab<Wp, T>) -> Self::Output {
         Lab {
             l: self.l * other.l,
             a: self.a * other.a,
@@ -437,13 +485,37 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn mul(self, c: T) -> Lab<Wp, T> {
+    fn mul(self, c: T) -> Self::Output {
         Lab {
             l: self.l * c,
             a: self.a * c,
             b: self.b * c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> MulAssign<Lab<Wp, T>> for Lab<Wp, T>
+    where
+        T: Component + Float + MulAssign,
+        Wp: WhitePoint,
+{
+    fn mul_assign(&mut self, other: Lab<Wp, T>) {
+        self.l *= other.l;
+        self.a *= other.a;
+        self.b *= other.b;
+    }
+}
+
+impl<Wp, T> MulAssign<T> for Lab<Wp, T>
+    where
+        T: Component + Float + MulAssign,
+        Wp: WhitePoint,
+{
+    fn mul_assign(&mut self, c: T) {
+        self.l *= c;
+        self.a *= c;
+        self.b *= c;
     }
 }
 
@@ -454,7 +526,7 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn div(self, other: Lab<Wp, T>) -> Lab<Wp, T> {
+    fn div(self, other: Lab<Wp, T>) -> Self::Output {
         Lab {
             l: self.l / other.l,
             a: self.a / other.a,
@@ -471,13 +543,37 @@ where
 {
     type Output = Lab<Wp, T>;
 
-    fn div(self, c: T) -> Lab<Wp, T> {
+    fn div(self, c: T) -> Self::Output {
         Lab {
             l: self.l / c,
             a: self.a / c,
             b: self.b / c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> DivAssign<Lab<Wp, T>> for Lab<Wp, T>
+    where
+        T: Component + Float + DivAssign,
+        Wp: WhitePoint,
+{
+    fn div_assign(&mut self, other: Lab<Wp, T>) {
+        self.l /= other.l;
+        self.a /= other.a;
+        self.b /= other.b;
+    }
+}
+
+impl<Wp, T> DivAssign<T> for Lab<Wp, T>
+    where
+        T: Component + Float + DivAssign,
+        Wp: WhitePoint,
+{
+    fn div_assign(&mut self, c: T) {
+        self.l /= c;
+        self.a /= c;
+        self.b /= c;
     }
 }
 

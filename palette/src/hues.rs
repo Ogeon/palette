@@ -2,7 +2,7 @@ use float::Float;
 
 use core::f64::consts::PI;
 use core::cmp::PartialEq;
-use core::ops::{Add, Sub};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use cast;
 
@@ -150,6 +150,34 @@ macro_rules! make_hues {
             }
         }
 
+        impl<T: Float + AddAssign> AddAssign<$name<T>> for $name<T> {
+            #[inline]
+            fn add_assign(&mut self, other: $name<T>) {
+                self.0 += other.0;
+            }
+        }
+
+        impl<T: Float + AddAssign> AddAssign<T> for $name<T> {
+            #[inline]
+            fn add_assign(&mut self, other: T) {
+                self.0 += other;
+            }
+        }
+
+        impl AddAssign<$name<f32>> for f32 {
+            #[inline]
+            fn add_assign(&mut self, other: $name<f32>) {
+                *self += other.0;
+            }
+        }
+
+        impl AddAssign<$name<f64>> for f64 {
+            #[inline]
+            fn add_assign(&mut self, other: $name<f64>){
+                *self += other.0;
+            }
+        }
+
         impl<T: Float> Sub<$name<T>> for $name<T> {
             type Output = $name<T>;
 
@@ -183,6 +211,34 @@ macro_rules! make_hues {
             #[inline]
             fn sub(self, other: $name<f64>) -> $name<f64> {
                 $name(self - other.0)
+            }
+        }
+        
+        impl<T: Float + SubAssign> SubAssign<$name<T>> for $name<T> {
+            #[inline]
+            fn sub_assign(&mut self, other: $name<T>) {
+                self.0 -= other.0;
+            }
+        }
+
+        impl<T: Float + SubAssign> SubAssign<T> for $name<T> {
+            #[inline]
+            fn sub_assign(&mut self, other: T) {
+                self.0 -= other;
+            }
+        }
+
+        impl SubAssign<$name<f32>> for f32 {
+            #[inline]
+            fn sub_assign(&mut self, other: $name<f32>) {
+                *self -= other.0;
+            }
+        }
+
+        impl SubAssign<$name<f64>> for f64 {
+            #[inline]
+            fn sub_assign(&mut self, other: $name<f64>){
+                *self -= other.0;
             }
         }
     )+)
