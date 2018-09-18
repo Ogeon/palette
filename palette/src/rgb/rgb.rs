@@ -1,7 +1,7 @@
 use core::any::TypeId;
 use core::fmt;
 use core::marker::PhantomData;
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use float::Float;
@@ -420,6 +420,30 @@ where
     }
 }
 
+impl<S, T> AddAssign<Rgb<S, T>> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + AddAssign,
+{
+    fn add_assign(&mut self, other: Rgb<S, T>) {
+        self.red += other.red;
+        self.green += other.green;
+        self.blue += other.blue;
+    }
+}
+
+impl<S, T> AddAssign<T> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + AddAssign,
+{
+    fn add_assign(&mut self, c: T) {
+        self.red += c;
+        self.green += c;
+        self.blue += c;
+    }
+}
+
 impl<S, T> Sub<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
@@ -453,6 +477,30 @@ where
             blue: self.blue - c,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> SubAssign<Rgb<S, T>> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + SubAssign,
+{
+    fn sub_assign(&mut self, other: Rgb<S, T>) {
+        self.red -= other.red;
+        self.green -= other.green;
+        self.blue -= other.blue;
+    }
+}
+
+impl<S, T> SubAssign<T> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + SubAssign,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.red -= c;
+        self.green -= c;
+        self.blue -= c;
     }
 }
 
@@ -492,6 +540,30 @@ where
     }
 }
 
+impl<S, T> MulAssign<Rgb<S, T>> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + MulAssign,
+{
+    fn mul_assign(&mut self, other: Rgb<S, T>) {
+        self.red *= other.red;
+        self.green *= other.green;
+        self.blue *= other.blue;
+    }
+}
+
+impl<S, T> MulAssign<T> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + MulAssign,
+{
+    fn mul_assign(&mut self, c: T) {
+        self.red *= c;
+        self.green *= c;
+        self.blue *= c;
+    }
+}
+
 impl<S, T> Div<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
@@ -525,6 +597,30 @@ where
             blue: self.blue / c,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> DivAssign<Rgb<S, T>> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + DivAssign,
+{
+    fn div_assign(&mut self, other: Rgb<S, T>) {
+        self.red /= other.red;
+        self.green /= other.green;
+        self.blue /= other.blue;
+    }
+}
+
+impl<S, T> DivAssign<T> for Rgb<S, T>
+where
+    S: RgbStandard<TransferFn = LinearFn>,
+    T: Component + DivAssign,
+{
+    fn div_assign(&mut self, c: T) {
+        self.red /= c;
+        self.green /= c;
+        self.blue /= c;
     }
 }
 
