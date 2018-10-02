@@ -107,16 +107,6 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         }
     });
 
-    let into_color_ty = impl_into_color_type(&ident, &meta, &original_generics, generic_component);
-    let from_color_ty_other_alpha = impl_into_color_type_alpha(
-        &ident,
-        &meta,
-        &original_generics,
-        generic_component,
-        alpha_property.as_ref(),
-        &alpha_type,
-    );
-
     let result = util::bundle_impl(
         "IntoColor",
         ident.clone(),
@@ -124,8 +114,6 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         quote! {
             #into_color_impl
             #(#into_impls)*
-            #into_color_ty
-            #from_color_ty_other_alpha
         },
     );
 
@@ -269,124 +257,6 @@ struct IntoImplParameters {
     trait_path: TokenStream2,
     color_ty: Type,
     method_call: TokenStream2,
-}
-
-fn impl_into_color_type(
-    ident: &Ident,
-    meta: &IntoColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-
-    let IntoColorTypeImplParameters {
-        generics,
-        color_path,
-        color_ty,
-    } = prepare_into_color_type_impl(meta, generics, generic_component);
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    quote!{
-        #[automatically_derived]
-        impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
-            fn into(self) -> #color_ty {
-                #color_path::Rgb(self.into())
-            }
-        }
-    }
-}
-
-fn impl_into_color_type_alpha(
-    ident: &Ident,
-    meta: &IntoColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-    alpha_property: Option<&IdentOrIndex>,
-    alpha_type: &Type,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-    let alpha_path = util::path(&["Alpha"], meta.internal);
-
-    let IntoColorTypeImplParameters {
-        generics,
-        color_path,
-        color_ty,
-    } = prepare_into_color_type_impl(meta, generics, generic_component);
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    if let Some(alpha_property) = alpha_property {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
-                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
-                    #alpha_path {
-                        alpha: self.#alpha_property.clone(),
-                        color: #color_path::Rgb(self.into()).into(),
-                    }
-                }
-            }
-        }
-    } else {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
-                fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
-                    #color_path::Rgb(self.into()).into()
-                }
-            }
-        }
-    }
-}
-
-fn prepare_into_color_type_impl(
-    meta: &IntoColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> IntoColorTypeImplParameters {
-    let mut generics = generics.clone();
-
-    let color_path = util::path(&["Color"], meta.internal);
-
-    let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
-    let component = shared::component_type(meta.component.clone());
-
-    if meta.rgb_space.is_none() {
-        generics.params.push(parse_quote!(_S));
-    }
-
-    if generic_component {
-        shared::add_component_where_clause(&component, &mut generics, meta.internal)
-    }
-
-    let color_ty = {
-        let rgb_space_type = if let Some(ref rgb_space) = meta.rgb_space {
-            rgb_space.clone()
-        } else {
-            let rgb_space_path = util::path(&["rgb", "RgbSpace"], meta.internal);
-            generics
-                .make_where_clause()
-                .predicates
-                .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
-
-            parse_quote!(_S)
-        };
-
-        quote!(#color_path<#rgb_space_type, #component>)
-    };
-
-    IntoColorTypeImplParameters {
-        generics,
-        color_path,
-        color_ty,
-    }
-}
-
-struct IntoColorTypeImplParameters {
-    generics: Generics,
-    color_path: TokenStream2,
-    color_ty: TokenStream2,
 }
 
 #[derive(Default)]

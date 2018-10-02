@@ -2,7 +2,7 @@ extern crate clap;
 extern crate image;
 extern crate palette;
 
-use palette::{Color, Hue, Pixel, Shade, Srgb};
+use palette::{Hue, Pixel, Shade, Hsv, Srgb, LinSrgb};
 
 use image::{GenericImage, RgbImage, SubImage};
 
@@ -93,8 +93,8 @@ fn main() {
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary: Color = Srgb::new(red, green, blue)
-        .into_format()
+    let primary: Hsv = Srgb::new(red, green, blue)
+        .into_format::<f32>()
         .into_linear()
         .into();
 
@@ -154,12 +154,12 @@ fn main() {
     let mut image = RgbImage::new((secondary.len() as u32 + 1) * SWATCH_SIZE, SWATCH_SIZE);
 
     //Draw the primary swatches
-    blit_shades(primary, image.sub_image(0, 0, SWATCH_SIZE, SWATCH_SIZE));
+    blit_shades(primary.into(), image.sub_image(0, 0, SWATCH_SIZE, SWATCH_SIZE));
 
     //Draw the secondary swatches
     for (n, color) in secondary.into_iter().enumerate() {
         blit_shades(
-            color,
+            color.into(),
             image.sub_image((n as u32 + 1) * SWATCH_SIZE, 0, SWATCH_SIZE, SWATCH_SIZE),
         );
     }
@@ -170,14 +170,14 @@ fn main() {
     }
 }
 
-fn blit_shades<I: GenericImage<Pixel = image::Rgb<u8>> + 'static>(
-    color: Color,
+fn blit_shades<I>(
+    color: LinSrgb<f32>,
     mut canvas: SubImage<I>,
-) {
+) where I: GenericImage<Pixel = image::Rgb<u8>> + 'static {
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Srgb::from_linear(color.into()).into_format().into_raw();
+    let primary = Srgb::from_linear(color).into_format().into_raw();
 
     //Generate one lighter and two darker versions of the color
     let light = Srgb::from_linear(color.lighten(0.1).into())
