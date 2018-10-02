@@ -2,7 +2,7 @@ extern crate clap;
 extern crate image;
 extern crate palette;
 
-use palette::{Hue, Pixel, Shade, Hsv, Srgb, LinSrgb};
+use palette::{Hue, Pixel, Shade, Lch, Srgb, LinSrgb};
 
 use image::{GenericImage, RgbImage, SubImage};
 
@@ -93,7 +93,7 @@ fn main() {
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary: Hsv = Srgb::new(red, green, blue)
+    let primary: Lch = Srgb::new(red, green, blue)
         .into_format::<f32>()
         .into_linear()
         .into();

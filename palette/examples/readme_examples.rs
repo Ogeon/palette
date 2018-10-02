@@ -27,13 +27,13 @@ mod color_spaces {
 }
 
 mod manipulation {
-    use palette::{Saturate, Shade, Srgb, Hsv};
+    use palette::{Saturate, Shade, Srgb, Lch};
     use display_colors;
 
     pub fn run() {
         let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
         let lighter = color.lighten(0.1);
-        let desaturated = Hsv::from(color).desaturate(0.5);
+        let desaturated = Lch::from(color).desaturate(0.5);
 
         display_colors(
             "examples/readme_manipulation.png",
