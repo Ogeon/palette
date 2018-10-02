@@ -82,11 +82,11 @@ The following example shows how the `Color` type is used to make a lighter and a
 
 ```Rust
 extern crate palette;
-use palette::{Color, Srgb, Shade, Saturate};
+use palette::{Saturate, Shade, Srgb, Lch};
 
-let color: Color = Srgb::new(0.8, 0.2, 0.1).into_linear().into();
+let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
 let lighter = color.lighten(0.1);
-let desaturated = color.desaturate(0.5);
+let desaturated = Lch::from(color).desaturate(0.5);
 ```
 
 This results in the following three colors:
