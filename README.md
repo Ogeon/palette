@@ -44,7 +44,7 @@ default-features = false
 
 ## It's Never "Just RGB"
 
-Colors in, for example, images are often "gamma corrected" or stored in sRGB format as a compression method and to prevent banding. This is also a bit of a legacy from the ages of the CRT monitors, where the output from the electron gun was nonlinear. The problem is that these formats doesn't represent the actual intensities, and the compression has to be reverted to make sure that any operations on the colors are accurate. This library uses a completely linear work flow, and comes with the tools for transitioning between linear and non-linear RGB.
+Colors in, for example, images are often "gamma corrected" or stored in sRGB format as a compression method and to prevent banding. This is also a bit of a legacy from the ages of the CRT monitors, where the output from the electron gun was nonlinear. The problem is that these formats don't represent the actual intensities, and the compression has to be reverted to make sure that any operations on the colors are accurate. This library uses a completely linear work flow, and comes with the tools for transitioning between linear and non-linear RGB.
 
 Adding to that, there are more than one kind of non-linear RGB. Ironically enough, this turns RGB into one of the most complex color spaces.
 
