@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use syn::{self, DeriveInput, Generics, Ident, Type};
+use syn::{parse_macro_input, DeriveInput, Generics, Ident, Type};
 
 use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
 use util;
@@ -15,7 +15,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         generics: original_generics,
         data,
         ..
-    } = syn::parse(tokens).expect("could not parse tokens");
+    } = parse_macro_input!(tokens);
     let mut generics = original_generics.clone();
 
     let mut meta: IntoColorMeta = meta::parse_attributes(attrs);
