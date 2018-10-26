@@ -1,7 +1,7 @@
 use std::fmt;
 
 use proc_macro2::{Span, TokenStream};
-use syn::{GenericParam, Generics, Ident, Path, Turbofish, Type, TypePath};
+use syn::{parse_quote, GenericParam, Generics, Ident, Path, Turbofish, Type, TypePath};
 
 use meta::KeyValuePair;
 use util;
