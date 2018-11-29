@@ -17,7 +17,7 @@ use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use rgb::{RgbSpace, RgbStandard, TransferFn};
 use white_point::WhitePoint;
 use {cast, clamp};
-use {Blend, Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use {Blend, Component, ComponentWise, GetHue, IntoComponent, Limited, Mix, Pixel, Shade};
 use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
@@ -82,17 +82,23 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Rgb<S, U> {
+    pub fn into_format<U: Component>(self) -> Rgb<S, U>
+    where
+        T: IntoComponent<U>,
+    {
         Rgb {
-            red: self.red.convert(),
-            green: self.green.convert(),
-            blue: self.blue.convert(),
+            red: self.red.into_component(),
+            green: self.green.into_component(),
+            blue: self.blue.into_component(),
             standard: PhantomData,
         }
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self {
+    pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self
+    where
+        U: IntoComponent<T>,
+    {
         color.into_format()
     }
 
@@ -182,17 +188,25 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Rgb<S, U>, B> {
+    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Rgb<S, U>, B>
+    where
+        T: IntoComponent<U>,
+        A: IntoComponent<B>,
+    {
         Alpha::<Rgb<S, U>, B>::new(
-            self.red.convert(),
-            self.green.convert(),
-            self.blue.convert(),
-            self.alpha.convert(),
+            self.red.into_component(),
+            self.green.into_component(),
+            self.blue.into_component(),
+            self.alpha.into_component(),
         )
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component, B: Component>(color: Alpha<Rgb<S, U>, B>) -> Self {
+    pub fn from_format<U: Component, B: Component>(color: Alpha<Rgb<S, U>, B>) -> Self
+    where
+        U: IntoComponent<T>,
+        B: IntoComponent<A>,
+    {
         color.into_format()
     }
 

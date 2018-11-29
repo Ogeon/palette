@@ -162,7 +162,7 @@ extern crate serde;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
-use num_traits::{NumCast, ToPrimitive, Zero};
+use num_traits::{ToPrimitive, Zero};
 use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -825,134 +825,430 @@ pub trait ComponentWise {
 }
 
 /// Common trait for color components.
-pub trait Component: Copy + Zero + PartialOrd + NumCast {
-    /// True if the max intensity is also the highest possible value of the
-    /// type. Conversion to limited types requires clamping.
-    const LIMITED: bool;
-
+pub trait Component: Copy + Zero + PartialOrd {
     /// The highest displayable value this component type can reach. Higher
     /// values are allowed, but they may be lowered to this before
     /// converting to another format.
     fn max_intensity() -> Self;
+}
 
+/// Trait for converting between color components; component-specific version
+/// of std::convert::From.
+pub trait FromComponent<T: Component>: Component {
+    fn from_component(T) -> Self;
+}
+
+/// Trait for converting between color components; component-specific version
+/// of std::convert::Into.
+pub trait IntoComponent<T: Component>: Component {
     /// Convert into another color component type, including scaling.
-    fn convert<T: Component>(&self) -> T;
+    fn into_component(self) -> T;
+}
+
+impl<T, U> IntoComponent<U> for T
+where
+    T: Component,
+    U: FromComponent<T>,
+{
+    fn into_component(self) -> U {
+        U::from_component(self)
+    }
+}
+
+
+// Conversions between floats
+impl FromComponent<f32> for f64 {
+    fn from_component(float: f32) -> f64 {
+        float.into()
+    }
+}
+
+impl FromComponent<f64> for f32 {
+    fn from_component(float: f64) -> f32 {
+        float as f32
+    }
+}
+
+
+// Conversions from float to integer
+impl FromComponent<f32> for u8 {
+    fn from_component(float: f32) -> u8 {
+        let max: f32 = u8::max_value().into();
+        let scaled = (float * max).round();
+        let clamped = clamp(scaled, 0.0, max);
+        clamped as u8
+    }
+}
+
+impl FromComponent<f32> for u16 {
+    fn from_component(float: f32) -> u16 {
+        let max: f32 = u16::max_value().into();
+        let scaled = (float * max).round();
+        let clamped = clamp(scaled, 0.0, max);
+        clamped as u16
+    }
+}
+
+// impl FromComponent<f32> for u32 {
+//     fn from_component(float: f32) -> u32 {
+//         let max: f64 = u32::max_value().into();
+//         let scaled = (f64::from(float) * max).round();
+//         let clamped = clamp(scaled, 0.0, max);
+//         clamped as u32
+//     }
+// }
+
+impl FromComponent<f64> for u8 {
+    fn from_component(float: f64) -> u8 {
+        let max: f64 = u8::max_value().into();
+        let scaled = (float * max).round();
+        let clamped = clamp(scaled, 0.0, max);
+        clamped as u8
+    }
+}
+
+impl FromComponent<f64> for u16 {
+    fn from_component(float: f64) -> u16 {
+        let max: f64 = u16::max_value().into();
+        let scaled = (float * max).round();
+        let clamped = clamp(scaled, 0.0, max);
+        clamped as u16
+    }
+}
+
+impl FromComponent<f64> for u32 {
+    fn from_component(float: f64) -> u32 {
+        let max: f64 = u32::max_value().into();
+        let scaled = (float * max).round();
+        let clamped = clamp(scaled, 0.0, max);
+        clamped as u32
+    }
+}
+
+
+// Conversions from int to float
+impl FromComponent<u8> for f32 {
+    fn from_component(int: u8) -> f32 {
+        f32::from(int) / f32::from(u8::max_value())
+    }
+}
+
+impl FromComponent<u8> for f64 {
+    fn from_component(int: u8) -> f64 {
+        f64::from(int) / f64::from(u8::max_value())
+    }
+}
+
+impl FromComponent<u16> for f32 {
+    fn from_component(int: u16) -> f32 {
+        f32::from(int) / f32::from(u16::max_value())
+    }
+}
+
+impl FromComponent<u16> for f64 {
+    fn from_component(int: u16) -> f64 {
+        f64::from(int) / f64::from(u16::max_value())
+    }
+}
+
+impl FromComponent<u32> for f32 {
+    fn from_component(int: u32) -> f32 {
+        f64::from_component(int) as f32
+    }
+}
+
+impl FromComponent<u32> for f64 {
+    fn from_component(int: u32) -> f64 {
+        f64::from(int) / f64::from(u32::max_value())
+    }
+}
+
+
+// Conversions from smaller int to larger int
+//
+// Each of the larger max values is evenly divisible by the smaller ones,
+// so no floating point operations are needed.
+impl FromComponent<u8> for u16 {
+    fn from_component(int: u8) -> u16 {
+        u16::from(int) * (u16::max_value() / u16::from(u8::max_value()))
+    }
+}
+
+impl FromComponent<u8> for u32 {
+    fn from_component(int: u8) -> u32 {
+        u32::from(int) * (u32::max_value() / u32::from(u8::max_value()))
+    }
+}
+
+impl FromComponent<u16> for u32 {
+    fn from_component(int: u16) -> u32 {
+        u32::from(int) * (u32::max_value() / u32::from(u16::max_value()))
+    }
+}
+
+// Conversions from larger int to smaller int
+//
+// We want to divide by the (integer) quotient of the max values, while
+// rounding to nearest intstead of down. To do so, we add half the divisior
+// (rounded down) to the dividend, then divide rounding down.
+impl FromComponent<u16> for u8 {
+    fn from_component(int: u16) -> u8 {
+        let divisor = u16::max_value() / u16::from(u8::max_value());
+        let dividend = int.saturating_add(divisor / 2);
+        (dividend / divisor) as u8
+    }
+}
+
+impl FromComponent<u32> for u8 {
+    fn from_component(int: u32) -> u8 {
+        let divisor = u32::max_value() / u32::from(u8::max_value());
+        let dividend = int.saturating_add(divisor / 2);
+        (dividend / divisor) as u8
+    }
+}
+
+impl FromComponent<u32> for u16 {
+    fn from_component(int: u32) -> u16 {
+        let divisor = u32::max_value() / u32::from(u16::max_value());
+        let dividend = int.saturating_add(divisor / 2);
+        (dividend / divisor) as u16
+    }
 }
 
 impl Component for f32 {
-    const LIMITED: bool = false;
-
     fn max_intensity() -> Self {
         1.0
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = *self * cast::<f32, _>(T::max_intensity());
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 impl Component for f64 {
-    const LIMITED: bool = false;
-
     fn max_intensity() -> Self {
         1.0
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = *self * cast::<f64, _>(T::max_intensity());
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 impl Component for u8 {
-    const LIMITED: bool = true;
-
     fn max_intensity() -> Self {
         core::u8::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 impl Component for u16 {
-    const LIMITED: bool = true;
-
     fn max_intensity() -> Self {
         core::u16::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 impl Component for u32 {
-    const LIMITED: bool = true;
-
     fn max_intensity() -> Self {
         core::u32::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 impl Component for u64 {
-    const LIMITED: bool = true;
-
     fn max_intensity() -> Self {
         core::u64::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(scaled.round(), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
     }
 }
 
 /// A convenience function to convert a constant number to Float Type
 #[inline]
-fn cast<T: NumCast, P: ToPrimitive>(prim: P) -> T {
-    NumCast::from(prim).unwrap()
+fn cast<T: num_traits::NumCast, P: ToPrimitive>(prim: P) -> T {
+    num_traits::NumCast::from(prim).unwrap()
+}
+
+#[cfg(test)]
+mod test {
+    use FromComponent;
+
+    #[test]
+    fn f64_from_f32_1() {
+        assert_eq!(f64::from_component(0.0f32), 0.0f64);
+    }
+
+    #[test]
+    fn f64_from_f32_2() {
+        assert_eq!(f64::from_component(1.0f32), 1.0f64);
+    }
+
+    #[test]
+    fn f32_from_f64_1() {
+        assert_eq!(f32::from_component(0.0f64), 0.0f32);
+    }
+
+    #[test]
+    fn f32_from_f64_2() {
+        assert_eq!(f32::from_component(1.0f64), 1.0f32);
+    }
+
+    #[test]
+    fn u8_from_f32_1() {
+        assert_eq!(u8::from_component(254.499f32 / 255.0f32), 254u8);
+    }
+
+    #[test]
+    fn u8_from_f32_2() {
+        assert_eq!(u8::from_component(254.501f32 / 255.0f32), 255u8);
+    }
+
+   #[test]
+    fn u16_from_f32_1() {
+        assert_eq!(u16::from_component(65_534.49f32 / 65_535.0f32), 65_534u16);
+    }
+
+    #[test]
+    fn u16_from_f32_2() {
+        assert_eq!(u16::from_component(65_534.51f32 / 65_535.0f32), 65_535u16);
+    }
+
+   #[test]
+    fn u8_from_f64_1() {
+        assert_eq!(u8::from_component(254.49999f64 / 255.0f64), 254u8);
+    }
+
+    #[test]
+    fn u8_from_f64_2() {
+        assert_eq!(u8::from_component(254.50001f64 / 255.0f64), 255u8);
+    }
+
+   #[test]
+    fn u16_from_f64_1() {
+        assert_eq!(u16::from_component(65_534.49999f64 / 65_535.0f64), 65_534u16);
+    }
+
+    #[test]
+    fn u16_from_f64_2() {
+        assert_eq!(u16::from_component(65_534.50001f64 / 65_535.0f64), 65_535u16);
+    }
+
+   #[test]
+    fn u32_from_f64_1() {
+        assert_eq!(u32::from_component(4_294_967_294.49f64 / 4_294_967_295.0f64), 4_294_967_294u32);
+    }
+
+    #[test]
+    fn u32_from_f64_2() {
+        assert_eq!(u32::from_component(4_294_967_294.51f64 / 4_294_967_295.0f64), 4_294_967_295u32);
+    }
+
+    #[test]
+    fn f32_from_u8_1() {
+        assert_eq!(f32::from_component(0u8), 0.0f32);
+    }
+
+    #[test]
+    fn f32_from_u8_2() {
+        assert_eq!(f32::from_component(255u8), 1.0f32);
+    }
+
+    #[test]
+    fn f64_from_u8_1() {
+        assert_eq!(f64::from_component(0u8), 0.0f64);
+    }
+
+    #[test]
+    fn f64_from_u8_2() {
+        assert_eq!(f64::from_component(255u8), 1.0f64);
+    }
+
+    #[test]
+    fn f32_from_u16_1() {
+        assert_eq!(f32::from_component(0u16), 0.0f32);
+    }
+
+    #[test]
+    fn f32_from_u16_2() {
+        assert_eq!(f32::from_component(65_535u16), 1.0f32);
+    }
+
+    #[test]
+    fn f64_from_u16_1() {
+        assert_eq!(f64::from_component(0u16), 0.0f64);
+    }
+
+    #[test]
+    fn f64_from_u16_2() {
+        assert_eq!(f64::from_component(65_535u16), 1.0f64);
+    }
+
+    #[test]
+    fn f32_from_u32_1() {
+        assert_eq!(f32::from_component(0u32), 0.0f32);
+    }
+
+    #[test]
+    fn f32_from_u32_2() {
+        assert_eq!(f32::from_component(4_294_967_295u32), 1.0f32);
+    }
+
+    #[test]
+    fn f64_from_u32_1() {
+        assert_eq!(f64::from_component(0u32), 0.0f64);
+    }
+
+    #[test]
+    fn f64_from_u32_2() {
+        assert_eq!(f64::from_component(4_294_967_295u32), 1.0f64);
+    }
+
+    #[test]
+    fn u16_from_u8_1() {
+        assert_eq!(u16::from_component(0xFEu8), 0xFEFEu16);
+    }
+
+    #[test]
+    fn u16_from_u8_2() {
+        assert_eq!(u16::from_component(0xFFu8), 0xFFFFu16);
+    }
+
+    #[test]
+    fn u32_from_u8_1() {
+        assert_eq!(u32::from_component(0xFEu8), 0xFEFEFEFEu32);
+    }
+
+    #[test]
+    fn u32_from_u8_2() {
+        assert_eq!(u32::from_component(0xFFu8), 0xFFFFFFFFu32);
+    }
+
+    #[test]
+    fn u32_from_u16_1() {
+        assert_eq!(u32::from_component(0xFFFEu16), 0xFFFEFFFEu32);
+    }
+
+    #[test]
+    fn u32_from_u16_2() {
+        assert_eq!(u32::from_component(0xFFFFu16), 0xFFFFFFFFu32);
+    }
+
+    #[test]
+    fn u8_from_u16_1() {
+        assert_eq!(u8::from_component(0xFF7Eu16), 0xFEu8);
+    }
+
+    #[test]
+    fn u8_from_u16_2() {
+        assert_eq!(u8::from_component(0xFF7Fu16), 0xFFu8);
+    }
+
+    #[test]
+    fn u8_from_u32_1() {
+        assert_eq!(u8::from_component(0xFF7F7F7Eu32), 0xFEu8);
+    }
+
+    #[test]
+    fn u8_from_u32_2() {
+        assert_eq!(u8::from_component(0xFF7F7F7Fu32), 0xFFu8);
+    }
+
+    #[test]
+    fn u16_from_u32_1() {
+        assert_eq!(u16::from_component(0xFFFF7FFEu32), 0xFFFEu16);
+    }
+
+    #[test]
+    fn u16_from_u32_2() {
+        assert_eq!(u16::from_component(0xFFFF7FFFu32), 0xFFFFu16);
+    }
+
 }

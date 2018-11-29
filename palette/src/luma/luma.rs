@@ -14,7 +14,7 @@ use encoding::{Linear, Srgb, TransferFn};
 use luma::LumaStandard;
 use white_point::WhitePoint;
 use {Alpha, Xyz, Yxy};
-use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
+use {Blend, Component, ComponentWise, FromColor, IntoColor, IntoComponent, Limited, Mix, Pixel, Shade};
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
 /// in `Alpha`](struct.Alpha.html#Lumaa).
@@ -79,15 +79,21 @@ where
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Luma<S, U> {
+    pub fn into_format<U: Component>(self) -> Luma<S, U>
+    where
+        T: IntoComponent<U>,
+    {
         Luma {
-            luma: self.luma.convert(),
+            luma: self.luma.into_component(),
             standard: PhantomData,
         }
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Luma<S, U>) -> Self {
+    pub fn from_format<U: Component>(color: Luma<S, U>) -> Self
+    where
+        U: IntoComponent<T>,
+    {
         color.into_format()
     }
 
@@ -150,12 +156,20 @@ where
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Luma<S, U>, B> {
-        Alpha::<Luma<S, U>, B>::new(self.luma.convert(), self.alpha.convert())
+    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Luma<S, U>, B>
+    where
+        T: IntoComponent<U>,
+        A: IntoComponent<B>,
+    {
+        Alpha::<Luma<S, U>, B>::new(self.luma.into_component(), self.alpha.into_component())
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component, B: Component>(color: Alpha<Luma<S, U>, B>) -> Self {
+    pub fn from_format<U: Component, B: Component>(color: Alpha<Luma<S, U>, B>) -> Self
+    where
+        U: IntoComponent<T>,
+        B: IntoComponent<A>,
+    {
         color.into_format()
     }
 
