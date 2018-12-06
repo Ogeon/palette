@@ -1,9 +1,8 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::ToTokens;
+use syn::parse::{Parse, Parser, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::synom::Synom;
-use syn::token::{Comma, Eq};
-use syn::{Attribute, Data, Field, Fields, Ident, Index, LitStr, Type};
+use syn::{parenthesized, Attribute, Data, Field, Fields, Ident, Index, LitStr, Token, Type};
 
 pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
     let mut result = T::default();
@@ -64,7 +63,7 @@ pub fn parse_data_attributes<T: DataMetaParser>(data: Data) -> T {
 
 pub fn parse_struct_field_attributes<T: DataMetaParser>(
     parser: &mut T,
-    fields: Punctuated<Field, Comma>,
+    fields: Punctuated<Field, Token![,]>,
 ) {
     for (index, field) in fields.into_iter().enumerate() {
         let identifier = field
@@ -113,21 +112,30 @@ pub fn assert_empty_attribute(attribute_name: &Ident, tts: TokenStream) {
     }
 }
 
-pub fn parse_tuple_attribute<T: Synom>(
+pub fn parse_tuple_attribute<T: Parse>(
     attribute_name: &Ident,
     tts: TokenStream,
-) -> Punctuated<T, Comma> {
-    struct GenericTuple<T>(Punctuated<T, Comma>);
+) -> Vec<T> {
+    fn parse_generic_tuple<T: Parse>(input: ParseStream) -> Result<Vec<T>> {
+        let content;
+        parenthesized!(content in input);
 
-    impl<T: Synom> Synom for GenericTuple<T> {
-        named!(parse -> Self, do_parse!(
-            tuple: parens!(call!(Punctuated::parse_separated_nonempty)) >>
-            (GenericTuple(tuple.1))
-        ));
+        let mut tuple = Vec::new();
+        loop {
+            tuple.push(content.parse()?);
+            if content.is_empty() {
+                break;
+            }
+            content.parse::<Token![,]>()?;
+            if content.is_empty() {
+                break;
+            }
+        }
+        Ok(tuple)
     }
 
-    match ::syn::parse2::<GenericTuple<T>>(tts.clone()) {
-        Ok(elements) => elements.0,
+    match parse_generic_tuple.parse2(tts.clone()) {
+        Ok(elements) => elements,
         Err(_) => panic!(
             "expected the attribute to be on the form `#[{name}(A, B, ...)]`, but found #[{name}{tts}]",
             name = attribute_name,
@@ -136,42 +144,18 @@ pub fn parse_tuple_attribute<T: Synom>(
     }
 }
 
-pub fn parse_equal_attribute<T: Synom>(attribute_name: &Ident, tts: TokenStream) -> T {
-    struct Paren<T>(T);
-
-    impl<T: Synom> Synom for Paren<T> {
-        named!(parse -> Self, do_parse!(
-            _eq: syn!(Eq) >>
-            content: syn!(StringOrValue<T>) >>
-            result: switch!(value!(content),
-                StringOrValue::Value(value) => value!(value) |
-                StringOrValue::String(string) => call!(parse_string, string)
-            ) >>
-            (Paren(result))
-        ));
+pub fn parse_equal_attribute<T: Parse>(attribute_name: &Ident, tts: TokenStream) -> T {
+    fn parse_paren<T: Parse>(input: ParseStream) -> Result<T> {
+        input.parse::<Token![=]>()?;
+        if input.peek(LitStr) {
+            input.parse::<LitStr>()?.parse()
+        } else {
+            input.parse()
+        }
     }
 
-    enum StringOrValue<T> {
-        String(String),
-        Value(T),
-    }
-
-    impl<T: Synom> Synom for StringOrValue<T> {
-        named!(parse -> Self, alt!(
-            syn!(T) => {StringOrValue::Value} |
-            syn!(LitStr) => {|lit| StringOrValue::String(lit.value())}
-        ));
-    }
-
-    fn parse_string<T: Synom>(
-        cursor: ::syn::buffer::Cursor,
-        string: String,
-    ) -> ::syn::synom::PResult<T> {
-        ::syn::parse2(string.parse().unwrap()).map(|value| (value, cursor))
-    }
-
-    match ::syn::parse2::<Paren<T>>(tts.clone()) {
-        Ok(assign) => assign.0,
+    match parse_paren::<T>.parse2(tts.clone()) {
+        Ok(assign) => assign,
         Err(_) => panic!(
             "expected the attribute to be on the form `#[{name} = A]` or `#[{name} = \"A\"]`, but found #[{name}{tts}]",
             name = attribute_name,
@@ -186,19 +170,19 @@ pub struct KeyValuePair {
     pub value: Option<Ident>,
 }
 
-impl ::syn::synom::Synom for KeyValuePair {
-    named!(parse -> Self, do_parse!(
-        key: syn!(Ident) >>
-        value: option!(do_parse!(
-            _eq: syn!(Eq) >>
-            value: syn!(LitStr) >>
-            (Ident::new(&value.value(), Span::call_site()))
-        )) >>
-        (KeyValuePair {
+impl Parse for KeyValuePair {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let key: Ident = input.parse()?;
+        let option_eq: Option<Token![=]> = input.parse()?;
+        let value = match option_eq {
+            None => None,
+            Some(_) => Some(input.parse::<LitStr>()?.parse::<Ident>()?),
+        };
+        Ok(KeyValuePair {
             key,
             value
         })
-    ));
+    }
 }
 
 impl PartialEq<str> for KeyValuePair {
@@ -225,7 +209,7 @@ impl PartialEq for IdentOrIndex {
     }
 }
 
-impl ::std::cmp::Eq for IdentOrIndex {}
+impl Eq for IdentOrIndex {}
 
 impl ::std::hash::Hash for IdentOrIndex {
     fn hash<H: ::std::hash::Hasher>(&self, hasher: &mut H) {

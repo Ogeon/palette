@@ -1,4 +1,4 @@
-use core::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use core::fmt;
 
 use float::Float;
@@ -237,6 +237,20 @@ impl<T: Add + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
     }
 }
 
+impl<C: AddAssign, T: Float + AddAssign> AddAssign for Alpha<C, T> {
+    fn add_assign(&mut self, other: Alpha<C, T>) {
+        self.color += other.color;
+        self.alpha += other.alpha;
+    }
+}
+
+impl<T: AddAssign + Copy, C: AddAssign<T>> AddAssign<T> for Alpha<C, T> {
+    fn add_assign(&mut self, c: T) {
+        self.color += c;
+        self.alpha += c;
+    }
+}
+
 impl<C: Sub, T: Float> Sub for Alpha<C, T> {
     type Output = Alpha<C::Output, <T as Sub>::Output>;
 
@@ -256,6 +270,20 @@ impl<T: Sub + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
             color: self.color - c.clone(),
             alpha: self.alpha - c,
         }
+    }
+}
+
+impl<C: SubAssign, T: Float + SubAssign> SubAssign for Alpha<C, T> {
+    fn sub_assign(&mut self, other: Alpha<C, T>) {
+        self.color -= other.color;
+        self.alpha -= other.alpha;
+    }
+}
+
+impl<T: SubAssign + Copy, C: SubAssign<T>> SubAssign<T> for Alpha<C, T> {
+    fn sub_assign(&mut self, c: T) {
+        self.color -= c;
+        self.alpha -= c;
     }
 }
 
@@ -281,6 +309,20 @@ impl<T: Mul + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
     }
 }
 
+impl<C: MulAssign, T: Float + MulAssign> MulAssign for Alpha<C, T> {
+    fn mul_assign(&mut self, other: Alpha<C, T>) {
+        self.color *= other.color;
+        self.alpha *= other.alpha;
+    }
+}
+
+impl<T: MulAssign + Copy, C: MulAssign<T>> MulAssign<T> for Alpha<C, T> {
+    fn mul_assign(&mut self, c: T) {
+        self.color *= c;
+        self.alpha *= c;
+    }
+}
+
 impl<C: Div, T: Float> Div for Alpha<C, T> {
     type Output = Alpha<C::Output, <T as Div>::Output>;
 
@@ -300,6 +342,20 @@ impl<T: Div + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
             color: self.color / c.clone(),
             alpha: self.alpha / c,
         }
+    }
+}
+
+impl<C: DivAssign, T: Float + DivAssign> DivAssign for Alpha<C, T> {
+    fn div_assign(&mut self, other: Alpha<C, T>) {
+        self.color /= other.color;
+        self.alpha /= other.alpha;
+    }
+}
+
+impl<T: DivAssign + Copy, C: DivAssign<T>> DivAssign<T> for Alpha<C, T> {
+    fn div_assign(&mut self, c: T) {
+        self.color /= c;
+        self.alpha /= c;
     }
 }
 

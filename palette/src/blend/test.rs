@@ -1,12 +1,12 @@
-use {Blend, Color, Colora, ComponentWise, LinSrgb, LinSrgba};
+use {Blend, ComponentWise, LinSrgb, LinSrgba};
 use rgb::Rgb;
 use encoding::Linear;
 use blend::PreAlpha;
 
 #[test]
 fn blend_color() {
-    let a = Color::linear_rgb(1.0, 0.0, 0.0);
-    let b = Color::linear_rgb(0.0, 0.0, 1.0);
+    let a = LinSrgb::new(1.0, 0.0, 0.0);
+    let b = LinSrgb::new(0.0, 0.0, 1.0);
 
     let c: LinSrgb = a.blend(
         b,
@@ -19,8 +19,8 @@ fn blend_color() {
 
 #[test]
 fn blend_alpha_color() {
-    let a = Colora::linear_rgb(1.0, 0.0, 0.0, 0.2);
-    let b = Colora::linear_rgb(0.0, 0.0, 1.0, 0.2);
+    let a =  LinSrgba::new(1.0, 0.0, 0.0, 0.2);
+    let b =  LinSrgba::new(0.0, 0.0, 1.0, 0.2);
 
     let c: LinSrgba = a.blend(
         b,

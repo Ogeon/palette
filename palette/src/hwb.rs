@@ -3,7 +3,7 @@ use float::Float;
 
 use core::any::TypeId;
 use core::marker::PhantomData;
-use core::ops::{Add, Sub};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use encoding::Srgb;
@@ -363,7 +363,7 @@ where
 {
     type Output = Hwb<S, T>;
 
-    fn add(self, other: Hwb<S, T>) -> Hwb<S, T> {
+    fn add(self, other: Hwb<S, T>) -> Self::Output {
         Hwb {
             hue: self.hue + other.hue,
             whiteness: self.whiteness + other.whiteness,
@@ -380,13 +380,37 @@ where
 {
     type Output = Hwb<S, T>;
 
-    fn add(self, c: T) -> Hwb<S, T> {
+    fn add(self, c: T) -> Self::Output {
         Hwb {
             hue: self.hue + c,
             whiteness: self.whiteness + c,
             blackness: self.blackness + c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T> AddAssign<Hwb<S, T>> for Hwb<S, T>
+    where
+        T: Component + Float + AddAssign,
+        S: RgbSpace,
+{
+    fn add_assign(&mut self, other: Hwb<S, T>) {
+        self.hue += other.hue;
+        self.whiteness += other.whiteness;
+        self.blackness += other.blackness;
+    }
+}
+
+impl<S, T> AddAssign<T> for Hwb<S, T>
+    where
+        T: Component + Float + AddAssign,
+        S: RgbSpace,
+{
+    fn add_assign(&mut self, c: T) {
+        self.hue += c;
+        self.whiteness += c;
+        self.blackness += c;
     }
 }
 
@@ -397,7 +421,7 @@ where
 {
     type Output = Hwb<S, T>;
 
-    fn sub(self, other: Hwb<S, T>) -> Hwb<S, T> {
+    fn sub(self, other: Hwb<S, T>) -> Self::Output {
         Hwb {
             hue: self.hue - other.hue,
             whiteness: self.whiteness - other.whiteness,
@@ -414,13 +438,38 @@ where
 {
     type Output = Hwb<S, T>;
 
-    fn sub(self, c: T) -> Hwb<S, T> {
+    fn sub(self, c: T) -> Self::Output {
         Hwb {
             hue: self.hue - c,
             whiteness: self.whiteness - c,
             blackness: self.blackness - c,
             space: PhantomData,
         }
+    }
+}
+
+
+impl<S, T> SubAssign<Hwb<S, T>> for Hwb<S, T>
+    where
+        T: Component + Float + SubAssign,
+        S: RgbSpace,
+{
+    fn sub_assign(&mut self, other: Hwb<S, T>) {
+        self.hue -= other.hue;
+        self.whiteness -= other.whiteness;
+        self.blackness -= other.blackness;
+    }
+}
+
+impl<S, T> SubAssign<T> for Hwb<S, T>
+    where
+        T: Component + Float + SubAssign,
+        S: RgbSpace,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.hue -= c;
+        self.whiteness -= c;
+        self.blackness -= c;
     }
 }
 

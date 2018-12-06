@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use syn::{self, DeriveInput, Generics, Ident, Type};
+use syn::{parse_macro_input, DeriveInput, Generics, Ident, Type};
 
 use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
 use util;
@@ -16,7 +16,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         generics: original_generics,
         data,
         ..
-    } = syn::parse(tokens).expect("could not parse tokens");
+    } = parse_macro_input!(tokens);
     let mut generics = original_generics.clone();
 
     let mut meta: FromColorMeta = meta::parse_attributes(attrs);
@@ -129,39 +129,6 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         })
         .collect();
 
-    let from_color_ty = impl_from_color_type(&ident, &meta, &original_generics, generic_component);
-
-    let from_color_ty_self_alpha = if meta.internal {
-        Some(impl_from_color_type_no_alpha_to_alpha(
-            &ident,
-            &meta,
-            &original_generics,
-            generic_component,
-        ))
-    } else {
-        None
-    };
-
-    let from_color_ty_other_alpha = impl_from_color_type_alpha_to_no_alpha(
-        &ident,
-        &meta,
-        &original_generics,
-        generic_component,
-        alpha_property.as_ref(),
-        &alpha_type,
-    );
-
-    let from_color_ty_both_alpha = if meta.internal {
-        Some(impl_from_color_type_alpha_to_alpha(
-            &ident,
-            &meta,
-            &original_generics,
-            generic_component,
-        ))
-    } else {
-        None
-    };
-
     let trait_path = util::path(&["FromColor"], meta.internal);
     let from_color_impl = quote!{
         #[automatically_derived]
@@ -177,10 +144,6 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         quote! {
             #from_color_impl
             #(#from_impls)*
-            #from_color_ty
-            #from_color_ty_self_alpha
-            #from_color_ty_other_alpha
-            #from_color_ty_both_alpha
         },
     );
 
@@ -390,214 +353,6 @@ struct FromImplParameters {
     color_ty: Type,
     component: Type,
     method_call: TokenStream2,
-}
-
-fn impl_from_color_type(
-    ident: &Ident,
-    meta: &FromColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-    let turbofish_generics = type_generics.as_turbofish();
-
-    let FromColorTypeImplParameters {
-        color_path,
-        generics,
-        color_ty,
-        ..
-    } = prepare_from_color_type_impl(meta, generics, generic_component);
-
-    let match_arms = COLOR_TYPES.into_iter().map(|&color| {
-        let color_ident = Ident::new(color, Span::call_site());
-        if meta.internal && ident == color {
-            let convert_function = meta
-                .manual_implementations
-                .iter()
-                .find(|color_impl| color_impl.key == color)
-                .and_then(|color_impl| color_impl.value.as_ref());
-
-            if let Some(convert_function) = convert_function {
-                quote!(#color_path::#color_ident(c) => #ident #turbofish_generics::#convert_function(c))
-            } else {
-                quote!(#color_path::#color_ident(c) => c)
-            }
-        } else {
-            quote!(#color_path::#color_ident(c) => Self::from(c))
-        }
-    });
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    quote!{
-        #[automatically_derived]
-        impl #impl_generics From<#color_ty> for #ident #type_generics #where_clause {
-            fn from(color: #color_ty) -> Self {
-                match color {
-                    #(#match_arms),*
-                }
-            }
-        }
-    }
-}
-
-fn impl_from_color_type_alpha_to_alpha(
-    ident: &Ident,
-    meta: &FromColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-    let turbofish_generics = type_generics.as_turbofish();
-
-    let FromColorTypeImplParameters {
-        generics,
-        alpha_path,
-        color_ty,
-        component,
-        ..
-    } = prepare_from_color_type_impl(meta, generics, generic_component);
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    quote!{
-        #[automatically_derived]
-        impl #impl_generics From<#alpha_path<#color_ty, #component>> for #alpha_path<#ident #type_generics, #component> #where_clause {
-            fn from(color: #alpha_path<#color_ty, #component>) -> Self {
-                let #alpha_path {color, alpha} = color;
-                #alpha_path {
-                    color: #ident #turbofish_generics::from(color),
-                    alpha
-                }
-            }
-        }
-    }
-}
-
-fn impl_from_color_type_no_alpha_to_alpha(
-    ident: &Ident,
-    meta: &FromColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-    let turbofish_generics = type_generics.as_turbofish();
-
-    let FromColorTypeImplParameters {
-        generics,
-        alpha_path,
-        color_ty,
-        component,
-        ..
-    } = prepare_from_color_type_impl(meta, generics, generic_component);
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    quote!{
-        #[automatically_derived]
-        impl #impl_generics From<#color_ty> for #alpha_path<#ident #type_generics, #component> #where_clause {
-            fn from(color: #color_ty) -> Self {
-                #ident #turbofish_generics::from(color).into()
-            }
-        }
-    }
-}
-
-fn impl_from_color_type_alpha_to_no_alpha(
-    ident: &Ident,
-    meta: &FromColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-    alpha_property: Option<&IdentOrIndex>,
-    alpha_type: &Type,
-) -> TokenStream2 {
-    let (_, type_generics, _) = generics.split_for_impl();
-
-    let FromColorTypeImplParameters {
-        generics,
-        alpha_path,
-        color_ty,
-        ..
-    } = prepare_from_color_type_impl(meta, generics, generic_component);
-
-    let (impl_generics, _, where_clause) = generics.split_for_impl();
-
-    if let Some(alpha_property) = alpha_property {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics From<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
-                fn from(color: #alpha_path<#color_ty, #alpha_type>) -> Self {
-                    let #alpha_path { color, alpha } = color;
-                    let mut result = Self::from(color);
-                    result.#alpha_property = alpha;
-                    result
-                }
-            }
-        }
-    } else {
-        quote!{
-            #[automatically_derived]
-            impl #impl_generics From<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
-                fn from(color: #alpha_path<#color_ty, #alpha_type>) -> Self {
-                    Self::from(color.color)
-                }
-            }
-        }
-    }
-}
-
-fn prepare_from_color_type_impl(
-    meta: &FromColorMeta,
-    generics: &Generics,
-    generic_component: bool,
-) -> FromColorTypeImplParameters {
-    let mut generics = generics.clone();
-
-    let color_path = util::path(&["Color"], meta.internal);
-    let alpha_path = util::path(&["Alpha"], meta.internal);
-
-    let white_point = shared::white_point_type(meta.white_point.clone(), meta.internal);
-    let component = shared::component_type(meta.component.clone());
-
-    if meta.rgb_space.is_none() {
-        generics.params.push(parse_quote!(_S));
-    }
-
-    if generic_component {
-        shared::add_component_where_clause(&component, &mut generics, meta.internal);
-    }
-
-    let color_ty = {
-        let rgb_space_type = if let Some(ref rgb_space) = meta.rgb_space {
-            rgb_space.clone()
-        } else {
-            let rgb_space_path = util::path(&["rgb", "RgbSpace"], meta.internal);
-            generics
-                .make_where_clause()
-                .predicates
-                .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
-
-            parse_quote!(_S)
-        };
-
-        quote!(#color_path<#rgb_space_type, #component>)
-    };
-
-    return FromColorTypeImplParameters {
-        generics,
-        alpha_path,
-        color_path,
-        color_ty,
-        component,
-    };
-}
-
-struct FromColorTypeImplParameters {
-    generics: Generics,
-    alpha_path: TokenStream2,
-    color_path: TokenStream2,
-    color_ty: TokenStream2,
-    component: Type,
 }
 
 #[derive(Default)]

@@ -1,4 +1,4 @@
-use core::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use float::Float;
 
@@ -197,7 +197,7 @@ where
 impl<C: Add, T: Float> Add for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn add(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn add(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
             color: self.color + other.color,
             alpha: self.alpha + other.alpha,
@@ -208,7 +208,7 @@ impl<C: Add, T: Float> Add for PreAlpha<C, T> {
 impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn add(self, c: T) -> PreAlpha<C::Output, T> {
+    fn add(self, c: T) -> Self::Output {
         PreAlpha {
             color: self.color + c,
             alpha: self.alpha + c,
@@ -216,10 +216,24 @@ impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
     }
 }
 
+impl<C: AddAssign , T: Float + AddAssign> AddAssign for PreAlpha<C, T> {
+    fn add_assign(&mut self, other: PreAlpha<C, T>) {
+        self.color += other.color;
+        self.alpha += other.alpha;
+    }
+}
+
+impl<T: Float + AddAssign, C: AddAssign<T>> AddAssign<T> for PreAlpha<C, T> {
+    fn add_assign(&mut self, c: T) {
+        self.color += c;
+        self.alpha += c;
+    }
+}
+
 impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn sub(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn sub(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
             color: self.color - other.color,
             alpha: self.alpha - other.alpha,
@@ -230,7 +244,7 @@ impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
 impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn sub(self, c: T) -> PreAlpha<C::Output, T> {
+    fn sub(self, c: T) -> Self::Output {
         PreAlpha {
             color: self.color - c,
             alpha: self.alpha - c,
@@ -238,10 +252,25 @@ impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
     }
 }
 
+impl<C: SubAssign , T: Float + SubAssign> SubAssign for PreAlpha<C, T> {
+    fn sub_assign(&mut self, other: PreAlpha<C, T>) {
+        self.color -= other.color;
+        self.alpha -= other.alpha;
+    }
+}
+
+impl<T: Float + SubAssign, C: SubAssign<T>> SubAssign<T> for PreAlpha<C, T> {
+    fn sub_assign(&mut self, c: T) {
+        self.color -= c;
+        self.alpha -= c;
+    }
+}
+
+
 impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn mul(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn mul(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
             color: self.color * other.color,
             alpha: self.alpha * other.alpha,
@@ -252,7 +281,7 @@ impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
 impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn mul(self, c: T) -> PreAlpha<C::Output, T> {
+    fn mul(self, c: T) -> Self::Output {
         PreAlpha {
             color: self.color * c,
             alpha: self.alpha * c,
@@ -260,10 +289,24 @@ impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
     }
 }
 
+impl<C: MulAssign , T: Float + MulAssign> MulAssign for PreAlpha<C, T> {
+    fn mul_assign(&mut self, other: PreAlpha<C, T>) {
+        self.color *= other.color;
+        self.alpha *= other.alpha;
+    }
+}
+
+impl<T: Float + MulAssign, C: MulAssign<T>> MulAssign<T> for PreAlpha<C, T> {
+    fn mul_assign(&mut self, c: T) {
+        self.color *= c;
+        self.alpha *= c;
+    }
+}
+
 impl<C: Div, T: Float> Div for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn div(self, other: PreAlpha<C, T>) -> PreAlpha<C::Output, T> {
+    fn div(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
             color: self.color / other.color,
             alpha: self.alpha / other.alpha,
@@ -274,11 +317,25 @@ impl<C: Div, T: Float> Div for PreAlpha<C, T> {
 impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
 
-    fn div(self, c: T) -> PreAlpha<C::Output, T> {
+    fn div(self, c: T) -> Self::Output {
         PreAlpha {
             color: self.color / c,
             alpha: self.alpha / c,
         }
+    }
+}
+
+impl<C: DivAssign , T: Float + DivAssign> DivAssign for PreAlpha<C, T> {
+    fn div_assign(&mut self, other: PreAlpha<C, T>) {
+        self.color /= other.color;
+        self.alpha /= other.alpha;
+    }
+}
+
+impl<T: Float + DivAssign, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
+    fn div_assign(&mut self, c: T) {
+        self.color /= c;
+        self.alpha /= c;
     }
 }
 

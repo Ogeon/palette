@@ -3,7 +3,7 @@ use float::Float;
 
 use core::any::TypeId;
 use core::marker::PhantomData;
-use core::ops::{Add, Sub};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use encoding::{Linear, Srgb};
@@ -435,7 +435,7 @@ where
 {
     type Output = Hsl<S, T>;
 
-    fn add(self, other: Hsl<S, T>) -> Hsl<S, T> {
+    fn add(self, other: Hsl<S, T>) -> Self::Output {
         Hsl {
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
@@ -452,13 +452,37 @@ where
 {
     type Output = Hsl<S, T>;
 
-    fn add(self, c: T) -> Hsl<S, T> {
+    fn add(self, c: T) -> Self::Output {
         Hsl {
             hue: self.hue + c,
             saturation: self.saturation + c,
             lightness: self.lightness + c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T> AddAssign<Hsl<S, T>> for Hsl<S, T>
+    where
+        T: Component + Float + AddAssign,
+        S: RgbSpace,
+{
+    fn add_assign(&mut self, other: Hsl<S, T>) {
+        self.hue += other.hue;
+        self.saturation += other.saturation;
+        self.lightness += other.lightness;
+    }
+}
+
+impl<S, T> AddAssign<T> for Hsl<S, T>
+    where
+        T: Component + Float + AddAssign,
+        S: RgbSpace,
+{
+    fn add_assign(&mut self, c: T) {
+        self.hue += c;
+        self.saturation += c;
+        self.lightness += c;
     }
 }
 
@@ -469,7 +493,7 @@ where
 {
     type Output = Hsl<S, T>;
 
-    fn sub(self, other: Hsl<S, T>) -> Hsl<S, T> {
+    fn sub(self, other: Hsl<S, T>) -> Self::Output {
         Hsl {
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
@@ -486,13 +510,37 @@ where
 {
     type Output = Hsl<S, T>;
 
-    fn sub(self, c: T) -> Hsl<S, T> {
+    fn sub(self, c: T) -> Self::Output {
         Hsl {
             hue: self.hue - c,
             saturation: self.saturation - c,
             lightness: self.lightness - c,
             space: PhantomData,
         }
+    }
+}
+
+impl<S, T> SubAssign<Hsl<S, T>> for Hsl<S, T>
+    where
+        T: Component + Float + SubAssign,
+        S: RgbSpace,
+{
+    fn sub_assign(&mut self, other: Hsl<S, T>) {
+        self.hue -= other.hue;
+        self.saturation -= other.saturation;
+        self.lightness -= other.lightness;
+    }
+}
+
+impl<S, T> SubAssign<T> for Hsl<S, T>
+    where
+        T: Component + Float + SubAssign,
+        S: RgbSpace,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.hue -= c;
+        self.saturation -= c;
+        self.lightness -= c;
     }
 }
 

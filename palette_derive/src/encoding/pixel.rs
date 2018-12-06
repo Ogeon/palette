@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
-use syn::{self, Data, DeriveInput, Fields, Ident, Type};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, Type};
 
 use meta::{self, DataMetaParser, IdentOrIndex, MetaParser};
 use util;
@@ -15,7 +15,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         generics,
         data,
         ..
-    } = syn::parse(tokens).expect("could not parse tokens");
+    } = parse_macro_input!(tokens);
 
     let meta: PixelMeta = meta::parse_attributes(attrs);
     let item_meta: PixelItemMeta = meta::parse_data_attributes(data.clone());

@@ -1,5 +1,5 @@
 use proc_macro2::{Span, TokenStream};
-use syn::{Ident, Type};
+use syn::{parse_quote, Ident, Type};
 
 pub fn bundle_impl(
     trait_name: &str,

@@ -556,7 +556,6 @@ pub trait ConvertInto<T>: Into<T> {
     ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_unclamped_into();
     ///assert!(!rgb.is_valid());
     ///```
-    #[inline]
     fn convert_unclamped_into(self) -> T;
 
     ///Convert into T, returning ok if the color is inside of its defined range,
@@ -762,10 +761,10 @@ mod tests {
     use core::marker::PhantomData;
     use float::Float;
     use Component;
-    use Linear;
+    use encoding::linear::Linear;
     use rgb::{Rgb, RgbSpace};
     use luma::Luma;
-    use {Color, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+    use {Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 
     #[derive(Copy, Clone, FromColor, IntoColor)]
     #[palette_manual_from(Xyz, Luma = "from_luma_internal")]
@@ -857,9 +856,6 @@ mod tests {
 
         let luma: Luma<::encoding::Srgb, f64> = Default::default();
         WithXyz::<::encoding::Srgb>::from(luma);
-
-        let color: Color<_, f64> = Default::default();
-        WithXyz::<::encoding::Srgb>::from(color);
     }
 
     #[test]
@@ -875,7 +871,6 @@ mod tests {
         let _hsv: Hsv<_, f64> = color.into();
         let _hwb: Hwb<_, f64> = color.into();
         let _luma: Luma<::encoding::Srgb, f64> = color.into();
-        let _color: Color<::encoding::Srgb, f64> = color.into();
     }
 
     #[test]
@@ -906,9 +901,6 @@ mod tests {
 
         let luma: Luma<Linear<::white_point::E>, f64> = Default::default();
         WithoutXyz::<f64>::from(luma);
-
-        let color: Color<_, f64> = Default::default();
-        WithoutXyz::<f64>::from(color);
     }
 
     #[test]
@@ -924,6 +916,5 @@ mod tests {
         let _hsv: Hsv<_, f64> = color.into();
         let _hwb: Hwb<_, f64> = color.into();
         let _luma: Luma<Linear<::white_point::E>, f64> = color.into();
-        let _color: Color<_, f64> = color.into();
     }
 }

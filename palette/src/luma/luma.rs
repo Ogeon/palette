@@ -1,6 +1,6 @@
 use core::fmt;
 use core::marker::PhantomData;
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -426,6 +426,26 @@ where
     }
 }
 
+impl<S, T> AddAssign<Luma<S, T>> for Luma<S, T>
+where
+    T: Component + AddAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn add_assign(&mut self, other: Luma<S, T>) {
+        self.luma += other.luma;
+    }
+}
+
+impl<S, T> AddAssign<T> for Luma<S, T>
+where
+    T: Component + AddAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn add_assign(&mut self, c: T) {
+        self.luma += c;
+    }
+}
+
 impl<S, T> Sub<Luma<S, T>> for Luma<S, T>
 where
     T: Component + Sub,
@@ -455,6 +475,26 @@ where
             luma: self.luma - c,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> SubAssign<Luma<S, T>> for Luma<S, T>
+where
+    T: Component + SubAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn sub_assign(&mut self, other: Luma<S, T>) {
+        self.luma -= other.luma;
+    }
+}
+
+impl<S, T> SubAssign<T> for Luma<S, T>
+where
+    T: Component + SubAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.luma -= c;
     }
 }
 
@@ -490,6 +530,26 @@ where
     }
 }
 
+impl<S, T> MulAssign<Luma<S, T>> for Luma<S, T>
+where
+    T: Component + MulAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn mul_assign(&mut self, other: Luma<S, T>) {
+        self.luma *= other.luma;
+    }
+}
+
+impl<S, T> MulAssign<T> for Luma<S, T>
+where
+    T: Component + MulAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn mul_assign(&mut self, c: T) {
+        self.luma *= c;
+    }
+}
+
 impl<S, T> Div<Luma<S, T>> for Luma<S, T>
 where
     T: Component + Div,
@@ -519,6 +579,26 @@ where
             luma: self.luma / c,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> DivAssign<Luma<S, T>> for Luma<S, T>
+where
+    T: Component + DivAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn div_assign(&mut self, other: Luma<S, T>) {
+        self.luma /= other.luma;
+    }
+}
+
+impl<S, T> DivAssign<T> for Luma<S, T>
+where
+    T: Component + DivAssign,
+    S: LumaStandard<TransferFn = LinearFn>,
+{
+    fn div_assign(&mut self, c: T) {
+        self.luma /= c;
     }
 }
 

@@ -1,7 +1,7 @@
 use float::Float;
 
 use core::marker::PhantomData;
-use core::ops::{Add, Sub};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use white_point::{D65, WhitePoint};
@@ -337,7 +337,7 @@ where
 {
     type Output = Lch<Wp, T>;
 
-    fn add(self, other: Lch<Wp, T>) -> Lch<Wp, T> {
+    fn add(self, other: Lch<Wp, T>) -> Self::Output {
         Lch {
             l: self.l + other.l,
             chroma: self.chroma + other.chroma,
@@ -354,13 +354,37 @@ where
 {
     type Output = Lch<Wp, T>;
 
-    fn add(self, c: T) -> Lch<Wp, T> {
+    fn add(self, c: T) -> Self::Output {
         Lch {
             l: self.l + c,
             chroma: self.chroma + c,
             hue: self.hue + c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> AddAssign<Lch<Wp, T>> for Lch<Wp, T>
+where
+    T: Component + Float + AddAssign,
+    Wp: WhitePoint,
+{
+    fn add_assign(&mut self, other: Lch<Wp, T>) {
+        self.l += other.l;
+        self.chroma += other.chroma;
+        self.hue += other.hue;
+    }
+}
+
+impl<Wp, T> AddAssign<T> for Lch<Wp, T>
+    where
+        T: Component + Float + AddAssign,
+        Wp: WhitePoint,
+{
+    fn add_assign(&mut self, c: T) {
+        self.l += c;
+        self.chroma += c;
+        self.hue += c;
     }
 }
 
@@ -371,7 +395,7 @@ where
 {
     type Output = Lch<Wp, T>;
 
-    fn sub(self, other: Lch<Wp, T>) -> Lch<Wp, T> {
+    fn sub(self, other: Lch<Wp, T>) -> Self::Output {
         Lch {
             l: self.l - other.l,
             chroma: self.chroma - other.chroma,
@@ -388,13 +412,37 @@ where
 {
     type Output = Lch<Wp, T>;
 
-    fn sub(self, c: T) -> Lch<Wp, T> {
+    fn sub(self, c: T) -> Self::Output {
         Lch {
             l: self.l - c,
             chroma: self.chroma - c,
             hue: self.hue - c,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> SubAssign<Lch<Wp, T>> for Lch<Wp, T>
+where
+    T: Component + Float + SubAssign,
+    Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, other: Lch<Wp, T>) {
+        self.l -= other.l;
+        self.chroma -= other.chroma;
+        self.hue -= other.hue;
+    }
+}
+
+impl<Wp, T> SubAssign<T> for Lch<Wp, T>
+where
+    T: Component + Float + SubAssign,
+    Wp: WhitePoint,
+{
+    fn sub_assign(&mut self, c: T) {
+        self.l -= c;
+        self.chroma -= c;
+        self.hue -= c;
     }
 }
 
