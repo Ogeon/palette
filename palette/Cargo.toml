@@ -25,7 +25,7 @@ strict = []
 [dependencies]
 palette_derive = {version = "0.4.1", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
-approx = {version = "0.2", default-features = false}
+approx = {version = "0.3", default-features = false}
 libm = "0.1.2"
 
 [dependencies.phf]
