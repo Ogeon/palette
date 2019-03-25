@@ -391,7 +391,7 @@ where
 ///         0.7353569830524495,
 ///         0.5370987304831942,
 ///     ];
-///     let hsv = Bgr::from_raw_slice(&buffer)[1].into();
+///     let hsv: Hsv<palette::encoding::Srgb, _> = Bgr::from_raw_slice(&buffer)[1].into();
 ///
 ///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
 /// }
@@ -441,7 +441,7 @@ where
 ///         blue: 255,
 ///         alpha: 0.3,
 ///     };
-///     let color = css_color.into();
+///     let color: LinSrgba = css_color.into();
 ///
 ///     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
 /// }
