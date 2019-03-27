@@ -352,9 +352,11 @@ where
 ///
 /// use palette::{Component, Hsv, IntoColor, Pixel, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
-/// use palette::encoding::Linear;
+/// use palette::encoding::{Linear, self};
 /// use palette::white_point::D65;
 /// use palette::float::Float;
+///
+/// type Hsv64 = Hsv<encoding::Srgb, f64>;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(Copy, Clone, IntoColor, Pixel)]
@@ -391,7 +393,7 @@ where
 ///         0.7353569830524495,
 ///         0.5370987304831942,
 ///     ];
-///     let hsv: Hsv<palette::encoding::Srgb, _> = Bgr::from_raw_slice(&buffer)[1].into();
+///     let hsv: Hsv64 = Bgr::from_raw_slice(&buffer)[1].into();
 ///
 ///     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
 /// }
