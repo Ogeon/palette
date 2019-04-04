@@ -9,12 +9,13 @@
 //!
 //! [`libm`]: https://github.com/japaric/libm
 
+#[cfg(feature = "std")]
 pub use num_traits::Float;
 
-#[cfg(feature = "libm_works")]
+#[cfg(not(feature = "std"))]
 pub use self::no_std_float_trait::Float;
 
-#[cfg(feature = "libm_works")]
+#[cfg(not(feature = "std"))]
 mod no_std_float_trait {
     extern crate libm;
     use self::libm::{F32Ext, F64Ext};
