@@ -361,6 +361,7 @@ mod lch;
 pub mod luma;
 pub mod rgb;
 mod xyz;
+pub mod yuv;
 mod yxy;
 
 mod hues;
