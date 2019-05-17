@@ -1,9 +1,9 @@
 //! YUV types, spaces and standards.
-use float::Float;
+use crate::float::Float;
 
-use encoding::{TransferFn};
-use rgb::RgbSpace;
-use {Component};
+use crate::encoding::{TransferFn};
+use crate::rgb::RgbSpace;
+use crate::{Component, FloatComponent};
 
 mod yuv;
 
@@ -57,10 +57,10 @@ pub trait QuantizationFn<Y: YuvStandard> {
     type Output: Component;
 
     /// Quantize an analog yuv pixel.
-    fn quantize<F: Component + Float>(yuv: [F; 3]) -> [Self::Output; 3];
+    fn quantize<F: FloatComponent>(yuv: [F; 3]) -> [Self::Output; 3];
 
     /// Quantize from an rgb value directly.
-    fn quantize_direct<F: Component + Float>(rgb: [F; 3]) -> [Self::Output; 3];
+    fn quantize_direct<F: FloatComponent>(rgb: [F; 3]) -> [Self::Output; 3];
 
     /// Transfer a quantized color value.
     fn quantized_rgb(rgb: [Self::Output; 3]) -> [Self::Output; 3];

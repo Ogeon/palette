@@ -1,25 +1,27 @@
 use core::marker::PhantomData;
 
-use float::Float;
+use crate::float::Float;
 
-use encoding::Linear;
-use luma::{Luma, LumaStandard};
-use rgb::{Rgb, RgbSpace};
-use yuv::{YuvStandard, Differences};
-use {Component, Pixel};
-use {Xyz};
+use crate::encoding::Linear;
+use crate::convert::FromColorUnclamped;
+use crate::luma::{Luma, LumaStandard};
+use crate::rgb::{Rgb, RgbSpace};
+use crate::yuv::{YuvStandard, Differences};
+use crate::{FloatComponent, Pixel, Xyz};
 
 /// Generic YUV.
 ///
 /// YUV is an alternate representation for an RGB color space with a focus on separating luminance
 /// from chroma components.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, FromColorUnclamped, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_rgb_space = "S::RgbSpace"]
-#[palette_white_point = "<S::RgbSpace as RgbSpace>::WhitePoint"]
-#[palette_component = "T"]
-#[palette_manual_from(Luma, Rgb = "from_rgb_internal")]
+#[palette(
+    palette_internal,
+    // rgb_standard = "S::RgbSpace",
+    white_point = "<S::RgbSpace as RgbSpace>::WhitePoint",
+    component = "T",
+    skip_derives(Luma, Rgb)
+)]
 #[repr(C)]
 pub struct Yuv<S: YuvStandard, T: Float = f32> {
     /// The lumnance signal where `0.0f` is no light and `1.0f` means a maximum displayable amount
@@ -36,7 +38,7 @@ pub struct Yuv<S: YuvStandard, T: Float = f32> {
 
     /// The kind of YUV standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 
@@ -61,7 +63,7 @@ impl<S: YuvStandard, T: Float> Yuv<S, T> {
 
     fn from_rgb_internal<Sp>(rgb: Rgb<Linear<Sp>, T>) -> Self
     where
-        T: Component,
+        T: FloatComponent,
         Sp: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
     {
         let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from(rgb);
@@ -94,7 +96,7 @@ where
 impl<S, T, St> From<Luma<St, T>> for Yuv<S, T>
 where
     S: YuvStandard,
-    T: Component + Float,
+    T: FloatComponent,
     St: LumaStandard<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
 {
     fn from(color: Luma<St, T>) -> Self {
