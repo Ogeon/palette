@@ -6,6 +6,7 @@ use crate::rgb::RgbSpace;
 use crate::{Component, FloatComponent};
 
 mod quant;
+mod ycbcr;
 mod yuv;
 
 /// A YUV standard for analog signal conversion.
@@ -21,6 +22,15 @@ pub trait YuvStandard {
 
     /// The normalized color difference space.
     type DifferenceFn: DifferenceFn;
+}
+
+/// Combines a YUV standard with a quantization model.
+pub trait YCbCrStandard {
+    /// The analog representation standard to which this quantization applies.
+    type YuvStandard: YuvStandard;
+
+    /// The quantization function to use.
+    type QuantizationFn: QuantizationFn;
 }
 
 /// Gives the YUV space values of each primary.
@@ -80,4 +90,9 @@ impl<R: RgbSpace, T: TransferFn, D: DifferenceFn> YuvStandard for (R, T, D) {
     type RgbSpace = R;
     type TransferFn = T;
     type DifferenceFn = D;
+}
+
+impl<S: YuvStandard, Q: QuantizationFn> YCbCrStandard for (S, Q) {
+    type YuvStandard = S;
+    type QuantizationFn = Q;
 }
