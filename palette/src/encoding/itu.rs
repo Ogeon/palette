@@ -4,6 +4,7 @@ use crate::rgb::{Primaries, RgbSpace, RgbStandard};
 use crate::luma::LumaStandard;
 use crate::encoding::TransferFn;
 use crate::white_point::{D65, WhitePoint};
+use crate::yuv::{DifferenceFn, YuvStandard};
 use crate::{FloatComponent, FromF64, Yxy};
 
 fn cast<T: FromF64>(float: f64) -> T {
@@ -38,39 +39,64 @@ pub struct BT709;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Transfer601And709;
 
+/// The Yuv encoding difference functions for BT601.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct DifferenceFn601;
+
+/// The Yuv encoding difference functions for BT709.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct DifferenceFn709;
+
+// See 2.5.1 (page 2). RGB primary luminances.
+const BT601_LUMINANCE: (f64, f64, f64) = (0.2990, 0.5870, 0.1140);
+// Divisor to renormalize the blue difference signal.
+const BT601_BLUE_NORM: f64 = 1.772;
+// Divisor to renormalize the red difference signal.
+const BT601_RED_NORM: f64 = 1.402;
+
+// Exact primary luminances derived from the color space primaries.
+const BT709_LUMINANCE: (f64, f64, f64) = (0.212656, 0.715158, 0.072186);
+// Luminances for the sake of exact specification compliance for YUV luminance.
+// See 3.2 (page 4)
+const BT709_WEIGHTS: (f64, f64, f64) = (0.2126, 0.7152, 0.07212);
+// Divisor to renormalize the blue difference signal.
+const BT709_BLUE_NORM: f64 = 1.8556;
+// Divisor to renormalize the red difference signal.
+const BT709_RED_NORM: f64 = 1.5748;
+
 impl Primaries for BT601_525 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6300), cast(0.3400), cast(0.2990))
+        Yxy::with_wp(cast(0.6300), cast(0.3400), cast(BT601_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.3100), cast(0.5950), cast(0.5870))
+        Yxy::with_wp(cast(0.3100), cast(0.5950), cast(BT601_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1550), cast(0.0700), cast(0.1140))
+        Yxy::with_wp(cast(0.1550), cast(0.0700), cast(BT601_LUMINANCE.2))
     }
 }
 
 impl Primaries for BT601_625 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(0.2990))
+        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(BT601_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.2900), cast(0.6000), cast(0.5870))
+        Yxy::with_wp(cast(0.2900), cast(0.6000), cast(BT601_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(0.1140))
+        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(BT601_LUMINANCE.2))
     }
 }
 
 impl Primaries for BT709 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(0.212656))
+        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(BT709_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.3000), cast(0.6000), cast(0.715158))
+        Yxy::with_wp(cast(0.3000), cast(0.6000), cast(BT709_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(0.072186))
+        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(BT709_LUMINANCE.2))
     }
 }
 
@@ -119,6 +145,24 @@ impl LumaStandard for BT709 {
     type TransferFn = Transfer601And709;
 }
 
+impl YuvStandard for BT601_525 {
+    type RgbSpace = Self;
+    type TransferFn = Transfer601And709;
+    type DifferenceFn = DifferenceFn601;
+}
+
+impl YuvStandard for BT601_625 {
+    type RgbSpace = Self;
+    type TransferFn = Transfer601And709;
+    type DifferenceFn = DifferenceFn601;
+}
+
+impl YuvStandard for BT709 {
+    type RgbSpace = Self;
+    type TransferFn = Transfer601And709;
+    type DifferenceFn = DifferenceFn709;
+}
+
 impl TransferFn for Transfer601And709 {
     fn into_linear<T: Float + FromF64>(x: T) -> T {
         if x <= cast(0.0091) {
@@ -134,5 +178,53 @@ impl TransferFn for Transfer601And709 {
         } else {
             x.powf(cast(0.45)) * cast(1.099) - cast(0.099)
         }
+    }
+}
+
+impl DifferenceFn for DifferenceFn601 {
+    fn luminance<T: Float>() -> [T; 3] {
+        // Full intensity matches whitepoint, these are exactly the Y component of primares.
+        let (r, g, b) = BT601_LUMINANCE;
+        [cast(r), cast(g), cast(b)]
+    }
+
+    fn norm_blue<T: Float>(denorm: T) -> T {
+        denorm / cast(BT601_BLUE_NORM)
+    }
+
+    fn denorm_blue<T: Float>(norm: T) -> T {
+        norm * cast(BT601_BLUE_NORM)
+    }
+
+    fn norm_red<T: Float>(denorm: T) -> T {
+        denorm / cast(BT601_RED_NORM)
+    }
+
+    fn denorm_red<T: Float>(norm: T) -> T {
+        norm * cast(BT601_RED_NORM)
+    }
+}
+
+impl DifferenceFn for DifferenceFn709 {
+    fn luminance<T: Float>() -> [T; 3] {
+        // Full intensity matches whitepoint, these are exactly the Y component of primares.
+        let (r, g, b) = BT709_WEIGHTS;
+        [cast(r), cast(g), cast(b)]
+    }
+
+    fn norm_blue<T: Float>(denorm: T) -> T {
+        denorm / cast(BT709_BLUE_NORM)
+    }
+
+    fn denorm_blue<T: Float>(norm: T) -> T {
+        norm * cast(BT709_BLUE_NORM)
+    }
+
+    fn norm_red<T: Float>(denorm: T) -> T {
+        denorm / cast(BT709_RED_NORM)
+    }
+
+    fn denorm_red<T: Float>(norm: T) -> T {
+        norm * cast(BT709_RED_NORM)
     }
 }
