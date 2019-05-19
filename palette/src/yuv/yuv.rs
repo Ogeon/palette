@@ -5,7 +5,7 @@ use float::Float;
 use encoding::Linear;
 use luma::{Luma, LumaStandard};
 use rgb::{Rgb, RgbSpace};
-use yuv::{YuvStandard, Differences};
+use yuv::{DifferenceFn, YuvStandard};
 use {Component, Pixel};
 use {Xyz};
 
@@ -66,10 +66,10 @@ impl<S: YuvStandard, T: Float> Yuv<S, T> {
     {
         let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from(rgb);
         let rgb = Rgb::<(S::RgbSpace, S::TransferFn), T>::from(xyz);
-        let weights = S::Differences::luminance::<T>();
+        let weights = S::DifferenceFn::luminance::<T>();
         let luminance = weights[0]*rgb.red + weights[1]*rgb.green + weights[2]*rgb.blue;
-        let blue_diff = S::Differences::norm_blue(luminance - rgb.blue);
-        let red_diff = S::Differences::norm_red(luminance - rgb.red);
+        let blue_diff = S::DifferenceFn::norm_blue(luminance - rgb.blue);
+        let red_diff = S::DifferenceFn::norm_red(luminance - rgb.red);
 
         Yuv {
             luminance,
