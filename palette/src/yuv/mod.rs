@@ -40,25 +40,30 @@ pub trait DifferenceFn {
     fn luminance<T: Float>() -> [T; 3];
 
     /// Normalize the difference of luminance and blue channel.
-    fn norm_blue<T: Float>(denorm: T) -> T;
+    fn normalize_blue<T: Float>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and blue channel.
-    fn denorm_blue<T: Float>(norm: T) -> T;
+    fn denormalize_blue<T: Float>(norm: T) -> T;
 
     /// Normalize the difference of luminance and red channel.
-    fn norm_red<T: Float>(denorm: T) -> T;
+    fn normalize_red<T: Float>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and red channel.
-    fn denorm_red<T: Float>(norm: T) -> T;
+    fn denormalize_red<T: Float>(norm: T) -> T;
 }
 
 /// A digital encoding of a YUV color model.
+///
+/// This is not a mere type conversion. Instead, it is a standardized encoding depending on the bit
+/// length of the output symbols. This also ensures that the symbol space is not completely
+/// exhausted by color information and therefore keeps some headroom in the produced digital
+/// signal.
 ///
 /// While the difference conversion is mostly performed in an analog signal space free of
 /// quantization errors, the final digital output is quantized to some number of bits defined in
 /// individual standards.
 ///
-// TODO:
+// TODO: See https://github.com/Ogeon/palette/issues/121
 // The direct conversion of digitally quantized, gamma pre-corrected RGB is also possible. This
 // yields minor differences compared to a conversion to analog signals and quantization. A strict
 // integer arithmetic quantization is available as well where performance concerns make the

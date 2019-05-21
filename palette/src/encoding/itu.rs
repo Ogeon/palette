@@ -185,19 +185,19 @@ impl DifferenceFn for DifferenceFn601 {
         [cast(r), cast(g), cast(b)]
     }
 
-    fn norm_blue<T: Float>(denorm: T) -> T {
+    fn normalize_blue<T: Float>(denorm: T) -> T {
         denorm / cast(BT601_BLUE_NORM)
     }
 
-    fn denorm_blue<T: Float>(norm: T) -> T {
+    fn denormalize_blue<T: Float>(norm: T) -> T {
         norm * cast(BT601_BLUE_NORM)
     }
 
-    fn norm_red<T: Float>(denorm: T) -> T {
+    fn normalize_red<T: Float>(denorm: T) -> T {
         denorm / cast(BT601_RED_NORM)
     }
 
-    fn denorm_red<T: Float>(norm: T) -> T {
+    fn denormalize_red<T: Float>(norm: T) -> T {
         norm * cast(BT601_RED_NORM)
     }
 }
@@ -209,19 +209,19 @@ impl DifferenceFn for DifferenceFn709 {
         [cast(r), cast(g), cast(b)]
     }
 
-    fn norm_blue<T: Float>(denorm: T) -> T {
+    fn normalize_blue<T: Float>(denorm: T) -> T {
         denorm / cast(BT709_BLUE_NORM)
     }
 
-    fn denorm_blue<T: Float>(norm: T) -> T {
+    fn denormalize_blue<T: Float>(norm: T) -> T {
         norm * cast(BT709_BLUE_NORM)
     }
 
-    fn norm_red<T: Float>(denorm: T) -> T {
+    fn normalize_red<T: Float>(denorm: T) -> T {
         denorm / cast(BT709_RED_NORM)
     }
 
-    fn denorm_red<T: Float>(norm: T) -> T {
+    fn denormalize_red<T: Float>(norm: T) -> T {
         norm * cast(BT709_RED_NORM)
     }
 }
