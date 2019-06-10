@@ -225,3 +225,72 @@ impl DifferenceFn for DifferenceFn709 {
         norm * cast(BT709_RED_NORM)
     }
 }
+
+/// Forwards to the `DifferenceFn` of the yuv standard.
+impl DifferenceFn for BT601_525 {
+    fn luminance<T: Float>() -> [T; 3] {
+        DifferenceFn601::luminance()
+    }
+
+    fn normalize_blue<T: Float>(denorm: T) -> T {
+        DifferenceFn601::normalize_blue(denorm)
+    }
+
+    fn denormalize_blue<T: Float>(norm: T) -> T {
+        DifferenceFn601::denormalize_blue(norm)
+    }
+
+    fn normalize_red<T: Float>(denorm: T) -> T {
+        DifferenceFn601::normalize_red(denorm)
+    }
+
+    fn denormalize_red<T: Float>(norm: T) -> T {
+        DifferenceFn601::denormalize_red(norm)
+    }
+}
+
+/// Forwards to the `DifferenceFn` of the yuv standard.
+impl DifferenceFn for BT601_625 {
+    fn luminance<T: Float>() -> [T; 3] {
+        DifferenceFn601::luminance()
+    }
+
+    fn normalize_blue<T: Float>(denorm: T) -> T {
+        DifferenceFn601::normalize_blue(denorm)
+    }
+
+    fn denormalize_blue<T: Float>(norm: T) -> T {
+        DifferenceFn601::denormalize_blue(norm)
+    }
+
+    fn normalize_red<T: Float>(denorm: T) -> T {
+        DifferenceFn601::normalize_red(denorm)
+    }
+
+    fn denormalize_red<T: Float>(norm: T) -> T {
+        DifferenceFn601::denormalize_red(norm)
+    }
+}
+
+/// Forwards to the `DifferenceFn` of the yuv standard.
+impl DifferenceFn for BT709 {
+    fn luminance<T: Float>() -> [T; 3] {
+        DifferenceFn709::luminance()
+    }
+
+    fn normalize_blue<T: Float>(denorm: T) -> T {
+        DifferenceFn709::normalize_blue(denorm)
+    }
+
+    fn denormalize_blue<T: Float>(norm: T) -> T {
+        DifferenceFn709::denormalize_blue(norm)
+    }
+
+    fn normalize_red<T: Float>(denorm: T) -> T {
+        DifferenceFn709::normalize_red(denorm)
+    }
+
+    fn denormalize_red<T: Float>(norm: T) -> T {
+        DifferenceFn709::denormalize_red(norm)
+    }
+}
