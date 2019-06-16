@@ -215,7 +215,7 @@ mod test {
             0.7578869,
         ];
         let xyz_scaling = Method::XyzScaling;
-        let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&xyz_scaling);
+        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&xyz_scaling);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }
@@ -227,7 +227,7 @@ mod test {
             0.0000000, 0.7578869,
         ];
         let von_kries = Method::VonKries;
-        let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&von_kries);
+        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&von_kries);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }
@@ -239,7 +239,7 @@ mod test {
             0.0150436, 0.7521316,
         ];
         let bradford = Method::Bradford;
-        let computed = <TransformMatrix<D65, D50, _>>::generate_transform_matrix(&bradford);
+        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&bradford);
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }
