@@ -3,7 +3,7 @@ extern crate palette;
 
 use palette::{Hsl, Lch, Pixel, Saturate, Srgb};
 
-use image::GenericImage;
+use image::{GenericImage, GenericImageView};
 
 fn main() {
     let mut image = image::open("res/cat.png")

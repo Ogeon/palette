@@ -2,7 +2,7 @@ extern crate image;
 extern crate num_traits;
 extern crate palette;
 
-use image::{GenericImage, RgbImage};
+use image::{GenericImage, GenericImageView, RgbImage};
 
 use palette::{Pixel, Srgb};
 #[cfg(feature = "std")]

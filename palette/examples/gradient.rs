@@ -10,7 +10,7 @@ fn main() {
 fn main() {
     use palette::{Gradient, Lch, LinSrgb, Pixel, Srgb};
 
-    use image::{GenericImage, RgbImage};
+    use image::{GenericImage, GenericImageView, RgbImage};
 
     //A gradient of evenly spaced colors
     let grad1 = Gradient::new(vec![

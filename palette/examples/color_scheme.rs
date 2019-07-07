@@ -2,9 +2,9 @@ extern crate clap;
 extern crate image;
 extern crate palette;
 
-use palette::{Hue, Pixel, Shade, Lch, Srgb, LinSrgb};
+use palette::{Hue, Lch, LinSrgb, Pixel, Shade, Srgb};
 
-use image::{GenericImage, RgbImage, SubImage};
+use image::{GenericImage, GenericImageView, RgbImage, SubImage};
 
 use clap::{App, AppSettings, Arg, SubCommand};
 
@@ -109,10 +109,7 @@ fn main() {
 
             let shift = 180.0 - (distance / 2.0);
 
-            vec![
-                primary.shift_hue(shift),
-                primary.shift_hue(-shift),
-            ]
+            vec![primary.shift_hue(shift), primary.shift_hue(-shift)]
         }
         ("analogous", matches) => {
             //Two secondary colors that are close to the primary
@@ -123,10 +120,7 @@ fn main() {
 
             let shift = distance / 2.0;
 
-            vec![
-                primary.shift_hue(shift),
-                primary.shift_hue(-shift),
-            ]
+            vec![primary.shift_hue(shift), primary.shift_hue(-shift)]
         }
         ("rectangle", matches) => {
             //Three secondary colors that forms a rectangle or a square, together with the
@@ -145,8 +139,7 @@ fn main() {
                 primary.shift_hue(shift2),
             ]
         }
-        ("complementary", _) => vec![primary.shift_hue(180.0)], /* Simply the
-                                                                         * complementary color */
+        ("complementary", _) => vec![primary.shift_hue(180.0)], // Simply the complementary color
         (name, _) => panic!("unknown subcommand: {}", name),
     };
 
@@ -154,7 +147,10 @@ fn main() {
     let mut image = RgbImage::new((secondary.len() as u32 + 1) * SWATCH_SIZE, SWATCH_SIZE);
 
     //Draw the primary swatches
-    blit_shades(primary.into(), image.sub_image(0, 0, SWATCH_SIZE, SWATCH_SIZE));
+    blit_shades(
+        primary.into(),
+        image.sub_image(0, 0, SWATCH_SIZE, SWATCH_SIZE),
+    );
 
     //Draw the secondary swatches
     for (n, color) in secondary.into_iter().enumerate() {
@@ -170,10 +166,7 @@ fn main() {
     }
 }
 
-fn blit_shades<I>(
-    color: LinSrgb<f32>,
-    mut canvas: SubImage<I>,
-) where I: GenericImage<Pixel = image::Rgb<u8>> + 'static {
+fn blit_shades(color: LinSrgb<f32>, mut canvas: SubImage<&mut RgbImage>) {
     let width = canvas.width();
     let height = canvas.height();
 
@@ -190,21 +183,19 @@ fn blit_shades<I>(
         .into_format()
         .into_raw();
 
-
     for x in 0..width {
         for y in 0..height {
-            canvas.put_pixel(x, y, image::Rgb {
-                data:
-                if y < height / 2 {
-                    primary
-                } else if x < width / 3 {
-                    light
-                } else if x < (width / 3) * 2 {
-                    dark1
-                } else {
-                    dark2
-                }
-            });
+            let data = if y < height / 2 {
+                primary
+            } else if x < width / 3 {
+                light
+            } else if x < (width / 3) * 2 {
+                dark1
+            } else {
+                dark2
+            };
+
+            canvas.put_pixel(x, y, image::Rgb { data });
         }
     }
 }

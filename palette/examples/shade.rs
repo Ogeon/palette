@@ -3,7 +3,7 @@ extern crate palette;
 
 use palette::{Hsv, Lab, LinSrgb, Pixel, Shade, Srgb};
 
-use image::{GenericImage, RgbImage};
+use image::{GenericImage, GenericImageView, RgbImage};
 
 fn main() {
     //The same color in linear RGB, CIE L*a*b*, and HSV

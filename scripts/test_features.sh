@@ -36,10 +36,10 @@ echo -e "features: $features\n"
 
 #Test without any optional feature
 echo testing with --no-default-features --features "$required_features"
-cargo test --release --no-default-features --features "$required_features"
+cargo test --no-default-features --features "$required_features"
 
 #Isolated test of each optional feature
 for feature in $features; do
 	echo testing with --no-default-features --features "\"$feature $required_features\""
-	cargo test --release --no-default-features --features "$feature $required_features"
+	cargo test --no-default-features --features "$feature $required_features"
 done
