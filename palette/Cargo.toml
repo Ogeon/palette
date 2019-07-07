@@ -26,7 +26,7 @@ strict = []
 palette_derive = {version = "0.4.1", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
 approx = {version = "0.3", default-features = false}
-libm = "0.1.2"
+libm = "0.1"
 
 [dependencies.phf]
 version = "0.7"
@@ -38,9 +38,9 @@ features = ["serde_derive"]
 optional = true
 
 [dev-dependencies]
-image = "0.19"
+image = "0.21"
 clap = "2"
-csv = "1.0.0-beta.3"
+csv = "1"
 serde = "1"
 serde_derive = "1"
 lazy_static = "1"
