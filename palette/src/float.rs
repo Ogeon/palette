@@ -57,6 +57,8 @@ mod no_std_float_trait {
         /// `y.atan2(x)` computes the inverse tangent of `y / x`, in the
         /// corresponding quadrant
         fn atan2(self, other: Self) -> Self;
+        /// `x.round()` returns the nearest integer to a number. Round half-way cases away from 0.0.
+        fn round(self) -> Self;
     }
 
     impl Float for f32 {
@@ -78,6 +80,9 @@ mod no_std_float_trait {
         fn atan2(self, other: f32) -> f32 {
             F32Ext::atan2(self, other)
         }
+        fn round(self) -> f32 {
+            F32Ext::round(self)
+        }
     }
 
     impl Float for f64 {
@@ -98,6 +103,9 @@ mod no_std_float_trait {
         }
         fn atan2(self, other: f64) -> f64 {
             F64Ext::atan2(self, other)
+        }
+        fn round(self) -> f64 {
+            F64Ext::round(self)
         }
     }
 }
