@@ -4,7 +4,7 @@ set -e
 features=""
 
 #Features that will always be activated
-required_features="strict"
+required_features="std strict"
 
 
 #Find features
@@ -14,7 +14,7 @@ current_dependency=""
 while read -r line || [[ -n "$line" ]]; do
 	if [[ "$line" == "[features]" ]]; then
 		walking_features=true
-	elif [[ $walking_features == true ]] && [[ "$line" == "#internal" ]]; then
+	elif [[ $walking_features == true ]] && [[ "$line" == "#ignore in feature test" ]]; then
 		walking_features=false
 	elif [[ $walking_features == true ]] && echo "$line" | grep -E "^\[.*\]" > /dev/null; then
 		walking_features=false

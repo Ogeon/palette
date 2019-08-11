@@ -16,11 +16,11 @@ build = "build/main.rs"
 default = ["named_from_str", "std"]
 named_from_str = ["named", "phf", "phf_codegen", "std"]
 named = []
-std = ["approx/std", "num-traits/std"]
 serializing = ["serde", "std"]
 
-#internal
-strict = []
+#ignore in feature test
+std = ["approx/std", "num-traits/std"]
+strict = [] # Only for CI internal testing
 
 [dependencies]
 palette_derive = {version = "0.4.1", path = "../palette_derive"}
