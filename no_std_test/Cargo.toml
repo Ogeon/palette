@@ -1,0 +1,17 @@
+[package]
+name = "no_std_test"
+version = "0.0.0"
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = []
+description = "Test crate for #[no_std]."
+repository = "https://github.com/Ogeon/palette"
+license = "MIT OR Apache-2.0"
+
+[dependencies.libc]
+version = "0.2"
+default-features = false
+
+[dependencies.palette]
+path = "../palette"
+default-features = false
+features = ["named"]
