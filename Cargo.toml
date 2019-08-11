@@ -1,5 +1,8 @@
 [workspace]
 members = [
     "palette",
-    "palette_derive"
+    "palette_derive",
+
+    # Test crates
+    "no_std_test"
 ]

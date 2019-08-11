@@ -25,7 +25,12 @@ script:
   - cargo test -v --features strict
   - bash ../scripts/test_features.sh
 
+  - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then
+      cd ../no_std_test;
+      cargo build -v;
+    fi
+
   - cd ..
-  - cargo doc
+  - cargo doc --all --exclude no_std_test
 after_success:
   - sh scripts/upload_doc.sh
