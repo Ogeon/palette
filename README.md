@@ -9,7 +9,7 @@ A Rust library that makes linear color calculations and conversion easy and acce
 
 [Released](https://docs.rs/palette/0.4.1/palette/)
 
-[Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html).
+[Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html)
 
 ## Cargo.toml Entries
 
@@ -31,6 +31,7 @@ These features are enabled by default:
 These features are disabled by default:
 
 * `"serializing"` - Enables color serializing and deserializing using `serde`.
+* `"libm"` - Makes it use the `libm` floating point math library. It's only for when the `"std"` feature is disabled.
 
 ### Without the standard library
 
@@ -40,6 +41,7 @@ Here is an example `Cargo.toml` entry for using palette on `#![no_std]`:
 [dependencies.palette]
 version = "0.4"
 default-features = false
+features = ["libm"] # Makes it use libm instead of std for float math
 ```
 
 ## It's Never "Just RGB"

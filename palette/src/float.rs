@@ -17,7 +17,9 @@ pub use self::no_std_float_trait::Float;
 
 #[cfg(not(feature = "std"))]
 mod no_std_float_trait {
+    #[cfg(feature = "libm")]
     extern crate libm;
+    #[cfg(feature = "libm")]
     use self::libm::{F32Ext, F64Ext};
 
     use core::{f32, f64};
@@ -61,6 +63,7 @@ mod no_std_float_trait {
         fn round(self) -> Self;
     }
 
+    #[cfg(feature = "libm")]
     impl Float for f32 {
         fn sqrt(self) -> f32 {
             F32Ext::cbrt(self)
@@ -85,6 +88,7 @@ mod no_std_float_trait {
         }
     }
 
+    #[cfg(feature = "libm")]
     impl Float for f64 {
         fn sqrt(self) -> f64 {
             F64Ext::sqrt(self)
@@ -108,4 +112,57 @@ mod no_std_float_trait {
             F64Ext::round(self)
         }
     }
+
+    #[cfg(not(feature = "libm"))]
+    impl Float for f32 {
+        fn sqrt(self) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn cbrt(self) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn powf(self, other: f32) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn sin(self) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn cos(self) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn atan2(self, other: f32) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+        fn round(self) -> f32 {
+            panic!("need to select a float library for palette")
+        }
+    }
+
+    #[cfg(not(feature = "libm"))]
+    impl Float for f64 {
+        fn sqrt(self) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn cbrt(self) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn powf(self, other: f64) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn sin(self) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn cos(self) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn atan2(self, other: f64) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+        fn round(self) -> f64 {
+            panic!("need to select a float library for palette")
+        }
+    }
 }
+
+#[cfg(not(any(feature = "std", feature = "libm")))]
+compile_error!("The palette crate needs a float library. Please enable the \"std\" or \"libm\" feature.");

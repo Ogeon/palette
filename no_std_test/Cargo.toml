@@ -14,4 +14,4 @@ default-features = false
 [dependencies.palette]
 path = "../palette"
 default-features = false
-features = ["named"]
+features = ["libm", "named"]
