@@ -25,7 +25,7 @@ pub fn find_in_generics(
                     },
             })) = component
             {
-                let first = component.first().map(|s| s.into_value());
+                let first = component.first();
                 let is_ident_path = leading_colon.is_none()
                     && component.len() == 1
                     && first.unwrap().arguments.is_empty()
@@ -45,7 +45,7 @@ pub fn find_in_generics(
                     },
             })) = white_point
             {
-                let first = white_point.first().map(|s| s.into_value());
+                let first = white_point.first();
                 let is_ident_path = leading_colon.is_none()
                     && white_point.len() == 1
                     && first.unwrap().arguments.is_empty()
