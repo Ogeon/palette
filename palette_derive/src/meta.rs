@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use syn::parse::{Parse, Parser, ParseStream, Result};
+use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::punctuated::Punctuated;
 use syn::{parenthesized, Attribute, Data, Field, Fields, Ident, Index, LitStr, Token, Type};
 
@@ -8,14 +8,7 @@ pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
     let mut result = T::default();
 
     for attribute in attributes {
-        let attribute_name = attribute
-            .path
-            .segments
-            .first()
-            .unwrap()
-            .into_value()
-            .ident
-            .clone();
+        let attribute_name = attribute.path.segments.first().unwrap().ident.clone();
         let is_palette_attribute = attribute_name.to_string().starts_with("palette_");
 
         if attribute.path.segments.len() > 1 {
@@ -31,10 +24,10 @@ pub fn parse_attributes<T: MetaParser>(attributes: Vec<Attribute>) -> T {
         }
 
         if attribute_name == "palette_internal" {
-            assert_empty_attribute(&attribute_name, attribute.tts);
+            assert_empty_attribute(&attribute_name, attribute.tokens);
             result.internal();
         } else {
-            result.parse_attribute(attribute_name, attribute.tts);
+            result.parse_attribute(attribute_name, attribute.tokens);
         }
     }
 
@@ -72,14 +65,7 @@ pub fn parse_struct_field_attributes<T: DataMetaParser>(
             .unwrap_or_else(|| IdentOrIndex::Index(index.into()));
 
         for attribute in field.attrs {
-            let attribute_name = attribute
-                .path
-                .segments
-                .first()
-                .unwrap()
-                .into_value()
-                .ident
-                .clone();
+            let attribute_name = attribute.path.segments.first().unwrap().ident.clone();
             if !attribute_name.to_string().starts_with("palette_") {
                 continue;
             }
@@ -96,7 +82,7 @@ pub fn parse_struct_field_attributes<T: DataMetaParser>(
                 identifier.clone(),
                 field.ty.clone(),
                 attribute_name,
-                attribute.tts,
+                attribute.tokens,
             );
         }
     }
@@ -112,10 +98,7 @@ pub fn assert_empty_attribute(attribute_name: &Ident, tts: TokenStream) {
     }
 }
 
-pub fn parse_tuple_attribute<T: Parse>(
-    attribute_name: &Ident,
-    tts: TokenStream,
-) -> Vec<T> {
+pub fn parse_tuple_attribute<T: Parse>(attribute_name: &Ident, tts: TokenStream) -> Vec<T> {
     fn parse_generic_tuple<T: Parse>(input: ParseStream) -> Result<Vec<T>> {
         let content;
         parenthesized!(content in input);
@@ -178,10 +161,7 @@ impl Parse for KeyValuePair {
             None => None,
             Some(_) => Some(input.parse::<LitStr>()?.parse::<Ident>()?),
         };
-        Ok(KeyValuePair {
-            key,
-            value
-        })
+        Ok(KeyValuePair { key, value })
     }
 }
 
