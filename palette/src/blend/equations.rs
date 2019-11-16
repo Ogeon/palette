@@ -1,9 +1,7 @@
 use float::Float;
-#[cfg(not(feature = "std"))]
-use num_traits::float::FloatCore;
 
-use {Blend, ComponentWise};
 use blend::{BlendFunction, PreAlpha};
+use {Blend, ComponentWise};
 
 ///A pair of blending equations and corresponding parameters.
 ///
@@ -71,16 +69,20 @@ where
         source: PreAlpha<C, C::Scalar>,
         destination: PreAlpha<C, C::Scalar>,
     ) -> PreAlpha<C, C::Scalar> {
-        let col_src_param = self.color_parameters
+        let col_src_param = self
+            .color_parameters
             .source
             .apply_to(source.clone(), destination.clone());
-        let col_dst_param = self.color_parameters
+        let col_dst_param = self
+            .color_parameters
             .destination
             .apply_to(source.clone(), destination.clone());
-        let alpha_src_param = self.alpha_parameters
+        let alpha_src_param = self
+            .alpha_parameters
             .source
             .apply_to(source.clone(), destination.clone());
-        let alpha_dst_param = self.alpha_parameters
+        let alpha_dst_param = self
+            .alpha_parameters
             .destination
             .apply_to(source.clone(), destination.clone());
 

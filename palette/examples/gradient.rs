@@ -55,15 +55,12 @@ fn main() {
         let c3 = Srgb::from_linear(c3.into()).into_format().into_raw();
         let c4 = Srgb::from_linear(c4.into()).into_format().into_raw();
 
-
         {
             let mut sub_image = image.sub_image(i as u32, 0, 1, 31);
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb {
-                        data: c1
-                    });
+                    sub_image.put_pixel(x, y, image::Rgb(c1));
                 }
             }
         }
@@ -73,9 +70,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb {
-                        data: c2
-                    });
+                    sub_image.put_pixel(x, y, image::Rgb(c2));
                 }
             }
         }
@@ -85,9 +80,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb {
-                        data: c3
-                    });
+                    sub_image.put_pixel(x, y, image::Rgb(c3));
                 }
             }
         }
@@ -97,9 +90,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb {
-                        data: c4
-                    });
+                    sub_image.put_pixel(x, y, image::Rgb(c4));
                 }
             }
         }

@@ -4,13 +4,13 @@ extern crate palette;
 
 use image::{GenericImage, GenericImageView, RgbImage};
 
-use palette::{Pixel, Srgb};
 #[cfg(feature = "std")]
 use palette::{Gradient, LinSrgb, Mix};
+use palette::{Pixel, Srgb};
 
 mod color_spaces {
-    use palette::{Hue, Lch, LinSrgb, Srgb};
     use display_colors;
+    use palette::{Hue, Lch, LinSrgb, Srgb};
 
     pub fn run() {
         let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
@@ -27,8 +27,8 @@ mod color_spaces {
 }
 
 mod manipulation {
-    use palette::{Saturate, Shade, Srgb, Lch};
     use display_colors;
+    use palette::{Lch, Saturate, Shade, Srgb};
 
     pub fn run() {
         let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
@@ -48,8 +48,8 @@ mod manipulation {
 
 #[cfg(feature = "std")]
 mod gradients {
-    use palette::{Gradient, Hsv, LinSrgb};
     use display_gradients;
+    use palette::{Gradient, Hsv, LinSrgb};
 
     pub fn run() {
         let grad1 = Gradient::new(vec![
@@ -73,7 +73,7 @@ fn display_colors(filename: &str, colors: &[Srgb<u8>]) {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                sub_image.put_pixel(x, y, image::Rgb { data: *color.as_raw() });
+                sub_image.put_pixel(x, y, image::Rgb(*color.as_raw()));
             }
         }
     }
@@ -99,11 +99,15 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                sub_image.put_pixel(x, y, image::Rgb {
-                    data: Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
-                        .into_format()
-                        .into_raw()
-                });
+                sub_image.put_pixel(
+                    x,
+                    y,
+                    image::Rgb(
+                        Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
+                            .into_format()
+                            .into_raw(),
+                    ),
+                );
             }
         }
     }
@@ -113,11 +117,15 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                sub_image.put_pixel(x, y, image::Rgb {
-                    data: Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
-                        .into_format()
-                        .into_raw()
-                });
+                sub_image.put_pixel(
+                    x,
+                    y,
+                    image::Rgb(
+                        Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
+                            .into_format()
+                            .into_raw(),
+                    ),
+                );
             }
         }
     }

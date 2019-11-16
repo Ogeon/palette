@@ -20,6 +20,7 @@ serializing = ["serde", "std"]
 
 #ignore in feature test
 std = ["approx/std", "num-traits/std"]
+libm = ["num-traits/libm"]
 strict = [] # Only for CI internal testing
 
 [dependencies]
@@ -27,12 +28,8 @@ palette_derive = {version = "0.4.1", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
 approx = {version = "0.3", default-features = false}
 
-[dependencies.libm]
-version = "0.1"
-optional = true
-
 [dependencies.phf]
-version = "0.7"
+version = "0.8"
 optional = true
 
 [dependencies.serde]
@@ -41,7 +38,7 @@ features = ["serde_derive"]
 optional = true
 
 [dev-dependencies]
-image = "0.21"
+image = "0.22"
 clap = "2"
 csv = "1"
 serde = "1"
@@ -50,5 +47,5 @@ lazy_static = "1"
 serde_json = "1"
 
 [build-dependencies.phf_codegen]
-version = "0.7"
+version = "0.8"
 optional = true

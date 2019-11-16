@@ -20,15 +20,17 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let color: Hsl = Srgb::from_raw(&sub_image.get_pixel(x, y).data)
+                let color: Hsl = Srgb::from_raw(&sub_image.get_pixel(x, y).0)
                     .into_format()
                     .into_linear()
                     .into();
 
                 let saturated = color.saturate(0.8);
-                sub_image.put_pixel(x, y, image::Rgb {
-                    data: Srgb::from_linear(saturated.into()).into_format().into_raw()
-                });
+                sub_image.put_pixel(
+                    x,
+                    y,
+                    image::Rgb(Srgb::from_linear(saturated.into()).into_format().into_raw()),
+                );
             }
         }
     }
@@ -38,15 +40,17 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let color: Lch = Srgb::from_raw(&sub_image.get_pixel(x, y).data)
+                let color: Lch = Srgb::from_raw(&sub_image.get_pixel(x, y).0)
                     .into_format()
                     .into_linear()
                     .into();
 
                 let saturated = color.saturate(0.8);
-                sub_image.put_pixel(x, y, image::Rgb {
-                    data: Srgb::from_linear(saturated.into()).into_format().into_raw()
-                });
+                sub_image.put_pixel(
+                    x,
+                    y,
+                    image::Rgb(Srgb::from_linear(saturated.into()).into_format().into_raw()),
+                );
             }
         }
     }
