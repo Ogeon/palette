@@ -26,7 +26,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: rgb1 });
+                    sub_image.put_pixel(x, y, image::Rgb(rgb1));
                 }
             }
         }
@@ -36,7 +36,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: rgb2 });
+                    sub_image.put_pixel(x, y, image::Rgb(rgb2));
                 }
             }
         }
@@ -53,7 +53,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: lab1 });
+                    sub_image.put_pixel(x, y, image::Rgb(lab1));
                 }
             }
         }
@@ -63,7 +63,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: lab2 });
+                    sub_image.put_pixel(x, y, image::Rgb(lab2));
                 }
             }
         }
@@ -80,7 +80,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: hsv1 });
+                    sub_image.put_pixel(x, y, image::Rgb(hsv1));
                 }
             }
         }
@@ -90,7 +90,7 @@ fn main() {
             let (width, height) = sub_image.dimensions();
             for x in 0..width {
                 for y in 0..height {
-                    sub_image.put_pixel(x, y, image::Rgb { data: hsv2 });
+                    sub_image.put_pixel(x, y, image::Rgb(hsv2));
                 }
             }
         }

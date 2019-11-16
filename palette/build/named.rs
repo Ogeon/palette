@@ -2,8 +2,8 @@ use std::fs::File;
 
 #[cfg(feature = "named")]
 pub fn build() {
-    use std::path::Path;
     use std::io::{BufRead, BufReader, Write};
+    use std::path::Path;
 
     let out_dir = ::std::env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("named.rs");
@@ -21,13 +21,16 @@ pub fn build() {
             .next()
             .expect(&format!("couldn't get color for {}", name))
             .split(", ");
-        let red: u8 = rgb.next()
+        let red: u8 = rgb
+            .next()
             .and_then(|r| r.trim().parse().ok())
             .expect(&format!("couldn't get red for {}", name));
-        let green: u8 = rgb.next()
+        let green: u8 = rgb
+            .next()
             .and_then(|r| r.trim().parse().ok())
             .expect(&format!("couldn't get green for {}", name));
-        let blue: u8 = rgb.next()
+        let blue: u8 = rgb
+            .next()
             .and_then(|r| r.trim().parse().ok())
             .expect(&format!("couldn't get blue for {}", name));
 
@@ -44,16 +47,16 @@ pub fn build() {
 fn gen_from_str(writer: &mut File, entries: &[(String, String)]) {
     use std::io::Write;
 
-    write!(
-        writer,
-        "static COLORS: ::phf::Map<&'static str, ::rgb::Srgb<u8>> = "
-    ).unwrap();
     let mut map = ::phf_codegen::Map::new();
     for &(ref key, ref value) in entries {
         map.entry(&**key, value);
     }
-    map.build(writer).unwrap();
-    writeln!(writer, ";").unwrap();
+    write!(
+        writer,
+        "static COLORS: ::phf::Map<&'static str, ::rgb::Srgb<u8>> = {};",
+        map.build()
+    )
+    .unwrap();
 }
 
 #[cfg(not(feature = "named"))]

@@ -195,7 +195,7 @@ fn blit_shades(color: LinSrgb<f32>, mut canvas: SubImage<&mut RgbImage>) {
                 dark2
             };
 
-            canvas.put_pixel(x, y, image::Rgb { data });
+            canvas.put_pixel(x, y, image::Rgb(data));
         }
     }
 }

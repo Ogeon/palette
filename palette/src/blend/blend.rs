@@ -1,10 +1,8 @@
-use num_traits::{One, Zero};
 use float::Float;
-#[cfg(not(feature = "std"))]
-use num_traits::float::FloatCore;
+use num_traits::{One, Zero};
 
-use {cast, clamp, ComponentWise};
 use blend::{BlendFunction, PreAlpha};
+use {cast, clamp, ComponentWise};
 
 ///A trait for colors that can be blended together.
 ///
@@ -69,7 +67,8 @@ where
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color
+            color: src
+                .color
                 .component_wise(&dst.color, |a, b| a + b * (one - src.alpha)),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
@@ -120,7 +119,8 @@ where
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color
+            color: src
+                .color
                 .component_wise(&dst.color, |a, b| a * dst.alpha + b * (one - src.alpha)),
             alpha: clamp(dst.alpha, zero, one),
         };
@@ -218,7 +218,8 @@ where
                 if b * two <= dst.alpha {
                     two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
                 } else {
-                    a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b
+                    a * (one + dst.alpha) + b * (one + src.alpha)
+                        - two * a * b
                         - src.alpha * dst.alpha
                 }
             }),
@@ -281,7 +282,8 @@ where
                     src.alpha * dst.alpha + a * (one - dst.alpha) + b * (one - src.alpha)
                 } else {
                     src.alpha * dst.alpha * one.min((b / dst.alpha) * src.alpha / (src.alpha - a))
-                        + a * (one - dst.alpha) + b * (one - src.alpha)
+                        + a * (one - dst.alpha)
+                        + b * (one - src.alpha)
                 }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
@@ -307,7 +309,8 @@ where
                     b * (one - src.alpha)
                 } else {
                     src.alpha * dst.alpha * (one - one.min((one - b / dst.alpha) * src.alpha / a))
-                        + a * (one - dst.alpha) + b * (one - src.alpha)
+                        + a * (one - dst.alpha)
+                        + b * (one - src.alpha)
                 }
             }),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
@@ -332,7 +335,8 @@ where
                 if a * two <= src.alpha {
                     two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
                 } else {
-                    a * (one + dst.alpha) + b * (one + src.alpha) - two * a * b
+                    a * (one + dst.alpha) + b * (one + src.alpha)
+                        - two * a * b
                         - src.alpha * dst.alpha
                 }
             }),
@@ -362,15 +366,19 @@ where
                 };
 
                 if a * two <= src.alpha {
-                    b * (src.alpha + (two * a - src.alpha) * (one - m)) + a * (one - dst.alpha)
+                    b * (src.alpha + (two * a - src.alpha) * (one - m))
+                        + a * (one - dst.alpha)
                         + b * (one - src.alpha)
                 } else if b * cast(4.0) <= dst.alpha {
                     let m2 = m * m;
                     let m3 = m2 * m;
 
-                    dst.alpha * (two * a - src.alpha)
+                    dst.alpha
+                        * (two * a - src.alpha)
                         * (m3 * cast(16.0) - m2 * cast(12.0) - m * cast(3.0))
-                        + a - a * dst.alpha + b
+                        + a
+                        - a * dst.alpha
+                        + b
                 } else {
                     dst.alpha * (two * a - src.alpha) * (m.sqrt() - m) + a - a * dst.alpha + b
                 }
@@ -413,7 +421,8 @@ where
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color
+            color: src
+                .color
                 .component_wise(&dst.color, |a, b| a + b - two * a * b),
             alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
         };
