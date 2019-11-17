@@ -1,5 +1,27 @@
 # Changelog
 
+## Version 0.5.0 - 2019-11-17
+
+* [#149][149]: Use libm through num_traits, and update all dependencies.
+* [#146][146]: bump syn, quote and proc-macro2 to version 1.0.
+* [#142][142]: Make libm optional. Closes [#116][116].
+* [#141][141]: Also test no_std with a target without std support.
+* [#140][140]: Add a basic test crate for no_std. Closes [#139][139].
+* [#138][138]: Fix no_std build failure.
+* [#136][136]: Update dependencies and remove --release flag from feature tests.
+* [#135][135]: Round to nearest instead of down when converting components to integers..
+* [#132][132]: Add the dyn keyword where trait objects are used.
+* [#127][127]: fix no_std. Closes [#125][125].
+* [#124][124]: Update approx dependency to 0.3.
+* [#122][122]: Update to syn 0.15.
+* [#120][120]: Fix grammar in readme.
+* [#119][119]: Remove the color enum. Closes [#72][72].
+* [#118][118]: Implement assign ops. Closes [#94][94].
+* [#110][110]: No std support. Closes [#108][108].
+* [#106][106]: Add Extended Conversion Trait .
+* [#104][104]: Update image and approx crate dependency. Closes [#101][101], [#100][100].
+* [#103][103]: Use Generics::make_where_clause helper.
+
 ## Version 0.4.1 - 2018-08-02
 
 * [#113][113]: Import everything from the parent scope in derives.
@@ -59,7 +81,26 @@
 
 The first published version.
 
+[149]: https://github.com/Ogeon/palette/pull/149
+[146]: https://github.com/Ogeon/palette/pull/146
+[142]: https://github.com/Ogeon/palette/pull/142
+[141]: https://github.com/Ogeon/palette/pull/141
+[140]: https://github.com/Ogeon/palette/pull/140
+[138]: https://github.com/Ogeon/palette/pull/138
+[136]: https://github.com/Ogeon/palette/pull/136
+[135]: https://github.com/Ogeon/palette/pull/135
+[132]: https://github.com/Ogeon/palette/pull/132
+[127]: https://github.com/Ogeon/palette/pull/127
+[124]: https://github.com/Ogeon/palette/pull/124
+[122]: https://github.com/Ogeon/palette/pull/122
+[120]: https://github.com/Ogeon/palette/pull/120
+[119]: https://github.com/Ogeon/palette/pull/119
+[118]: https://github.com/Ogeon/palette/pull/118
+[110]: https://github.com/Ogeon/palette/pull/110
 [113]: https://github.com/Ogeon/palette/pull/113
+[106]: https://github.com/Ogeon/palette/pull/106
+[104]: https://github.com/Ogeon/palette/pull/104
+[103]: https://github.com/Ogeon/palette/pull/103
 [99]: https://github.com/Ogeon/palette/pull/99
 [98]: https://github.com/Ogeon/palette/pull/98
 [97]: https://github.com/Ogeon/palette/pull/97
@@ -96,6 +137,14 @@ The first published version.
 [18]: https://github.com/Ogeon/palette/pull/18
 [12]: https://github.com/Ogeon/palette/pull/12
 [9]: https://github.com/Ogeon/palette/pull/9
+[116]: https://github.com/Ogeon/palette/issues/116
+[139]: https://github.com/Ogeon/palette/issues/139
+[125]: https://github.com/Ogeon/palette/issues/125
+[72]: https://github.com/Ogeon/palette/issues/72
+[94]: https://github.com/Ogeon/palette/issues/94
+[108]: https://github.com/Ogeon/palette/issues/108
+[101]: https://github.com/Ogeon/palette/issues/101
+[100]: https://github.com/Ogeon/palette/issues/100
 [87]: https://github.com/Ogeon/palette/issues/87
 [80]: https://github.com/Ogeon/palette/issues/80
 [91]: https://github.com/Ogeon/palette/issues/91
