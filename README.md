@@ -7,7 +7,7 @@ A Rust library that makes linear color calculations and conversion easy and acce
 
 ## Online Documentation
 
-[Released](https://docs.rs/palette/0.4.1/palette/)
+[Released](https://docs.rs/palette/0.5.0/palette/)
 
 [Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html)
 
@@ -17,7 +17,7 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette = "0.4"
+palette = "0.5"
 ```
 
 ### Features
