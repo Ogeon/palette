@@ -1,6 +1,5 @@
 //!RGB types, spaces and standards.
 
-use alpha::Alpha;
 use float::Float;
 use core::any::Any;
 
@@ -100,9 +99,9 @@ where
     U: Component,
 {
     fn from(lin_srgb: LinSrgb<T>) -> Self {
-        let color = lin_srgb.into();
-        let alpha = U::max_intensity();
-        Alpha { color, alpha }
+        let non_lin = Srgb::<T>::from_linear(lin_srgb);
+        let new_fmt = Srgb::<U>::from_format(non_lin);
+        new_fmt.into()
     }
 }
 
@@ -112,10 +111,8 @@ where
     U: Component,
 {
     fn from(lin_srgba: LinSrgba<T>) -> Self {
-        let (r, g, b, a) = lin_srgba.into();
-        let color = LinSrgb::new(r, g, b).into();
-        let alpha = a.convert();
-        Alpha { color, alpha }
+        let non_lin = Srgba::<T>::from_linear(lin_srgba);
+        non_lin.into_format()
     }
 }
 
@@ -125,9 +122,9 @@ where
     U: Component,
 {
     fn from(srgb: Srgb<T>) -> Self {
-        let color = srgb.into();
-        let alpha = U::max_intensity();
-        Alpha { color, alpha }
+        srgb.into_linear()
+            .into_format()
+            .into()
     }
 }
 
@@ -137,9 +134,7 @@ where
     U: Component,
 {
     fn from(srgba: Srgba<T>) -> Self {
-        let (r, g, b, a) = srgba.into();
-        let color = Srgb::new(r, g, b).into();
-        let alpha = a.convert();
-        Alpha { color, alpha }
+        srgba.into_linear()
+            .into_format()
     }
 }
