@@ -101,7 +101,8 @@ impl<C: Mix + Clone> Gradient<C> {
             from: min,
             diff: max - min,
             len: n,
-            current: 0,
+            from_head: 0,
+            from_end: 0,
         }
     }
 
@@ -132,16 +133,17 @@ pub struct Take<'a, C: Mix + Clone + 'a> {
     from: C::Scalar,
     diff: C::Scalar,
     len: usize,
-    current: usize,
+    from_head: usize,
+    from_end: usize,
 }
 
 impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
     type Item = C;
 
     fn next(&mut self) -> Option<C> {
-        if self.current < self.len {
-            let i = self.from + (self.diff / cast(self.len)) * cast(self.current);
-            self.current += 1;
+        if self.from_head + self.from_end < self.len {
+            let i = self.from + (self.diff / cast(self.len)) * cast(self.from_head);
+            self.from_head += 1;
             Some(self.gradient.get(i))
         } else {
             None
@@ -149,11 +151,23 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.len - self.current, Some(self.len - self.current))
+        (self.len - self.from_head - self.from_end, Some(self.len - self.from_head - self.from_end))
     }
 }
 
 impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> {}
+
+impl<'a, C: Mix + Clone> DoubleEndedIterator for Take<'a, C> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.from_head + self.from_end < self.len {
+            let i = self.from + (self.diff / cast(self.len)) * cast(self.len - self.from_end - 1);
+            self.from_end += 1;
+            Some(self.gradient.get(i))
+        } else {
+            None
+        }
+    }
+}
 
 ///A slice of a Gradient that limits its domain.
 #[derive(Clone, Debug)]
@@ -178,7 +192,8 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
             from: min,
             diff: max - min,
             len: n,
-            current: 0,
+            from_head: 0,
+            from_end: 0,
         }
     }
 
@@ -429,5 +444,17 @@ mod test {
         for (t1, t2) in v1.iter().zip(v2.iter()) {
             assert_relative_eq!(t1, t2);
         }
+    }
+
+    #[test]
+    fn iter_rev_eq_rev_iter() {
+        let g = Gradient::new(vec![
+            LinSrgb::new(1.0, 0.0, 0.0),
+            LinSrgb::new(0.0, 0.0, 1.0),
+        ]);
+
+        let v1: Vec<_> = g.take(10).collect::<Vec<_>>().iter().rev().cloned().collect();
+        let v2: Vec<_> = g.take(10).rev().collect();
+        assert_eq!(v1, v2);
     }
 }
