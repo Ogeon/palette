@@ -99,7 +99,7 @@ This results in the following three colors:
 
 There is also a linear gradient type which makes it easy to interpolate between a series of colors. This gradient can be used in any color space and it can be used to make color sequence iterators.
 
-The following example shows two gradients between the same two endpoints, but one is in RGB and the other in is HSV space.
+The following example shows three gradients between the same two endpoints, but the top is in RGB space while the middle and bottom are in HSV space. The bottom gradient is an example of using the color sequence iterator.
 
 ```Rust
 extern crate palette;
@@ -116,7 +116,7 @@ let grad2 = Gradient::new(vec![
 ]);
 ```
 
-The RGB gradient goes through gray, while the HSV gradients changes only the hue:
+The RGB gradient goes through gray, while the HSV gradients only change hue:
 
 ![Gradient Comparison](gfx/readme_gradients.png)
 
