@@ -93,7 +93,7 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
     LinSrgb: From<A>,
     LinSrgb: From<B>,
 {
-    let mut image = RgbImage::new(256, 64);
+    let mut image = RgbImage::new(256, 96);
     {
         let mut sub_image = image.sub_image(0, 0, 256, 32);
         let (width, height) = sub_image.dimensions();
@@ -126,6 +126,26 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
                             .into_raw(),
                     ),
                 );
+            }
+        }
+    }
+
+    {
+        let mut sub_image = image.sub_image(0, 64, 256, 32);
+        let swatch_size = 32;
+        let mut v1 = Vec::new();
+        for color in grad2.take(8) {
+            let pix: [u8; 3] = Srgb::from_linear(LinSrgb::from(color))
+                .into_format()
+                .into_raw();
+            v1.push(pix);
+        }
+        for (s, color) in v1.into_iter().enumerate() {
+            for x in (s * swatch_size)..((s + 1) * swatch_size) {
+                for y in 0..swatch_size {
+                    let pixel = sub_image.get_pixel_mut(x as u32, y as u32);
+                    *pixel = image::Rgb(color);
+                }
             }
         }
     }

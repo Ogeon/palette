@@ -92,7 +92,34 @@ impl<C: Mix + Clone> Gradient<C> {
         min_color.mix(max_color, factor)
     }
 
-    ///Take `n` evenly spaced colors from the gradient, as an iterator.
+    ///Take `n` evenly spaced colors from the gradient, as an iterator. The
+    ///iterator includes both ends of the gradient, for `n > 1`, or just
+    ///the lower end of the gradient for `n = 0`.
+    ///
+    ///For example, `take(5)` will include point 0.0 of the gradient, three
+    ///intermediate colors, and point 1.0 spaced apart at 1/4 the distance
+    ///between colors 0.0 and 1.0 on the gradient.
+    /// ```
+    /// #[macro_use] extern crate approx;
+    /// use palette::{Gradient, LinSrgb};
+    ///
+    /// let gradient = Gradient::new(vec![
+    ///     LinSrgb::new(1.0, 1.0, 0.0),
+    ///     LinSrgb::new(0.0, 0.0, 1.0),
+    /// ]);
+    ///
+    /// let taken_colors: Vec<_> = gradient.take(5).collect();
+    /// let colors = vec![
+    ///     LinSrgb::new(1.0, 1.0, 0.0),
+    ///     LinSrgb::new(0.75, 0.75, 0.25),
+    ///     LinSrgb::new(0.5, 0.5, 0.5),
+    ///     LinSrgb::new(0.25, 0.25, 0.75),
+    ///     LinSrgb::new(0.0, 0.0, 1.0),
+    /// ];
+    /// for (c1, c2) in taken_colors.iter().zip(colors.iter()) {
+    ///     assert_relative_eq!(c1, c2);
+    /// }
+    /// ```
     pub fn take(&self, n: usize) -> Take<C> {
         let (min, max) = self.domain();
 
@@ -142,9 +169,14 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
 
     fn next(&mut self) -> Option<C> {
         if self.from_head + self.from_end < self.len {
-            let i = self.from + (self.diff / cast(self.len)) * cast(self.from_head);
-            self.from_head += 1;
-            Some(self.gradient.get(i))
+            if self.len == 1 {
+                self.from_head += 1;
+                Some(self.gradient.get(self.from))
+            } else {
+                let i = self.from + (self.diff / cast(self.len - 1)) * cast(self.from_head);
+                self.from_head += 1;
+                Some(self.gradient.get(i))
+            }
         } else {
             None
         }
@@ -160,9 +192,14 @@ impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> {}
 impl<'a, C: Mix + Clone> DoubleEndedIterator for Take<'a, C> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.from_head + self.from_end < self.len {
-            let i = self.from + (self.diff / cast(self.len)) * cast(self.len - self.from_end - 1);
-            self.from_end += 1;
-            Some(self.gradient.get(i))
+            if self.len == 1 {
+                self.from_end += 1;
+                Some(self.gradient.get(self.from))
+            } else {
+                let i = self.from + (self.diff / cast(self.len - 1)) * cast(self.len - self.from_end - 1);
+                self.from_end += 1;
+                Some(self.gradient.get(i))
+            }
         } else {
             None
         }
@@ -439,7 +476,7 @@ mod test {
         ]);
         let g2 = g1.slice(..0.5);
 
-        let v1: Vec<_> = g1.take(10).take(5).collect();
+        let v1: Vec<_> = g1.take(9).take(5).collect();
         let v2: Vec<_> = g2.take(5).collect();
         for (t1, t2) in v1.iter().zip(v2.iter()) {
             assert_relative_eq!(t1, t2);
@@ -456,5 +493,29 @@ mod test {
         let v1: Vec<_> = g.take(10).collect::<Vec<_>>().iter().rev().cloned().collect();
         let v2: Vec<_> = g.take(10).rev().collect();
         assert_eq!(v1, v2);
+
+        //make sure `take(1).rev()` doesn't produce NaN results
+        let v1: Vec<_> = g.take(1).collect::<Vec<_>>().iter().rev().cloned().collect();
+        let v2: Vec<_> = g.take(1).rev().collect();
+        assert_eq!(v1, v2);
+    }
+
+    #[test]
+    fn inclusive_take() {
+        let g = Gradient::new(vec![
+            LinSrgb::new(1.0, 1.0, 0.0),
+            LinSrgb::new(0.0, 0.0, 1.0),
+        ]);
+
+        //take(0) returns None
+        let v1: Vec<_> = g.take(0).collect();
+        assert_eq!(v1.len(), 0);
+        //`Take` produces minimum gradient boundary for n=1
+        let v1: Vec<_> = g.take(1).collect();
+        assert_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
+        //`Take` includes the maximum gradient color
+        let v1: Vec<_> = g.take(5).collect();
+        assert_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
+        assert_eq!(v1[4], LinSrgb::new(0.0, 0.0, 1.0));
     }
 }
