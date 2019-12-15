@@ -148,7 +148,9 @@ mod test {
         let expected = [28.0, 33.0, 29.0, 28.0, 31.0, 31.0, 26.0, 33.0, 31.0];
 
         let computed = multiply_3x3(&inp1, &inp2);
-        assert_eq!(expected, computed)
+        for (t1, t2) in expected.iter().zip(computed.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
     }
 
     #[test]
@@ -168,7 +170,9 @@ mod test {
 
         let expected: [f64; 9] = [0.2, 0.2, 0.0, -0.2, 0.3, 1.0, 0.2, -0.3, 0.0];
         let computed = matrix_inverse(&input);
-        assert_eq!(expected, computed);
+        for (t1, t2) in expected.iter().zip(computed.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
     }
     #[test]
     fn matrix_inverse_check_2() {
@@ -176,7 +180,9 @@ mod test {
 
         let expected: [f64; 9] = [-1.0, -1.0, 2.0, -1.0, 0.0, 1.0, 2.0, 1.0, -2.0];
         let computed = matrix_inverse(&input);
-        assert_eq!(expected, computed);
+        for (t1, t2) in expected.iter().zip(computed.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
     }
     #[test]
     #[should_panic]

@@ -312,7 +312,7 @@ mod test {
 
         let result: Vec<f32> = inp.iter().map(|x| normalize_angle_positive(*x)).collect();
         for (res, exp) in result.iter().zip(expected.iter()) {
-            assert_eq!(res, exp);
+            assert_relative_eq!(res, exp);
         }
     }
 
@@ -351,7 +351,7 @@ mod test {
 
         let result: Vec<f32> = inp.iter().map(|x| normalize_angle(*x)).collect();
         for (res, exp) in result.iter().zip(expected.iter()) {
-            assert_eq!(res, exp);
+            assert_relative_eq!(res, exp);
         }
     }
 
@@ -366,7 +366,7 @@ mod test {
             let pos_degs = hue.to_positive_degrees();
             assert!(pos_degs >= 0.0 && pos_degs < 360.0);
 
-            assert_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
+            assert_relative_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
         }
     }
 
