@@ -34,9 +34,6 @@ mod raw;
 /// Basic use:
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate approx;
-///
 /// use palette::Pixel;
 ///
 /// #[derive(PartialEq, Debug, Pixel)]
@@ -67,9 +64,6 @@ mod raw;
 /// Heterogenous field types:
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate approx;
-///
 /// use std::marker::PhantomData;
 ///
 /// use palette::{Pixel, RgbHue};

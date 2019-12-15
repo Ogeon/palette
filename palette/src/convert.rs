@@ -157,9 +157,6 @@ use encoding::Linear;
 /// With alpha component:
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate approx;
-///
 /// use palette::{FromColor, LinSrgba, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
