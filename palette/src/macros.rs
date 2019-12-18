@@ -43,10 +43,10 @@ macro_rules! raw_pixel_conversion_tests {
 
         let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(&raw_plus_1);
 
-        assert_relative_eq!(color, $name::new($($component),+));
-        assert_relative_eq!(color_long, $name::new($($component),+));
+        assert_eq!(color, $name::new($($component),+));
+        assert_eq!(color_long, $name::new($($component),+));
 
-        assert_relative_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
     };
 
     (@float_slice_test $float: ty, $name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
@@ -76,11 +76,11 @@ macro_rules! raw_pixel_conversion_tests {
         let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(raw_plus_1);
         let color_alpha_long: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(raw_plus_2);
 
-        assert_relative_eq!(color, $name::new($($component),+));
-        assert_relative_eq!(color_long, $name::new($($component),+));
+        assert_eq!(color, $name::new($($component),+));
+        assert_eq!(color_long, $name::new($($component),+));
 
-        assert_relative_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
-        assert_relative_eq!(color_alpha_long, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha_long, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
     };
 }
 
