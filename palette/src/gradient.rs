@@ -451,21 +451,21 @@ mod test {
     #[test]
     fn range_clamp() {
         let range: Range<f64> = (0.0..1.0).into();
-        assert_eq!(range.clamp(-1.0), 0.0);
-        assert_eq!(range.clamp(2.0), 1.0);
-        assert_eq!(range.clamp(0.5), 0.5);
+        assert_relative_eq!(range.clamp(-1.0), 0.0);
+        assert_relative_eq!(range.clamp(2.0), 1.0);
+        assert_relative_eq!(range.clamp(0.5), 0.5);
     }
 
     #[test]
     fn range_constrain() {
         let range: Range<f64> = (0.0..1.0).into();
-        assert_eq!(range.constrain(&(-3.0..-5.0).into()), (0.0..0.0).into());
-        assert_eq!(range.constrain(&(-3.0..0.8).into()), (0.0..0.8).into());
+        assert_relative_eq!(range.constrain(&(-3.0..-5.0).into()), (0.0..0.0).into());
+        assert_relative_eq!(range.constrain(&(-3.0..0.8).into()), (0.0..0.8).into());
 
-        assert_eq!(range.constrain(&(3.0..5.0).into()), (1.0..1.0).into());
-        assert_eq!(range.constrain(&(0.2..5.0).into()), (0.2..1.0).into());
+        assert_relative_eq!(range.constrain(&(3.0..5.0).into()), (1.0..1.0).into());
+        assert_relative_eq!(range.constrain(&(0.2..5.0).into()), (0.2..1.0).into());
 
-        assert_eq!(range.constrain(&(0.2..0.8).into()), (0.2..0.8).into());
+        assert_relative_eq!(range.constrain(&(0.2..0.8).into()), (0.2..0.8).into());
     }
 
     #[test]
@@ -492,12 +492,15 @@ mod test {
 
         let v1: Vec<_> = g.take(10).collect::<Vec<_>>().iter().rev().cloned().collect();
         let v2: Vec<_> = g.take(10).rev().collect();
-        assert_eq!(v1, v2);
-
+        for (t1, t2) in v1.iter().zip(v2.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
         //make sure `take(1).rev()` doesn't produce NaN results
         let v1: Vec<_> = g.take(1).collect::<Vec<_>>().iter().rev().cloned().collect();
         let v2: Vec<_> = g.take(1).rev().collect();
-        assert_eq!(v1, v2);
+        for (t1, t2) in v1.iter().zip(v2.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
     }
 
     #[test]
@@ -512,10 +515,10 @@ mod test {
         assert_eq!(v1.len(), 0);
         //`Take` produces minimum gradient boundary for n=1
         let v1: Vec<_> = g.take(1).collect();
-        assert_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
+        assert_relative_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
         //`Take` includes the maximum gradient color
         let v1: Vec<_> = g.take(5).collect();
-        assert_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
-        assert_eq!(v1[4], LinSrgb::new(0.0, 0.0, 1.0));
+        assert_relative_eq!(v1[0], LinSrgb::new(1.0, 1.0, 0.0));
+        assert_relative_eq!(v1[4], LinSrgb::new(0.0, 0.0, 1.0));
     }
 }

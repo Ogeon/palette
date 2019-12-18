@@ -100,8 +100,6 @@ use encoding::Linear;
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette;
-/// #[macro_use]
 /// extern crate approx;
 ///
 /// use palette::{Component, FromColor, Hsv, Pixel, Srgb};
@@ -159,9 +157,6 @@ use encoding::Linear;
 /// With alpha component:
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate palette;
-///
 /// use palette::{FromColor, LinSrgba, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
@@ -346,8 +341,6 @@ where
 ///
 /// ```rust
 /// #[macro_use]
-/// extern crate palette;
-/// #[macro_use]
 /// extern crate approx;
 ///
 /// use palette::{Component, Hsv, IntoColor, Pixel, Srgb};
@@ -402,8 +395,6 @@ where
 /// With alpha component:
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate palette;
 /// #[macro_use]
 /// extern crate approx;
 ///

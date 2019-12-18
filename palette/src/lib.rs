@@ -400,14 +400,19 @@ pub trait Limited {
 /// A trait for linear color interpolation.
 ///
 /// ```
+/// #[macro_use]
+/// extern crate approx;
+///
 /// use palette::{LinSrgb, Mix};
 ///
-/// let a = LinSrgb::new(0.0, 0.5, 1.0);
-/// let b = LinSrgb::new(1.0, 0.5, 0.0);
+/// fn main() {
+///     let a = LinSrgb::new(0.0, 0.5, 1.0);
+///     let b = LinSrgb::new(1.0, 0.5, 0.0);
 ///
-/// assert_eq!(a.mix(&b, 0.0), a);
-/// assert_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
-/// assert_eq!(a.mix(&b, 1.0), b);
+///     assert_relative_eq!(a.mix(&b, 0.0), a);
+///     assert_relative_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
+///     assert_relative_eq!(a.mix(&b, 1.0), b);
+/// }
 /// ```
 pub trait Mix {
     ///The type of the mixing factor.
@@ -424,12 +429,17 @@ pub trait Mix {
 /// The `Shade` trait allows a color to be lightened or darkened.
 ///
 /// ```
+/// #[macro_use]
+/// extern crate approx;
+///
 /// use palette::{LinSrgb, Shade};
 ///
-/// let a = LinSrgb::new(0.4, 0.4, 0.4);
-/// let b = LinSrgb::new(0.6, 0.6, 0.6);
+/// fn main() {
+///     let a = LinSrgb::new(0.4, 0.4, 0.4);
+///     let b = LinSrgb::new(0.6, 0.6, 0.6);
 ///
-/// assert_eq!(a.lighten(0.1), b.darken(0.1));
+///     assert_relative_eq!(a.lighten(0.1), b.darken(0.1));
+/// }
 /// ```
 pub trait Shade: Sized {
     ///The type of the lighten/darken amount.
@@ -447,17 +457,22 @@ pub trait Shade: Sized {
 /// A trait for colors where a hue may be calculated.
 ///
 /// ```
+/// #[macro_use]
+/// extern crate approx;
+///
 /// use palette::{GetHue, LinSrgb};
 ///
-/// let red = LinSrgb::new(1.0f32, 0.0, 0.0);
-/// let green = LinSrgb::new(0.0f32, 1.0, 0.0);
-/// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
-/// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
+/// fn main() {
+///     let red = LinSrgb::new(1.0f32, 0.0, 0.0);
+///     let green = LinSrgb::new(0.0f32, 1.0, 0.0);
+///     let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
+///     let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
-/// assert_eq!(red.get_hue(), Some(0.0.into()));
-/// assert_eq!(green.get_hue(), Some(120.0.into()));
-/// assert_eq!(blue.get_hue(), Some(240.0.into()));
-/// assert_eq!(gray.get_hue(), None);
+///     assert_relative_eq!(red.get_hue().unwrap(), 0.0.into());
+///     assert_relative_eq!(green.get_hue().unwrap(), 120.0.into());
+///     assert_relative_eq!(blue.get_hue().unwrap(), 240.0.into());
+///     assert_eq!(gray.get_hue(), None);
+/// }
 /// ```
 pub trait GetHue {
     ///The kind of hue unit this color space uses.
@@ -488,12 +503,17 @@ pub trait Hue: GetHue {
 /// without conversion.
 ///
 /// ```
+/// #[macro_use]
+/// extern crate approx;
+///
 /// use palette::{Hsv, Saturate};
 ///
-/// let a = Hsv::new(0.0, 0.25, 1.0);
-/// let b = Hsv::new(0.0, 1.0, 1.0);
+/// fn main() {
+///     let a = Hsv::new(0.0, 0.25, 1.0);
+///     let b = Hsv::new(0.0, 1.0, 1.0);
 ///
-/// assert_eq!(a.saturate(1.0), b.desaturate(0.5));
+///     assert_relative_eq!(a.saturate(1.0), b.desaturate(0.5));
+/// }
 /// ```
 pub trait Saturate: Sized {
     ///The type of the (de)saturation factor.
