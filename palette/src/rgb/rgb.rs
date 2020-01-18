@@ -2,6 +2,8 @@ use core::any::TypeId;
 use core::fmt;
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::str::FromStr;
+use core::num::ParseIntError;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use float::Float;
@@ -953,14 +955,92 @@ where
     }
 }
 
+#[derive(Debug)]
+pub enum FromHexError {
+    ParseIntError(ParseIntError),
+    HexFormatError(&'static str)
+}
+
+impl From<ParseIntError> for FromHexError {
+    fn from(err: ParseIntError) -> FromHexError {
+        FromHexError::ParseIntError(err)
+    }
+}
+
+impl From<&'static str> for FromHexError {
+    fn from(err: &'static str) -> FromHexError {
+        FromHexError::HexFormatError(err)
+    }
+}
+impl core::fmt::Display for FromHexError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &*self {
+            FromHexError::ParseIntError(e) => {
+                write!(f, "{}", e)
+            }
+            FromHexError::HexFormatError(s) => {
+                write!(f, "{}, please use format '#fff', 'fff', '#ffffff' or\
+                'ffffff'.", s)
+            }
+        }
+    }
+}
+
+#[cfg(feature="std")]
+impl std::error::Error for FromHexError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match &*self {
+            FromHexError::HexFormatError(_s) => None,
+            FromHexError::ParseIntError(e) => Some(e),
+        }
+    }
+}
+
+
+impl<S: RgbStandard> FromStr for Rgb<S, u8> {
+    type Err = FromHexError;
+
+    // Parses a color hex code of format '#ff00bb' or '#abc' into a
+    // Rgb<S, u8> instance.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = if hex.starts_with('#') {
+            &hex[1..]
+        } else {
+            hex
+        };
+        match hex_code.len() {
+            3 => {
+                let red = u8::from_str_radix(&hex_code[..1], 16)?;
+                let green = u8::from_str_radix(&hex_code[1..2], 16)?;
+                let blue = u8::from_str_radix(&hex_code[2..3], 16)?;
+                let col: Rgb<S, u8> = Rgb::new(
+                    red * 17,
+                    green * 17,
+                    blue * 17,
+                );
+                Ok(col)
+            }
+            6 => {
+                let red = u8::from_str_radix(&hex_code[..2], 16)?;
+                let green = u8::from_str_radix(&hex_code[2..4], 16)?;
+                let blue = u8::from_str_radix(&hex_code[4..6], 16)?;
+                let col: Rgb<S, u8> = Rgb::new(red, green, blue);
+                Ok(col)
+            }
+            _ => Err("invalid hex code format".into()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Rgb;
     use encoding::Srgb;
+    use core::str::FromStr;
 
     #[test]
     fn ranges() {
-        assert_ranges!{
+        assert_ranges! {
             Rgb<Srgb, f64>;
             limited {
                 red: 0.0 => 1.0,
@@ -1080,5 +1160,50 @@ mod test {
             ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Rgb::<Srgb>::new(0.3, 0.8, 0.1));
+    }
+
+    #[test]
+    fn from_str() {
+        let c = Rgb::<Srgb, u8>::from_str("#ffffff");
+        assert!(c.is_ok());
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(255,255,255));
+        let c = Rgb::<Srgb, u8>::from_str("#gggggg");
+        assert!(c.is_err());
+        let c = Rgb::<Srgb,u8>::from_str("#fff");
+        assert!(c.is_ok());
+        assert_eq!(c.unwrap(),Rgb::<Srgb,u8>::new(255,255,255));
+        let c = Rgb::<Srgb,u8>::from_str("#000000");
+        assert!(c.is_ok());
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0,0,0));
+        let c = Rgb::<Srgb,u8>::from_str("");
+        assert!(c.is_err());
+        let c = Rgb::<Srgb,u8>::from_str("#123456");
+        assert!(c.is_ok());
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(18, 52, 86));
+        let c = Rgb::<Srgb,u8>::from_str("#iii");
+        assert!(c.is_err());
+        assert_eq!(
+            format!("{}", c.err().unwrap()),
+            "invalid digit found in string"
+        );
+        let c = Rgb::<Srgb,u8>::from_str("#08f");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0, 136, 255));
+        let c = Rgb::<Srgb,u8>::from_str("08f");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0, 136,255));
+        let c = Rgb::<Srgb,u8>::from_str("ffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(255,255,255));
+        let c = Rgb::<Srgb,u8>::from_str("#12");
+        assert!(c.is_err());
+        assert_eq!(
+            format!("{}", c.err().unwrap()), 
+            "invalid hex code format, \
+        please use format \'#fff\', \'fff\', \'#ffffff\' or\'ffffff\'."
+        );
+        let c = Rgb::<Srgb,u8>::from_str("da0bce");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(218,11,206));
+        let c = Rgb::<Srgb,u8>::from_str("f034e6");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(240,52,230));
+        let c = Rgb::<Srgb,u8>::from_str("abc");
+        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(170,187,204));
     }
 }
