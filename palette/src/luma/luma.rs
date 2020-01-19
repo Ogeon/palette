@@ -4,8 +4,6 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use float::Float;
-
 use blend::PreAlpha;
 use clamp;
 use encoding::linear::LinearFn;
@@ -14,7 +12,10 @@ use encoding::{Linear, Srgb, TransferFn};
 use luma::LumaStandard;
 use white_point::WhitePoint;
 use {Alpha, Xyz, Yxy};
-use {Blend, Component, ComponentWise, FromColor, IntoColor, Limited, Mix, Pixel, Shade};
+use {
+    Blend, Component, ComponentWise, FloatComponent, FromColor, FromComponent, IntoColor, Limited,
+    Mix, Pixel, Shade,
+};
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
 /// in `Alpha`](struct.Alpha.html#Lumaa).
@@ -79,15 +80,22 @@ where
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Luma<S, U> {
+    pub fn into_format<U>(self) -> Luma<S, U>
+    where
+        U: Component + FromComponent<T>,
+    {
         Luma {
-            luma: self.luma.convert(),
+            luma: U::from_component(self.luma),
             standard: PhantomData,
         }
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Luma<S, U>) -> Self {
+    pub fn from_format<U>(color: Luma<S, U>) -> Self
+    where
+        U: Component,
+        T: FromComponent<U>,
+    {
         color.into_format()
     }
 
@@ -104,7 +112,7 @@ where
 
 impl<S, T> Luma<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: LumaStandard,
 {
     /// Convert the color to linear luminance.
@@ -150,12 +158,22 @@ where
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Luma<S, U>, B> {
-        Alpha::<Luma<S, U>, B>::new(self.luma.convert(), self.alpha.convert())
+    pub fn into_format<U, B>(self) -> Alpha<Luma<S, U>, B>
+    where
+        U: Component + FromComponent<T>,
+        B: Component + FromComponent<A>,
+    {
+        Alpha::<Luma<S, U>, B>::new(U::from_component(self.luma), B::from_component(self.alpha))
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component, B: Component>(color: Alpha<Luma<S, U>, B>) -> Self {
+    pub fn from_format<U, B>(color: Alpha<Luma<S, U>, B>) -> Self
+    where
+        T: FromComponent<U>,
+        U: Component,
+        A: FromComponent<B>,
+        B: Component,
+    {
         color.into_format()
     }
 
@@ -173,7 +191,7 @@ where
 ///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
-    T: Component + Float,
+    T: FloatComponent,
     A: Component,
     S: LumaStandard,
 {
@@ -214,7 +232,7 @@ where
 impl<S, T> From<Xyz<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard,
-    T: Component + Float,
+    T: FloatComponent,
 {
     fn from(color: Xyz<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
@@ -227,7 +245,7 @@ where
 impl<S, T> From<Yxy<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard,
-    T: Component + Float,
+    T: FloatComponent,
 {
     fn from(color: Yxy<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
@@ -264,7 +282,7 @@ impl<S: LumaStandard, T: Component, A: Component> Into<(T, A)> for Alpha<Luma<S,
 impl<S, Wp, T> IntoColor<Wp, T> for Luma<S, T>
 where
     S: LumaStandard<WhitePoint = Wp>,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     fn into_xyz(self) -> Xyz<Wp, T> {
@@ -302,7 +320,7 @@ where
 
 impl<S, T> Mix for Luma<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     type Scalar = T;
@@ -319,7 +337,7 @@ where
 
 impl<S, T> Shade for Luma<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     type Scalar = T;
@@ -334,7 +352,7 @@ where
 
 impl<S, T> Blend for Luma<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     type Color = Luma<S, T>;
@@ -714,7 +732,7 @@ mod test {
 
     #[test]
     fn ranges() {
-        assert_ranges!{
+        assert_ranges! {
             Luma<Srgb, f64>;
             limited {
                 luma: 0.0 => 1.0

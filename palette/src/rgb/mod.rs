@@ -1,10 +1,9 @@
 //!RGB types, spaces and standards.
 
-use float::Float;
 use core::any::Any;
 
-use {Component, Yxy};
 use white_point::WhitePoint;
+use {Component, FloatComponent, FromComponent, Yxy};
 
 use encoding::{Linear, TransferFn};
 
@@ -64,17 +63,17 @@ impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
 ///Represents the red, green and blue primaries of an RGB space.
 pub trait Primaries: Any {
     ///Primary red.
-    fn red<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
+    fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
     ///Primary green.
-    fn green<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
+    fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
     ///Primary blue.
-    fn blue<Wp: WhitePoint, T: Component + Float>() -> Yxy<Wp, T>;
+    fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
 }
 
 impl<T, U> From<LinSrgb<T>> for Srgb<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(lin_srgb: LinSrgb<T>) -> Self {
         let non_lin = Srgb::<T>::from_linear(lin_srgb);
@@ -84,19 +83,18 @@ where
 
 impl<T, U> From<Srgb<T>> for LinSrgb<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(srgb: Srgb<T>) -> Self {
-        srgb.into_linear()
-            .into_format()
+        srgb.into_linear().into_format()
     }
 }
 
 impl<T, U> From<LinSrgb<T>> for Srgba<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(lin_srgb: LinSrgb<T>) -> Self {
         let non_lin = Srgb::<T>::from_linear(lin_srgb);
@@ -107,8 +105,8 @@ where
 
 impl<T, U> From<LinSrgba<T>> for Srgba<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(lin_srgba: LinSrgba<T>) -> Self {
         let non_lin = Srgba::<T>::from_linear(lin_srgba);
@@ -118,23 +116,20 @@ where
 
 impl<T, U> From<Srgb<T>> for LinSrgba<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(srgb: Srgb<T>) -> Self {
-        srgb.into_linear()
-            .into_format()
-            .into()
+        srgb.into_linear().into_format().into()
     }
 }
 
 impl<T, U> From<Srgba<T>> for LinSrgba<U>
 where
-    T: Component + Float,
-    U: Component,
+    T: FloatComponent,
+    U: Component + FromComponent<T>,
 {
     fn from(srgba: Srgba<T>) -> Self {
-        srgba.into_linear()
-            .into_format()
+        srgba.into_linear().into_format()
     }
 }

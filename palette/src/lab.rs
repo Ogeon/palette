@@ -1,13 +1,11 @@
-use float::Float;
-
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
-use white_point::{D65, WhitePoint};
-use {cast, clamp};
+use white_point::{WhitePoint, D65};
+use {clamp, from_f64};
 use {Alpha, LabHue, Lch, Xyz};
-use {Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, FloatComponent, GetHue, Limited, Mix, Pixel, Shade};
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
 /// implementation in `Alpha`](struct.Alpha.html#Laba).
@@ -33,7 +31,7 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 #[repr(C)]
 pub struct Lab<Wp = D65, T = f32>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     ///L\* is the lightness of the color. 0.0 gives absolute black and 100
@@ -55,14 +53,14 @@ where
 
 impl<Wp, T> Copy for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
 }
 
 impl<Wp, T> Clone for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     fn clone(&self) -> Lab<Wp, T> {
@@ -72,7 +70,7 @@ where
 
 impl<T> Lab<D65, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
 {
     ///CIE L\*a\*b\* with white point D65.
     pub fn new(l: T, a: T, b: T) -> Lab<D65, T> {
@@ -87,7 +85,7 @@ where
 
 impl<Wp, T> Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     ///CIE L\*a\*b\*.
@@ -114,7 +112,7 @@ where
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
 impl<T, A> Alpha<Lab<D65, T>, A>
 where
-    T: Component + Float,
+    T: FloatComponent,
     A: Component,
 {
     ///CIE L\*a\*b\* and transparency and white point D65.
@@ -129,7 +127,7 @@ where
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
 impl<Wp, T, A> Alpha<Lab<Wp, T>, A>
 where
-    T: Component + Float,
+    T: FloatComponent,
     A: Component,
     Wp: WhitePoint,
 {
@@ -154,7 +152,7 @@ where
 
 impl<Wp, T> From<Xyz<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     fn from(color: Xyz<Wp, T>) -> Self {
@@ -165,10 +163,10 @@ where
             ..
         } = color / Wp::get_xyz();
 
-        fn convert<T: Component + Float>(c: T) -> T {
-            let epsilon: T = (cast::<T, _>(6.0 / 29.0)).powi(3);
-            let kappa: T = cast(841.0 / 108.0);
-            let delta: T = cast(4.0 / 29.0);
+        fn convert<T: FloatComponent>(c: T) -> T {
+            let epsilon = from_f64::<T>(6.0 / 29.0).powi(3);
+            let kappa: T = from_f64(841.0 / 108.0);
+            let delta: T = from_f64(4.0 / 29.0);
             if c > epsilon {
                 c.cbrt()
             } else {
@@ -181,9 +179,9 @@ where
         z = convert(z);
 
         Lab {
-            l: ((y * cast(116.0)) - cast(16.0)),
-            a: ((x - y) * cast(500.0)),
-            b: ((y - z) * cast(200.0)),
+            l: ((y * from_f64(116.0)) - from_f64(16.0)),
+            a: ((x - y) * from_f64(500.0)),
+            b: ((y - z) * from_f64(200.0)),
             white_point: PhantomData,
         }
     }
@@ -191,7 +189,7 @@ where
 
 impl<Wp, T> From<Lch<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     fn from(color: Lch<Wp, T>) -> Self {
@@ -204,29 +202,25 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: Component + Float> From<(T, T, T)> for Lab<Wp, T> {
+impl<Wp: WhitePoint, T: FloatComponent> From<(T, T, T)> for Lab<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: Component + Float> Into<(T, T, T)> for Lab<Wp, T> {
+impl<Wp: WhitePoint, T: FloatComponent> Into<(T, T, T)> for Lab<Wp, T> {
     fn into(self) -> (T, T, T) {
         self.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: Component + Float, A: Component> From<(T, T, T, A)>
-    for Alpha<Lab<Wp, T>, A>
-{
+impl<Wp: WhitePoint, T: FloatComponent, A: Component> From<(T, T, T, A)> for Alpha<Lab<Wp, T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, T, A)>
-    for Alpha<Lab<Wp, T>, A>
-{
+impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Lab<Wp, T>, A> {
     fn into(self) -> (T, T, T, A) {
         self.into_components()
     }
@@ -234,14 +228,14 @@ impl<Wp: WhitePoint, T: Component + Float, A: Component> Into<(T, T, T, A)>
 
 impl<Wp, T> Limited for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
     fn is_valid(&self) -> bool {
-        self.l >= T::zero() && self.l <= cast(100.0) &&
-        self.a >= cast(-128) && self.a <= cast(127.0) &&
-        self.b >= cast(-128) && self.b <= cast(127.0)
+        self.l >= T::zero() && self.l <= from_f64(100.0) &&
+        self.a >= from_f64(-128.0) && self.a <= from_f64(127.0) &&
+        self.b >= from_f64(-128.0) && self.b <= from_f64(127.0)
     }
 
     fn clamp(&self) -> Lab<Wp, T> {
@@ -251,15 +245,15 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), cast(100.0));
-        self.a = clamp(self.a, cast(-128.0), cast(127.0));
-        self.b = clamp(self.b, cast(-128.0), cast(127.0));
+        self.l = clamp(self.l, T::zero(), from_f64(100.0));
+        self.a = clamp(self.a, from_f64(-128.0), from_f64(127.0));
+        self.b = clamp(self.b, from_f64(-128.0), from_f64(127.0));
     }
 }
 
 impl<Wp, T> Mix for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -278,14 +272,14 @@ where
 
 impl<Wp, T> Shade for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Scalar = T;
 
     fn lighten(&self, amount: T) -> Lab<Wp, T> {
         Lab {
-            l: self.l + amount * cast(100.0),
+            l: self.l + amount * from_f64(100.0),
             a: self.a,
             b: self.b,
             white_point: PhantomData,
@@ -295,7 +289,7 @@ where
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Hue = LabHue<T>;
@@ -311,7 +305,7 @@ where
 
 impl<Wp, T> ComponentWise for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Scalar = T;
@@ -337,7 +331,7 @@ where
 
 impl<Wp, T> Default for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     fn default() -> Lab<Wp, T> {
@@ -347,7 +341,7 @@ where
 
 impl<Wp, T> Add<Lab<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -364,7 +358,7 @@ where
 
 impl<Wp, T> Add<T> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -380,9 +374,9 @@ where
 }
 
 impl<Wp, T> AddAssign<Lab<Wp, T>> for Lab<Wp, T>
-    where
-        T: Component + Float + AddAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + AddAssign,
+    Wp: WhitePoint,
 {
     fn add_assign(&mut self, other: Lab<Wp, T>) {
         self.l += other.l;
@@ -392,9 +386,9 @@ impl<Wp, T> AddAssign<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> AddAssign<T> for Lab<Wp, T>
-    where
-        T: Component + Float + AddAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + AddAssign,
+    Wp: WhitePoint,
 {
     fn add_assign(&mut self, c: T) {
         self.l += c;
@@ -405,7 +399,7 @@ impl<Wp, T> AddAssign<T> for Lab<Wp, T>
 
 impl<Wp, T> Sub<Lab<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -422,7 +416,7 @@ where
 
 impl<Wp, T> Sub<T> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -438,21 +432,21 @@ where
 }
 
 impl<Wp, T> SubAssign<Lab<Wp, T>> for Lab<Wp, T>
-    where
-        T: Component + Float + SubAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + SubAssign,
+    Wp: WhitePoint,
 {
     fn sub_assign(&mut self, other: Lab<Wp, T>) {
-         self.l -= other.l;
-         self.a -= other.a;
-         self.b -= other.b;
+        self.l -= other.l;
+        self.a -= other.a;
+        self.b -= other.b;
     }
 }
 
 impl<Wp, T> SubAssign<T> for Lab<Wp, T>
-    where
-        T: Component + Float + SubAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + SubAssign,
+    Wp: WhitePoint,
 {
     fn sub_assign(&mut self, c: T) {
         self.l -= c;
@@ -463,7 +457,7 @@ impl<Wp, T> SubAssign<T> for Lab<Wp, T>
 
 impl<Wp, T> Mul<Lab<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -480,7 +474,7 @@ where
 
 impl<Wp, T> Mul<T> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -496,9 +490,9 @@ where
 }
 
 impl<Wp, T> MulAssign<Lab<Wp, T>> for Lab<Wp, T>
-    where
-        T: Component + Float + MulAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + MulAssign,
+    Wp: WhitePoint,
 {
     fn mul_assign(&mut self, other: Lab<Wp, T>) {
         self.l *= other.l;
@@ -508,9 +502,9 @@ impl<Wp, T> MulAssign<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> MulAssign<T> for Lab<Wp, T>
-    where
-        T: Component + Float + MulAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + MulAssign,
+    Wp: WhitePoint,
 {
     fn mul_assign(&mut self, c: T) {
         self.l *= c;
@@ -521,7 +515,7 @@ impl<Wp, T> MulAssign<T> for Lab<Wp, T>
 
 impl<Wp, T> Div<Lab<Wp, T>> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -538,7 +532,7 @@ where
 
 impl<Wp, T> Div<T> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     type Output = Lab<Wp, T>;
@@ -554,9 +548,9 @@ where
 }
 
 impl<Wp, T> DivAssign<Lab<Wp, T>> for Lab<Wp, T>
-    where
-        T: Component + Float + DivAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + DivAssign,
+    Wp: WhitePoint,
 {
     fn div_assign(&mut self, other: Lab<Wp, T>) {
         self.l /= other.l;
@@ -566,9 +560,9 @@ impl<Wp, T> DivAssign<Lab<Wp, T>> for Lab<Wp, T>
 }
 
 impl<Wp, T> DivAssign<T> for Lab<Wp, T>
-    where
-        T: Component + Float + DivAssign,
-        Wp: WhitePoint,
+where
+    T: FloatComponent + DivAssign,
+    Wp: WhitePoint,
 {
     fn div_assign(&mut self, c: T) {
         self.l /= c;
@@ -579,7 +573,7 @@ impl<Wp, T> DivAssign<T> for Lab<Wp, T>
 
 impl<Wp, T, P> AsRef<P> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
@@ -590,7 +584,7 @@ where
 
 impl<Wp, T, P> AsMut<P> for Lab<Wp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
@@ -628,7 +622,7 @@ mod test {
 
     #[test]
     fn ranges() {
-        assert_ranges!{
+        assert_ranges! {
             Lab<D65, f64>;
             limited {
                 l: 0.0 => 100.0,

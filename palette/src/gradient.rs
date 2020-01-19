@@ -3,12 +3,12 @@
 //!This module is only available if the `std` feature is enabled (this is the
 //!default).
 
-use num_traits::{One, Zero};
-use float::Float;
-use std::cmp::max;
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use float::Float;
+use num_traits::{One, Zero};
+use std::cmp::max;
 
-use cast;
+use {from_f64, FromF64};
 
 use Mix;
 
@@ -26,13 +26,16 @@ pub struct Gradient<C: Mix + Clone>(Vec<(C::Scalar, C)>);
 impl<C: Mix + Clone> Gradient<C> {
     ///Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     ///There must be at least one color.
-    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C> {
+    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C>
+    where
+        C::Scalar: FromF64,
+    {
         let mut points: Vec<_> = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
         assert!(points.len() > 0);
-        let step_size = C::Scalar::one() / cast(max(points.len() - 1, 1) as f64);
+        let step_size = C::Scalar::one() / from_f64(max(points.len() - 1, 1) as f64);
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = cast::<C::Scalar, _>(i) * step_size;
+            *p = from_f64::<C::Scalar>(i as f64) * step_size;
         }
 
         Gradient(points)
@@ -51,7 +54,8 @@ impl<C: Mix + Clone> Gradient<C> {
     ///Get a color from the gradient. The color of the closest control point
     ///will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C {
-        let &(mut min, ref min_color) = self.0
+        let &(mut min, ref min_color) = self
+            .0
             .get(0)
             .expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
@@ -61,7 +65,8 @@ impl<C: Mix + Clone> Gradient<C> {
             return min_color.clone();
         }
 
-        let &(mut max, ref max_color) = self.0
+        let &(mut max, ref max_color) = self
+            .0
             .last()
             .expect("a Gradient must contain at least one color");
         let mut max_color = max_color;
@@ -143,10 +148,12 @@ impl<C: Mix + Clone> Gradient<C> {
 
     ///Get the limits of this gradient's domain.
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
-        let &(min, _) = self.0
+        let &(min, _) = self
+            .0
             .get(0)
             .expect("a Gradient must contain at least one color");
-        let &(max, _) = self.0
+        let &(max, _) = self
+            .0
             .last()
             .expect("a Gradient must contain at least one color");
         (min, max)
@@ -164,7 +171,10 @@ pub struct Take<'a, C: Mix + Clone + 'a> {
     from_end: usize,
 }
 
-impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
+impl<'a, C: Mix + Clone> Iterator for Take<'a, C>
+where
+    C::Scalar: FromF64,
+{
     type Item = C;
 
     fn next(&mut self) -> Option<C> {
@@ -173,7 +183,9 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
                 self.from_head += 1;
                 Some(self.gradient.get(self.from))
             } else {
-                let i = self.from + (self.diff / cast(self.len - 1)) * cast(self.from_head);
+                let i = self.from
+                    + (self.diff / from_f64((self.len - 1) as f64))
+                        * from_f64(self.from_head as f64);
                 self.from_head += 1;
                 Some(self.gradient.get(i))
             }
@@ -183,20 +195,27 @@ impl<'a, C: Mix + Clone> Iterator for Take<'a, C> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.len - self.from_head - self.from_end, Some(self.len - self.from_head - self.from_end))
+        (
+            self.len - self.from_head - self.from_end,
+            Some(self.len - self.from_head - self.from_end),
+        )
     }
 }
 
-impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> {}
+impl<'a, C: Mix + Clone> ExactSizeIterator for Take<'a, C> where C::Scalar: FromF64 {}
 
-impl<'a, C: Mix + Clone> DoubleEndedIterator for Take<'a, C> {
+impl<'a, C: Mix + Clone> DoubleEndedIterator for Take<'a, C>
+where
+    C::Scalar: FromF64,
+{
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.from_head + self.from_end < self.len {
             if self.len == 1 {
                 self.from_end += 1;
                 Some(self.gradient.get(self.from))
             } else {
-                let i = self.from + (self.diff / cast(self.len - 1)) * cast(self.len - self.from_end - 1);
+                let i = self.from
+                    + (self.diff / from_f64((self.len - 1) as f64)) * from_f64((self.len - self.from_end - 1) as f64);
                 self.from_end += 1;
                 Some(self.gradient.get(i))
             }
@@ -490,13 +509,25 @@ mod test {
             LinSrgb::new(0.0, 0.0, 1.0),
         ]);
 
-        let v1: Vec<_> = g.take(10).collect::<Vec<_>>().iter().rev().cloned().collect();
+        let v1: Vec<_> = g
+            .take(10)
+            .collect::<Vec<_>>()
+            .iter()
+            .rev()
+            .cloned()
+            .collect();
         let v2: Vec<_> = g.take(10).rev().collect();
         for (t1, t2) in v1.iter().zip(v2.iter()) {
             assert_relative_eq!(t1, t2);
         }
         //make sure `take(1).rev()` doesn't produce NaN results
-        let v1: Vec<_> = g.take(1).collect::<Vec<_>>().iter().rev().cloned().collect();
+        let v1: Vec<_> = g
+            .take(1)
+            .collect::<Vec<_>>()
+            .iter()
+            .rev()
+            .cloned()
+            .collect();
         let v2: Vec<_> = g.take(1).rev().collect();
         for (t1, t2) in v1.iter().zip(v2.iter()) {
             assert_relative_eq!(t1, t2);

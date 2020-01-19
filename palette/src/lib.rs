@@ -137,7 +137,6 @@
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
-
 #![doc(html_root_url = "https://docs.rs/palette/0.5.0/palette/")]
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
@@ -162,7 +161,6 @@ extern crate serde;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
-use num_traits::{NumCast, ToPrimitive, Zero};
 use float::Float;
 
 use luma::Luma;
@@ -185,7 +183,8 @@ pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
-pub use convert::{ConvertFrom, ConvertInto, OutOfBounds, FromColor, IntoColor};
+pub use component::*;
+pub use convert::{ConvertFrom, ConvertInto, FromColor, IntoColor, OutOfBounds};
 pub use encoding::pixel::Pixel;
 pub use hues::{LabHue, RgbHue};
 pub use matrix::Mat3;
@@ -341,7 +340,6 @@ macro_rules! assert_ranges {
     );
 }
 
-
 #[macro_use]
 mod macros;
 
@@ -366,6 +364,7 @@ mod yxy;
 mod hues;
 
 pub mod chromatic_adaptation;
+mod component;
 mod convert;
 pub mod encoding;
 mod equality;
@@ -544,135 +543,28 @@ pub trait ComponentWise {
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
 }
 
-/// Common trait for color components.
-pub trait Component: Copy + Zero + PartialOrd + NumCast {
-    /// True if the max intensity is also the highest possible value of the
-    /// type. Conversion to limited types requires clamping.
-    const LIMITED: bool;
-
-    /// The highest displayable value this component type can reach. Higher
-    /// values are allowed, but they may be lowered to this before
-    /// converting to another format.
-    fn max_intensity() -> Self;
-
-    /// Convert into another color component type, including scaling.
-    fn convert<T: Component>(&self) -> T;
+/// A trait for infallible conversion from `f64`. The conversion may be lossy.
+pub trait FromF64 {
+    /// Creates a value from an `f64` constant.
+    fn from_f64(c: f64) -> Self;
 }
 
-impl Component for f32 {
-    const LIMITED: bool = false;
-
-    fn max_intensity() -> Self {
-        1.0
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = *self * cast::<f32, _>(T::max_intensity());
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
+impl FromF64 for f32 {
+    #[inline]
+    fn from_f64(c: f64) -> Self {
+        c as f32
     }
 }
 
-impl Component for f64 {
-    const LIMITED: bool = false;
-
-    fn max_intensity() -> Self {
-        1.0
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = *self * cast::<f64, _>(T::max_intensity());
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
-    }
-}
-
-impl Component for u8 {
-    const LIMITED: bool = true;
-
-    fn max_intensity() -> Self {
-        core::u8::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
-    }
-}
-
-impl Component for u16 {
-    const LIMITED: bool = true;
-
-    fn max_intensity() -> Self {
-        core::u16::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
-    }
-}
-
-impl Component for u32 {
-    const LIMITED: bool = true;
-
-    fn max_intensity() -> Self {
-        core::u32::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
-    }
-}
-
-impl Component for u64 {
-    const LIMITED: bool = true;
-
-    fn max_intensity() -> Self {
-        core::u64::MAX
-    }
-
-    fn convert<T: Component>(&self) -> T {
-        let scaled = cast::<f64, _>(T::max_intensity())
-            * (cast::<f64, _>(*self) / cast::<f64, _>(Self::max_intensity()));
-
-        if T::LIMITED {
-            cast(clamp(Float::round(scaled), 0.0, cast(T::max_intensity())))
-        } else {
-            cast(scaled)
-        }
+impl FromF64 for f64 {
+    #[inline]
+    fn from_f64(c: f64) -> Self {
+        c
     }
 }
 
 /// A convenience function to convert a constant number to Float Type
 #[inline]
-fn cast<T: NumCast, P: ToPrimitive>(prim: P) -> T {
-    NumCast::from(prim).unwrap()
+fn from_f64<T: FromF64>(c: f64) -> T {
+    T::from_f64(c)
 }

@@ -5,17 +5,17 @@ use float::Float;
 
 use core::marker::PhantomData;
 
-use {Component, Xyz};
-use white_point::WhitePoint;
-use rgb::{Primaries, Rgb, RgbSpace};
-use encoding::Linear;
 use convert::IntoColor;
+use encoding::Linear;
+use rgb::{Primaries, Rgb, RgbSpace};
+use white_point::WhitePoint;
+use {FloatComponent, Xyz};
 
 ///A 9 element array representing a 3x3 matrix
 pub type Mat3<T> = [T; 9];
 
 ///Multiply the 3x3 matrix with the XYZ color
-pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Component + Float>(
+pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Xyz<Swp, T>,
 ) -> Xyz<Dwp, T> {
@@ -27,7 +27,7 @@ pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: Component + Float>(
     }
 }
 ///Multiply the 3x3 matrix with the XYZ color into RGB color
-pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Component + Float>(
+pub fn multiply_xyz_to_rgb<S: RgbSpace, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Xyz<S::WhitePoint, T>,
 ) -> Rgb<Linear<S>, T> {
@@ -39,7 +39,7 @@ pub fn multiply_xyz_to_rgb<S: RgbSpace, T: Component + Float>(
     }
 }
 ///Multiply the 3x3 matrix with the  RGB into XYZ color
-pub fn multiply_rgb_to_xyz<S: RgbSpace, T: Component + Float>(
+pub fn multiply_rgb_to_xyz<S: RgbSpace, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Rgb<Linear<S>, T>,
 ) -> Xyz<S::WhitePoint, T> {
@@ -99,7 +99,7 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
 }
 
 ///Geneartes to Srgb to Xyz transformation matrix for the given white point
-pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Component + Float>() -> Mat3<T> {
+pub fn rgb_to_xyz_matrix<S: RgbSpace, T: FloatComponent>() -> Mat3<T> {
     let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_xyz();
     let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_xyz();
     let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_xyz();
@@ -124,7 +124,7 @@ pub fn rgb_to_xyz_matrix<S: RgbSpace, T: Component + Float>() -> Mat3<T> {
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-fn mat3_from_primaries<T: Component + Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
+fn mat3_from_primaries<T: FloatComponent, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
     [
         r.x, g.x, b.x,
         r.y, g.y, b.y,
@@ -134,12 +134,12 @@ fn mat3_from_primaries<T: Component + Float, Wp: WhitePoint>(r: Xyz<Wp, T>, g: X
 
 #[cfg(test)]
 mod test {
-    use Xyz;
-    use rgb::Rgb;
-    use encoding::{Linear, Srgb};
+    use super::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
     use chromatic_adaptation::AdaptInto;
+    use encoding::{Linear, Srgb};
+    use rgb::Rgb;
     use white_point::D50;
-    use super::{matrix_inverse, multiply_xyz, rgb_to_xyz_matrix, multiply_3x3};
+    use Xyz;
 
     #[test]
     fn matrix_multiply_3x3() {

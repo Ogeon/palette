@@ -77,7 +77,7 @@ pub fn rgb_space_type(rgb_space: Option<Type>, white_point: &Type, internal: boo
 }
 
 pub fn add_component_where_clause(component: &Type, generics: &mut Generics, internal: bool) {
-    let component_trait_path = util::path(&["Component"], internal);
+    let component_trait_path = util::path(&["FloatComponent"], internal);
 
     generics
         .make_where_clause()

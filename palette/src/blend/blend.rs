@@ -2,7 +2,7 @@ use float::Float;
 use num_traits::{One, Zero};
 
 use blend::{BlendFunction, PreAlpha};
-use {cast, clamp, ComponentWise};
+use {clamp, ComponentWise};
 
 ///A trait for colors that can be blended together.
 ///
@@ -353,6 +353,10 @@ where
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
         let two = one + one;
+        let three = two + one;
+        let four = two + two;
+        let twelve = four + four + four;
+        let sixteen = twelve + four;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -369,14 +373,11 @@ where
                     b * (src.alpha + (two * a - src.alpha) * (one - m))
                         + a * (one - dst.alpha)
                         + b * (one - src.alpha)
-                } else if b * cast(4.0) <= dst.alpha {
+                } else if b * four <= dst.alpha {
                     let m2 = m * m;
                     let m3 = m2 * m;
 
-                    dst.alpha
-                        * (two * a - src.alpha)
-                        * (m3 * cast(16.0) - m2 * cast(12.0) - m * cast(3.0))
-                        + a
+                    dst.alpha * (two * a - src.alpha) * (m3 * sixteen - m2 * twelve - m * three) + a
                         - a * dst.alpha
                         + b
                 } else {

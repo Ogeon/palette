@@ -1,12 +1,11 @@
 use core::any::TypeId;
 use core::fmt;
 use core::marker::PhantomData;
+use core::num::ParseIntError;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use core::str::FromStr;
-use core::num::ParseIntError;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use float::Float;
 
 use alpha::Alpha;
 use blend::PreAlpha;
@@ -18,8 +17,11 @@ use luma::LumaStandard;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use rgb::{RgbSpace, RgbStandard, TransferFn};
 use white_point::WhitePoint;
-use {cast, clamp};
-use {Blend, Component, ComponentWise, GetHue, Limited, Mix, Pixel, Shade};
+use {clamp, from_f64};
+use {
+    Blend, Component, ComponentWise, FloatComponent, FromComponent, GetHue, Limited, Mix, Pixel,
+    Shade,
+};
 use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
@@ -84,17 +86,24 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component>(self) -> Rgb<S, U> {
+    pub fn into_format<U>(self) -> Rgb<S, U>
+    where
+        U: Component + FromComponent<T>,
+    {
         Rgb {
-            red: self.red.convert(),
-            green: self.green.convert(),
-            blue: self.blue.convert(),
+            red: U::from_component(self.red),
+            green: U::from_component(self.green),
+            blue: U::from_component(self.blue),
             standard: PhantomData,
         }
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component>(color: Rgb<S, U>) -> Self {
+    pub fn from_format<U>(color: Rgb<S, U>) -> Self
+    where
+        T: FromComponent<U>,
+        U: Component,
+    {
         color.into_format()
     }
 
@@ -109,7 +118,7 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     }
 }
 
-impl<S: RgbStandard, T: Component + Float> Rgb<S, T> {
+impl<S: RgbStandard, T: FloatComponent> Rgb<S, T> {
     /// Convert the color to linear RGB.
     pub fn into_linear(self) -> Rgb<Linear<S::Space>, T> {
         Rgb::new(
@@ -184,17 +193,27 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     }
 
     /// Convert into another component type.
-    pub fn into_format<U: Component, B: Component>(self) -> Alpha<Rgb<S, U>, B> {
+    pub fn into_format<U, B>(self) -> Alpha<Rgb<S, U>, B>
+    where
+        U: Component + FromComponent<T>,
+        B: Component + FromComponent<A>,
+    {
         Alpha::<Rgb<S, U>, B>::new(
-            self.red.convert(),
-            self.green.convert(),
-            self.blue.convert(),
-            self.alpha.convert(),
+            U::from_component(self.red),
+            U::from_component(self.green),
+            U::from_component(self.blue),
+            B::from_component(self.alpha),
         )
     }
 
     /// Convert from another component type.
-    pub fn from_format<U: Component, B: Component>(color: Alpha<Rgb<S, U>, B>) -> Self {
+    pub fn from_format<U, B>(color: Alpha<Rgb<S, U>, B>) -> Self
+    where
+        T: FromComponent<U>,
+        U: Component,
+        A: FromComponent<B>,
+        B: Component,
+    {
         color.into_format()
     }
 
@@ -210,7 +229,7 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
 }
 
 /// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
-impl<S: RgbStandard, T: Component + Float, A: Component> Alpha<Rgb<S, T>, A> {
+impl<S: RgbStandard, T: FloatComponent, A: Component> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
     pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
         Alpha::<Rgb<Linear<S::Space>, T>, A>::new(
@@ -280,7 +299,7 @@ where
 impl<S, T> Mix for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Float,
+    T: FloatComponent,
 {
     type Scalar = T;
 
@@ -299,7 +318,7 @@ where
 impl<S, T> Shade for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Float,
+    T: FloatComponent,
 {
     type Scalar = T;
 
@@ -316,19 +335,19 @@ where
 impl<S, T> GetHue for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Float,
+    T: FloatComponent,
 {
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        let sqrt_3: T = cast(1.73205081);
+        let sqrt_3: T = from_f64(1.73205081);
 
         if self.red == self.green && self.red == self.blue {
             None
         } else {
             Some(RgbHue::from_radians(
                 (sqrt_3 * (self.green - self.blue))
-                    .atan2(self.red * cast(2.0) - self.green - self.blue),
+                    .atan2(self.red * from_f64(2.0) - self.green - self.blue),
             ))
         }
     }
@@ -337,7 +356,7 @@ where
 impl<S, T> Blend for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Float,
+    T: FloatComponent,
 {
     type Color = Rgb<S, T>;
 
@@ -629,7 +648,7 @@ where
 impl<S, Wp, T> From<Xyz<Wp, T>> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
@@ -642,7 +661,7 @@ where
 impl<S, T, Sp, Wp> From<Hsl<Sp, T>> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
     Sp: RgbSpace<WhitePoint = Wp>,
@@ -650,20 +669,20 @@ where
     fn from(color: Hsl<Sp, T>) -> Self {
         let hsl = Hsl::<S::Space, T>::from_hsl(color);
 
-        let c = (T::one() - (hsl.lightness * cast(2.0) - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / cast(60.0);
-        let x = c * (T::one() - (h % cast(2.0) - T::one()).abs());
-        let m = hsl.lightness - c * cast(0.5);
+        let c = (T::one() - (hsl.lightness * from_f64(2.0) - T::one()).abs()) * hsl.saturation;
+        let h = hsl.hue.to_positive_degrees() / from_f64(60.0);
+        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
+        let m = hsl.lightness - c * from_f64(0.5);
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < cast(2.0) {
+        } else if h >= T::one() && h < from_f64(2.0) {
             (x, c, T::zero())
-        } else if h >= cast(2.0) && h < cast(3.0) {
+        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
             (T::zero(), c, x)
-        } else if h >= cast(3.0) && h < cast(4.0) {
+        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
             (T::zero(), x, c)
-        } else if h >= cast(4.0) && h < cast(5.0) {
+        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)
@@ -681,7 +700,7 @@ where
 impl<S, T, Sp, Wp> From<Hsv<Sp, T>> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
     Sp: RgbSpace<WhitePoint = Wp>,
@@ -690,19 +709,19 @@ where
         let hsv = Hsv::<S::Space, T>::from_hsv(color);
 
         let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / cast(60.0);
-        let x = c * (T::one() - (h % cast(2.0) - T::one()).abs());
+        let h = hsv.hue.to_positive_degrees() / from_f64(60.0);
+        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
         let m = hsv.value - c;
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < cast(2.0) {
+        } else if h >= T::one() && h < from_f64(2.0) {
             (x, c, T::zero())
-        } else if h >= cast(2.0) && h < cast(3.0) {
+        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
             (T::zero(), c, x)
-        } else if h >= cast(3.0) && h < cast(4.0) {
+        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
             (T::zero(), x, c)
-        } else if h >= cast(4.0) && h < cast(5.0) {
+        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)
@@ -720,7 +739,7 @@ where
 impl<S, T, St, Wp> From<Luma<St, T>> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
     St: LumaStandard<WhitePoint = Wp>,
@@ -764,7 +783,7 @@ impl<S: RgbStandard, T: Component, A: Component> Into<(T, T, T, A)> for Alpha<Rg
 impl<S, T, Wp> IntoColor<Wp, T> for Rgb<S, T>
 where
     S: RgbStandard,
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
@@ -827,9 +846,9 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.red.abs_diff_eq(&other.red, epsilon) &&
-            self.green.abs_diff_eq(&other.green, epsilon) &&
-            self.blue.abs_diff_eq(&other.blue, epsilon)
+        self.red.abs_diff_eq(&other.red, epsilon)
+            && self.green.abs_diff_eq(&other.green, epsilon)
+            && self.blue.abs_diff_eq(&other.blue, epsilon)
     }
 }
 
@@ -958,7 +977,7 @@ where
 #[derive(Debug)]
 pub enum FromHexError {
     ParseIntError(ParseIntError),
-    HexFormatError(&'static str)
+    HexFormatError(&'static str),
 }
 
 impl From<ParseIntError> for FromHexError {
@@ -975,18 +994,17 @@ impl From<&'static str> for FromHexError {
 impl core::fmt::Display for FromHexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self {
-            FromHexError::ParseIntError(e) => {
-                write!(f, "{}", e)
-            }
-            FromHexError::HexFormatError(s) => {
-                write!(f, "{}, please use format '#fff', 'fff', '#ffffff' or\
-                'ffffff'.", s)
-            }
+            FromHexError::ParseIntError(e) => write!(f, "{}", e),
+            FromHexError::HexFormatError(s) => write!(
+                f,
+                "{}, please use format '#fff', 'fff', '#ffffff' or 'ffffff'.",
+                s
+            ),
         }
     }
 }
 
-#[cfg(feature="std")]
+#[cfg(feature = "std")]
 impl std::error::Error for FromHexError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match &*self {
@@ -996,28 +1014,19 @@ impl std::error::Error for FromHexError {
     }
 }
 
-
 impl<S: RgbStandard> FromStr for Rgb<S, u8> {
     type Err = FromHexError;
 
     // Parses a color hex code of format '#ff00bb' or '#abc' into a
     // Rgb<S, u8> instance.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
-        let hex_code = if hex.starts_with('#') {
-            &hex[1..]
-        } else {
-            hex
-        };
+        let hex_code = if hex.starts_with('#') { &hex[1..] } else { hex };
         match hex_code.len() {
             3 => {
                 let red = u8::from_str_radix(&hex_code[..1], 16)?;
                 let green = u8::from_str_radix(&hex_code[1..2], 16)?;
                 let blue = u8::from_str_radix(&hex_code[2..3], 16)?;
-                let col: Rgb<S, u8> = Rgb::new(
-                    red * 17,
-                    green * 17,
-                    blue * 17,
-                );
+                let col: Rgb<S, u8> = Rgb::new(red * 17, green * 17, blue * 17);
                 Ok(col)
             }
             6 => {
@@ -1035,8 +1044,8 @@ impl<S: RgbStandard> FromStr for Rgb<S, u8> {
 #[cfg(test)]
 mod test {
     use super::Rgb;
-    use encoding::Srgb;
     use core::str::FromStr;
+    use encoding::Srgb;
 
     #[test]
     fn ranges() {
@@ -1166,44 +1175,44 @@ mod test {
     fn from_str() {
         let c = Rgb::<Srgb, u8>::from_str("#ffffff");
         assert!(c.is_ok());
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(255,255,255));
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
         let c = Rgb::<Srgb, u8>::from_str("#gggggg");
         assert!(c.is_err());
-        let c = Rgb::<Srgb,u8>::from_str("#fff");
+        let c = Rgb::<Srgb, u8>::from_str("#fff");
         assert!(c.is_ok());
-        assert_eq!(c.unwrap(),Rgb::<Srgb,u8>::new(255,255,255));
-        let c = Rgb::<Srgb,u8>::from_str("#000000");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
+        let c = Rgb::<Srgb, u8>::from_str("#000000");
         assert!(c.is_ok());
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0,0,0));
-        let c = Rgb::<Srgb,u8>::from_str("");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(0, 0, 0));
+        let c = Rgb::<Srgb, u8>::from_str("");
         assert!(c.is_err());
-        let c = Rgb::<Srgb,u8>::from_str("#123456");
+        let c = Rgb::<Srgb, u8>::from_str("#123456");
         assert!(c.is_ok());
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(18, 52, 86));
-        let c = Rgb::<Srgb,u8>::from_str("#iii");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(18, 52, 86));
+        let c = Rgb::<Srgb, u8>::from_str("#iii");
         assert!(c.is_err());
         assert_eq!(
             format!("{}", c.err().unwrap()),
             "invalid digit found in string"
         );
-        let c = Rgb::<Srgb,u8>::from_str("#08f");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0, 136, 255));
-        let c = Rgb::<Srgb,u8>::from_str("08f");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(0, 136,255));
-        let c = Rgb::<Srgb,u8>::from_str("ffffff");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(255,255,255));
-        let c = Rgb::<Srgb,u8>::from_str("#12");
+        let c = Rgb::<Srgb, u8>::from_str("#08f");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(0, 136, 255));
+        let c = Rgb::<Srgb, u8>::from_str("08f");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(0, 136, 255));
+        let c = Rgb::<Srgb, u8>::from_str("ffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
+        let c = Rgb::<Srgb, u8>::from_str("#12");
         assert!(c.is_err());
         assert_eq!(
-            format!("{}", c.err().unwrap()), 
+            format!("{}", c.err().unwrap()),
             "invalid hex code format, \
-        please use format \'#fff\', \'fff\', \'#ffffff\' or\'ffffff\'."
+             please use format \'#fff\', \'fff\', \'#ffffff\' or \'ffffff\'."
         );
-        let c = Rgb::<Srgb,u8>::from_str("da0bce");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(218,11,206));
-        let c = Rgb::<Srgb,u8>::from_str("f034e6");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(240,52,230));
-        let c = Rgb::<Srgb,u8>::from_str("abc");
-        assert_eq!(c.unwrap(), Rgb::<Srgb,u8>::new(170,187,204));
+        let c = Rgb::<Srgb, u8>::from_str("da0bce");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(218, 11, 206));
+        let c = Rgb::<Srgb, u8>::from_str("f034e6");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(240, 52, 230));
+        let c = Rgb::<Srgb, u8>::from_str("abc");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(170, 187, 204));
     }
 }
