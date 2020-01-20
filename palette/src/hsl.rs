@@ -9,8 +9,8 @@ use encoding::pixel::RawPixel;
 use encoding::{Linear, Srgb};
 use rgb::{Rgb, RgbSpace};
 use {
-    cast, clamp, Alpha, Component, FromColor, GetHue, Hsv, Hue, IntoColor, Limited, Mix, Pixel,
-    RgbHue, Saturate, Shade, Xyz,
+    clamp, from_f64, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue, Hsv, Hue,
+    IntoColor, Limited, Mix, Pixel, RgbHue, Saturate, Shade, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -38,7 +38,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     ///The hue of the color, in degrees. Decides if it's red, blue, purple,
@@ -63,14 +63,14 @@ where
 
 impl<S, T> Copy for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
 }
 
 impl<S, T> Clone for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     fn clone(&self) -> Hsl<S, T> {
@@ -80,7 +80,7 @@ where
 
 impl<T> Hsl<Srgb, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
 {
     ///HSL for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<Srgb, T> {
@@ -95,7 +95,7 @@ where
 
 impl<S, T> Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     ///Linear HSL.
@@ -135,16 +135,12 @@ where
             let (max, min, sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
             } else {
-                (rgb.green, rgb.red, rgb.blue - rgb.red, cast(2.0))
+                (rgb.green, rgb.red, rgb.blue - rgb.red, from_f64(2.0))
             };
             if rgb.blue > max {
-                (rgb.blue, min, rgb.red - rgb.green, cast(4.0))
+                (rgb.blue, min, rgb.red - rgb.green, from_f64(4.0))
             } else {
-                let min_val = if rgb.blue < min {
-                    rgb.blue
-                } else {
-                    min
-                };
+                let min_val = if rgb.blue < min { rgb.blue } else { min };
                 (max, min_val, sep, coeff)
             }
         };
@@ -153,15 +149,15 @@ where
         let mut s = T::zero();
 
         let sum = max + min;
-        let l = sum / cast(2.0);
+        let l = sum / from_f64(2.0);
         if max != min {
             let d = max - min;
             s = if sum > T::one() {
-                d / (cast::<T, _>(2.0) - sum)
+                d / (from_f64::<T>(2.0) - sum)
             } else {
                 d / sum
             };
-            h = ((sep / d) + coeff) * cast(60.0);
+            h = ((sep / d) + coeff) * from_f64(60.0);
         };
 
         Hsl {
@@ -186,7 +182,7 @@ where
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<T, A> Alpha<Hsl<Srgb, T>, A>
 where
-    T: Component + Float,
+    T: FloatComponent,
     A: Component,
 {
     ///HSL and transparency for linear sRGB.
@@ -201,7 +197,7 @@ where
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
 impl<S, T, A> Alpha<Hsl<S, T>, A>
 where
-    T: Component + Float,
+    T: FloatComponent,
     A: Component,
     S: RgbSpace,
 {
@@ -228,7 +224,7 @@ where
 
 impl<S, T> From<Xyz<S::WhitePoint, T>> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     fn from(color: Xyz<S::WhitePoint, T>) -> Self {
@@ -239,14 +235,14 @@ where
 
 impl<S, Sp, T> From<Hsv<Sp, T>> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
     Sp: RgbSpace<WhitePoint = S::WhitePoint>,
 {
     fn from(color: Hsv<Sp, T>) -> Self {
         let hsv = Hsv::<S, T>::from_hsv(color);
 
-        let x = (cast::<T, _>(2.0) - hsv.saturation) * hsv.value;
+        let x = (from_f64::<T>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
             T::zero()
         } else if x < T::one() {
@@ -256,7 +252,7 @@ where
                 T::zero()
             }
         } else {
-            let denom = cast::<T, _>(2.0) - x;
+            let denom = from_f64::<T>(2.0) - x;
             if denom.is_normal() {
                 hsv.saturation * hsv.value / denom
             } else {
@@ -267,25 +263,25 @@ where
         Hsl {
             hue: hsv.hue,
             saturation: saturation,
-            lightness: x / cast(2.0),
+            lightness: x / from_f64(2.0),
             space: PhantomData,
         }
     }
 }
 
-impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
+impl<S: RgbSpace, T: FloatComponent, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
     fn from(components: (H, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbSpace, T: Component + Float> Into<(RgbHue<T>, T, T)> for Hsl<S, T> {
+impl<S: RgbSpace, T: FloatComponent> Into<(RgbHue<T>, T, T)> for Hsl<S, T> {
     fn into(self) -> (RgbHue<T>, T, T) {
         self.into_components()
     }
 }
 
-impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
+impl<S: RgbSpace, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
     for Alpha<Hsl<S, T>, A>
 {
     fn from(components: (H, T, T, A)) -> Self {
@@ -293,7 +289,7 @@ impl<S: RgbSpace, T: Component + Float, H: Into<RgbHue<T>>, A: Component> From<(
     }
 }
 
-impl<S: RgbSpace, T: Component + Float, A: Component> Into<(RgbHue<T>, T, T, A)>
+impl<S: RgbSpace, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
     for Alpha<Hsl<S, T>, A>
 {
     fn into(self) -> (RgbHue<T>, T, T, A) {
@@ -303,7 +299,7 @@ impl<S: RgbSpace, T: Component + Float, A: Component> Into<(RgbHue<T>, T, T, A)>
 
 impl<S, T> Limited for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -326,7 +322,7 @@ where
 
 impl<S, T> Mix for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -346,7 +342,7 @@ where
 
 impl<S, T> Shade for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -363,7 +359,7 @@ where
 
 impl<S, T> GetHue for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Hue = RgbHue<T>;
@@ -379,7 +375,7 @@ where
 
 impl<S, T> Hue for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
@@ -403,7 +399,7 @@ where
 
 impl<S, T> Saturate for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Scalar = T;
@@ -420,7 +416,7 @@ where
 
 impl<S, T> Default for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     fn default() -> Hsl<S, T> {
@@ -430,7 +426,7 @@ where
 
 impl<S, T> Add<Hsl<S, T>> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -447,7 +443,7 @@ where
 
 impl<S, T> Add<T> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -463,9 +459,9 @@ where
 }
 
 impl<S, T> AddAssign<Hsl<S, T>> for Hsl<S, T>
-    where
-        T: Component + Float + AddAssign,
-        S: RgbSpace,
+where
+    T: FloatComponent + AddAssign,
+    S: RgbSpace,
 {
     fn add_assign(&mut self, other: Hsl<S, T>) {
         self.hue += other.hue;
@@ -475,9 +471,9 @@ impl<S, T> AddAssign<Hsl<S, T>> for Hsl<S, T>
 }
 
 impl<S, T> AddAssign<T> for Hsl<S, T>
-    where
-        T: Component + Float + AddAssign,
-        S: RgbSpace,
+where
+    T: FloatComponent + AddAssign,
+    S: RgbSpace,
 {
     fn add_assign(&mut self, c: T) {
         self.hue += c;
@@ -488,7 +484,7 @@ impl<S, T> AddAssign<T> for Hsl<S, T>
 
 impl<S, T> Sub<Hsl<S, T>> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -505,7 +501,7 @@ where
 
 impl<S, T> Sub<T> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
 {
     type Output = Hsl<S, T>;
@@ -521,9 +517,9 @@ where
 }
 
 impl<S, T> SubAssign<Hsl<S, T>> for Hsl<S, T>
-    where
-        T: Component + Float + SubAssign,
-        S: RgbSpace,
+where
+    T: FloatComponent + SubAssign,
+    S: RgbSpace,
 {
     fn sub_assign(&mut self, other: Hsl<S, T>) {
         self.hue -= other.hue;
@@ -533,9 +529,9 @@ impl<S, T> SubAssign<Hsl<S, T>> for Hsl<S, T>
 }
 
 impl<S, T> SubAssign<T> for Hsl<S, T>
-    where
-        T: Component + Float + SubAssign,
-        S: RgbSpace,
+where
+    T: FloatComponent + SubAssign,
+    S: RgbSpace,
 {
     fn sub_assign(&mut self, c: T) {
         self.hue -= c;
@@ -546,7 +542,7 @@ impl<S, T> SubAssign<T> for Hsl<S, T>
 
 impl<S, T, P> AsRef<P> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
     P: RawPixel<T> + ?Sized,
 {
@@ -557,7 +553,7 @@ where
 
 impl<S, T, P> AsMut<P> for Hsl<S, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     S: RgbSpace,
     P: RawPixel<T> + ?Sized,
 {
@@ -568,8 +564,8 @@ where
 
 impl<S, T> AbsDiffEq for Hsl<S, T>
 where
-    T: Component + Float + AbsDiffEq,
-    T::Epsilon: Copy + Float,
+    T: FloatComponent + AbsDiffEq,
+    T::Epsilon: Copy + Float + FromF64,
     S: RgbSpace + PartialEq,
 {
     type Epsilon = T::Epsilon;
@@ -579,16 +575,16 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.hue.abs_diff_eq(&other.hue, epsilon) &&
-            self.saturation.abs_diff_eq(&other.saturation, epsilon) &&
-            self.lightness.abs_diff_eq(&other.lightness, epsilon)
+        self.hue.abs_diff_eq(&other.hue, epsilon)
+            && self.saturation.abs_diff_eq(&other.saturation, epsilon)
+            && self.lightness.abs_diff_eq(&other.lightness, epsilon)
     }
 }
 
 impl<S, T> RelativeEq for Hsl<S, T>
 where
-    T: Component + Float + RelativeEq,
-    T::Epsilon: Copy + Float,
+    T: FloatComponent + RelativeEq,
+    T::Epsilon: Copy + Float + FromF64,
     S: RgbSpace + PartialEq,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -610,8 +606,8 @@ where
 
 impl<S, T> UlpsEq for Hsl<S, T>
 where
-    T: Component + Float + UlpsEq,
-    T::Epsilon: Copy + Float,
+    T: FloatComponent + UlpsEq,
+    T::Epsilon: Copy + Float + FromF64,
     S: RgbSpace + PartialEq,
 {
     fn default_max_ulps() -> u32 {
@@ -684,7 +680,7 @@ mod test {
 
     #[test]
     fn ranges() {
-        assert_ranges!{
+        assert_ranges! {
             Hsl<Srgb, f64>;
             limited {
                 saturation: 0.0 => 1.0,

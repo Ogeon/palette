@@ -4,11 +4,11 @@ use core::marker::PhantomData;
 
 use float::Float;
 
-use cast;
-use rgb::{RgbSpace, RgbStandard};
-use luma::LumaStandard;
 use encoding::TransferFn;
+use luma::LumaStandard;
+use rgb::{RgbSpace, RgbStandard};
 use white_point::WhitePoint;
+use {from_f64, FromF64};
 
 /// Gamma encoding.
 ///
@@ -40,25 +40,25 @@ impl<Wp: WhitePoint, N: Number> LumaStandard for Gamma<Wp, N> {
 pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 
 impl<N: Number> TransferFn for GammaFn<N> {
-    fn into_linear<T: Float>(x: T) -> T {
-        x.powf(T::one() / cast(N::VALUE))
+    fn into_linear<T: Float + FromF64>(x: T) -> T {
+        x.powf(T::one() / from_f64(N::VALUE))
     }
 
-    fn from_linear<T: Float>(x: T) -> T {
-        x.powf(cast(N::VALUE))
+    fn from_linear<T: Float + FromF64>(x: T) -> T {
+        x.powf(from_f64(N::VALUE))
     }
 }
 
 /// A type level float constant.
 pub trait Number {
     /// The represented number.
-    const VALUE: f32;
+    const VALUE: f64;
 }
 
-/// Represents `2.2f32`.
+/// Represents `2.2f64`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F2p2;
 
 impl Number for F2p2 {
-    const VALUE: f32 = 2.2;
+    const VALUE: f64 = 2.2;
 }

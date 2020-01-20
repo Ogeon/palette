@@ -2,14 +2,14 @@ use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use {cast, Component, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
 use white_point::WhitePoint;
+use {from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
         impl<Wp, T> AbsDiffEq for $self_ty<Wp, T>
-        where T: Component + Float + AbsDiffEq,
-            T::Epsilon: Copy + Float,
+        where T: FloatComponent + AbsDiffEq,
+            T::Epsilon: Copy + FloatComponent,
             Wp: WhitePoint + PartialEq
         {
             type Epsilon = T::Epsilon;
@@ -27,8 +27,8 @@ macro_rules! impl_eq {
         }
 
         impl<Wp, T> RelativeEq for $self_ty<Wp, T>
-        where T: Component + Float + RelativeEq,
-            T::Epsilon: Copy + Float,
+        where T: FloatComponent + RelativeEq,
+            T::Epsilon: Copy + FloatComponent,
             Wp: WhitePoint + PartialEq
         {
             fn default_max_relative() -> T::Epsilon {
@@ -44,8 +44,8 @@ macro_rules! impl_eq {
         }
 
         impl<Wp, T> UlpsEq for $self_ty<Wp, T>
-        where T: Component + Float + UlpsEq,
-            T::Epsilon: Copy + Float,
+        where T: FloatComponent + UlpsEq,
+            T::Epsilon: Copy + FloatComponent,
             Wp: WhitePoint + PartialEq
         {
             fn default_max_ulps() -> u32 {
@@ -77,13 +77,14 @@ impl_eq!(Lch, [l, chroma, hue]);
 // ulps. Because of this we loose some precision for values close to 0.0.
 macro_rules! impl_eq_hue {
     (  $self_ty: ident ) => {
-        impl<T: Float + AbsDiffEq> AbsDiffEq for $self_ty<T>
-        where T::Epsilon: Float
+        impl<T: Float + FromF64 + AbsDiffEq> AbsDiffEq for $self_ty<T>
+        where
+            T::Epsilon: Float + FromF64,
         {
             type Epsilon = T::Epsilon;
 
             fn default_epsilon() -> Self::Epsilon {
-                T::default_epsilon() * cast(180.0)
+                T::default_epsilon() * from_f64(180.0)
             }
 
             fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
@@ -96,25 +97,37 @@ macro_rules! impl_eq_hue {
             }
         }
 
-        impl<T: Float + RelativeEq> RelativeEq for $self_ty<T>
-        where T::Epsilon: Float
+        impl<T: Float + FromF64 + RelativeEq> RelativeEq for $self_ty<T>
+        where
+            T::Epsilon: Float + FromF64,
         {
             fn default_max_relative() -> Self::Epsilon {
-                T::default_max_relative() * cast(180.0)
+                T::default_max_relative() * from_f64(180.0)
             }
 
-            fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
+            fn relative_eq(
+                &self,
+                other: &Self,
+                epsilon: T::Epsilon,
+                max_relative: T::Epsilon,
+            ) -> bool {
                 let diff: T = (*self - *other).to_degrees();
                 T::relative_eq(&diff, &T::zero(), epsilon, max_relative)
             }
-            fn relative_ne(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+            fn relative_ne(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_relative: Self::Epsilon,
+            ) -> bool {
                 let diff: T = (*self - *other).to_degrees();
                 T::relative_ne(&diff, &T::zero(), epsilon, max_relative)
             }
         }
 
-        impl<T: Float + UlpsEq> UlpsEq for $self_ty<T>
-        where T::Epsilon: Float
+        impl<T: Float + FromF64 + UlpsEq> UlpsEq for $self_ty<T>
+        where
+            T::Epsilon: Float + FromF64,
         {
             fn default_max_ulps() -> u32 {
                 T::default_max_ulps() * 180
@@ -129,7 +142,7 @@ macro_rules! impl_eq_hue {
                 T::ulps_ne(&diff, &T::zero(), epsilon, max_ulps)
             }
         }
-    }
+    };
 }
 
 impl_eq_hue!(LabHue);

@@ -1,11 +1,9 @@
-use float::Float;
-
 use core::fmt::{self, Display, Formatter};
-use {Component, Limited, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
-use white_point::{D65, WhitePoint};
-use rgb::{Rgb, RgbSpace};
-use luma::Luma;
 use encoding::Linear;
+use luma::Luma;
+use rgb::{Rgb, RgbSpace};
+use white_point::{WhitePoint, D65};
+use {FloatComponent, Hsl, Hsv, Hwb, Lab, Lch, Limited, Xyz, Yxy};
 
 /// FromColor provides conversion from the colors.
 ///
@@ -102,11 +100,10 @@ use encoding::Linear;
 /// #[macro_use]
 /// extern crate approx;
 ///
-/// use palette::{Component, FromColor, Hsv, Pixel, Srgb};
+/// use palette::{FloatComponent, FromColor, Hsv, Pixel, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::Linear;
 /// use palette::white_point::D65;
-/// use palette::float::Float;
 ///
 /// /// sRGB, but with a reversed memory layout.
 /// #[derive(PartialEq, Debug, FromColor, Pixel)]
@@ -123,7 +120,7 @@ use encoding::Linear;
 /// // implementing a private conversion function and letting it
 /// // derive `From` automatically. It will take a round trip
 /// // through linear format, but that's fine in this case.
-/// impl<T: Component + Float> Bgr<T> {
+/// impl<T: FloatComponent> Bgr<T> {
 ///     // It converts from any linear Rgb type that has the D65
 ///     // white point, which is the default if we don't specify
 ///     // anything else with the `palette_white_point` attribute.
@@ -209,7 +206,7 @@ use encoding::Linear;
 /// ```
 pub trait FromColor<Wp = D65, T = f32>: Sized
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     ///Convert from XYZ color space
@@ -343,11 +340,10 @@ where
 /// #[macro_use]
 /// extern crate approx;
 ///
-/// use palette::{Component, Hsv, IntoColor, Pixel, Srgb};
+/// use palette::{FloatComponent, Hsv, IntoColor, Pixel, Srgb};
 /// use palette::rgb::{Rgb, RgbSpace};
 /// use palette::encoding::{Linear, self};
 /// use palette::white_point::D65;
-/// use palette::float::Float;
 ///
 /// type Hsv64 = Hsv<encoding::Srgb, f64>;
 ///
@@ -365,7 +361,7 @@ where
 /// // Rgb is a bit more complex than other colors, so we are
 /// // implementing a private conversion function and letting it
 /// // derive `Into` automatically.
-/// impl<T: Component + Float> Bgr<T> {
+/// impl<T: FloatComponent> Bgr<T> {
 ///     // It converts from any linear Rgb type that has the D65
 ///     // white point, which is the default if we don't specify
 ///     // anything else with the `palette_white_point` attribute.
@@ -441,7 +437,7 @@ where
 /// ```
 pub trait IntoColor<Wp = D65, T = f32>: Sized
 where
-    T: Component + Float,
+    T: FloatComponent,
     Wp: WhitePoint,
 {
     ///Convert into XYZ space
@@ -619,7 +615,10 @@ pub trait ConvertFrom<T>: From<T> {
     fn try_convert_from(_: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
-impl<T, U> ConvertFrom<T> for U where U: From<T> + Limited {
+impl<T, U> ConvertFrom<T> for U
+where
+    U: From<T> + Limited,
+{
     fn convert_from(t: T) -> U {
         let mut this = U::from(t);
         if !this.is_valid() {
@@ -639,7 +638,10 @@ impl<T, U> ConvertFrom<T> for U where U: From<T> + Limited {
 }
 
 // ConvertFrom implies ConvertInto
-impl<T, U> ConvertInto<U> for T where U: ConvertFrom<T> {
+impl<T, U> ConvertInto<U> for T
+where
+    U: ConvertFrom<T>,
+{
     #[inline]
     fn convert_into(self) -> U {
         U::convert_from(self)
@@ -660,7 +662,7 @@ macro_rules! impl_into_color {
     ($self_ty: ident, $from_fn: ident) => {
         impl<Wp, T> IntoColor<Wp, T> for $self_ty<Wp, T>
         where
-            T: Component + Float,
+            T: FloatComponent,
             Wp: WhitePoint,
         {
             fn into_xyz(self) -> Xyz<Wp, T> {
@@ -702,7 +704,7 @@ macro_rules! impl_into_color_rgb {
     ($self_ty: ident, $from_fn: ident) => {
         impl<S, Wp, T> IntoColor<Wp, T> for $self_ty<S, T>
         where
-            T: Component + Float,
+            T: FloatComponent,
             Wp: WhitePoint,
             S: RgbSpace<WhitePoint = Wp>,
         {
@@ -752,11 +754,10 @@ impl_into_color_rgb!(Hwb, from_hwb);
 #[cfg(test)]
 mod tests {
     use core::marker::PhantomData;
-    use float::Float;
-    use Component;
     use encoding::linear::Linear;
-    use rgb::{Rgb, RgbSpace};
     use luma::Luma;
+    use rgb::{Rgb, RgbSpace};
+    use FloatComponent;
     use {Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 
     #[derive(Copy, Clone, FromColor, IntoColor)]
@@ -797,9 +798,9 @@ mod tests {
     #[palette_component = "T"]
     #[palette_rgb_space = "(::encoding::Srgb, ::white_point::E)"]
     #[palette_internal]
-    struct WithoutXyz<T: Component + Float>(PhantomData<T>);
+    struct WithoutXyz<T: FloatComponent>(PhantomData<T>);
 
-    impl<T: Component + Float> WithoutXyz<T> {
+    impl<T: FloatComponent> WithoutXyz<T> {
         fn from_luma_internal(_color: Luma<Linear<::white_point::E>, T>) -> Self {
             WithoutXyz(PhantomData)
         }
@@ -809,13 +810,13 @@ mod tests {
         }
     }
 
-    impl<T: Component + Float> From<Lch<::white_point::E, T>> for WithoutXyz<T> {
+    impl<T: FloatComponent> From<Lch<::white_point::E, T>> for WithoutXyz<T> {
         fn from(_color: Lch<::white_point::E, T>) -> Self {
             WithoutXyz(PhantomData)
         }
     }
 
-    impl<T: Component + Float> Into<Lch<::white_point::E, T>> for WithoutXyz<T> {
+    impl<T: FloatComponent> Into<Lch<::white_point::E, T>> for WithoutXyz<T> {
         fn into(self) -> Lch<::white_point::E, T> {
             Lch::with_wp(T::one(), T::zero(), T::zero())
         }

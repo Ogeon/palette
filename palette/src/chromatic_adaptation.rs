@@ -24,9 +24,10 @@
 //!```
 use float::Float;
 
-use {cast, Component, FromColor, IntoColor, Xyz};
+use from_f64;
+use matrix::{multiply_3x3, multiply_xyz, Mat3};
 use white_point::WhitePoint;
-use matrix::{multiply_xyz, Mat3, multiply_3x3};
+use {FloatComponent, FromColor, IntoColor, Xyz};
 
 ///Chromatic adaptation methods implemented in the library
 pub enum Method {
@@ -50,7 +51,7 @@ pub struct ConeResponseMatrices<T: Float> {
 ///one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -86,7 +87,7 @@ where
 
 impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -95,38 +96,44 @@ where
         match *self {
              Method::Bradford => {
                 ConeResponseMatrices::<T> {
-                    ma: [cast(0.8951000), cast(0.2664000), cast(-0.1614000),
-                         cast(-0.7502000), cast(1.7135000), cast(0.0367000),
-                         cast(0.0389000), cast(-0.0685000), cast(1.0296000)
-                         ],
-                    inv_ma: [cast(0.9869929), cast(-0.1470543), cast(0.1599627),
-                             cast(0.4323053), cast(0.5183603), cast(0.0492912),
-                             cast(-0.0085287), cast(0.0400428), cast(0.9684867)
-                            ],
+                    ma: [
+                        from_f64(0.8951000), from_f64(0.2664000), from_f64(-0.1614000),
+                        from_f64(-0.7502000), from_f64(1.7135000), from_f64(0.0367000),
+                        from_f64(0.0389000), from_f64(-0.0685000), from_f64(1.0296000)
+                    ],
+                    inv_ma: [
+                        from_f64(0.9869929), from_f64(-0.1470543), from_f64(0.1599627),
+                        from_f64(0.4323053), from_f64(0.5183603), from_f64(0.0492912),
+                        from_f64(-0.0085287), from_f64(0.0400428), from_f64(0.9684867)
+                    ],
                 }
             }
              Method::VonKries => {
                 ConeResponseMatrices::<T> {
-                    ma: [cast(0.4002400), cast(0.7076000), cast(-0.0808100),
-                         cast(-0.2263000), cast(1.1653200), cast(0.0457000),
-                         cast(0.0000000), cast(0.0000000), cast(0.9182200)
-                         ],
-                    inv_ma: [cast(1.8599364), cast(-1.1293816), cast(0.2198974),
-                             cast(0.3611914), cast(0.6388125), cast(-0.0000064),
-                             cast(0.0000000), cast(0.0000000), cast(1.0890636)
-                             ],
+                    ma: [
+                        from_f64(0.4002400), from_f64(0.7076000), from_f64(-0.0808100),
+                        from_f64(-0.2263000), from_f64(1.1653200), from_f64(0.0457000),
+                        from_f64(0.0000000), from_f64(0.0000000), from_f64(0.9182200)
+                    ],
+                    inv_ma: [
+                        from_f64(1.8599364), from_f64(-1.1293816), from_f64(0.2198974),
+                        from_f64(0.3611914), from_f64(0.6388125), from_f64(-0.0000064),
+                        from_f64(0.0000000), from_f64(0.0000000), from_f64(1.0890636)
+                    ],
                 }
             }
              Method::XyzScaling => {
                 ConeResponseMatrices::<T> {
-                    ma: [cast(1.0000000), cast(0.0000000), cast(0.0000000),
-                         cast(0.0000000), cast(1.0000000), cast(0.0000000),
-                         cast(0.0000000), cast(0.0000000), cast(1.0000000)
-                         ],
-                    inv_ma: [cast(1.0000000), cast(0.0000000), cast(0.0000000),
-                             cast(0.0000000), cast(1.0000000), cast(0.0000000),
-                             cast(0.0000000), cast(0.0000000), cast(1.0000000)
-                             ],
+                    ma: [
+                        from_f64(1.0000000), from_f64(0.0000000), from_f64(0.0000000),
+                        from_f64(0.0000000), from_f64(1.0000000), from_f64(0.0000000),
+                        from_f64(0.0000000), from_f64(0.0000000), from_f64(1.0000000)
+                    ],
+                    inv_ma: [
+                        from_f64(1.0000000), from_f64(0.0000000), from_f64(0.0000000),
+                        from_f64(0.0000000), from_f64(1.0000000), from_f64(0.0000000),
+                        from_f64(0.0000000), from_f64(0.0000000), from_f64(1.0000000)
+                    ],
                 }
             }
         }
@@ -139,7 +146,7 @@ where
 ///Uses the bradford method for conversion by default.
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -155,7 +162,7 @@ where
 
 impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
     S: IntoColor<Swp, T>,
@@ -175,7 +182,7 @@ where
 ///Uses the bradford method for conversion by default.
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
@@ -191,7 +198,7 @@ where
 
 impl<S, D, Swp, Dwp, T> AdaptInto<D, Swp, Dwp, T> for S
 where
-    T: Component + Float,
+    T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
     D: AdaptFrom<S, Swp, Dwp, T>,
@@ -204,9 +211,9 @@ where
 #[cfg(test)]
 mod test {
 
-    use Xyz;
-    use white_point::{D50, D65, A, C};
     use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};
+    use white_point::{A, C, D50, D65};
+    use Xyz;
 
     #[test]
     fn d65_to_d50_matrix_xyz_scaling() {

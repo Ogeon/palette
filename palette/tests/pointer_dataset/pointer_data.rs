@@ -11,16 +11,16 @@ u', v'		0.2008907213	0.4608888395
 Note: The xyz and yxy conversions do not use the updated conversion formula. So they are not used.
 */
 
+use csv;
 use num_traits::{NumCast, ToPrimitive};
 use palette::float::Float;
-use csv;
-use palette::{Component, IntoColor, Lab, Lch, Xyz};
 use palette::white_point::WhitePoint;
+use palette::{FloatComponent, IntoColor, Lab, Lch, Xyz};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
 impl WhitePoint for PointerWP {
-    fn get_xyz<Wp: WhitePoint, T: Component + Float>() -> Xyz<Wp, T> {
+    fn get_xyz<Wp: WhitePoint, T: FloatComponent>() -> Xyz<Wp, T> {
         Xyz::with_wp(flt(0.980722647624), T::one(), flt(1.182254189827))
     }
 }
@@ -68,8 +68,7 @@ macro_rules! impl_from_color_pointer {
                 }
             }
         }
-
-    }
+    };
 }
 
 impl_from_color_pointer!(Lch);
