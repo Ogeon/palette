@@ -1,10 +1,16 @@
 mod data_cie_15_2004;
+mod data_ciede_2000;
 mod data_color_mine;
 mod lab_lch;
 
 #[test]
 pub fn xyz_yxy_conversion() {
     data_cie_15_2004::run_tests();
+}
+
+#[test]
+pub fn color_difference_ciede() {
+    data_ciede_2000::run_tests();
 }
 
 #[test]

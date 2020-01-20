@@ -183,6 +183,7 @@ pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
+pub use color_difference::ColorDifference;
 pub use component::*;
 pub use convert::{ConvertFrom, ConvertInto, FromColor, IntoColor, OutOfBounds};
 pub use encoding::pixel::Pixel;
@@ -364,6 +365,7 @@ mod yxy;
 mod hues;
 
 pub mod chromatic_adaptation;
+mod color_difference;
 mod component;
 mod convert;
 pub mod encoding;

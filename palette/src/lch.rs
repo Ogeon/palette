@@ -1,6 +1,8 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
+use color_difference::ColorDifference;
+use color_difference::{get_ciede_difference, LabColorDiff};
 use encoding::pixel::RawPixel;
 use white_point::{WhitePoint, D65};
 use {clamp, from_f64};
@@ -300,6 +302,53 @@ where
             hue: self.hue + amount.into(),
             white_point: PhantomData,
         }
+    }
+}
+
+/// CIEDE2000 distance metric for color difference.
+impl<Wp, T> ColorDifference for Lch<Wp, T>
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+{
+    type Scalar = T;
+
+    fn get_color_difference(&self, other: &Lch<Wp, T>) -> Self::Scalar {
+        // Prepare a* and b* from Lch components to calculate color difference
+        let self_a = clamp(
+            self.chroma.max(T::zero()) * self.hue.to_radians().cos(),
+            from_f64(-128.0),
+            from_f64(127.0),
+        );
+        let self_b = clamp(
+            self.chroma.max(T::zero()) * self.hue.to_radians().sin(),
+            from_f64(-128.0),
+            from_f64(127.0),
+        );
+        let other_a = clamp(
+            other.chroma.max(T::zero()) * other.hue.to_radians().cos(),
+            from_f64(-128.0),
+            from_f64(127.0),
+        );
+        let other_b = clamp(
+            other.chroma.max(T::zero()) * other.hue.to_radians().sin(),
+            from_f64(-128.0),
+            from_f64(127.0),
+        );
+        let self_params = LabColorDiff {
+            l: self.l,
+            a: self_a,
+            b: self_b,
+            chroma: self.chroma,
+        };
+        let other_params = LabColorDiff {
+            l: other.l,
+            a: other_a,
+            b: other_b,
+            chroma: other.chroma,
+        };
+
+        get_ciede_difference(&self_params, &other_params)
     }
 }
 
