@@ -122,7 +122,7 @@ The RGB gradient goes through gray, while the HSV gradients only change hue:
 
 ## What It Isn't
 
-This library is only meant for color manipulation and conversion. It's not a fully features image manipulation library. It will only handle colors, and not whole images. There are features that are meant to work as bridges between Palette and other graphical libraries, but the main features are limited to only focus on single pixel operations, to keep the scope at a manageable size.
+This library is only meant for color manipulation and conversion. It's not a fully featured image manipulation library. It will only handle colors, and not whole images. There are features that are meant to work as bridges between Palette and other graphical libraries, but the main features are limited to only focus on single pixel operations, to keep the scope at a manageable size.
 
 [pixel_module]: https://ogeon.github.io/docs/palette/master/palette/pixel/index.html
 
