@@ -7,6 +7,9 @@ use {clamp, from_f64};
 use {Alpha, LabHue, Lch, Xyz};
 use {Component, ComponentWise, FloatComponent, GetHue, Limited, Mix, Pixel, Shade};
 
+use color_difference::ColorDifference;
+use color_difference::{get_ciede_difference, LabColorDiff};
+
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
 /// implementation in `Alpha`](struct.Alpha.html#Laba).
 pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
@@ -300,6 +303,34 @@ where
         } else {
             Some(LabHue::from_radians(self.b.atan2(self.a)))
         }
+    }
+}
+
+impl<Wp, T> ColorDifference for Lab<Wp, T>
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+{
+    type Scalar = T;
+
+    fn get_color_difference(&self, other: &Lab<Wp, T>) -> Self::Scalar {
+        // Color difference calculation requires Lab and chroma components. This
+        // function handles the conversion into those components which are then
+        // passed to `get_ciede_difference()` where calculation is completed.
+        let self_params = LabColorDiff {
+            l: self.l,
+            a: self.a,
+            b: self.b,
+            chroma: (self.a * self.a + self.b * self.b).sqrt(),
+        };
+        let other_params = LabColorDiff {
+            l: other.l,
+            a: other.a,
+            b: other.b,
+            chroma: (other.a * other.a + other.b * other.b).sqrt(),
+        };
+
+        get_ciede_difference(&self_params, &other_params)
     }
 }
 
