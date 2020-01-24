@@ -1,12 +1,15 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use clamp;
 use encoding::pixel::RawPixel;
 use luma::LumaStandard;
 use white_point::{WhitePoint, D65};
+use {clamp, contrast_ratio};
 use {Alpha, Luma, Xyz};
-use {Component, ComponentWise, FloatComponent, IntoColor, Limited, Mix, Pixel, Shade};
+use {
+    Component, ComponentWise, FloatComponent, IntoColor, Limited, Mix, Pixel, RelativeContrast,
+    Shade,
+};
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
 /// in `Alpha`](struct.Alpha.html#Yxya).
@@ -563,6 +566,18 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
+    }
+}
+
+impl<Wp, T> RelativeContrast for Yxy<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        contrast_ratio(self.luma, other.luma)
     }
 }
 

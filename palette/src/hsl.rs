@@ -8,9 +8,11 @@ use core::ops::{Add, AddAssign, Sub, SubAssign};
 use encoding::pixel::RawPixel;
 use encoding::{Linear, Srgb};
 use rgb::{Rgb, RgbSpace};
+use {clamp, contrast_ratio, from_f64};
+use {Alpha, Hsv, RgbHue, Xyz};
 use {
-    clamp, from_f64, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue, Hsv, Hue,
-    IntoColor, Limited, Mix, Pixel, RgbHue, Saturate, Shade, Xyz,
+    Component, FloatComponent, FromColor, FromF64, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
+    RelativeContrast, Saturate, Shade,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -619,6 +621,21 @@ where
         self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
             self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
             self.lightness.ulps_eq(&other.lightness, epsilon, max_ulps)
+    }
+}
+
+impl<S, T> RelativeContrast for Hsl<S, T>
+where
+    T: FloatComponent,
+    S: RgbSpace,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 

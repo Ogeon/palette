@@ -5,16 +5,16 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use blend::PreAlpha;
-use clamp;
 use encoding::linear::LinearFn;
 use encoding::pixel::RawPixel;
 use encoding::{Linear, Srgb, TransferFn};
 use luma::LumaStandard;
 use white_point::WhitePoint;
+use {clamp, contrast_ratio};
 use {Alpha, Xyz, Yxy};
 use {
     Blend, Component, ComponentWise, FloatComponent, FromColor, FromComponent, IntoColor, Limited,
-    Mix, Pixel, Shade,
+    Mix, Pixel, RelativeContrast, Shade,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -722,6 +722,21 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
         write!(f, "{:0width$X}", self.luma, width = size)
+    }
+}
+
+impl<S, T> RelativeContrast for Luma<S, T>
+where
+    T: FloatComponent,
+    S: LumaStandard,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 

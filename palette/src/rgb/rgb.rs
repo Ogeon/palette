@@ -17,10 +17,10 @@ use luma::LumaStandard;
 use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use rgb::{RgbSpace, RgbStandard, TransferFn};
 use white_point::WhitePoint;
-use {clamp, from_f64};
+use {clamp, contrast_ratio, from_f64};
 use {
     Blend, Component, ComponentWise, FloatComponent, FromComponent, GetHue, Limited, Mix, Pixel,
-    Shade,
+    RelativeContrast, Shade,
 };
 use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
@@ -1038,6 +1038,21 @@ impl<S: RgbStandard> FromStr for Rgb<S, u8> {
             }
             _ => Err("invalid hex code format".into()),
         }
+    }
+}
+
+impl<S, T> RelativeContrast for Rgb<S, T>
+where
+    T: FloatComponent,
+    S: RgbStandard,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 

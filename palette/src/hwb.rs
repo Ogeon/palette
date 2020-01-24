@@ -8,9 +8,11 @@ use core::ops::{Add, AddAssign, Sub, SubAssign};
 use encoding::pixel::RawPixel;
 use encoding::Srgb;
 use rgb::RgbSpace;
+use {clamp, contrast_ratio};
+use {Alpha, Hsv, RgbHue, Xyz};
 use {
-    clamp, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue, Hsv, Hue, IntoColor,
-    Limited, Mix, Pixel, RgbHue, Shade, Xyz,
+    Component, FloatComponent, FromColor, FromF64, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
+    RelativeContrast, Shade,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -580,6 +582,21 @@ where
         } else {
             self.hue.ulps_eq(&other.hue, epsilon, max_ulps) && equal_shade
         }
+    }
+}
+
+impl<S, T> RelativeContrast for Hwb<S, T>
+where
+    T: FloatComponent,
+    S: RgbSpace,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 
