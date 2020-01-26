@@ -2,8 +2,8 @@
 List of color from www.colormine.org
 */
 use csv;
-use palette::{Hsl, Hsv, Hwb, IntoColor, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 use palette::white_point::D65;
+use palette::{Hsl, Hsv, Hwb, IntoColor, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 
 #[derive(Deserialize, PartialEq)]
 pub struct ColorMineRaw {
@@ -94,8 +94,7 @@ macro_rules! impl_from_color {
                 }
             }
         }
-
-    }
+    };
 }
 
 impl_from_color!(LinSrgb<f32>);

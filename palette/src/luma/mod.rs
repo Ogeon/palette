@@ -2,8 +2,8 @@
 
 mod luma;
 
-use white_point::{D65, WhitePoint};
 use encoding::{Gamma, Linear, Srgb, TransferFn};
+use white_point::{WhitePoint, D65};
 
 pub use self::luma::{Luma, Lumaa};
 

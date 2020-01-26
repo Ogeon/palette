@@ -1,9 +1,9 @@
-use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use float::Float;
 
-use {clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
 use encoding::pixel::RawPixel;
+use {clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
 
 ///Premultiplied alpha wrapper.
 ///
@@ -141,8 +141,8 @@ impl<C: Default, T: Float> Default for PreAlpha<C, T> {
 
 impl<C, T> AbsDiffEq for PreAlpha<C, T>
 where
-    C: AbsDiffEq <Epsilon = T::Epsilon>,
-    T: AbsDiffEq  + Float,
+    C: AbsDiffEq<Epsilon = T::Epsilon>,
+    T: AbsDiffEq + Float,
     T::Epsilon: Copy,
 {
     type Epsilon = T::Epsilon;
@@ -159,8 +159,8 @@ where
 
 impl<C, T> RelativeEq for PreAlpha<C, T>
 where
-    C: RelativeEq <Epsilon = T::Epsilon>,
-    T: RelativeEq  + Float,
+    C: RelativeEq<Epsilon = T::Epsilon>,
+    T: RelativeEq + Float,
     T::Epsilon: Copy,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -180,8 +180,8 @@ where
 
 impl<C, T> UlpsEq for PreAlpha<C, T>
 where
-    C: UlpsEq <Epsilon = T::Epsilon>,
-    T: UlpsEq  + Float,
+    C: UlpsEq<Epsilon = T::Epsilon>,
+    T: UlpsEq + Float,
     T::Epsilon: Copy,
 {
     fn default_max_ulps() -> u32 {
@@ -216,7 +216,7 @@ impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: AddAssign , T: Float + AddAssign> AddAssign for PreAlpha<C, T> {
+impl<C: AddAssign, T: Float + AddAssign> AddAssign for PreAlpha<C, T> {
     fn add_assign(&mut self, other: PreAlpha<C, T>) {
         self.color += other.color;
         self.alpha += other.alpha;
@@ -252,7 +252,7 @@ impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: SubAssign , T: Float + SubAssign> SubAssign for PreAlpha<C, T> {
+impl<C: SubAssign, T: Float + SubAssign> SubAssign for PreAlpha<C, T> {
     fn sub_assign(&mut self, other: PreAlpha<C, T>) {
         self.color -= other.color;
         self.alpha -= other.alpha;
@@ -265,7 +265,6 @@ impl<T: Float + SubAssign, C: SubAssign<T>> SubAssign<T> for PreAlpha<C, T> {
         self.alpha -= c;
     }
 }
-
 
 impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
     type Output = PreAlpha<C::Output, T>;
@@ -289,7 +288,7 @@ impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: MulAssign , T: Float + MulAssign> MulAssign for PreAlpha<C, T> {
+impl<C: MulAssign, T: Float + MulAssign> MulAssign for PreAlpha<C, T> {
     fn mul_assign(&mut self, other: PreAlpha<C, T>) {
         self.color *= other.color;
         self.alpha *= other.alpha;
@@ -325,7 +324,7 @@ impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C: DivAssign , T: Float + DivAssign> DivAssign for PreAlpha<C, T> {
+impl<C: DivAssign, T: Float + DivAssign> DivAssign for PreAlpha<C, T> {
     fn div_assign(&mut self, other: PreAlpha<C, T>) {
         self.color /= other.color;
         self.alpha /= other.alpha;
@@ -379,20 +378,23 @@ impl<C, T: Float> DerefMut for PreAlpha<C, T> {
 #[cfg(feature = "serializing")]
 mod test {
     use super::PreAlpha;
-    use rgb::Rgb;
     use encoding::Srgb;
+    use rgb::Rgb;
 
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let color = PreAlpha {
             color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
-            alpha: 0.5
+            alpha: 0.5,
         };
 
         let serialized = ::serde_json::to_string(&color).unwrap();
 
-        assert_eq!(serialized, r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#);
+        assert_eq!(
+            serialized,
+            r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
+        );
     }
 
     #[cfg(feature = "serializing")]
@@ -400,10 +402,11 @@ mod test {
     fn deserialize() {
         let expected = PreAlpha {
             color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
-            alpha: 0.5
+            alpha: 0.5,
         };
 
-        let deserialized: PreAlpha<_, _> = ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+        let deserialized: PreAlpha<_, _> =
+            ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
 
         assert_eq!(deserialized, expected);
     }

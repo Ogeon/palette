@@ -40,13 +40,13 @@ use float::Float;
 
 use ComponentWise;
 
+pub use self::blend::Blend;
 pub use self::equations::{Equation, Equations, Parameter, Parameters};
 pub use self::pre_alpha::PreAlpha;
-pub use self::blend::Blend;
 
+mod blend;
 mod equations;
 mod pre_alpha;
-mod blend;
 
 #[cfg(test)]
 mod test;

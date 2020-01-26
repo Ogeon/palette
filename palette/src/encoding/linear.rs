@@ -2,10 +2,10 @@
 
 use core::marker::PhantomData;
 
-use float::Float;
-use rgb::{RgbSpace, RgbStandard};
-use luma::LumaStandard;
 use encoding::TransferFn;
+use float::Float;
+use luma::LumaStandard;
+use rgb::{RgbSpace, RgbStandard};
 use white_point::WhitePoint;
 
 /// A generic standard with linear components.

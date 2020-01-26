@@ -120,7 +120,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
                 None
             };
 
-            quote!{
+            quote! {
                 #regular_from
                 #self_alpha
                 #other_alpha
@@ -130,7 +130,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
         .collect();
 
     let trait_path = util::path(&["FromColor"], meta.internal);
-    let from_color_impl = quote!{
+    let from_color_impl = quote! {
         #[automatically_derived]
         impl #impl_generics #trait_path<#white_point, #component> for #ident #type_generics #where_clause {
             #(#methods)*
@@ -169,7 +169,7 @@ fn impl_from(
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    quote!{
+    quote! {
         #[automatically_derived]
         impl #impl_generics From<#color_ty> for #ident #type_generics #where_clause {
             fn from(color: #color_ty) -> Self {
@@ -200,7 +200,7 @@ fn impl_from_alpha_to_alpha(
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    quote!{
+    quote! {
            #[automatically_derived]
            impl #impl_generics From<#alpha_path<#color_ty, #component>> for #alpha_path<#ident #type_generics, #component> #where_clause {
                fn from(color: #alpha_path<#color_ty, #component>) -> Self {
@@ -235,7 +235,7 @@ fn impl_from_no_alpha_to_alpha(
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    quote!{
+    quote! {
         #[automatically_derived]
         impl #impl_generics From<#color_ty> for #alpha_path<#ident #type_generics, #component> #where_clause {
             fn from(color: #color_ty) -> Self {
@@ -269,7 +269,7 @@ fn impl_from_alpha_to_no_alpha(
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
     if let Some(alpha_property) = alpha_property {
-        quote!{
+        quote! {
             #[automatically_derived]
             impl #impl_generics From<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
                 fn from(color: #alpha_path<#color_ty, #alpha_type>) -> Self {
@@ -282,7 +282,7 @@ fn impl_from_alpha_to_no_alpha(
             }
         }
     } else {
-        quote!{
+        quote! {
             #[automatically_derived]
             impl #impl_generics From<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
                 fn from(color: #alpha_path<#color_ty, #alpha_type>) -> Self {

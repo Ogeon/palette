@@ -6,10 +6,10 @@ The Rgb colors in this data appear to be adapted to the D50 white_point from the
 
 */
 
-use palette::{Xyz, Yxy, Lab, IntoColor};
 use palette::white_point::D50;
+use palette::{IntoColor, Lab, Xyz, Yxy};
 
-use super::load_data::{ColorCheckerRaw, load_babel};
+use super::load_data::{load_babel, ColorCheckerRaw};
 use super::MAX_ERROR;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -18,7 +18,6 @@ pub struct BabelData {
     xyz: Xyz<D50, f64>,
     lab: Lab<D50, f64>,
 }
-
 
 impl From<ColorCheckerRaw> for BabelData {
     fn from(src: ColorCheckerRaw) -> BabelData {
@@ -41,8 +40,7 @@ macro_rules! impl_from_color {
                 }
             }
         }
-
-    }
+    };
 }
 
 impl_from_color!(Yxy);
