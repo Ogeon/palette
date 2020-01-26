@@ -65,7 +65,7 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
     );
 
     let trait_path = util::path(&["IntoColor"], meta.internal);
-    let into_color_impl = quote!{
+    let into_color_impl = quote! {
         #[automatically_derived]
         impl #impl_generics #trait_path<#white_point, #component> for #ident #type_generics #where_clause {
             #(#methods)*
@@ -139,7 +139,7 @@ fn impl_into(
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    quote!{
+    quote! {
         #[automatically_derived]
         impl #impl_generics Into<#color_ty> for #ident #type_generics #where_clause {
             fn into(self) -> #color_ty {
@@ -174,7 +174,7 @@ fn impl_into_alpha(
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
     if let Some(alpha_property) = alpha_property {
-        quote!{
+        quote! {
             #[automatically_derived]
             impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
                 fn into(self) -> #alpha_path<#color_ty, #alpha_type> {
@@ -188,7 +188,7 @@ fn impl_into_alpha(
             }
         }
     } else {
-        quote!{
+        quote! {
             #[automatically_derived]
             impl #impl_generics Into<#alpha_path<#color_ty, #alpha_type>> for #ident #type_generics #where_clause {
                 fn into(self) -> #alpha_path<#color_ty, #alpha_type> {

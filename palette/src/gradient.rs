@@ -215,7 +215,8 @@ where
                 Some(self.gradient.get(self.from))
             } else {
                 let i = self.from
-                    + (self.diff / from_f64((self.len - 1) as f64)) * from_f64((self.len - self.from_end - 1) as f64);
+                    + (self.diff / from_f64((self.len - 1) as f64))
+                        * from_f64((self.len - self.from_end - 1) as f64);
                 self.from_end += 1;
                 Some(self.gradient.get(i))
             }

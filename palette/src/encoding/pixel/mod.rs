@@ -119,7 +119,10 @@ pub unsafe trait Pixel<T>: Sized {
     fn into_raw<P: RawPixelSized<T>>(self) -> P {
         assert_eq!(P::CHANNELS, Self::CHANNELS);
         assert_eq!(::core::mem::size_of::<P>(), ::core::mem::size_of::<Self>());
-        assert_eq!(::core::mem::align_of::<P>(), ::core::mem::align_of::<Self>());
+        assert_eq!(
+            ::core::mem::align_of::<P>(),
+            ::core::mem::align_of::<Self>()
+        );
 
         let converted = unsafe { ::core::ptr::read(&self as *const Self as *const P) };
 

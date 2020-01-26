@@ -1,13 +1,13 @@
-use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use core::fmt;
+use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use float::Float;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use {clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
 use blend::PreAlpha;
 use encoding::pixel::RawPixel;
+use {clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
 
 ///An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -424,8 +424,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use rgb::Rgba;
     use encoding::Srgb;
+    use rgb::Rgba;
 
     #[test]
     fn lower_hex() {

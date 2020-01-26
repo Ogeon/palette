@@ -13,7 +13,7 @@ pub fn bundle_impl(
     );
 
     if internal {
-        quote!{
+        quote! {
             #[allow(non_snake_case, unused_attributes, unused_qualifications, unused_imports)]
             mod #const_name {
                 use float::Float as _FloatTrait;
@@ -22,7 +22,7 @@ pub fn bundle_impl(
             }
         }
     } else {
-        quote!{
+        quote! {
             #[allow(non_snake_case, unused_attributes, unused_qualifications, unused_imports)]
             mod #const_name {
                 extern crate palette as _palette;
@@ -40,9 +40,9 @@ pub fn path(path: &[&str], internal: bool) -> TokenStream {
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
-        quote!{::#(#path)::*}
+        quote! {::#(#path)::*}
     } else {
-        quote!{self::_palette::#(#path)::*}
+        quote! {self::_palette::#(#path)::*}
     }
 }
 
@@ -52,9 +52,9 @@ pub fn path_type(path: &[&str], internal: bool) -> Type {
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
-        parse_quote!{::#(#path)::*}
+        parse_quote! {::#(#path)::*}
     } else {
-        parse_quote!{self::_palette::#(#path)::*}
+        parse_quote! {self::_palette::#(#path)::*}
     }
 }
 

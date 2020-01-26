@@ -1,33 +1,37 @@
-use {Blend, ComponentWise, LinSrgb, LinSrgba};
-use rgb::Rgb;
-use encoding::Linear;
 use blend::PreAlpha;
+use encoding::Linear;
+use rgb::Rgb;
+use {Blend, ComponentWise, LinSrgb, LinSrgba};
 
 #[test]
 fn blend_color() {
     let a = LinSrgb::new(1.0, 0.0, 0.0);
     let b = LinSrgb::new(0.0, 0.0, 1.0);
 
-    let c: LinSrgb = a.blend(
-        b,
-        |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
-            a.component_wise(&b, |a, b| a + b)
-        },
-    ).into();
+    let c: LinSrgb = a
+        .blend(
+            b,
+            |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
+                a.component_wise(&b, |a, b| a + b)
+            },
+        )
+        .into();
     assert_relative_eq!(LinSrgb::new(1.0, 0.0, 1.0), c);
 }
 
 #[test]
 fn blend_alpha_color() {
-    let a =  LinSrgba::new(1.0, 0.0, 0.0, 0.2);
-    let b =  LinSrgba::new(0.0, 0.0, 1.0, 0.2);
+    let a = LinSrgba::new(1.0, 0.0, 0.0, 0.2);
+    let b = LinSrgba::new(0.0, 0.0, 1.0, 0.2);
 
-    let c: LinSrgba = a.blend(
-        b,
-        |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
-            a.component_wise(&b, |a, b| a + b)
-        },
-    ).into();
+    let c: LinSrgba = a
+        .blend(
+            b,
+            |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
+                a.component_wise(&b, |a, b| a + b)
+            },
+        )
+        .into();
     assert_relative_eq!(LinSrgba::new(0.2 / 0.4, 0.0, 0.2 / 0.4, 0.4), c);
 }
 

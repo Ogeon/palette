@@ -15,7 +15,7 @@ fn start(_argc: isize, _argv: *const *const u8) -> isize {
 }
 
 #[lang = "eh_personality"]
-extern fn eh_personality() {}
+extern "C" fn eh_personality() {}
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
