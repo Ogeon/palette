@@ -189,6 +189,7 @@ pub use convert::{ConvertFrom, ConvertInto, FromColor, IntoColor, OutOfBounds};
 pub use encoding::pixel::Pixel;
 pub use hues::{LabHue, RgbHue};
 pub use matrix::Mat3;
+pub use relative_contrast::{contrast_ratio, RelativeContrast};
 
 //Helper macro for checking ranges and clamping.
 #[cfg(test)]
@@ -371,6 +372,7 @@ mod convert;
 pub mod encoding;
 mod equality;
 mod matrix;
+mod relative_contrast;
 pub mod white_point;
 
 pub mod float;

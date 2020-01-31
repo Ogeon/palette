@@ -5,10 +5,11 @@ use color_difference::ColorDifference;
 use color_difference::{get_ciede_difference, LabColorDiff};
 use encoding::pixel::RawPixel;
 use white_point::{WhitePoint, D65};
-use {clamp, from_f64};
-use {Alpha, Hue, Lab, LabHue, Xyz};
+use {clamp, contrast_ratio, from_f64};
+use {Alpha, Lab, LabHue, Xyz};
 use {
-    Component, FloatComponent, FromColor, GetHue, IntoColor, Limited, Mix, Pixel, Saturate, Shade,
+    Component, FloatComponent, FromColor, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
+    RelativeContrast, Saturate, Shade,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -514,6 +515,21 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
+    }
+}
+
+impl<Wp, T> RelativeContrast for Lch<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 

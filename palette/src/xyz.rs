@@ -6,9 +6,9 @@ use luma::LumaStandard;
 use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use rgb::{Rgb, RgbSpace, RgbStandard};
 use white_point::{WhitePoint, D65};
-use {clamp, from_f64};
+use {clamp, contrast_ratio, from_f64};
 use {Alpha, Lab, Luma, Yxy};
-use {Component, ComponentWise, FloatComponent, Limited, Mix, Pixel, Shade};
+use {Component, ComponentWise, FloatComponent, Limited, Mix, Pixel, RelativeContrast, Shade};
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
 /// `Alpha`](struct.Alpha.html#Xyza).
@@ -597,6 +597,18 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
+    }
+}
+
+impl<Wp, T> RelativeContrast for Xyz<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        contrast_ratio(self.y, other.y)
     }
 }
 

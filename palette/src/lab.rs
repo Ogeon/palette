@@ -3,9 +3,12 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use encoding::pixel::RawPixel;
 use white_point::{WhitePoint, D65};
-use {clamp, from_f64};
+use {clamp, contrast_ratio, from_f64};
 use {Alpha, LabHue, Lch, Xyz};
-use {Component, ComponentWise, FloatComponent, GetHue, Limited, Mix, Pixel, Shade};
+use {
+    Component, ComponentWise, FloatComponent, GetHue, IntoColor, Limited, Mix, Pixel,
+    RelativeContrast, Shade,
+};
 
 use color_difference::ColorDifference;
 use color_difference::{get_ciede_difference, LabColorDiff};
@@ -621,6 +624,21 @@ where
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()
+    }
+}
+
+impl<Wp, T> RelativeContrast for Lab<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    type Scalar = T;
+
+    fn get_contrast_ratio(&self, other: &Self) -> T {
+        let luma1 = self.into_luma();
+        let luma2 = other.into_luma();
+
+        contrast_ratio(luma1.luma, luma2.luma)
     }
 }
 
