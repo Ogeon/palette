@@ -6,7 +6,10 @@ https://law.resource.org/pub/us/cfr/ibr/003/cie.15.2004.pdf
 Tests XYZ and YXY conversion
 */
 
+use approx::assert_relative_eq;
 use csv;
+use serde_derive::Deserialize;
+
 use palette::white_point::D65;
 use palette::{IntoColor, Xyz, Yxy};
 

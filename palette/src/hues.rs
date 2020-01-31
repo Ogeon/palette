@@ -1,8 +1,8 @@
-use float::Float;
-
 use core::cmp::PartialEq;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
-use {from_f64, FromF64};
+
+use crate::float::Float;
+use crate::{from_f64, FromF64};
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -273,7 +273,7 @@ fn normalize_angle_positive<T: Float + FromF64>(deg: T) -> T {
 #[cfg(test)]
 mod test {
     use super::{normalize_angle, normalize_angle_positive};
-    use RgbHue;
+    use crate::RgbHue;
 
     #[test]
     fn normalize_angle_0_360() {

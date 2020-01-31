@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::ToTokens;
+use quote::{quote, ToTokens};
 use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, Type};
 
-use meta::{self, DataMetaParser, IdentOrIndex, MetaParser};
-use util;
+use crate::meta::{self, DataMetaParser, IdentOrIndex, MetaParser};
+use crate::util;
 
 pub fn derive(tokens: TokenStream) -> TokenStream {
     let DeriveInput {

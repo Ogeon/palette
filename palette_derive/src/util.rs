@@ -1,5 +1,6 @@
 use proc_macro2::{Span, TokenStream};
 use syn::{parse_quote, Ident, Type};
+use quote::quote;
 
 pub fn bundle_impl(
     trait_name: &str,
@@ -16,7 +17,7 @@ pub fn bundle_impl(
         quote! {
             #[allow(non_snake_case, unused_attributes, unused_qualifications, unused_imports)]
             mod #const_name {
-                use float::Float as _FloatTrait;
+                use crate::float::Float as _FloatTrait;
                 use super::*;
                 #block
             }
@@ -40,7 +41,7 @@ pub fn path(path: &[&str], internal: bool) -> TokenStream {
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
-        quote! {::#(#path)::*}
+        quote! {crate::#(#path)::*}
     } else {
         quote! {self::_palette::#(#path)::*}
     }

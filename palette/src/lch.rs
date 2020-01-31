@@ -1,27 +1,27 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
-use color_difference::ColorDifference;
-use color_difference::{get_ciede_difference, LabColorDiff};
-use encoding::pixel::RawPixel;
-use white_point::{WhitePoint, D65};
-use {clamp, contrast_ratio, from_f64};
-use {Alpha, Lab, LabHue, Xyz};
-use {
-    Component, FloatComponent, FromColor, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
-    RelativeContrast, Saturate, Shade,
+use crate::color_difference::ColorDifference;
+use crate::color_difference::{get_ciede_difference, LabColorDiff};
+use crate::encoding::pixel::RawPixel;
+use crate::white_point::{WhitePoint, D65};
+use crate::{clamp, contrast_ratio, from_f64};
+use crate::{Alpha, Hue, Lab, LabHue, Xyz};
+use crate::{
+    Component, FloatComponent, FromColor, GetHue, IntoColor, Limited, Mix, Pixel, RelativeContrast,
+    Saturate, Shade,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
 /// `Alpha`](struct.Alpha.html#Lcha).
 pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 
-///CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](struct.Lab.html).
+/// CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](struct.Lab.html).
 ///
-///L\*C\*h° shares its range and perceptual uniformity with L\*a\*b\*, but
+/// L\*C\*h° shares its range and perceptual uniformity with L\*a\*b\*, but
 /// it's a cylindrical color space, like [HSL](struct.Hsl.html) and
-///[HSV](struct.Hsv.html). This gives it the same ability to directly change
-///the hue and colorfulness of a color, while preserving other visual aspects.
+/// [HSV](struct.Hsv.html). This gives it the same ability to directly change
+/// the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -34,23 +34,23 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///L\* is the lightness of the color. 0.0 gives absolute black and 100.0
-    ///gives the brightest white.
+    /// L\* is the lightness of the color. 0.0 gives absolute black and 100.0
+    /// gives the brightest white.
     pub l: T,
 
-    ///C\* is the colorfulness of the color. It's similar to saturation. 0.0
-    ///gives gray scale colors, and numbers around 128-181 gives fully
-    ///saturated colors. The upper limit of 128 should
-    ///include the whole L\*a\*b\* space and some more.
+    /// C\* is the colorfulness of the color. It's similar to saturation. 0.0
+    /// gives gray scale colors, and numbers around 128-181 gives fully
+    /// saturated colors. The upper limit of 128 should
+    /// include the whole L\*a\*b\* space and some more.
     pub chroma: T,
 
-    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
-    ///etc.
+    /// The hue of the color, in degrees. Decides if it's red, blue, purple,
+    /// etc.
     #[palette_unsafe_same_layout_as = "T"]
     pub hue: LabHue<T>,
 
-    ///The white point associated with the color's illuminant and observer.
-    ///D65 for 2 degree observer is used by default.
+    /// The white point associated with the color's illuminant and observer.
+    /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
@@ -77,11 +77,11 @@ impl<T> Lch<D65, T>
 where
     T: FloatComponent,
 {
-    ///CIE L\*C\*h° with white point D65.
+    /// CIE L\*C\*h° with white point D65.
     pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<D65, T> {
         Lch {
-            l: l,
-            chroma: chroma,
+            l,
+            chroma,
             hue: hue.into(),
             white_point: PhantomData,
         }
@@ -93,11 +93,11 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///CIE L\*C\*h°.
+    /// CIE L\*C\*h°.
     pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<Wp, T> {
         Lch {
-            l: l,
-            chroma: chroma,
+            l,
+            chroma,
             hue: hue.into(),
             white_point: PhantomData,
         }
@@ -120,11 +120,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///CIE L\*C\*h° and transparency with white point D65.
+    /// CIE L\*C\*h° and transparency with white point D65.
     pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
             color: Lch::new(l, chroma, hue),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -136,11 +136,11 @@ where
     A: Component,
     Wp: WhitePoint,
 {
-    ///CIE L\*C\*h° and transparency.
+    /// CIE L\*C\*h° and transparency.
     pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
             color: Lch::with_wp(l, chroma, hue),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -535,8 +535,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use white_point::D65;
-    use Lch;
+    use crate::white_point::D65;
+    use crate::Lch;
 
     #[test]
     fn ranges() {

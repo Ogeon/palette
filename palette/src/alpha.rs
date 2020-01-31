@@ -1,25 +1,26 @@
 use core::fmt;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use float::Float;
-
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use blend::PreAlpha;
-use encoding::pixel::RawPixel;
-use {clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade};
+use crate::blend::PreAlpha;
+use crate::encoding::pixel::RawPixel;
+use crate::float::Float;
+use crate::{
+    clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade,
+};
 
-///An alpha component wrapper for colors.
+/// An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
-    ///The color.
+    /// The color.
     #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
-    ///The transparency component. 0.0 is fully transparent and 1.0 is fully
-    ///opaque.
+    /// The transparency component. 0.0 is fully transparent and 1.0 is fully
+    /// opaque.
     pub alpha: T,
 }
 
@@ -382,7 +383,7 @@ where
 impl<C, T: Component> From<C> for Alpha<C, T> {
     fn from(color: C) -> Alpha<C, T> {
         Alpha {
-            color: color,
+            color,
             alpha: T::max_intensity(),
         }
     }
@@ -424,8 +425,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use encoding::Srgb;
-    use rgb::Rgba;
+    use crate::encoding::Srgb;
+    use crate::rgb::Rgba;
 
     #[test]
     fn lower_hex() {

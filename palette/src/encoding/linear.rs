@@ -2,11 +2,11 @@
 
 use core::marker::PhantomData;
 
-use encoding::TransferFn;
-use float::Float;
-use luma::LumaStandard;
-use rgb::{RgbSpace, RgbStandard};
-use white_point::WhitePoint;
+use crate::encoding::TransferFn;
+use crate::float::Float;
+use crate::luma::LumaStandard;
+use crate::rgb::{RgbSpace, RgbStandard};
+use crate::white_point::WhitePoint;
 
 /// A generic standard with linear components.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -22,7 +22,7 @@ impl<Wp: WhitePoint> LumaStandard for Linear<Wp> {
     type TransferFn = LinearFn;
 }
 
-///Linear color component encoding.
+/// Linear color component encoding.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct LinearFn;
 

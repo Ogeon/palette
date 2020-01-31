@@ -2,9 +2,10 @@ use std::fmt;
 
 use proc_macro2::{Span, TokenStream};
 use syn::{parse_quote, GenericParam, Generics, Ident, Path, Turbofish, Type, TypePath};
+use quote::quote;
 
-use meta::KeyValuePair;
-use util;
+use crate::meta::KeyValuePair;
+use crate::util;
 
 pub fn find_in_generics(
     component: Option<&Type>,

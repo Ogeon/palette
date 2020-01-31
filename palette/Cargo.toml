@@ -9,6 +9,7 @@ repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "colour", "space", "linear"]
 license = "MIT OR Apache-2.0"
+edition = "2018"
 
 build = "build/main.rs"
 

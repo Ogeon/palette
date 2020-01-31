@@ -1,4 +1,5 @@
 use csv;
+use serde_derive::Deserialize;
 
 use super::babel::BabelData;
 use super::color_checker::ColorCheckerData;

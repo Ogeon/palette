@@ -1,27 +1,29 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use encoding::pixel::RawPixel;
-use luma::LumaStandard;
-use matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
-use rgb::{Rgb, RgbSpace, RgbStandard};
-use white_point::{WhitePoint, D65};
-use {clamp, contrast_ratio, from_f64};
-use {Alpha, Lab, Luma, Yxy};
-use {Component, ComponentWise, FloatComponent, Limited, Mix, Pixel, RelativeContrast, Shade};
+use crate::encoding::pixel::RawPixel;
+use crate::luma::LumaStandard;
+use crate::matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
+use crate::rgb::{Rgb, RgbSpace, RgbStandard};
+use crate::white_point::{WhitePoint, D65};
+use crate::{clamp, contrast_ratio, from_f64};
+use crate::{Alpha, Lab, Luma, Yxy};
+use crate::{
+    Component, ComponentWise, FloatComponent, Limited, Mix, Pixel, RelativeContrast, Shade,
+};
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
 /// `Alpha`](struct.Alpha.html#Xyza).
 pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 
-///The CIE 1931 XYZ color space.
+/// The CIE 1931 XYZ color space.
 ///
-///XYZ links the perceived colors to their wavelengths and simply makes it
-///possible to describe the way we see colors as numbers. It's often used when
-///converting from one color space to an other, and requires a standard
-///illuminant and a standard observer to be defined.
+/// XYZ links the perceived colors to their wavelengths and simply makes it
+/// possible to describe the way we see colors as numbers. It's often used when
+/// converting from one color space to an other, and requires a standard
+/// illuminant and a standard observer to be defined.
 ///
-///Conversions and operations on this color space depend on the defined white
+/// Conversions and operations on this color space depend on the defined white
 /// point
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -35,21 +37,21 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///X is the scale of what can be seen as a response curve for the cone
-    ///cells in the human eye. Its range depends
-    ///on the white point and goes from 0.0 to 0.95047 for the default D65.
+    /// X is the scale of what can be seen as a response curve for the cone
+    /// cells in the human eye. Its range depends
+    /// on the white point and goes from 0.0 to 0.95047 for the default D65.
     pub x: T,
 
-    ///Y is the luminance of the color, where 0.0 is black and 1.0 is white.
+    /// Y is the luminance of the color, where 0.0 is black and 1.0 is white.
     pub y: T,
 
-    ///Z is the scale of what can be seen as the blue stimulation. Its range
+    /// Z is the scale of what can be seen as the blue stimulation. Its range
     /// depends on the white point and goes from 0.0 to 1.08883 for the
     /// defautl D65.
     pub z: T,
 
-    ///The white point associated with the color's illuminant and observer.
-    ///D65 for 2 degree observer is used by default.
+    /// The white point associated with the color's illuminant and observer.
+    /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
@@ -76,12 +78,12 @@ impl<T> Xyz<D65, T>
 where
     T: FloatComponent,
 {
-    ///CIE XYZ with whtie point D65.
+    /// CIE XYZ with whtie point D65.
     pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
         Xyz {
-            x: x,
-            y: y,
-            z: z,
+            x,
+            y,
+            z,
             white_point: PhantomData,
         }
     }
@@ -92,12 +94,12 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///CIE XYZ.
+    /// CIE XYZ.
     pub fn with_wp(x: T, y: T, z: T) -> Xyz<Wp, T> {
         Xyz {
-            x: x,
-            y: y,
-            z: z,
+            x,
+            y,
+            z,
             white_point: PhantomData,
         }
     }
@@ -119,11 +121,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///CIE Yxy and transparency with white point D65.
+    /// CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Xyz::new(x, y, luma),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -135,11 +137,11 @@ where
     A: Component,
     Wp: WhitePoint,
 {
-    ///CIE XYZ and transparency.
+    /// CIE XYZ and transparency.
     pub fn with_wp(x: T, y: T, z: T, alpha: A) -> Self {
         Alpha {
             color: Xyz::with_wp(x, y, z),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -252,7 +254,7 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         let xyz_ref: Self = Wp::get_xyz();
         self.x >= T::zero() && self.x <= xyz_ref.x &&
@@ -615,9 +617,9 @@ where
 #[cfg(test)]
 mod test {
     use super::Xyz;
-    use white_point::D65;
-    use LinLuma;
-    use LinSrgb;
+    use crate::white_point::D65;
+    use crate::LinLuma;
+    use crate::LinSrgb;
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;

@@ -9,6 +9,7 @@ repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["palette", "derive", "macros"]
 license = "MIT OR Apache-2.0"
+edition = "2018"
 
 [lib]
 proc-macro = true

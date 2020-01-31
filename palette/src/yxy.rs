@@ -1,12 +1,12 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use encoding::pixel::RawPixel;
-use luma::LumaStandard;
-use white_point::{WhitePoint, D65};
-use {clamp, contrast_ratio};
-use {Alpha, Luma, Xyz};
-use {
+use crate::encoding::pixel::RawPixel;
+use crate::luma::LumaStandard;
+use crate::white_point::{WhitePoint, D65};
+use crate::{clamp, contrast_ratio};
+use crate::{Alpha, Luma, Xyz};
+use crate::{
     Component, ComponentWise, FloatComponent, IntoColor, Limited, Mix, Pixel, RelativeContrast,
     Shade,
 };
@@ -15,13 +15,13 @@ use {
 /// in `Alpha`](struct.Alpha.html#Yxya).
 pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 
-///The CIE 1931 Yxy (xyY)  color space.
+/// The CIE 1931 Yxy (xyY)  color space.
 ///
-///Yxy is a luminance-chromaticity color space derived from the CIE XYZ
-///color space. It is widely used to define colors. The chromacity diagrams
-///for the color spaces are a plot of this color space's x and y coordiantes.
+/// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
+/// color space. It is widely used to define colors. The chromacity diagrams
+/// for the color spaces are a plot of this color space's x and y coordiantes.
 ///
-///Conversions and operations on this color space depend on the white point.
+/// Conversions and operations on this color space depend on the white point.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -34,21 +34,21 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
-    ///Typical range is between 0 and 1
+    /// x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
+    /// Typical range is between 0 and 1
     pub x: T,
 
-    ///y chromacity co-ordinate derived from XYZ color space as Y/(X+Y+Z).
-    ///Typical range is between 0 and 1
+    /// y chromacity co-ordinate derived from XYZ color space as Y/(X+Y+Z).
+    /// Typical range is between 0 and 1
     pub y: T,
 
-    ///luma (Y) was a measure of the brightness or luminance of a color.
-    ///It is the same as the Y from the XYZ color space. Its range is from
+    /// luma (Y) was a measure of the brightness or luminance of a color.
+    /// It is the same as the Y from the XYZ color space. Its range is from
     ///0 to 1, where 0 is black and 1 is white.
     pub luma: T,
 
-    ///The white point associated with the color's illuminant and observer.
-    ///D65 for 2 degree observer is used by default.
+    /// The white point associated with the color's illuminant and observer.
+    /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
@@ -75,12 +75,12 @@ impl<T> Yxy<D65, T>
 where
     T: FloatComponent,
 {
-    ///CIE Yxy with white point D65.
+    /// CIE Yxy with white point D65.
     pub fn new(x: T, y: T, luma: T) -> Yxy<D65, T> {
         Yxy {
-            x: x,
-            y: y,
-            luma: luma,
+            x,
+            y,
+            luma,
             white_point: PhantomData,
         }
     }
@@ -91,12 +91,12 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///CIE Yxy.
+    /// CIE Yxy.
     pub fn with_wp(x: T, y: T, luma: T) -> Yxy<Wp, T> {
         Yxy {
-            x: x,
-            y: y,
-            luma: luma,
+            x,
+            y,
+            luma,
             white_point: PhantomData,
         }
     }
@@ -118,11 +118,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///CIE Yxy and transparency with white point D65.
+    /// CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Yxy::new(x, y, luma),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -133,11 +133,11 @@ where
     A: Component,
     Wp: WhitePoint,
 {
-    ///CIE Yxy and transparency.
+    /// CIE Yxy and transparency.
     pub fn with_wp(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Yxy::with_wp(x, y, luma),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -216,7 +216,7 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         self.x >= T::zero() && self.x <= T::one() &&
         self.y >= T::zero() && self.y <= T::one() &&
@@ -584,9 +584,9 @@ where
 #[cfg(test)]
 mod test {
     use super::Yxy;
-    use white_point::D65;
-    use LinLuma;
-    use LinSrgb;
+    use crate::white_point::D65;
+    use crate::LinLuma;
+    use crate::LinSrgb;
 
     #[test]
     fn luma() {

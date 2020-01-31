@@ -1,6 +1,3 @@
-extern crate image;
-extern crate palette;
-
 #[cfg(not(feature = "std"))]
 fn main() {
     println!("You can't use gradients without the standard library");

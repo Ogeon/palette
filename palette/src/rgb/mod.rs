@@ -1,38 +1,37 @@
-//!RGB types, spaces and standards.
+//! RGB types, spaces and standards.
 
 use core::any::Any;
 
-use white_point::WhitePoint;
-use {Component, FloatComponent, FromComponent, Yxy};
-
-use encoding::{Linear, TransferFn};
+use crate::encoding::{self, Gamma, Linear, TransferFn};
+use crate::white_point::WhitePoint;
+use crate::{Component, FloatComponent, FromComponent, Yxy};
 
 pub use self::rgb::{Rgb, Rgba};
 
 //mod linear;
 mod rgb;
 
-///Nonlinear sRGB.
-pub type Srgb<T = f32> = Rgb<::encoding::Srgb, T>;
-///Nonlinear sRGB with an alpha component.
-pub type Srgba<T = f32> = Rgba<::encoding::Srgb, T>;
+/// Nonlinear sRGB.
+pub type Srgb<T = f32> = Rgb<encoding::Srgb, T>;
+/// Nonlinear sRGB with an alpha component.
+pub type Srgba<T = f32> = Rgba<encoding::Srgb, T>;
 
-///Linear sRGB.
-pub type LinSrgb<T = f32> = Rgb<Linear<::encoding::Srgb>, T>;
-///Linear sRGB with an alpha component.
-pub type LinSrgba<T = f32> = Rgba<Linear<::encoding::Srgb>, T>;
+/// Linear sRGB.
+pub type LinSrgb<T = f32> = Rgb<Linear<encoding::Srgb>, T>;
+/// Linear sRGB with an alpha component.
+pub type LinSrgba<T = f32> = Rgba<Linear<encoding::Srgb>, T>;
 
 /// Gamma 2.2 encoded sRGB.
-pub type GammaSrgb<T = f32> = Rgb<::encoding::Gamma<::encoding::Srgb>, T>;
+pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 /// Gamma 2.2 encoded sRGB with an alpha component.
-pub type GammaSrgba<T = f32> = Rgba<::encoding::Gamma<::encoding::Srgb>, T>;
+pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
-///An RGB space and a transfer function.
+/// An RGB space and a transfer function.
 pub trait RgbStandard {
-    ///The RGB color space.
+    /// The RGB color space.
     type Space: RgbSpace;
 
-    ///The transfer function for the color components.
+    /// The transfer function for the color components.
     type TransferFn: TransferFn;
 }
 
@@ -46,12 +45,12 @@ impl<P: Primaries, W: WhitePoint, T: TransferFn> RgbStandard for (P, W, T) {
     type TransferFn = T;
 }
 
-///A set of primaries and a white point.
+/// A set of primaries and a white point.
 pub trait RgbSpace {
-    ///The primaries of the RGB color space.
+    /// The primaries of the RGB color space.
     type Primaries: Primaries;
 
-    ///The white point of the RGB color space.
+    /// The white point of the RGB color space.
     type WhitePoint: WhitePoint;
 }
 
@@ -60,13 +59,13 @@ impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
     type WhitePoint = W;
 }
 
-///Represents the red, green and blue primaries of an RGB space.
+/// Represents the red, green and blue primaries of an RGB space.
 pub trait Primaries: Any {
-    ///Primary red.
+    /// Primary red.
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
-    ///Primary green.
+    /// Primary green.
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
-    ///Primary blue.
+    /// Primary blue.
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
 }
 

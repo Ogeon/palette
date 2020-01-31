@@ -1,13 +1,14 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use syn::{parse_macro_input, DeriveInput, Generics, Ident, Type};
+use quote::quote;
 
-use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
-use util;
+use crate::meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
+use crate::util;
 
 use super::shared::{self, ConvertDirection};
 
-use COLOR_TYPES;
+use crate::COLOR_TYPES;
 
 pub fn derive(tokens: TokenStream) -> TokenStream {
     let DeriveInput {

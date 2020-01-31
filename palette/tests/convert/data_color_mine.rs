@@ -2,6 +2,11 @@
 List of color from www.colormine.org
 */
 use csv;
+
+use approx::assert_relative_eq;
+use lazy_static::lazy_static;
+use serde_derive::Deserialize;
+
 use palette::white_point::D65;
 use palette::{Hsl, Hsv, Hwb, IntoColor, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 

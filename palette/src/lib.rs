@@ -133,7 +133,6 @@
 //! When the desired processing is done, it's time to encode the colors back
 //! into some image format. The same rules applies as for the decoding, but the
 //! process reversed.
-//!
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
@@ -149,8 +148,6 @@ extern crate approx;
 
 #[macro_use]
 extern crate palette_derive;
-
-extern crate num_traits;
 
 #[cfg(feature = "phf")]
 extern crate phf;
@@ -208,7 +205,7 @@ macro_rules! assert_ranges {
     ) => (
         {
             use core::iter::repeat;
-            use Limited;
+            use crate::Limited;
 
             {
                 print!("checking below limits ... ");
@@ -387,71 +384,65 @@ fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
     }
 }
 
-///A trait for clamping and checking if colors are within their ranges.
+/// A trait for clamping and checking if colors are within their ranges.
 pub trait Limited {
-    ///Check if the color's components are within the expected ranges.
+    /// Check if the color's components are within the expected ranges.
     fn is_valid(&self) -> bool;
 
-    ///Return a new color where the components has been clamped to the nearest
-    ///valid values.
+    /// Return a new color where the components has been clamped to the nearest
+    /// valid values.
     fn clamp(&self) -> Self;
 
-    ///Clamp the color's components to the nearest valid values.
+    /// Clamp the color's components to the nearest valid values.
     fn clamp_self(&mut self);
 }
 
 /// A trait for linear color interpolation.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate approx;
+/// use approx::assert_relative_eq;
 ///
 /// use palette::{LinSrgb, Mix};
 ///
-/// fn main() {
-///     let a = LinSrgb::new(0.0, 0.5, 1.0);
-///     let b = LinSrgb::new(1.0, 0.5, 0.0);
+/// let a = LinSrgb::new(0.0, 0.5, 1.0);
+/// let b = LinSrgb::new(1.0, 0.5, 0.0);
 ///
-///     assert_relative_eq!(a.mix(&b, 0.0), a);
-///     assert_relative_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
-///     assert_relative_eq!(a.mix(&b, 1.0), b);
-/// }
+/// assert_relative_eq!(a.mix(&b, 0.0), a);
+/// assert_relative_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
+/// assert_relative_eq!(a.mix(&b, 1.0), b);
 /// ```
 pub trait Mix {
-    ///The type of the mixing factor.
+    /// The type of the mixing factor.
     type Scalar: Float;
 
-    ///Mix the color with an other color, by `factor`.
+    /// Mix the color with an other color, by `factor`.
     ///
-    ///`factor` sould be between `0.0` and `1.0`, where `0.0` will result in
-    ///the same color as `self` and `1.0` will result in the same color as
-    ///`other`.
+    /// `factor` sould be between `0.0` and `1.0`, where `0.0` will result in
+    /// the same color as `self` and `1.0` will result in the same color as
+    /// `other`.
     fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
 }
 
 /// The `Shade` trait allows a color to be lightened or darkened.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate approx;
+/// use approx::assert_relative_eq;
 ///
 /// use palette::{LinSrgb, Shade};
 ///
-/// fn main() {
-///     let a = LinSrgb::new(0.4, 0.4, 0.4);
-///     let b = LinSrgb::new(0.6, 0.6, 0.6);
+/// let a = LinSrgb::new(0.4, 0.4, 0.4);
+/// let b = LinSrgb::new(0.6, 0.6, 0.6);
 ///
-///     assert_relative_eq!(a.lighten(0.1), b.darken(0.1));
-/// }
+/// assert_relative_eq!(a.lighten(0.1), b.darken(0.1));
 /// ```
 pub trait Shade: Sized {
-    ///The type of the lighten/darken amount.
+    /// The type of the lighten/darken amount.
     type Scalar: Float;
 
-    ///Lighten the color by `amount`.
+    /// Lighten the color by `amount`.
     fn lighten(&self, amount: Self::Scalar) -> Self;
 
-    ///Darken the color by `amount`.
+    /// Darken the color by `amount`.
     fn darken(&self, amount: Self::Scalar) -> Self {
         self.lighten(-amount)
     }
@@ -460,45 +451,42 @@ pub trait Shade: Sized {
 /// A trait for colors where a hue may be calculated.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate approx;
+/// use approx::assert_relative_eq;
 ///
 /// use palette::{GetHue, LinSrgb};
 ///
-/// fn main() {
-///     let red = LinSrgb::new(1.0f32, 0.0, 0.0);
-///     let green = LinSrgb::new(0.0f32, 1.0, 0.0);
-///     let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
-///     let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
+/// let red = LinSrgb::new(1.0f32, 0.0, 0.0);
+/// let green = LinSrgb::new(0.0f32, 1.0, 0.0);
+/// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
+/// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
-///     assert_relative_eq!(red.get_hue().unwrap(), 0.0.into());
-///     assert_relative_eq!(green.get_hue().unwrap(), 120.0.into());
-///     assert_relative_eq!(blue.get_hue().unwrap(), 240.0.into());
-///     assert_eq!(gray.get_hue(), None);
-/// }
+/// assert_relative_eq!(red.get_hue().unwrap(), 0.0.into());
+/// assert_relative_eq!(green.get_hue().unwrap(), 120.0.into());
+/// assert_relative_eq!(blue.get_hue().unwrap(), 240.0.into());
+/// assert_eq!(gray.get_hue(), None);
 /// ```
 pub trait GetHue {
-    ///The kind of hue unit this color space uses.
+    /// The kind of hue unit this color space uses.
     ///
-    ///The hue is most commonly calculated as an angle around a color circle
-    ///and may not always be uniform between color spaces. It's therefore not
-    ///recommended to take one type of hue and apply it to a color space that
-    ///expects an other.
+    /// The hue is most commonly calculated as an angle around a color circle
+    /// and may not always be uniform between color spaces. It's therefore not
+    /// recommended to take one type of hue and apply it to a color space that
+    /// expects an other.
     type Hue;
 
-    ///Calculate a hue if possible.
+    /// Calculate a hue if possible.
     ///
-    ///Colors in the gray scale has no well defined hue and should preferably
-    ///return `None`.
+    /// Colors in the gray scale has no well defined hue and should preferably
+    /// return `None`.
     fn get_hue(&self) -> Option<Self::Hue>;
 }
 
-///A trait for colors where the hue can be manipulated without conversion.
+/// A trait for colors where the hue can be manipulated without conversion.
 pub trait Hue: GetHue {
-    ///Return a new copy of `self`, but with a specific hue.
+    /// Return a new copy of `self`, but with a specific hue.
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Self;
 
-    ///Return a new copy of `self`, but with the hue shifted by `amount`.
+    /// Return a new copy of `self`, but with the hue shifted by `amount`.
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Self;
 }
 
@@ -506,44 +494,41 @@ pub trait Hue: GetHue {
 /// without conversion.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate approx;
+/// use approx::assert_relative_eq;
 ///
 /// use palette::{Hsv, Saturate};
 ///
-/// fn main() {
-///     let a = Hsv::new(0.0, 0.25, 1.0);
-///     let b = Hsv::new(0.0, 1.0, 1.0);
+/// let a = Hsv::new(0.0, 0.25, 1.0);
+/// let b = Hsv::new(0.0, 1.0, 1.0);
 ///
-///     assert_relative_eq!(a.saturate(1.0), b.desaturate(0.5));
-/// }
+/// assert_relative_eq!(a.saturate(1.0), b.desaturate(0.5));
 /// ```
 pub trait Saturate: Sized {
-    ///The type of the (de)saturation factor.
+    /// The type of the (de)saturation factor.
     type Scalar: Float;
 
-    ///Increase the saturation by `factor`.
+    /// Increase the saturation by `factor`.
     fn saturate(&self, factor: Self::Scalar) -> Self;
 
-    ///Decrease the saturation by `factor`.
+    /// Decrease the saturation by `factor`.
     fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
 }
 
-///Perform a unary or binary operation on each component of a color.
+/// Perform a unary or binary operation on each component of a color.
 pub trait ComponentWise {
-    ///The scalar type for color components.
+    /// The scalar type for color components.
     type Scalar;
 
-    ///Perform a binary operation on this and an other color.
+    /// Perform a binary operation on this and an other color.
     fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
         &self,
         other: &Self,
         f: F,
     ) -> Self;
 
-    ///Perform a unary operation on this color.
+    /// Perform a unary operation on this color.
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
 }
 

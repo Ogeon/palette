@@ -1,3 +1,5 @@
+use approx::assert_relative_eq;
+
 use palette::{IntoColor, Lab, Lch};
 
 #[test]

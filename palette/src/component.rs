@@ -1,7 +1,7 @@
 use num_traits::Zero;
 
-use float::Float;
-use {clamp, FromF64};
+use crate::float::Float;
+use crate::{clamp, FromF64};
 
 /// Common trait for color components.
 pub trait Component: Copy + Zero + PartialOrd {
@@ -44,7 +44,8 @@ macro_rules! impl_uint_components {
 
 impl_uint_components!(u8, u16, u32, u64, u128);
 
-/// Converts from a color component type, while performing the appropriate scaling, rounding and clamping.
+/// Converts from a color component type, while performing the appropriate
+/// scaling, rounding and clamping.
 ///
 /// ```
 /// use palette::FromComponent;
@@ -54,7 +55,8 @@ impl_uint_components!(u8, u16, u32, u64, u128);
 /// assert_eq!(u8_component, 255);
 /// ```
 pub trait FromComponent<T: Component> {
-    /// Converts `other` into `Self`, while performing the appropriate scaling, rounding and clamping.
+    /// Converts `other` into `Self`, while performing the appropriate scaling,
+    /// rounding and clamping.
     fn from_component(other: T) -> Self;
 }
 
@@ -65,7 +67,8 @@ impl<T: Component, U: IntoComponent<T> + Component> FromComponent<U> for T {
     }
 }
 
-/// Converts into a color component type, while performing the appropriate scaling, rounding and clamping.
+/// Converts into a color component type, while performing the appropriate
+/// scaling, rounding and clamping.
 ///
 /// ```
 /// use palette::IntoComponent;
@@ -75,7 +78,8 @@ impl<T: Component, U: IntoComponent<T> + Component> FromComponent<U> for T {
 /// assert_eq!(u8_component, 255);
 /// ```
 pub trait IntoComponent<T: Component> {
-    /// Converts `self` into `T`, while performing the appropriate scaling, rounding and clamping.
+    /// Converts `self` into `T`, while performing the appropriate scaling,
+    /// rounding and clamping.
     fn into_component(self) -> T;
 }
 

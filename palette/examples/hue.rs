@@ -1,6 +1,3 @@
-extern crate image;
-extern crate palette;
-
 use palette::{Hsl, Hue, Lch, Pixel, Srgb};
 
 fn main() {

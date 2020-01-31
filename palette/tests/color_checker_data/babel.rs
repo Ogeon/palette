@@ -6,6 +6,9 @@ The Rgb colors in this data appear to be adapted to the D50 white_point from the
 
 */
 
+use approx::assert_relative_eq;
+use lazy_static::lazy_static;
+
 use palette::white_point::D50;
 use palette::{IntoColor, Lab, Xyz, Yxy};
 

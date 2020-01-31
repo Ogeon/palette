@@ -1,7 +1,3 @@
-extern crate image;
-extern crate num_traits;
-extern crate palette;
-
 use image::{GenericImage, GenericImageView, RgbImage};
 
 #[cfg(feature = "std")]
@@ -9,7 +5,7 @@ use palette::{Gradient, LinSrgb, Mix};
 use palette::{Pixel, Srgb};
 
 mod color_spaces {
-    use display_colors;
+    use crate::display_colors;
     use palette::{Hue, Lch, LinSrgb, Srgb};
 
     pub fn run() {
@@ -27,7 +23,7 @@ mod color_spaces {
 }
 
 mod manipulation {
-    use display_colors;
+    use crate::display_colors;
     use palette::{Lch, Saturate, Shade, Srgb};
 
     pub fn run() {
@@ -48,7 +44,7 @@ mod manipulation {
 
 #[cfg(feature = "std")]
 mod gradients {
-    use display_gradients;
+    use crate::display_gradients;
     use palette::{Gradient, Hsv, LinSrgb};
 
     pub fn run() {

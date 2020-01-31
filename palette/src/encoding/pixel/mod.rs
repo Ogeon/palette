@@ -1,33 +1,39 @@
-//!Pixel encodings and pixel format conversion.
+//! Pixel encodings and pixel format conversion.
 
 pub use self::raw::*;
 mod raw;
 
-/// Represents colors that can be serialized and deserialized from raw color components.
+/// Represents colors that can be serialized and deserialized from raw color
+/// components.
 ///
-/// This uses bit by bit conversion, so make sure that anything that implements it can be
-/// represented as a contiguous sequence of a single type `T`. This is most safely done using
-/// `#[derive(Pixel)]`.
+/// This uses bit by bit conversion, so make sure that anything that implements
+/// it can be represented as a contiguous sequence of a single type `T`. This is
+/// most safely done using `#[derive(Pixel)]`.
 ///
 /// # Deriving
 ///
-/// `Pixel` can be automatically derived. The only requirements are that the type is a `struct`,
-/// that it has a `#[repr(C)]` attribute, and that all of its fields have the same types. It stays
-/// on the conservative side and will show an error if any of those requirements are not fulfilled.
-/// If some fields have different types, but the same memory layout, or are zero-sized, they can be
-/// marked with attributes to show that their types are safe to use.
+/// `Pixel` can be automatically derived. The only requirements are that the
+/// type is a `struct`, that it has a `#[repr(C)]` attribute, and that all of
+/// its fields have the same types. It stays on the conservative side and will
+/// show an error if any of those requirements are not fulfilled. If some fields
+/// have different types, but the same memory layout, or are zero-sized, they
+/// can be marked with attributes to show that their types are safe to use.
 ///
 /// ## Field Attributes
 ///
-/// * `#[palette_unsafe_same_layout_as = "SomeType"]`: Mark the field as having the same memory
+/// * `#[palette_unsafe_same_layout_as = "SomeType"]`: Mark the field as having
+///   the same memory
 /// layout as `SomeType`.
 ///
-///   **Unsafety:** corrupt data and undefined behavior may occur if this is not true!
+///   **Unsafety:** corrupt data and undefined behavior may occur if this is not
+/// true!
 ///
-/// * `#[palette_unsafe_zero_sized]`: Mark the field as being zero-sized, and thus not taking up
+/// * `#[palette_unsafe_zero_sized]`: Mark the field as being zero-sized, and
+///   thus not taking up
 /// any memory space. This means that it can be ignored.
 ///
-///   **Unsafety:** corrupt data and undefined behavior may occur if this is not true!
+///   **Unsafety:** corrupt data and undefined behavior may occur if this is not
+/// true!
 ///
 /// ## Examples
 ///
@@ -45,20 +51,18 @@ mod raw;
 ///     key: f32,
 /// }
 ///
-/// fn main() {
-///     let buffer = [0.1, 0.2, 0.3, 0.4];
-///     let color = MyCmyk::from_raw(&buffer);
+/// let buffer = [0.1, 0.2, 0.3, 0.4];
+/// let color = MyCmyk::from_raw(&buffer);
 ///
-///     assert_eq!(
-///         color,
-///         &MyCmyk {
-///             cyan: 0.1,
-///             magenta: 0.2,
-///             yellow: 0.3,
-///             key: 0.4,
-///         }
-///     );
-/// }
+/// assert_eq!(
+///     color,
+///     &MyCmyk {
+///         cyan: 0.1,
+///         magenta: 0.2,
+///         yellow: 0.3,
+///         key: 0.4,
+///     }
+/// );
 /// ```
 ///
 /// Heterogenous field types:
@@ -83,20 +87,18 @@ mod raw;
 ///     chroma: f32,
 /// }
 ///
-/// fn main() {
-///     let buffer = [172.0, 100.0, 0.3];
-///     let color = MyCoolColor::<Srgb>::from_raw(&buffer);
+/// let buffer = [172.0, 100.0, 0.3];
+/// let color = MyCoolColor::<Srgb>::from_raw(&buffer);
 ///
-///     assert_eq!(
-///         color,
-///         &MyCoolColor {
-///             hue: 172.0.into(),
-///             lumen: 100.0,
-///             chroma: 0.3,
-///             standard: PhantomData,
-///         }
-///     );
-/// }
+/// assert_eq!(
+///     color,
+///     &MyCoolColor {
+///         hue: 172.0.into(),
+///         lumen: 100.0,
+///         chroma: 0.3,
+///         standard: PhantomData,
+///     }
+/// );
 /// ```
 pub unsafe trait Pixel<T>: Sized {
     /// The number of color channels.
@@ -168,7 +170,8 @@ pub unsafe trait Pixel<T>: Sized {
         unsafe { ::core::slice::from_raw_parts(slice.as_ptr() as *const Self, new_length) }
     }
 
-    /// Cast a mutable slice of raw color components to a mutable slice of colors.
+    /// Cast a mutable slice of raw color components to a mutable slice of
+    /// colors.
     ///
     /// ```rust
     /// use palette::{Pixel, Srgb};
@@ -210,7 +213,8 @@ pub unsafe trait Pixel<T>: Sized {
         unsafe { ::core::slice::from_raw_parts(slice.as_ptr() as *const T, new_length) }
     }
 
-    /// Cast a mutable slice of colors to a mutable slice of raw color components.
+    /// Cast a mutable slice of colors to a mutable slice of raw color
+    /// components.
     ///
     /// ```rust
     /// use palette::{Pixel, Srgb};

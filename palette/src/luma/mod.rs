@@ -2,8 +2,8 @@
 
 mod luma;
 
-use encoding::{Gamma, Linear, Srgb, TransferFn};
-use white_point::{WhitePoint, D65};
+use crate::encoding::{Gamma, Linear, Srgb, TransferFn};
+use crate::white_point::{WhitePoint, D65};
 
 pub use self::luma::{Luma, Lumaa};
 

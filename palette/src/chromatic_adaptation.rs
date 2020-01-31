@@ -1,45 +1,45 @@
-//!Convert colors from one reference white point to another
+//! Convert colors from one reference white point to another
 //!
-//!Chromatic adaptation is the human visual system’s ability to adjust to changes
-//!in illumination in order to preserve the appearance of object colors. It is responsible
-//!for the stable appearance of object colours despite the wide variation of light which
-//!might be reflected from an object and observed by our eyes.
+//! Chromatic adaptation is the human visual system’s ability to adjust to
+//! changes in illumination in order to preserve the appearance of object
+//! colors. It is responsible for the stable appearance of object colours
+//! despite the wide variation of light which might be reflected from an object
+//! and observed by our eyes.
 //!
-//!This library provides three methods for chromatic adaptation Bradford (which is the default),
-//!VonKries and XyzScaling
+//! This library provides three methods for chromatic adaptation Bradford (which
+//! is the default), VonKries and XyzScaling
 //!
-//!```
-//!use palette::Xyz;
-//!use palette::white_point::{A, C};
-//!use palette::chromatic_adaptation::AdaptInto;
+//! ```
+//! use palette::Xyz;
+//! use palette::white_point::{A, C};
+//! use palette::chromatic_adaptation::AdaptInto;
 //!
 //!
-//!let a = Xyz::<A, f32>::with_wp(0.315756, 0.162732, 0.015905);
+//! let a = Xyz::<A, f32>::with_wp(0.315756, 0.162732, 0.015905);
 //!
-//!//Will convert Xyz<A, f32> to Xyz<C, f32> using Bradford chromatic adaptation
-//!let c: Xyz<C, f32> = a.adapt_into();
+//! //Will convert Xyz<A, f32> to Xyz<C, f32> using Bradford chromatic adaptation
+//! let c: Xyz<C, f32> = a.adapt_into();
 //!
-//!//Should print {x: 0.257963, y: 0.139776,z: 0.058825}
-//!println!("{:?}", c)
-//!```
-use float::Float;
+//! //Should print {x: 0.257963, y: 0.139776,z: 0.058825}
+//! println!("{:?}", c)
+//! ```
+use crate::float::Float;
+use crate::from_f64;
+use crate::matrix::{multiply_3x3, multiply_xyz, Mat3};
+use crate::white_point::WhitePoint;
+use crate::{FloatComponent, FromColor, IntoColor, Xyz};
 
-use from_f64;
-use matrix::{multiply_3x3, multiply_xyz, Mat3};
-use white_point::WhitePoint;
-use {FloatComponent, FromColor, IntoColor, Xyz};
-
-///Chromatic adaptation methods implemented in the library
+/// Chromatic adaptation methods implemented in the library
 pub enum Method {
-    ///Bradford chromatic adaptation method
+    /// Bradford chromatic adaptation method
     Bradford,
-    ///VonKries chromatic adaptation method
+    /// VonKries chromatic adaptation method
     VonKries,
-    ///XyzScaling chromatic adaptation method
+    /// XyzScaling chromatic adaptation method
     XyzScaling,
 }
 
-///Holds the matrix coeffecients for the chromatic adaptation methods
+/// Holds the matrix coeffecients for the chromatic adaptation methods
 pub struct ConeResponseMatrices<T: Float> {
     ///3x3 matrix for the cone response domains
     pub ma: Mat3<T>,
@@ -47,19 +47,19 @@ pub struct ConeResponseMatrices<T: Float> {
     pub inv_ma: Mat3<T>,
 }
 
-///Generates a conversion matrix to convert the Xyz trisitmilus values from
-///one illuminant to another (Swp -> Dwp)
+/// Generates a conversion matrix to convert the Xyz trisitmilus values from
+/// one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
 where
     T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    ///Get the cone response functions for the chromatic adaptation method
+    /// Get the cone response functions for the chromatic adaptation method
     fn get_cone_response(&self) -> ConeResponseMatrices<T>;
 
-    ///Generates a 3x3 transformation matrix to convert color from one reference white point
-    ///to another with the given cone_response
+    /// Generates a 3x3 transformation matrix to convert color from one
+    /// reference white point to another with the given cone_response
     fn generate_transform_matrix(&self) -> Mat3<T> {
         let s_wp: Xyz<Swp, T> = Swp::get_xyz();
         let t_wp: Xyz<Dwp, T> = Dwp::get_xyz();
@@ -91,7 +91,7 @@ where
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn get_cone_response(&self) -> ConeResponseMatrices<T> {
         match *self {
              Method::Bradford => {
@@ -140,22 +140,22 @@ where
     }
 }
 
-///Trait to convert color from one reference white point to another
+/// Trait to convert color from one reference white point to another
 ///
-///Converts a color from the source white point (Swp) to the destination white point (Dwp).
-///Uses the bradford method for conversion by default.
+/// Converts a color from the source white point (Swp) to the destination white
+/// point (Dwp). Uses the bradford method for conversion by default.
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
 where
     T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford
+    /// Convert the source color to the destination color using the bradford
     /// method by default
     fn adapt_from(color: S) -> Self {
         Self::adapt_from_using(color, Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified
+    /// Convert the source color to the destination color using the specified
     /// method
     fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> Self;
 }
@@ -176,22 +176,22 @@ where
     }
 }
 
-///Trait to convert color with one reference white point into another
+/// Trait to convert color with one reference white point into another
 ///
-///Converts a color with the source white point (Swp) into the destination white point (Dwp).
-///Uses the bradford method for conversion by default.
+/// Converts a color with the source white point (Swp) into the destination
+/// white point (Dwp). Uses the bradford method for conversion by default.
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
 where
     T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
 {
-    ///Convert the source color to the destination color using the bradford
+    /// Convert the source color to the destination color using the bradford
     /// method by default
     fn adapt_into(self) -> D {
         self.adapt_into_using(Method::Bradford)
     }
-    ///Convert the source color to the destination color using the specified
+    /// Convert the source color to the destination color using the specified
     /// method
     fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D;
 }
@@ -212,8 +212,8 @@ where
 mod test {
 
     use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};
-    use white_point::{A, C, D50, D65};
-    use Xyz;
+    use crate::white_point::{A, C, D50, D65};
+    use crate::Xyz;
 
     #[test]
     fn d65_to_d50_matrix_xyz_scaling() {

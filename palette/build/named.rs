@@ -19,23 +19,23 @@ pub fn build() {
         let name = parts.next().expect("couldn't get the color name");
         let mut rgb = parts
             .next()
-            .expect(&format!("couldn't get color for {}", name))
+            .unwrap_or_else(|| panic!("couldn't get color for {}", name))
             .split(", ");
         let red: u8 = rgb
             .next()
             .and_then(|r| r.trim().parse().ok())
-            .expect(&format!("couldn't get red for {}", name));
+            .unwrap_or_else(|| panic!("couldn't get red for {}", name));
         let green: u8 = rgb
             .next()
             .and_then(|r| r.trim().parse().ok())
-            .expect(&format!("couldn't get green for {}", name));
+            .unwrap_or_else(|| panic!("couldn't get green for {}", name));
         let blue: u8 = rgb
             .next()
             .and_then(|r| r.trim().parse().ok())
-            .expect(&format!("couldn't get blue for {}", name));
+            .unwrap_or_else(|| panic!("couldn't get blue for {}", name));
 
         writeln!(writer, "\n///<div style=\"display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: {0};\"></div>", name).unwrap();
-        writeln!(writer, "pub const {}: ::rgb::Srgb<u8> = ::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
+        writeln!(writer, "pub const {}: crate::rgb::Srgb<u8> = crate::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
 
         entries.push((name.to_owned(), name.to_uppercase()));
     }
@@ -53,7 +53,7 @@ fn gen_from_str(writer: &mut File, entries: &[(String, String)]) {
     }
     write!(
         writer,
-        "static COLORS: ::phf::Map<&'static str, ::rgb::Srgb<u8>> = {};",
+        "static COLORS: ::phf::Map<&'static str, crate::rgb::Srgb<u8>> = {};",
         map.build()
     )
     .unwrap();
