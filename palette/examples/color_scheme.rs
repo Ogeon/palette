@@ -1,7 +1,3 @@
-extern crate clap;
-extern crate image;
-extern crate palette;
-
 use palette::{Hue, Lch, LinSrgb, Pixel, Shade, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage, SubImage};

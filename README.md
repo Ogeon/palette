@@ -63,7 +63,6 @@ Selecting the proper color space can have a big impact on how the resulting imag
 This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue by 180° and converts it back to RGB:
 
 ```Rust
-extern crate palette;
 use palette::{Srgb, LinSrgb, Lch, Hue};
 
 let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
@@ -83,7 +82,6 @@ This may seem limiting, but the point is to avoid inconsistent behavior due to a
 The following example shows how the `Color` type is used to make a lighter and a desaturated version of the original.
 
 ```Rust
-extern crate palette;
 use palette::{Saturate, Shade, Srgb, Lch};
 
 let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
@@ -102,7 +100,6 @@ There is also a linear gradient type which makes it easy to interpolate between 
 The following example shows three gradients between the same two endpoints, but the top is in RGB space while the middle and bottom are in HSV space. The bottom gradient is an example of using the color sequence iterator.
 
 ```Rust
-extern crate palette;
 use palette::{LinSrgb, Hsv, Gradient};
 
 let grad1 = Gradient::new(vec![

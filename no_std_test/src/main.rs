@@ -1,11 +1,9 @@
 #![feature(lang_items, start)]
 #![no_std]
 
-extern crate libc;
-
-extern crate palette;
-
 use core::panic::PanicInfo;
+
+extern crate libc;
 
 #[start]
 fn start(_argc: isize, _argv: *const *const u8) -> isize {

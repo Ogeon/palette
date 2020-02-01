@@ -1,6 +1,3 @@
-extern crate image;
-extern crate palette;
-
 use palette::{Hsv, Lab, LinSrgb, Pixel, Shade, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage};

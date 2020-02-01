@@ -1,14 +1,14 @@
 //! The sRGB standard.
 
-use encoding::TransferFn;
-use float::Float;
-use luma::LumaStandard;
-use rgb::{Primaries, RgbSpace, RgbStandard};
-use white_point::{WhitePoint, D65};
-use {from_f64, FromF64};
-use {FloatComponent, Yxy};
+use crate::encoding::TransferFn;
+use crate::float::Float;
+use crate::luma::LumaStandard;
+use crate::rgb::{Primaries, RgbSpace, RgbStandard};
+use crate::white_point::{WhitePoint, D65};
+use crate::{from_f64, FromF64};
+use crate::{FloatComponent, Yxy};
 
-///The sRGB color space.
+/// The sRGB color space.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Srgb;
 

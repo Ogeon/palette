@@ -11,8 +11,12 @@ u', v'		0.2008907213	0.4608888395
 Note: The xyz and yxy conversions do not use the updated conversion formula. So they are not used.
 */
 
+use approx::assert_relative_eq;
 use csv;
+use lazy_static::lazy_static;
 use num_traits::{NumCast, ToPrimitive};
+use serde_derive::Deserialize;
+
 use palette::float::Float;
 use palette::white_point::WhitePoint;
 use palette::{FloatComponent, IntoColor, Lab, Lch, Xyz};
@@ -25,7 +29,7 @@ impl WhitePoint for PointerWP {
     }
 }
 
-///A convenience function to convert a constant number to Float Type
+/// A convenience function to convert a constant number to Float Type
 fn flt<T: Float, P: ToPrimitive>(prim: P) -> T {
     NumCast::from(prim).unwrap()
 }

@@ -1,7 +1,7 @@
-use blend::PreAlpha;
-use encoding::Linear;
-use rgb::Rgb;
-use {Blend, ComponentWise, LinSrgb, LinSrgba};
+use crate::blend::PreAlpha;
+use crate::encoding::Linear;
+use crate::rgb::Rgb;
+use crate::{Blend, ComponentWise, LinSrgb, LinSrgba};
 
 #[test]
 fn blend_color() {

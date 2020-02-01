@@ -1,32 +1,30 @@
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use float::Float;
-
 use core::any::TypeId;
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
-use encoding::pixel::RawPixel;
-use encoding::Srgb;
-use rgb::RgbSpace;
-use {clamp, contrast_ratio};
-use {Alpha, Hsv, RgbHue, Xyz};
-use {
-    Component, FloatComponent, FromColor, FromF64, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
-    RelativeContrast, Shade,
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+
+use crate::encoding::pixel::RawPixel;
+use crate::encoding::Srgb;
+use crate::float::Float;
+use crate::rgb::RgbSpace;
+use crate::{
+    clamp, contrast_ratio, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue, Hsv, Hue,
+    IntoColor, Limited, Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
 /// `Alpha`](struct.Alpha.html#Hwba).
 pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 
-///Linear HWB color space.
+/// Linear HWB color space.
 ///
-///HWB is a cylindrical version of [RGB](rgb/struct.LinRgb.html) and it's very
-///closely related to [HSV](struct.Hsv.html).  It describes colors with a
+/// HWB is a cylindrical version of [RGB](rgb/struct.LinRgb.html) and it's very
+/// closely related to [HSV](struct.Hsv.html).  It describes colors with a
 /// starting hue, then a degree of whiteness and blackness to mix into that
 /// base hue.
 ///
-///It is very intuitive for humans to use and many color-pickers are based on
+/// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -41,26 +39,26 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
-    ///etc. Same as the hue for HSL and HSV.
+    /// The hue of the color, in degrees. Decides if it's red, blue, purple,
+    /// etc. Same as the hue for HSL and HSV.
     #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
-    ///The whiteness of the color. It specifies the amount white to mix into
+    /// The whiteness of the color. It specifies the amount white to mix into
     /// the hue. It varies from 0 to 1, with 1 being always full white and 0
-    ///always being the color shade (a mixture of a pure hue with black)
+    /// always being the color shade (a mixture of a pure hue with black)
     /// chosen with the other two controls.
     pub whiteness: T,
 
-    ///The blackness of the color. It specifies the amount black to mix into
+    /// The blackness of the color. It specifies the amount black to mix into
     /// the hue. It varies from 0 to 1, with 1 being always full black and
     /// 0 always being the color tint (a mixture of a pure hue with white)
     /// chosen with the other two
     //controls.
     pub blackness: T,
 
-    ///The white point and RGB primaries this color is adapted to. The default
-    ///is the sRGB standard.
+    /// The white point and RGB primaries this color is adapted to. The default
+    /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
@@ -87,12 +85,12 @@ impl<T> Hwb<Srgb, T>
 where
     T: FloatComponent,
 {
-    ///HWB for linear sRGB.
+    /// HWB for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
         Hwb {
             hue: hue.into(),
-            whiteness: whiteness,
-            blackness: blackness,
+            whiteness,
+            blackness,
             space: PhantomData,
         }
     }
@@ -103,12 +101,12 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    ///Linear HWB.
+    /// Linear HWB.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<S, T> {
         Hwb {
             hue: hue.into(),
-            whiteness: whiteness,
-            blackness: blackness,
+            whiteness,
+            blackness,
             space: PhantomData,
         }
     }
@@ -148,11 +146,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///HWB and transparency for linear sRGB.
+    /// HWB and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
             color: Hwb::new(hue, whiteness, blackness),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -164,11 +162,11 @@ where
     A: Component,
     S: RgbSpace,
 {
-    ///Linear HWB and transparency.
+    /// Linear HWB and transparency.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
             color: Hwb::with_wp(hue, whiteness, blackness),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -247,7 +245,7 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         self.blackness >= T::zero() && self.blackness <= T::one() &&
         self.whiteness >= T::zero() && self.whiteness <= T::one() &&
@@ -603,8 +601,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use encoding::Srgb;
-    use {Limited, LinSrgb};
+    use crate::encoding::Srgb;
+    use crate::{Limited, LinSrgb};
 
     #[test]
     fn red() {

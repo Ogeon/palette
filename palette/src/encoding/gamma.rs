@@ -2,13 +2,12 @@
 
 use core::marker::PhantomData;
 
-use float::Float;
-
-use encoding::TransferFn;
-use luma::LumaStandard;
-use rgb::{RgbSpace, RgbStandard};
-use white_point::WhitePoint;
-use {from_f64, FromF64};
+use crate::encoding::TransferFn;
+use crate::float::Float;
+use crate::luma::LumaStandard;
+use crate::rgb::{RgbSpace, RgbStandard};
+use crate::white_point::WhitePoint;
+use crate::{from_f64, FromF64};
 
 /// Gamma encoding.
 ///
@@ -16,10 +15,11 @@ use {from_f64, FromF64};
 /// values to either match a non-linear display, like CRT, or to prevent
 /// banding among the darker colors. `GammaRgb` represents a gamma corrected
 /// RGB color, where the intensities are encoded using the following power-law
-/// expression: _V<sup> γ</sup>_ (where _V_ is the intensity value an _γ_ is the encoding
-/// gamma).
+/// expression: _V<sup> γ</sup>_ (where _V_ is the intensity value an _γ_ is the
+/// encoding gamma).
 ///
-/// The gamma value is stored as a simple type that represents an `f32` constant.
+/// The gamma value is stored as a simple type that represents an `f32`
+/// constant.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Gamma<S, N: Number = F2p2>(PhantomData<(S, N)>);
 
@@ -35,7 +35,8 @@ impl<Wp: WhitePoint, N: Number> LumaStandard for Gamma<Wp, N> {
 
 /// The transfer function for gamma encoded colors.
 ///
-/// The gamma value is stored as a simple type that represents an `f32` constant.
+/// The gamma value is stored as a simple type that represents an `f32`
+/// constant.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 

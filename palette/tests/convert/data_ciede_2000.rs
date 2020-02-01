@@ -9,12 +9,13 @@ Note: Test uses `f64` because `f32` failed Travis CI builds on Linux for Lch on
         MacOS and Windows passed the tests so be wary when using f32 on Linux.
 */
 
-extern crate approx;
-
 use csv;
+
+use approx::assert_relative_eq;
+use serde_derive::Deserialize;
+
 use palette::white_point::D65;
-use palette::ColorDifference;
-use palette::{Lab, Lch};
+use palette::{ColorDifference, Lab, Lch};
 
 #[derive(Deserialize, PartialEq)]
 struct Cie2000Raw {

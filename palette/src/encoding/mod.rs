@@ -1,7 +1,7 @@
 //! Various encoding traits, types and standards.
 
-use float::Float;
-use FromF64;
+use crate::float::Float;
+use crate::FromF64;
 
 pub use self::gamma::{F2p2, Gamma};
 pub use self::linear::Linear;

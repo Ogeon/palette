@@ -1,9 +1,8 @@
-use float::Float;
-
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use white_point::WhitePoint;
-use {from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
+use crate::float::Float;
+use crate::white_point::WhitePoint;
+use crate::{from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {

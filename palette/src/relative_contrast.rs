@@ -1,6 +1,7 @@
-use component::Component;
 use core::ops::{Add, Div};
-use {from_f64, FromF64};
+
+use crate::component::Component;
+use crate::{from_f64, FromF64};
 
 /// A trait for calculating relative contrast between two colors.
 ///
@@ -19,19 +20,14 @@ use {from_f64, FromF64};
 /// the contrast ratio of two colors in RGB format.
 ///
 /// ```rust
-/// #[macro_use]
-/// extern crate approx;
-///
 /// use std::str::FromStr;
 /// use palette::{Srgb, RelativeContrast};
 ///
-/// fn main() {
-///     // the rustdoc "DARK" theme background and text colors
-///     let my_background_rgb: Srgb<f32> = Srgb::from_str("#353535").unwrap().into_format();
-///     let my_foreground_rgb = Srgb::from_str("#ddd").unwrap().into_format();
+/// // the rustdoc "DARK" theme background and text colors
+/// let my_background_rgb: Srgb<f32> = Srgb::from_str("#353535").unwrap().into_format();
+/// let my_foreground_rgb = Srgb::from_str("#ddd").unwrap().into_format();
 ///
-///     assert!(my_background_rgb.has_enhanced_contrast_text(&my_foreground_rgb));
-/// }
+/// assert!(my_background_rgb.has_enhanced_contrast_text(&my_foreground_rgb));
 /// ```
 ///
 /// The possible range of contrast ratios is from 1:1 to 21:1. There is a
@@ -103,8 +99,9 @@ where
 #[cfg(test)]
 mod test {
     use core::str::FromStr;
-    use RelativeContrast;
-    use Srgb;
+
+    use crate::RelativeContrast;
+    use crate::Srgb;
 
     #[test]
     fn relative_contrast() {

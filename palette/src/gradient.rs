@@ -1,31 +1,31 @@
-//!Types for interpolation between multiple colors.
+//! Types for interpolation between multiple colors.
 //!
-//!This module is only available if the `std` feature is enabled (this is the
-//!default).
+//! This module is only available if the `std` feature is enabled (this is the
+//! default).
 
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use float::Float;
-use num_traits::{One, Zero};
 use std::cmp::max;
 
-use {from_f64, FromF64};
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::{One, Zero};
 
-use Mix;
+use crate::float::Float;
+use crate::Mix;
+use crate::{from_f64, FromF64};
 
-///A linear interpolation between colors.
+/// A linear interpolation between colors.
 ///
-///It's used to smoothly transition between a series of colors, that can be
-///either evenly spaced or have customized positions. The gradient is
-///continuous between the control points, but it's possible to iterate over a
-///number of evenly spaced points using the `take` method. Any point outside
-///the domain of the gradient will have the same color as the closest control
-///point.
+/// It's used to smoothly transition between a series of colors, that can be
+/// either evenly spaced or have customized positions. The gradient is
+/// continuous between the control points, but it's possible to iterate over a
+/// number of evenly spaced points using the `take` method. Any point outside
+/// the domain of the gradient will have the same color as the closest control
+/// point.
 #[derive(Clone, Debug)]
 pub struct Gradient<C: Mix + Clone>(Vec<(C::Scalar, C)>);
 
 impl<C: Mix + Clone> Gradient<C> {
-    ///Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
-    ///There must be at least one color.
+    /// Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
+    /// There must be at least one color.
     pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C>
     where
         C::Scalar: FromF64,
@@ -41,9 +41,9 @@ impl<C: Mix + Clone> Gradient<C> {
         Gradient(points)
     }
 
-    ///Create a gradient of colors with custom spacing and domain. There must be
-    ///at least one color and they are expected to be ordered by their
-    ///position value.
+    /// Create a gradient of colors with custom spacing and domain. There must
+    /// be at least one color and they are expected to be ordered by their
+    /// position value.
     pub fn with_domain(colors: Vec<(C::Scalar, C)>) -> Gradient<C> {
         assert!(colors.len() > 0);
 
@@ -51,8 +51,8 @@ impl<C: Mix + Clone> Gradient<C> {
         Gradient(colors)
     }
 
-    ///Get a color from the gradient. The color of the closest control point
-    ///will be returned if `i` is outside the domain.
+    /// Get a color from the gradient. The color of the closest control point
+    /// will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C {
         let &(mut min, ref min_color) = self
             .0
@@ -97,15 +97,15 @@ impl<C: Mix + Clone> Gradient<C> {
         min_color.mix(max_color, factor)
     }
 
-    ///Take `n` evenly spaced colors from the gradient, as an iterator. The
-    ///iterator includes both ends of the gradient, for `n > 1`, or just
-    ///the lower end of the gradient for `n = 0`.
+    /// Take `n` evenly spaced colors from the gradient, as an iterator. The
+    /// iterator includes both ends of the gradient, for `n > 1`, or just
+    /// the lower end of the gradient for `n = 0`.
     ///
-    ///For example, `take(5)` will include point 0.0 of the gradient, three
-    ///intermediate colors, and point 1.0 spaced apart at 1/4 the distance
-    ///between colors 0.0 and 1.0 on the gradient.
+    /// For example, `take(5)` will include point 0.0 of the gradient, three
+    /// intermediate colors, and point 1.0 spaced apart at 1/4 the distance
+    /// between colors 0.0 and 1.0 on the gradient.
     /// ```
-    /// #[macro_use] extern crate approx;
+    /// use approx::assert_relative_eq;
     /// use palette::{Gradient, LinSrgb};
     ///
     /// let gradient = Gradient::new(vec![
@@ -138,7 +138,7 @@ impl<C: Mix + Clone> Gradient<C> {
         }
     }
 
-    ///Slice this gradient to limit its domain.
+    /// Slice this gradient to limit its domain.
     pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C> {
         Slice {
             gradient: self,
@@ -146,7 +146,7 @@ impl<C: Mix + Clone> Gradient<C> {
         }
     }
 
-    ///Get the limits of this gradient's domain.
+    /// Get the limits of this gradient's domain.
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
         let &(min, _) = self
             .0
@@ -160,7 +160,7 @@ impl<C: Mix + Clone> Gradient<C> {
     }
 }
 
-///An iterator over interpolated colors.
+/// An iterator over interpolated colors.
 #[derive(Clone)]
 pub struct Take<'a, C: Mix + Clone + 'a> {
     gradient: MaybeSlice<'a, C>,
@@ -226,7 +226,7 @@ where
     }
 }
 
-///A slice of a Gradient that limits its domain.
+/// A slice of a Gradient that limits its domain.
 #[derive(Clone, Debug)]
 pub struct Slice<'a, C: Mix + Clone + 'a> {
     gradient: &'a Gradient<C>,
@@ -234,13 +234,13 @@ pub struct Slice<'a, C: Mix + Clone + 'a> {
 }
 
 impl<'a, C: Mix + Clone> Slice<'a, C> {
-    ///Get a color from the gradient slice. The color of the closest domain
-    ///limit will be returned if `i` is outside the domain.
+    /// Get a color from the gradient slice. The color of the closest domain
+    /// limit will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C {
         self.gradient.get(self.range.clamp(i))
     }
 
-    ///Take `n` evenly spaced colors from the gradient slice, as an iterator.
+    /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
     pub fn take(&self, n: usize) -> Take<C> {
         let (min, max) = self.domain();
 
@@ -254,8 +254,8 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
         }
     }
 
-    ///Slice this gradient slice to further limit its domain. Ranges outside
-    ///the domain will be clamped to the nearest domain limit.
+    /// Slice this gradient slice to further limit its domain. Ranges outside
+    /// the domain will be clamped to the nearest domain limit.
     pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C> {
         Slice {
             gradient: self.gradient,
@@ -263,7 +263,7 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
         }
     }
 
-    ///Get the limits of this gradient slice's domain.
+    /// Get the limits of this gradient slice's domain.
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
         if let Range {
             from: Some(from),
@@ -278,7 +278,7 @@ impl<'a, C: Mix + Clone> Slice<'a, C> {
     }
 }
 
-///A domain range for gradient slices.
+/// A domain range for gradient slices.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Range<T: Float> {
     from: Option<T>,
@@ -466,7 +466,7 @@ impl<'a, C: Mix + Clone> MaybeSlice<'a, C> {
 #[cfg(test)]
 mod test {
     use super::{Gradient, Range};
-    use LinSrgb;
+    use crate::LinSrgb;
 
     #[test]
     fn range_clamp() {

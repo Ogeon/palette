@@ -1,53 +1,53 @@
-use float::Float;
 use num_traits::{One, Zero};
 
-use blend::{BlendFunction, PreAlpha};
-use {clamp, ComponentWise};
+use crate::blend::{BlendFunction, PreAlpha};
+use crate::float::Float;
+use crate::{clamp, ComponentWise};
 
-///A trait for colors that can be blended together.
+/// A trait for colors that can be blended together.
 ///
-///Blending can either be performed through the predefined blend modes, or a
-///custom blend functions.
+/// Blending can either be performed through the predefined blend modes, or a
+/// custom blend functions.
 ///
-///_Note: The default implementations of the blend modes are meant for color
-///components in the range [0.0, 1.0] and may otherwise produce strange
-///results._
+/// _Note: The default implementations of the blend modes are meant for color
+/// components in the range [0.0, 1.0] and may otherwise produce strange
+/// results._
 pub trait Blend: Sized
 where
     <Self::Color as ComponentWise>::Scalar: Float,
 {
-    ///The core color type. Typically `Self` for color types without alpha.
+    /// The core color type. Typically `Self` for color types without alpha.
     type Color: Blend<Color = Self::Color> + ComponentWise;
 
-    ///Convert the color to premultiplied alpha.
+    /// Convert the color to premultiplied alpha.
     fn into_premultiplied(self) -> PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>;
 
-    ///Convert the color from premultiplied alpha.
+    /// Convert the color from premultiplied alpha.
     fn from_premultiplied(
         color: PreAlpha<Self::Color, <Self::Color as ComponentWise>::Scalar>,
     ) -> Self;
 
-    ///Blend self, as the source color, with `destination`, using
-    ///`blend_function`. Anything that implements `BlendFunction` is
-    ///acceptable, including functions and closures.
+    /// Blend self, as the source color, with `destination`, using
+    /// `blend_function`. Anything that implements `BlendFunction` is
+    /// acceptable, including functions and closures.
     ///
-    ///```
-    ///use palette::{LinSrgb, LinSrgba, Blend};
-    ///use palette::blend::PreAlpha;
+    /// ```
+    /// use palette::{LinSrgb, LinSrgba, Blend};
+    /// use palette::blend::PreAlpha;
     ///
-    ///type PreRgba = PreAlpha<LinSrgb<f32>, f32>;
+    /// type PreRgba = PreAlpha<LinSrgb<f32>, f32>;
     ///
-    ///fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
+    /// fn blend_mode(a: PreRgba, b: PreRgba) -> PreRgba {
     ///    PreAlpha {
     ///        color: LinSrgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),
     ///        alpha: a.alpha * b.alpha,
     ///    }
-    ///}
+    /// }
     ///
-    ///let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
-    ///let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
-    ///let c = a.blend(b, blend_mode);
-    ///```
+    /// let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+    /// let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+    /// let c = a.blend(b, blend_mode);
+    /// ```
     fn blend<F>(self, destination: Self, blend_function: F) -> Self
     where
         F: BlendFunction<Self::Color>,
@@ -57,8 +57,8 @@ where
         )
     }
 
-    ///Place `self` over `other`. This is the good old common alpha
-    ///composition equation.
+    /// Place `self` over `other`. This is the good old common alpha
+    /// composition equation.
     fn over(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -76,8 +76,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Results in the parts of `self` that overlaps the visible parts of
-    ///`other`.
+    /// Results in the parts of `self` that overlaps the visible parts of
+    /// `other`.
     fn inside(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -93,8 +93,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Results in the parts of `self` that lies outside the visible parts of
-    ///`other`.
+    /// Results in the parts of `self` that lies outside the visible parts of
+    /// `other`.
     fn outside(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -110,7 +110,7 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Place `self` over only the visible parts of `other`.
+    /// Place `self` over only the visible parts of `other`.
     fn atop(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -128,7 +128,7 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Results in either `self` or `other`, where they do not overlap.
+    /// Results in either `self` or `other`, where they do not overlap.
     fn xor(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -151,8 +151,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Add `self` and `other`. This uses the alpha component to regulate the
-    ///effect, so it's not just plain component wise addition.
+    /// Add `self` and `other`. This uses the alpha component to regulate the
+    /// effect, so it's not just plain component wise addition.
     fn plus(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -168,8 +168,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Multiply `self` with `other`. This uses the alpha component to regulate
-    ///the effect, so it's not just plain component wise multiplication.
+    /// Multiply `self` with `other`. This uses the alpha component to regulate
+    /// the effect, so it's not just plain component wise multiplication.
     fn multiply(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -187,7 +187,7 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Make a color which is at least as light as `self` or `other`.
+    /// Make a color which is at least as light as `self` or `other`.
     fn screen(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -203,8 +203,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Multiply `self` or `other` if other is dark, or screen them if `other`
-    ///is light. This results in an S curve.
+    /// Multiply `self` or `other` if other is dark, or screen them if `other`
+    /// is light. This results in an S curve.
     fn overlay(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -229,7 +229,7 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Return the darkest parts of `self` and `other`.
+    /// Return the darkest parts of `self` and `other`.
     fn darken(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -247,7 +247,7 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Return the lightest parts of `self` and `other`.
+    /// Return the lightest parts of `self` and `other`.
     fn lighten(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -265,8 +265,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Lighten `other` to reflect `self`. Results in `other` if `self` is
-    ///black.
+    /// Lighten `other` to reflect `self`. Results in `other` if `self` is
+    /// black.
     fn dodge(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -292,8 +292,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Darken `other` to reflect `self`. Results in `other` if `self` is
-    ///white.
+    /// Darken `other` to reflect `self`. Results in `other` if `self` is
+    /// white.
     fn burn(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -319,9 +319,9 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Multiply `self` or `other` if other is dark, or screen them if `self`
-    ///is light. This is similar to `overlay`, but depends on `self` instead
-    ///of `other`.
+    /// Multiply `self` or `other` if other is dark, or screen them if `self`
+    /// is light. This is similar to `overlay`, but depends on `self` instead
+    /// of `other`.
     fn hard_light(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -346,9 +346,9 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Lighten `other` if `self` is light, or darken `other` as if it's burned
-    ///if `self` is dark. The effect is increased if the components of `self`
-    ///is further from 0.5.
+    /// Lighten `other` if `self` is light, or darken `other` as if it's burned
+    /// if `self` is dark. The effect is increased if the components of `self`
+    /// is further from 0.5.
     fn soft_light(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -390,8 +390,8 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Return the absolute difference between `self` and `other`. It's
-    ///basically `abs(self - other)`, but regulated by the alpha component.
+    /// Return the absolute difference between `self` and `other`. It's
+    /// basically `abs(self - other)`, but regulated by the alpha component.
     fn difference(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();
@@ -410,9 +410,9 @@ where
         Self::from_premultiplied(result)
     }
 
-    ///Similar to `difference`, but appears to result in a lower contrast.
-    ///`other` is inverted if `self` is white, and preserved if `self` is
-    ///black.
+    /// Similar to `difference`, but appears to result in a lower contrast.
+    /// `other` is inverted if `self` is white, and preserved if `self` is
+    /// black.
     fn exclusion(self, other: Self) -> Self {
         let one = <Self::Color as ComponentWise>::Scalar::one();
         let zero = <Self::Color as ComponentWise>::Scalar::zero();

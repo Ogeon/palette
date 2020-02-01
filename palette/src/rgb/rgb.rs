@@ -7,22 +7,22 @@ use core::str::FromStr;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use alpha::Alpha;
-use blend::PreAlpha;
-use convert::{FromColor, IntoColor};
-use encoding::linear::LinearFn;
-use encoding::pixel::RawPixel;
-use encoding::{Linear, Srgb};
-use luma::LumaStandard;
-use matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
-use rgb::{RgbSpace, RgbStandard, TransferFn};
-use white_point::WhitePoint;
-use {clamp, contrast_ratio, from_f64};
-use {
+use crate::alpha::Alpha;
+use crate::blend::PreAlpha;
+use crate::convert::{FromColor, IntoColor};
+use crate::encoding::linear::LinearFn;
+use crate::encoding::pixel::RawPixel;
+use crate::encoding::{Linear, Srgb};
+use crate::luma::LumaStandard;
+use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
+use crate::rgb::{RgbSpace, RgbStandard, TransferFn};
+use crate::white_point::WhitePoint;
+use crate::{clamp, contrast_ratio, from_f64};
+use crate::{
     Blend, Component, ComponentWise, FloatComponent, FromComponent, GetHue, Limited, Mix, Pixel,
     RelativeContrast, Shade,
 };
-use {Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
+use crate::{Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](../struct.Alpha.html#Rgba).
@@ -78,9 +78,9 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     /// Create an RGB color.
     pub fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
         Rgb {
-            red: red,
-            green: green,
-            blue: blue,
+            red,
+            green,
+            blue,
             standard: PhantomData,
         }
     }
@@ -188,7 +188,7 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
             color: Rgb::new(red, green, blue),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -276,7 +276,7 @@ where
     S: RgbStandard,
     T: Component,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         self.red >= T::zero() && self.red <= T::max_intensity() &&
         self.green >= T::zero() && self.green <= T::max_intensity() &&
@@ -862,7 +862,7 @@ where
         T::default_max_relative()
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn relative_eq(
         &self,
         other: &Self,
@@ -885,7 +885,7 @@ where
         T::default_max_ulps()
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
             self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
@@ -1059,8 +1059,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Rgb;
+    use crate::encoding::Srgb;
     use core::str::FromStr;
-    use encoding::Srgb;
 
     #[test]
     fn ranges() {

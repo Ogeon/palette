@@ -23,8 +23,8 @@ macro_rules! raw_pixel_conversion_tests {
     };
 
     (@float_array_test $float: ty, $name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
-        use ::Pixel;
-        use ::Alpha;
+        use crate::Pixel;
+        use crate::Alpha;
 
         let mut counter: $float = 0.0;
         $(
@@ -50,8 +50,8 @@ macro_rules! raw_pixel_conversion_tests {
     };
 
     (@float_slice_test $float: ty, $name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
-        use ::Pixel;
-        use ::Alpha;
+        use crate::Pixel;
+        use crate::Alpha;
 
         let mut counter: $float = 0.0;
         $(
@@ -113,13 +113,13 @@ macro_rules! raw_pixel_conversion_fail_tests {
     };
 
     (@float_array_test $float: ty, $name: ident <$($ty_param: ident),+>) => {
-        use ::Pixel;
+        use crate::Pixel;
         let raw: [$float; 1] = [0.1];
         let _: $name<$($ty_param,)+ $float> = *$name::from_raw(&raw);
     };
 
     (@float_slice_test $float: ty, $name: ident <$($ty_param: ident),+>) => {
-        use ::Pixel;
+        use crate::Pixel;
         let raw: &[$float] = &[0.1];
         let _: $name<$($ty_param,)+ $float> = *$name::from_raw(raw);
     };

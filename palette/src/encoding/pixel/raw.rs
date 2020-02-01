@@ -1,7 +1,7 @@
 /// A contiguous sequence of pixel channels with a known length.
 ///
-/// It's used when converting to and from raw pixel data and should only be implemented for types
-/// with either a suitable in-memory representation.
+/// It's used when converting to and from raw pixel data and should only be
+/// implemented for types with either a suitable in-memory representation.
 pub unsafe trait RawPixelSized<T>: Sized {
     /// The guaranteed number of channels in the sequence.
     const CHANNELS: usize;
@@ -25,8 +25,8 @@ unsafe impl<T> RawPixelSized<T> for [T; 4] {
 
 /// A contiguous sequence of pixel channels.
 ///
-/// It's used when converting to and from raw pixel data and should only be implemented for types
-/// with a suitable in-memory representation.
+/// It's used when converting to and from raw pixel data and should only be
+/// implemented for types with a suitable in-memory representation.
 pub unsafe trait RawPixel<T> {
     /// The length of the sequence.
     fn channels(&self) -> usize;

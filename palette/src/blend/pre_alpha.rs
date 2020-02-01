@@ -1,41 +1,42 @@
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-use float::Float;
 
-use encoding::pixel::RawPixel;
-use {clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-///Premultiplied alpha wrapper.
+use crate::encoding::pixel::RawPixel;
+use crate::float::Float;
+use crate::{clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
+
+/// Premultiplied alpha wrapper.
 ///
-///Premultiplied colors are commonly used in composition algorithms to
-///simplify the calculations. It may also be preferred when interpolating
-///between colors, which is one of the reasons why it's offered as a separate
-///type. The other reason is to make it easier to avoid unnecessary
-///computations in composition chains.
+/// Premultiplied colors are commonly used in composition algorithms to
+/// simplify the calculations. It may also be preferred when interpolating
+/// between colors, which is one of the reasons why it's offered as a separate
+/// type. The other reason is to make it easier to avoid unnecessary
+/// computations in composition chains.
 ///
-///```
-///use palette::{Blend, LinSrgb, LinSrgba};
-///use palette::blend::PreAlpha;
+/// ```
+/// use palette::{Blend, LinSrgb, LinSrgba};
+/// use palette::blend::PreAlpha;
 ///
-///let a = PreAlpha::from(LinSrgba::new(0.4, 0.5, 0.5, 0.3));
-///let b = PreAlpha::from(LinSrgba::new(0.3, 0.8, 0.4, 0.4));
-///let c = PreAlpha::from(LinSrgba::new(0.7, 0.1, 0.8, 0.8));
+/// let a = PreAlpha::from(LinSrgba::new(0.4, 0.5, 0.5, 0.3));
+/// let b = PreAlpha::from(LinSrgba::new(0.3, 0.8, 0.4, 0.4));
+/// let c = PreAlpha::from(LinSrgba::new(0.7, 0.1, 0.8, 0.8));
 ///
-///let res = LinSrgb::from_premultiplied(a.screen(b).overlay(c));
-///```
+/// let res = LinSrgb::from_premultiplied(a.screen(b).overlay(c));
+/// ```
 ///
-///Note that converting to and from premultiplied alpha will cause the alpha
-///component to be clamped to [0.0, 1.0].
+/// Note that converting to and from premultiplied alpha will cause the alpha
+/// component to be clamped to [0.0, 1.0].
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C, T: Float> {
-    ///The premultiplied color components (`original.color * original.alpha`).
+    /// The premultiplied color components (`original.color * original.alpha`).
     #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
-    ///The transparency component. 0.0 is fully transparent and 1.0 is fully
-    ///opaque.
+    /// The transparency component. 0.0 is fully transparent and 1.0 is fully
+    /// opaque.
     pub alpha: T,
 }
 
@@ -49,7 +50,7 @@ where
 
         PreAlpha {
             color: color.color.component_wise_self(|a| a * alpha),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -70,10 +71,7 @@ where
             }
         });
 
-        Alpha {
-            color: color,
-            alpha: alpha,
-        }
+        Alpha { color, alpha }
     }
 }
 
@@ -378,8 +376,8 @@ impl<C, T: Float> DerefMut for PreAlpha<C, T> {
 #[cfg(feature = "serializing")]
 mod test {
     use super::PreAlpha;
-    use encoding::Srgb;
-    use rgb::Rgb;
+    use crate::encoding::Srgb;
+    use crate::rgb::Rgb;
 
     #[cfg(feature = "serializing")]
     #[test]

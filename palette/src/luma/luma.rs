@@ -4,15 +4,15 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use blend::PreAlpha;
-use encoding::linear::LinearFn;
-use encoding::pixel::RawPixel;
-use encoding::{Linear, Srgb, TransferFn};
-use luma::LumaStandard;
-use white_point::WhitePoint;
-use {clamp, contrast_ratio};
-use {Alpha, Xyz, Yxy};
-use {
+use crate::blend::PreAlpha;
+use crate::encoding::linear::LinearFn;
+use crate::encoding::pixel::RawPixel;
+use crate::encoding::{Linear, Srgb, TransferFn};
+use crate::luma::LumaStandard;
+use crate::white_point::WhitePoint;
+use crate::{clamp, contrast_ratio};
+use crate::{Alpha, Xyz, Yxy};
+use crate::{
     Blend, Component, ComponentWise, FloatComponent, FromColor, FromComponent, IntoColor, Limited,
     Mix, Pixel, RelativeContrast, Shade,
 };
@@ -21,13 +21,13 @@ use {
 /// in `Alpha`](struct.Alpha.html#Lumaa).
 pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 
-///Luminance.
+/// Luminance.
 ///
-///Luma is a purely gray scale color space, which is included more for
-///completeness than anything else, and represents how bright a color is
-///perceived to be. It's basically the `Y` component of [CIE
-///XYZ](struct.Xyz.html). The lack of any form of hue representation limits
-///the set of operations that can be performed on it.
+/// Luma is a purely gray scale color space, which is included more for
+/// completeness than anything else, and represents how bright a color is
+/// perceived to be. It's basically the `Y` component of [CIE
+/// XYZ](struct.Xyz.html). The lack of any form of hue representation limits
+/// the set of operations that can be performed on it.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette_internal]
@@ -40,7 +40,7 @@ where
     T: Component,
     S: LumaStandard,
 {
-    ///The lightness of the color. 0.0 is black and 1.0 is white.
+    /// The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: T,
 
     /// The kind of RGB standard. sRGB is the default.
@@ -74,7 +74,7 @@ where
     /// Create a luminance color.
     pub fn new(luma: T) -> Luma<S, T> {
         Luma {
-            luma: luma,
+            luma,
             standard: PhantomData,
         }
     }
@@ -153,7 +153,7 @@ where
     pub fn new(luma: T, alpha: A) -> Self {
         Alpha {
             color: Luma::new(luma),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -742,8 +742,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use encoding::Srgb;
-    use Luma;
+    use crate::encoding::Srgb;
+    use crate::Luma;
 
     #[test]
     fn ranges() {

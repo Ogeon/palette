@@ -1,32 +1,31 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use encoding::pixel::RawPixel;
-use white_point::{WhitePoint, D65};
-use {clamp, contrast_ratio, from_f64};
-use {Alpha, LabHue, Lch, Xyz};
-use {
+use crate::color_difference::ColorDifference;
+use crate::color_difference::{get_ciede_difference, LabColorDiff};
+use crate::encoding::pixel::RawPixel;
+use crate::white_point::{WhitePoint, D65};
+use crate::{clamp, contrast_ratio, from_f64};
+use crate::{Alpha, LabHue, Lch, Xyz};
+use crate::{
     Component, ComponentWise, FloatComponent, GetHue, IntoColor, Limited, Mix, Pixel,
     RelativeContrast, Shade,
 };
-
-use color_difference::ColorDifference;
-use color_difference::{get_ciede_difference, LabColorDiff};
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
 /// implementation in `Alpha`](struct.Alpha.html#Laba).
 pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 
-///The CIE L\*a\*b\* (CIELAB) color space.
+/// The CIE L\*a\*b\* (CIELAB) color space.
 ///
-///CIE L\*a\*b\* is a device independent color space which includes all
-///perceivable colors. It's sometimes used to convert between other color
-///spaces, because of its ability to represent all of their colors, and
-///sometimes in color manipulation, because of its perceptual uniformity. This
-///means that the perceptual difference between two colors is equal to their
-///numerical difference.
+/// CIE L\*a\*b\* is a device independent color space which includes all
+/// perceivable colors. It's sometimes used to convert between other color
+/// spaces, because of its ability to represent all of their colors, and
+/// sometimes in color manipulation, because of its perceptual uniformity. This
+/// means that the perceptual difference between two colors is equal to their
+/// numerical difference.
 ///
-///The parameters of L\*a\*b\* are quite different, compared to many other
+/// The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -40,18 +39,18 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///L\* is the lightness of the color. 0.0 gives absolute black and 100
-    ///give the brightest white.
+    /// L\* is the lightness of the color. 0.0 gives absolute black and 100
+    /// give the brightest white.
     pub l: T,
 
-    ///a\* goes from red at -128 to green at 127.
+    /// a\* goes from red at -128 to green at 127.
     pub a: T,
 
-    ///b\* goes from yellow at -128 to blue at 127.
+    /// b\* goes from yellow at -128 to blue at 127.
     pub b: T,
 
-    ///The white point associated with the color's illuminant and observer.
-    ///D65 for 2 degree observer is used by default.
+    /// The white point associated with the color's illuminant and observer.
+    /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub white_point: PhantomData<Wp>,
@@ -78,12 +77,12 @@ impl<T> Lab<D65, T>
 where
     T: FloatComponent,
 {
-    ///CIE L\*a\*b\* with white point D65.
+    /// CIE L\*a\*b\* with white point D65.
     pub fn new(l: T, a: T, b: T) -> Lab<D65, T> {
         Lab {
-            l: l,
-            a: a,
-            b: b,
+            l,
+            a,
+            b,
             white_point: PhantomData,
         }
     }
@@ -94,12 +93,12 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    ///CIE L\*a\*b\*.
+    /// CIE L\*a\*b\*.
     pub fn with_wp(l: T, a: T, b: T) -> Lab<Wp, T> {
         Lab {
-            l: l,
-            a: a,
-            b: b,
+            l,
+            a,
+            b,
             white_point: PhantomData,
         }
     }
@@ -121,11 +120,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///CIE L\*a\*b\* and transparency and white point D65.
+    /// CIE L\*a\*b\* and transparency and white point D65.
     pub fn new(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Lab::new(l, a, b),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -137,11 +136,11 @@ where
     A: Component,
     Wp: WhitePoint,
 {
-    ///CIE L\*a\*b\* and transparency.
+    /// CIE L\*a\*b\* and transparency.
     pub fn with_wp(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Lab::with_wp(l, a, b),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -237,7 +236,7 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         self.l >= T::zero() && self.l <= from_f64(100.0) &&
         self.a >= from_f64(-128.0) && self.a <= from_f64(127.0) &&
@@ -645,8 +644,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Lab;
-    use white_point::D65;
-    use LinSrgb;
+    use crate::white_point::D65;
+    use crate::LinSrgb;
 
     #[test]
     fn red() {

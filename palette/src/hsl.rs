@@ -1,34 +1,32 @@
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use float::Float;
-
 use core::any::TypeId;
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
-use encoding::pixel::RawPixel;
-use encoding::{Linear, Srgb};
-use rgb::{Rgb, RgbSpace};
-use {clamp, contrast_ratio, from_f64};
-use {Alpha, Hsv, RgbHue, Xyz};
-use {
-    Component, FloatComponent, FromColor, FromF64, GetHue, Hue, IntoColor, Limited, Mix, Pixel,
-    RelativeContrast, Saturate, Shade,
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+
+use crate::encoding::pixel::RawPixel;
+use crate::encoding::{Linear, Srgb};
+use crate::float::Float;
+use crate::rgb::{Rgb, RgbSpace};
+use crate::{
+    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue,
+    Hsv, Hue, IntoColor, Limited, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
 /// `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 
-///Linear HSL color space.
+/// Linear HSL color space.
 ///
-///The HSL color space can be seen as a cylindrical version of
-///[RGB](rgb/struct.LinRgb.html), where the `hue` is the angle around the color
-///cylinder, the `saturation` is the distance from the center, and the
-///`lightness` is the height from the bottom. Its composition makes it
-///especially good for operations like changing green to red, making a color
-///more gray, or making it darker.
+/// The HSL color space can be seen as a cylindrical version of
+/// [RGB](rgb/struct.LinRgb.html), where the `hue` is the angle around the color
+/// cylinder, the `saturation` is the distance from the center, and the
+/// `lightness` is the height from the bottom. Its composition makes it
+/// especially good for operations like changing green to red, making a color
+/// more gray, or making it darker.
 ///
-///See [HSV](struct.Hsv.html) for a very similar color space, with brightness
+/// See [HSV](struct.Hsv.html) for a very similar color space, with brightness
 /// instead of lightness.
 #[derive(Debug, PartialEq, FromColor, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -43,21 +41,21 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    ///The hue of the color, in degrees. Decides if it's red, blue, purple,
-    ///etc.
+    /// The hue of the color, in degrees. Decides if it's red, blue, purple,
+    /// etc.
     #[palette_unsafe_same_layout_as = "T"]
     pub hue: RgbHue<T>,
 
-    ///The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
-    ///give absolutely clear colors.
+    /// The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
+    /// give absolutely clear colors.
     pub saturation: T,
 
-    ///Decides how light the color will look. 0.0 will be black, 0.5 will give
-    ///a clear color, and 1.0 will give white.
+    /// Decides how light the color will look. 0.0 will be black, 0.5 will give
+    /// a clear color, and 1.0 will give white.
     pub lightness: T,
 
-    ///The white point and RGB primaries this color is adapted to. The default
-    ///is the sRGB standard.
+    /// The white point and RGB primaries this color is adapted to. The default
+    /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette_unsafe_zero_sized]
     pub space: PhantomData<S>,
@@ -84,12 +82,12 @@ impl<T> Hsl<Srgb, T>
 where
     T: FloatComponent,
 {
-    ///HSL for linear sRGB.
+    /// HSL for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<Srgb, T> {
         Hsl {
             hue: hue.into(),
-            saturation: saturation,
-            lightness: lightness,
+            saturation,
+            lightness,
             space: PhantomData,
         }
     }
@@ -100,12 +98,12 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    ///Linear HSL.
+    /// Linear HSL.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<S, T> {
         Hsl {
             hue: hue.into(),
-            saturation: saturation,
-            lightness: lightness,
+            saturation,
+            lightness,
             space: PhantomData,
         }
     }
@@ -187,11 +185,11 @@ where
     T: FloatComponent,
     A: Component,
 {
-    ///HSL and transparency for linear sRGB.
+    /// HSL and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
             color: Hsl::new(hue, saturation, lightness),
-            alpha: alpha,
+            alpha,
         }
     }
 }
@@ -203,11 +201,11 @@ where
     A: Component,
     S: RgbSpace,
 {
-    ///Linear HSL and transparency.
+    /// Linear HSL and transparency.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
             color: Hsl::with_wp(hue, saturation, lightness),
-            alpha: alpha,
+            alpha,
         }
     }
 
@@ -264,7 +262,7 @@ where
 
         Hsl {
             hue: hsv.hue,
-            saturation: saturation,
+            saturation,
             lightness: x / from_f64(2.0),
             space: PhantomData,
         }
@@ -304,7 +302,7 @@ where
     T: FloatComponent,
     S: RgbSpace,
 {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn is_valid(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
@@ -593,7 +591,7 @@ where
         T::default_max_relative()
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn relative_eq(
         &self,
         other: &Self,
@@ -616,7 +614,7 @@ where
         T::default_max_ulps()
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
             self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
@@ -642,8 +640,8 @@ where
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use encoding::Srgb;
-    use {Hsv, LinSrgb};
+    use crate::encoding::Srgb;
+    use crate::{Hsv, LinSrgb};
 
     #[test]
     fn red() {

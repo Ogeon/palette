@@ -1,44 +1,43 @@
-//!Color blending and blending equations.
+//! Color blending and blending equations.
 //!
-//!Palette offers both OpenGL style blending equations, as well as most of the
-//!SVG composition operators (also common in photo manipulation software). The
-//!composition operators are all implemented in the
-//![`Blend`](trait.Blend.html) trait, and ready to use with any appropriate
-//!color type:
+//! Palette offers both OpenGL style blending equations, as well as most of the
+//! SVG composition operators (also common in photo manipulation software). The
+//! composition operators are all implemented in the
+//! [`Blend`](trait.Blend.html) trait, and ready to use with any appropriate
+//! color type:
 //!
-//!```
-//!use palette::{LinSrgba, Blend};
+//! ```
+//! use palette::{LinSrgba, Blend};
 //!
-//!let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
-//!let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
-//!let c = a.overlay(b);
-//!```
+//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+//! let c = a.overlay(b);
+//! ```
 //!
-//!Blending equations can be defined using the
-//![`Equations`](struct.Equations.html) type, which is then passed to the
-//!`blend` function, from the `Blend` trait:
+//! Blending equations can be defined using the
+//! [`Equations`](struct.Equations.html) type, which is then passed to the
+//! `blend` function, from the `Blend` trait:
 //!
-//!```
-//!use palette::{LinSrgba, Blend};
-//!use palette::blend::{Equations, Parameter};
+//! ```
+//! use palette::{LinSrgba, Blend};
+//! use palette::blend::{Equations, Parameter};
 //!
-//!let blend_mode = Equations::from_parameters(
+//! let blend_mode = Equations::from_parameters(
 //!    Parameter::SourceAlpha,
 //!    Parameter::OneMinusSourceAlpha
-//!);
+//! );
 //!
-//!let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
-//!let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
-//!let c = a.blend(b, blend_mode);
-//!```
+//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+//! let c = a.blend(b, blend_mode);
+//! ```
 //!
-//!Note that blending will use [premultiplied alpha](struct.PreAlpha.html),
-//!which may result in loss of some color information in some cases. One such
-//!case is that a completely transparent resultant color will become black.
+//! Note that blending will use [premultiplied alpha](struct.PreAlpha.html),
+//! which may result in loss of some color information in some cases. One such
+//! case is that a completely transparent resultant color will become black.
 
-use float::Float;
-
-use ComponentWise;
+use crate::float::Float;
+use crate::ComponentWise;
 
 pub use self::blend::Blend;
 pub use self::equations::{Equation, Equations, Parameter, Parameters};
@@ -51,12 +50,12 @@ mod pre_alpha;
 #[cfg(test)]
 mod test;
 
-///A trait for custom blend functions.
+/// A trait for custom blend functions.
 pub trait BlendFunction<C: Blend<Color = C> + ComponentWise>
 where
     C::Scalar: Float,
 {
-    ///Apply this blend function to a pair of colors.
+    /// Apply this blend function to a pair of colors.
     fn apply_to(
         self,
         source: PreAlpha<C, C::Scalar>,

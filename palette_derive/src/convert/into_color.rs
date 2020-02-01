@@ -1,10 +1,11 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use syn::{parse_macro_input, DeriveInput, Generics, Ident, Type};
+use quote::quote;
 
-use meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
-use util;
-use COLOR_TYPES;
+use crate::meta::{self, DataMetaParser, IdentOrIndex, KeyValuePair, MetaParser};
+use crate::util;
+use crate::COLOR_TYPES;
 
 use super::shared::{self, ConvertDirection};
 

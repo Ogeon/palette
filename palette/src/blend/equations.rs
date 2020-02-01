@@ -1,32 +1,31 @@
-use float::Float;
+use crate::blend::{BlendFunction, PreAlpha};
+use crate::float::Float;
+use crate::{Blend, ComponentWise};
 
-use blend::{BlendFunction, PreAlpha};
-use {Blend, ComponentWise};
-
-///A pair of blending equations and corresponding parameters.
+/// A pair of blending equations and corresponding parameters.
 ///
-///The `Equations` type is similar to how blending works in OpenGL, where a
-///blend function has can be written as `e(sp * S, dp * D)`. `e` is the
-///equation (like `s + d`), `sp` and `dp` are the source and destination
-///parameters, and `S` and `D` are the source and destination colors.
+/// The `Equations` type is similar to how blending works in OpenGL, where a
+/// blend function has can be written as `e(sp * S, dp * D)`. `e` is the
+/// equation (like `s + d`), `sp` and `dp` are the source and destination
+/// parameters, and `S` and `D` are the source and destination colors.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Equations {
-    ///The equation for the color components.
+    /// The equation for the color components.
     pub color_equation: Equation,
 
-    ///The equation for the alpha component.
+    /// The equation for the alpha component.
     pub alpha_equation: Equation,
 
-    ///The parameters for the color components.
+    /// The parameters for the color components.
     pub color_parameters: Parameters,
 
-    ///The parameters for the alpha component.
+    /// The parameters for the alpha component.
     pub alpha_parameters: Parameters,
 }
 
 impl Equations {
-    ///Create a pair of blending equations, where all the parameters are
-    ///`One`.
+    /// Create a pair of blending equations, where all the parameters are
+    /// `One`.
     pub fn from_equations(color: Equation, alpha: Equation) -> Equations {
         Equations {
             color_equation: color,
@@ -42,19 +41,19 @@ impl Equations {
         }
     }
 
-    ///Create a pair of additive blending equations with the provided
-    ///parameters.
+    /// Create a pair of additive blending equations with the provided
+    /// parameters.
     pub fn from_parameters(source: Parameter, destination: Parameter) -> Equations {
         Equations {
             color_equation: Equation::Add,
             alpha_equation: Equation::Add,
             color_parameters: Parameters {
-                source: source,
-                destination: destination,
+                source,
+                destination,
             },
             alpha_parameters: Parameters {
-                source: source,
-                destination: destination,
+                source,
+                destination,
             },
         }
     }
@@ -111,17 +110,14 @@ where
             Equation::Max => source.alpha.max(destination.alpha),
         };
 
-        PreAlpha {
-            color: color,
-            alpha: alpha,
-        }
+        PreAlpha { color, alpha }
     }
 }
 
-///A blending equation.
+/// A blending equation.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Equation {
-    ///Add the source and destination, according to `sp * S + dp * D`.
+    /// Add the source and destination, according to `sp * S + dp * D`.
     Add,
 
     /// Subtract the destination from the source, according to `sp * S - dp *
@@ -132,58 +128,58 @@ pub enum Equation {
     /// S`.
     ReverseSubtract,
 
-    ///Create a color where each component is the smallest of each of the
-    ///source and destination components. A.k.a. component wise min. The
-    ///parameters are ignored.
+    /// Create a color where each component is the smallest of each of the
+    /// source and destination components. A.k.a. component wise min. The
+    /// parameters are ignored.
     Min,
 
-    ///Create a color where each component is the largest of each of the
-    ///source and destination components. A.k.a. component wise max. The
-    ///parameters are ignored.
+    /// Create a color where each component is the largest of each of the
+    /// source and destination components. A.k.a. component wise max. The
+    /// parameters are ignored.
     Max,
 }
 
-///A pair of source and destination parameters.
+/// A pair of source and destination parameters.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Parameters {
-    ///The source parameter.
+    /// The source parameter.
     pub source: Parameter,
 
-    ///The destination parameter.
+    /// The destination parameter.
     pub destination: Parameter,
 }
 
-///A blending parameter.
+/// A blending parameter.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Parameter {
-    ///A simple 1.
+    /// A simple 1.
     One,
 
-    ///A simple 0.
+    /// A simple 0.
     Zero,
 
-    ///The source color, or alpha.
+    /// The source color, or alpha.
     SourceColor,
 
-    ///One minus the source color, or alpha.
+    /// One minus the source color, or alpha.
     OneMinusSourceColor,
 
-    ///The destination color, or alpha.
+    /// The destination color, or alpha.
     DestinationColor,
 
-    ///One minus the destination color, or alpha.
+    /// One minus the destination color, or alpha.
     OneMinusDestinationColor,
 
-    ///The source alpha.
+    /// The source alpha.
     SourceAlpha,
 
-    ///One minus the source alpha.
+    /// One minus the source alpha.
     OneMinusSourceAlpha,
 
-    ///The destination alpha.
+    /// The destination alpha.
     DestinationAlpha,
 
-    ///One minus the destination alpha.
+    /// One minus the destination alpha.
     OneMinusDestinationAlpha,
 }
 
