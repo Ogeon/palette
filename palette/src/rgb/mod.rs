@@ -6,9 +6,10 @@ use crate::encoding::{self, Gamma, Linear, TransferFn};
 use crate::white_point::WhitePoint;
 use crate::{Component, FloatComponent, FromComponent, Yxy};
 
+pub use self::packed::{channels, Packed, RgbChannels};
 pub use self::rgb::{Rgb, Rgba};
 
-//mod linear;
+mod packed;
 mod rgb;
 
 /// Nonlinear sRGB.
