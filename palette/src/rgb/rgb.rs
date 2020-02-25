@@ -15,7 +15,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb};
 use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
-use crate::rgb::{RgbSpace, RgbStandard, TransferFn};
+use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::white_point::WhitePoint;
 use crate::{clamp, contrast_ratio, from_f64};
 use crate::{
@@ -115,6 +115,35 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     /// Convert from a `(red, green, blue)` tuple.
     pub fn from_components((red, green, blue): (T, T, T)) -> Self {
         Self::new(red, green, blue)
+    }
+}
+
+/// Convenience functions to convert between a packed `u32` and `Rgb`.
+///
+/// ```
+/// use palette::Srgb;
+///
+/// let rgb = Srgb::from(0x607F00);
+/// assert_eq!(Srgb::new(96u8, 127, 0), rgb);
+///
+/// let integer = u32::from(rgb);
+/// assert_eq!(0xFF607F00, integer);
+/// ```
+impl<S: RgbStandard> Rgb<S, u8> {
+    /// Convert to a packed `u32` with with specifiable component order.
+    /// Defaults to ARGB ordering (0xAARRGGBB).
+    ///
+    /// See [Packed](struct.Packed.html) for more details.
+    pub fn into_u32<C: RgbChannels>(self) -> u32 {
+        Packed::<C>::from(self).color
+    }
+
+    /// Convert from a packed `u32` with specifiable component order. Defaults
+    /// to ARGB ordering (0xAARRGGBB).
+    ///
+    /// See [Packed](struct.Packed.html) for more details.
+    pub fn from_u32<C: RgbChannels>(color: u32) -> Self {
+        Packed::<C>::from(color).into()
     }
 }
 
@@ -225,6 +254,35 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     /// Convert from a `(red, green, blue, alpha)` tuple.
     pub fn from_components((red, green, blue, alpha): (T, T, T, A)) -> Self {
         Self::new(red, green, blue, alpha)
+    }
+}
+
+/// Convenience functions to convert between a packed `u32` and `Rgba`.
+///
+/// ```
+/// use palette::Srgba;
+///
+/// let rgba = Srgba::from(0x607F00FF);
+/// assert_eq!(Srgba::new(96u8, 127, 0, 255), rgba);
+///
+/// let integer = u32::from(rgba);
+/// assert_eq!(0x607F00FF, integer);
+/// ```
+impl<S: RgbStandard> Rgba<S, u8> {
+    /// Convert to a packed `u32` with with specifiable component order.
+    /// Defaults to ARGB ordering (0xAARRGGBB).
+    ///
+    /// See [Packed](struct.Packed.html) for more details.
+    pub fn into_u32<C: RgbChannels>(self) -> u32 {
+        Packed::<C>::from(self).color
+    }
+
+    /// Convert from a packed `u32` with specifiable component order. Defaults
+    /// to ARGB ordering (0xAARRGGBB).
+    ///
+    /// See [Packed](struct.Packed.html) for more details.
+    pub fn from_u32<C: RgbChannels>(color: u32) -> Self {
+        Packed::<C>::from(color).into()
     }
 }
 
@@ -1058,9 +1116,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::Rgb;
-    use crate::encoding::Srgb;
     use core::str::FromStr;
+
+    use super::{Rgb, Rgba};
+    use crate::encoding::Srgb;
+    use crate::rgb::packed::channels;
 
     #[test]
     fn ranges() {
@@ -1166,6 +1226,31 @@ mod test {
         assert_eq!(
             format!("{:03X}", Rgb::<Srgb, u64>::new(1, 2, 3)),
             "001002003"
+        );
+    }
+
+    #[test]
+    fn rgb_hex_into_from() {
+        let c1 = Rgb::<Srgb, u8>::from_u32::<channels::Argb>(0x1100_7FFF);
+        let c2 = Rgb::<Srgb, u8>::new(0u8, 127, 255);
+        assert_eq!(c1, c2);
+        assert_eq!(Rgb::<Srgb, u8>::into_u32::<channels::Argb>(c1), 0xFF00_7FFF);
+
+        let c1 = Rgba::<Srgb, u8>::from_u32::<channels::Rgba>(0x007F_FF80);
+        let c2 = Rgba::<Srgb, u8>::new(0u8, 127, 255, 128);
+        assert_eq!(c1, c2);
+        assert_eq!(
+            Rgba::<Srgb, u8>::into_u32::<channels::Rgba>(c1),
+            0x007F_FF80
+        );
+
+        assert_eq!(
+            Rgb::<Srgb, u8>::from(0x7FFF_FF80),
+            Rgb::from((255u8, 255, 128))
+        );
+        assert_eq!(
+            Rgba::<Srgb, u8>::from(0x7FFF_FF80),
+            Rgba::from((127u8, 255, 255, 128))
         );
     }
 
