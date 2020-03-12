@@ -118,6 +118,27 @@ The RGB gradient goes through gray, while the HSV gradients only change hue:
 
 ![Gradient Comparison](gfx/readme_gradients.png)
 
+### Working with Raw Color Types
+
+Palette supports converting from a raw buffer of data into a color type using the `Pixel` trait. This is useful for interoperation with other crates or programs.
+
+Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. `from_raw` can be used to convert into a Palette color, `into_format` converts from  `Srgb<u8>` to `Srgb<f32>`, and finally `into_raw` to convert from a Palette color back to a `[u8;3]`.
+
+Here's an example of turning a buffer of `[u8; 3]` into a Palette `Srgb` color and back to a raw buffer.
+```rust
+use approx::assert_relative_eq;
+use palette::{Srgb, Pixel};
+
+let buffer = [255, 0, 255];
+let raw = Srgb::from_raw(&buffer);
+assert_eq!(raw, &Srgb::<u8>::new(255u8, 0, 255));
+
+let raw_float: Srgb<f32> = raw.into_format();
+assert_relative_eq!(raw_float, Srgb::new(1.0, 0.0, 1.0));
+
+let raw: [u8; 3] = Srgb::into_raw(raw_float.into_format());
+assert_eq!(raw, buffer);
+
 ## What It Isn't
 
 This library is only meant for color manipulation and conversion. It's not a fully featured image manipulation library. It will only handle colors, and not whole images. There are features that are meant to work as bridges between Palette and other graphical libraries, but the main features are limited to only focus on single pixel operations, to keep the scope at a manageable size.

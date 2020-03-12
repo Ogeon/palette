@@ -133,12 +133,35 @@
 //! When the desired processing is done, it's time to encode the colors back
 //! into some image format. The same rules applies as for the decoding, but the
 //! process reversed.
+//!
+//! # Working with Raw Data
+//!
+//! Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. The
+//! [`Pixel`](encoding/pixel/trait.Pixel.html) trait allows for easy interoperation between
+//! Palette colors and other crates or systems. `from_raw` can be used to
+//! convert into a Palette color, `into_format` converts from  `Srgb<u8>` to
+//! `Srgb<f32>`, and finally `into_raw` to convert from a Palette color back to
+//! a `[u8;3]`.
+//!
+//! ```rust
+//! use approx::assert_relative_eq;
+//! use palette::{Srgb, Pixel};
+//!
+//! let buffer = [255, 0, 255];
+//! let raw = Srgb::from_raw(&buffer);
+//! assert_eq!(raw, &Srgb::<u8>::new(255u8, 0, 255));
+//!
+//! let raw_float: Srgb<f32> = raw.into_format();
+//! assert_relative_eq!(raw_float, Srgb::new(1.0, 0.0, 1.0));
+//!
+//! let raw: [u8; 3] = Srgb::into_raw(raw_float.into_format());
+//! assert_eq!(raw, buffer);
+//! ```
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 #![doc(html_root_url = "https://docs.rs/palette/0.5.0/palette/")]
-#![cfg_attr(feature = "strict", deny(missing_docs))]
-#![cfg_attr(feature = "strict", deny(warnings))]
+#![warn(missing_docs)]
 
 #[cfg(any(feature = "std", test))]
 extern crate core;

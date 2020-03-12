@@ -7,6 +7,8 @@ rust:
   - stable
   - beta
   - nightly
+env:
+  - RUSTFLAGS="-D warnings"
 os:
   - linux
   - osx
@@ -18,11 +20,11 @@ branches:
     - /^\d+\.\d+$/
 script:
   - cd palette_derive
-  - cargo build -v --features strict
+  - cargo build -v
 
   - cd ../palette
-  - cargo build -v --features strict
-  - cargo test -v --features strict
+  - cargo build -v
+  - cargo test -v
   - bash ../scripts/test_features.sh
 
   - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then
