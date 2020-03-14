@@ -138,6 +138,7 @@ assert_relative_eq!(raw_float, Srgb::new(1.0, 0.0, 1.0));
 
 let raw: [u8; 3] = Srgb::into_raw(raw_float.into_format());
 assert_eq!(raw, buffer);
+```
 
 ## What It Isn't
 
