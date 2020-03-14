@@ -116,7 +116,7 @@ pub unsafe trait Pixel<T>: Sized {
         unsafe { P::from_raw_parts_mut(self as *mut Self as *mut T, Self::CHANNELS) }
     }
 
-    /// Convert from raw color components.
+    /// Convert into raw color components.
     #[inline]
     fn into_raw<P: RawPixelSized<T>>(self) -> P {
         assert_eq!(P::CHANNELS, Self::CHANNELS);

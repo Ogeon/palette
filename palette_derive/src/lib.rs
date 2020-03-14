@@ -1,9 +1,6 @@
 //! Derives traits from the [palette](https://crates.io/crates/palette) crate.
 
-#![cfg_attr(feature = "strict", deny(warnings))]
 #![recursion_limit = "128"]
-
-extern crate proc_macro;
 
 use proc_macro::TokenStream;
 

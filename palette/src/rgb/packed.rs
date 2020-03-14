@@ -167,7 +167,6 @@ where
 
 #[cfg(test)]
 mod test {
-    // use crate::rgb::{Abgr, Argb, Bgra, Rgba};
     use crate::rgb::packed::channels::{Abgr, Argb, Bgra, Rgba};
     use crate::{Packed, Srgb, Srgba};
 
