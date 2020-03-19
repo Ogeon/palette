@@ -138,6 +138,26 @@ where
             space: PhantomData,
         }
     }
+
+    /// Return the `whiteness` value minimum.
+    pub fn min_whiteness() -> T {
+        T::zero()
+    }
+
+    /// Return the `whiteness` value maximum.
+    pub fn max_whiteness() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `blackness` value minimum.
+    pub fn min_blackness() -> T {
+        T::zero()
+    }
+
+    /// Return the `blackness` value maximum.
+    pub fn max_blackness() -> T {
+        T::max_intensity()
+    }
 }
 
 ///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
@@ -675,6 +695,14 @@ mod test {
 
     raw_pixel_conversion_tests!(Hwb<Srgb>: hue, whiteness, blackness);
     raw_pixel_conversion_fail_tests!(Hwb<Srgb>: hue, whiteness, blackness);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Hwb::<Srgb>::min_whiteness(), 0.0,);
+        assert_relative_eq!(Hwb::<Srgb>::min_blackness(), 0.0,);
+        assert_relative_eq!(Hwb::<Srgb>::max_whiteness(), 1.0,);
+        assert_relative_eq!(Hwb::<Srgb>::max_blackness(), 1.0,);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

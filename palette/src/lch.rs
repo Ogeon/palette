@@ -112,6 +112,35 @@ where
     pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
         Self::with_wp(l, chroma, hue)
     }
+
+    /// Return the `l` value minimum.
+    pub fn min_l() -> T {
+        T::zero()
+    }
+
+    /// Return the `l` value maximum.
+    pub fn max_l() -> T {
+        from_f64(100.0)
+    }
+
+    /// Return the `chroma` value minimum.
+    pub fn min_chroma() -> T {
+        T::zero()
+    }
+
+    /// Return the `chroma` value maximum. This value does not cover the entire
+    /// color space, but covers enough to be practical for downsampling to
+    /// smaller color spaces like sRGB.
+    pub fn max_chroma() -> T {
+        from_f64(128.0)
+    }
+
+    /// Return the `chroma` extended maximum value. This value covers the entire
+    /// color space and is included for completeness, but the additional range
+    /// should be unnecessary for most use cases.
+    pub fn max_extended_chroma() -> T {
+        from_f64(crate::float::Float::sqrt(128.0f64 * 128.0 + 128.0 * 128.0))
+    }
 }
 
 ///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
@@ -556,6 +585,15 @@ mod test {
 
     raw_pixel_conversion_tests!(Lch<D65>: l, chroma, hue);
     raw_pixel_conversion_fail_tests!(Lch<D65>: l, chroma, hue);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Lch::<D65, f32>::min_l(), 0.0);
+        assert_relative_eq!(Lch::<D65, f32>::max_l(), 100.0);
+        assert_relative_eq!(Lch::<D65, f32>::min_chroma(), 0.0);
+        assert_relative_eq!(Lch::<D65, f32>::max_chroma(), 128.0);
+        assert_relative_eq!(Lch::<D65, f32>::max_extended_chroma(), 181.01933598375618);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

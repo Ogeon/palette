@@ -108,6 +108,16 @@ where
     pub fn from_components((luma,): (T,)) -> Self {
         Self::new(luma)
     }
+
+    /// Return the `luma` value minimum.
+    pub fn min_luma() -> T {
+        T::zero()
+    }
+
+    /// Return the `luma` value maximum.
+    pub fn max_luma() -> T {
+        T::max_intensity()
+    }
 }
 
 impl<S, T> Luma<S, T>
@@ -805,6 +815,12 @@ mod test {
         assert_eq!(format!("{:03X}", Luma::<Srgb, u16>::new(1)), "001");
         assert_eq!(format!("{:03X}", Luma::<Srgb, u32>::new(1)), "001");
         assert_eq!(format!("{:03X}", Luma::<Srgb, u64>::new(1)), "001");
+    }
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Luma::<Srgb, f32>::min_luma(), 0.0);
+        assert_relative_eq!(Luma::<Srgb, f32>::max_luma(), 1.0);
     }
 
     #[cfg(feature = "serializing")]

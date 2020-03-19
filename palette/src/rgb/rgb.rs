@@ -116,6 +116,36 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     pub fn from_components((red, green, blue): (T, T, T)) -> Self {
         Self::new(red, green, blue)
     }
+
+    /// Return the `red` value minimum.
+    pub fn min_red() -> T {
+        T::zero()
+    }
+
+    /// Return the `red` value maximum.
+    pub fn max_red() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `green` value minimum.
+    pub fn min_green() -> T {
+        T::zero()
+    }
+
+    /// Return the `green` value maximum.
+    pub fn max_green() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `blue` value minimum.
+    pub fn min_blue() -> T {
+        T::zero()
+    }
+
+    /// Return the `blue` value maximum.
+    pub fn max_blue() -> T {
+        T::max_intensity()
+    }
 }
 
 /// Convenience functions to convert between a packed `u32` and `Rgb`.
@@ -1314,5 +1344,15 @@ mod test {
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(240, 52, 230));
         let c = Rgb::<Srgb, u8>::from_str("abc");
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(170, 187, 204));
+    }
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Rgb::<Srgb, f32>::min_red(), 0.0);
+        assert_relative_eq!(Rgb::<Srgb, f32>::min_green(), 0.0);
+        assert_relative_eq!(Rgb::<Srgb, f32>::min_blue(), 0.0);
+        assert_relative_eq!(Rgb::<Srgb, f32>::max_red(), 1.0);
+        assert_relative_eq!(Rgb::<Srgb, f32>::max_green(), 1.0);
+        assert_relative_eq!(Rgb::<Srgb, f32>::max_blue(), 1.0);
     }
 }

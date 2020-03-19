@@ -172,6 +172,26 @@ where
             space: PhantomData,
         }
     }
+
+    /// Return the `saturation` value minimum.
+    pub fn min_saturation() -> T {
+        T::zero()
+    }
+
+    /// Return the `saturation` value maximum.
+    pub fn max_saturation() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `value` value minimum.
+    pub fn min_value() -> T {
+        T::zero()
+    }
+
+    /// Return the `value` value maximum.
+    pub fn max_value() -> T {
+        T::max_intensity()
+    }
 }
 
 ///<span id="Hsva"></span>[`Hsva`](type.Hsva.html) implementations.
@@ -725,6 +745,14 @@ mod test {
 
     raw_pixel_conversion_tests!(Hsv<Srgb>: hue, saturation, value);
     raw_pixel_conversion_fail_tests!(Hsv<Srgb>: hue, saturation, value);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Hsv::<Srgb>::min_saturation(), 0.0,);
+        assert_relative_eq!(Hsv::<Srgb>::min_value(), 0.0,);
+        assert_relative_eq!(Hsv::<Srgb>::max_saturation(), 1.0,);
+        assert_relative_eq!(Hsv::<Srgb>::max_value(), 1.0,);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

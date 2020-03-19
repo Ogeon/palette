@@ -110,6 +110,36 @@ where
     pub fn from_components((x, y, luma): (T, T, T)) -> Self {
         Self::with_wp(x, y, luma)
     }
+
+    /// Return the `x` value minimum.
+    pub fn min_x() -> T {
+        T::zero()
+    }
+
+    /// Return the `x` value maximum.
+    pub fn max_x() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `y` value minimum.
+    pub fn min_y() -> T {
+        T::zero()
+    }
+
+    /// Return the `y` value maximum.
+    pub fn max_y() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `luma` value minimum.
+    pub fn min_luma() -> T {
+        T::zero()
+    }
+
+    /// Return the `luma` value maximum.
+    pub fn max_luma() -> T {
+        T::max_intensity()
+    }
 }
 
 ///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
@@ -585,8 +615,7 @@ where
 mod test {
     use super::Yxy;
     use crate::white_point::D65;
-    use crate::LinLuma;
-    use crate::LinSrgb;
+    use crate::{LinLuma, LinSrgb};
 
     #[test]
     fn luma() {
@@ -632,6 +661,16 @@ mod test {
 
     raw_pixel_conversion_tests!(Yxy<D65>: x, y, luma);
     raw_pixel_conversion_fail_tests!(Yxy<D65>: x, y, luma);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Yxy::<D65>::min_x(), 0.0);
+        assert_relative_eq!(Yxy::<D65>::min_y(), 0.0);
+        assert_relative_eq!(Yxy::<D65>::min_luma(), 0.0);
+        assert_relative_eq!(Yxy::<D65>::max_x(), 1.0);
+        assert_relative_eq!(Yxy::<D65>::max_y(), 1.0);
+        assert_relative_eq!(Yxy::<D65>::max_luma(), 1.0);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

@@ -177,6 +177,26 @@ where
             space: PhantomData,
         }
     }
+
+    /// Return the `saturation` value minimum.
+    pub fn min_saturation() -> T {
+        T::zero()
+    }
+
+    /// Return the `saturation` value maximum.
+    pub fn max_saturation() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `lightness` value minimum.
+    pub fn min_lightness() -> T {
+        T::zero()
+    }
+
+    /// Return the `lightness` value maximum.
+    pub fn max_lightness() -> T {
+        T::max_intensity()
+    }
 }
 
 ///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
@@ -710,6 +730,14 @@ mod test {
 
     raw_pixel_conversion_tests!(Hsl<Srgb>: hue, saturation, lightness);
     raw_pixel_conversion_fail_tests!(Hsl<Srgb>: hue, saturation, lightness);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Hsl::<Srgb>::min_saturation(), 0.0);
+        assert_relative_eq!(Hsl::<Srgb>::min_lightness(), 0.0);
+        assert_relative_eq!(Hsl::<Srgb>::max_saturation(), 1.0);
+        assert_relative_eq!(Hsl::<Srgb>::max_lightness(), 1.0);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

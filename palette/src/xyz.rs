@@ -113,6 +113,39 @@ where
     pub fn from_components((x, y, z): (T, T, T)) -> Self {
         Self::with_wp(x, y, z)
     }
+
+    /// Return the `x` value minimum.
+    pub fn min_x() -> T {
+        T::zero()
+    }
+
+    /// Return the `x` value maximum.
+    pub fn max_x() -> T {
+        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
+        xyz_ref.x
+    }
+
+    /// Return the `y` value minimum.
+    pub fn min_y() -> T {
+        T::zero()
+    }
+
+    /// Return the `y` value maximum.
+    pub fn max_y() -> T {
+        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
+        xyz_ref.y
+    }
+
+    /// Return the `z` value minimum.
+    pub fn min_z() -> T {
+        T::zero()
+    }
+
+    /// Return the `z` value maximum.
+    pub fn max_z() -> T {
+        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
+        xyz_ref.z
+    }
 }
 
 ///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
@@ -618,8 +651,7 @@ where
 mod test {
     use super::Xyz;
     use crate::white_point::D65;
-    use crate::LinLuma;
-    use crate::LinSrgb;
+    use crate::{LinLuma, LinSrgb};
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;
@@ -668,6 +700,16 @@ mod test {
 
     raw_pixel_conversion_tests!(Xyz<D65>: x, y, z);
     raw_pixel_conversion_fail_tests!(Xyz<D65>: x, y, z);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Xyz::<D65>::min_x(), 0.0);
+        assert_relative_eq!(Xyz::<D65>::min_y(), 0.0);
+        assert_relative_eq!(Xyz::<D65>::min_z(), 0.0);
+        assert_relative_eq!(Xyz::<D65, f64>::max_x(), X_N);
+        assert_relative_eq!(Xyz::<D65, f64>::max_y(), Y_N);
+        assert_relative_eq!(Xyz::<D65, f64>::max_z(), Z_N);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]
