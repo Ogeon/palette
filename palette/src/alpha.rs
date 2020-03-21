@@ -2,6 +2,12 @@ use core::fmt;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
 
 use crate::blend::PreAlpha;
 use crate::encoding::pixel::RawPixel;
@@ -432,6 +438,83 @@ where
             self.alpha,
             width = size
         )
+    }
+}
+
+#[cfg(feature = "random")]
+impl<C, T> Distribution<Alpha<C, T>> for Standard
+where
+    T: Component,
+    Standard: Distribution<C> + Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alpha<C, T> {
+        Alpha {
+            color: rng.gen(),
+            alpha: rng.gen(),
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformAlpha<C, T>
+where
+    T: Component + SampleUniform,
+    C: SampleUniform,
+{
+    color: Uniform<C>,
+    alpha: Uniform<T>,
+}
+
+#[cfg(feature = "random")]
+impl<C, T> SampleUniform for Alpha<C, T>
+where
+    T: Component + SampleUniform,
+    C: Copy + SampleUniform,
+{
+    type Sampler = UniformAlpha<C, T>;
+}
+
+#[cfg(feature = "random")]
+impl<C, T> UniformSampler for UniformAlpha<C, T>
+where
+    T: Component + SampleUniform,
+    C: Copy + SampleUniform,
+{
+    type X = Alpha<C, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformAlpha {
+            color: Uniform::new::<C, _>(low.color, high.color),
+            alpha: Uniform::new::<_, T>(low.alpha, high.alpha),
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformAlpha {
+            color: Uniform::new_inclusive::<C, _>(low.color, high.color),
+            alpha: Uniform::new_inclusive::<_, T>(low.alpha, high.alpha),
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alpha<C, T> {
+        Alpha {
+            color: self.color.sample(rng),
+            alpha: self.alpha.sample(rng),
+        }
     }
 }
 

@@ -1,15 +1,20 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
+
 use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
-use crate::{clamp, contrast_ratio, from_f64};
-use crate::{Alpha, Hue, Lab, LabHue, Xyz};
 use crate::{
-    Component, FloatComponent, FromColor, GetHue, IntoColor, Limited, Mix, Pixel, RelativeContrast,
-    Saturate, Shade,
+    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, GetHue, Hue,
+    IntoColor, Lab, LabHue, Limited, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -559,6 +564,97 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> Distribution<Lch<Wp, T>> for Standard
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
+        Lch {
+            l: rng.gen(),
+            chroma: crate::Float::sqrt(rng.gen()) * from_f64(128.0),
+            hue: rng.gen::<LabHue<T>>(),
+            white_point: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformLch<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    l: Uniform<T>,
+    chroma: Uniform<T>,
+    hue: crate::hues::UniformLabHue<T>,
+    white_point: PhantomData<Wp>,
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> SampleUniform for Lch<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type Sampler = UniformLch<Wp, T>;
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> UniformSampler for UniformLch<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type X = Lch<Wp, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLch {
+            l: Uniform::new::<_, T>(low.l, high.l),
+            chroma: Uniform::new::<_, T>(low.chroma * low.chroma, high.chroma * high.chroma),
+            hue: crate::hues::UniformLabHue::new(low.hue, high.hue),
+            white_point: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLch {
+            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
+            chroma: Uniform::new_inclusive::<_, T>(
+                low.chroma * low.chroma,
+                high.chroma * high.chroma,
+            ),
+            hue: crate::hues::UniformLabHue::new_inclusive(low.hue, high.hue),
+            white_point: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
+        Lch {
+            l: self.l.sample(rng),
+            chroma: crate::Float::sqrt(self.chroma.sample(rng)),
+            hue: self.hue.sample(rng),
+            white_point: PhantomData,
+        }
     }
 }
 

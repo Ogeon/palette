@@ -3,6 +3,12 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
 
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
@@ -615,6 +621,81 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<S, T> Distribution<Hwb<S, T>> for Standard
+where
+    T: FloatComponent,
+    S: RgbSpace,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
+        Hwb::from(rng.gen::<Hsv<S, T>>())
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformHwb<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    sampler: crate::hsv::UniformHsv<S, T>,
+    space: PhantomData<S>,
+}
+
+#[cfg(feature = "random")]
+impl<S, T> SampleUniform for Hwb<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    type Sampler = UniformHwb<S, T>;
+}
+
+#[cfg(feature = "random")]
+impl<S, T> UniformSampler for UniformHwb<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    type X = Hwb<S, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+        let sampler = crate::hsv::UniformHsv::<S, _>::new(Hsv::from(low), Hsv::from(high));
+
+        UniformHwb {
+            sampler,
+            space: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+        let sampler =
+            crate::hsv::UniformHsv::<S, _>::new_inclusive(Hsv::from(low), Hsv::from(high));
+
+        UniformHwb {
+            sampler,
+            space: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
+        Hwb::from(self.sampler.sample(rng))
     }
 }
 

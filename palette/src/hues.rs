@@ -1,6 +1,13 @@
 use core::cmp::PartialEq;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
+
 use crate::float::Float;
 use crate::{from_f64, FromF64};
 
@@ -239,6 +246,17 @@ macro_rules! make_hues {
                 *self -= other.0;
             }
         }
+
+        #[cfg(feature = "random")]
+        impl<T> Distribution<$name<T>> for Standard
+        where
+            T: Float + FromF64,
+            Standard: Distribution<T>,
+        {
+            fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $name<T> {
+                    $name(rng.gen() * from_f64(360.0))
+            }
+        }
     )+)
 }
 
@@ -268,6 +286,126 @@ fn normalize_angle<T: Float + FromF64>(deg: T) -> T {
 fn normalize_angle_positive<T: Float + FromF64>(deg: T) -> T {
     let c360 = from_f64(360.0);
     deg - ((deg / c360).floor() * c360)
+}
+
+#[cfg(feature = "random")]
+pub struct UniformLabHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    hue: Uniform<T>,
+}
+
+#[cfg(feature = "random")]
+impl<T> SampleUniform for LabHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    type Sampler = UniformLabHue<T>;
+}
+
+#[cfg(feature = "random")]
+impl<T> UniformSampler for UniformLabHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    type X = LabHue<T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLabHue {
+            hue: Uniform::new(
+                LabHue::to_positive_degrees(low),
+                LabHue::to_positive_degrees(high),
+            ),
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLabHue {
+            hue: Uniform::new_inclusive(
+                LabHue::to_positive_degrees(low),
+                LabHue::to_positive_degrees(high),
+            ),
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> LabHue<T> {
+        LabHue::from(self.hue.sample(rng) * from_f64(360.0))
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformRgbHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    hue: Uniform<T>,
+}
+
+#[cfg(feature = "random")]
+impl<T> SampleUniform for RgbHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    type Sampler = UniformRgbHue<T>;
+}
+
+#[cfg(feature = "random")]
+impl<T> UniformSampler for UniformRgbHue<T>
+where
+    T: Float + FromF64 + SampleUniform,
+{
+    type X = RgbHue<T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformRgbHue {
+            hue: Uniform::new(
+                RgbHue::to_positive_degrees(low),
+                RgbHue::to_positive_degrees(high),
+            ),
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformRgbHue {
+            hue: Uniform::new_inclusive(
+                RgbHue::to_positive_degrees(low),
+                RgbHue::to_positive_degrees(high),
+            ),
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> RgbHue<T> {
+        RgbHue::from(self.hue.sample(rng) * from_f64(360.0))
+    }
 }
 
 #[cfg(test)]
