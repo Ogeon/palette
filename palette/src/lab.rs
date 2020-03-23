@@ -112,6 +112,36 @@ where
     pub fn from_components((l, a, b): (T, T, T)) -> Self {
         Self::with_wp(l, a, b)
     }
+
+    /// Return the `l` value minimum.
+    pub fn min_l() -> T {
+        T::zero()
+    }
+
+    /// Return the `l` value maximum.
+    pub fn max_l() -> T {
+        from_f64(100.0)
+    }
+
+    /// Return the `a` value minimum.
+    pub fn min_a() -> T {
+        from_f64(-128.0)
+    }
+
+    /// Return the `a` value maximum.
+    pub fn max_a() -> T {
+        from_f64(127.0)
+    }
+
+    /// Return the `b` value minimum.
+    pub fn min_b() -> T {
+        from_f64(-128.0)
+    }
+
+    /// Return the `b` value maximum.
+    pub fn max_b() -> T {
+        from_f64(127.0)
+    }
 }
 
 ///<span id="Laba"></span>[`Laba`](type.Laba.html) implementations.
@@ -684,6 +714,16 @@ mod test {
 
     raw_pixel_conversion_tests!(Lab<D65>: l, a, b);
     raw_pixel_conversion_fail_tests!(Lab<D65>: l, a, b);
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Lab::<D65, f32>::min_l(), 0.0);
+        assert_relative_eq!(Lab::<D65, f32>::min_a(), -128.0);
+        assert_relative_eq!(Lab::<D65, f32>::min_b(), -128.0);
+        assert_relative_eq!(Lab::<D65, f32>::max_l(), 100.0);
+        assert_relative_eq!(Lab::<D65, f32>::max_a(), 127.0);
+        assert_relative_eq!(Lab::<D65, f32>::max_b(), 127.0);
+    }
 
     #[cfg(feature = "serializing")]
     #[test]

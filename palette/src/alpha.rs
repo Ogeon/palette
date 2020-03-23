@@ -24,6 +24,18 @@ pub struct Alpha<C, T> {
     pub alpha: T,
 }
 
+impl<C, T: Component> Alpha<C, T> {
+    /// Return the `alpha` value minimum.
+    pub fn min_alpha() -> T {
+        T::zero()
+    }
+
+    /// Return the `alpha` value maximum.
+    pub fn max_alpha() -> T {
+        T::max_intensity()
+    }
+}
+
 impl<C, T> Deref for Alpha<C, T> {
     type Target = C;
 
@@ -522,6 +534,12 @@ mod test {
             format!("{:03X}", Rgba::<Srgb, u64>::new(1, 2, 3, 4)),
             "001002003004"
         );
+    }
+
+    #[test]
+    fn check_min_max_components() {
+        assert_relative_eq!(Rgba::<Srgb>::min_alpha(), 0.0);
+        assert_relative_eq!(Rgba::<Srgb>::max_alpha(), 1.0);
     }
 
     #[cfg(feature = "serializing")]
