@@ -18,7 +18,7 @@ use crate::{from_f64, FloatComponent, Xyz};
 /// Custom white points can be easily defined on an empty struct with the
 /// tristimulus values and can be used in place of the ones defined in this
 /// library.
-pub trait WhitePoint {
+pub trait WhitePoint: 'static {
     /// Get the Xyz chromacity co-ordinates for the white point.
     fn get_xyz<Wp: WhitePoint, T: FloatComponent>() -> Xyz<Wp, T>;
 }

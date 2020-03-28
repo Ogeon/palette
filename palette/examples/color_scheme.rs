@@ -1,4 +1,4 @@
-use palette::{Hue, Lch, LinSrgb, Pixel, Shade, Srgb};
+use palette::{Hue, IntoColor, Lch, LinSrgb, Pixel, Shade, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage, SubImage};
 
@@ -92,7 +92,7 @@ fn main() {
     let primary: Lch = Srgb::new(red, green, blue)
         .into_format::<f32>()
         .into_linear()
-        .into();
+        .into_color();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {
@@ -144,14 +144,14 @@ fn main() {
 
     //Draw the primary swatches
     blit_shades(
-        primary.into(),
+        primary.into_color(),
         image.sub_image(0, 0, SWATCH_SIZE, SWATCH_SIZE),
     );
 
     //Draw the secondary swatches
     for (n, color) in secondary.into_iter().enumerate() {
         blit_shades(
-            color.into(),
+            color.into_color(),
             image.sub_image((n as u32 + 1) * SWATCH_SIZE, 0, SWATCH_SIZE, SWATCH_SIZE),
         );
     }

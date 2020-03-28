@@ -1,488 +1,277 @@
+//! Traits for converting between color spaces.
+//!
+//! # Deriving
+//!
+//! `FromColorUnclamped` can be derived in a mostly automatic way.
+//! The default minimum requirement is to implement `FromColorUnclamped<Xyz>`, but it can
+//! also be customized to make use of generics and have other manual implementations.
+//!
+//! It is also recommended to derive or implement [`WithAlpha`](../trait.WithAlpha.html),
+//! to be able to convert between all `Alpha` wrapped color types.
+//!
+//! ## Configuration Attributes
+//!
+//! The derives can be configured using one or more `#[palette(...)]` attributes.
+//! They can be attached to either the item itself, or to the fields.
+//!
+//! ```
+//! # use palette::rgb::RgbSpace;
+//! # use palette::convert::FromColorUnclamped;
+//! # use palette::{Xyz, Component, FloatComponent};
+//! #
+//! #[palette(
+//!     component = "T",
+//!     rgb_space = "S",
+//!     white_point = "S::WhitePoint",
+//! )]
+//! #[derive(FromColorUnclamped)]
+//! #[repr(C)]
+//! struct ExampleType<S: RgbSpace, T: Component> {
+//!     // ...
+//!     #[palette(alpha)]
+//!     alpha: T,
+//!     space: std::marker::PhantomData<S>,
+//! }
+//!
+//! # impl<S: RgbSpace, T: FloatComponent> FromColorUnclamped<Xyz<S::WhitePoint, T>> for ExampleType<S, T> {
+//! #   fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
+//! #       ExampleType {alpha: T::max_intensity(), space: std::marker::PhantomData}
+//! #   }
+//! # }
+//! #
+//! # impl<S: RgbSpace, T: FloatComponent> FromColorUnclamped<ExampleType<S, T>> for Xyz<S::WhitePoint, T> {
+//! #   fn from_color_unclamped(color: ExampleType<S, T>) -> Self {
+//! #       Xyz::default()
+//! #   }
+//! # }
+//! ```
+//!
+//! ### Item Attributes
+//!
+//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for these colors.
+//! They are instead to be implemented manually, and serve as the basis for the automatic
+//! implementations.
+//!
+//! * `white_point = "some::white_point::Type"`: Sets the white
+//! point type that should be used when deriving. The default is `D65`, but it
+//! may be any other type, including type parameters.
+//!
+//! * `component = "some::component::Type"`: Sets the color
+//! component type that should be used when deriving. The default is `f32`, but
+//! it may be any other type, including type parameters.
+//!
+//! * `rgb_space = "some::rgb_space::Type"`: Sets the RGB space
+//! type that should be used when deriving. The default is to either use `Srgb`
+//! or a best effort to convert between spaces, so sometimes it has to be set
+//! to a specific type. This also accepts type parameters.
+//!
+//! ## Field Attributes
+//!
+//! * `alpha`: Specifies field as the color's transparency value.
+//!
+//! ## Examples
+//!
+//! Minimum requirements implementation:
+//!
+//! ```rust
+//! use palette::convert::FromColorUnclamped;
+//! use palette::{Srgb, Xyz, IntoColor};
+//!
+//! /// A custom version of Xyz that stores integer values from 0 to 100.
+//! #[derive(PartialEq, Debug, FromColorUnclamped)]
+//! struct Xyz100 {
+//!     x: u8,
+//!     y: u8,
+//!     z: u8,
+//! }
+//!
+//! // We have to implement at least one "manual" conversion. The default
+//! // is to and from `Xyz`, but it can be customized with `skip_derives(...)`.
+//! impl FromColorUnclamped<Xyz> for Xyz100 {
+//!     fn from_color_unclamped(color: Xyz) -> Xyz100 {
+//!         Xyz100 {
+//!             x: (color.x * 100.0) as u8,
+//!             y: (color.y * 100.0) as u8,
+//!             z: (color.z * 100.0) as u8,
+//!         }
+//!     }
+//! }
+//!
+//! impl FromColorUnclamped<Xyz100> for Xyz {
+//!     fn from_color_unclamped(color: Xyz100) -> Xyz {
+//!         Xyz::new(
+//!             color.x as f32 / 100.0,
+//!             color.y as f32 / 100.0,
+//!             color.z as f32 / 100.0,
+//!         )
+//!     }
+//! }
+//!
+//! fn main() {
+//!     // Start with an Xyz100 color.
+//!     let xyz = Xyz100 {
+//!         x: 59,
+//!         y: 75,
+//!         z: 42,
+//!     };
+//!
+//!     // Convert the color to sRGB.
+//!     let rgb: Srgb = xyz.into_color();
+//!
+//!     assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
+//! }
+//! ```
+//!
+//! With generic components:
+//!
+//! ```rust
+//! #[macro_use]
+//! extern crate approx;
+//!
+//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
+//! use palette::encoding::Linear;
+//! use palette::white_point::D65;
+//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
+//! use palette::{FloatComponent, Hsv, Pixel, Srgb, IntoColor};
+//!
+//! /// sRGB, but with a reversed memory layout.
+//! #[palette(
+//!     skip_derives(Rgb),
+//!     component = "T",
+//!     rgb_space = "palette::encoding::Srgb"
+//! )]
+//! #[derive(Copy, Clone, Pixel, FromColorUnclamped)]
+//! #[repr(C)] // Makes sure the memory layout is as we want it.
+//! struct Bgr<T> {
+//!     blue: T,
+//!     green: T,
+//!     red: T,
+//! }
+//!
+//! // It converts from and into any linear Rgb type that has the
+//! // D65 white point, which is the default if we don't specify
+//! // anything else with the `white_point` attribute argument.
+//! impl<S, T> FromColorUnclamped<Bgr<T>> for Rgb<S, T>
+//! where
+//!     T: FloatComponent,
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>
+//! {
+//!     fn from_color_unclamped(color: Bgr<T>) -> Rgb<S, T> {
+//!         Srgb::new(color.red, color.green, color.blue)
+//!             .into_color_unclamped()
+//!     }
+//! }
+//!
+//! impl<S, T> FromColorUnclamped<Rgb<S, T>> for Bgr<T>
+//! where
+//!     T: FloatComponent,
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>
+//! {
+//!     fn from_color_unclamped(color: Rgb<S, T>) -> Bgr<T> {
+//!         let color = Srgb::from_color_unclamped(color);
+//!         Bgr {
+//!             blue: color.blue,
+//!             green: color.green,
+//!             red: color.red,
+//!         }
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let buffer = vec![
+//!         0.0f64,
+//!         0.0,
+//!         0.0,
+//!         0.0,
+//!         0.7353569830524495,
+//!         0.5370987304831942,
+//!     ];
+//!     let hsv: Hsv<_, f64> = Bgr::from_raw_slice(&buffer)[1].into_color();
+//!
+//!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
+//! }
+//! ```
+//!
+//! With alpha component:
+//!
+//! ```rust
+//! #[macro_use]
+//! extern crate approx;
+//!
+//! use palette::{LinSrgba, Srgb, IntoColor, WithAlpha};
+//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
+//! use palette::encoding::Linear;
+//! use palette::white_point::D65;
+//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
+//!
+//! /// CSS style sRGB.
+//! #[palette(
+//!     skip_derives(Rgb),
+//!     rgb_space = "palette::encoding::Srgb"
+//! )]
+//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
+//! struct CssRgb {
+//!     red: u8,
+//!     green: u8,
+//!     blue: u8,
+//!     #[palette(alpha)]
+//!     alpha: f32,
+//! }
+//!
+//! // We will write a conversion function for opaque RGB and
+//! // `impl_default_conversions` will take care of preserving
+//! // the transparency for us.
+//! impl<S> FromColorUnclamped<Rgb<S, f32>> for CssRgb
+//! where
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>,
+//! {
+//!     fn from_color_unclamped(color: Rgb<S, f32>) -> CssRgb{
+//!         let srgb = Srgb::from_color_unclamped(color)
+//!             .into_format();
+//!
+//!         CssRgb {
+//!             red: srgb.red,
+//!             green: srgb.green,
+//!             blue: srgb.blue,
+//!             alpha: 1.0
+//!         }
+//!     }
+//! }
+//!
+//! impl<S> FromColorUnclamped<CssRgb> for Rgb<S, f32>
+//! where
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>,
+//! {
+//!     fn from_color_unclamped(color: CssRgb) -> Rgb<S, f32>{
+//!         Srgb::new(color.red, color.green, color.blue)
+//!             .into_format()
+//!             .into_color_unclamped()
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let css_color = CssRgb {
+//!         red: 187,
+//!         green: 0,
+//!         blue: 255,
+//!         alpha: 0.3,
+//!     };
+//!     let color: LinSrgba = css_color.into_color();
+//!
+//!     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
+//! }
+//! ```
+
 use core::fmt::{self, Display, Formatter};
 
-use crate::encoding::Linear;
-use crate::luma::Luma;
-use crate::rgb::{Rgb, RgbSpace};
-use crate::white_point::{WhitePoint, D65};
-use crate::{FloatComponent, Hsl, Hsv, Hwb, Lab, Lch, Limited, Xyz, Yxy};
+#[doc(hidden)]
+pub use palette_derive::FromColorUnclamped;
 
-/// FromColor provides conversion from the colors.
-///
-/// It requires from_xyz, when implemented manually, and derives conversion to
-/// other colors as a default from this. These defaults must be overridden when
-/// direct conversion exists between colors. For example, Luma has direct
-/// conversion to LinRgb. So from_rgb conversion for Luma and from_luma for
-/// LinRgb is implemented directly. The from for the same color must override
-/// the default. For example, from_rgb for LinRgb will convert via Xyz which
-/// needs to be overridden with self to avoid the unnecessary conversion.
-///
-/// # Deriving
-///
-/// `FromColor` can be derived in a mostly automatic way. The strength of
-/// deriving it is that it will also derive `From` implementations for all of
-/// the `palette` color types. The minimum requirement is to implement
-/// `From<Xyz>`, but it can also be customized to make use of generics
-/// and have other manual implementations.
-///
-/// ## Item Attributes
-///
-///  * `#[palette_manual_from(Luma, Rgb = "from_rgb_internal")]`: Specifies the
-///    color types that
-/// the the custom color type already has `From` implementations for. Adding `=
-/// "function_name"` tells it to use that function instead of a `From`
-/// implementation. The default, when omitted, is to require `From<Xyz>` to be
-/// implemented.
-///
-///  * `#[palette_white_point = "some::white_point::Type"]`: Sets the white
-///    point type that should
-/// be used when deriving. The default is `D65`, but it may be any other type,
-/// including type parameters.
-///
-///  * `#[palette_component = "some::component::Type"]`: Sets the color
-///    component type that should
-/// be used when deriving. The default is `f32`, but it may be any other type,
-/// including type parameters.
-///
-///  * `#[palette_rgb_space = "some::rgb_space::Type"]`: Sets the RGB space type
-///    that should
-/// be used when deriving. The default is to either use `Srgb` or a best effort
-/// to convert between spaces, so sometimes it has to be set to a specific type.
-/// This does also accept type parameters.
-///
-/// ## Field Attributes
-///
-///  * `#[palette_alpha]`: Specifies that the field is the color's transparency
-///    value.
-///
-/// ## Examples
-///
-/// Minimum requirements implementation:
-///
-/// ```rust
-/// use palette::{FromColor, Srgb, Xyz};
-///
-/// /// A custom version of Xyz that stores integer values from 0 to 100.
-/// #[derive(PartialEq, Debug, FromColor)]
-/// struct Xyz100 {
-///     x: u8,
-///     y: u8,
-///     z: u8,
-/// }
-///
-/// // We have to at least implement conversion from Xyz if we don't
-/// // specify anything else, using the `palette_manual_from` attribute.
-/// impl From<Xyz> for Xyz100 {
-///     fn from(color: Xyz) -> Self {
-///         let scaled = color * 100.0;
-///         Xyz100 {
-///             x: scaled.x.max(0.0).min(100.0) as u8,
-///             y: scaled.y.max(0.0).min(100.0) as u8,
-///             z: scaled.z.max(0.0).min(100.0) as u8,
-///         }
-///     }
-/// }
-///
-/// // Start with an sRGB color and convert it from u8 to f32,
-/// // which is the default component type.
-/// let rgb = Srgb::new(196u8, 238, 155).into_format();
-///
-/// // Convert the rgb color to our own format.
-/// let xyz = Xyz100::from(rgb);
-///
-/// assert_eq!(
-///     xyz,
-///     Xyz100 {
-///         x: 59,
-///         y: 75,
-///         z: 42,
-///     }
-/// );
-/// ```
-///
-/// With generic components:
-///
-/// ```rust
-/// use approx::assert_relative_eq;
-///
-/// use palette::{FloatComponent, FromColor, Hsv, Pixel, Srgb};
-/// use palette::rgb::{Rgb, RgbSpace};
-/// use palette::encoding::Linear;
-/// use palette::white_point::D65;
-///
-/// /// sRGB, but with a reversed memory layout.
-/// #[derive(PartialEq, Debug, FromColor, Pixel)]
-/// #[palette_manual_from(Rgb = "from_rgb_internal")]
-/// #[palette_component = "T"]
-/// #[repr(C)] // Makes sure the memory layout is as we want it.
-/// struct Bgr<T> {
-///     blue: T,
-///     green: T,
-///     red: T,
-/// }
-///
-/// // Rgb is a bit more complex than other colors, so we are
-/// // implementing a private conversion function and letting it
-/// // derive `From` automatically. It will take a round trip
-/// // through linear format, but that's fine in this case.
-/// impl<T: FloatComponent> Bgr<T> {
-///     // It converts from any linear Rgb type that has the D65
-///     // white point, which is the default if we don't specify
-///     // anything else with the `palette_white_point` attribute.
-///     fn from_rgb_internal<S>(color: Rgb<Linear<S>, T>) -> Self
-///     where
-///         S: RgbSpace<WhitePoint = D65>,
-///     {
-///         let srgb = Srgb::from_rgb(color);
-///
-///         Bgr {
-///             blue: srgb.blue,
-///             green: srgb.green,
-///             red: srgb.red,
-///         }
-///     }
-/// }
-///
-/// let mut buffer = vec![0.0f64, 0.0, 0.0, 0.0, 0.0, 0.0];
-/// {
-///     let bgr_buffer = Bgr::from_raw_slice_mut(&mut buffer);
-///     bgr_buffer[1] = Hsv::new(90.0, 1.0, 0.5).into();
-/// }
-///
-/// assert_relative_eq!(buffer[3], 0.0);
-/// assert_relative_eq!(buffer[4], 0.7353569830524495);
-/// assert_relative_eq!(buffer[5], 0.5370987304831942);
-/// ```
-///
-/// With alpha component:
-///
-/// ```rust
-/// use palette::{FromColor, LinSrgba, Srgb};
-/// use palette::rgb::{Rgb, RgbSpace};
-/// use palette::encoding::Linear;
-/// use palette::white_point::D65;
-///
-/// /// CSS style sRGB.
-/// #[derive(PartialEq, Debug, FromColor)]
-/// #[palette_manual_from(Rgb = "from_rgb_internal")]
-/// struct CssRgb {
-///     red: u8,
-///     green: u8,
-///     blue: u8,
-///     #[palette_alpha]
-///     alpha: f32,
-/// }
-///
-/// // We will write a conversion function for opaque RGB and derive
-/// // will take care of preserving the transparency for us.
-/// impl CssRgb {
-///     fn from_rgb_internal<S>(color: Rgb<Linear<S>, f32>) -> Self
-///     where
-///         S: RgbSpace<WhitePoint = D65>,
-///     {
-///         // Convert to u8 sRGB
-///         let srgb = Srgb::from_rgb(color).into_format();
-///
-///         CssRgb {
-///             red: srgb.red,
-///             green: srgb.green,
-///             blue: srgb.blue,
-///             alpha: 1.0,
-///         }
-///     }
-/// }
-///
-/// let color = LinSrgba::new(0.5, 0.0, 1.0, 0.3);
-/// let css_color = CssRgb::from(color);
-///
-/// assert_eq!(
-///     css_color,
-///     CssRgb {
-///         red: 188,
-///         green: 0,
-///         blue: 255,
-///         alpha: 0.3,
-///     }
-/// );
-/// ```
-pub trait FromColor<Wp = D65, T = f32>: Sized
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    /// Convert from XYZ color space
-    fn from_xyz(inp: Xyz<Wp, T>) -> Self;
-
-    /// Convert from Yxy color space
-    fn from_yxy(inp: Yxy<Wp, T>) -> Self {
-        Self::from_xyz(inp.into_xyz())
-    }
-
-    /// Convert from L\*a\*b\* color space
-    fn from_lab(inp: Lab<Wp, T>) -> Self {
-        Self::from_xyz(inp.into_xyz())
-    }
-
-    /// Convert from L\*C\*h° color space
-    fn from_lch(inp: Lch<Wp, T>) -> Self {
-        Self::from_lab(inp.into_lab())
-    }
-
-    /// Convert from RGB color space
-    fn from_rgb<S: RgbSpace<WhitePoint = Wp>>(inp: Rgb<Linear<S>, T>) -> Self {
-        Self::from_xyz(inp.into_xyz())
-    }
-
-    /// Convert from HSL color space
-    fn from_hsl<S: RgbSpace<WhitePoint = Wp>>(inp: Hsl<S, T>) -> Self {
-        Self::from_rgb(Rgb::<Linear<S>, T>::from_hsl(inp))
-    }
-
-    /// Convert from HSV color space
-    fn from_hsv<S: RgbSpace<WhitePoint = Wp>>(inp: Hsv<S, T>) -> Self {
-        Self::from_rgb(Rgb::<Linear<S>, T>::from_hsv(inp))
-    }
-
-    /// Convert from HWB color space
-    fn from_hwb<S: RgbSpace<WhitePoint = Wp>>(inp: Hwb<S, T>) -> Self {
-        Self::from_hsv(Hsv::<S, T>::from_hwb(inp))
-    }
-
-    /// Convert from Luma
-    fn from_luma(inp: Luma<Linear<Wp>, T>) -> Self {
-        Self::from_xyz(inp.into_xyz())
-    }
-}
-
-/// IntoColor provides conversion to the colors.
-///
-/// It requires into_xyz, when implemented manually, and derives conversion to
-/// other colors as a default from this. These defaults must be overridden when
-/// direct conversion exists between colors.
-///
-/// # Deriving
-///
-/// `IntoColor` can be derived in a mostly automatic way. The strength of
-/// deriving it is that it will also derive `Into` implementations for all of
-/// the `palette` color types. The minimum requirement is to implement
-/// `Into<Xyz>`, but it can also be customized to make use of generics
-/// and have other manual implementations.
-///
-/// ## Item Attributes
-///
-///  * `#[palette_manual_into(Luma, Rgb = "into_rgb_internal")]`: Specifies the
-///    color types that
-/// the the custom color type already has `Into` implementations for. Adding `=
-/// "function_name"` tells it to use that function instead of an `Into`
-/// implementation. The default, when omitted, is to require `Into<Xyz>` to be
-/// implemented.
-///
-///  * `#[palette_white_point = "some::white_point::Type"]`: Sets the white
-///    point type that should
-/// be used when deriving. The default is `D65`, but it may be any other type,
-/// including type parameters.
-///
-///  * `#[palette_component = "some::component::Type"]`: Sets the color
-///    component type that should
-/// be used when deriving. The default is `f32`, but it may be any other type,
-/// including type parameters.
-///
-///  * `#[palette_rgb_space = "some::rgb_space::Type"]`: Sets the RGB space type
-///    that should
-/// be used when deriving. The default is to either use `Srgb` or a best effort
-/// to convert between spaces, so sometimes it has to be set to a specific type.
-/// This does also accept type parameters.
-///
-/// ## Field Attributes
-///
-///  * `#[palette_alpha]`: Specifies that the field is the color's transparency
-///    value.
-///
-/// ## Examples
-///
-/// Minimum requirements implementation:
-///
-/// ```rust
-/// use palette::{IntoColor, Srgb, Xyz};
-///
-/// /// A custom version of Xyz that stores integer values from 0 to 100.
-/// #[derive(PartialEq, Debug, IntoColor)]
-/// struct Xyz100 {
-///     x: u8,
-///     y: u8,
-///     z: u8,
-/// }
-///
-/// // We have to at least implement conversion into Xyz if we don't
-/// // specify anything else, using the `palette_manual_into` attribute.
-/// impl Into<Xyz> for Xyz100 {
-///     fn into(self) -> Xyz {
-///         Xyz::new(
-///             self.x as f32 / 100.0,
-///             self.y as f32 / 100.0,
-///             self.z as f32 / 100.0,
-///         )
-///     }
-/// }
-///
-/// // Start with an Xyz100 color.
-/// let xyz = Xyz100 {
-///     x: 59,
-///     y: 75,
-///     z: 42,
-/// };
-///
-/// // Convert the color to sRGB.
-/// let rgb: Srgb = xyz.into();
-///
-/// assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
-/// ```
-///
-/// With generic components:
-///
-/// ```rust
-/// use approx::assert_relative_eq;
-///
-/// use palette::{FloatComponent, Hsv, IntoColor, Pixel, Srgb};
-/// use palette::rgb::{Rgb, RgbSpace};
-/// use palette::encoding::{Linear, self};
-/// use palette::white_point::D65;
-///
-/// type Hsv64 = Hsv<encoding::Srgb, f64>;
-///
-/// /// sRGB, but with a reversed memory layout.
-/// #[derive(Copy, Clone, IntoColor, Pixel)]
-/// #[palette_manual_into(Rgb = "into_rgb_internal")]
-/// #[palette_component = "T"]
-/// #[repr(C)] // Makes sure the memory layout is as we want it.
-/// struct Bgr<T> {
-///     blue: T,
-///     green: T,
-///     red: T,
-/// }
-///
-/// // Rgb is a bit more complex than other colors, so we are
-/// // implementing a private conversion function and letting it
-/// // derive `Into` automatically.
-/// impl<T: FloatComponent> Bgr<T> {
-///     // It converts from any linear Rgb type that has the D65
-///     // white point, which is the default if we don't specify
-///     // anything else with the `palette_white_point` attribute.
-///     fn into_rgb_internal<S>(self) -> Rgb<Linear<S>, T>
-///     where
-///         S: RgbSpace<WhitePoint = D65>,
-///     {
-///         Srgb::new(self.red, self.green, self.blue).into_rgb()
-///     }
-/// }
-///
-/// let buffer = vec![
-///     0.0f64,
-///     0.0,
-///     0.0,
-///     0.0,
-///     0.7353569830524495,
-///     0.5370987304831942,
-/// ];
-/// let hsv: Hsv64 = Bgr::from_raw_slice(&buffer)[1].into();
-///
-/// assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
-/// ```
-///
-/// With alpha component:
-///
-/// ```rust
-/// use approx::assert_relative_eq;
-///
-/// use palette::{IntoColor, LinSrgba, Srgb};
-/// use palette::rgb::{Rgb, RgbSpace};
-/// use palette::encoding::Linear;
-/// use palette::white_point::D65;
-///
-/// /// CSS style sRGB.
-/// #[derive(PartialEq, Debug, IntoColor)]
-/// #[palette_manual_into(Rgb = "into_rgb_internal")]
-/// struct CssRgb {
-///     red: u8,
-///     green: u8,
-///     blue: u8,
-///     #[palette_alpha]
-///     alpha: f32,
-/// }
-///
-/// // We will write a conversion function for opaque RGB and derive
-/// // will take care of preserving the transparency for us.
-/// impl CssRgb {
-///     fn into_rgb_internal<S>(self) -> Rgb<Linear<S>, f32>
-///     where
-///         S: RgbSpace<WhitePoint = D65>,
-///     {
-///         Srgb::new(self.red, self.green, self.blue)
-///             .into_format()
-///             .into_rgb()
-///     }
-/// }
-///
-/// let css_color = CssRgb {
-///     red: 187,
-///     green: 0,
-///     blue: 255,
-///     alpha: 0.3,
-/// };
-/// let color: LinSrgba = css_color.into();
-///
-/// assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
-/// ```
-pub trait IntoColor<Wp = D65, T = f32>: Sized
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    /// Convert into XYZ space
-    fn into_xyz(self) -> Xyz<Wp, T>;
-
-    /// Convert into Yxy color space
-    fn into_yxy(self) -> Yxy<Wp, T> {
-        Yxy::from_xyz(self.into_xyz())
-    }
-
-    /// Convert into L\*a\*b\* color space
-    fn into_lab(self) -> Lab<Wp, T> {
-        Lab::from_xyz(self.into_xyz())
-    }
-
-    /// Convert into L\*C\*h° color space
-    fn into_lch(self) -> Lch<Wp, T> {
-        Lch::from_lab(self.into_lab())
-    }
-
-    /// Convert into RGB color space.
-    fn into_rgb<S: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<S>, T> {
-        Rgb::from_xyz(self.into_xyz())
-    }
-
-    /// Convert into HSL color space
-    fn into_hsl<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<S, T> {
-        let rgb: Rgb<Linear<S>, T> = self.into_rgb();
-        Hsl::from_rgb(rgb)
-    }
-
-    /// Convert into HSV color space
-    fn into_hsv<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<S, T> {
-        let rgb: Rgb<Linear<S>, T> = self.into_rgb();
-        Hsv::from_rgb(rgb)
-    }
-
-    /// Convert into HWB color space
-    fn into_hwb<S: RgbSpace<WhitePoint = Wp>>(self) -> Hwb<S, T> {
-        let hsv: Hsv<S, T> = self.into_hsv();
-        Hwb::from_hsv(hsv)
-    }
-
-    /// Convert into Luma
-    fn into_luma(self) -> Luma<Linear<Wp>, T> {
-        Luma::from_xyz(self.into_xyz())
-    }
-}
+use crate::Limited;
 
 /// The error type for a color conversion that converted a color into a color
 /// with invalid values.
@@ -508,127 +297,184 @@ impl<T> OutOfBounds<T> {
 #[cfg(feature = "std")]
 impl<T: ::std::fmt::Debug> ::std::error::Error for OutOfBounds<T> {
     fn description(&self) -> &str {
-        "Color conversion is out of bounds"
+        "color conversion is out of bounds"
     }
 }
 
 impl<T> Display for OutOfBounds<T> {
     fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
-        write!(fmt, "Color conversion is out of bounds")
+        write!(fmt, "color conversion is out of bounds")
     }
 }
 
-/// A trait for converting a color into another.
-pub trait ConvertInto<T>: Into<T> {
+/// A trait for converting a color into another, in a possibly lossy way.
+///
+/// `U: IntoColor<T>` is implemented for every type `T: FromColor<U>`.
+///
+/// See [`FromColor`](trait.FromColor.html) for more details.
+pub trait IntoColor<T>: Sized {
     /// Convert into T with values clamped to the color defined bounds
     ///
     /// ```
-    /// use palette::ConvertInto;
-    /// use palette::Limited;
-    /// use palette::{Srgb, Lch};
+    /// use palette::{Lch, Srgb, Limited, IntoColor};
     ///
-    ///
-    /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_into();
+    /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color();
     /// assert!(rgb.is_valid());
     /// ```
-    fn convert_into(self) -> T;
+    fn into_color(self) -> T;
+}
 
+/// A trait for unchecked conversion of a color into another.
+///
+/// `U: IntoColorUnclamped<T>` is implemented for every type `T: FromColorUnclamped<U>`.
+///
+/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for more details.
+pub trait IntoColorUnclamped<T>: Sized {
     /// Convert into T. The resulting color might be invalid in its color space
     ///
     /// ```
-    /// use palette::ConvertInto;
-    /// use palette::Limited;
-    /// use palette::{Srgb, Lch};
+    /// use palette::convert::IntoColorUnclamped;
+    /// use palette::{Lch, Srgb, Limited};
     ///
-    /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).convert_unclamped_into();
-    /// assert!(!rgb.is_valid());
-    /// ```
-    fn convert_unclamped_into(self) -> T;
+    ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color_unclamped();
+    ///assert!(!rgb.is_valid());
+    ///```
+    fn into_color_unclamped(self) -> T;
+}
 
+/// A trait for fallible conversion of a color into another.
+///
+/// `U: TryIntoColor<T>` is implemented for every type `T: TryFromColor<U>`.
+///
+/// See [`TryFromColor`](trait.TryFromColor.html) for more details.
+pub trait TryIntoColor<T>: Sized {
     /// Convert into T, returning ok if the color is inside of its defined
     /// range, otherwise an `OutOfBounds` error is returned which contains
     /// the unclamped color.
     ///
-    /// ```
-    /// use palette::ConvertInto;
-    /// use palette::{Srgb, Hsl};
+    ///```
+    /// use palette::convert::TryIntoColor;
+    /// use palette::{Hsl, Srgb};
     ///
-    /// let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_convert_into() {
-    ///    Ok(color) => color,
-    ///    Err(err) => {
-    ///        println!("Color is out of bounds");
-    ///        err.color()
-    ///    },
+    /// let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_into_color() {
+    ///     Ok(color) => color,
+    ///     Err(err) => {
+    ///         println!("Color is out of bounds");
+    ///         err.color()
+    ///     }
     /// };
     /// ```
-    fn try_convert_into(self) -> Result<T, OutOfBounds<T>>;
+    fn try_into_color(self) -> Result<T, OutOfBounds<T>>;
 }
 
-/// A trait for converting one color from another.
+///A trait for converting one color from another, in a possibly lossy way.
 ///
-/// `convert_unclamped` currently wraps the underlying `From` implementation.
-pub trait ConvertFrom<T>: From<T> {
-    /// Convert from T with values clamped to the color defined bounds
+/// `U: FromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
+///
+/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for a lossless version of this trait.
+/// See [`TryFromColor`](trait.TryFromColor.html) for a trait that gives an error when the result
+/// is out of bounds.
+///
+/// # The Difference Between FromColor and From
+///
+/// The conversion traits, including `FromColor`, were added to gain even more flexibility
+/// than what `From` and the other standard library traits can give. There are a few subtle,
+/// but important, differences in their semantics:
+///
+/// * `FromColor` and `IntoColor` are allowed to be lossy, meaning converting `A -> B -> A`
+/// may result in a different value than the original. This applies to `A -> A` as well.
+/// * `From<Self>` and `Into<Self>` are blanket implemented, while `FromColor<Self>` and
+/// `IntoColor<Self>` have to be manually implemented. This allows additional flexibility,
+/// such as allowing implementing `FromColor<Rgb<S2, T>> for Rgb<S1, T>`.
+/// * Implementing `FromColorUnclamped` and `Limited` is enough to get all the other conversion
+/// traits, while `From` and `Into` would not be possible to blanket implement in the same way.
+/// This also reduces the work that needs to be done by macros.
+///
+/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// custom colors.
+pub trait FromColor<T>: Sized {
+    /// Convert from T with values clamped to the color defined bounds.
     ///
     /// ```
-    /// use palette::ConvertFrom;
-    /// use palette::Limited;
-    /// use palette::{Srgb, Lch};
+    /// use palette::{Lch, Srgb, Limited, FromColor};
     ///
-    ///
-    /// let rgb = Srgb::convert_from(Lch::new(50.0, 100.0, -175.0));
+    /// let rgb = Srgb::from_color(Lch::new(50.0, 100.0, -175.0));
     /// assert!(rgb.is_valid());
     /// ```
-    fn convert_from(_: T) -> Self;
+    fn from_color(t: T) -> Self;
+}
 
-    /// Convert from T. The resulting color might be invalid in its color space
+/// A trait for unchecked conversion of one color from another.
+///
+/// See [`FromColor`](trait.FromColor.html) for a lossy version of this trait.
+/// See [`TryFromColor`](trait.TryFromColor.html) for a trait that gives an error when the result
+/// is out of bounds.
+///
+/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// custom colors.
+pub trait FromColorUnclamped<T>: Sized {
+    /// Convert from T. The resulting color might be invalid in its color space.
     ///
     /// ```
-    /// use palette::ConvertFrom;
-    /// use palette::Limited;
-    /// use palette::{Srgb, Lch};
+    /// use palette::convert::FromColorUnclamped;
+    /// use palette::{Lch, Srgb, Limited};
     ///
-    /// let rgb = Srgb::convert_unclamped_from(Lch::new(50.0, 100.0, -175.0));
+    /// let rgb = Srgb::from_color_unclamped(Lch::new(50.0, 100.0, -175.0));
     /// assert!(!rgb.is_valid());
     /// ```
-    #[inline]
-    fn convert_unclamped_from(val: T) -> Self {
-        Self::from(val)
-    }
+    fn from_color_unclamped(val: T) -> Self;
+}
 
+/// A trait for fallible conversion of one color from another.
+///
+/// `U: TryFromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
+///
+/// See [`FromColor`](trait.FromColor.html) for a lossy version of this trait.
+/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for a lossless version.
+///
+/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// custom colors.
+pub trait TryFromColor<T>: Sized {
     /// Convert from T, returning ok if the color is inside of its defined
     /// range, otherwise an `OutOfBounds` error is returned which contains
     /// the unclamped color.
     ///
-    /// ```
-    /// use palette::ConvertFrom;
-    /// use palette::{Srgb, Hsl};
+    ///```
+    /// use palette::convert::TryFromColor;
+    /// use palette::{Hsl, Srgb};
     ///
-    /// let rgb = match Srgb::try_convert_from(Hsl::new(150.0, 1.0, 1.1)) {
-    ///    Ok(color) => color,
-    ///    Err(err) => {
-    ///        println!("Color is out of bounds");
-    ///        err.color()
-    ///    },
+    /// let rgb = match Srgb::try_from_color(Hsl::new(150.0, 1.0, 1.1)) {
+    ///     Ok(color) => color,
+    ///     Err(err) => {
+    ///         println!("Color is out of bounds");
+    ///         err.color()
+    ///     }
     /// };
     /// ```
-    fn try_convert_from(_: T) -> Result<Self, OutOfBounds<Self>>;
+    fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
-impl<T, U> ConvertFrom<T> for U
+impl<T, U> FromColor<T> for U
 where
-    U: From<T> + Limited,
+    U: FromColorUnclamped<T> + Limited,
 {
-    fn convert_from(t: T) -> U {
-        let mut this = U::from(t);
+    #[inline]
+    fn from_color(t: T) -> Self {
+        let mut this = Self::from_color_unclamped(t);
         if !this.is_valid() {
             this.clamp_self();
         }
         this
     }
+}
 
-    fn try_convert_from(t: T) -> Result<U, OutOfBounds<U>> {
-        let this = U::from(t);
+impl<T, U> TryFromColor<T> for U
+where
+    U: FromColorUnclamped<T> + Limited,
+{
+    #[inline]
+    fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>> {
+        let this = Self::from_color_unclamped(t);
         if this.is_valid() {
             Ok(this)
         } else {
@@ -637,280 +483,421 @@ where
     }
 }
 
-// ConvertFrom implies ConvertInto
-impl<T, U> ConvertInto<U> for T
+impl<T, U> IntoColor<U> for T
 where
-    U: ConvertFrom<T>,
+    U: FromColor<T>,
 {
     #[inline]
-    fn convert_into(self) -> U {
-        U::convert_from(self)
+    fn into_color(self) -> U {
+        U::from_color(self)
     }
+}
 
+impl<T, U> IntoColorUnclamped<U> for T
+where
+    U: FromColorUnclamped<T>,
+{
     #[inline]
-    fn convert_unclamped_into(self) -> U {
-        U::convert_unclamped_from(self)
+    fn into_color_unclamped(self) -> U {
+        U::from_color_unclamped(self)
     }
+}
 
+impl<T, U> TryIntoColor<U> for T
+where
+    U: TryFromColor<T>,
+{
     #[inline]
-    fn try_convert_into(self) -> Result<U, OutOfBounds<U>> {
-        U::try_convert_from(self)
+    fn try_into_color(self) -> Result<U, OutOfBounds<U>> {
+        U::try_from_color(self)
     }
 }
-
-macro_rules! impl_into_color {
-    ($self_ty: ident, $from_fn: ident) => {
-        impl<Wp, T> IntoColor<Wp, T> for $self_ty<Wp, T>
-        where
-            T: FloatComponent,
-            Wp: WhitePoint,
-        {
-            fn into_xyz(self) -> Xyz<Wp, T> {
-                Xyz::$from_fn(self)
-            }
-
-            fn into_yxy(self) -> Yxy<Wp, T> {
-                Yxy::$from_fn(self)
-            }
-
-            fn into_lab(self) -> Lab<Wp, T> {
-                Lab::$from_fn(self)
-            }
-
-            fn into_lch(self) -> Lch<Wp, T> {
-                Lch::$from_fn(self)
-            }
-
-            fn into_rgb<S: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<S>, T> {
-                Rgb::$from_fn(self)
-            }
-
-            fn into_hsl<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<S, T> {
-                Hsl::$from_fn(self)
-            }
-
-            fn into_hsv<S: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<S, T> {
-                Hsv::$from_fn(self)
-            }
-
-            fn into_luma(self) -> Luma<Linear<Wp>, T> {
-                Luma::$from_fn(self)
-            }
-        }
-    };
-}
-
-macro_rules! impl_into_color_rgb {
-    ($self_ty: ident, $from_fn: ident) => {
-        impl<S, Wp, T> IntoColor<Wp, T> for $self_ty<S, T>
-        where
-            T: FloatComponent,
-            Wp: WhitePoint,
-            S: RgbSpace<WhitePoint = Wp>,
-        {
-            fn into_xyz(self) -> Xyz<Wp, T> {
-                Xyz::$from_fn(self)
-            }
-
-            fn into_yxy(self) -> Yxy<Wp, T> {
-                Yxy::$from_fn(self)
-            }
-
-            fn into_lab(self) -> Lab<Wp, T> {
-                Lab::$from_fn(self)
-            }
-
-            fn into_lch(self) -> Lch<Wp, T> {
-                Lch::$from_fn(self)
-            }
-
-            fn into_rgb<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<Sp>, T> {
-                Rgb::$from_fn(self)
-            }
-
-            fn into_hsl<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<Sp, T> {
-                Hsl::$from_fn(self)
-            }
-
-            fn into_hsv<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<Sp, T> {
-                Hsv::$from_fn(self)
-            }
-
-            fn into_luma(self) -> Luma<Linear<Wp>, T> {
-                Luma::$from_fn(self)
-            }
-        }
-    };
-}
-
-impl_into_color!(Xyz, from_xyz);
-impl_into_color!(Yxy, from_yxy);
-impl_into_color!(Lab, from_lab);
-impl_into_color!(Lch, from_lch);
-impl_into_color_rgb!(Hsl, from_hsl);
-impl_into_color_rgb!(Hsv, from_hsv);
-impl_into_color_rgb!(Hwb, from_hwb);
 
 #[cfg(test)]
 mod tests {
-    use crate::encoding;
-    use crate::encoding::linear::Linear;
-    use crate::luma::Luma;
-    use crate::rgb::{Rgb, RgbSpace};
-    use crate::white_point;
-    use crate::FloatComponent;
-    use crate::{Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
     use core::marker::PhantomData;
 
-    #[derive(Copy, Clone, FromColor, IntoColor)]
-    #[palette_manual_from(Xyz, Luma = "from_luma_internal")]
-    #[palette_manual_into(Xyz, Luma = "into_luma_internal")]
-    #[palette_white_point = "S::WhitePoint"]
-    #[palette_component = "f64"]
-    #[palette_rgb_space = "S"]
-    #[palette_internal]
+    use super::{FromColor, FromColorUnclamped, IntoColor};
+    use crate::encoding::linear::Linear;
+    use crate::luma::{Luma, LumaStandard};
+    use crate::rgb::{Rgb, RgbSpace};
+    use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+    use crate::{FloatComponent, Limited};
+
+    #[palette(
+        skip_derives(Xyz, Luma),
+        white_point = "S::WhitePoint",
+        component = "f64",
+        rgb_space = "S",
+        palette_internal,
+        palette_internal_not_base_type
+    )]
+    #[derive(FromColorUnclamped, WithAlpha)]
     struct WithXyz<S: RgbSpace>(PhantomData<S>);
 
-    impl<S: RgbSpace> WithXyz<S> {
-        fn from_luma_internal(_color: Luma<Linear<S::WhitePoint>, f64>) -> Self {
-            WithXyz(PhantomData)
-        }
-
-        fn into_luma_internal(self) -> Luma<Linear<S::WhitePoint>, f64> {
-            Luma::new(1.0)
+    impl<S: RgbSpace> Clone for WithXyz<S> {
+        fn clone(&self) -> Self {
+            *self
         }
     }
 
-    impl<S: RgbSpace> From<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
-        fn from(_color: Xyz<S::WhitePoint, f64>) -> Self {
+    impl<S: RgbSpace> Copy for WithXyz<S> {}
+
+    impl<S: RgbSpace> Limited for WithXyz<S> {
+        fn is_valid(&self) -> bool {
+            true
+        }
+
+        fn clamp(&self) -> Self {
+            *self
+        }
+
+        fn clamp_self(&mut self) {}
+    }
+
+    impl<S1, S2> FromColorUnclamped<WithXyz<S2>> for WithXyz<S1>
+    where
+        S1: RgbSpace,
+        S2: RgbSpace<WhitePoint = S1::WhitePoint>,
+    {
+        fn from_color_unclamped(_color: WithXyz<S2>) -> Self {
             WithXyz(PhantomData)
         }
     }
 
-    impl<S: RgbSpace> Into<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
-        fn into(self) -> Xyz<S::WhitePoint, f64> {
+    impl<S: RgbSpace> FromColorUnclamped<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
+        fn from_color_unclamped(_color: Xyz<S::WhitePoint, f64>) -> Self {
+            WithXyz(PhantomData)
+        }
+    }
+
+    impl<S: RgbSpace> FromColorUnclamped<WithXyz<S>> for Xyz<S::WhitePoint, f64> {
+        fn from_color_unclamped(_color: WithXyz<S>) -> Xyz<S::WhitePoint, f64> {
             Xyz::with_wp(0.0, 1.0, 0.0)
         }
     }
 
-    #[derive(Copy, Clone, FromColor, IntoColor)]
-    #[palette_manual_from(Lch, Luma = "from_luma_internal")]
-    #[palette_manual_into(Lch, Luma = "into_luma_internal")]
-    #[palette_white_point = "crate::white_point::E"]
-    #[palette_component = "T"]
-    #[palette_rgb_space = "(crate::encoding::Srgb, crate::white_point::E)"]
-    #[palette_internal]
+    impl<Rs: RgbSpace, Ls: LumaStandard<WhitePoint = Rs::WhitePoint>>
+        FromColorUnclamped<Luma<Ls, f64>> for WithXyz<Rs>
+    {
+        fn from_color_unclamped(_color: Luma<Ls, f64>) -> Self {
+            WithXyz(PhantomData)
+        }
+    }
+
+    impl<Rs: RgbSpace, Ls: LumaStandard<WhitePoint = Rs::WhitePoint>>
+        FromColorUnclamped<WithXyz<Rs>> for Luma<Ls, f64>
+    {
+        fn from_color_unclamped(_color: WithXyz<Rs>) -> Self {
+            Luma::new(1.0)
+        }
+    }
+
+    #[palette(
+        skip_derives(Lch, Luma),
+        white_point = "crate::white_point::E",
+        component = "T",
+        rgb_space = "(crate::encoding::Srgb, crate::white_point::E)",
+        palette_internal,
+        palette_internal_not_base_type
+    )]
+    #[derive(Copy, Clone, FromColorUnclamped, WithAlpha)]
     struct WithoutXyz<T: FloatComponent>(PhantomData<T>);
 
-    impl<T: FloatComponent> WithoutXyz<T> {
-        fn from_luma_internal(_color: Luma<Linear<white_point::E>, T>) -> Self {
-            WithoutXyz(PhantomData)
+    impl<T: FloatComponent> Limited for WithoutXyz<T> {
+        fn is_valid(&self) -> bool {
+            true
         }
 
-        fn into_luma_internal(self) -> Luma<Linear<white_point::E>, T> {
-            Luma::new(T::one())
+        fn clamp(&self) -> Self {
+            *self
+        }
+
+        fn clamp_self(&mut self) {}
+    }
+
+    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for WithoutXyz<T> {
+        fn from_color_unclamped(color: WithoutXyz<T>) -> Self {
+            color
         }
     }
 
-    impl<T: FloatComponent> From<Lch<white_point::E, T>> for WithoutXyz<T> {
-        fn from(_color: Lch<white_point::E, T>) -> Self {
+    impl<T: FloatComponent> FromColorUnclamped<Lch<crate::white_point::E, T>> for WithoutXyz<T> {
+        fn from_color_unclamped(_color: Lch<crate::white_point::E, T>) -> Self {
             WithoutXyz(PhantomData)
         }
     }
 
-    impl<T: FloatComponent> Into<Lch<white_point::E, T>> for WithoutXyz<T> {
-        fn into(self) -> Lch<white_point::E, T> {
+    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for Lch<crate::white_point::E, T> {
+        fn from_color_unclamped(_color: WithoutXyz<T>) -> Lch<crate::white_point::E, T> {
             Lch::with_wp(T::one(), T::zero(), T::zero())
+        }
+    }
+
+    impl<T: FloatComponent> FromColorUnclamped<Luma<Linear<crate::white_point::E>, T>>
+        for WithoutXyz<T>
+    {
+        fn from_color_unclamped(_color: Luma<Linear<crate::white_point::E>, T>) -> Self {
+            WithoutXyz(PhantomData)
+        }
+    }
+
+    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>>
+        for Luma<Linear<crate::white_point::E>, T>
+    {
+        fn from_color_unclamped(_color: WithoutXyz<T>) -> Luma<Linear<crate::white_point::E>, T> {
+            Luma::new(T::one())
         }
     }
 
     #[test]
     fn from_with_xyz() {
+        let color: WithXyz<crate::encoding::Srgb> = WithXyz(Default::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(color);
+
         let xyz: Xyz<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(xyz);
+        WithXyz::<crate::encoding::Srgb>::from_color(xyz);
 
         let yxy: Yxy<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(yxy);
+        WithXyz::<crate::encoding::Srgb>::from_color(yxy);
 
         let lab: Lab<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(lab);
+        WithXyz::<crate::encoding::Srgb>::from_color(lab);
 
         let lch: Lch<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(lch);
+        WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
-        let rgb: Rgb<encoding::Srgb, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(rgb);
+        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(hsl);
+        WithXyz::<crate::encoding::Srgb>::from_color(hsl);
 
         let hsv: Hsv<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(hsv);
+        WithXyz::<crate::encoding::Srgb>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(hwb);
+        WithXyz::<crate::encoding::Srgb>::from_color(hwb);
 
-        let luma: Luma<encoding::Srgb, f64> = Default::default();
-        WithXyz::<encoding::Srgb>::from(luma);
+        let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
+        WithXyz::<crate::encoding::Srgb>::from_color(luma);
     }
 
     #[test]
-    fn into_with_xyz() {
-        let color = WithXyz::<encoding::Srgb>(PhantomData);
+    fn from_with_xyz_alpha() {
+        let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
+            Alpha::from(WithXyz(Default::default()));
+        WithXyz::<crate::encoding::Srgb>::from_color(color);
 
-        let _xyz: Xyz<_, f64> = color.into();
-        let _yxy: Yxy<_, f64> = color.into();
-        let _lab: Lab<_, f64> = color.into();
-        let _lch: Lch<_, f64> = color.into();
-        let _rgb: Rgb<encoding::Srgb, f64> = color.into();
-        let _hsl: Hsl<_, f64> = color.into();
-        let _hsv: Hsv<_, f64> = color.into();
-        let _hwb: Hwb<_, f64> = color.into();
-        let _luma: Luma<encoding::Srgb, f64> = color.into();
+        let xyz: Alpha<Xyz<_, f64>, u8> = Alpha::from(Xyz::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(xyz);
+
+        let yxy: Alpha<Yxy<_, f64>, u8> = Alpha::from(Yxy::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(yxy);
+
+        let lab: Alpha<Lab<_, f64>, u8> = Alpha::from(Lab::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(lab);
+
+        let lch: Alpha<Lch<_, f64>, u8> = Alpha::from(Lch::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(lch);
+
+        let rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> =
+            Alpha::from(Rgb::<crate::encoding::Srgb, f64>::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(rgb);
+
+        let hsl: Alpha<Hsl<_, f64>, u8> = Alpha::from(Hsl::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(hsl);
+
+        let hsv: Alpha<Hsv<_, f64>, u8> = Alpha::from(Hsv::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(hsv);
+
+        let hwb: Alpha<Hwb<_, f64>, u8> = Alpha::from(Hwb::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(hwb);
+
+        let luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> =
+            Alpha::from(Luma::<crate::encoding::Srgb, f64>::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(luma);
+    }
+
+    #[test]
+    fn from_with_xyz_into_alpha() {
+        let color: WithXyz<crate::encoding::Srgb> = WithXyz(Default::default());
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
+
+        let xyz: Xyz<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
+
+        let yxy: Yxy<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
+
+        let lab: Lab<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
+
+        let lch: Lch<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
+
+        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
+
+        let hsl: Hsl<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
+
+        let hsv: Hsv<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
+
+        let hwb: Hwb<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
+
+        let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
+    }
+
+    #[test]
+    fn from_with_xyz_alpha_into_alpha() {
+        let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
+            Alpha::from(WithXyz(Default::default()));
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
+
+        let xyz: Xyz<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
+
+        let yxy: Yxy<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
+
+        let lab: Lab<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
+
+        let lch: Lch<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
+
+        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
+
+        let hsl: Hsl<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
+
+        let hsv: Hsv<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
+
+        let hwb: Hwb<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
+
+        let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
+    }
+
+    #[test]
+    fn into_from_with_xyz() {
+        let color = WithXyz::<crate::encoding::Srgb>(PhantomData);
+
+        let _self: WithXyz<crate::encoding::Srgb> = color.into_color();
+        let _xyz: Xyz<_, f64> = color.into_color();
+        let _yxy: Yxy<_, f64> = color.into_color();
+        let _lab: Lab<_, f64> = color.into_color();
+        let _lch: Lch<_, f64> = color.into_color();
+        let _rgb: Rgb<crate::encoding::Srgb, f64> = color.into_color();
+        let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsv: Hsv<_, f64> = color.into_color();
+        let _hwb: Hwb<_, f64> = color.into_color();
+        let _luma: Luma<crate::encoding::Srgb, f64> = color.into_color();
+    }
+
+    #[test]
+    fn into_from_with_xyz_alpha() {
+        let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
+            Alpha::from(WithXyz::<crate::encoding::Srgb>(PhantomData));
+
+        let _self: WithXyz<crate::encoding::Srgb> = color.into_color();
+        let _xyz: Xyz<_, f64> = color.into_color();
+        let _yxy: Yxy<_, f64> = color.into_color();
+        let _lab: Lab<_, f64> = color.into_color();
+        let _lch: Lch<_, f64> = color.into_color();
+        let _rgb: Rgb<crate::encoding::Srgb, f64> = color.into_color();
+        let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsv: Hsv<_, f64> = color.into_color();
+        let _hwb: Hwb<_, f64> = color.into_color();
+        let _luma: Luma<crate::encoding::Srgb, f64> = color.into_color();
+    }
+
+    #[test]
+    fn into_alpha_from_with_xyz() {
+        let color = WithXyz::<crate::encoding::Srgb>(PhantomData);
+
+        let _self: Alpha<WithXyz<crate::encoding::Srgb>, u8> = color.into_color();
+        let _xyz: Alpha<Xyz<_, f64>, u8> = color.into_color();
+        let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
+        let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
+        let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
+        let _rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> = color.into_color();
+        let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
+        let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
+        let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
+        let _luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> = color.into_color();
+    }
+
+    #[test]
+    fn into_alpha_from_with_xyz_alpha() {
+        let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
+            Alpha::from(WithXyz::<crate::encoding::Srgb>(PhantomData));
+
+        let _self: Alpha<WithXyz<crate::encoding::Srgb>, u8> = color.into_color();
+        let _xyz: Alpha<Xyz<_, f64>, u8> = color.into_color();
+        let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
+        let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
+        let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
+        let _rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> = color.into_color();
+        let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
+        let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
+        let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
+        let _luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> = color.into_color();
     }
 
     #[test]
     fn from_without_xyz() {
-        let xyz: Xyz<white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from(xyz);
+        let color: WithoutXyz<f64> = WithoutXyz(Default::default());
+        WithoutXyz::<f64>::from_color(color);
 
-        let yxy: Yxy<white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from(yxy);
+        let xyz: Xyz<crate::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(xyz);
 
-        let lab: Lab<white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from(lab);
+        let yxy: Yxy<crate::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(yxy);
 
-        let lch: Lch<white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from(lch);
+        let lab: Lab<crate::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(lab);
 
-        let rgb: Rgb<(_, encoding::Srgb), f64> = Default::default();
-        WithoutXyz::<f64>::from(rgb);
+        let lch: Lch<crate::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(lch);
+
+        let rgb: Rgb<(_, crate::encoding::Srgb), f64> = Default::default();
+        WithoutXyz::<f64>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        WithoutXyz::<f64>::from(hsl);
+        WithoutXyz::<f64>::from_color(hsl);
 
         let hsv: Hsv<_, f64> = Default::default();
-        WithoutXyz::<f64>::from(hsv);
+        WithoutXyz::<f64>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        WithoutXyz::<f64>::from(hwb);
+        WithoutXyz::<f64>::from_color(hwb);
 
-        let luma: Luma<Linear<white_point::E>, f64> = Default::default();
-        WithoutXyz::<f64>::from(luma);
+        let luma: Luma<Linear<crate::white_point::E>, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(luma);
     }
 
     #[test]
     fn into_without_xyz() {
         let color = WithoutXyz::<f64>(PhantomData);
 
-        let _xyz: Xyz<white_point::E, f64> = color.into();
-        let _yxy: Yxy<white_point::E, f64> = color.into();
-        let _lab: Lab<white_point::E, f64> = color.into();
-        let _lch: Lch<white_point::E, f64> = color.into();
-        let _rgb: Rgb<(_, encoding::Srgb), f64> = color.into();
-        let _hsl: Hsl<_, f64> = color.into();
-        let _hsv: Hsv<_, f64> = color.into();
-        let _hwb: Hwb<_, f64> = color.into();
-        let _luma: Luma<Linear<white_point::E>, f64> = color.into();
+        let _self: WithoutXyz<f64> = color.into_color();
+        let _xyz: Xyz<crate::white_point::E, f64> = color.into_color();
+        let _yxy: Yxy<crate::white_point::E, f64> = color.into_color();
+        let _lab: Lab<crate::white_point::E, f64> = color.into_color();
+        let _lch: Lch<crate::white_point::E, f64> = color.into_color();
+        let _rgb: Rgb<(_, crate::encoding::Srgb), f64> = color.into_color();
+        let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsv: Hsv<_, f64> = color.into_color();
+        let _hwb: Hwb<_, f64> = color.into_color();
+        let _luma: Luma<Linear<crate::white_point::E>, f64> = color.into_color();
     }
 }

@@ -1,22 +1,22 @@
 use image::{GenericImage, GenericImageView, RgbImage};
 
 #[cfg(feature = "std")]
-use palette::{Gradient, LinSrgb, Mix};
+use palette::{FromColor, Gradient, IntoColor, LinSrgb, Mix};
 use palette::{Pixel, Srgb};
 
 mod color_spaces {
     use crate::display_colors;
-    use palette::{Hue, Lch, LinSrgb, Srgb};
+    use palette::{FromColor, Hue, IntoColor, Lch, Srgb};
 
     pub fn run() {
-        let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
-        let new_color = LinSrgb::from(lch_color.shift_hue(180.0));
+        let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_color();
+        let new_color = Srgb::from_color(lch_color.shift_hue(180.0));
 
         display_colors(
             "examples/readme_color_spaces.png",
             &[
                 ::palette::Srgb::new(0.8, 0.2, 0.1).into_format(),
-                Srgb::from_linear(new_color.into()).into_format(),
+                new_color.into_format(),
             ],
         );
     }
@@ -24,19 +24,19 @@ mod color_spaces {
 
 mod manipulation {
     use crate::display_colors;
-    use palette::{Lch, Saturate, Shade, Srgb};
+    use palette::{FromColor, IntoColor, Lch, Saturate, Shade, Srgb};
 
     pub fn run() {
         let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
         let lighter = color.lighten(0.1);
-        let desaturated = Lch::from(color).desaturate(0.5);
+        let desaturated = Lch::from_color(color).desaturate(0.5);
 
         display_colors(
             "examples/readme_manipulation.png",
             &[
                 Srgb::from_linear(color.into()).into_format(),
                 Srgb::from_linear(lighter.into()).into_format(),
-                Srgb::from_linear(desaturated.into()).into_format(),
+                Srgb::from_linear(desaturated.into_color()).into_format(),
             ],
         );
     }
@@ -45,7 +45,7 @@ mod manipulation {
 #[cfg(feature = "std")]
 mod gradients {
     use crate::display_gradients;
-    use palette::{Gradient, Hsv, LinSrgb};
+    use palette::{FromColor, Gradient, Hsv, LinSrgb};
 
     pub fn run() {
         let grad1 = Gradient::new(vec![
@@ -54,8 +54,8 @@ mod gradients {
         ]);
 
         let grad2 = Gradient::new(vec![
-            Hsv::from(LinSrgb::new(1.0, 0.1, 0.1)),
-            Hsv::from(LinSrgb::new(0.1, 1.0, 1.0)),
+            Hsv::from_color(LinSrgb::new(1.0, 0.1, 0.1)),
+            Hsv::from_color(LinSrgb::new(0.1, 1.0, 1.0)),
         ]);
 
         display_gradients("examples/readme_gradients.png", grad1, grad2);
@@ -86,8 +86,8 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
     grad1: Gradient<A>,
     grad2: Gradient<B>,
 ) where
-    LinSrgb: From<A>,
-    LinSrgb: From<B>,
+    LinSrgb: FromColor<A>,
+    LinSrgb: FromColor<B>,
 {
     let mut image = RgbImage::new(256, 96);
     {
@@ -99,7 +99,7 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
                     x,
                     y,
                     image::Rgb(
-                        Srgb::from_linear(grad1.get(x as f32 / 255.0).into())
+                        Srgb::from_linear(grad1.get(x as f32 / 255.0).into_color())
                             .into_format()
                             .into_raw(),
                     ),
@@ -117,7 +117,7 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
                     x,
                     y,
                     image::Rgb(
-                        Srgb::from_linear(grad2.get(x as f32 / 255.0).into())
+                        Srgb::from_linear(grad2.get(x as f32 / 255.0).into_color())
                             .into_format()
                             .into_raw(),
                     ),
@@ -131,7 +131,7 @@ fn display_gradients<A: Mix<Scalar = f32> + Clone, B: Mix<Scalar = f32> + Clone>
         let swatch_size = 32;
         let mut v1 = Vec::new();
         for color in grad2.take(8) {
-            let pix: [u8; 3] = Srgb::from_linear(LinSrgb::from(color))
+            let pix: [u8; 3] = Srgb::from_linear(LinSrgb::from_color(color))
                 .into_format()
                 .into_raw();
             v1.push(pix);

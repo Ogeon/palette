@@ -7,8 +7,9 @@ use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
+use palette::convert::IntoColorUnclamped;
 use palette::white_point::D65;
-use palette::{Hsl, Hsv, Hwb, IntoColor, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
+use palette::{Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 
 #[derive(Deserialize, PartialEq)]
 pub struct ColorMineRaw {
@@ -89,13 +90,13 @@ macro_rules! impl_from_color {
         impl From<$self_ty> for ColorMine {
             fn from(color: $self_ty) -> ColorMine {
                 ColorMine {
-                    xyz: color.into_xyz(),
-                    yxy: color.into_yxy(),
-                    linear_rgb: color.into_rgb(),
-                    rgb: color.into_rgb(),
-                    hsl: color.into_hsl(),
-                    hsv: color.into_hsv(),
-                    hwb: color.into_hwb(),
+                    xyz: color.into_color_unclamped(),
+                    yxy: color.into_color_unclamped(),
+                    linear_rgb: color.into_color_unclamped(),
+                    rgb: color.into_color_unclamped(),
+                    hsl: color.into_color_unclamped(),
+                    hsv: color.into_color_unclamped(),
+                    hwb: color.into_color_unclamped(),
                 }
             }
         }

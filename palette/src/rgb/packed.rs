@@ -65,7 +65,7 @@ use crate::Pixel;
 /// assert_eq!(colors[1].color, 0x60BBCC);
 /// ```
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Pixel)]
-#[palette_internal]
+#[palette(palette_internal)]
 #[repr(C)]
 pub struct Packed<C: RgbChannels = channels::Argb> {
     /// The sRGB color packed into a `u32`.
@@ -74,7 +74,7 @@ pub struct Packed<C: RgbChannels = channels::Argb> {
     /// The channel ordering for red, green, blue, and alpha components in the
     /// packed integer; can be `Abgr`, `Argb`, `Bgra`, or `Rgba`. See
     /// [RgbChannels](trait.RgbChannels.html).
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub channel_order: PhantomData<C>,
 }
 

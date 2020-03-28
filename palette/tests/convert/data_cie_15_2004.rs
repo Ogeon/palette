@@ -10,8 +10,9 @@ use approx::assert_relative_eq;
 use csv;
 use serde_derive::Deserialize;
 
+use palette::convert::IntoColorUnclamped;
 use palette::white_point::D65;
-use palette::{IntoColor, Xyz, Yxy};
+use palette::{Xyz, Yxy};
 
 #[derive(Deserialize, PartialEq)]
 struct Cie2004Raw {
@@ -43,8 +44,8 @@ macro_rules! impl_from_color_pointer {
         impl From<$self_ty> for Cie2004 {
             fn from(color: $self_ty) -> Cie2004 {
                 Cie2004 {
-                    xyz: color.into_xyz(),
-                    yxy: color.into_yxy(),
+                    xyz: color.into_color_unclamped(),
+                    yxy: color.into_color_unclamped(),
                 }
             }
         }

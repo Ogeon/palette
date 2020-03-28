@@ -10,13 +10,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb};
 use crate::float::Float;
-use crate::rgb::{Rgb, RgbSpace};
+use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue,
-    Hsv, Hue, IntoColor, Limited, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromF64, GetHue, Hsv, Hue,
+    Limited, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -34,13 +35,15 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///
 /// See [HSV](struct.Hsv.html) for a very similar color space, with brightness
 /// instead of lightness.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_rgb_space = "S"]
-#[palette_white_point = "S::WhitePoint"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Rgb = "from_rgb_internal", Hsv, Hsl = "from_hsl_internal")]
+#[palette(
+    palette_internal,
+    rgb_space = "S",
+    white_point = "S::WhitePoint",
+    component = "T",
+    skip_derives(Xyz, Rgb, Hsv, Hsl)
+)]
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
 where
@@ -49,7 +52,7 @@ where
 {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette_unsafe_same_layout_as = "T"]
+    #[palette(unsafe_same_layout_as = "T")]
     pub hue: RgbHue<T>,
 
     /// The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
@@ -63,7 +66,7 @@ where
     /// The white point and RGB primaries this color is adapted to. The default
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub space: PhantomData<S>,
 }
 
@@ -122,56 +125,6 @@ where
     /// Convert from a `(hue, saturation, lightness)` tuple.
     pub fn from_components<H: Into<RgbHue<T>>>((hue, saturation, lightness): (H, T, T)) -> Self {
         Self::with_wp(hue, saturation, lightness)
-    }
-
-    fn from_hsl_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(hsl: Hsl<Sp, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
-            hsl.reinterpret_as()
-        } else {
-            Self::from_rgb(Rgb::<Linear<Sp>, T>::from_hsl(hsl))
-        }
-    }
-
-    fn from_rgb_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(
-        color: Rgb<Linear<Sp>, T>,
-    ) -> Self {
-        let rgb = Rgb::<Linear<S>, T>::from_rgb(color);
-
-        let (max, min, sep, coeff) = {
-            let (max, min, sep, coeff) = if rgb.red > rgb.green {
-                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
-            } else {
-                (rgb.green, rgb.red, rgb.blue - rgb.red, from_f64(2.0))
-            };
-            if rgb.blue > max {
-                (rgb.blue, min, rgb.red - rgb.green, from_f64(4.0))
-            } else {
-                let min_val = if rgb.blue < min { rgb.blue } else { min };
-                (max, min_val, sep, coeff)
-            }
-        };
-
-        let mut h = T::zero();
-        let mut s = T::zero();
-
-        let sum = max + min;
-        let l = sum / from_f64(2.0);
-        if max != min {
-            let d = max - min;
-            s = if sum > T::one() {
-                d / (from_f64::<T>(2.0) - sum)
-            } else {
-                d / sum
-            };
-            h = ((sep / d) + coeff) * from_f64(60.0);
-        };
-
-        Hsl {
-            hue: h.into(),
-            saturation: s,
-            lightness: l,
-            space: PhantomData,
-        }
     }
 
     #[inline]
@@ -248,26 +201,86 @@ where
     }
 }
 
-impl<S, T> From<Xyz<S::WhitePoint, T>> for Hsl<S, T>
-where
-    T: FloatComponent,
-    S: RgbSpace,
-{
-    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
-        let rgb: Rgb<Linear<S>, T> = color.into_rgb();
-        Self::from_rgb(rgb)
-    }
-}
-
-impl<S, Sp, T> From<Hsv<Sp, T>> for Hsl<S, T>
+impl<S, Sp, T> FromColorUnclamped<Hsl<Sp, T>> for Hsl<S, T>
 where
     T: FloatComponent,
     S: RgbSpace,
     Sp: RgbSpace<WhitePoint = S::WhitePoint>,
 {
-    fn from(color: Hsv<Sp, T>) -> Self {
-        let hsv = Hsv::<S, T>::from_hsv(color);
+    fn from_color_unclamped(hsl: Hsl<Sp, T>) -> Self {
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+            hsl.reinterpret_as()
+        } else {
+            let rgb = Rgb::<Linear<Sp>, T>::from_color_unclamped(hsl);
+            let converted_rgb = Rgb::<Linear<S>, T>::from_color_unclamped(rgb);
+            Self::from_color_unclamped(converted_rgb)
+        }
+    }
+}
 
+impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsl<S::Space, T>
+where
+    T: FloatComponent,
+    S: RgbStandard,
+{
+    fn from_color_unclamped(color: Rgb<S, T>) -> Self {
+        let rgb = color.into_linear();
+
+        let (max, min, sep, coeff) = {
+            let (max, min, sep, coeff) = if rgb.red > rgb.green {
+                (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
+            } else {
+                (rgb.green, rgb.red, rgb.blue - rgb.red, from_f64(2.0))
+            };
+            if rgb.blue > max {
+                (rgb.blue, min, rgb.red - rgb.green, from_f64(4.0))
+            } else {
+                let min_val = if rgb.blue < min { rgb.blue } else { min };
+                (max, min_val, sep, coeff)
+            }
+        };
+
+        let mut h = T::zero();
+        let mut s = T::zero();
+
+        let sum = max + min;
+        let l = sum / from_f64(2.0);
+        if max != min {
+            let d = max - min;
+            s = if sum > T::one() {
+                d / (from_f64::<T>(2.0) - sum)
+            } else {
+                d / sum
+            };
+            h = ((sep / d) + coeff) * from_f64(60.0);
+        };
+
+        Hsl {
+            hue: h.into(),
+            saturation: s,
+            lightness: l,
+            space: PhantomData,
+        }
+    }
+}
+
+impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Hsl<S, T>
+where
+    T: FloatComponent,
+    S: RgbSpace,
+{
+    fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
+        let rgb: Rgb<Linear<S>, T> = color.into_color_unclamped();
+        Self::from_color_unclamped(rgb)
+    }
+}
+
+impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hsl<S, T>
+where
+    T: FloatComponent,
+    S: RgbSpace,
+{
+    fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
         let x = (from_f64::<T>(2.0) - hsv.saturation) * hsv.value;
         let saturation = if !hsv.value.is_normal() {
             T::zero()
@@ -656,10 +669,12 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        use crate::FromColor;
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        let xyz1 = Xyz::from_color(*self);
+        let xyz2 = Xyz::from_color(*other);
+
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
@@ -759,13 +774,13 @@ where
 mod test {
     use super::Hsl;
     use crate::encoding::Srgb;
-    use crate::{Hsv, LinSrgb};
+    use crate::{FromColor, Hsv, LinSrgb};
 
     #[test]
     fn red() {
-        let a = Hsl::from(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Hsl::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hsl::new(0.0, 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(0.0, 1.0, 1.0));
+        let c = Hsl::from_color(Hsv::new(0.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -773,9 +788,9 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from(LinSrgb::new(1.0, 0.5, 0.0));
+        let a = Hsl::from_color(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hsl::new(30.0, 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(30.0, 1.0, 1.0));
+        let c = Hsl::from_color(Hsv::new(30.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -783,9 +798,9 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Hsl::from_color(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Hsl::new(120.0, 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(120.0, 1.0, 1.0));
+        let c = Hsl::from_color(Hsv::new(120.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -793,9 +808,9 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Hsl::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Hsl::new(240.0, 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(240.0, 1.0, 1.0));
+        let c = Hsl::from_color(Hsv::new(240.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -803,9 +818,9 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from(LinSrgb::new(0.5, 0.0, 1.0));
+        let a = Hsl::from_color(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hsl::new(270.0, 1.0, 0.5);
-        let c = Hsl::from(Hsv::new(270.0, 1.0, 1.0));
+        let c = Hsl::from_color(Hsv::new(270.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);

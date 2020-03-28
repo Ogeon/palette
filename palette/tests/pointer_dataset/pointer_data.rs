@@ -17,9 +17,10 @@ use lazy_static::lazy_static;
 use num_traits::{NumCast, ToPrimitive};
 use serde_derive::Deserialize;
 
+use palette::convert::IntoColorUnclamped;
 use palette::float::Float;
 use palette::white_point::WhitePoint;
-use palette::{FloatComponent, IntoColor, Lab, Lch, Xyz};
+use palette::{FloatComponent, Lab, Lch, Xyz};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
@@ -67,8 +68,8 @@ macro_rules! impl_from_color_pointer {
         impl From<$self_ty<PointerWP, f64>> for PointerData {
             fn from(color: $self_ty<PointerWP, f64>) -> PointerData {
                 PointerData {
-                    lch: color.into_lch(),
-                    lab: color.into_lab(),
+                    lch: color.into_color_unclamped(),
+                    lab: color.into_color_unclamped(),
                 }
             }
         }

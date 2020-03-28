@@ -1,5 +1,8 @@
 //! Pixel encodings and pixel format conversion.
 
+#[doc(hidden)]
+pub use palette_derive::Pixel;
+
 pub use self::raw::*;
 mod raw;
 
@@ -77,11 +80,11 @@ mod raw;
 /// #[derive(PartialEq, Debug, Pixel)]
 /// #[repr(C)]
 /// struct MyCoolColor<S: RgbStandard> {
-///     #[palette_unsafe_zero_sized]
+///     #[palette(unsafe_zero_sized)]
 ///     standard: PhantomData<S>,
 ///     // RgbHue is a wrapper with `#[repr(C)]`, so it can safely
 ///     // be converted straight from `f32`.
-///     #[palette_unsafe_same_layout_as = "f32"]
+///     #[palette(unsafe_same_layout_as = "f32")]
 ///     hue: RgbHue<f32>,
 ///     lumen: f32,
 ///     chroma: f32,

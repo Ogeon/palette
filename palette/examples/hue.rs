@@ -1,4 +1,4 @@
-use palette::{Hsl, Hue, Lch, Pixel, Srgb};
+use palette::{FromColor, Hsl, Hue, IntoColor, Lch, Pixel, Srgb};
 
 fn main() {
     let mut image = image::open("res/fruits.png")
@@ -12,11 +12,15 @@ fn main() {
         let color = Srgb::from_raw(&pixel.0).into_format();
 
         pixel.0 = if x < y {
-            let saturated = Hsl::from(color).shift_hue(180.0);
-            Srgb::from_linear(saturated.into()).into_format().into_raw()
+            let saturated = Hsl::from_color(color).shift_hue(180.0);
+            Srgb::from_linear(saturated.into_color())
+                .into_format()
+                .into_raw()
         } else {
-            let saturated = Lch::from(color).shift_hue(180.0);
-            Srgb::from_linear(saturated.into()).into_format().into_raw()
+            let saturated = Lch::from_color(color).shift_hue(180.0);
+            Srgb::from_linear(saturated.into_color())
+                .into_format()
+                .into_raw()
         };
     }
 

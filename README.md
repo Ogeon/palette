@@ -59,15 +59,15 @@ Palette provides tools for both color manipulation and conversion between color 
 
 RGB is probably the most widely known color space, but it's not the only one. You have probably used a color picker with a rainbow wheel and a brightness slider. That may have been an HSV or an HSL color picker, where the color is encoded as hue, saturation and brightness/lightness. There's also a group of color spaces that are designed to be perceptually uniform, meaning that the perceptual change is equal to the numerical change.
 
-Selecting the proper color space can have a big impact on how the resulting image looks (as illustrated by some of the programs in `examples`), and Palette makes the conversion between them as easy as a call to `from` or `into`.
+Selecting the proper color space can have a big impact on how the resulting image looks (as illustrated by some of the programs in `examples`), and Palette makes the conversion between them as easy as a call to `from_color` or `into_color`.
 
 This example takes an sRGB color, converts it to CIE L\*C\*h°, shifts its hue by 180° and converts it back to RGB:
 
 ```Rust
-use palette::{Srgb, LinSrgb, Lch, Hue};
+use palette::{FromColor, Hue, IntoColor, Lch, Srgb};
 
-let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into();
-let new_color = LinSrgb::from(lch_color.shift_hue(180.0));
+let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_color();
+let new_color = Srgb::from_color(lch_color.shift_hue(180.0));
 ```
 
 This results in the following two colors:
@@ -78,16 +78,14 @@ This results in the following two colors:
 
 Palette comes with a number of color manipulation tools, that are implemented as traits. These includes lighten/darken, saturate/desaturate and hue shift. These traits are only implemented on types where they are meaningful, which means that you can't shift the hue of an RGB color without converting it to a color space where it makes sense.
 
-This may seem limiting, but the point is to avoid inconsistent behavior due to arbitrary defaults, such as saturating a gray color to red when there is no available hue information. The abstract `Color` type does still support every operation, for when this is less important.
-
-The following example shows how the `Color` type is used to make a lighter and a desaturated version of the original.
+The following example shows how to make a lighter and a desaturated version of the original.
 
 ```Rust
-use palette::{Saturate, Shade, Srgb, Lch};
+use palette::{FromColor, Saturate, Shade, Srgb, Lch};
 
 let color = Srgb::new(0.8, 0.2, 0.1).into_linear();
 let lighter = color.lighten(0.1);
-let desaturated = Lch::from(color).desaturate(0.5);
+let desaturated = Lch::from_color(color).desaturate(0.5);
 ```
 
 This results in the following three colors:
@@ -101,7 +99,7 @@ There is also a linear gradient type which makes it easy to interpolate between 
 The following example shows three gradients between the same two endpoints, but the top is in RGB space while the middle and bottom are in HSV space. The bottom gradient is an example of using the color sequence iterator.
 
 ```Rust
-use palette::{LinSrgb, Hsv, Gradient};
+use palette::{FromColor, LinSrgb, Hsv, Gradient};
 
 let grad1 = Gradient::new(vec![
     LinSrgb::new(1.0, 0.1, 0.1),
@@ -109,8 +107,8 @@ let grad1 = Gradient::new(vec![
 ]);
 
 let grad2 = Gradient::new(vec![
-    Hsv::from(LinSrgb::new(1.0, 0.1, 0.1)),
-    Hsv::from(LinSrgb::new(0.1, 1.0, 1.0))
+    Hsv::from_color(LinSrgb::new(1.0, 0.1, 0.1)),
+    Hsv::from_color(LinSrgb::new(0.1, 1.0, 1.0))
 ]);
 ```
 
@@ -125,6 +123,7 @@ Palette supports converting from a raw buffer of data into a color type using th
 Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. `from_raw` can be used to convert into a Palette color, `into_format` converts from  `Srgb<u8>` to `Srgb<f32>`, and finally `into_raw` to convert from a Palette color back to a `[u8;3]`.
 
 Here's an example of turning a buffer of `[u8; 3]` into a Palette `Srgb` color and back to a raw buffer.
+
 ```rust
 use approx::assert_relative_eq;
 use palette::{Srgb, Pixel};

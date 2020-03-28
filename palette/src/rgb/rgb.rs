@@ -15,19 +15,18 @@ use rand::Rng;
 
 use crate::alpha::Alpha;
 use crate::blend::PreAlpha;
-use crate::convert::{FromColor, IntoColor};
+use crate::convert::FromColorUnclamped;
 use crate::encoding::linear::LinearFn;
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb};
 use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
-use crate::white_point::WhitePoint;
 use crate::{
     clamp, contrast_ratio, from_f64, Blend, Component, ComponentWise, FloatComponent,
     FromComponent, GetHue, Limited, Mix, Pixel, RelativeContrast, Shade,
 };
-use crate::{Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
+use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](../struct.Alpha.html#Rgba).
@@ -44,13 +43,15 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// linear, meaning that gamma correction is required when converting to and
 /// from a displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html)
 /// module for encoding formats.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_rgb_space = "S::Space"]
-#[palette_white_point = "<S::Space as RgbSpace>::WhitePoint"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Hsv, Hsl, Luma, Rgb = "from_rgb_internal")]
+#[palette(
+    palette_internal,
+    rgb_space = "S::Space",
+    white_point = "<S::Space as RgbSpace>::WhitePoint",
+    component = "T",
+    skip_derives(Xyz, Hsv, Hsl, Luma, Rgb)
+)]
 #[repr(C)]
 pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8)
@@ -67,7 +68,7 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 
@@ -218,22 +219,11 @@ impl<S: RgbStandard, T: FloatComponent> Rgb<S, T> {
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
         )
     }
-
-    fn from_rgb_internal<Sp>(rgb: Rgb<Linear<Sp>, T>) -> Self
-    where
-        Sp: RgbSpace<WhitePoint = <S::Space as RgbSpace>::WhitePoint>,
-    {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<<S::Space as RgbSpace>::Primaries>() {
-            Self::from_linear(rgb.reinterpret_as())
-        } else {
-            Self::from_xyz(Xyz::from_rgb(rgb))
-        }
-    }
 }
 
-impl<S: RgbStandard<TransferFn = LinearFn>, T: Component> Rgb<S, T> {
+impl<S: RgbStandard, T: Component> Rgb<S, T> {
     #[inline]
-    fn reinterpret_as<St: RgbStandard<TransferFn = LinearFn>>(self) -> Rgb<St, T>
+    fn reinterpret_as<St: RgbStandard>(self) -> Rgb<St, T>
     where
         S::Space: RgbSpace<WhitePoint = <St::Space as RgbSpace>::WhitePoint>,
     {
@@ -364,6 +354,123 @@ impl<S: RgbStandard, T: FloatComponent, A: Component> Alpha<Rgb<S, T>, A> {
     }
 }
 
+impl<S1, S2, T> FromColorUnclamped<Rgb<S2, T>> for Rgb<S1, T>
+where
+    S1: RgbStandard,
+    S2: RgbStandard,
+    S2::Space: RgbSpace<WhitePoint = <S1::Space as RgbSpace>::WhitePoint>,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(rgb: Rgb<S2, T>) -> Self {
+        if TypeId::of::<S1>() == TypeId::of::<S2>() {
+            rgb.reinterpret_as()
+        } else if TypeId::of::<<S1::Space as RgbSpace>::Primaries>()
+            == TypeId::of::<<S2::Space as RgbSpace>::Primaries>()
+        {
+            Self::from_linear(rgb.into_linear().reinterpret_as())
+        } else {
+            Self::from_color_unclamped(Xyz::from_color_unclamped(rgb))
+        }
+    }
+}
+
+impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace>::WhitePoint, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
+        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<S::Space, T>());
+        Self::from_linear(multiply_xyz_to_rgb(&transform_matrix, &color))
+    }
+}
+
+impl<S, T> FromColorUnclamped<Hsl<S::Space, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(hsl: Hsl<S::Space, T>) -> Self {
+        let c = (T::one() - (hsl.lightness * from_f64(2.0) - T::one()).abs()) * hsl.saturation;
+        let h = hsl.hue.to_positive_degrees() / from_f64(60.0);
+        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
+        let m = hsl.lightness - c * from_f64(0.5);
+
+        let (red, green, blue) = if h >= T::zero() && h < T::one() {
+            (c, x, T::zero())
+        } else if h >= T::one() && h < from_f64(2.0) {
+            (x, c, T::zero())
+        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
+            (T::zero(), c, x)
+        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
+            (T::zero(), x, c)
+        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
+            (x, T::zero(), c)
+        } else {
+            (c, T::zero(), x)
+        };
+
+        Self::from_linear(Rgb {
+            red: red + m,
+            green: green + m,
+            blue: blue + m,
+            standard: PhantomData,
+        })
+    }
+}
+
+impl<S, T> FromColorUnclamped<Hsv<S::Space, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(hsv: Hsv<S::Space, T>) -> Self {
+        let c = hsv.value * hsv.saturation;
+        let h = hsv.hue.to_positive_degrees() / from_f64(60.0);
+        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
+        let m = hsv.value - c;
+
+        let (red, green, blue) = if h >= T::zero() && h < T::one() {
+            (c, x, T::zero())
+        } else if h >= T::one() && h < from_f64(2.0) {
+            (x, c, T::zero())
+        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
+            (T::zero(), c, x)
+        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
+            (T::zero(), x, c)
+        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
+            (x, T::zero(), c)
+        } else {
+            (c, T::zero(), x)
+        };
+
+        Self::from_linear(Rgb {
+            red: red + m,
+            green: green + m,
+            blue: blue + m,
+            standard: PhantomData,
+        })
+    }
+}
+
+impl<S, St, T> FromColorUnclamped<Luma<St, T>> for Rgb<S, T>
+where
+    S: RgbStandard,
+    St: LumaStandard<WhitePoint = <S::Space as RgbSpace>::WhitePoint>,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Luma<St, T>) -> Self {
+        let luma = color.into_linear();
+
+        Self::from_linear(Rgb {
+            red: luma.luma,
+            green: luma.luma,
+            blue: luma.luma,
+            standard: PhantomData,
+        })
+    }
+}
+
 impl<S, T> Limited for Rgb<S, T>
 where
     S: RgbStandard,
@@ -454,11 +561,15 @@ where
     type Color = Rgb<S, T>;
 
     fn into_premultiplied(self) -> PreAlpha<Rgb<S, T>, T> {
-        Rgba::from(self).into()
+        Rgba {
+            color: self,
+            alpha: T::one(),
+        }
+        .into_premultiplied()
     }
 
     fn from_premultiplied(color: PreAlpha<Rgb<S, T>, T>) -> Self {
-        Rgba::from(color).into()
+        Rgba::from_premultiplied(color).color
     }
 }
 
@@ -738,117 +849,6 @@ where
     }
 }
 
-impl<S, Wp, T> From<Xyz<Wp, T>> for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S::Space: RgbSpace<WhitePoint = Wp>,
-{
-    fn from(color: Xyz<Wp, T>) -> Self {
-        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<S::Space, T>());
-        Self::from_linear(multiply_xyz_to_rgb(&transform_matrix, &color))
-    }
-}
-
-impl<S, T, Sp, Wp> From<Hsl<Sp, T>> for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S::Space: RgbSpace<WhitePoint = Wp>,
-    Sp: RgbSpace<WhitePoint = Wp>,
-{
-    fn from(color: Hsl<Sp, T>) -> Self {
-        let hsl = Hsl::<S::Space, T>::from_hsl(color);
-
-        let c = (T::one() - (hsl.lightness * from_f64(2.0) - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / from_f64(60.0);
-        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
-        let m = hsl.lightness - c * from_f64(0.5);
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < from_f64(2.0) {
-            (x, c, T::zero())
-        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
-            (T::zero(), c, x)
-        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
-            (T::zero(), x, c)
-        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-        Self::from_linear(Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
-            standard: PhantomData,
-        })
-    }
-}
-
-impl<S, T, Sp, Wp> From<Hsv<Sp, T>> for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S::Space: RgbSpace<WhitePoint = Wp>,
-    Sp: RgbSpace<WhitePoint = Wp>,
-{
-    fn from(color: Hsv<Sp, T>) -> Self {
-        let hsv = Hsv::<S::Space, T>::from_hsv(color);
-
-        let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / from_f64(60.0);
-        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
-        let m = hsv.value - c;
-
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < from_f64(2.0) {
-            (x, c, T::zero())
-        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
-            (T::zero(), c, x)
-        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
-            (T::zero(), x, c)
-        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
-        };
-
-        Self::from_linear(Rgb {
-            red: red + m,
-            green: green + m,
-            blue: blue + m,
-            standard: PhantomData,
-        })
-    }
-}
-
-impl<S, T, St, Wp> From<Luma<St, T>> for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S::Space: RgbSpace<WhitePoint = Wp>,
-    St: LumaStandard<WhitePoint = Wp>,
-{
-    fn from(color: Luma<St, T>) -> Self {
-        let luma = color.into_linear();
-
-        Self::from_linear(Rgb {
-            red: luma.luma,
-            green: luma.luma,
-            blue: luma.luma,
-            standard: PhantomData,
-        })
-    }
-}
-
 impl<S: RgbStandard, T: Component> From<(T, T, T)> for Rgb<S, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
@@ -870,59 +870,6 @@ impl<S: RgbStandard, T: Component, A: Component> From<(T, T, T, A)> for Alpha<Rg
 impl<S: RgbStandard, T: Component, A: Component> Into<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
     fn into(self) -> (T, T, T, A) {
         self.into_components()
-    }
-}
-
-impl<S, T, Wp> IntoColor<Wp, T> for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S::Space: RgbSpace<WhitePoint = Wp>,
-{
-    #[inline(always)]
-    fn into_xyz(self) -> Xyz<Wp, T> {
-        Xyz::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_yxy(self) -> Yxy<Wp, T> {
-        Yxy::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_lab(self) -> Lab<Wp, T> {
-        Lab::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_lch(self) -> Lch<Wp, T> {
-        Lch::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_rgb<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Rgb<Linear<Sp>, T> {
-        Rgb::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_hsl<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsl<Sp, T> {
-        Hsl::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_hsv<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hsv<Sp, T> {
-        Hsv::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_hwb<Sp: RgbSpace<WhitePoint = Wp>>(self) -> Hwb<Sp, T> {
-        Hwb::from_rgb(self.into_linear())
-    }
-
-    #[inline(always)]
-    fn into_luma(self) -> Luma<Linear<Wp>, T> {
-        Luma::from_rgb(self.into_linear())
     }
 }
 
@@ -1142,10 +1089,12 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        use crate::FromColor;
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        let xyz1 = Xyz::from_color(*self);
+        let xyz2 = Xyz::from_color(*other);
+
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

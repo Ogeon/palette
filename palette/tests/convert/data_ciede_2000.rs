@@ -14,6 +14,7 @@ use csv;
 use approx::assert_relative_eq;
 use serde_derive::Deserialize;
 
+use palette::convert::FromColorUnclamped;
 use palette::white_point::D65;
 use palette::{ColorDifference, Lab, Lch};
 
@@ -73,8 +74,8 @@ pub fn run_tests() {
         let result_lab = expected.c1.get_color_difference(&expected.c2);
         check_equal_lab(result_lab, expected.delta_e);
 
-        let lch1: Lch<_, f64> = Lch::from(expected.c1);
-        let lch2: Lch<_, f64> = Lch::from(expected.c2);
+        let lch1: Lch<_, f64> = Lch::from_color_unclamped(expected.c1);
+        let lch2: Lch<_, f64> = Lch::from_color_unclamped(expected.c2);
         let result_lch = lch1.get_color_difference(&lch2);
         check_equal_lch(result_lch, expected.delta_e);
     }

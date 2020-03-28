@@ -1,36 +1,51 @@
-use std::collections::{HashMap, HashSet};
-
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident, Type};
+use proc_macro2::Span;
 
-use crate::meta::{self, DataMetaParser, IdentOrIndex, MetaParser};
+use quote::{quote, ToTokens};
+use syn::{Attribute, Data, DeriveInput, Fields, Ident, Type};
+
+use crate::meta::{self, FieldAttributes, IdentOrIndex, TypeItemAttributes};
 use crate::util;
 
-pub fn derive(tokens: TokenStream) -> TokenStream {
+pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::Error>> {
     let DeriveInput {
         ident,
         attrs,
         generics,
         data,
         ..
-    } = parse_macro_input!(tokens);
+    } = syn::parse(tokens).map_err(|error| vec![error])?;
 
-    let meta: PixelMeta = meta::parse_attributes(attrs);
-    let item_meta: PixelItemMeta = meta::parse_data_attributes(data.clone());
+    let repr_c = is_repr_c(&attrs)?;
+    let item_meta: TypeItemAttributes = meta::parse_namespaced_attributes(attrs)?;
 
     let mut number_of_channels = 0usize;
     let mut field_type: Option<Type> = None;
 
-    let all_fields = match data {
-        Data::Struct(struct_item) => match struct_item.fields {
-            Fields::Named(fields) => fields.named,
-            Fields::Unnamed(fields) => fields.unnamed,
-            Fields::Unit => Default::default(),
-        },
-        Data::Enum(_) => panic!("`Pixel` cannot be derived for enums, because of the discriminant"),
-        Data::Union(_) => panic!("`Pixel` cannot be derived for unions"),
+    let (all_fields, fields_meta) = match data {
+        Data::Struct(struct_item) => {
+            let fields_meta: FieldAttributes =
+                meta::parse_field_attributes(struct_item.fields.clone())?;
+            let all_fields = match struct_item.fields {
+                Fields::Named(fields) => fields.named,
+                Fields::Unnamed(fields) => fields.unnamed,
+                Fields::Unit => Default::default(),
+            };
+
+            (all_fields, fields_meta)
+        }
+        Data::Enum(_) => {
+            return Err(vec![syn::Error::new(
+                Span::call_site(),
+                "`Pixel` cannot be derived for enums, because of the discriminant",
+            )]);
+        }
+        Data::Union(_) => {
+            return Err(vec![syn::Error::new(
+                Span::call_site(),
+                "`Pixel` cannot be derived for unions",
+            )]);
+        }
     };
 
     let fields = all_fields
@@ -45,10 +60,12 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
                 field.ty,
             )
         })
-        .filter(|&(ref field, _)| !item_meta.zero_size_fields.contains(field));
+        .filter(|&(ref field, _)| !fields_meta.zero_size_fields.contains(field));
+
+    let mut errors = Vec::new();
 
     for (field, ty) in fields {
-        let ty = item_meta
+        let ty = fields_meta
             .type_substitutes
             .get(&field)
             .cloned()
@@ -57,28 +74,32 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
 
         if let Some(field_type) = field_type.clone() {
             if field_type != ty {
-                panic!(
-                    "expected fields to be of type `{}`, but `{}` is of type `{}`",
-                    field_type.into_token_stream(),
-                    field.into_token_stream(),
-                    ty.into_token_stream()
-                );
+                errors.push(syn::Error::new_spanned(
+                    &field,
+                    format!(
+                        "expected fields to have type `{}`",
+                        field_type.into_token_stream()
+                    ),
+                ));
             }
         } else {
             field_type = Some(ty);
         }
     }
 
-    if !meta.repr_c {
-        panic!(
-            "a `#[repr(C)]` attribute is required to give `{}` a fixed memory layout",
-            ident
-        );
+    if !repr_c {
+        errors.push(syn::Error::new(
+            Span::call_site(),
+            format!(
+                "a `#[repr(C)]` attribute is required to give `{}` a fixed memory layout",
+                ident
+            ),
+        ));
     }
 
-    let pixel_trait_path = util::path(&["Pixel"], meta.internal);
+    let pixel_trait_path = util::path(&["Pixel"], item_meta.internal);
 
-    let implementation = if let Some(field_type) = field_type {
+    let mut implementation = if let Some(field_type) = field_type {
         let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
 
         quote! {
@@ -88,63 +109,47 @@ pub fn derive(tokens: TokenStream) -> TokenStream {
             }
         }
     } else {
-        panic!("`Pixel` can only be derived for structs with one or more fields");
+        errors.push(syn::Error::new(
+            Span::call_site(),
+            format!("`Pixel` can only be derived for structs with one or more fields"),
+        ));
+
+        return Err(errors);
     };
 
-    let result = util::bundle_impl("Pixel", ident, meta.internal, implementation);
-    result.into()
+    implementation.extend(errors.iter().map(syn::Error::to_compile_error));
+    Ok(implementation.into())
 }
 
-#[derive(Default)]
-struct PixelMeta {
-    internal: bool,
-    repr_c: bool,
-}
+fn is_repr_c(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Error>> {
+    let mut errors = Vec::new();
 
-impl MetaParser for PixelMeta {
-    fn internal(&mut self) {
-        self.internal = true;
-    }
+    for attribute in attributes {
+        let attribute_name = attribute.path.get_ident().map(ToString::to_string);
 
-    fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream2) {
-        match &*attribute_name.to_string() {
-            "repr" => {
-                let items = meta::parse_tuple_attribute(&attribute_name, attribute_tts);
+        match attribute_name.as_deref() {
+            Some("repr") => {
+                let items = match meta::parse_tuple_attribute(attribute.tokens.clone()) {
+                    Ok(items) => items,
+                    Err(error) => {
+                        errors.push(error);
+                        continue;
+                    }
+                };
+
                 let contains_c = items.into_iter().find(|item: &Ident| item == "C").is_some();
 
                 if contains_c {
-                    self.repr_c = true;
+                    return Ok(true);
                 }
             }
             _ => {}
         }
     }
-}
 
-#[derive(Default)]
-struct PixelItemMeta {
-    zero_size_fields: HashSet<IdentOrIndex>,
-    type_substitutes: HashMap<IdentOrIndex, Type>,
-}
-
-impl DataMetaParser for PixelItemMeta {
-    fn parse_struct_field_attribute(
-        &mut self,
-        field_name: IdentOrIndex,
-        _ty: Type,
-        attribute_name: Ident,
-        attribute_tts: TokenStream2,
-    ) {
-        match &*attribute_name.to_string() {
-            "palette_unsafe_same_layout_as" => {
-                let substitute = meta::parse_equal_attribute(&attribute_name, attribute_tts);
-                self.type_substitutes.insert(field_name, substitute);
-            }
-            "palette_unsafe_zero_sized" => {
-                meta::assert_empty_attribute(&attribute_name, attribute_tts);
-                self.zero_size_fields.insert(field_name);
-            }
-            _ => {}
-        }
+    if errors.is_empty() {
+        Ok(false)
+    } else {
+        Err(errors)
     }
 }

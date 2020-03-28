@@ -51,7 +51,7 @@ impl<N: Number> TransferFn for GammaFn<N> {
 }
 
 /// A type level float constant.
-pub trait Number {
+pub trait Number: 'static {
     /// The represented number.
     const VALUE: f64;
 }

@@ -23,11 +23,12 @@
 //! //Should print {x: 0.257963, y: 0.139776,z: 0.058825}
 //! println!("{:?}", c)
 //! ```
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::float::Float;
 use crate::from_f64;
 use crate::matrix::{multiply_3x3, multiply_xyz, Mat3};
 use crate::white_point::WhitePoint;
-use crate::{FloatComponent, FromColor, IntoColor, Xyz};
+use crate::{FloatComponent, Xyz};
 
 /// Chromatic adaptation methods implemented in the library
 pub enum Method {
@@ -165,14 +166,14 @@ where
     T: FloatComponent,
     Swp: WhitePoint,
     Dwp: WhitePoint,
-    S: IntoColor<Swp, T>,
-    D: FromColor<Dwp, T>,
+    S: IntoColorUnclamped<Xyz<Swp, T>>,
+    D: FromColorUnclamped<Xyz<Dwp, T>>,
 {
     fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> D {
-        let src_xyz: Xyz<Swp, T> = color.into_xyz();
+        let src_xyz: Xyz<Swp, T> = color.into_color_unclamped();
         let transform_matrix = method.generate_transform_matrix();
         let dst_xyz: Xyz<Dwp, T> = multiply_xyz(&transform_matrix, &src_xyz);
-        D::from_xyz(dst_xyz)
+        D::from_color_unclamped(dst_xyz)
     }
 }
 
@@ -210,7 +211,6 @@ where
 
 #[cfg(test)]
 mod test {
-
     use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};
     use crate::white_point::{A, C, D50, D65};
     use crate::Xyz;

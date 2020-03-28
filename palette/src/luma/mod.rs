@@ -23,7 +23,7 @@ pub type GammaLuma<T = f32> = Luma<Gamma<D65>, T>;
 pub type GammaLumaa<T = f32> = Lumaa<Gamma<D65>, T>;
 
 /// A white point and a transfer function.
-pub trait LumaStandard {
+pub trait LumaStandard: 'static {
     /// The white point of the color space.
     type WhitePoint: WhitePoint;
 
