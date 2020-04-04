@@ -3,6 +3,12 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
 
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb};
@@ -654,6 +660,98 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<S, T> Distribution<Hsl<S, T>> for Standard
+where
+    T: FloatComponent,
+    S: RgbSpace,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsl<S, T> {
+        crate::random_sampling::sample_hsl(rng.gen::<RgbHue<T>>(), rng.gen(), rng.gen())
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformHsl<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    hue: crate::hues::UniformRgbHue<T>,
+    u1: Uniform<T>,
+    u2: Uniform<T>,
+    space: PhantomData<S>,
+}
+
+#[cfg(feature = "random")]
+impl<S, T> SampleUniform for Hsl<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    type Sampler = UniformHsl<S, T>;
+}
+
+#[cfg(feature = "random")]
+impl<S, T> UniformSampler for UniformHsl<S, T>
+where
+    T: FloatComponent + SampleUniform,
+    S: RgbSpace + SampleUniform,
+{
+    type X = Hsl<S, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        use crate::random_sampling::invert_hsl_sample;
+
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        let (r1_min, r2_min) = invert_hsl_sample(low);
+        let (r1_max, r2_max) = invert_hsl_sample(high);
+
+        UniformHsl {
+            hue: crate::hues::UniformRgbHue::new(low.hue, high.hue),
+            u1: Uniform::new::<_, T>(r1_min, r1_max),
+            u2: Uniform::new::<_, T>(r2_min, r2_max),
+            space: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        use crate::random_sampling::invert_hsl_sample;
+
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        let (r1_min, r2_min) = invert_hsl_sample(low);
+        let (r1_max, r2_max) = invert_hsl_sample(high);
+
+        UniformHsl {
+            hue: crate::hues::UniformRgbHue::new_inclusive(low.hue, high.hue),
+            u1: Uniform::new_inclusive::<_, T>(r1_min, r1_max),
+            u2: Uniform::new_inclusive::<_, T>(r2_min, r2_max),
+            space: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsl<S, T> {
+        crate::random_sampling::sample_hsl(
+            self.hue.sample(rng),
+            self.u1.sample(rng),
+            self.u2.sample(rng),
+        )
     }
 }
 

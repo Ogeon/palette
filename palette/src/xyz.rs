@@ -1,15 +1,21 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
+
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
-use crate::{clamp, contrast_ratio, from_f64};
-use crate::{Alpha, Lab, Luma, Yxy};
 use crate::{
-    Component, ComponentWise, FloatComponent, Limited, Mix, Pixel, RelativeContrast, Shade,
+    clamp, contrast_ratio, from_f64, Alpha, Component, ComponentWise, FloatComponent, Lab, Limited,
+    Luma, Mix, Pixel, RelativeContrast, Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -644,6 +650,95 @@ where
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
         contrast_ratio(self.y, other.y)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> Distribution<Xyz<Wp, T>> for Standard
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
+        let xyz_ref: Xyz<Wp, T> = Wp::get_xyz();
+        Xyz {
+            x: rng.gen() * xyz_ref.x,
+            y: rng.gen() * xyz_ref.y,
+            z: rng.gen() * xyz_ref.z,
+            white_point: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformXyz<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    x: Uniform<T>,
+    y: Uniform<T>,
+    z: Uniform<T>,
+    white_point: PhantomData<Wp>,
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> SampleUniform for Xyz<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type Sampler = UniformXyz<Wp, T>;
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> UniformSampler for UniformXyz<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type X = Xyz<Wp, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformXyz {
+            x: Uniform::new::<_, T>(low.x, high.x),
+            y: Uniform::new::<_, T>(low.y, high.y),
+            z: Uniform::new::<_, T>(low.z, high.z),
+            white_point: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformXyz {
+            x: Uniform::new_inclusive::<_, T>(low.x, high.x),
+            y: Uniform::new_inclusive::<_, T>(low.y, high.y),
+            z: Uniform::new_inclusive::<_, T>(low.z, high.z),
+            white_point: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
+        Xyz {
+            x: self.x.sample(rng),
+            y: self.y.sample(rng),
+            z: self.z.sample(rng),
+            white_point: PhantomData,
+        }
     }
 }
 

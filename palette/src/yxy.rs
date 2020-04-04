@@ -1,14 +1,19 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
+
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
-use crate::{clamp, contrast_ratio};
-use crate::{Alpha, Luma, Xyz};
 use crate::{
-    Component, ComponentWise, FloatComponent, IntoColor, Limited, Mix, Pixel, RelativeContrast,
-    Shade,
+    clamp, contrast_ratio, Alpha, Component, ComponentWise, FloatComponent, IntoColor, Limited,
+    Luma, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -608,6 +613,94 @@ where
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
         contrast_ratio(self.luma, other.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> Distribution<Yxy<Wp, T>> for Standard
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Yxy<Wp, T> {
+        Yxy {
+            x: rng.gen(),
+            y: rng.gen(),
+            luma: rng.gen(),
+            white_point: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformYxy<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    x: Uniform<T>,
+    y: Uniform<T>,
+    luma: Uniform<T>,
+    white_point: PhantomData<Wp>,
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> SampleUniform for Yxy<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type Sampler = UniformYxy<Wp, T>;
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> UniformSampler for UniformYxy<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type X = Yxy<Wp, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformYxy {
+            x: Uniform::new::<_, T>(low.x, high.x),
+            y: Uniform::new::<_, T>(low.y, high.y),
+            luma: Uniform::new::<_, T>(low.luma, high.luma),
+            white_point: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformYxy {
+            x: Uniform::new_inclusive::<_, T>(low.x, high.x),
+            y: Uniform::new_inclusive::<_, T>(low.y, high.y),
+            luma: Uniform::new_inclusive::<_, T>(low.luma, high.luma),
+            white_point: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Yxy<Wp, T> {
+        Yxy {
+            x: self.x.sample(rng),
+            y: self.y.sample(rng),
+            luma: self.luma.sample(rng),
+            white_point: PhantomData,
+        }
     }
 }
 

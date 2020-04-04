@@ -372,6 +372,9 @@ pub mod gradient;
 #[cfg(feature = "named")]
 pub mod named;
 
+#[cfg(feature = "random")]
+mod random_sampling;
+
 mod alpha;
 mod hsl;
 mod hsv;

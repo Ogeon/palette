@@ -3,6 +3,12 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
 
 use crate::blend::PreAlpha;
 use crate::encoding::linear::LinearFn;
@@ -10,11 +16,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::white_point::WhitePoint;
-use crate::{clamp, contrast_ratio};
-use crate::{Alpha, Xyz, Yxy};
 use crate::{
-    Blend, Component, ComponentWise, FloatComponent, FromColor, FromComponent, IntoColor, Limited,
-    Mix, Pixel, RelativeContrast, Shade,
+    clamp, contrast_ratio, Alpha, Blend, Component, ComponentWise, FloatComponent, FromColor,
+    FromComponent, IntoColor, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -747,6 +751,84 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<S, T> Distribution<Luma<S, T>> for Standard
+where
+    T: Component,
+    S: LumaStandard,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luma<S, T> {
+        Luma {
+            luma: rng.gen(),
+            standard: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformLuma<S, T>
+where
+    T: Component + SampleUniform,
+    S: LumaStandard + SampleUniform,
+{
+    luma: Uniform<T>,
+    standard: PhantomData<S>,
+}
+
+#[cfg(feature = "random")]
+impl<S, T> SampleUniform for Luma<S, T>
+where
+    T: Component + SampleUniform,
+    S: LumaStandard + SampleUniform,
+{
+    type Sampler = UniformLuma<S, T>;
+}
+
+#[cfg(feature = "random")]
+impl<S, T> UniformSampler for UniformLuma<S, T>
+where
+    T: Component + SampleUniform,
+    S: LumaStandard + SampleUniform,
+{
+    type X = Luma<S, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLuma {
+            luma: Uniform::new::<_, T>(low.luma, high.luma),
+            standard: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLuma {
+            luma: Uniform::new_inclusive::<_, T>(low.luma, high.luma),
+            standard: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luma<S, T> {
+        Luma {
+            luma: self.luma.sample(rng),
+            standard: PhantomData,
+        }
     }
 }
 

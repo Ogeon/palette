@@ -6,6 +6,12 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use core::str::FromStr;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
 
 use crate::alpha::Alpha;
 use crate::blend::PreAlpha;
@@ -17,10 +23,9 @@ use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::white_point::WhitePoint;
-use crate::{clamp, contrast_ratio, from_f64};
 use crate::{
-    Blend, Component, ComponentWise, FloatComponent, FromComponent, GetHue, Limited, Mix, Pixel,
-    RelativeContrast, Shade,
+    clamp, contrast_ratio, from_f64, Blend, Component, ComponentWise, FloatComponent,
+    FromComponent, GetHue, Limited, Mix, Pixel, RelativeContrast, Shade,
 };
 use crate::{Hsl, Hsv, Hwb, Lab, Lch, Luma, RgbHue, Xyz, Yxy};
 
@@ -1141,6 +1146,94 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<S, T> Distribution<Rgb<S, T>> for Standard
+where
+    T: Component,
+    S: RgbStandard,
+    Standard: Distribution<T>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rgb<S, T> {
+        Rgb {
+            red: rng.gen(),
+            green: rng.gen(),
+            blue: rng.gen(),
+            standard: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformRgb<S, T>
+where
+    T: Component + SampleUniform,
+    S: RgbStandard + SampleUniform,
+{
+    red: Uniform<T>,
+    green: Uniform<T>,
+    blue: Uniform<T>,
+    standard: PhantomData<S>,
+}
+
+#[cfg(feature = "random")]
+impl<S, T> SampleUniform for Rgb<S, T>
+where
+    T: Component + SampleUniform,
+    S: RgbStandard + SampleUniform,
+{
+    type Sampler = UniformRgb<S, T>;
+}
+
+#[cfg(feature = "random")]
+impl<S, T> UniformSampler for UniformRgb<S, T>
+where
+    T: Component + SampleUniform,
+    S: RgbStandard + SampleUniform,
+{
+    type X = Rgb<S, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformRgb {
+            red: Uniform::new::<_, T>(low.red, high.red),
+            green: Uniform::new::<_, T>(low.green, high.green),
+            blue: Uniform::new::<_, T>(low.blue, high.blue),
+            standard: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformRgb {
+            red: Uniform::new_inclusive::<_, T>(low.red, high.red),
+            green: Uniform::new_inclusive::<_, T>(low.green, high.green),
+            blue: Uniform::new_inclusive::<_, T>(low.blue, high.blue),
+            standard: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rgb<S, T> {
+        Rgb {
+            red: self.red.sample(rng),
+            green: self.green.sample(rng),
+            blue: self.blue.sample(rng),
+            standard: PhantomData,
+        }
     }
 }
 

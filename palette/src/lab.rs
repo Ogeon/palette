@@ -1,15 +1,20 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+#[cfg(feature = "random")]
+use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
+#[cfg(feature = "random")]
+use rand::distributions::{Distribution, Standard};
+#[cfg(feature = "random")]
+use rand::Rng;
+
 use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
-use crate::{clamp, contrast_ratio, from_f64};
-use crate::{Alpha, LabHue, Lch, Xyz};
 use crate::{
-    Component, ComponentWise, FloatComponent, GetHue, IntoColor, Limited, Mix, Pixel,
-    RelativeContrast, Shade,
+    clamp, contrast_ratio, from_f64, Alpha, Component, ComponentWise, FloatComponent, GetHue,
+    IntoColor, LabHue, Lch, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -668,6 +673,95 @@ where
         let luma2 = other.into_luma();
 
         contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> Distribution<Lab<Wp, T>> for Standard
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+    Standard: Distribution<T>,
+{
+    // `a` and `b` both range from (-128.0, 127.0)
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lab<Wp, T> {
+        Lab {
+            l: rng.gen(),
+            a: rng.gen() * from_f64(255.0) - from_f64(128.0),
+            b: rng.gen() * from_f64(255.0) - from_f64(128.0),
+            white_point: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "random")]
+pub struct UniformLab<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    l: Uniform<T>,
+    a: Uniform<T>,
+    b: Uniform<T>,
+    white_point: PhantomData<Wp>,
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> SampleUniform for Lab<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type Sampler = UniformLab<Wp, T>;
+}
+
+#[cfg(feature = "random")]
+impl<Wp, T> UniformSampler for UniformLab<Wp, T>
+where
+    T: FloatComponent + SampleUniform,
+    Wp: WhitePoint + SampleUniform,
+{
+    type X = Lab<Wp, T>;
+
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLab {
+            l: Uniform::new::<_, T>(low.l, high.l),
+            a: Uniform::new::<_, T>(low.a, high.a),
+            b: Uniform::new::<_, T>(low.b, high.b),
+            white_point: PhantomData,
+        }
+    }
+
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    where
+        B1: SampleBorrow<Self::X> + Sized,
+        B2: SampleBorrow<Self::X> + Sized,
+    {
+        let low = *low_b.borrow();
+        let high = *high_b.borrow();
+
+        UniformLab {
+            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
+            a: Uniform::new_inclusive::<_, T>(low.a, high.a),
+            b: Uniform::new_inclusive::<_, T>(low.b, high.b),
+            white_point: PhantomData,
+        }
+    }
+
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lab<Wp, T> {
+        Lab {
+            l: self.l.sample(rng),
+            a: self.a.sample(rng),
+            b: self.b.sample(rng),
+            white_point: PhantomData,
+        }
     }
 }
 

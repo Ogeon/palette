@@ -18,6 +18,7 @@ build = "build/main.rs"
 default = ["named_from_str", "std"]
 named_from_str = ["named", "phf", "phf_codegen", "std"]
 named = []
+random = ["rand"]
 serializing = ["serde", "std"]
 
 #ignore in feature test
@@ -31,6 +32,11 @@ approx = {version = "0.3", default-features = false}
 
 [dependencies.phf]
 version = "0.8"
+optional = true
+
+[dependencies.rand]
+version = "0.7"
+default-features = false
 optional = true
 
 [dependencies.serde]
