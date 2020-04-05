@@ -10,10 +10,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::blend::PreAlpha;
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
     clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade,
+    WithAlpha,
 };
 
 /// An alpha component wrapper for colors.
@@ -39,6 +41,38 @@ impl<C, T: Component> Alpha<C, T> {
     /// Return the `alpha` value maximum.
     pub fn max_alpha() -> T {
         T::max_intensity()
+    }
+}
+
+impl<C1: WithAlpha<T>, C2, T: Component> FromColorUnclamped<C1> for Alpha<C2, T>
+where
+    C1::Color: IntoColorUnclamped<C2>,
+{
+    fn from_color_unclamped(other: C1) -> Self {
+        let (color, alpha) = other.split();
+
+        Alpha {
+            color: color.into_color_unclamped(),
+            alpha,
+        }
+    }
+}
+
+impl<C, A: Component> WithAlpha<A> for Alpha<C, A> {
+    type Color = C;
+    type WithAlpha = Self;
+
+    fn with_alpha(mut self, alpha: A) -> Self::WithAlpha {
+        self.alpha = alpha;
+        self
+    }
+
+    fn without_alpha(self) -> Self::Color {
+        self.color
+    }
+
+    fn split(self) -> (Self::Color, A) {
+        (self.color, self.alpha)
     }
 }
 

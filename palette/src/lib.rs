@@ -185,10 +185,7 @@ use float::Float;
 
 use luma::Luma;
 
-#[doc(hidden)]
-pub use palette_derive::*;
-
-pub use alpha::Alpha;
+pub use alpha::{Alpha, WithAlpha};
 pub use blend::Blend;
 #[cfg(feature = "std")]
 pub use gradient::Gradient;
@@ -205,7 +202,7 @@ pub use yxy::{Yxy, Yxya};
 
 pub use color_difference::ColorDifference;
 pub use component::*;
-pub use convert::{ConvertFrom, ConvertInto, FromColor, IntoColor, OutOfBounds};
+pub use convert::{FromColor, IntoColor};
 pub use encoding::pixel::Pixel;
 pub use hues::{LabHue, RgbHue};
 pub use matrix::Mat3;
@@ -391,7 +388,7 @@ mod hues;
 pub mod chromatic_adaptation;
 mod color_difference;
 mod component;
-mod convert;
+pub mod convert;
 pub mod encoding;
 mod equality;
 mod matrix;

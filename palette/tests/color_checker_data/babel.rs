@@ -9,8 +9,9 @@ The Rgb colors in this data appear to be adapted to the D50 white_point from the
 use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 
+use palette::convert::IntoColorUnclamped;
 use palette::white_point::D50;
-use palette::{IntoColor, Lab, Xyz, Yxy};
+use palette::{Lab, Xyz, Yxy};
 
 use super::load_data::{load_babel, ColorCheckerRaw};
 use super::MAX_ERROR;
@@ -37,9 +38,9 @@ macro_rules! impl_from_color {
         impl From<$self_ty<D50, f64>> for BabelData {
             fn from(color: $self_ty<D50, f64>) -> BabelData {
                 BabelData {
-                    yxy: color.into_yxy(),
-                    xyz: color.into_xyz(),
-                    lab: color.into_lab(),
+                    yxy: color.into_color_unclamped(),
+                    xyz: color.into_color_unclamped(),
+                    lab: color.into_color_unclamped(),
                 }
             }
         }

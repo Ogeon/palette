@@ -10,11 +10,12 @@ use rand::Rng;
 
 use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, GetHue, Hue,
-    IntoColor, Lab, LabHue, Limited, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, GetHue, Hue, Lab,
+    LabHue, Limited, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -27,12 +28,14 @@ pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
 /// it's a cylindrical color space, like [HSL](struct.Hsl.html) and
 /// [HSV](struct.Hsv.html). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_white_point = "Wp"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Lab, Lch)]
+#[palette(
+    palette_internal,
+    white_point = "Wp",
+    component = "T",
+    skip_derives(Xyz, Lab, Lch)
+)]
 #[repr(C)]
 pub struct Lch<Wp = D65, T = f32>
 where
@@ -51,13 +54,13 @@ where
 
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette_unsafe_same_layout_as = "T"]
+    #[palette(unsafe_same_layout_as = "T")]
     pub hue: LabHue<T>,
 
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -189,23 +192,33 @@ where
     }
 }
 
-impl<Wp, T> From<Xyz<Wp, T>> for Lch<Wp, T>
+impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lch<Wp, T>
 where
-    T: FloatComponent,
     Wp: WhitePoint,
+    T: FloatComponent,
 {
-    fn from(color: Xyz<Wp, T>) -> Self {
-        let lab: Lab<Wp, T> = color.into_lab();
-        Self::from_lab(lab)
+    fn from_color_unclamped(color: Lch<Wp, T>) -> Self {
+        color
     }
 }
 
-impl<Wp, T> From<Lab<Wp, T>> for Lch<Wp, T>
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Lch<Wp, T>
 where
-    T: FloatComponent,
     Wp: WhitePoint,
+    T: FloatComponent,
 {
-    fn from(color: Lab<Wp, T>) -> Self {
+    fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
+        let lab: Lab<Wp, T> = color.into_color_unclamped();
+        Self::from_color_unclamped(lab)
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lch<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         Lch {
             l: color.l,
             chroma: (color.a * color.a + color.b * color.b).sqrt(),
@@ -560,10 +573,10 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        let xyz1 = Xyz::from_color(*self);
+        let xyz2 = Xyz::from_color(*other);
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

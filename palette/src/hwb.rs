@@ -10,13 +10,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::float::Float;
 use crate::rgb::RgbSpace;
 use crate::{
-    clamp, contrast_ratio, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue, Hsv, Hue,
-    IntoColor, Limited, Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
+    clamp, contrast_ratio, Alpha, Component, FloatComponent, FromF64, GetHue, Hsv, Hue, Limited,
+    Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -32,13 +33,15 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///
 /// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_rgb_space = "S"]
-#[palette_white_point = "S::WhitePoint"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Hsv, Hwb = "from_hwb_internal")]
+#[palette(
+    palette_internal,
+    rgb_space = "S",
+    white_point = "S::WhitePoint",
+    component = "T",
+    skip_derives(Xyz, Hsv, Hwb)
+)]
 #[repr(C)]
 pub struct Hwb<S = Srgb, T = f32>
 where
@@ -47,7 +50,7 @@ where
 {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc. Same as the hue for HSL and HSV.
-    #[palette_unsafe_same_layout_as = "T"]
+    #[palette(unsafe_same_layout_as = "T")]
     pub hue: RgbHue<T>,
 
     /// The whiteness of the color. It specifies the amount white to mix into
@@ -66,7 +69,7 @@ where
     /// The white point and RGB primaries this color is adapted to. The default
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub space: PhantomData<S>,
 }
 
@@ -125,14 +128,6 @@ where
     /// Convert from a `(hue, whiteness, blackness)` tuple.
     pub fn from_components<H: Into<RgbHue<T>>>((hue, whiteness, blackness): (H, T, T)) -> Self {
         Self::with_wp(hue, whiteness, blackness)
-    }
-
-    fn from_hwb_internal<Sp: RgbSpace<WhitePoint = S::WhitePoint>>(color: Hwb<Sp, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
-            color.reinterpret_as()
-        } else {
-            Self::from_hsv(Hsv::<Sp, T>::from_hwb(color))
-        }
     }
 
     #[inline]
@@ -209,26 +204,40 @@ where
     }
 }
 
-impl<S, T> From<Xyz<S::WhitePoint, T>> for Hwb<S, T>
+impl<S, Sp, T> FromColorUnclamped<Hwb<Sp, T>> for Hwb<S, T>
 where
-    T: FloatComponent,
     S: RgbSpace,
+    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
+    T: FloatComponent,
 {
-    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
-        let hsv: Hsv<S, T> = color.into_hsv();
-        Self::from_hsv(hsv)
+    fn from_color_unclamped(color: Hwb<Sp, T>) -> Self {
+        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+            color.reinterpret_as()
+        } else {
+            let hsv = Hsv::<Sp, T>::from_color_unclamped(color);
+            let converted_hsv = Hsv::<S, T>::from_color_unclamped(hsv);
+            Self::from_color_unclamped(converted_hsv)
+        }
     }
 }
 
-impl<S, T, Sp> From<Hsv<Sp, T>> for Hwb<S, T>
+impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Hwb<S, T>
 where
-    T: FloatComponent,
     S: RgbSpace,
-    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
+    T: FloatComponent,
 {
-    fn from(color: Hsv<Sp, T>) -> Self {
-        let color = Hsv::<S, T>::from_hsv(color);
+    fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
+        let hsv: Hsv<S, T> = color.into_color_unclamped();
+        Self::from_color_unclamped(hsv)
+    }
+}
 
+impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hwb<S, T>
+where
+    S: RgbSpace,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Hsv<S, T>) -> Self {
         Hwb {
             hue: color.hue,
             whiteness: (T::one() - color.saturation) * color.value,
@@ -617,10 +626,12 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        use crate::FromColor;
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        let xyz1 = Xyz::from_color(*self);
+        let xyz2 = Xyz::from_color(*other);
+
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
@@ -632,7 +643,7 @@ where
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
-        Hwb::from(rng.gen::<Hsv<S, T>>())
+        Hwb::from_color_unclamped(rng.gen::<Hsv<S, T>>())
     }
 }
 
@@ -670,7 +681,10 @@ where
     {
         let low = *low_b.borrow();
         let high = *high_b.borrow();
-        let sampler = crate::hsv::UniformHsv::<S, _>::new(Hsv::from(low), Hsv::from(high));
+        let sampler = crate::hsv::UniformHsv::<S, _>::new(
+            Hsv::from_color_unclamped(low),
+            Hsv::from_color_unclamped(high),
+        );
 
         UniformHwb {
             sampler,
@@ -685,8 +699,10 @@ where
     {
         let low = *low_b.borrow();
         let high = *high_b.borrow();
-        let sampler =
-            crate::hsv::UniformHsv::<S, _>::new_inclusive(Hsv::from(low), Hsv::from(high));
+        let sampler = crate::hsv::UniformHsv::<S, _>::new_inclusive(
+            Hsv::from_color_unclamped(low),
+            Hsv::from_color_unclamped(high),
+        );
 
         UniformHwb {
             sampler,
@@ -695,7 +711,7 @@ where
     }
 
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
-        Hwb::from(self.sampler.sample(rng))
+        Hwb::from_color_unclamped(self.sampler.sample(rng))
     }
 }
 
@@ -703,39 +719,39 @@ where
 mod test {
     use super::Hwb;
     use crate::encoding::Srgb;
-    use crate::{Limited, LinSrgb};
+    use crate::{FromColor, Limited, LinSrgb};
 
     #[test]
     fn red() {
-        let a = Hwb::from(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Hwb::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Hwb::new(0.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn orange() {
-        let a = Hwb::from(LinSrgb::new(1.0, 0.5, 0.0));
+        let a = Hwb::from_color(LinSrgb::new(1.0, 0.5, 0.0));
         let b = Hwb::new(30.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
-        let a = Hwb::from(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Hwb::from_color(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Hwb::new(120.0, 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn blue() {
-        let a = Hwb::from(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Hwb::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Hwb::new(240.0, 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn purple() {
-        let a = Hwb::from(LinSrgb::new(0.5, 0.0, 1.0));
+        let a = Hwb::from_color(LinSrgb::new(0.5, 0.0, 1.0));
         let b = Hwb::new(270.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }

@@ -3,7 +3,7 @@
 
 use core::marker::PhantomData;
 
-use crate::convert::IntoColor;
+use crate::convert::IntoColorUnclamped;
 use crate::encoding::Linear;
 use crate::float::Float;
 use crate::rgb::{Primaries, Rgb, RgbSpace};
@@ -99,9 +99,9 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
 
 /// Geneartes to Srgb to Xyz transformation matrix for the given white point
 pub fn rgb_to_xyz_matrix<S: RgbSpace, T: FloatComponent>() -> Mat3<T> {
-    let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_xyz();
-    let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_xyz();
-    let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_xyz();
+    let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_color_unclamped();
+    let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_color_unclamped();
+    let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_color_unclamped();
 
     let mut transform_matrix = mat3_from_primaries(r, g, b);
 

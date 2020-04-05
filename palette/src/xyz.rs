@@ -8,6 +8,7 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
@@ -31,12 +32,14 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 /// Conversions and operations on this color space depend on the defined white
 /// point
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_white_point = "Wp"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Rgb, Lab, Yxy, Luma)]
+#[palette(
+    palette_internal,
+    white_point = "Wp",
+    component = "T",
+    skip_derives(Xyz, Yxy, Rgb, Lab, Luma)
+)]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
 where
@@ -59,7 +62,7 @@ where
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -195,25 +198,35 @@ where
     }
 }
 
-impl<Wp, T, S> From<Rgb<S, T>> for Xyz<Wp, T>
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
+        color
+    }
+}
+
+impl<Wp, T, S> FromColorUnclamped<Rgb<S, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
     S: RgbStandard,
     S::Space: RgbSpace<WhitePoint = Wp>,
 {
-    fn from(color: Rgb<S, T>) -> Self {
+    fn from_color_unclamped(color: Rgb<S, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S::Space, T>();
         multiply_rgb_to_xyz(&transform_matrix, &color.into_linear())
     }
 }
 
-impl<Wp, T> From<Yxy<Wp, T>> for Xyz<Wp, T>
+impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    fn from(color: Yxy<Wp, T>) -> Self {
+    fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
         let mut xyz = Xyz {
             y: color.luma,
             ..Default::default()
@@ -227,12 +240,12 @@ where
     }
 }
 
-impl<Wp, T> From<Lab<Wp, T>> for Xyz<Wp, T>
+impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    fn from(color: Lab<Wp, T>) -> Self {
+    fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         let y = (color.l + from_f64(16.0)) / from_f64(116.0);
         let x = y + (color.a / from_f64(500.0));
         let z = y - (color.b / from_f64(200.0));
@@ -253,13 +266,13 @@ where
     }
 }
 
-impl<Wp, T, S> From<Luma<S, T>> for Xyz<Wp, T>
+impl<Wp, T, S> FromColorUnclamped<Luma<S, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
     S: LumaStandard<WhitePoint = Wp>,
 {
-    fn from(color: Luma<S, T>) -> Self {
+    fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz() * color.luma
     }
 }
@@ -746,35 +759,35 @@ where
 mod test {
     use super::Xyz;
     use crate::white_point::D65;
-    use crate::{LinLuma, LinSrgb};
+    use crate::{FromColor, LinLuma, LinSrgb};
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;
 
     #[test]
     fn luma() {
-        let a = Xyz::from(LinLuma::new(0.5));
+        let a = Xyz::from_color(LinLuma::new(0.5));
         let b = Xyz::new(0.475235, 0.5, 0.544415);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn red() {
-        let a = Xyz::from(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Xyz::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Xyz::new(0.41240, 0.21260, 0.01930);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn green() {
-        let a = Xyz::from(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Xyz::from_color(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Xyz::new(0.35760, 0.71520, 0.11920);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
 
     #[test]
     fn blue() {
-        let a = Xyz::from(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Xyz::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Xyz::new(0.18050, 0.07220, 0.95030);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }

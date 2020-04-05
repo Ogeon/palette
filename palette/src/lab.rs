@@ -10,11 +10,12 @@ use rand::Rng;
 
 use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
+use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Component, ComponentWise, FloatComponent, GetHue,
-    IntoColor, LabHue, Lch, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    LabHue, Lch, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -32,12 +33,14 @@ pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///
 /// The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_white_point = "Wp"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Lab, Lch)]
+#[palette(
+    palette_internal,
+    white_point = "Wp",
+    component = "T",
+    skip_derives(Xyz, Lab, Lch)
+)]
 #[repr(C)]
 pub struct Lab<Wp = D65, T = f32>
 where
@@ -57,7 +60,7 @@ where
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -190,12 +193,22 @@ where
     }
 }
 
-impl<Wp, T> From<Xyz<Wp, T>> for Lab<Wp, T>
+impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lab<Wp, T>
 where
-    T: FloatComponent,
     Wp: WhitePoint,
+    T: FloatComponent,
 {
-    fn from(color: Xyz<Wp, T>) -> Self {
+    fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
+        color
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Lab<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         let Xyz {
             mut x,
             mut y,
@@ -227,12 +240,12 @@ where
     }
 }
 
-impl<Wp, T> From<Lch<Wp, T>> for Lab<Wp, T>
+impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lab<Wp, T>
 where
-    T: FloatComponent,
     Wp: WhitePoint,
+    T: FloatComponent,
 {
-    fn from(color: Lch<Wp, T>) -> Self {
+    fn from_color_unclamped(color: Lch<Wp, T>) -> Self {
         Lab {
             l: color.l,
             a: color.chroma.max(T::zero()) * color.hue.to_radians().cos(),
@@ -669,10 +682,12 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        use crate::FromColor;
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        let xyz1 = Xyz::from_color(*self);
+        let xyz2 = Xyz::from_color(*other);
+
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
@@ -769,25 +784,25 @@ where
 mod test {
     use super::Lab;
     use crate::white_point::D65;
-    use crate::LinSrgb;
+    use crate::{FromColor, LinSrgb};
 
     #[test]
     fn red() {
-        let a = Lab::from(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Lab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Lab::new(53.23288, 80.09246, 67.2031);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn green() {
-        let a = Lab::from(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Lab::from_color(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Lab::new(87.73704, -86.184654, 83.18117);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }
 
     #[test]
     fn blue() {
-        let a = Lab::from(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Lab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Lab::new(32.302586, 79.19668, -107.863686);
         assert_relative_eq!(a, b, epsilon = 0.01);
     }

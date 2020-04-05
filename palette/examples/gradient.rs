@@ -5,7 +5,7 @@ fn main() {
 
 #[cfg(feature = "std")]
 fn main() {
-    use palette::{Gradient, Lch, LinSrgb, Pixel, Srgb};
+    use palette::{FromColor, Gradient, IntoColor, Lch, LinSrgb, Pixel, Srgb};
 
     use image::{GenericImage, GenericImageView, RgbImage};
 
@@ -26,17 +26,17 @@ fn main() {
     //The same colors and offsets as in grad1, but in a color space where the hue
     // is a component
     let grad3 = Gradient::new(vec![
-        Lch::from(LinSrgb::new(1.0, 0.1, 0.1)),
-        Lch::from(LinSrgb::new(0.1, 0.1, 1.0)),
-        Lch::from(LinSrgb::new(0.1, 1.0, 0.1)),
+        Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1)),
+        Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0)),
+        Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1)),
     ]);
 
     //The same colors and and color space as in grad3, but with the blue point
     // shifted down
     let grad4 = Gradient::with_domain(vec![
-        (0.0, Lch::from(LinSrgb::new(1.0, 0.1, 0.1))),
-        (0.25, Lch::from(LinSrgb::new(0.1, 0.1, 1.0))),
-        (1.0, Lch::from(LinSrgb::new(0.1, 1.0, 0.1))),
+        (0.0, Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1))),
+        (0.25, Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0))),
+        (1.0, Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1))),
     ]);
 
     let mut image = RgbImage::new(256, 128);
@@ -49,8 +49,8 @@ fn main() {
     {
         let c1 = Srgb::from_linear(c1).into_format().into_raw();
         let c2 = Srgb::from_linear(c2).into_format().into_raw();
-        let c3 = Srgb::from_linear(c3.into()).into_format().into_raw();
-        let c4 = Srgb::from_linear(c4.into()).into_format().into_raw();
+        let c3 = Srgb::from_linear(c3.into_color()).into_format().into_raw();
+        let c4 = Srgb::from_linear(c4.into_color()).into_format().into_raw();
 
         {
             let mut sub_image = image.sub_image(i as u32, 0, 1, 31);

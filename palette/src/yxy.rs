@@ -8,12 +8,13 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, Alpha, Component, ComponentWise, FloatComponent, IntoColor, Limited,
-    Luma, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, contrast_ratio, Alpha, Component, ComponentWise, FloatComponent, Limited, Luma, Mix,
+    Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -27,12 +28,14 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 /// for the color spaces are a plot of this color space's x and y coordiantes.
 ///
 /// Conversions and operations on this color space depend on the white point.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_white_point = "Wp"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Yxy, Luma)]
+#[palette(
+    palette_internal,
+    white_point = "Wp",
+    component = "T",
+    skip_derives(Xyz, Yxy, Luma)
+)]
 #[repr(C)]
 pub struct Yxy<Wp = D65, T = f32>
 where
@@ -55,7 +58,7 @@ where
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 
@@ -187,41 +190,6 @@ where
     }
 }
 
-impl<Wp, T> From<Xyz<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    fn from(xyz: Xyz<Wp, T>) -> Self {
-        let mut yxy = Yxy {
-            x: T::zero(),
-            y: T::zero(),
-            luma: xyz.y,
-            white_point: PhantomData,
-        };
-        let sum = xyz.x + xyz.y + xyz.z;
-        // If denominator is zero, NAN or INFINITE leave x and y at the default 0
-        if sum.is_normal() {
-            yxy.x = xyz.x / sum;
-            yxy.y = xyz.y / sum;
-        }
-        yxy
-    }
-}
-
-impl<S, T> From<Luma<S, T>> for Yxy<S::WhitePoint, T>
-where
-    T: FloatComponent,
-    S: LumaStandard,
-{
-    fn from(luma: Luma<S, T>) -> Self {
-        Yxy {
-            luma: luma.into_linear().luma,
-            ..Default::default()
-        }
-    }
-}
-
 impl<Wp: WhitePoint, T: FloatComponent> From<(T, T, T)> for Yxy<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
@@ -243,6 +211,51 @@ impl<Wp: WhitePoint, T: FloatComponent, A: Component> From<(T, T, T, A)> for Alp
 impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
     fn into(self) -> (T, T, T, A) {
         self.into_components()
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
+        color
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Yxy<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(xyz: Xyz<Wp, T>) -> Self {
+        let mut yxy = Yxy {
+            x: T::zero(),
+            y: T::zero(),
+            luma: xyz.y,
+            white_point: PhantomData,
+        };
+        let sum = xyz.x + xyz.y + xyz.z;
+        // If denominator is zero, NAN or INFINITE leave x and y at the default 0
+        if sum.is_normal() {
+            yxy.x = xyz.x / sum;
+            yxy.y = xyz.y / sum;
+        }
+        yxy
+    }
+}
+
+impl<T, S> FromColorUnclamped<Luma<S, T>> for Yxy<S::WhitePoint, T>
+where
+    T: FloatComponent,
+    S: LumaStandard,
+{
+    fn from_color_unclamped(luma: Luma<S, T>) -> Self {
+        Yxy {
+            luma: luma.into_linear().luma,
+            ..Default::default()
+        }
     }
 }
 
@@ -345,7 +358,7 @@ where
         // outside the usual color gamut and might cause scaling issues.
         Yxy {
             luma: T::zero(),
-            ..Wp::get_xyz().into_yxy()
+            ..Wp::get_xyz().into_color_unclamped()
         }
     }
 }
@@ -708,32 +721,32 @@ where
 mod test {
     use super::Yxy;
     use crate::white_point::D65;
-    use crate::{LinLuma, LinSrgb};
+    use crate::{FromColor, LinLuma, LinSrgb};
 
     #[test]
     fn luma() {
-        let a = Yxy::from(LinLuma::new(0.5));
+        let a = Yxy::from_color(LinLuma::new(0.5));
         let b = Yxy::new(0.312727, 0.329023, 0.5);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn red() {
-        let a = Yxy::from(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Yxy::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         let b = Yxy::new(0.64, 0.33, 0.212673);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
-        let a = Yxy::from(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Yxy::from_color(LinSrgb::new(0.0, 1.0, 0.0));
         let b = Yxy::new(0.3, 0.6, 0.715152);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn blue() {
-        let a = Yxy::from(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Yxy::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         let b = Yxy::new(0.15, 0.06, 0.072175);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }

@@ -1,3 +1,4 @@
+use core::any::TypeId;
 use core::fmt;
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
@@ -11,14 +12,14 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::blend::PreAlpha;
+use crate::convert::FromColorUnclamped;
 use crate::encoding::linear::LinearFn;
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
-use crate::white_point::WhitePoint;
 use crate::{
-    clamp, contrast_ratio, Alpha, Blend, Component, ComponentWise, FloatComponent, FromColor,
-    FromComponent, IntoColor, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
+    clamp, contrast_ratio, Alpha, Blend, Component, ComponentWise, FloatComponent, FromComponent,
+    Limited, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -32,12 +33,14 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 /// perceived to be. It's basically the `Y` component of [CIE
 /// XYZ](struct.Xyz.html). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
-#[derive(Debug, PartialEq, FromColor, Pixel)]
+#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
-#[palette_white_point = "S::WhitePoint"]
-#[palette_component = "T"]
-#[palette_manual_from(Xyz, Yxy, Luma = "from_linear")]
+#[palette(
+    palette_internal,
+    white_point = "S::WhitePoint",
+    component = "T",
+    skip_derives(Xyz, Yxy, Luma)
+)]
 #[repr(C)]
 pub struct Luma<S = Srgb, T = f32>
 where
@@ -49,7 +52,7 @@ where
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 
@@ -121,6 +124,13 @@ where
     /// Return the `luma` value maximum.
     pub fn max_luma() -> T {
         T::max_intensity()
+    }
+
+    fn reinterpret_as<S2: LumaStandard<WhitePoint = S::WhitePoint>>(&self) -> Luma<S2, T> {
+        Luma {
+            luma: self.luma,
+            standard: PhantomData,
+        }
     }
 }
 
@@ -243,12 +253,27 @@ where
     }
 }
 
-impl<S, T> From<Xyz<S::WhitePoint, T>> for Luma<S, T>
+impl<S1, S2, T> FromColorUnclamped<Luma<S2, T>> for Luma<S1, T>
+where
+    S1: LumaStandard,
+    S2: LumaStandard<WhitePoint = S1::WhitePoint>,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Luma<S2, T>) -> Self {
+        if TypeId::of::<S1>() == TypeId::of::<S2>() {
+            color.reinterpret_as()
+        } else {
+            Self::from_linear(color.into_linear().reinterpret_as())
+        }
+    }
+}
+
+impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard,
     T: FloatComponent,
 {
-    fn from(color: Xyz<S::WhitePoint, T>) -> Self {
+    fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
             luma: color.y,
             standard: PhantomData,
@@ -256,12 +281,12 @@ where
     }
 }
 
-impl<S, T> From<Yxy<S::WhitePoint, T>> for Luma<S, T>
+impl<S, T> FromColorUnclamped<Yxy<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard,
     T: FloatComponent,
 {
-    fn from(color: Yxy<S::WhitePoint, T>) -> Self {
+    fn from_color_unclamped(color: Yxy<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
             luma: color.luma,
             standard: PhantomData,
@@ -290,25 +315,6 @@ impl<S: LumaStandard, T: Component, A: Component> From<(T, A)> for Alpha<Luma<S,
 impl<S: LumaStandard, T: Component, A: Component> Into<(T, A)> for Alpha<Luma<S, T>, A> {
     fn into(self) -> (T, A) {
         self.into_components()
-    }
-}
-
-impl<S, Wp, T> IntoColor<Wp, T> for Luma<S, T>
-where
-    S: LumaStandard<WhitePoint = Wp>,
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    fn into_xyz(self) -> Xyz<Wp, T> {
-        Xyz::from_luma(self.into_linear())
-    }
-
-    fn into_yxy(self) -> Yxy<Wp, T> {
-        Yxy::from_luma(self.into_linear())
-    }
-
-    fn into_luma(self) -> Luma<Linear<Wp>, T> {
-        self.into_linear()
     }
 }
 
@@ -372,11 +378,15 @@ where
     type Color = Luma<S, T>;
 
     fn into_premultiplied(self) -> PreAlpha<Luma<S, T>, T> {
-        Lumaa::from(self).into()
+        Lumaa {
+            color: self,
+            alpha: T::one(),
+        }
+        .into_premultiplied()
     }
 
     fn from_premultiplied(color: PreAlpha<Luma<S, T>, T>) -> Self {
-        Lumaa::from(color).into()
+        Lumaa::from_premultiplied(color).color
     }
 }
 
@@ -747,8 +757,8 @@ where
     type Scalar = T;
 
     fn get_contrast_ratio(&self, other: &Self) -> T {
-        let luma1 = self.into_luma();
-        let luma2 = other.into_luma();
+        let luma1 = self.into_linear();
+        let luma2 = other.into_linear();
 
         contrast_ratio(luma1.luma, luma2.luma)
     }

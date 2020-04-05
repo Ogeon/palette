@@ -13,7 +13,7 @@ pub mod pixel;
 pub mod srgb;
 
 /// A transfer function to and from linear space.
-pub trait TransferFn {
+pub trait TransferFn: 'static {
     /// Convert the color component `x` from linear space.
     fn from_linear<T: Float + FromF64>(x: T) -> T;
 

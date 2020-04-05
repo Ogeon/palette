@@ -1,6 +1,4 @@
-pub use self::from_color::derive as derive_from_color;
-pub use self::into_color::derive as derive_into_color;
+pub use self::from_color_unclamped::derive as derive_from_color_unclamped;
 
-mod from_color;
-mod into_color;
-mod shared;
+mod from_color_unclamped;
+mod util;

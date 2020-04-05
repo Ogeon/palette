@@ -1,9 +1,37 @@
 //! Derives traits from the [palette](https://crates.io/crates/palette) crate.
 
-#![recursion_limit = "128"]
-
 use proc_macro::TokenStream;
 
+macro_rules! syn_try {
+    ($e:expr) => {
+        match $e {
+            Ok(value) => value,
+            Err(errors) => {
+                trait IntoErrors {
+                    fn into_errors(self) -> Vec<::syn::parse::Error>;
+                }
+                impl IntoErrors for Vec<::syn::parse::Error> {
+                    fn into_errors(self) -> Vec<::syn::parse::Error> {
+                        self
+                    }
+                }
+                impl IntoErrors for ::syn::parse::Error {
+                    fn into_errors(self) -> Vec<::syn::parse::Error> {
+                        vec![self]
+                    }
+                }
+
+                let errors: ::proc_macro2::TokenStream = IntoErrors::into_errors(errors)
+                    .iter()
+                    .map(::syn::parse::Error::to_compile_error)
+                    .collect();
+                return ::proc_macro::TokenStream::from(errors);
+            }
+        }
+    };
+}
+
+mod alpha;
 mod convert;
 mod encoding;
 mod meta;
@@ -13,44 +41,28 @@ const COLOR_TYPES: &[&str] = &[
     "Rgb", "Luma", "Hsl", "Hsv", "Hwb", "Lab", "Lch", "Xyz", "Yxy",
 ];
 
-#[proc_macro_derive(
-    FromColor,
-    attributes(
-        palette_internal,
-        palette_white_point,
-        palette_component,
-        palette_manual_from,
-        palette_rgb_space,
-        palette_alpha
-    )
-)]
-pub fn derive_from_color(tokens: TokenStream) -> TokenStream {
-    convert::derive_from_color(tokens)
+const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
+    ("Rgb", "Xyz"),
+    ("Luma", "Xyz"),
+    ("Hsl", "Rgb"),
+    ("Hsv", "Rgb"),
+    ("Hwb", "Hsv"),
+    ("Lab", "Xyz"),
+    ("Lch", "Lab"),
+    ("Yxy", "Xyz"),
+];
+
+#[proc_macro_derive(WithAlpha, attributes(palette))]
+pub fn derive_with_alpha(tokens: TokenStream) -> TokenStream {
+    syn_try!(alpha::derive_with_alpha(tokens))
 }
 
-#[proc_macro_derive(
-    IntoColor,
-    attributes(
-        palette_internal,
-        palette_white_point,
-        palette_component,
-        palette_manual_into,
-        palette_rgb_space,
-        palette_alpha
-    )
-)]
-pub fn derive_into_color(tokens: TokenStream) -> TokenStream {
-    convert::derive_into_color(tokens)
+#[proc_macro_derive(FromColorUnclamped, attributes(palette))]
+pub fn derive_from_color_unclamped(tokens: TokenStream) -> TokenStream {
+    syn_try!(convert::derive_from_color_unclamped(tokens))
 }
 
-#[proc_macro_derive(
-    Pixel,
-    attributes(
-        palette_internal,
-        palette_unsafe_same_layout_as,
-        palette_unsafe_zero_sized
-    )
-)]
+#[proc_macro_derive(Pixel, attributes(palette))]
 pub fn derive_pixel(tokens: TokenStream) -> TokenStream {
-    encoding::derive_pixel(tokens)
+    syn_try!(encoding::derive_pixel(tokens))
 }

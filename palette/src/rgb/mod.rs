@@ -1,7 +1,5 @@
 //! RGB types, spaces and standards.
 
-use core::any::Any;
-
 use crate::encoding::{self, Gamma, Linear, TransferFn};
 use crate::white_point::WhitePoint;
 use crate::{Component, FloatComponent, FromComponent, Yxy};
@@ -28,7 +26,7 @@ pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
 /// An RGB space and a transfer function.
-pub trait RgbStandard {
+pub trait RgbStandard: 'static {
     /// The RGB color space.
     type Space: RgbSpace;
 
@@ -47,7 +45,7 @@ impl<P: Primaries, W: WhitePoint, T: TransferFn> RgbStandard for (P, W, T) {
 }
 
 /// A set of primaries and a white point.
-pub trait RgbSpace {
+pub trait RgbSpace: 'static {
     /// The primaries of the RGB color space.
     type Primaries: Primaries;
 
@@ -61,7 +59,7 @@ impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
 }
 
 /// Represents the red, green and blue primaries of an RGB space.
-pub trait Primaries: Any {
+pub trait Primaries: 'static {
     /// Primary red.
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
     /// Primary green.
