@@ -62,13 +62,13 @@ pub struct ColorMineRaw {
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct ColorMine {
-    xyz: Xyz<D65, f32>,
-    yxy: Yxy<D65, f32>,
-    rgb: LinSrgb<f32>,
-    linear_rgb: LinSrgb<f32>,
-    hsl: Hsl<::palette::encoding::Srgb, f32>,
-    hsv: Hsv<::palette::encoding::Srgb, f32>,
-    hwb: Hwb<::palette::encoding::Srgb, f32>,
+    pub xyz: Xyz<D65, f32>,
+    pub yxy: Yxy<D65, f32>,
+    pub rgb: LinSrgb<f32>,
+    pub linear_rgb: LinSrgb<f32>,
+    pub hsl: Hsl<::palette::encoding::Srgb, f32>,
+    pub hsv: Hsv<::palette::encoding::Srgb, f32>,
+    pub hwb: Hwb<::palette::encoding::Srgb, f32>,
 }
 
 impl From<ColorMineRaw> for ColorMine {

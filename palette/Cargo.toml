@@ -25,6 +25,9 @@ serializing = ["serde", "std"]
 std = ["approx/std", "num-traits/std"]
 libm = ["num-traits/libm"]
 
+[lib]
+bench = false
+
 [dependencies]
 palette_derive = {version = "0.5.0", path = "../palette_derive"}
 num-traits = {version = "0.2", default-features = false}
@@ -55,6 +58,10 @@ serde_json = "1"
 version = "2"
 default-features = false
 
+[dev-dependencies.criterion]
+version = "0.3"
+default-features = false
+
 [dev-dependencies.image]
 version = "0.22"
 default-features = false
@@ -62,3 +69,18 @@ default-features = false
 [build-dependencies.phf_codegen]
 version = "0.8"
 optional = true
+
+[[bench]]
+path = "benches/cie.rs"
+name = "cie_conversion"
+harness = false
+
+[[bench]]
+path = "benches/rgb.rs"
+name = "rgb_conversion"
+harness = false
+
+[[bench]]
+path = "benches/matrix.rs"
+name = "matrix"
+harness = false

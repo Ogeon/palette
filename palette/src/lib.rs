@@ -391,11 +391,13 @@ mod component;
 pub mod convert;
 pub mod encoding;
 mod equality;
-mod matrix;
 mod relative_contrast;
 pub mod white_point;
 
 pub mod float;
+
+#[doc(hidden)]
+pub mod matrix;
 
 fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
     if v < min {
