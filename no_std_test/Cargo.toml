@@ -8,6 +8,9 @@ repository = "https://github.com/Ogeon/palette"
 license = "MIT OR Apache-2.0"
 edition = "2018"
 
+[features]
+nightly = []
+
 [dependencies.libc]
 version = "0.2"
 default-features = false

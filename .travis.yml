@@ -29,12 +29,12 @@ script:
 
   - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then
       cd ../no_std_test;
-      cargo build -v;
+      cargo build -v --features nightly;
     fi
 
   - if [ "$TRAVIS_RUST_VERSION" = "nightly" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then
       rustup target add thumbv6m-none-eabi;
-      cargo build -v --target thumbv6m-none-eabi;
+      cargo build -v --features nightly --target thumbv6m-none-eabi;
     fi;
 
   - cd ..
