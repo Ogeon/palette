@@ -41,10 +41,11 @@ impl LumaStandard for Srgb {
 
 impl TransferFn for Srgb {
     fn into_linear<T: Float + FromF64>(x: T) -> T {
+        // Recip call shows performance benefits in benchmarks for this function
         if x <= from_f64(0.04045) {
-            x / from_f64(12.92)
+            x * from_f64::<T>(12.92).recip()
         } else {
-            ((x + from_f64(0.055)) / from_f64(1.055)).powf(from_f64(2.4))
+            ((x + from_f64(0.055)) * from_f64::<T>(1.055).recip()).powf(from_f64(2.4))
         }
     }
 

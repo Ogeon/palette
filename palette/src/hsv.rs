@@ -296,15 +296,12 @@ where
     }
 }
 
-impl<S, Sp, T> FromColorUnclamped<Hwb<Sp, T>> for Hsv<S, T>
+impl<S, T> FromColorUnclamped<Hwb<S, T>> for Hsv<S, T>
 where
     T: FloatComponent,
     S: RgbSpace,
-    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
 {
-    fn from_color_unclamped(color: Hwb<Sp, T>) -> Self {
-        let hwb = Hwb::<S, T>::from_color_unclamped(color);
-
+    fn from_color_unclamped(hwb: Hwb<S, T>) -> Self {
         let inv = T::one() - hwb.blackness;
         // avoid divide by zero
         let s = if inv.is_normal() {

@@ -14,69 +14,99 @@ use crate::{FloatComponent, Xyz};
 pub type Mat3<T> = [T; 9];
 
 /// Multiply the 3x3 matrix with an XYZ color.
+#[inline]
 pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Xyz<Swp, T>,
 ) -> Xyz<Dwp, T> {
+    // Input Mat3 is destructured to avoid panic paths
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+
+    let x1 = c0 * f.x;
+    let y1 = c3 * f.x;
+    let z1 = c6 * f.x;
+    let x2 = c1 * f.y;
+    let y2 = c4 * f.y;
+    let z2 = c7 * f.y;
+    let x3 = c2 * f.z;
+    let y3 = c5 * f.z;
+    let z3 = c8 * f.z;
+
     Xyz {
-        x: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
-        y: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
-        z: (c[6] * f.x) + (c[7] * f.y) + (c[8] * f.z),
+        x: x1 + x2 + x3,
+        y: y1 + y2 + y3,
+        z: z1 + z2 + z3,
         white_point: PhantomData,
     }
 }
 /// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
+#[inline]
 pub fn multiply_xyz_to_rgb<S: RgbSpace, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Xyz<S::WhitePoint, T>,
 ) -> Rgb<Linear<S>, T> {
+    // Input Mat3 is destructured to avoid panic paths. red, green, and blue
+    // can't be extracted like in `multiply_xyz` to get a performance increase
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+
     Rgb {
-        red: (c[0] * f.x) + (c[1] * f.y) + (c[2] * f.z),
-        green: (c[3] * f.x) + (c[4] * f.y) + (c[5] * f.z),
-        blue: (c[6] * f.x) + (c[7] * f.y) + (c[8] * f.z),
+        red: (c0 * f.x) + (c1 * f.y) + (c2 * f.z),
+        green: (c3 * f.x) + (c4 * f.y) + (c5 * f.z),
+        blue: (c6 * f.x) + (c7 * f.y) + (c8 * f.z),
         standard: PhantomData,
     }
 }
 /// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
+#[inline]
 pub fn multiply_rgb_to_xyz<S: RgbSpace, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Rgb<Linear<S>, T>,
 ) -> Xyz<S::WhitePoint, T> {
+    // Input Mat3 is destructured to avoid panic paths. Same problem as
+    // `multiply_xyz_to_rgb` for extracting x, y, z
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+
     Xyz {
-        x: (c[0] * f.red) + (c[1] * f.green) + (c[2] * f.blue),
-        y: (c[3] * f.red) + (c[4] * f.green) + (c[5] * f.blue),
-        z: (c[6] * f.red) + (c[7] * f.green) + (c[8] * f.blue),
+        x: (c0 * f.red) + (c1 * f.green) + (c2 * f.blue),
+        y: (c3 * f.red) + (c4 * f.green) + (c5 * f.blue),
+        z: (c6 * f.red) + (c7 * f.green) + (c8 * f.blue),
         white_point: PhantomData,
     }
 }
 
 /// Multiply two 3x3 matrices.
+#[inline]
 pub fn multiply_3x3<T: Float>(c: &Mat3<T>, f: &Mat3<T>) -> Mat3<T> {
-    let mut out = [T::zero(); 9];
-    out[0] = c[0] * f[0] + c[1] * f[3] + c[2] * f[6];
-    out[1] = c[0] * f[1] + c[1] * f[4] + c[2] * f[7];
-    out[2] = c[0] * f[2] + c[1] * f[5] + c[2] * f[8];
+    // Input Mat3 are destructured to avoid panic paths
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+    let [f0, f1, f2, f3, f4, f5, f6, f7, f8] = *f;
 
-    out[3] = c[3] * f[0] + c[4] * f[3] + c[5] * f[6];
-    out[4] = c[3] * f[1] + c[4] * f[4] + c[5] * f[7];
-    out[5] = c[3] * f[2] + c[4] * f[5] + c[5] * f[8];
+    let o0 = c0 * f0 + c1 * f3 + c2 * f6;
+    let o1 = c0 * f1 + c1 * f4 + c2 * f7;
+    let o2 = c0 * f2 + c1 * f5 + c2 * f8;
 
-    out[6] = c[6] * f[0] + c[7] * f[3] + c[8] * f[6];
-    out[7] = c[6] * f[1] + c[7] * f[4] + c[8] * f[7];
-    out[8] = c[6] * f[2] + c[7] * f[5] + c[8] * f[8];
+    let o3 = c3 * f0 + c4 * f3 + c5 * f6;
+    let o4 = c3 * f1 + c4 * f4 + c5 * f7;
+    let o5 = c3 * f2 + c4 * f5 + c5 * f8;
 
-    out
+    let o6 = c6 * f0 + c7 * f3 + c8 * f6;
+    let o7 = c6 * f1 + c7 * f4 + c8 * f7;
+    let o8 = c6 * f2 + c7 * f5 + c8 * f8;
+
+    [o0, o1, o2, o3, o4, o5, o6, o7, o8]
 }
 
 /// Invert a 3x3 matrix and panic if matrix is not invertible.
+#[inline]
 pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
+    // This function runs fastest with assert and no destructuring. The `det`'s
+    // location should not be changed until benched that it's faster elsewhere
+    assert!(a.len() > 8);
+
     let d0 = a[4] * a[8] - a[5] * a[7];
     let d1 = a[3] * a[8] - a[5] * a[6];
     let d2 = a[3] * a[7] - a[4] * a[6];
-    let det = a[0] * d0 - a[1] * d1 + a[2] * d2;
-    if !det.is_normal() {
-        panic!("The given matrix is not invertible")
-    }
+    let mut det = a[0] * d0 - a[1] * d1 + a[2] * d2;
     let d3 = a[1] * a[8] - a[2] * a[7];
     let d4 = a[0] * a[8] - a[2] * a[6];
     let d5 = a[0] * a[7] - a[1] * a[6];
@@ -84,45 +114,54 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
     let d7 = a[0] * a[5] - a[2] * a[3];
     let d8 = a[0] * a[4] - a[1] * a[3];
 
+    if !det.is_normal() {
+        panic!("The given matrix is not invertible")
+    }
+    det = det.recip();
+
     [
-        d0 / det,
-        -d3 / det,
-        d6 / det,
-        -d1 / det,
-        d4 / det,
-        -d7 / det,
-        d2 / det,
-        -d5 / det,
-        d8 / det,
+        d0 * det,
+        -d3 * det,
+        d6 * det,
+        -d1 * det,
+        d4 * det,
+        -d7 * det,
+        d2 * det,
+        -d5 * det,
+        d8 * det,
     ]
 }
 
 /// Generates the Srgb to Xyz transformation matrix for a given white point.
+#[inline]
 pub fn rgb_to_xyz_matrix<S: RgbSpace, T: FloatComponent>() -> Mat3<T> {
     let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_color_unclamped();
     let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_color_unclamped();
     let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_color_unclamped();
 
-    let mut transform_matrix = mat3_from_primaries(r, g, b);
+    // Destructuring has some performance benefits, don't change unless measured
+    let [t0, t1, t2, t3, t4, t5, t6, t7, t8] = mat3_from_primaries(r, g, b);
 
     let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(
-        &matrix_inverse(&transform_matrix),
+        &matrix_inverse(&[t0, t1, t2, t3, t4, t5, t6, t7, t8]),
         &S::WhitePoint::get_xyz(),
     );
-    transform_matrix[0] = transform_matrix[0] * s_matrix.red;
-    transform_matrix[1] = transform_matrix[1] * s_matrix.green;
-    transform_matrix[2] = transform_matrix[2] * s_matrix.blue;
-    transform_matrix[3] = transform_matrix[3] * s_matrix.red;
-    transform_matrix[4] = transform_matrix[4] * s_matrix.green;
-    transform_matrix[5] = transform_matrix[5] * s_matrix.blue;
-    transform_matrix[6] = transform_matrix[6] * s_matrix.red;
-    transform_matrix[7] = transform_matrix[7] * s_matrix.green;
-    transform_matrix[8] = transform_matrix[8] * s_matrix.blue;
 
-    transform_matrix
+    [
+        t0 * s_matrix.red,
+        t1 * s_matrix.green,
+        t2 * s_matrix.blue,
+        t3 * s_matrix.red,
+        t4 * s_matrix.green,
+        t5 * s_matrix.blue,
+        t6 * s_matrix.red,
+        t7 * s_matrix.green,
+        t8 * s_matrix.blue,
+    ]
 }
 
 #[rustfmt::skip]
+#[inline]
 fn mat3_from_primaries<T: FloatComponent, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
     [
         r.x, g.x, b.x,
