@@ -246,9 +246,10 @@ where
     Wp: WhitePoint,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
-        let y = (color.l + from_f64(16.0)) / from_f64(116.0);
-        let x = y + (color.a / from_f64(500.0));
-        let z = y - (color.b / from_f64(200.0));
+        // Recip call shows performance benefits in benchmarks for this function
+        let y = (color.l + from_f64(16.0)) * from_f64::<T>(116.0).recip();
+        let x = y + (color.a * from_f64::<T>(500.0).recip());
+        let z = y - (color.b * from_f64::<T>(200.0).recip());
 
         fn convert<T: FloatComponent>(c: T) -> T {
             let epsilon: T = from_f64(6.0 / 29.0);
