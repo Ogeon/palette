@@ -39,11 +39,6 @@ use crate::Pixel;
 ///
 /// let rgba = Srgba::from(0xFF80007F);
 /// assert_eq!(Srgba::new(0xFF, 0x80, 0x00, 0x7F), rgba);
-///
-/// // The second assert is essentially how library components are converted
-/// let float = 0.5f32 * 255.0;
-/// assert_eq!(0x7F, float as u32);
-/// assert_eq!(0x80, float.round() as u32);
 /// ```
 ///
 /// When an `Rgb` type is packed, the alpha value will be `0xFF` in the
