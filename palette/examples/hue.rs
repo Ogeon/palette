@@ -1,8 +1,8 @@
 use palette::{FromColor, Hsl, Hue, IntoColor, Lch, Pixel, Srgb};
 
 fn main() {
-    let mut image = image::open("res/fruits.png")
-        .expect("could not open 'res/fruits.png'")
+    let mut image = image::open("example-data/input/fruits.png")
+        .expect("could not open 'example-data/input/fruits.png'")
         .to_rgb();
 
     //Shift hue by 180 degrees as HSL in bottom left part, and as LCh in top
@@ -24,8 +24,9 @@ fn main() {
         };
     }
 
-    match image.save("examples/hue.png") {
-        Ok(()) => println!("see 'examples/hue.png' for the result"),
-        Err(e) => println!("failed to write 'examples/hue.png': {}", e),
+    let _ = std::fs::create_dir("example-data/output");
+    match image.save("example-data/output/hue.png") {
+        Ok(()) => println!("see 'example-data/output/hue.png' for the result"),
+        Err(e) => println!("failed to write 'example-data/output/hue.png': {}", e),
     }
 }
