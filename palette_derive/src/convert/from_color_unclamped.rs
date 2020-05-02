@@ -67,7 +67,7 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         &item_meta.skip_derives,
         &component,
         &white_point,
-        item_meta.rgb_space.as_ref(),
+        item_meta.rgb_standard.as_ref(),
         &item_meta,
         &generics,
         generic_component,
@@ -100,7 +100,7 @@ fn prepare_from_impl(
     skip: &HashSet<String>,
     component: &Type,
     white_point: &Type,
-    rgb_space: Option<&Type>,
+    rgb_standard: Option<&Type>,
     meta: &TypeItemAttributes,
     generics: &Generics,
     generic_component: bool,
@@ -124,39 +124,34 @@ fn prepare_from_impl(
             color_name,
             white_point,
             component,
-            rgb_space,
+            rgb_standard,
             &mut generics,
             meta.internal,
         );
 
         let nearest_color_path = util::color_path(nearest_color_name, meta.internal);
-        let target_color_rgb_space = match color_name {
-            "Rgb" => Some(parse_quote!(_S::Space)),
-            "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
+        let target_color_rgb_standard = match color_name {
+            "Rgb" | "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
             _ => None,
         };
 
-        let rgb_space = rgb_space.cloned().or(target_color_rgb_space);
+        let rgb_standard = rgb_standard.cloned().or(target_color_rgb_standard);
 
         let nearest_color_ty: Type = match nearest_color_name {
             "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
-                let rgb_space = rgb_space
+                let rgb_standard = rgb_standard
                     .ok_or_else(|| {
                         syn::parse::Error::new(
                             Span::call_site(),
                             format!(
-                                "could not determine which RGB space to use when converting to and from `{}` via `{}`",
+                                "could not determine which RGB standard to use when converting to and from `{}` via `{}`",
                                 color_name,
                                 nearest_color_name
                             ),
                         )
                     })?;
 
-                if nearest_color_name == "Rgb" {
-                    parse_quote!(#nearest_color_path::<#linear_path<#rgb_space>, #component>)
-                } else {
-                    parse_quote!(#nearest_color_path::<#rgb_space, #component>)
-                }
+                parse_quote!(#nearest_color_path::<#rgb_standard, #component>)
             }
             "Luma" => parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>),
             _ => parse_quote!(#nearest_color_path::<#white_point, #component>),

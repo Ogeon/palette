@@ -7,7 +7,7 @@ use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
-use palette::convert::IntoColorUnclamped;
+use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 use palette::white_point::D65;
 use palette::{Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 
@@ -64,7 +64,7 @@ pub struct ColorMineRaw {
 pub struct ColorMine {
     pub xyz: Xyz<D65, f32>,
     pub yxy: Yxy<D65, f32>,
-    pub rgb: LinSrgb<f32>,
+    pub rgb: Srgb<f32>,
     pub linear_rgb: LinSrgb<f32>,
     pub hsl: Hsl<::palette::encoding::Srgb, f32>,
     pub hsv: Hsv<::palette::encoding::Srgb, f32>,
@@ -76,7 +76,7 @@ impl From<ColorMineRaw> for ColorMine {
         ColorMine {
             xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
-            rgb: LinSrgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
+            rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into_linear(),
             hsl: Hsl::new(src.hsl_h, src.hsl_s, src.hsl_l),
             hsv: Hsv::new(src.hsv_h, src.hsv_s, src.hsv_v),
@@ -103,14 +103,47 @@ macro_rules! impl_from_color {
     };
 }
 
-impl_from_color!(LinSrgb<f32>);
+macro_rules! impl_from_rgb_derivative {
+    ($self_ty:ty) => {
+        impl From<$self_ty> for ColorMine {
+            fn from(color: $self_ty) -> ColorMine {
+                ColorMine {
+                    xyz: color.into_color_unclamped(),
+                    yxy: color.into_color_unclamped(),
+                    linear_rgb: Srgb::from_color_unclamped(color).into_color_unclamped(),
+                    rgb: color.into_color_unclamped(),
+                    hsl: color.into_color_unclamped(),
+                    hsv: color.into_color_unclamped(),
+                    hwb: color.into_color_unclamped(),
+                }
+            }
+        }
+    };
+}
+
+impl From<LinSrgb<f32>> for ColorMine {
+    fn from(color: LinSrgb<f32>) -> ColorMine {
+        ColorMine {
+            xyz: color.into_color_unclamped(),
+            yxy: color.into_color_unclamped(),
+            linear_rgb: color.into_color_unclamped(),
+            rgb: color.into_color_unclamped(),
+            hsl: Srgb::from_linear(color).into_color_unclamped(),
+            hsv: Srgb::from_linear(color).into_color_unclamped(),
+            hwb: Srgb::from_linear(color).into_color_unclamped(),
+        }
+    }
+}
+
+impl_from_color!(Srgb<f32>);
 impl_from_color!(Xyz<D65, f32>);
 impl_from_color!(Yxy<D65, f32>);
 impl_from_color!(Lab<D65, f32>);
 impl_from_color!(Lch<D65, f32>);
-impl_from_color!(Hsl<::palette::encoding::Srgb, f32>);
-impl_from_color!(Hsv<::palette::encoding::Srgb, f32>);
-impl_from_color!(Hwb<::palette::encoding::Srgb, f32>);
+
+impl_from_rgb_derivative!(Hsl<::palette::encoding::Srgb, f32>);
+impl_from_rgb_derivative!(Hsv<::palette::encoding::Srgb, f32>);
+impl_from_rgb_derivative!(Hwb<::palette::encoding::Srgb, f32>);
 
 lazy_static! {
     static ref TEST_DATA: Vec<ColorMine> = load_data();

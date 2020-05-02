@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use crate::float::Float;
 use crate::hues::RgbHue;
-use crate::rgb::RgbSpace;
+use crate::rgb::RgbStandard;
 use crate::{from_f64, FloatComponent, Hsl, Hsv};
 
 // Based on https://stackoverflow.com/q/4778147 and https://math.stackexchange.com/q/18686,
@@ -19,7 +19,7 @@ use crate::{from_f64, FloatComponent, Hsl, Hsv};
 pub fn sample_hsv<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     let (value, saturation) = (Float::cbrt(r1), Float::sqrt(r2));
 
@@ -27,14 +27,14 @@ where
         hue,
         saturation,
         value,
-        space: PhantomData,
+        standard: PhantomData,
     }
 }
 
 pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     let (saturation, lightness) = if r1 <= from_f64::<T>(0.5) {
         // Scale it up to [0, 1]
@@ -56,14 +56,14 @@ where
         hue,
         saturation,
         lightness,
-        space: PhantomData,
+        standard: PhantomData,
     }
 }
 
 pub fn invert_hsl_sample<S, T>(color: Hsl<S, T>) -> (T, T)
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     let r1 = if color.lightness <= from_f64::<T>(0.5) {
         // ((x * 2)^3) / 2 = x^3 * 4.

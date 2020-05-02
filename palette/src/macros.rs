@@ -1,6 +1,6 @@
 #[cfg(test)]
 macro_rules! raw_pixel_conversion_tests {
-    ($name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
+    ($name: ident <$($ty_param: path),+> : $($component: ident),+) => {
         #[test]
         fn convert_from_f32_array() {
             raw_pixel_conversion_tests!(@float_array_test f32, $name<$($ty_param),+>: $($component),+);
@@ -22,7 +22,7 @@ macro_rules! raw_pixel_conversion_tests {
         }
     };
 
-    (@float_array_test $float: ty, $name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
+    (@float_array_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
         use crate::Pixel;
         use crate::Alpha;
 
@@ -49,7 +49,7 @@ macro_rules! raw_pixel_conversion_tests {
         assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
     };
 
-    (@float_slice_test $float: ty, $name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
+    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
         use crate::Pixel;
         use crate::Alpha;
 
@@ -86,7 +86,7 @@ macro_rules! raw_pixel_conversion_tests {
 
 #[cfg(test)]
 macro_rules! raw_pixel_conversion_fail_tests {
-    ($name: ident <$($ty_param: ident),+> : $($component: ident),+) => {
+    ($name: ident <$($ty_param: path),+> : $($component: ident),+) => {
         #[test]
         #[should_panic(expected = "not enough color channels")]
         fn convert_from_short_f32_array() {
@@ -112,13 +112,13 @@ macro_rules! raw_pixel_conversion_fail_tests {
         }
     };
 
-    (@float_array_test $float: ty, $name: ident <$($ty_param: ident),+>) => {
+    (@float_array_test $float: ty, $name: ident <$($ty_param: path),+>) => {
         use crate::Pixel;
         let raw: [$float; 1] = [0.1];
         let _: $name<$($ty_param,)+ $float> = *$name::from_raw(&raw);
     };
 
-    (@float_slice_test $float: ty, $name: ident <$($ty_param: ident),+>) => {
+    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+>) => {
         use crate::Pixel;
         let raw: &[$float] = &[0.1];
         let _: $name<$($ty_param,)+ $float> = *$name::from_raw(raw);

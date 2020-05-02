@@ -15,31 +15,39 @@
 //! They can be attached to either the item itself, or to the fields.
 //!
 //! ```
-//! # use palette::rgb::RgbSpace;
+//! # use palette::rgb::{RgbStandard, RgbSpace};
 //! # use palette::convert::FromColorUnclamped;
 //! # use palette::{Xyz, Component, FloatComponent};
 //! #
 //! #[palette(
 //!     component = "T",
-//!     rgb_space = "S",
-//!     white_point = "S::WhitePoint",
+//!     rgb_standard = "S",
+//!     white_point = "<S::Space as RgbSpace>::WhitePoint",
 //! )]
 //! #[derive(FromColorUnclamped)]
 //! #[repr(C)]
-//! struct ExampleType<S: RgbSpace, T: Component> {
+//! struct ExampleType<S: RgbStandard, T: Component> {
 //!     // ...
 //!     #[palette(alpha)]
 //!     alpha: T,
-//!     space: std::marker::PhantomData<S>,
+//!     standard: std::marker::PhantomData<S>,
 //! }
 //!
-//! # impl<S: RgbSpace, T: FloatComponent> FromColorUnclamped<Xyz<S::WhitePoint, T>> for ExampleType<S, T> {
-//! #   fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
-//! #       ExampleType {alpha: T::max_intensity(), space: std::marker::PhantomData}
+//! # impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace>::WhitePoint, T>> for ExampleType<S, T>
+//! # where
+//! #   S: RgbStandard,
+//! #   T: FloatComponent
+//! # {
+//! #   fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
+//! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}
 //! #   }
 //! # }
 //! #
-//! # impl<S: RgbSpace, T: FloatComponent> FromColorUnclamped<ExampleType<S, T>> for Xyz<S::WhitePoint, T> {
+//! # impl<S, T> FromColorUnclamped<ExampleType<S, T>> for Xyz<<S::Space as RgbSpace>::WhitePoint, T>
+//! # where
+//! #   S: RgbStandard,
+//! #   T: FloatComponent
+//! # {
 //! #   fn from_color_unclamped(color: ExampleType<S, T>) -> Self {
 //! #       Xyz::default()
 //! #   }
@@ -60,9 +68,9 @@
 //! component type that should be used when deriving. The default is `f32`, but
 //! it may be any other type, including type parameters.
 //!
-//! * `rgb_space = "some::rgb_space::Type"`: Sets the RGB space
+//! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard
 //! type that should be used when deriving. The default is to either use `Srgb`
-//! or a best effort to convert between spaces, so sometimes it has to be set
+//! or a best effort to convert between standards, but sometimes it has to be set
 //! to a specific type. This also accepts type parameters.
 //!
 //! ## Field Attributes
@@ -138,7 +146,7 @@
 //! #[palette(
 //!     skip_derives(Rgb),
 //!     component = "T",
-//!     rgb_space = "palette::encoding::Srgb"
+//!     rgb_standard = "palette::encoding::Srgb"
 //! )]
 //! #[derive(Copy, Clone, Pixel, FromColorUnclamped)]
 //! #[repr(C)] // Makes sure the memory layout is as we want it.
@@ -185,8 +193,8 @@
 //!         0.0,
 //!         0.0,
 //!         0.0,
-//!         0.7353569830524495,
-//!         0.5370987304831942,
+//!         0.5,
+//!         0.25,
 //!     ];
 //!     let hsv: Hsv<_, f64> = Bgr::from_raw_slice(&buffer)[1].into_color();
 //!
@@ -209,7 +217,7 @@
 //! /// CSS style sRGB.
 //! #[palette(
 //!     skip_derives(Rgb),
-//!     rgb_space = "palette::encoding::Srgb"
+//!     rgb_standard = "palette::encoding::Srgb"
 //! )]
 //! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! struct CssRgb {
@@ -528,7 +536,7 @@ mod tests {
         skip_derives(Xyz, Luma),
         white_point = "S::WhitePoint",
         component = "f64",
-        rgb_space = "S",
+        rgb_standard = "Linear<S>",
         palette_internal,
         palette_internal_not_base_type
     )]
@@ -597,7 +605,7 @@ mod tests {
         skip_derives(Lch, Luma),
         white_point = "crate::white_point::E",
         component = "T",
-        rgb_space = "(crate::encoding::Srgb, crate::white_point::E)",
+        rgb_standard = "Linear<(crate::encoding::Srgb, crate::white_point::E)>",
         palette_internal,
         palette_internal_not_base_type
     )]
@@ -667,7 +675,7 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
-        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        let rgb: Rgb<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
@@ -701,8 +709,7 @@ mod tests {
         let lch: Alpha<Lch<_, f64>, u8> = Alpha::from(Lch::default());
         WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
-        let rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> =
-            Alpha::from(Rgb::<crate::encoding::Srgb, f64>::default());
+        let rgb: Alpha<Rgb<_, f64>, u8> = Alpha::from(Rgb::default());
         WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
         let hsl: Alpha<Hsl<_, f64>, u8> = Alpha::from(Hsl::default());
@@ -736,7 +743,7 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
-        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        let rgb: Rgb<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
@@ -770,7 +777,7 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
-        let rgb: Rgb<crate::encoding::Srgb, f64> = Default::default();
+        let rgb: Rgb<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
@@ -795,7 +802,7 @@ mod tests {
         let _yxy: Yxy<_, f64> = color.into_color();
         let _lab: Lab<_, f64> = color.into_color();
         let _lch: Lch<_, f64> = color.into_color();
-        let _rgb: Rgb<crate::encoding::Srgb, f64> = color.into_color();
+        let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
@@ -812,7 +819,7 @@ mod tests {
         let _yxy: Yxy<_, f64> = color.into_color();
         let _lab: Lab<_, f64> = color.into_color();
         let _lch: Lch<_, f64> = color.into_color();
-        let _rgb: Rgb<crate::encoding::Srgb, f64> = color.into_color();
+        let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
@@ -828,7 +835,7 @@ mod tests {
         let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
         let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
         let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
-        let _rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> = color.into_color();
+        let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
         let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
@@ -845,7 +852,7 @@ mod tests {
         let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
         let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
         let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
-        let _rgb: Alpha<Rgb<crate::encoding::Srgb, f64>, u8> = color.into_color();
+        let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
         let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
@@ -869,7 +876,7 @@ mod tests {
         let lch: Lch<crate::white_point::E, f64> = Default::default();
         WithoutXyz::<f64>::from_color(lch);
 
-        let rgb: Rgb<(_, crate::encoding::Srgb), f64> = Default::default();
+        let rgb: Rgb<_, f64> = Default::default();
         WithoutXyz::<f64>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
@@ -894,7 +901,7 @@ mod tests {
         let _yxy: Yxy<crate::white_point::E, f64> = color.into_color();
         let _lab: Lab<crate::white_point::E, f64> = color.into_color();
         let _lch: Lch<crate::white_point::E, f64> = color.into_color();
-        let _rgb: Rgb<(_, crate::encoding::Srgb), f64> = color.into_color();
+        let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
