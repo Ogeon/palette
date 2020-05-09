@@ -26,7 +26,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 
 /// HWB color space.
 ///
-/// HWB is a cylindrical version of [RGB](rgb/struct.LinRgb.html) and it's very
+/// HWB is a cylindrical version of [RGB](rgb/struct.Rgb.html) and it's very
 /// closely related to [HSV](struct.Hsv.html). It describes colors with a
 /// starting hue, then a degree of whiteness and blackness to mix into that
 /// base hue.

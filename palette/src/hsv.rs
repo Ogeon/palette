@@ -26,7 +26,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 
 /// HSV color space.
 ///
-/// HSV is a cylindrical version of [RGB](rgb/struct.LinRgb.html) and it's very
+/// HSV is a cylindrical version of [RGB](rgb/struct.Rgb.html) and it's very
 /// similar to [HSL](struct.Hsl.html). The difference is that the `value`
 /// component in HSV determines the _brightness_ of the color, and not the
 /// _lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)

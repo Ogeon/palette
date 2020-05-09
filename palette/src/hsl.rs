@@ -27,7 +27,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 /// HSL color space.
 ///
 /// The HSL color space can be seen as a cylindrical version of
-/// [RGB](rgb/struct.LinRgb.html), where the `hue` is the angle around the color
+/// [RGB](rgb/struct.Rgb.html), where the `hue` is the angle around the color
 /// cylinder, the `saturation` is the distance from the center, and the
 /// `lightness` is the height from the bottom. Its composition makes it
 /// especially good for operations like changing green to red, making a color
