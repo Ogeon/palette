@@ -92,36 +92,13 @@ pub fn get_convert_color_type(
     color: &str,
     white_point: &Type,
     component: &Type,
-    rgb_space: Option<&Type>,
+    rgb_standard: Option<&Type>,
     generics: &mut Generics,
     internal: bool,
 ) -> Type {
     let color_path = util::color_path(color, internal);
 
     match color {
-        "Rgb" => {
-            let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
-            let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
-            generics.params.push(GenericParam::Type(
-                Ident::new("_S", Span::call_site()).into(),
-            ));
-
-            let where_clause = generics.make_where_clause();
-            if let Some(ref rgb_space) = rgb_space {
-                where_clause
-                    .predicates
-                    .push(parse_quote!(_S: #rgb_standard_path<Space = #rgb_space>));
-            } else {
-                where_clause
-                    .predicates
-                    .push(parse_quote!(_S: #rgb_standard_path));
-                where_clause
-                    .predicates
-                    .push(parse_quote!(_S::Space: #rgb_space_path<WhitePoint = #white_point>));
-            }
-
-            parse_quote!(#color_path<_S, #component>)
-        }
         "Luma" => {
             let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
             generics.params.push(GenericParam::Type(
@@ -134,20 +111,24 @@ pub fn get_convert_color_type(
                 .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
             parse_quote!(#color_path<_S, #component>)
         }
-        "Hsl" | "Hsv" | "Hwb" => {
+        "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
+            let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
             let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
 
-            if let Some(ref rgb_space) = rgb_space {
-                parse_quote!(#color_path<#rgb_space, #component>)
+            if let Some(rgb_standard) = rgb_standard {
+                parse_quote!(#color_path<#rgb_standard, #component>)
             } else {
                 generics.params.push(GenericParam::Type(
                     Ident::new("_S", Span::call_site()).into(),
                 ));
+                let where_clause = generics.make_where_clause();
 
-                generics
-                    .make_where_clause()
+                where_clause
                     .predicates
-                    .push(parse_quote!(_S: #rgb_space_path<WhitePoint = #white_point>));
+                    .push(parse_quote!(_S: #rgb_standard_path));
+                where_clause
+                    .predicates
+                    .push(parse_quote!(_S::Space: #rgb_space_path<WhitePoint = #white_point>));
 
                 parse_quote!(#color_path<_S, #component>)
             }

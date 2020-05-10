@@ -47,7 +47,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    rgb_space = "S::Space",
+    rgb_standard = "S",
     white_point = "<S::Space as RgbSpace>::WhitePoint",
     component = "T",
     skip_derives(Xyz, Hsv, Hsl, Luma, Rgb)
@@ -385,12 +385,12 @@ where
     }
 }
 
-impl<S, T> FromColorUnclamped<Hsl<S::Space, T>> for Rgb<S, T>
+impl<S, T> FromColorUnclamped<Hsl<S, T>> for Rgb<S, T>
 where
     S: RgbStandard,
     T: FloatComponent,
 {
-    fn from_color_unclamped(hsl: Hsl<S::Space, T>) -> Self {
+    fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
         let c = (T::one() - (hsl.lightness * from_f64(2.0) - T::one()).abs()) * hsl.saturation;
         let h = hsl.hue.to_positive_degrees() / from_f64(60.0);
         let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
@@ -410,21 +410,21 @@ where
             (c, T::zero(), x)
         };
 
-        Self::from_linear(Rgb {
+        Rgb {
             red: red + m,
             green: green + m,
             blue: blue + m,
             standard: PhantomData,
-        })
+        }
     }
 }
 
-impl<S, T> FromColorUnclamped<Hsv<S::Space, T>> for Rgb<S, T>
+impl<S, T> FromColorUnclamped<Hsv<S, T>> for Rgb<S, T>
 where
     S: RgbStandard,
     T: FloatComponent,
 {
-    fn from_color_unclamped(hsv: Hsv<S::Space, T>) -> Self {
+    fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
         let c = hsv.value * hsv.saturation;
         let h = hsv.hue.to_positive_degrees() / from_f64(60.0);
         let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
@@ -444,12 +444,12 @@ where
             (c, T::zero(), x)
         };
 
-        Self::from_linear(Rgb {
+        Rgb {
             red: red + m,
             green: green + m,
             blue: blue + m,
             standard: PhantomData,
-        })
+        }
     }
 }
 
