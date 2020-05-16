@@ -1,7 +1,14 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion, Throughput};
 use palette::convert::FromColorUnclamped;
 use palette::encoding;
-use palette::{Hsl, Hsv, Hwb, LinSrgb, Srgb};
+use palette::{Hsl, Hsv, Hwb, IntoColor, LinSrgb, Srgb};
+
+type SrgbHsv = Hsv<encoding::Srgb>;
+type SrgbHsl = Hsl<encoding::Srgb>;
+type SrgbHwb = Hwb<encoding::Srgb>;
+type LinHsv = Hsv<encoding::Linear<encoding::Srgb>>;
+type LinHsl = Hsl<encoding::Linear<encoding::Srgb>>;
+type LinHwb = Hwb<encoding::Linear<encoding::Srgb>>;
 
 #[path = "../tests/convert/data_color_mine.rs"]
 #[allow(dead_code)]
@@ -19,6 +26,12 @@ use data_color_mine::{load_data, ColorMine};
     - xyz to rgb
     - hsl to rgb
     - hsv to rgb
+    - hsv to linear hsv
+    - linear hsv to hsv
+    - hsl to linear hsl
+    - linear hsl to hsl
+    - hwb to linear hwb
+    - linear hwb to hwb
     - linsrgb to rgb
     - rgb_u8 to linsrgb_f32
     - linsrgb_f32 to rgb_u8
@@ -27,22 +40,25 @@ use data_color_mine::{load_data, ColorMine};
 fn rgb_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Rgb family");
     let colormine: Vec<ColorMine> = load_data();
-    let rgb: Vec<Srgb> = colormine.iter().map(|x| Srgb::from(x.linear_rgb)).collect();
-    let rgb_u8: Vec<Srgb<u8>> = rgb.iter().map(|x| x.into_format().into()).collect();
+    let rgb_u8: Vec<Srgb<u8>> = colormine.iter().map(|x| x.rgb.into_format()).collect();
+
+    let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
+    let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
+    let linear_hwb: Vec<LinHwb> = colormine.iter().map(|x| x.hwb.into_color()).collect();
 
     group.throughput(Throughput::Elements(colormine.len() as u64));
 
-    group.bench_with_input("rgb to linsrgb", &rgb, |b, rgb| {
+    group.bench_with_input("rgb to linsrgb", &colormine, |b, colormine| {
         b.iter(|| {
-            for c in rgb {
-                black_box(c.into_linear());
+            for c in colormine {
+                black_box(c.rgb.into_linear());
             }
         })
     });
-    group.bench_with_input("rgb to hsl", &rgb, |b, rgb| {
+    group.bench_with_input("rgb to hsl", &colormine, |b, colormine| {
         b.iter(|| {
-            for c in rgb {
-                black_box(Hsl::from_color_unclamped(*c));
+            for c in colormine {
+                black_box(Hsl::from_color_unclamped(c.rgb));
             }
         })
     });
@@ -53,10 +69,10 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    group.bench_with_input("rgb to hsv", &rgb, |b, rgb| {
+    group.bench_with_input("rgb to hsv", &colormine, |b, colormine| {
         b.iter(|| {
-            for c in rgb {
-                black_box(Hsv::from_color_unclamped(*c));
+            for c in colormine {
+                black_box(Hsv::from_color_unclamped(c.rgb));
             }
         })
     });
@@ -99,6 +115,48 @@ fn rgb_conversion(c: &mut Criterion) {
         b.iter(|| {
             for c in colormine {
                 black_box(Srgb::from_color_unclamped(c.hsv));
+            }
+        })
+    });
+    group.bench_with_input("hsv to linear hsv", &colormine, |b, colormine| {
+        b.iter(|| {
+            for c in colormine {
+                black_box(LinHsv::from_color_unclamped(c.hsv));
+            }
+        })
+    });
+    group.bench_with_input("linear hsv to hsv", &linear_hsv, |b, linear_hsv| {
+        b.iter(|| {
+            for &c in linear_hsv {
+                black_box(SrgbHsv::from_color_unclamped(c));
+            }
+        })
+    });
+    group.bench_with_input("hsl to linear hsl", &colormine, |b, colormine| {
+        b.iter(|| {
+            for c in colormine {
+                black_box(LinHsl::from_color_unclamped(c.hsl));
+            }
+        })
+    });
+    group.bench_with_input("linear hsl to hsl", &linear_hsl, |b, linear_hsl| {
+        b.iter(|| {
+            for &c in linear_hsl {
+                black_box(SrgbHsl::from_color_unclamped(c));
+            }
+        })
+    });
+    group.bench_with_input("hwb to linear hwb", &colormine, |b, colormine| {
+        b.iter(|| {
+            for c in colormine {
+                black_box(LinHwb::from_color_unclamped(c.hwb));
+            }
+        })
+    });
+    group.bench_with_input("linear hwb to hwb", &linear_hwb, |b, linear_hwb| {
+        b.iter(|| {
+            for &c in linear_hwb {
+                black_box(SrgbHwb::from_color_unclamped(c));
             }
         })
     });

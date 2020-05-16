@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use quote::quote;
 use syn::spanned::Spanned;
 use syn::{Ident, Lit, Meta, MetaNameValue, NestedMeta, Result, Type};
 
@@ -12,7 +13,7 @@ pub struct TypeItemAttributes {
     pub internal_not_base_type: bool,
     pub component: Option<Type>,
     pub white_point: Option<Type>,
-    pub rgb_space: Option<Type>,
+    pub rgb_standard: Option<Type>,
 }
 
 impl AttributeArgumentParser for TypeItemAttributes {
@@ -98,26 +99,26 @@ impl AttributeArgumentParser for TypeItemAttributes {
                     ));
                 }
             }
-            Some("rgb_space") => {
-                if self.rgb_space.is_none() {
+            Some("rgb_standard") => {
+                if self.rgb_standard.is_none() {
                     let result = if let Meta::NameValue(MetaNameValue {
                         lit: Lit::Str(ty), ..
                     }) = argument
                     {
-                        self.rgb_space = Some(ty.parse()?);
+                        self.rgb_standard = Some(ty.parse()?);
                         Ok(())
                     } else {
                         Err(argument.span())
                     };
 
                     if let Err(span) = result {
-                        let message = "expected `rgb_space` to be a type or type parameter in a string, like `rgb_space = \"T\"`";
+                        let message = "expected `rgb_standard` to be a type or type parameter in a string, like `rgb_standard = \"T\"`";
                         return Err(::syn::parse::Error::new(span, message));
                     }
                 } else {
                     return Err(::syn::parse::Error::new(
                         argument.span(),
-                        "`rgb_space` appears more than once",
+                        "`rgb_standard` appears more than once",
                     ));
                 }
             }
@@ -144,7 +145,7 @@ impl AttributeArgumentParser for TypeItemAttributes {
             _ => {
                 return Err(::syn::parse::Error::new(
                     argument.span(),
-                    "unknown type item attribute",
+                    format!("`{}` is not a known type item attribute", quote!(#argument)),
                 ));
             }
         }

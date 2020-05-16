@@ -10,9 +10,9 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
+use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
-use crate::encoding::{Linear, Srgb};
+use crate::encoding::Srgb;
 use crate::float::Float;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
@@ -24,10 +24,10 @@ use crate::{
 /// `Alpha`](struct.Alpha.html#Hsla).
 pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 
-/// Linear HSL color space.
+/// HSL color space.
 ///
 /// The HSL color space can be seen as a cylindrical version of
-/// [RGB](rgb/struct.LinRgb.html), where the `hue` is the angle around the color
+/// [RGB](rgb/struct.Rgb.html), where the `hue` is the angle around the color
 /// cylinder, the `saturation` is the distance from the center, and the
 /// `lightness` is the height from the bottom. Its composition makes it
 /// especially good for operations like changing green to red, making a color
@@ -39,16 +39,16 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    rgb_space = "S",
-    white_point = "S::WhitePoint",
+    rgb_standard = "S",
+    white_point = "<S::Space as RgbSpace>::WhitePoint",
     component = "T",
-    skip_derives(Xyz, Rgb, Hsv, Hsl)
+    skip_derives(Rgb, Hsv, Hsl)
 )]
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
@@ -67,20 +67,20 @@ where
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
-    pub space: PhantomData<S>,
+    pub standard: PhantomData<S>,
 }
 
 impl<S, T> Copy for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
 }
 
 impl<S, T> Clone for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn clone(&self) -> Hsl<S, T> {
         *self
@@ -97,7 +97,7 @@ where
             hue: hue.into(),
             saturation,
             lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -105,7 +105,7 @@ where
 impl<S, T> Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     /// Linear HSL.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<S, T> {
@@ -113,7 +113,7 @@ where
             hue: hue.into(),
             saturation,
             lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 
@@ -128,12 +128,12 @@ where
     }
 
     #[inline]
-    fn reinterpret_as<Sp: RgbSpace>(self) -> Hsl<Sp, T> {
+    fn reinterpret_as<St: RgbStandard>(self) -> Hsl<St, T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
             lightness: self.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 
@@ -178,7 +178,7 @@ impl<S, T, A> Alpha<Hsl<S, T>, A>
 where
     T: FloatComponent,
     A: Component,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     /// Linear HSL and transparency.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
@@ -201,31 +201,30 @@ where
     }
 }
 
-impl<S, Sp, T> FromColorUnclamped<Hsl<Sp, T>> for Hsl<S, T>
+impl<S1, S2, T> FromColorUnclamped<Hsl<S1, T>> for Hsl<S2, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
-    Sp: RgbSpace<WhitePoint = S::WhitePoint>,
+    S1: RgbStandard,
+    S2: RgbStandard,
+    S1::Space: RgbSpace<WhitePoint = <S2::Space as RgbSpace>::WhitePoint>,
 {
-    fn from_color_unclamped(hsl: Hsl<Sp, T>) -> Self {
-        if TypeId::of::<Sp::Primaries>() == TypeId::of::<S::Primaries>() {
+    fn from_color_unclamped(hsl: Hsl<S1, T>) -> Self {
+        if TypeId::of::<S1>() == TypeId::of::<S2>() {
             hsl.reinterpret_as()
         } else {
-            let rgb = Rgb::<Linear<Sp>, T>::from_color_unclamped(hsl);
-            let converted_rgb = Rgb::<Linear<S>, T>::from_color_unclamped(rgb);
+            let rgb = Rgb::<S1, T>::from_color_unclamped(hsl);
+            let converted_rgb = Rgb::<S2, T>::from_color_unclamped(rgb);
             Self::from_color_unclamped(converted_rgb)
         }
     }
 }
 
-impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsl<S::Space, T>
+impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsl<S, T>
 where
     T: FloatComponent,
     S: RgbStandard,
 {
-    fn from_color_unclamped(color: Rgb<S, T>) -> Self {
-        let rgb = color.into_linear();
-
+    fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
         let (max, min, sep, coeff) = {
             let (max, min, sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
@@ -259,26 +258,15 @@ where
             hue: h.into(),
             saturation: s,
             lightness: l,
-            space: PhantomData,
+            standard: PhantomData,
         }
-    }
-}
-
-impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Hsl<S, T>
-where
-    T: FloatComponent,
-    S: RgbSpace,
-{
-    fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
-        let rgb: Rgb<Linear<S>, T> = color.into_color_unclamped();
-        Self::from_color_unclamped(rgb)
     }
 }
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
         let x = (from_f64::<T>(2.0) - hsv.saturation) * hsv.value;
@@ -303,24 +291,24 @@ where
             hue: hsv.hue,
             saturation,
             lightness: x / from_f64(2.0),
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
 
-impl<S: RgbSpace, T: FloatComponent, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
+impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
     fn from(components: (H, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbSpace, T: FloatComponent> Into<(RgbHue<T>, T, T)> for Hsl<S, T> {
+impl<S: RgbStandard, T: FloatComponent> Into<(RgbHue<T>, T, T)> for Hsl<S, T> {
     fn into(self) -> (RgbHue<T>, T, T) {
         self.into_components()
     }
 }
 
-impl<S: RgbSpace, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
+impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
     for Alpha<Hsl<S, T>, A>
 {
     fn from(components: (H, T, T, A)) -> Self {
@@ -328,7 +316,7 @@ impl<S: RgbSpace, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, 
     }
 }
 
-impl<S: RgbSpace, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
+impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
     for Alpha<Hsl<S, T>, A>
 {
     fn into(self) -> (RgbHue<T>, T, T, A) {
@@ -339,7 +327,7 @@ impl<S: RgbSpace, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
 impl<S, T> Limited for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     #[rustfmt::skip]
     fn is_valid(&self) -> bool {
@@ -362,7 +350,7 @@ where
 impl<S, T> Mix for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -374,7 +362,7 @@ where
             hue: self.hue + factor * hue_diff,
             saturation: self.saturation + factor * (other.saturation - self.saturation),
             lightness: self.lightness + factor * (other.lightness - self.lightness),
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -382,7 +370,7 @@ where
 impl<S, T> Shade for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -391,7 +379,7 @@ where
             hue: self.hue,
             saturation: self.saturation,
             lightness: self.lightness + amount,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -399,7 +387,7 @@ where
 impl<S, T> GetHue for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Hue = RgbHue<T>;
 
@@ -415,14 +403,14 @@ where
 impl<S, T> Hue for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
         Hsl {
             hue: hue.into(),
             saturation: self.saturation,
             lightness: self.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 
@@ -431,7 +419,7 @@ where
             hue: self.hue + amount.into(),
             saturation: self.saturation,
             lightness: self.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -439,7 +427,7 @@ where
 impl<S, T> Saturate for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -448,7 +436,7 @@ where
             hue: self.hue,
             saturation: self.saturation * (T::one() + factor),
             lightness: self.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -456,7 +444,7 @@ where
 impl<S, T> Default for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn default() -> Hsl<S, T> {
         Hsl::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
@@ -466,7 +454,7 @@ where
 impl<S, T> Add<Hsl<S, T>> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Output = Hsl<S, T>;
 
@@ -475,7 +463,7 @@ where
             hue: self.hue + other.hue,
             saturation: self.saturation + other.saturation,
             lightness: self.lightness + other.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -483,7 +471,7 @@ where
 impl<S, T> Add<T> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Output = Hsl<S, T>;
 
@@ -492,7 +480,7 @@ where
             hue: self.hue + c,
             saturation: self.saturation + c,
             lightness: self.lightness + c,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -500,7 +488,7 @@ where
 impl<S, T> AddAssign<Hsl<S, T>> for Hsl<S, T>
 where
     T: FloatComponent + AddAssign,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn add_assign(&mut self, other: Hsl<S, T>) {
         self.hue += other.hue;
@@ -512,7 +500,7 @@ where
 impl<S, T> AddAssign<T> for Hsl<S, T>
 where
     T: FloatComponent + AddAssign,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn add_assign(&mut self, c: T) {
         self.hue += c;
@@ -524,7 +512,7 @@ where
 impl<S, T> Sub<Hsl<S, T>> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Output = Hsl<S, T>;
 
@@ -533,7 +521,7 @@ where
             hue: self.hue - other.hue,
             saturation: self.saturation - other.saturation,
             lightness: self.lightness - other.lightness,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -541,7 +529,7 @@ where
 impl<S, T> Sub<T> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Output = Hsl<S, T>;
 
@@ -550,7 +538,7 @@ where
             hue: self.hue - c,
             saturation: self.saturation - c,
             lightness: self.lightness - c,
-            space: PhantomData,
+            standard: PhantomData,
         }
     }
 }
@@ -558,7 +546,7 @@ where
 impl<S, T> SubAssign<Hsl<S, T>> for Hsl<S, T>
 where
     T: FloatComponent + SubAssign,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn sub_assign(&mut self, other: Hsl<S, T>) {
         self.hue -= other.hue;
@@ -570,7 +558,7 @@ where
 impl<S, T> SubAssign<T> for Hsl<S, T>
 where
     T: FloatComponent + SubAssign,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     fn sub_assign(&mut self, c: T) {
         self.hue -= c;
@@ -582,7 +570,7 @@ where
 impl<S, T, P> AsRef<P> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -593,7 +581,7 @@ where
 impl<S, T, P> AsMut<P> for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -605,7 +593,7 @@ impl<S, T> AbsDiffEq for Hsl<S, T>
 where
     T: FloatComponent + AbsDiffEq,
     T::Epsilon: Copy + Float + FromF64,
-    S: RgbSpace + PartialEq,
+    S: RgbStandard + PartialEq,
 {
     type Epsilon = T::Epsilon;
 
@@ -624,7 +612,7 @@ impl<S, T> RelativeEq for Hsl<S, T>
 where
     T: FloatComponent + RelativeEq,
     T::Epsilon: Copy + Float + FromF64,
-    S: RgbSpace + PartialEq,
+    S: RgbStandard + PartialEq,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -647,7 +635,7 @@ impl<S, T> UlpsEq for Hsl<S, T>
 where
     T: FloatComponent + UlpsEq,
     T::Epsilon: Copy + Float + FromF64,
-    S: RgbSpace + PartialEq,
+    S: RgbStandard + PartialEq,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -664,7 +652,7 @@ where
 impl<S, T> RelativeContrast for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -682,7 +670,7 @@ where
 impl<S, T> Distribution<Hsl<S, T>> for Standard
 where
     T: FloatComponent,
-    S: RgbSpace,
+    S: RgbStandard,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsl<S, T> {
@@ -694,7 +682,7 @@ where
 pub struct UniformHsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbSpace + SampleUniform,
+    S: RgbStandard + SampleUniform,
 {
     hue: crate::hues::UniformRgbHue<T>,
     u1: Uniform<T>,
@@ -706,7 +694,7 @@ where
 impl<S, T> SampleUniform for Hsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbSpace + SampleUniform,
+    S: RgbStandard + SampleUniform,
 {
     type Sampler = UniformHsl<S, T>;
 }
@@ -715,7 +703,7 @@ where
 impl<S, T> UniformSampler for UniformHsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbSpace + SampleUniform,
+    S: RgbStandard + SampleUniform,
 {
     type X = Hsl<S, T>;
 
@@ -773,12 +761,11 @@ where
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use crate::encoding::Srgb;
-    use crate::{FromColor, Hsv, LinSrgb};
+    use crate::{FromColor, Hsv, Srgb};
 
     #[test]
     fn red() {
-        let a = Hsl::from_color(LinSrgb::new(1.0, 0.0, 0.0));
+        let a = Hsl::from_color(Srgb::new(1.0, 0.0, 0.0));
         let b = Hsl::new(0.0, 1.0, 0.5);
         let c = Hsl::from_color(Hsv::new(0.0, 1.0, 1.0));
 
@@ -788,7 +775,7 @@ mod test {
 
     #[test]
     fn orange() {
-        let a = Hsl::from_color(LinSrgb::new(1.0, 0.5, 0.0));
+        let a = Hsl::from_color(Srgb::new(1.0, 0.5, 0.0));
         let b = Hsl::new(30.0, 1.0, 0.5);
         let c = Hsl::from_color(Hsv::new(30.0, 1.0, 1.0));
 
@@ -798,7 +785,7 @@ mod test {
 
     #[test]
     fn green() {
-        let a = Hsl::from_color(LinSrgb::new(0.0, 1.0, 0.0));
+        let a = Hsl::from_color(Srgb::new(0.0, 1.0, 0.0));
         let b = Hsl::new(120.0, 1.0, 0.5);
         let c = Hsl::from_color(Hsv::new(120.0, 1.0, 1.0));
 
@@ -808,7 +795,7 @@ mod test {
 
     #[test]
     fn blue() {
-        let a = Hsl::from_color(LinSrgb::new(0.0, 0.0, 1.0));
+        let a = Hsl::from_color(Srgb::new(0.0, 0.0, 1.0));
         let b = Hsl::new(240.0, 1.0, 0.5);
         let c = Hsl::from_color(Hsv::new(240.0, 1.0, 1.0));
 
@@ -818,7 +805,7 @@ mod test {
 
     #[test]
     fn purple() {
-        let a = Hsl::from_color(LinSrgb::new(0.5, 0.0, 1.0));
+        let a = Hsl::from_color(Srgb::new(0.5, 0.0, 1.0));
         let b = Hsl::new(270.0, 1.0, 0.5);
         let c = Hsl::from_color(Hsv::new(270.0, 1.0, 1.0));
 
@@ -829,7 +816,7 @@ mod test {
     #[test]
     fn ranges() {
         assert_ranges! {
-            Hsl<Srgb, f64>;
+            Hsl<crate::encoding::Srgb, f64>;
             limited {
                 saturation: 0.0 => 1.0,
                 lightness: 0.0 => 1.0
@@ -841,11 +828,13 @@ mod test {
         }
     }
 
-    raw_pixel_conversion_tests!(Hsl<Srgb>: hue, saturation, lightness);
-    raw_pixel_conversion_fail_tests!(Hsl<Srgb>: hue, saturation, lightness);
+    raw_pixel_conversion_tests!(Hsl<crate::encoding::Srgb>: hue, saturation, lightness);
+    raw_pixel_conversion_fail_tests!(Hsl<crate::encoding::Srgb>: hue, saturation, lightness);
 
     #[test]
     fn check_min_max_components() {
+        use crate::encoding::Srgb;
+
         assert_relative_eq!(Hsl::<Srgb>::min_saturation(), 0.0);
         assert_relative_eq!(Hsl::<Srgb>::min_lightness(), 0.0);
         assert_relative_eq!(Hsl::<Srgb>::max_saturation(), 1.0);
