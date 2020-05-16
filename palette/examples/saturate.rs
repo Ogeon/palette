@@ -3,8 +3,8 @@ use palette::{FromColor, Hsl, IntoColor, Lch, Pixel, Saturate, Srgb};
 use image::{GenericImage, GenericImageView};
 
 fn main() {
-    let mut image = image::open("res/cat.png")
-        .expect("could not open 'res/cat.png'")
+    let mut image = image::open("example-data/input/cat.png")
+        .expect("could not open 'example-data/input/cat.png'")
         .to_rgb();
 
     let width = image.width();
@@ -49,9 +49,10 @@ fn main() {
             }
         }
     }
-
-    match image.save("examples/saturate.png") {
-        Ok(()) => println!("see 'examples/saturate.png' for the result"),
-        Err(e) => println!("failed to write 'examples/saturate.png': {}", e),
+    
+    let _ = std::fs::create_dir("example-data/output");
+    match image.save("example-data/output/saturate.png") {
+        Ok(()) => println!("see 'example-data/output/saturate.png' for the result"),
+        Err(e) => println!("failed to write 'example-data/output/saturate.png': {}", e),
     }
 }

@@ -13,7 +13,7 @@ mod color_spaces {
         let new_color = Srgb::from_color(lch_color.shift_hue(180.0));
 
         display_colors(
-            "examples/readme_color_spaces.png",
+            "example-data/output/readme_color_spaces.png",
             &[
                 ::palette::Srgb::new(0.8, 0.2, 0.1).into_format(),
                 new_color.into_format(),
@@ -32,7 +32,7 @@ mod manipulation {
         let desaturated = Lch::from_color(color).desaturate(0.5);
 
         display_colors(
-            "examples/readme_manipulation.png",
+            "example-data/output/readme_manipulation.png",
             &[
                 Srgb::from_linear(color.into()).into_format(),
                 Srgb::from_linear(lighter.into()).into_format(),
@@ -58,7 +58,7 @@ mod gradients {
             Hsv::from_color(LinSrgb::new(0.1, 1.0, 1.0)),
         ]);
 
-        display_gradients("examples/readme_gradients.png", grad1, grad2);
+        display_gradients("example-data/output/readme_gradients.png", grad1, grad2);
     }
 }
 
@@ -74,6 +74,7 @@ fn display_colors(filename: &str, colors: &[Srgb<u8>]) {
         }
     }
 
+    let _ = std::fs::create_dir("example-data/output");
     match image.save(filename) {
         Ok(()) => println!("see '{}' for the result", filename),
         Err(e) => println!("failed to write '{}': {}", filename, e),

@@ -156,9 +156,10 @@ fn main() {
         );
     }
 
-    match image.save("examples/color_scheme.png") {
-        Ok(()) => println!("see 'examples/color_scheme.png' for the result"),
-        Err(e) => println!("failed to write 'examples/color_scheme.png': {}", e),
+    let _ = std::fs::create_dir("example-data/output");
+    match image.save("example-data/output/color_scheme.png") {
+        Ok(()) => println!("see 'example-data/output/color_scheme.png' for the result"),
+        Err(e) => println!("failed to write 'example-data/output/color_scheme.png': {}", e),
     }
 }
 

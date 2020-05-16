@@ -93,8 +93,9 @@ fn main() {
         }
     }
 
-    match image.save("examples/gradient.png") {
-        Ok(()) => println!("see 'examples/gradient.png' for the result"),
-        Err(e) => println!("failed to write 'examples/gradient.png': {}", e),
+    let _ = std::fs::create_dir("example-data/output");
+    match image.save("example-data/output/gradient.png") {
+        Ok(()) => println!("see 'example-data/output/gradient.png' for the result"),
+        Err(e) => println!("failed to write 'example-data/output/gradient.png': {}", e),
     }
 }

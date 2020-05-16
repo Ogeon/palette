@@ -1,3 +1,3 @@
 target
 Cargo.lock
-*/examples/*.png
+example-data/output/*
