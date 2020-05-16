@@ -589,7 +589,7 @@ where
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
         Lch {
-            l: rng.gen(),
+            l: rng.gen() * from_f64(100.0),
             chroma: crate::Float::sqrt(rng.gen()) * from_f64(128.0),
             hue: rng.gen::<LabHue<T>>(),
             white_point: PhantomData,

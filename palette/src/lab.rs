@@ -701,7 +701,7 @@ where
     // `a` and `b` both range from (-128.0, 127.0)
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lab<Wp, T> {
         Lab {
-            l: rng.gen(),
+            l: rng.gen() * from_f64(100.0),
             a: rng.gen() * from_f64(255.0) - from_f64(128.0),
             b: rng.gen() * from_f64(255.0) - from_f64(128.0),
             white_point: PhantomData,
