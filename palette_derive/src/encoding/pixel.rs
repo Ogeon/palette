@@ -111,7 +111,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     } else {
         errors.push(syn::Error::new(
             Span::call_site(),
-            format!("`Pixel` can only be derived for structs with one or more fields"),
+            "`Pixel` can only be derived for structs with one or more fields".to_string(),
         ));
 
         return Err(errors);
@@ -127,23 +127,20 @@ fn is_repr_c(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Err
     for attribute in attributes {
         let attribute_name = attribute.path.get_ident().map(ToString::to_string);
 
-        match attribute_name.as_deref() {
-            Some("repr") => {
-                let items = match meta::parse_tuple_attribute(attribute.tokens.clone()) {
-                    Ok(items) => items,
-                    Err(error) => {
-                        errors.push(error);
-                        continue;
-                    }
-                };
-
-                let contains_c = items.into_iter().find(|item: &Ident| item == "C").is_some();
-
-                if contains_c {
-                    return Ok(true);
+        if let Some("repr") = attribute_name.as_deref() {
+            let items = match meta::parse_tuple_attribute(attribute.tokens.clone()) {
+                Ok(items) => items,
+                Err(error) => {
+                    errors.push(error);
+                    continue;
                 }
+            };
+
+            let contains_c = items.iter().any(|item: &Ident| item == "C");
+
+            if contains_c {
+                return Ok(true);
             }
-            _ => {}
         }
     }
 

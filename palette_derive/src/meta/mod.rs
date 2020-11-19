@@ -157,7 +157,7 @@ pub fn parse_tuple_attribute<T: Parse>(tts: TokenStream) -> Result<Vec<T>> {
         Ok(tuple)
     }
 
-    parse_generic_tuple.parse2(tts.clone())
+    parse_generic_tuple.parse2(tts)
 }
 
 fn parse_meta_list(buffer: &ParseBuffer) -> syn::Result<Punctuated<NestedMeta, Token![,]>> {

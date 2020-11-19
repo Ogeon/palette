@@ -20,7 +20,7 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         attrs,
         ..
     } = syn::parse(item).map_err(|error| vec![error])?;
-    let generics = original_generics.clone();
+    let generics = original_generics;
 
     let item_meta: TypeItemAttributes = parse_namespaced_attributes(attrs)?;
 

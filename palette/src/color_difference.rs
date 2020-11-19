@@ -60,16 +60,12 @@ pub fn get_ciede_difference<T: FloatComponent>(this: &LabColorDiff<T>, other: &L
 
     let delta_h_prime: T = if c_one_prime == T::zero() || c_two_prime == T::zero() {
         from_f64(0.0)
+    } else if h_prime_difference <= from_f64(180.0) {
+        h_two_prime - h_one_prime
+    } else if h_two_prime <= h_one_prime {
+        h_two_prime - h_one_prime + from_f64(360.0)
     } else {
-        if h_prime_difference <= from_f64(180.0) {
-            h_two_prime - h_one_prime
-        } else {
-            if h_two_prime <= h_one_prime {
-                h_two_prime - h_one_prime + from_f64(360.0)
-            } else {
-                h_two_prime - h_one_prime - from_f64(360.0)
-            }
-        }
+        h_two_prime - h_one_prime - from_f64(360.0)
     };
 
     let delta_big_h_prime = from_f64::<T>(2.0)
@@ -77,12 +73,10 @@ pub fn get_ciede_difference<T: FloatComponent>(this: &LabColorDiff<T>, other: &L
         * (delta_h_prime / from_f64(2.0) * pi_over_180).sin();
     let h_bar_prime = if c_one_prime == T::zero() || c_two_prime == T::zero() {
         h_one_prime + h_two_prime
+    } else if h_prime_difference > from_f64(180.0) {
+        (h_one_prime + h_two_prime + from_f64(360.0)) / from_f64(2.0)
     } else {
-        if h_prime_difference > from_f64(180.0) {
-            (h_one_prime + h_two_prime + from_f64(360.0)) / from_f64(2.0)
-        } else {
-            (h_one_prime + h_two_prime) / from_f64(2.0)
-        }
+        (h_one_prime + h_two_prime) / from_f64(2.0)
     };
 
     let l_bar = (this.l + other.l) / from_f64(2.0);
@@ -103,13 +97,7 @@ pub fn get_ciede_difference<T: FloatComponent>(this: &LabColorDiff<T>, other: &L
         * (-(((h_bar_prime - from_f64(275.0)) / from_f64(25.0))
             * ((h_bar_prime - from_f64(275.0)) / from_f64(25.0))))
         .exp();
-    let c_bar_prime_pow_seven = c_bar_prime
-        * c_bar_prime
-        * c_bar_prime
-        * c_bar_prime
-        * c_bar_prime
-        * c_bar_prime
-        * c_bar_prime;
+    let c_bar_prime_pow_seven = c_bar_prime.powi(7);
     let r_c: T = from_f64::<T>(2.0)
         * (c_bar_prime_pow_seven / (c_bar_prime_pow_seven + twenty_five_pow_seven)).sqrt();
     let r_t = -r_c * (from_f64::<T>(2.0) * delta_theta * pi_over_180).sin();

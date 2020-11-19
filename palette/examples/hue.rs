@@ -3,7 +3,7 @@ use palette::{FromColor, Hsl, Hue, Lch, Pixel, Srgb};
 fn main() {
     let mut image = image::open("example-data/input/fruits.png")
         .expect("could not open 'example-data/input/fruits.png'")
-        .to_rgb();
+        .to_rgb8();
 
     //Shift hue by 180 degrees as HSL in bottom left part, and as LCh in top
     //right part. Notice how LCh manages to preserve the apparent lightness of

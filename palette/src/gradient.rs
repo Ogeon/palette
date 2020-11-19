@@ -31,7 +31,7 @@ impl<C: Mix + Clone> Gradient<C> {
         C::Scalar: FromF64,
     {
         let mut points: Vec<_> = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
-        assert!(points.len() > 0);
+        assert!(!points.is_empty());
         let step_size = C::Scalar::one() / from_f64(max(points.len() - 1, 1) as f64);
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
@@ -45,7 +45,7 @@ impl<C: Mix + Clone> Gradient<C> {
     /// be at least one color and they are expected to be ordered by their
     /// position value.
     pub fn with_domain(colors: Vec<(C::Scalar, C)>) -> Gradient<C> {
-        assert!(colors.len() > 0);
+        assert!(!colors.is_empty());
 
         //Maybe sort the colors?
         Gradient(colors)

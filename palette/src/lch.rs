@@ -20,7 +20,7 @@ use crate::{
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
 /// `Alpha`](crate::Alpha#Lcha).
-pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
+pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
 
 /// CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](crate::Lab).
 ///

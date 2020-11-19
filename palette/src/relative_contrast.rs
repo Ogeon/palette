@@ -52,7 +52,7 @@ pub trait RelativeContrast {
     /// The type of the contrast ratio.
     type Scalar: FromF64 + PartialOrd;
 
-    /// Calculate contrast ratio between two colors.
+    /// Calculate the contrast ratio between two colors.
     fn get_contrast_ratio(&self, other: &Self) -> Self::Scalar;
     /// Verify the contrast between two colors satisfies SC 1.4.3. Contrast
     /// is at least 4.5:1 (Level AA).
@@ -81,13 +81,10 @@ pub trait RelativeContrast {
     }
 }
 
-/// Calculate a ratio between two `luma` values.
+/// Calculate the ratio between two `luma` values.
 pub fn contrast_ratio<T>(luma1: T, luma2: T) -> T
 where
-    T: Add<Output = T>,
-    T: Div<Output = T>,
-    T: FromF64,
-    T: Component,
+    T: Component + FromF64 + Add<Output = T> + Div<Output = T>,
 {
     if luma1 > luma2 {
         (luma1 + from_f64(0.05)) / (luma2 + from_f64(0.05))

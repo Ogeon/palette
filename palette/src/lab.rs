@@ -20,7 +20,7 @@ use crate::{
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
 /// implementation in `Alpha`](crate::Alpha#Laba).
-pub type Laba<Wp, T = f32> = Alpha<Lab<Wp, T>, T>;
+pub type Laba<Wp = D65, T = f32> = Alpha<Lab<Wp, T>, T>;
 
 /// The CIE L\*a\*b\* (CIELAB) color space.
 ///

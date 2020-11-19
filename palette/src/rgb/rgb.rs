@@ -1060,7 +1060,7 @@ impl<S: RgbStandard> FromStr for Rgb<S, u8> {
     // Parses a color hex code of format '#ff00bb' or '#abc' into a
     // Rgb<S, u8> instance.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
-        let hex_code = if hex.starts_with('#') { &hex[1..] } else { hex };
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
         match hex_code.len() {
             3 => {
                 let red = u8::from_str_radix(&hex_code[..1], 16)?;
