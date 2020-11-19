@@ -3,7 +3,7 @@
 //! Palette offers both OpenGL style blending equations, as well as most of the
 //! SVG composition operators (also common in photo manipulation software). The
 //! composition operators are all implemented in the
-//! [`Blend`](trait.Blend.html) trait, and ready to use with any appropriate
+//! [`Blend`](crate::Blend) trait, and ready to use with any appropriate
 //! color type:
 //!
 //! ```
@@ -15,7 +15,7 @@
 //! ```
 //!
 //! Blending equations can be defined using the
-//! [`Equations`](struct.Equations.html) type, which is then passed to the
+//! [`Equations`](crate::blend::Equations) type, which is then passed to the
 //! `blend` function, from the `Blend` trait:
 //!
 //! ```
@@ -32,7 +32,7 @@
 //! let c = a.blend(b, blend_mode);
 //! ```
 //!
-//! Note that blending will use [premultiplied alpha](struct.PreAlpha.html),
+//! Note that blending will use [premultiplied alpha](crate::blend::PreAlpha),
 //! which may result in loss of some color information in some cases. One such
 //! case is that a completely transparent resultant color will become black.
 

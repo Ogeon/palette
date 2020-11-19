@@ -21,19 +21,19 @@ use crate::{
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
-/// `Alpha`](struct.Alpha.html#Hsla).
+/// `Alpha`](crate::Alpha#Hsla).
 pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 
 /// HSL color space.
 ///
 /// The HSL color space can be seen as a cylindrical version of
-/// [RGB](rgb/struct.Rgb.html), where the `hue` is the angle around the color
+/// [RGB](crate::rgb::Rgb), where the `hue` is the angle around the color
 /// cylinder, the `saturation` is the distance from the center, and the
 /// `lightness` is the height from the bottom. Its composition makes it
 /// especially good for operations like changing green to red, making a color
 /// more gray, or making it darker.
 ///
-/// See [HSV](struct.Hsv.html) for a very similar color space, with brightness
+/// See [HSV](crate::Hsv) for a very similar color space, with brightness
 /// instead of lightness.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -158,7 +158,7 @@ where
     }
 }
 
-///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
+///<span id="Hsla"></span>[`Hsla`](crate::Hsla) implementations.
 impl<T, A> Alpha<Hsl<Srgb, T>, A>
 where
     T: FloatComponent,
@@ -173,7 +173,7 @@ where
     }
 }
 
-///<span id="Hsla"></span>[`Hsla`](type.Hsla.html) implementations.
+///<span id="Hsla"></span>[`Hsla`](crate::Hsla) implementations.
 impl<S, T, A> Alpha<Hsl<S, T>, A>
 where
     T: FloatComponent,

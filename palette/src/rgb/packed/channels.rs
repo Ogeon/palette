@@ -4,7 +4,7 @@ use crate::rgb;
 
 /// RGBA color packed in ABGR order.
 ///
-/// See [Packed](struct.Packed.html) for more details.
+/// See [Packed](crate::Packed) for more details.
 pub struct Abgr;
 
 impl RgbChannels for Abgr {
@@ -19,7 +19,7 @@ impl RgbChannels for Abgr {
 
 /// RGBA color packed in ARGB order.
 ///
-/// See [Packed](struct.Packed.html) for more details.
+/// See [Packed](crate::Packed) for more details.
 pub struct Argb;
 
 impl RgbChannels for Argb {
@@ -34,7 +34,7 @@ impl RgbChannels for Argb {
 
 /// RGBA color packed in BGRA order.
 ///
-/// See [Packed](struct.Packed.html) for more details.
+/// See [Packed](crate::Packed) for more details.
 pub struct Bgra;
 
 impl RgbChannels for Bgra {
@@ -49,7 +49,7 @@ impl RgbChannels for Bgra {
 
 /// RGBA color packed in RGBA order.
 ///
-/// See [Packed](struct.Packed.html) for more details.
+/// See [Packed](crate::Packed) for more details.
 pub struct Rgba;
 
 impl RgbChannels for Rgba {
