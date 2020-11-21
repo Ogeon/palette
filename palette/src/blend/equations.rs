@@ -94,12 +94,8 @@ where
             Equation::Add => src_color.component_wise(&dst_color, |a, b| a + b),
             Equation::Subtract => src_color.component_wise(&dst_color, |a, b| a - b),
             Equation::ReverseSubtract => dst_color.component_wise(&src_color, |a, b| a - b),
-            Equation::Min => source
-                .color
-                .component_wise(&destination.color, |a, b| a.min(b)),
-            Equation::Max => source
-                .color
-                .component_wise(&destination.color, |a, b| a.max(b)),
+            Equation::Min => source.color.component_wise(&destination.color, Float::min),
+            Equation::Max => source.color.component_wise(&destination.color, Float::max),
         };
 
         let alpha = match self.alpha_equation {

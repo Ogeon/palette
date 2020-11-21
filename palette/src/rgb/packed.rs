@@ -45,7 +45,7 @@ use crate::Pixel;
 /// corresponding `u32`. Converting from a packed color type back to an `Rgb`
 /// type will disregard the alpha value.
 ///
-/// `Packed` implements [Pixel](encoding/pixel/trait.Pixel.html) and can be
+/// `Packed` implements [Pixel](crate::encoding::pixel::Pixel) and can be
 /// constructed from a slice of `&[u32]`.
 ///
 /// ```
@@ -68,7 +68,7 @@ pub struct Packed<C: RgbChannels = channels::Argb> {
 
     /// The channel ordering for red, green, blue, and alpha components in the
     /// packed integer; can be `Abgr`, `Argb`, `Bgra`, or `Rgba`. See
-    /// [RgbChannels](trait.RgbChannels.html).
+    /// [RgbChannels](crate::RgbChannels).
     #[palette(unsafe_zero_sized)]
     pub channel_order: PhantomData<C>,
 }

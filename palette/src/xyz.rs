@@ -20,7 +20,7 @@ use crate::{
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
-/// `Alpha`](struct.Alpha.html#Xyza).
+/// `Alpha`](crate::Alpha#Xyza).
 pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 
 /// The CIE 1931 XYZ color space.
@@ -157,7 +157,7 @@ where
     }
 }
 
-///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
+///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
 impl<T, A> Alpha<Xyz<D65, T>, A>
 where
     T: FloatComponent,
@@ -172,7 +172,7 @@ where
     }
 }
 
-///<span id="Xyza"></span>[`Xyza`](type.Xyza.html) implementations.
+///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
 impl<Wp, T, A> Alpha<Xyz<Wp, T>, A>
 where
     T: FloatComponent,

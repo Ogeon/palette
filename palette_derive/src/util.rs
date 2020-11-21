@@ -5,7 +5,7 @@ use syn::{parse_quote, Ident, Type};
 pub fn path<'a, P: AsRef<[&'a str]>>(path: P, internal: bool) -> TokenStream {
     let path = path
         .as_ref()
-        .into_iter()
+        .iter()
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {
@@ -18,7 +18,7 @@ pub fn path<'a, P: AsRef<[&'a str]>>(path: P, internal: bool) -> TokenStream {
 
 pub fn path_type(path: &[&str], internal: bool) -> Type {
     let path = path
-        .into_iter()
+        .iter()
         .map(|&ident| Ident::new(ident, Span::call_site()));
 
     if internal {

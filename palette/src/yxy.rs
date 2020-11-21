@@ -18,7 +18,7 @@ use crate::{
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
-/// in `Alpha`](struct.Alpha.html#Yxya).
+/// in `Alpha`](crate::Alpha#Yxya).
 pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 
 /// The CIE 1931 Yxy (xyY)  color space.
@@ -150,7 +150,7 @@ where
     }
 }
 
-///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
+///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
 impl<T, A> Alpha<Yxy<D65, T>, A>
 where
     T: FloatComponent,
@@ -164,7 +164,7 @@ where
         }
     }
 }
-///<span id="Yxya"></span>[`Yxya`](type.Yxya.html) implementations.
+///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
 impl<Wp, T, A> Alpha<Yxy<Wp, T>, A>
 where
     T: FloatComponent,

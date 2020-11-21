@@ -21,13 +21,13 @@ use crate::{
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
-/// `Alpha`](struct.Alpha.html#Hwba).
+/// `Alpha`](crate::Alpha#Hwba).
 pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 
 /// HWB color space.
 ///
-/// HWB is a cylindrical version of [RGB](rgb/struct.Rgb.html) and it's very
-/// closely related to [HSV](struct.Hsv.html). It describes colors with a
+/// HWB is a cylindrical version of [RGB](crate::rgb::Rgb) and it's very
+/// closely related to [HSV](crate::Hsv). It describes colors with a
 /// starting hue, then a degree of whiteness and blackness to mix into that
 /// base hue.
 ///
@@ -161,7 +161,7 @@ where
     }
 }
 
-///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
+///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
 impl<T, A> Alpha<Hwb<Srgb, T>, A>
 where
     T: FloatComponent,
@@ -176,7 +176,7 @@ where
     }
 }
 
-///<span id="Hwba"></span>[`Hwba`](type.Hwba.html) implementations.
+///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
 impl<S, T, A> Alpha<Hwb<S, T>, A>
 where
     T: FloatComponent,

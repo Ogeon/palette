@@ -13,7 +13,7 @@
 //! to perform on colors (addition, subtraction, multiplication, linear interpolation,
 //! etc.) will work unexpectedly when performed in such a non-linear color space. As
 //! such, the compression has to be reverted to restore linearity and make sure that
-//! many operations on the colors are accurate. 
+//! many operations on the colors are accurate.
 //!
 //! For example, this does not work:
 //!
@@ -96,7 +96,7 @@
 //! also many cases where it becomes a dead weight, if it's always stored
 //! together with the color, but not used. Palette has therefore adopted a
 //! structure where the transparency component (alpha) is attachable using the
-//! [`Alpha`](struct.Alpha.html) type, instead of having copies of each color
+//! [`Alpha`](crate::Alpha) type, instead of having copies of each color
 //! space.
 //!
 //! This approach comes with the extra benefit of allowing operations to
@@ -184,7 +184,7 @@
 //! # Working with Raw Data
 //!
 //! Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. The
-//! [`Pixel`](encoding/pixel/trait.Pixel.html) trait allows for easy interoperation between
+//! [`Pixel`](crate::encoding::pixel::Pixel) trait allows for easy interoperation between
 //! Palette colors and other crates or systems. `from_raw` can be used to
 //! convert into a Palette color, `into_format` converts from  `Srgb<u8>` to
 //! `Srgb<f32>`, and finally `into_raw` to convert from a Palette color back to

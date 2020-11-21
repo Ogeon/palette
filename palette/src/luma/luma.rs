@@ -23,7 +23,7 @@ use crate::{
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
-/// in `Alpha`](struct.Alpha.html#Lumaa).
+/// in `Alpha`](crate::Alpha#Lumaa).
 pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 
 /// Luminance.
@@ -31,7 +31,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 /// Luma is a purely gray scale color space, which is included more for
 /// completeness than anything else, and represents how bright a color is
 /// perceived to be. It's basically the `Y` component of [CIE
-/// XYZ](struct.Xyz.html). The lack of any form of hue representation limits
+/// XYZ](crate::Xyz). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -166,7 +166,7 @@ where
     }
 }
 
-///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
+///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: Component,
@@ -212,7 +212,7 @@ where
     }
 }
 
-///<span id="Lumaa"></span>[`Lumaa`](type.Lumaa.html) implementations.
+///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: FloatComponent,

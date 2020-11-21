@@ -29,7 +29,7 @@ use crate::{
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
-/// `Alpha`](../struct.Alpha.html#Rgba).
+/// `Alpha`](crate::Alpha#Rgba).
 pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 
 /// Generic RGB.
@@ -41,7 +41,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 ///
 /// Many conversions and operations on this color space requires that it's
 /// linear, meaning that gamma correction is required when converting to and
-/// from a displayable RGB, such as sRGB. See the [`pixel`](pixel/index.html)
+/// from a displayable RGB, such as sRGB. See the [`pixel`](crate::encoding::pixel)
 /// module for encoding formats.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -169,7 +169,7 @@ impl<S: RgbStandard> Rgb<S, u8> {
     /// Convert to a packed `u32` with with specifiable component order.
     /// Defaults to ARGB ordering (0xAARRGGBB).
     ///
-    /// See [Packed](struct.Packed.html) for more details.
+    /// See [Packed](crate::Packed) for more details.
     pub fn into_u32<C: RgbChannels>(self) -> u32 {
         Packed::<C>::from(self).color
     }
@@ -177,7 +177,7 @@ impl<S: RgbStandard> Rgb<S, u8> {
     /// Convert from a packed `u32` with specifiable component order. Defaults
     /// to ARGB ordering (0xAARRGGBB).
     ///
-    /// See [Packed](struct.Packed.html) for more details.
+    /// See [Packed](crate::Packed) for more details.
     pub fn from_u32<C: RgbChannels>(color: u32) -> Self {
         Packed::<C>::from(color).into()
     }
@@ -236,7 +236,7 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     }
 }
 
-/// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
+/// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
 impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     /// Nonlinear RGB.
     pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
@@ -297,7 +297,7 @@ impl<S: RgbStandard> Rgba<S, u8> {
     /// Convert to a packed `u32` with with specifiable component order.
     /// Defaults to ARGB ordering (0xAARRGGBB).
     ///
-    /// See [Packed](struct.Packed.html) for more details.
+    /// See [Packed](crate::Packed) for more details.
     pub fn into_u32<C: RgbChannels>(self) -> u32 {
         Packed::<C>::from(self).color
     }
@@ -305,13 +305,13 @@ impl<S: RgbStandard> Rgba<S, u8> {
     /// Convert from a packed `u32` with specifiable component order. Defaults
     /// to ARGB ordering (0xAARRGGBB).
     ///
-    /// See [Packed](struct.Packed.html) for more details.
+    /// See [Packed](crate::Packed) for more details.
     pub fn from_u32<C: RgbChannels>(color: u32) -> Self {
         Packed::<C>::from(color).into()
     }
 }
 
-/// <span id="Rgba"></span>[`Rgba`](rgb/type.Rgba.html) implementations.
+/// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
 impl<S: RgbStandard, T: FloatComponent, A: Component> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
     pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
@@ -1060,7 +1060,7 @@ impl<S: RgbStandard> FromStr for Rgb<S, u8> {
     // Parses a color hex code of format '#ff00bb' or '#abc' into a
     // Rgb<S, u8> instance.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
-        let hex_code = if hex.starts_with('#') { &hex[1..] } else { hex };
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
         match hex_code.len() {
             3 => {
                 let red = u8::from_str_radix(&hex_code[..1], 16)?;

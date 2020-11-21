@@ -19,14 +19,14 @@ use crate::{
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
-/// `Alpha`](struct.Alpha.html#Lcha).
-pub type Lcha<Wp, T = f32> = Alpha<Lch<Wp, T>, T>;
+/// `Alpha`](crate::Alpha#Lcha).
+pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
 
-/// CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](struct.Lab.html).
+/// CIE L\*C\*h°, a polar version of [CIE L\*a\*b\*](crate::Lab).
 ///
 /// L\*C\*h° shares its range and perceptual uniformity with L\*a\*b\*, but
-/// it's a cylindrical color space, like [HSL](struct.Hsl.html) and
-/// [HSV](struct.Hsv.html). This gives it the same ability to directly change
+/// it's a cylindrical color space, like [HSL](crate::Hsl) and
+/// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -151,7 +151,7 @@ where
     }
 }
 
-///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
+///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
 impl<T, A> Alpha<Lch<D65, T>, A>
 where
     T: FloatComponent,
@@ -166,7 +166,7 @@ where
     }
 }
 
-///<span id="Lcha"></span>[`Lcha`](type.Lcha.html) implementations.
+///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
 impl<Wp, T, A> Alpha<Lch<Wp, T>, A>
 where
     T: FloatComponent,

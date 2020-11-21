@@ -5,7 +5,7 @@ use image::{GenericImage, GenericImageView};
 fn main() {
     let mut image = image::open("example-data/input/cat.png")
         .expect("could not open 'example-data/input/cat.png'")
-        .to_rgb();
+        .to_rgb8();
 
     let width = image.width();
     let height = image.height();
@@ -49,7 +49,7 @@ fn main() {
             }
         }
     }
-    
+
     let _ = std::fs::create_dir("example-data/output");
     match image.save("example-data/output/saturate.png") {
         Ok(()) => println!("see 'example-data/output/saturate.png' for the result"),

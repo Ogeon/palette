@@ -105,9 +105,7 @@ fn prepare_from_impl(
     generics: &Generics,
     generic_component: bool,
 ) -> Result<Vec<FromImplParameters>> {
-    let included_colors = COLOR_TYPES
-        .into_iter()
-        .filter(|&&color| !skip.contains(color));
+    let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
     let linear_path = util::path(&["encoding", "Linear"], meta.internal);
 
     let mut parameters = Vec::new();

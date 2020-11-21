@@ -6,7 +6,7 @@
 //! The default minimum requirement is to implement `FromColorUnclamped<Xyz>`, but it can
 //! also be customized to make use of generics and have other manual implementations.
 //!
-//! It is also recommended to derive or implement [`WithAlpha`](../trait.WithAlpha.html),
+//! It is also recommended to derive or implement [`WithAlpha`](crate::WithAlpha),
 //! to be able to convert between all `Alpha` wrapped color types.
 //!
 //! ## Configuration Attributes
@@ -319,7 +319,7 @@ impl<T> Display for OutOfBounds<T> {
 ///
 /// `U: IntoColor<T>` is implemented for every type `T: FromColor<U>`.
 ///
-/// See [`FromColor`](trait.FromColor.html) for more details.
+/// See [`FromColor`](crate::convert::FromColor) for more details.
 pub trait IntoColor<T>: Sized {
     /// Convert into T with values clamped to the color defined bounds
     ///
@@ -336,7 +336,7 @@ pub trait IntoColor<T>: Sized {
 ///
 /// `U: IntoColorUnclamped<T>` is implemented for every type `T: FromColorUnclamped<U>`.
 ///
-/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for more details.
+/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for more details.
 pub trait IntoColorUnclamped<T>: Sized {
     /// Convert into T. The resulting color might be invalid in its color space
     ///
@@ -354,7 +354,7 @@ pub trait IntoColorUnclamped<T>: Sized {
 ///
 /// `U: TryIntoColor<T>` is implemented for every type `T: TryFromColor<U>`.
 ///
-/// See [`TryFromColor`](trait.TryFromColor.html) for more details.
+/// See [`TryFromColor`](crate::convert::TryFromColor) for more details.
 pub trait TryIntoColor<T>: Sized {
     /// Convert into T, returning ok if the color is inside of its defined
     /// range, otherwise an `OutOfBounds` error is returned which contains
@@ -379,8 +379,8 @@ pub trait TryIntoColor<T>: Sized {
 ///
 /// `U: FromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
 ///
-/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for a lossless version of this trait.
-/// See [`TryFromColor`](trait.TryFromColor.html) for a trait that gives an error when the result
+/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version of this trait.
+/// See [`TryFromColor`](crate::convert::TryFromColor) for a trait that gives an error when the result
 /// is out of bounds.
 ///
 /// # The Difference Between FromColor and From
@@ -398,7 +398,7 @@ pub trait TryIntoColor<T>: Sized {
 /// traits, while `From` and `Into` would not be possible to blanket implement in the same way.
 /// This also reduces the work that needs to be done by macros.
 ///
-/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// See the [`convert`](crate::convert) module for how to implement `FromColorUnclamped` for
 /// custom colors.
 pub trait FromColor<T>: Sized {
     /// Convert from T with values clamped to the color defined bounds.
@@ -414,11 +414,11 @@ pub trait FromColor<T>: Sized {
 
 /// A trait for unchecked conversion of one color from another.
 ///
-/// See [`FromColor`](trait.FromColor.html) for a lossy version of this trait.
-/// See [`TryFromColor`](trait.TryFromColor.html) for a trait that gives an error when the result
+/// See [`FromColor`](crate::convert::FromColor) for a lossy version of this trait.
+/// See [`TryFromColor`](crate::convert::TryFromColor) for a trait that gives an error when the result
 /// is out of bounds.
 ///
-/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// See the [`convert`](crate::convert) module for how to implement `FromColorUnclamped` for
 /// custom colors.
 pub trait FromColorUnclamped<T>: Sized {
     /// Convert from T. The resulting color might be invalid in its color space.
@@ -437,10 +437,10 @@ pub trait FromColorUnclamped<T>: Sized {
 ///
 /// `U: TryFromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
 ///
-/// See [`FromColor`](trait.FromColor.html) for a lossy version of this trait.
-/// See [`FromColorUnclamped`](trait.FromColorUnclamped.html) for a lossless version.
+/// See [`FromColor`](crate::convert::FromColor) for a lossy version of this trait.
+/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version.
 ///
-/// See the [`convert`](index.html) module for how to implement `FromColorUnclamped` for
+/// See the [`convert`](crate::convert) module for how to implement `FromColorUnclamped` for
 /// custom colors.
 pub trait TryFromColor<T>: Sized {
     /// Convert from T, returning ok if the color is inside of its defined
