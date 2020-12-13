@@ -22,7 +22,7 @@ where
     T: AsRef<[(C::Scalar, C)]>,
 {
     fn from(col: T) -> Self {
-        Gradient(col, PhantomData)
+        Gradient::with_domain(col)
     }
 }
 

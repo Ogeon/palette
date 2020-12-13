@@ -239,7 +239,12 @@ where
     T: FloatComponent,
     S: RgbStandard,
 {
-    fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
+    fn from_color_unclamped(mut rgb: Rgb<S, T>) -> Self {
+        // Avoid negative numbers
+        rgb.red = rgb.red.max(T::zero());
+        rgb.green = rgb.green.max(T::zero());
+        rgb.blue = rgb.blue.max(T::zero());
+
         let (max, min, sep, coeff) = {
             let (max, min, sep, coeff) = if rgb.red > rgb.green {
                 (rgb.red, rgb.green, rgb.green - rgb.blue, T::zero())
