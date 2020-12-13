@@ -76,14 +76,17 @@ Pull requests that break backwards compatibility should say so in the end of the
 
 Here is an example PR:
 
->### Translate the library to British English
+>## Translate the library to British English
 >
 >The whole library is translated to the one and only Queen's English.
 >
->This closes #123, by changing `Color` to `Colour`.
+>### Closed Issues
 >
->This is a breaking change, since it changes the name of a number of
->identifiers.
+>* This closes #123, by changing `Color` to `Colour`.
+>
+>### Breaking Change
+>
+>This changes the name of a number of identifiers to their British spelling.
 
 That's about it, depending on the size of the contribution.
 
