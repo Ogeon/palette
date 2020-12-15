@@ -56,7 +56,7 @@ where
 
     /// Z is the scale of what can be seen as the blue stimulation. Its range
     /// depends on the white point and goes from 0.0 to 1.08883 for the
-    /// defautl D65.
+    /// default D65.
     pub z: T,
 
     /// The white point associated with the color's illuminant and observer.
@@ -87,7 +87,7 @@ impl<T> Xyz<D65, T>
 where
     T: FloatComponent,
 {
-    /// CIE XYZ with whtie point D65.
+    /// CIE XYZ with white point D65.
     pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
         Xyz {
             x,

@@ -40,7 +40,7 @@ pub enum Method {
     XyzScaling,
 }
 
-/// Holds the matrix coeffecients for the chromatic adaptation methods
+/// Holds the matrix coefficients for the chromatic adaptation methods
 pub struct ConeResponseMatrices<T: Float> {
     ///3x3 matrix for the cone response domains
     pub ma: Mat3<T>,
@@ -48,7 +48,7 @@ pub struct ConeResponseMatrices<T: Float> {
     pub inv_ma: Mat3<T>,
 }
 
-/// Generates a conversion matrix to convert the Xyz trisitmilus values from
+/// Generates a conversion matrix to convert the Xyz tristimulus values from
 /// one illuminant to another (Swp -> Dwp)
 pub trait TransformMatrix<Swp, Dwp, T>
 where
