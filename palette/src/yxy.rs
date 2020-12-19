@@ -24,8 +24,8 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 /// The CIE 1931 Yxy (xyY)  color space.
 ///
 /// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
-/// color space. It is widely used to define colors. The chromacity diagrams
-/// for the color spaces are a plot of this color space's x and y coordiantes.
+/// color space. It is widely used to define colors. The chromaticity diagrams
+/// for the color spaces are a plot of this color space's x and y coordinates.
 ///
 /// Conversions and operations on this color space depend on the white point.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
@@ -42,11 +42,11 @@ where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    /// x chromacity co-ordinate derived from XYZ color space as X/(X+Y+Z).
+    /// x chromaticity co-ordinate derived from XYZ color space as X/(X+Y+Z).
     /// Typical range is between 0 and 1
     pub x: T,
 
-    /// y chromacity co-ordinate derived from XYZ color space as Y/(X+Y+Z).
+    /// y chromaticity co-ordinate derived from XYZ color space as Y/(X+Y+Z).
     /// Typical range is between 0 and 1
     pub y: T,
 
