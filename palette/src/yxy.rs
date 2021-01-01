@@ -650,7 +650,7 @@ where
 pub struct UniformYxy<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     x: Uniform<T>,
     y: Uniform<T>,
@@ -662,7 +662,7 @@ where
 impl<Wp, T> SampleUniform for Yxy<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type Sampler = UniformYxy<Wp, T>;
 }
@@ -671,7 +671,7 @@ where
 impl<Wp, T> UniformSampler for UniformYxy<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type X = Yxy<Wp, T>;
 
@@ -792,5 +792,16 @@ mod test {
         let deserialized: Yxy = ::serde_json::from_str(r#"{"x":0.3,"y":0.8,"luma":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Yxy::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Yxy<D65, f32> {
+            x: (0.0, 1.0),
+            y: (0.0, 1.0),
+            luma: (0.0, 1.0)
+        },
+        min: Yxy::new(0.0f32, 0.0, 0.0),
+        max: Yxy::new(1.0, 1.0, 1.0),
     }
 }

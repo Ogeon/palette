@@ -678,4 +678,16 @@ mod test {
 
         assert_eq!(deserialized, Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5));
     }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Rgba<Srgb, f32> {
+            red: (0.0, 1.0),
+            green: (0.0, 1.0),
+            blue: (0.0, 1.0),
+            alpha: (0.0, 1.0)
+        },
+        min: Rgba::new(0.0f32, 0.0, 0.0, 0.0),
+        max: Rgba::new(1.0, 1.0, 1.0, 1.0)
+    }
 }

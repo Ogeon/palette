@@ -1119,7 +1119,7 @@ where
 pub struct UniformRgb<S, T>
 where
     T: Component + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     red: Uniform<T>,
     green: Uniform<T>,
@@ -1131,7 +1131,7 @@ where
 impl<S, T> SampleUniform for Rgb<S, T>
 where
     T: Component + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type Sampler = UniformRgb<S, T>;
 }
@@ -1140,7 +1140,7 @@ where
 impl<S, T> UniformSampler for UniformRgb<S, T>
 where
     T: Component + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type X = Rgb<S, T>;
 
@@ -1396,5 +1396,16 @@ mod test {
         assert_relative_eq!(Rgb::<Srgb, f32>::max_red(), 1.0);
         assert_relative_eq!(Rgb::<Srgb, f32>::max_green(), 1.0);
         assert_relative_eq!(Rgb::<Srgb, f32>::max_blue(), 1.0);
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Rgb<Srgb, f32> {
+            red: (0.0, 1.0),
+            green: (0.0, 1.0),
+            blue: (0.0, 1.0)
+        },
+        min: Rgb::new(0.0f32, 0.0, 0.0),
+        max: Rgb::new(1.0, 1.0, 1.0)
     }
 }

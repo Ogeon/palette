@@ -713,7 +713,7 @@ where
 pub struct UniformLab<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     l: Uniform<T>,
     a: Uniform<T>,
@@ -725,7 +725,7 @@ where
 impl<Wp, T> SampleUniform for Lab<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type Sampler = UniformLab<Wp, T>;
 }
@@ -734,7 +734,7 @@ where
 impl<Wp, T> UniformSampler for UniformLab<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type X = Lab<Wp, T>;
 
@@ -848,5 +848,16 @@ mod test {
         let deserialized: Lab = ::serde_json::from_str(r#"{"l":0.3,"a":0.8,"b":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Lab::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Lab<D65, f32> {
+            l: (0.0, 100.0),
+            a: (-128.0, 127.0),
+            b: (-128.0, 127.0)
+        },
+        min: Lab::new(0.0f32, -128.0, -128.0),
+        max: Lab::new(100.0, 127.0, 127.0)
     }
 }

@@ -682,7 +682,7 @@ where
 pub struct UniformHsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     hue: crate::hues::UniformRgbHue<T>,
     u1: Uniform<T>,
@@ -694,7 +694,7 @@ where
 impl<S, T> SampleUniform for Hsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type Sampler = UniformHsl<S, T>;
 }
@@ -703,7 +703,7 @@ where
 impl<S, T> UniformSampler for UniformHsl<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type X = Hsl<S, T>;
 
@@ -859,5 +859,50 @@ mod test {
             ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"lightness":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hsl::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Hsl<crate::encoding::Srgb, f32> as crate::rgb::Rgb {
+            red: (0.0, 1.0),
+            green: (0.0, 1.0),
+            blue: (0.0, 1.0)
+        },
+        min: Hsl::new(0.0f32, 0.0, 0.0),
+        max: Hsl::new(360.0, 1.0, 1.0)
+    }
+
+    /// Sanity check to make sure the test doesn't start accepting known
+    /// non-uniform distributions.
+    #[cfg(feature = "random")]
+    #[test]
+    #[should_panic(expected = "is not uniform enough")]
+    fn uniform_distribution_fail() {
+        use rand::Rng;
+
+        const BINS: usize = crate::random_sampling::test_utils::BINS;
+        const SAMPLES: usize = crate::random_sampling::test_utils::SAMPLES;
+
+        let mut red = [0; BINS];
+        let mut green = [0; BINS];
+        let mut blue = [0; BINS];
+
+        let mut rng = rand_mt::Mt::new(1234); // We want the same seed on every run to avoid random fails
+
+        for _ in 0..SAMPLES {
+            let color = Hsl::<crate::encoding::Srgb, f32>::new(
+                rng.gen::<f32>() * 360.0,
+                rng.gen(),
+                rng.gen(),
+            );
+            let color: crate::rgb::Rgb = crate::IntoColor::into_color(color);
+            red[((color.red * BINS as f32) as usize).min(9)] += 1;
+            green[((color.green * BINS as f32) as usize).min(9)] += 1;
+            blue[((color.blue * BINS as f32) as usize).min(9)] += 1;
+        }
+
+        assert_uniform_distribution!(red);
+        assert_uniform_distribution!(green);
+        assert_uniform_distribution!(blue);
     }
 }

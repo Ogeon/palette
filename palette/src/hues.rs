@@ -317,13 +317,18 @@ where
         B2: SampleBorrow<Self::X> + Sized,
     {
         let low = *low_b.borrow();
+        let normalized_low = LabHue::to_positive_degrees(low);
         let high = *high_b.borrow();
+        let normalized_high = LabHue::to_positive_degrees(high);
+
+        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+            normalized_high + from_f64(360.0)
+        } else {
+            normalized_high
+        };
 
         UniformLabHue {
-            hue: Uniform::new(
-                LabHue::to_positive_degrees(low),
-                LabHue::to_positive_degrees(high),
-            ),
+            hue: Uniform::new(normalized_low, normalized_high),
         }
     }
 
@@ -333,13 +338,18 @@ where
         B2: SampleBorrow<Self::X> + Sized,
     {
         let low = *low_b.borrow();
+        let normalized_low = LabHue::to_positive_degrees(low);
         let high = *high_b.borrow();
+        let normalized_high = LabHue::to_positive_degrees(high);
+
+        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+            normalized_high + from_f64(360.0)
+        } else {
+            normalized_high
+        };
 
         UniformLabHue {
-            hue: Uniform::new_inclusive(
-                LabHue::to_positive_degrees(low),
-                LabHue::to_positive_degrees(high),
-            ),
+            hue: Uniform::new_inclusive(normalized_low, normalized_high),
         }
     }
 
@@ -377,13 +387,18 @@ where
         B2: SampleBorrow<Self::X> + Sized,
     {
         let low = *low_b.borrow();
+        let normalized_low = RgbHue::to_positive_degrees(low);
         let high = *high_b.borrow();
+        let normalized_high = RgbHue::to_positive_degrees(high);
+
+        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+            normalized_high + from_f64(360.0)
+        } else {
+            normalized_high
+        };
 
         UniformRgbHue {
-            hue: Uniform::new(
-                RgbHue::to_positive_degrees(low),
-                RgbHue::to_positive_degrees(high),
-            ),
+            hue: Uniform::new(normalized_low, normalized_high),
         }
     }
 
@@ -393,13 +408,18 @@ where
         B2: SampleBorrow<Self::X> + Sized,
     {
         let low = *low_b.borrow();
+        let normalized_low = RgbHue::to_positive_degrees(low);
         let high = *high_b.borrow();
+        let normalized_high = RgbHue::to_positive_degrees(high);
+
+        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+            normalized_high + from_f64(360.0)
+        } else {
+            normalized_high
+        };
 
         UniformRgbHue {
-            hue: Uniform::new_inclusive(
-                RgbHue::to_positive_degrees(low),
-                RgbHue::to_positive_degrees(high),
-            ),
+            hue: Uniform::new_inclusive(normalized_low, normalized_high),
         }
     }
 

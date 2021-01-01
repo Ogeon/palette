@@ -38,7 +38,7 @@ version = "0.8"
 optional = true
 
 [dependencies.rand]
-version = "0.7"
+version = "0.8"
 default-features = false
 optional = true
 
@@ -66,6 +66,11 @@ default-features = false
 version = "0.23"
 default-features = false
 features = ["png"]
+
+[dev-dependencies.rand_mt]
+version = "4"
+default-features = false
+features = ["rand-traits"]
 
 [build-dependencies.phf_codegen]
 version = "0.8"
