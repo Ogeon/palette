@@ -182,49 +182,49 @@ impl TransferFn for Transfer601And709 {
 }
 
 impl DifferenceFn for DifferenceFn601 {
-    fn luminance<T: Float>() -> [T; 3] {
+    fn luminance<T: FloatComponent>() -> [T; 3] {
         // Full intensity matches whitepoint, these are exactly the Y component of primares.
         let (r, g, b) = BT601_LUMINANCE;
         [cast(r), cast(g), cast(b)]
     }
 
-    fn norm_blue<T: Float>(denorm: T) -> T {
+    fn norm_blue<T: FloatComponent>(denorm: T) -> T {
         denorm / cast(BT601_BLUE_NORM)
     }
 
-    fn denorm_blue<T: Float>(norm: T) -> T {
+    fn denorm_blue<T: FloatComponent>(norm: T) -> T {
         norm * cast(BT601_BLUE_NORM)
     }
 
-    fn norm_red<T: Float>(denorm: T) -> T {
+    fn norm_red<T: FloatComponent>(denorm: T) -> T {
         denorm / cast(BT601_RED_NORM)
     }
 
-    fn denorm_red<T: Float>(norm: T) -> T {
+    fn denorm_red<T: FloatComponent>(norm: T) -> T {
         norm * cast(BT601_RED_NORM)
     }
 }
 
 impl DifferenceFn for DifferenceFn709 {
-    fn luminance<T: Float>() -> [T; 3] {
+    fn luminance<T: FloatComponent>() -> [T; 3] {
         // Full intensity matches whitepoint, these are exactly the Y component of primares.
         let (r, g, b) = BT709_WEIGHTS;
         [cast(r), cast(g), cast(b)]
     }
 
-    fn norm_blue<T: Float>(denorm: T) -> T {
+    fn norm_blue<T: FloatComponent>(denorm: T) -> T {
         denorm / cast(BT709_BLUE_NORM)
     }
 
-    fn denorm_blue<T: Float>(norm: T) -> T {
+    fn denorm_blue<T: FloatComponent>(norm: T) -> T {
         norm * cast(BT709_BLUE_NORM)
     }
 
-    fn norm_red<T: Float>(denorm: T) -> T {
+    fn norm_red<T: FloatComponent>(denorm: T) -> T {
         denorm / cast(BT709_RED_NORM)
     }
 
-    fn denorm_red<T: Float>(norm: T) -> T {
+    fn denorm_red<T: FloatComponent>(norm: T) -> T {
         norm * cast(BT709_RED_NORM)
     }
 }

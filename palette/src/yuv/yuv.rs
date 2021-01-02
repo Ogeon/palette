@@ -5,9 +5,9 @@ use crate::float::Float;
 use crate::encoding::Linear;
 use crate::convert::FromColorUnclamped;
 use crate::luma::{Luma, LumaStandard};
-use crate::rgb::{Rgb, RgbSpace};
+use crate::rgb::{Rgb, RgbStandard, RgbSpace};
 use crate::yuv::{DifferenceFn, YuvStandard};
-use crate::{FloatComponent, Pixel, Xyz};
+use crate::{FloatComponent, FromColor, Pixel, Xyz};
 
 /// Generic YUV.
 ///
@@ -66,8 +66,8 @@ impl<S: YuvStandard, T: Float> Yuv<S, T> {
         T: FloatComponent,
         Sp: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
     {
-        let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from(rgb);
-        let rgb = Rgb::<(S::RgbSpace, S::TransferFn), T>::from(xyz);
+        let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from_color(rgb);
+        let rgb = Rgb::<(S::RgbSpace, S::TransferFn), T>::from_color(xyz);
         let weights = S::DifferenceFn::luminance::<T>();
         let luminance = weights[0]*rgb.red + weights[1]*rgb.green + weights[2]*rgb.blue;
         let blue_diff = S::DifferenceFn::norm_blue(luminance - rgb.blue);
@@ -101,5 +101,49 @@ where
 {
     fn from(color: Luma<St, T>) -> Self {
         Yuv::new(color.luma, T::zero(), T::zero())
+    }
+}
+
+impl<S, T, St> From<Rgb<St, T>> for Yuv<S, T>
+where
+    S: YuvStandard,
+    T: FloatComponent,
+    St: RgbStandard,
+    St::Space: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
+{
+    fn from(color: Rgb<St, T>) -> Self {
+        let linear = color.into_linear();
+        Yuv::from_rgb_internal(linear)
+    }
+}
+
+impl<S, St, T> FromColorUnclamped<Luma<St, T>> for Yuv<S, T>
+where
+    S: YuvStandard,
+    T: FloatComponent,
+    St: LumaStandard<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
+{
+    fn from_color_unclamped(color: Luma<St, T>) -> Self {
+        let luma = color.into_linear();
+
+        Self::from(Rgb::<Linear<S::RgbSpace>, T> {
+            red: luma.luma,
+            green: luma.luma,
+            blue: luma.luma,
+            standard: PhantomData,
+        })
+    }
+}
+
+impl<S, St, T> FromColorUnclamped<Rgb<St, T>> for Yuv<S, T>
+where
+    S: YuvStandard,
+    T: FloatComponent,
+    St: RgbStandard,
+    St::Space: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
+{
+    fn from_color_unclamped(color: Rgb<St, T>) -> Self {
+        let linear = color.into_linear();
+        Yuv::from_rgb_internal(linear)
     }
 }

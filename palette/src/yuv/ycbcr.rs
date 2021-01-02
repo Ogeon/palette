@@ -1,7 +1,7 @@
 //! A quantized color representation.
 use core::marker::PhantomData;
 
-use yuv::{QuantizationFn, YuvStandard};
+use crate::yuv::{QuantizationFn, YuvStandard};
 
 /// A quantized YUV color value.
 ///
@@ -10,7 +10,9 @@ use yuv::{QuantizationFn, YuvStandard};
 /// and high ends of the available code symbols.
 #[derive(Debug, PartialEq, Pixel)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette_internal]
+#[palette(
+    palette_internal,
+)]
 #[repr(C)]
 pub struct YCbCr<S: YuvStandard, Q: QuantizationFn> {
     /// The lumnance signal where `0.0f` is no light and `1.0f` means a maximum displayable amount
@@ -27,6 +29,6 @@ pub struct YCbCr<S: YuvStandard, Q: QuantizationFn> {
 
     /// The kind of YUV standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette_unsafe_zero_sized]
+    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }

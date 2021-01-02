@@ -1,6 +1,4 @@
 //! YUV types, spaces and standards.
-use crate::float::Float;
-
 use crate::encoding::{TransferFn};
 use crate::rgb::RgbSpace;
 use crate::{Component, FloatComponent};
@@ -47,19 +45,19 @@ pub trait DifferenceFn {
     /// parameterization of the color space primaries. However, they may add up to a value smaller
     /// than `1` to represent colors appearing brighter than the white point i.e. offer a larger
     /// dynamic range than otherwise possible.
-    fn luminance<T: Float>() -> [T; 3];
+    fn luminance<T: FloatComponent>() -> [T; 3];
 
     /// Normalize the difference of luminance and blue channel.
-    fn norm_blue<T: Float>(denorm: T) -> T;
+    fn norm_blue<T: FloatComponent>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and blue channel.
-    fn denorm_blue<T: Float>(norm: T) -> T;
+    fn denorm_blue<T: FloatComponent>(norm: T) -> T;
 
     /// Normalize the difference of luminance and red channel.
-    fn norm_red<T: Float>(denorm: T) -> T;
+    fn norm_red<T: FloatComponent>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and red channel.
-    fn denorm_red<T: Float>(norm: T) -> T;
+    fn denorm_red<T: FloatComponent>(norm: T) -> T;
 }
 
 /// A digital encoding of a YUV color model.
