@@ -689,7 +689,7 @@ where
 pub struct UniformXyz<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     x: Uniform<T>,
     y: Uniform<T>,
@@ -701,7 +701,7 @@ where
 impl<Wp, T> SampleUniform for Xyz<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type Sampler = UniformXyz<Wp, T>;
 }
@@ -710,7 +710,7 @@ where
 impl<Wp, T> UniformSampler for UniformXyz<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type X = Xyz<Wp, T>;
 
@@ -761,6 +761,10 @@ mod test {
     use super::Xyz;
     use crate::white_point::D65;
     use crate::{FromColor, LinLuma, LinSrgb};
+
+    #[cfg(feature = "random")]
+    use crate::white_point::WhitePoint;
+
     const X_N: f64 = 0.95047;
     const Y_N: f64 = 1.0;
     const Z_N: f64 = 1.08883;
@@ -834,5 +838,16 @@ mod test {
         let deserialized: Xyz = ::serde_json::from_str(r#"{"x":0.3,"y":0.8,"z":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Xyz::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Xyz<D65, f32> {
+            x: (0.0, D65::get_xyz::<D65, f32>().x),
+            y: (0.0, D65::get_xyz::<D65, f32>().y),
+            z: (0.0, D65::get_xyz::<D65, f32>().z)
+        },
+        min: Xyz::new(0.0f32, 0.0, 0.0),
+        max: D65::get_xyz::<D65, f32>()
     }
 }

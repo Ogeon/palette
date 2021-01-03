@@ -689,7 +689,7 @@ where
 pub struct UniformHsv<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     hue: crate::hues::UniformRgbHue<T>,
     u1: Uniform<T>,
@@ -701,7 +701,7 @@ where
 impl<S, T> SampleUniform for Hsv<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type Sampler = UniformHsv<S, T>;
 }
@@ -710,7 +710,7 @@ where
 impl<S, T> UniformSampler for UniformHsv<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type X = Hsv<S, T>;
 
@@ -871,5 +871,16 @@ mod test {
             ::serde_json::from_str(r#"{"hue":0.3,"saturation":0.8,"value":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hsv::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Hsv<crate::encoding::Srgb, f32> as crate::rgb::Rgb {
+            red: (0.0, 1.0),
+            green: (0.0, 1.0),
+            blue: (0.0, 1.0)
+        },
+        min: Hsv::new(0.0f32, 0.0, 0.0),
+        max: Hsv::new(360.0, 1.0, 1.0)
     }
 }

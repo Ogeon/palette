@@ -783,7 +783,7 @@ where
 pub struct UniformLuma<S, T>
 where
     T: Component + SampleUniform,
-    S: LumaStandard + SampleUniform,
+    S: LumaStandard,
 {
     luma: Uniform<T>,
     standard: PhantomData<S>,
@@ -793,7 +793,7 @@ where
 impl<S, T> SampleUniform for Luma<S, T>
 where
     T: Component + SampleUniform,
-    S: LumaStandard + SampleUniform,
+    S: LumaStandard,
 {
     type Sampler = UniformLuma<S, T>;
 }
@@ -802,7 +802,7 @@ where
 impl<S, T> UniformSampler for UniformLuma<S, T>
 where
     T: Component + SampleUniform,
-    S: LumaStandard + SampleUniform,
+    S: LumaStandard,
 {
     type X = Luma<S, T>;
 
@@ -929,5 +929,14 @@ mod test {
         let deserialized: Luma<Srgb> = ::serde_json::from_str(r#"{"luma":0.3}"#).unwrap();
 
         assert_eq!(deserialized, Luma::<Srgb>::new(0.3));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Luma<Srgb, f32> {
+            luma: (0.0, 1.0)
+        },
+        min: Luma::new(0.0f32),
+        max: Luma::new(1.0)
     }
 }

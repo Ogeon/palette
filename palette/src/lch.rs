@@ -601,7 +601,7 @@ where
 pub struct UniformLch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     l: Uniform<T>,
     chroma: Uniform<T>,
@@ -613,7 +613,7 @@ where
 impl<Wp, T> SampleUniform for Lch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type Sampler = UniformLch<Wp, T>;
 }
@@ -622,7 +622,7 @@ where
 impl<Wp, T> UniformSampler for UniformLch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint + SampleUniform,
+    Wp: WhitePoint,
 {
     type X = Lch<Wp, T>;
 
@@ -719,5 +719,16 @@ mod test {
             ::serde_json::from_str(r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Lch::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Lch<D65, f32> as crate::Lab {
+            l: (0.0, 100.0),
+            a: (-89.0, 89.0),
+            b: (-89.0, 89.0),
+        },
+        min: Lch::new(0.0f32, 0.0, 0.0),
+        max: Lch::new(100.0, 128.0, 360.0)
     }
 }

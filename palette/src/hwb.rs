@@ -641,7 +641,7 @@ where
 pub struct UniformHwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     sampler: crate::hsv::UniformHsv<S, T>,
     space: PhantomData<S>,
@@ -651,7 +651,7 @@ where
 impl<S, T> SampleUniform for Hwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type Sampler = UniformHwb<S, T>;
 }
@@ -660,7 +660,7 @@ where
 impl<S, T> UniformSampler for UniformHwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard + SampleUniform,
+    S: RgbStandard,
 {
     type X = Hwb<S, T>;
 
@@ -669,12 +669,20 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
-        let sampler = crate::hsv::UniformHsv::<S, _>::new(
-            Hsv::from_color_unclamped(low),
-            Hsv::from_color_unclamped(high),
+        let low_input = Hsv::from_color_unclamped(*low_b.borrow());
+        let high_input = Hsv::from_color_unclamped(*high_b.borrow());
+
+        let low = Hsv::with_wp(
+            low_input.hue,
+            low_input.saturation.min(high_input.saturation),
+            low_input.value.min(high_input.value),
         );
+        let high = Hsv::with_wp(
+            high_input.hue,
+            low_input.saturation.max(high_input.saturation),
+            low_input.value.max(high_input.value),
+        );
+        let sampler = crate::hsv::UniformHsv::<S, _>::new(low, high);
 
         UniformHwb {
             sampler,
@@ -687,12 +695,21 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
-        let sampler = crate::hsv::UniformHsv::<S, _>::new_inclusive(
-            Hsv::from_color_unclamped(low),
-            Hsv::from_color_unclamped(high),
+        let low_input = Hsv::from_color_unclamped(*low_b.borrow());
+        let high_input = Hsv::from_color_unclamped(*high_b.borrow());
+
+        let low = Hsv::with_wp(
+            low_input.hue,
+            low_input.saturation.min(high_input.saturation),
+            low_input.value.min(high_input.value),
         );
+        let high = Hsv::with_wp(
+            high_input.hue,
+            low_input.saturation.max(high_input.saturation),
+            low_input.value.max(high_input.value),
+        );
+
+        let sampler = crate::hsv::UniformHsv::<S, _>::new_inclusive(low, high);
 
         UniformHwb {
             sampler,
@@ -807,5 +824,16 @@ mod test {
             ::serde_json::from_str(r#"{"hue":0.3,"whiteness":0.8,"blackness":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Hwb::new(0.3, 0.8, 0.1));
+    }
+
+    #[cfg(feature = "random")]
+    test_uniform_distribution! {
+        Hwb<crate::encoding::Srgb, f32> as crate::rgb::Rgb {
+            red: (0.0, 1.0),
+            green: (0.0, 1.0),
+            blue: (0.0, 1.0)
+        },
+        min: Hwb::new(0.0f32, 0.0, 0.0),
+        max: Hwb::new(360.0, 1.0, 1.0)
     }
 }
