@@ -438,7 +438,9 @@ mod component;
 pub mod convert;
 pub mod encoding;
 mod equality;
+pub mod pipeline;
 mod relative_contrast;
+pub mod scope;
 pub mod white_point;
 
 pub mod float;

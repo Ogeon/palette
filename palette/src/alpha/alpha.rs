@@ -199,7 +199,8 @@ impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for Alpha<C, T> {
     }
 }
 
-unsafe impl<T, C: Pixel<T>> Pixel<T> for Alpha<C, T> {
+unsafe impl<C: Pixel> Pixel for Alpha<C, C::Component> {
+    type Component = C::Component;
     const CHANNELS: usize = C::CHANNELS + 1;
 }
 
@@ -412,20 +413,20 @@ impl<T: DivAssign + Copy, C: DivAssign<T>> DivAssign<T> for Alpha<C, T> {
     }
 }
 
-impl<C, T, P> AsRef<P> for Alpha<C, T>
+impl<C, P> AsRef<P> for Alpha<C, C::Component>
 where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
+    C: Pixel,
+    P: RawPixel<C::Component> + ?Sized,
 {
     fn as_ref(&self) -> &P {
         self.as_raw()
     }
 }
 
-impl<C, T, P> AsMut<P> for Alpha<C, T>
+impl<C, P> AsMut<P> for Alpha<C, C::Component>
 where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
+    C: Pixel,
+    P: RawPixel<C::Component> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()

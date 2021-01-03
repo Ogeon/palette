@@ -124,7 +124,12 @@ impl<C: ComponentWise<Scalar = T>, T: Float> ComponentWise for PreAlpha<C, T> {
     }
 }
 
-unsafe impl<T: Float, C: Pixel<T>> Pixel<T> for PreAlpha<C, T> {
+unsafe impl<C> Pixel for PreAlpha<C, C::Component>
+where
+    C: Pixel,
+    C::Component: Float,
+{
+    type Component = C::Component;
     const CHANNELS: usize = C::CHANNELS + 1;
 }
 
@@ -336,22 +341,22 @@ impl<T: Float + DivAssign, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C, T, P> AsRef<P> for PreAlpha<C, T>
+impl<C, P> AsRef<P> for PreAlpha<C, C::Component>
 where
-    C: Pixel<T>,
-    T: Float,
-    P: RawPixel<T> + ?Sized,
+    C: Pixel,
+    C::Component: Float,
+    P: RawPixel<C::Component> + ?Sized,
 {
     fn as_ref(&self) -> &P {
         self.as_raw()
     }
 }
 
-impl<C, T, P> AsMut<P> for PreAlpha<C, T>
+impl<C, P> AsMut<P> for PreAlpha<C, C::Component>
 where
-    C: Pixel<T>,
-    T: Float,
-    P: RawPixel<T> + ?Sized,
+    C: Pixel,
+    C::Component: Float,
+    P: RawPixel<C::Component> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
         self.as_raw_mut()

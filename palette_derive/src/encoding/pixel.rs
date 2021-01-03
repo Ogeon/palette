@@ -98,14 +98,20 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     }
 
     let pixel_trait_path = util::path(&["Pixel"], item_meta.internal);
+    let array_repr_trait_path = util::path(&["encoding", "pixel", "ArrayRepr"], item_meta.internal);
 
     let mut implementation = if let Some(field_type) = field_type {
         let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
 
         quote! {
             #[automatically_derived]
-            unsafe impl #impl_generics #pixel_trait_path<#field_type> for #ident #type_generics #where_clause {
+            unsafe impl #impl_generics #pixel_trait_path for #ident #type_generics #where_clause {
+                type Component = #field_type;
                 const CHANNELS: usize = #number_of_channels;
+            }
+
+            unsafe impl #impl_generics #array_repr_trait_path for #ident #type_generics #where_clause {
+                type ArrayType = [Self::Component; #number_of_channels];
             }
         }
     } else {

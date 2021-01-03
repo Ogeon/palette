@@ -33,8 +33,8 @@ macro_rules! raw_pixel_conversion_tests {
         )+
         let alpha = counter + 0.1;
 
-        let raw: [$float; <$name<$($ty_param,)+ $float> as Pixel<$float>>::CHANNELS] = [$($component),+];
-        let raw_plus_1: [$float; <$name<$($ty_param,)+ $float> as Pixel<$float>>::CHANNELS + 1] = [
+        let raw: [$float; <$name<$($ty_param,)+ $float> as Pixel>::CHANNELS] = [$($component),+];
+        let raw_plus_1: [$float; <$name<$($ty_param,)+ $float> as Pixel>::CHANNELS + 1] = [
             $($component,)+
             alpha
         ];

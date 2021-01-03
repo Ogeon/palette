@@ -103,25 +103,33 @@ mod raw;
 ///     }
 /// );
 /// ```
-pub unsafe trait Pixel<T>: Sized {
+pub unsafe trait Pixel: Sized {
+    /// The data type that is used for the channels;
+    type Component;
+
     /// The number of color channels.
     const CHANNELS: usize;
 
     /// Cast as a reference to raw color components.
     #[inline]
-    fn as_raw<P: RawPixel<T> + ?Sized>(&self) -> &P {
-        unsafe { P::from_raw_parts(self as *const Self as *const T, Self::CHANNELS) }
+    fn as_raw<P: RawPixel<Self::Component> + ?Sized>(&self) -> &P {
+        unsafe {
+            P::from_raw_parts(
+                self as *const Self as *const Self::Component,
+                Self::CHANNELS,
+            )
+        }
     }
 
     /// Cast as a mutable reference to raw color components.
     #[inline]
-    fn as_raw_mut<P: RawPixel<T> + ?Sized>(&mut self) -> &mut P {
-        unsafe { P::from_raw_parts_mut(self as *mut Self as *mut T, Self::CHANNELS) }
+    fn as_raw_mut<P: RawPixel<Self::Component> + ?Sized>(&mut self) -> &mut P {
+        unsafe { P::from_raw_parts_mut(self as *mut Self as *mut Self::Component, Self::CHANNELS) }
     }
 
     /// Convert into raw color components.
     #[inline]
-    fn into_raw<P: RawPixelSized<T>>(self) -> P {
+    fn into_raw<P: RawPixelSized<Self::Component>>(self) -> P {
         assert_eq!(P::CHANNELS, Self::CHANNELS);
         assert_eq!(::core::mem::size_of::<P>(), ::core::mem::size_of::<Self>());
         assert_eq!(
@@ -139,7 +147,7 @@ pub unsafe trait Pixel<T>: Sized {
 
     /// Cast from a reference to raw color components.
     #[inline]
-    fn from_raw<P: RawPixel<T> + ?Sized>(pixel: &P) -> &Self {
+    fn from_raw<P: RawPixel<Self::Component> + ?Sized>(pixel: &P) -> &Self {
         assert!(
             pixel.channels() >= Self::CHANNELS,
             "not enough color channels"
@@ -149,7 +157,7 @@ pub unsafe trait Pixel<T>: Sized {
 
     /// Cast from a mutable reference to raw color components.
     #[inline]
-    fn from_raw_mut<P: RawPixel<T> + ?Sized>(pixel: &mut P) -> &mut Self {
+    fn from_raw_mut<P: RawPixel<Self::Component> + ?Sized>(pixel: &mut P) -> &mut Self {
         assert!(pixel.channels() >= Self::CHANNELS);
         unsafe { &mut *(pixel.as_mut_ptr() as *mut Self) }
     }
@@ -167,7 +175,7 @@ pub unsafe trait Pixel<T>: Sized {
     /// assert_eq!(colors[1].red, 10);
     /// ```
     #[inline]
-    fn from_raw_slice(slice: &[T]) -> &[Self] {
+    fn from_raw_slice(slice: &[Self::Component]) -> &[Self] {
         assert_eq!(slice.len() % Self::CHANNELS, 0);
         let new_length = slice.len() / Self::CHANNELS;
         unsafe { ::core::slice::from_raw_parts(slice.as_ptr() as *const Self, new_length) }
@@ -193,7 +201,7 @@ pub unsafe trait Pixel<T>: Sized {
     /// assert_eq!(raw, &[255, 128, 100, 200, 20, 30]);
     /// ```
     #[inline]
-    fn from_raw_slice_mut(slice: &mut [T]) -> &mut [Self] {
+    fn from_raw_slice_mut(slice: &mut [Self::Component]) -> &mut [Self] {
         assert_eq!(slice.len() % Self::CHANNELS, 0);
         let new_length = slice.len() / Self::CHANNELS;
         unsafe { ::core::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut Self, new_length) }
@@ -211,9 +219,11 @@ pub unsafe trait Pixel<T>: Sized {
     /// assert_eq!(raw, &[255u8, 128, 64, 10, 20, 30]);
     /// ```
     #[inline]
-    fn into_raw_slice(slice: &[Self]) -> &[T] {
+    fn into_raw_slice(slice: &[Self]) -> &[Self::Component] {
         let new_length = slice.len() * Self::CHANNELS;
-        unsafe { ::core::slice::from_raw_parts(slice.as_ptr() as *const T, new_length) }
+        unsafe {
+            ::core::slice::from_raw_parts(slice.as_ptr() as *const Self::Component, new_length)
+        }
     }
 
     /// Cast a mutable slice of colors to a mutable slice of raw color
@@ -236,8 +246,20 @@ pub unsafe trait Pixel<T>: Sized {
     /// assert_eq!(colors[1].red, 200);
     /// ```
     #[inline]
-    fn into_raw_slice_mut(slice: &mut [Self]) -> &mut [T] {
+    fn into_raw_slice_mut(slice: &mut [Self]) -> &mut [Self::Component] {
         let new_length = slice.len() * Self::CHANNELS;
-        unsafe { ::core::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut T, new_length) }
+        unsafe {
+            ::core::slice::from_raw_parts_mut(
+                slice.as_mut_ptr() as *mut Self::Component,
+                new_length,
+            )
+        }
     }
+}
+
+/// Experimental trait that represents colors that can be serialized as fixed
+/// size arrays without copying the data.
+pub unsafe trait ArrayRepr: Pixel {
+    /// The array type `Self` can be serialized as.
+    type ArrayType: RawPixelSized<Self::Component>;
 }
