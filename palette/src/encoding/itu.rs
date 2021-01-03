@@ -1,3 +1,4 @@
+//! Encodings by the International Telecommunication Union–Radiocommunications, aka. ITU-R.
 use crate::float::Float;
 
 use crate::rgb::{Primaries, RgbSpace, RgbStandard};
@@ -43,6 +44,14 @@ pub struct BT709;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct BT2020;
 
+/// The color space of ITU-R BT2100 with Hybrid Log-Gamma.
+///
+/// See [ITU-R Rec.2100].
+///
+/// [ITU-R Rec.2100]: https://www.itu.int/rec/R-REC-BT.2100/
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct BT2100Hlg;
+
 /// This transfer function is shared between `BT601` and `BT709`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Transfer601And709;
@@ -53,6 +62,14 @@ pub struct Transfer601And709;
 /// with increased accuracy due to supporting up to 12-bit quantized numbers.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Transfer2020;
+
+/// The electro optical transfer function of `BT2100` with HLG transfer.
+///
+/// This transforms _scene_ linear light to a non-linear electrical signal and back. It assumes
+/// that the opto-optical transfer (OOTF), which adjusts the scene color to the intended viewing
+/// environment, is not part of the camera system but the viewing display.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Transfer2100Hlg;
 
 /// The Yuv encoding difference functions for BT601.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -84,6 +101,7 @@ const BT709_BLUE_NORM: f64 = 1.8556;
 const BT709_RED_NORM: f64 = 1.5748;
 
 // See Table 4, Derivation of Luminance.
+// BT2100 uses the same as luminance as BT2020, see Table 6.
 const BT2020_WEIGHTS: (f64, f64, f64) = (0.2627, 0.6780, 0.0593);
 // Divisor to renormalize the blue difference.
 const BT2020_BLUE_NORM: f64 = 1.8814;
@@ -178,6 +196,12 @@ impl RgbStandard for BT2020 {
     type TransferFn = Transfer2020;
 }
 
+impl RgbStandard for BT2100Hlg {
+    /// This uses the same colorimetry as Rec. BT.2020.
+    type Space = BT2020;
+    type TransferFn = Transfer2100Hlg;
+}
+
 impl LumaStandard for BT601_525 {
     type WhitePoint = D65;
     type TransferFn = Transfer601And709;
@@ -196,6 +220,11 @@ impl LumaStandard for BT709 {
 impl LumaStandard for BT2020 {
     type WhitePoint = D65;
     type TransferFn = Transfer2020;
+}
+
+impl LumaStandard for BT2100Hlg {
+    type WhitePoint = D65;
+    type TransferFn = Transfer2100Hlg;
 }
 
 impl YuvStandard for BT601_525 {
@@ -219,6 +248,13 @@ impl YuvStandard for BT709 {
 impl YuvStandard for BT2020 {
     type RgbSpace = Self;
     type TransferFn = Transfer2020;
+    type DifferenceFn = DifferenceFn2020;
+}
+
+impl YuvStandard for BT2100Hlg {
+    type RgbSpace = BT2020;
+    type TransferFn = Transfer2100Hlg;
+    /// It uses the same scaling and for Yuv.
     type DifferenceFn = DifferenceFn2020;
 }
 
@@ -260,6 +296,37 @@ impl TransferFn for Transfer2020 {
             x * cast(4.5)
         } else {
             x.powf(cast(0.45)) * alpha - (alpha - T::one())
+        }
+    }
+}
+
+impl Transfer2100Hlg {
+    const A: f64 = 0.17883277;
+    const B: f64 = 1.0 - 4.0*Self::A;
+}
+
+impl TransferFn for Transfer2100Hlg {
+    fn into_linear<T: Float + FromF64>(x: T) -> T {
+        // ln is not yet const.
+        let c: f64 = 0.5 - Self::A*(4.0*Self::A).ln();
+
+        if x <= cast(0.5) {
+            x.sqrt() / cast(3.0)
+        } else {
+            let i: T = (x - cast(c)) / cast(Self::A);
+            (i.exp() + cast(Self::B)) / cast(12.0)
+        }
+    }
+
+    fn from_linear<T: Float + FromF64>(x: T) -> T {
+        // ln is not yet const.
+        let c: f64 = 0.5 - Self::A*(4.0*Self::A).ln();
+
+        if x <= cast(1.0 / 12.0) {
+            (x * cast(3.0)).sqrt()
+        } else {
+            let i: T = x * cast(12.0) - cast(Self::B);
+            i.ln() * cast(Self::A) + cast(c)
         }
     }
 }
