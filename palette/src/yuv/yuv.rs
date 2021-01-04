@@ -17,7 +17,6 @@ use crate::{FloatComponent, FromColor, Pixel, Xyz};
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    // rgb_standard = "S::RgbSpace",
     white_point = "<S::RgbSpace as RgbSpace>::WhitePoint",
     component = "T",
     skip_derives(Luma, Rgb)
@@ -51,7 +50,7 @@ impl<S: YuvStandard, T: Float> Clone for Yuv<S, T> {
 }
 
 impl<S: YuvStandard, T: Float> Yuv<S, T> {
-    /// Create an YUV color (in YCbCr order)
+    /// Create a YUV color (in YCbCr order).
     pub fn new(luminance: T, blue_diff: T, red_diff: T) -> Yuv<S, T> {
         Yuv {
             luminance,
@@ -93,30 +92,6 @@ where
     }
 }
 
-impl<S, T, St> From<Luma<St, T>> for Yuv<S, T>
-where
-    S: YuvStandard,
-    T: FloatComponent,
-    St: LumaStandard<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
-{
-    fn from(color: Luma<St, T>) -> Self {
-        Yuv::new(color.luma, T::zero(), T::zero())
-    }
-}
-
-impl<S, T, St> From<Rgb<St, T>> for Yuv<S, T>
-where
-    S: YuvStandard,
-    T: FloatComponent,
-    St: RgbStandard,
-    St::Space: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
-{
-    fn from(color: Rgb<St, T>) -> Self {
-        let linear = color.into_linear();
-        Yuv::from_rgb_internal(linear)
-    }
-}
-
 impl<S, St, T> FromColorUnclamped<Luma<St, T>> for Yuv<S, T>
 where
     S: YuvStandard,
@@ -124,14 +99,7 @@ where
     St: LumaStandard<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
 {
     fn from_color_unclamped(color: Luma<St, T>) -> Self {
-        let luma = color.into_linear();
-
-        Self::from(Rgb::<Linear<S::RgbSpace>, T> {
-            red: luma.luma,
-            green: luma.luma,
-            blue: luma.luma,
-            standard: PhantomData,
-        })
+        Yuv::from_rgb_internal::<S::RgbSpace>(Rgb::from_color(color))
     }
 }
 

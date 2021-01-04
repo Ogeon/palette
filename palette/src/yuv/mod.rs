@@ -41,7 +41,7 @@ pub trait DifferenceFn {
     /// the luminance value from the linear RGB values instead to optimize the accuracy of its
     /// result.
     ///
-    /// The luminance weights correspond closely to the `Y` components of the `yxy`
+    /// The luminance weights correspond closely to the `Y` components of the `Yxy`.
     /// parameterization of the color space primaries. However, they may add up to a value smaller
     /// than `1` to represent colors appearing brighter than the white point i.e. offer a larger
     /// dynamic range than otherwise possible.

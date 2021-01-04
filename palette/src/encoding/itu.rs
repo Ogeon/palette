@@ -6,11 +6,7 @@ use crate::luma::LumaStandard;
 use crate::encoding::TransferFn;
 use crate::white_point::{D65, WhitePoint};
 use crate::yuv::{DifferenceFn, YuvStandard};
-use crate::{FloatComponent, FromF64, Yxy};
-
-fn cast<T: FromF64>(float: f64) -> T {
-    FromF64::from_f64(float)
-}
+use crate::{FloatComponent, FromF64, Yxy, from_f64};
 
 ///The color space of ITU-R BT601 for 525-line.
 ///
@@ -110,49 +106,49 @@ const BT2020_RED_NORM: f64 = 1.4746;
 
 impl Primaries for BT601_525 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6300), cast(0.3400), cast(BT601_LUMINANCE.0))
+        Yxy::with_wp(from_f64(0.6300), from_f64(0.3400), from_f64(BT601_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.3100), cast(0.5950), cast(BT601_LUMINANCE.1))
+        Yxy::with_wp(from_f64(0.3100), from_f64(0.5950), from_f64(BT601_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1550), cast(0.0700), cast(BT601_LUMINANCE.2))
+        Yxy::with_wp(from_f64(0.1550), from_f64(0.0700), from_f64(BT601_LUMINANCE.2))
     }
 }
 
 impl Primaries for BT601_625 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(BT601_LUMINANCE.0))
+        Yxy::with_wp(from_f64(0.6400), from_f64(0.3300), from_f64(BT601_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.2900), cast(0.6000), cast(BT601_LUMINANCE.1))
+        Yxy::with_wp(from_f64(0.2900), from_f64(0.6000), from_f64(BT601_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(BT601_LUMINANCE.2))
+        Yxy::with_wp(from_f64(0.1500), from_f64(0.0600), from_f64(BT601_LUMINANCE.2))
     }
 }
 
 impl Primaries for BT709 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.6400), cast(0.3300), cast(BT709_LUMINANCE.0))
+        Yxy::with_wp(from_f64(0.6400), from_f64(0.3300), from_f64(BT709_LUMINANCE.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.3000), cast(0.6000), cast(BT709_LUMINANCE.1))
+        Yxy::with_wp(from_f64(0.3000), from_f64(0.6000), from_f64(BT709_LUMINANCE.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.1500), cast(0.0600), cast(BT709_LUMINANCE.2))
+        Yxy::with_wp(from_f64(0.1500), from_f64(0.0600), from_f64(BT709_LUMINANCE.2))
     }
 }
 
 impl Primaries for BT2020 {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.708), cast(0.292), cast(BT2020_WEIGHTS.0))
+        Yxy::with_wp(from_f64(0.708), from_f64(0.292), from_f64(BT2020_WEIGHTS.0))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.170), cast(0.797), cast(BT2020_WEIGHTS.1))
+        Yxy::with_wp(from_f64(0.170), from_f64(0.797), from_f64(BT2020_WEIGHTS.1))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(cast(0.131), cast(0.046), cast(BT2020_WEIGHTS.2))
+        Yxy::with_wp(from_f64(0.131), from_f64(0.046), from_f64(BT2020_WEIGHTS.2))
     }
 }
 
@@ -260,42 +256,42 @@ impl YuvStandard for BT2100Hlg {
 
 impl TransferFn for Transfer601And709 {
     fn into_linear<T: Float + FromF64>(x: T) -> T {
-        if x <= cast(0.0091) {
-            x / cast(4.500)
+        if x <= from_f64(0.0091) {
+            x / from_f64(4.500)
         } else {
-            ((x + cast(0.099)) / cast(1.099)).powf(T::one() / cast(0.45))
+            ((x + from_f64(0.099)) / from_f64(1.099)).powf(T::one() / from_f64(0.45))
         }
     }
 
     fn from_linear<T: Float + FromF64>(x: T) -> T {
-        if x <= cast(0.0018) {
-            x * cast(4.500)
+        if x <= from_f64(0.0018) {
+            x * from_f64(4.500)
         } else {
-            x.powf(cast(0.45)) * cast(1.099) - cast(0.099)
+            x.powf(from_f64(0.45)) * from_f64(1.099) - from_f64(0.099)
         }
     }
 }
 
 impl TransferFn for Transfer2020 {
     fn into_linear<T: Float + FromF64>(x: T) -> T {
-        let alpha: T = cast(1.09929682680944);
-        let beta: T = cast(0.018053968510807);
+        let alpha: T = from_f64(1.09929682680944);
+        let beta: T = from_f64(0.018053968510807);
 
-        if x < beta * cast(4.500) {
-            x / cast(4.500)
+        if x < beta * from_f64(4.500) {
+            x / from_f64(4.500)
         } else {
-            ((x + alpha - T::one()) / alpha).powf(T::one() / cast(0.45))
+            ((x + alpha - T::one()) / alpha).powf(T::one() / from_f64(0.45))
         }
     }
 
     fn from_linear<T: Float + FromF64>(x: T) -> T {
-        let alpha: T = cast(1.09929682680944);
-        let beta: T = cast(0.018053968510807);
+        let alpha: T = from_f64(1.09929682680944);
+        let beta: T = from_f64(0.018053968510807);
 
         if x < beta {
-            x * cast(4.5)
+            x * from_f64(4.5)
         } else {
-            x.powf(cast(0.45)) * alpha - (alpha - T::one())
+            x.powf(from_f64(0.45)) * alpha - (alpha - T::one())
         }
     }
 }
@@ -310,11 +306,11 @@ impl TransferFn for Transfer2100Hlg {
         // ln is not yet const.
         let c: f64 = 0.5 - Self::A*(4.0*Self::A).ln();
 
-        if x <= cast(0.5) {
-            x.sqrt() / cast(3.0)
+        if x <= from_f64(0.5) {
+            x.sqrt() / from_f64(3.0)
         } else {
-            let i: T = (x - cast(c)) / cast(Self::A);
-            (i.exp() + cast(Self::B)) / cast(12.0)
+            let i: T = (x - from_f64(c)) / from_f64(Self::A);
+            (i.exp() + from_f64(Self::B)) / from_f64(12.0)
         }
     }
 
@@ -322,11 +318,11 @@ impl TransferFn for Transfer2100Hlg {
         // ln is not yet const.
         let c: f64 = 0.5 - Self::A*(4.0*Self::A).ln();
 
-        if x <= cast(1.0 / 12.0) {
-            (x * cast(3.0)).sqrt()
+        if x <= from_f64(1.0 / 12.0) {
+            (x * from_f64(3.0)).sqrt()
         } else {
-            let i: T = x * cast(12.0) - cast(Self::B);
-            i.ln() * cast(Self::A) + cast(c)
+            let i: T = x * from_f64(12.0) - from_f64(Self::B);
+            i.ln() * from_f64(Self::A) + from_f64(c)
         }
     }
 }
@@ -335,23 +331,23 @@ impl DifferenceFn for DifferenceFn601 {
     fn luminance<T: FloatComponent>() -> [T; 3] {
         // Full intensity matches whitepoint, these are exactly the Y component of primares.
         let (r, g, b) = BT601_LUMINANCE;
-        [cast(r), cast(g), cast(b)]
+        [from_f64(r), from_f64(g), from_f64(b)]
     }
 
     fn norm_blue<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT601_BLUE_NORM)
+        denorm / from_f64(BT601_BLUE_NORM)
     }
 
     fn denorm_blue<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT601_BLUE_NORM)
+        norm * from_f64(BT601_BLUE_NORM)
     }
 
     fn norm_red<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT601_RED_NORM)
+        denorm / from_f64(BT601_RED_NORM)
     }
 
     fn denorm_red<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT601_RED_NORM)
+        norm * from_f64(BT601_RED_NORM)
     }
 }
 
@@ -359,23 +355,23 @@ impl DifferenceFn for DifferenceFn709 {
     fn luminance<T: FloatComponent>() -> [T; 3] {
         // Full intensity matches whitepoint, these are exactly the Y component of primares.
         let (r, g, b) = BT709_WEIGHTS;
-        [cast(r), cast(g), cast(b)]
+        [from_f64(r), from_f64(g), from_f64(b)]
     }
 
     fn norm_blue<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT709_BLUE_NORM)
+        denorm / from_f64(BT709_BLUE_NORM)
     }
 
     fn denorm_blue<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT709_BLUE_NORM)
+        norm * from_f64(BT709_BLUE_NORM)
     }
 
     fn norm_red<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT709_RED_NORM)
+        denorm / from_f64(BT709_RED_NORM)
     }
 
     fn denorm_red<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT709_RED_NORM)
+        norm * from_f64(BT709_RED_NORM)
     }
 }
 
@@ -383,22 +379,22 @@ impl DifferenceFn for DifferenceFn2020 {
     fn luminance<T: FloatComponent>() -> [T; 3] {
         // Full intensity matches whitepoint, these are exactly the Y component of primares.
         let (r, g, b) = BT2020_WEIGHTS;
-        [cast(r), cast(g), cast(b)]
+        [from_f64(r), from_f64(g), from_f64(b)]
     }
 
     fn norm_blue<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT2020_BLUE_NORM)
+        denorm / from_f64(BT2020_BLUE_NORM)
     }
 
     fn denorm_blue<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT2020_BLUE_NORM)
+        norm * from_f64(BT2020_BLUE_NORM)
     }
 
     fn norm_red<T: FloatComponent>(denorm: T) -> T {
-        denorm / cast(BT2020_RED_NORM)
+        denorm / from_f64(BT2020_RED_NORM)
     }
 
     fn denorm_red<T: FloatComponent>(norm: T) -> T {
-        norm * cast(BT2020_RED_NORM)
+        norm * from_f64(BT2020_RED_NORM)
     }
 }
