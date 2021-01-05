@@ -1,10 +1,8 @@
 //! YUV types, spaces and standards.
 use crate::encoding::{TransferFn};
 use crate::rgb::RgbSpace;
-use crate::{Component, FloatComponent};
+use crate::FloatComponent;
 
-mod quant;
-mod ycbcr;
 mod yuv;
 
 /// A YUV standard for analog signal conversion.
@@ -20,15 +18,6 @@ pub trait YuvStandard {
 
     /// The normalized color difference space.
     type DifferenceFn: DifferenceFn;
-}
-
-/// Combines a YUV standard with a quantization model.
-pub trait YCbCrStandard {
-    /// The analog representation standard to which this quantization applies.
-    type YuvStandard: YuvStandard;
-
-    /// The quantization function to use.
-    type QuantizationFn: QuantizationFn;
 }
 
 /// Gives the YUV space values of each primary.
@@ -60,37 +49,8 @@ pub trait DifferenceFn {
     fn denorm_red<T: FloatComponent>(norm: T) -> T;
 }
 
-/// A digital encoding of a YUV color model.
-///
-/// While the difference conversion is mostly performed in an analog signal space free of
-/// quantization errors, the final digital output is quantized to some number of bits defined in
-/// individual standards.
-///
-// TODO:
-// The direct conversion of digitally quantized, gamma pre-corrected RGB is also possible. This
-// yields minor differences compared to a conversion to analog signals and quantization. A strict
-// integer arithmetic quantization is available as well where performance concerns make the
-// floating point conversion less reasonable. Note that for Rec.601 there is an extensive
-// standardized table of integer coefficients for the conversion depending on the required accuracy
-// (8-16 bits) of the intermediates.
-pub trait QuantizationFn {
-    /// The quantized integer representation of the color value.
-    type Output: Component;
-
-    /// Quantize an analog yuv pixel.
-    fn quantize_yuv<F: FloatComponent>(yuv: [F; 3]) -> [Self::Output; 3];
-
-    /// Quantize from an rgb value directly.
-    fn quantize_rgb<F: FloatComponent>(rgb: [F; 3]) -> [Self::Output; 3];
-}
-
 impl<R: RgbSpace, T: TransferFn, D: DifferenceFn> YuvStandard for (R, T, D) {
     type RgbSpace = R;
     type TransferFn = T;
     type DifferenceFn = D;
-}
-
-impl<S: YuvStandard, Q: QuantizationFn> YCbCrStandard for (S, Q) {
-    type YuvStandard = S;
-    type QuantizationFn = Q;
 }
