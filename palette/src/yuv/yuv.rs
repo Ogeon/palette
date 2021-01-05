@@ -1,13 +1,13 @@
 use core::marker::PhantomData;
 
-use crate::float::Float;
-
-use crate::encoding::Linear;
+use crate::alpha::Alpha;
 use crate::convert::FromColorUnclamped;
+use crate::encoding::Linear;
+use crate::float::Float;
 use crate::luma::{Luma, LumaStandard};
 use crate::rgb::{Rgb, RgbStandard, RgbSpace};
 use crate::yuv::{DifferenceFn, YuvStandard};
-use crate::{FloatComponent, FromColor, Pixel, Xyz};
+use crate::{Component, FloatComponent, FromColor, FromComponent, Pixel, Xyz};
 
 /// Generic YUV.
 ///
@@ -49,7 +49,7 @@ impl<S: YuvStandard, T: Float> Clone for Yuv<S, T> {
     }
 }
 
-impl<S: YuvStandard, T: Float> Yuv<S, T> {
+impl<S: YuvStandard, T: FloatComponent> Yuv<S, T> {
     /// Create a YUV color (in YCbCr order).
     pub fn new(luminance: T, blue_diff: T, red_diff: T) -> Yuv<S, T> {
         Yuv {
@@ -58,6 +58,38 @@ impl<S: YuvStandard, T: Float> Yuv<S, T> {
             blue_diff,
             standard: PhantomData,
         }
+    }
+
+    /// Convert into another component type.
+    pub fn into_format<U>(self) -> Yuv<S, U>
+    where
+        U: FloatComponent + FromComponent<T>,
+    {
+        Yuv {
+            luminance: U::from_component(self.luminance),
+            red_diff: U::from_component(self.red_diff),
+            blue_diff: U::from_component(self.blue_diff),
+            standard: PhantomData,
+        }
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U>(color: Yuv<S, U>) -> Self
+    where
+        T: FromComponent<U>,
+        U: FloatComponent,
+    {
+        color.into_format()
+    }
+
+    /// Convert to a `(luminance, red_diff, blue_diff)` tuple.
+    pub fn into_components(self) -> (T, T, T) {
+        (self.luminance, self.red_diff, self.blue_diff)
+    }
+
+    /// Convert from a `(luminance, red_diff, blue_diff)` tuple.
+    pub fn from_components((luminance, red_diff, blue_diff): (T, T, T)) -> Self {
+        Self::new(luminance, red_diff, blue_diff)
     }
 
     fn from_rgb_internal<Sp>(rgb: Rgb<Linear<Sp>, T>) -> Self
@@ -81,10 +113,55 @@ impl<S: YuvStandard, T: Float> Yuv<S, T> {
     }
 }
 
+impl<S: YuvStandard, T: FloatComponent, A: Component> Alpha<Yuv<S, T>, A> {
+    /// Nonlinear RGB.
+    pub fn new(luminance: T, blue_diff: T, red_diff: T, alpha: A) -> Self {
+        Alpha {
+            color: Yuv::new(luminance, blue_diff, red_diff),
+            alpha,
+        }
+    }
+
+    /// Convert into another component type.
+    pub fn into_format<U, B>(self) -> Alpha<Yuv<S, U>, B>
+    where
+        U: FloatComponent + FromComponent<T>,
+        B: Component + FromComponent<A>,
+    {
+        Alpha::<Yuv<S, U>, B>::new(
+            U::from_component(self.luminance),
+            U::from_component(self.blue_diff),
+            U::from_component(self.red_diff),
+            B::from_component(self.alpha),
+        )
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U, B>(color: Alpha<Yuv<S, U>, B>) -> Self
+    where
+        T: FromComponent<U>,
+        U: FloatComponent,
+        A: FromComponent<B>,
+        B: Component,
+    {
+        color.into_format()
+    }
+
+    /// Convert to a `(luminance, blue_diff, red_diff, alpha)` tuple.
+    pub fn into_components(self) -> (T, T, T, A) {
+        (self.luminance, self.blue_diff, self.red_diff, self.alpha)
+    }
+
+    /// Convert from a `(luminance, blue_diff, red_diff, alpha)` tuple.
+    pub fn from_components((luminance, blue_diff, red_diff, alpha): (T, T, T, A)) -> Self {
+        Self::new(luminance, blue_diff, red_diff, alpha)
+    }
+}
+
 
 impl<S, T> Default for Yuv<S, T>
 where
-    T: Float,
+    T: FloatComponent,
     S: YuvStandard,
 {
     fn default() -> Yuv<S, T> {
@@ -114,4 +191,13 @@ where
         let linear = color.into_linear();
         Yuv::from_rgb_internal(linear)
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Yuv;
+    use crate::encoding::itu::BT601_525;
+
+    raw_pixel_conversion_tests!(Yuv<BT601_525>: luminance, blue_diff, red_diff);
+    raw_pixel_conversion_fail_tests!(Yuv<BT601_525>: luminance, blue_diff, red_diff);
 }
