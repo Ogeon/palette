@@ -107,6 +107,8 @@ fn prepare_from_impl(
 ) -> Result<Vec<FromImplParameters>> {
     let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
     let linear_path = util::path(&["encoding", "Linear"], meta.internal);
+    let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
+    let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
 
     let mut parameters = Vec::new();
 
@@ -155,8 +157,23 @@ fn prepare_from_impl(
             _ => parse_quote!(#nearest_color_path::<#white_point, #component>),
         };
 
+        let mut into_generics = generics.clone();
+
+        if color_name == "Oklab" {
+            generics.make_where_clause().predicates.push(parse_quote!(
+                #nearest_color_ty: #from_trait_path<#color_ty>
+            ));
+            into_generics
+                .make_where_clause()
+                .predicates
+                .push(parse_quote!(
+                    #nearest_color_ty: #into_trait_path<#color_ty>
+                ));
+        }
+
         parameters.push(FromImplParameters {
             generics,
+            into_generics,
             color_ty,
             nearest_color_ty,
         });
@@ -167,6 +184,7 @@ fn prepare_from_impl(
 
 struct FromImplParameters {
     generics: Generics,
+    into_generics: Generics,
     color_ty: Type,
     nearest_color_ty: Type,
 }
@@ -188,6 +206,7 @@ fn generate_from_implementations(
         let FromImplParameters {
             color_ty,
             generics,
+            into_generics,
             nearest_color_ty,
         } = parameters;
 
@@ -205,6 +224,8 @@ fn generate_from_implementations(
         });
 
         if !meta.internal || meta.internal_not_base_type {
+            let (impl_generics, _, where_clause) = into_generics.split_for_impl();
+
             implementations.push(quote! {
                 #[automatically_derived]
                 impl #impl_generics #from_trait_path<#ident #type_generics> for #color_ty #where_clause {

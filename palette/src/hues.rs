@@ -283,6 +283,11 @@ make_hues! {
     /// It's measured in degrees and uses the three additive primaries _red_,
     /// _green_ and _blue_.
     struct RgbHue;
+
+    /// A hue type for the Oklab color space.
+    ///
+    /// It's measured in degrees.
+    struct OklabHue;
 }
 
 #[inline]

@@ -11,12 +11,12 @@ use rand::Rng;
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
-use crate::matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
+use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent, Lab,
-    Luma, Luv, Mix, Pixel, RelativeContrast, Shade, Yxy,
+    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, Component, ComponentWise, FloatComponent,
+    Lab, Luma, Luv, Mix, Oklab, Pixel, RelativeContrast, Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -38,7 +38,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
@@ -315,6 +315,28 @@ where
         let x = y * from_f64(2.25) * u_prime / v_prime;
         let z = y * (from_f64(3.0) - from_f64(0.75) * u_prime - from_f64(5.0) * v_prime) / v_prime;
         Xyz::with_wp(x, y, z)
+    }
+}
+
+impl<T> FromColorUnclamped<Oklab<T>> for Xyz<D65, T>
+where
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Oklab<T>) -> Self {
+        let m1_inv = oklab::m1_inv();
+        let m2_inv = oklab::m2_inv();
+
+        let Xyz {
+            x: l_,
+            y: m_,
+            z: s_,
+            ..
+        } = multiply_xyz::<_, D65, _>(&m2_inv, &Xyz::new(color.l, color.a, color.b));
+
+        let lms = Xyz::new(l_.powi(3), m_.powi(3), s_.powi(3));
+        let Xyz { x, y, z, .. } = multiply_xyz::<_, D65, _>(&m1_inv, &lms);
+
+        Self::with_wp(x, y, z)
     }
 }
 
