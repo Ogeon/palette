@@ -9,6 +9,10 @@ use crate::rgb::{Rgb, RgbStandard, RgbSpace};
 use crate::yuv::{DifferenceFn, YuvStandard};
 use crate::{Component, FloatComponent, FromComponent, Pixel, Xyz};
 
+/// Generic YUV with an alpha component. See the [`Yuv` implementation in
+/// `Alpha`](crate::Alpha#Yuva).
+pub type Yuva<S, T = f32> = Alpha<Yuv<S, T>, T>;
+
 /// Generic YUV.
 ///
 /// YUV is an alternate representation for an RGB color space with a focus on separating luminance
@@ -113,6 +117,7 @@ impl<S: YuvStandard, T: FloatComponent> Yuv<S, T> {
     }
 }
 
+/// <span id="Yuva"></span>[`Yuva`](crate::yuv::Yuva) implementations.
 impl<S: YuvStandard, T: FloatComponent, A: Component> Alpha<Yuv<S, T>, A> {
     /// Nonlinear RGB.
     pub fn new(luminance: T, blue_diff: T, red_diff: T, alpha: A) -> Self {

@@ -5,6 +5,8 @@ use crate::FloatComponent;
 
 mod yuv;
 
+pub use self::yuv::{Yuv, Yuva};
+
 /// A YUV standard for analog signal conversion.
 ///
 /// In precise terms, YUV identifies an analog encoding of color signal while YCbCr is the digital,

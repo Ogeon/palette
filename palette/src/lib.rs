@@ -246,6 +246,7 @@ pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Packed, RgbChannels, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
+pub use yuv::{Yuv, Yuva};
 
 pub use color_difference::ColorDifference;
 pub use component::*;
