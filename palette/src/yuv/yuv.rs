@@ -7,7 +7,7 @@ use crate::float::Float;
 use crate::luma::{Luma, LumaStandard};
 use crate::rgb::{Rgb, RgbStandard, RgbSpace};
 use crate::yuv::{DifferenceFn, YuvStandard};
-use crate::{Component, FloatComponent, FromColor, FromComponent, Pixel, Xyz};
+use crate::{Component, FloatComponent, FromComponent, Pixel, Xyz};
 
 /// Generic YUV.
 ///
@@ -97,12 +97,12 @@ impl<S: YuvStandard, T: FloatComponent> Yuv<S, T> {
         T: FloatComponent,
         Sp: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
     {
-        let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from_color(rgb);
-        let rgb = Rgb::<(S::RgbSpace, S::TransferFn), T>::from_color(xyz);
+        let xyz = Xyz::<<S::RgbSpace as RgbSpace>::WhitePoint, T>::from_color_unclamped(rgb);
+        let rgb = Rgb::<(S::RgbSpace, S::TransferFn), T>::from_color_unclamped(xyz);
         let weights = S::DifferenceFn::luminance::<T>();
         let luminance = weights[0]*rgb.red + weights[1]*rgb.green + weights[2]*rgb.blue;
-        let blue_diff = S::DifferenceFn::norm_blue(luminance - rgb.blue);
-        let red_diff = S::DifferenceFn::norm_red(luminance - rgb.red);
+        let blue_diff = S::DifferenceFn::normalize_blue(luminance - rgb.blue);
+        let red_diff = S::DifferenceFn::normalize_red(luminance - rgb.red);
 
         Yuv {
             luminance,
@@ -176,7 +176,7 @@ where
     St: LumaStandard<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
 {
     fn from_color_unclamped(color: Luma<St, T>) -> Self {
-        Yuv::from_rgb_internal::<S::RgbSpace>(Rgb::from_color(color))
+        Yuv::from_rgb_internal::<S::RgbSpace>(Rgb::from_color_unclamped(color))
     }
 }
 
@@ -188,7 +188,7 @@ where
     St::Space: RgbSpace<WhitePoint = <S::RgbSpace as RgbSpace>::WhitePoint>,
 {
     fn from_color_unclamped(color: Rgb<St, T>) -> Self {
-        let linear = color.into_linear();
+        let linear: Rgb<Linear<St::Space>, T> = Rgb::from_color_unclamped(color);
         Yuv::from_rgb_internal(linear)
     }
 }

@@ -334,19 +334,19 @@ impl DifferenceFn for DifferenceFn601 {
         [from_f64(r), from_f64(g), from_f64(b)]
     }
 
-    fn norm_blue<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_blue<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT601_BLUE_NORM)
     }
 
-    fn denorm_blue<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_blue<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT601_BLUE_NORM)
     }
 
-    fn norm_red<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_red<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT601_RED_NORM)
     }
 
-    fn denorm_red<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_red<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT601_RED_NORM)
     }
 }
@@ -358,19 +358,19 @@ impl DifferenceFn for DifferenceFn709 {
         [from_f64(r), from_f64(g), from_f64(b)]
     }
 
-    fn norm_blue<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_blue<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT709_BLUE_NORM)
     }
 
-    fn denorm_blue<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_blue<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT709_BLUE_NORM)
     }
 
-    fn norm_red<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_red<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT709_RED_NORM)
     }
 
-    fn denorm_red<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_red<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT709_RED_NORM)
     }
 }
@@ -382,19 +382,19 @@ impl DifferenceFn for DifferenceFn2020 {
         [from_f64(r), from_f64(g), from_f64(b)]
     }
 
-    fn norm_blue<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_blue<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT2020_BLUE_NORM)
     }
 
-    fn denorm_blue<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_blue<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT2020_BLUE_NORM)
     }
 
-    fn norm_red<T: FloatComponent>(denorm: T) -> T {
+    fn normalize_red<T: FloatComponent>(denorm: T) -> T {
         denorm / from_f64(BT2020_RED_NORM)
     }
 
-    fn denorm_red<T: FloatComponent>(norm: T) -> T {
+    fn denormalize_red<T: FloatComponent>(norm: T) -> T {
         norm * from_f64(BT2020_RED_NORM)
     }
 }

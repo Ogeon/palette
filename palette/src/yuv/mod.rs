@@ -37,16 +37,16 @@ pub trait DifferenceFn {
     fn luminance<T: FloatComponent>() -> [T; 3];
 
     /// Normalize the difference of luminance and blue channel.
-    fn norm_blue<T: FloatComponent>(denorm: T) -> T;
+    fn normalize_blue<T: FloatComponent>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and blue channel.
-    fn denorm_blue<T: FloatComponent>(norm: T) -> T;
+    fn denormalize_blue<T: FloatComponent>(norm: T) -> T;
 
     /// Normalize the difference of luminance and red channel.
-    fn norm_red<T: FloatComponent>(denorm: T) -> T;
+    fn normalize_red<T: FloatComponent>(denorm: T) -> T;
 
     /// Denormalize the difference of luminance and red channel.
-    fn denorm_red<T: FloatComponent>(norm: T) -> T;
+    fn denormalize_red<T: FloatComponent>(norm: T) -> T;
 }
 
 impl<R: RgbSpace, T: TransferFn, D: DifferenceFn> YuvStandard for (R, T, D) {
