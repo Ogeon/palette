@@ -15,9 +15,10 @@ categories = ["graphics", "multimedia::images", "no-std"]
 build = "build/main.rs"
 
 [features]
-default = ["named_from_str", "std"]
+default = ["named_from_str", "named_gradients", "std"]
 named_from_str = ["named", "phf", "phf_codegen", "std"]
 named = []
+named_gradients = ["std"]
 random = ["rand"]
 serializing = ["serde", "std"]
 
