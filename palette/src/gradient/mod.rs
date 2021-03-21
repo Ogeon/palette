@@ -28,7 +28,11 @@ pub trait ArrayLike : Index<usize>{
     }
     /// Returns a pointer to the last element of the collection, or None if it is empty.
     fn last(&self) -> Option<&Self::Output> {
-        self.get(self.len() - 1)
+        if !self.is_empty() {
+            self.get(self.len() - 1)
+        } else {
+            None
+        }
     }
     /// Returns true if the collection contains no elements.
     fn is_empty(&self) -> bool {
