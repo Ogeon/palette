@@ -71,7 +71,7 @@ pub fn build_gradients(writer: &mut File) {
             .parse().unwrap_or_else(|_| panic!("couldn't parse the number of colors for color {}", name));
         writeln!(writer, "/// New matplotlib colormap by Nathaniel J. Smith, Stefan van der Walt, and (in the case of viridis) Eric Firing.").unwrap();
         writeln!(writer, "/// This gradient is perfectly perceptually-uniform, both in regular form and also when converted to black-and-white.").unwrap();
-        //writeln!(writer, "/// The colormap is released under the CC0 license public domain dedication.").unwrap();
+        writeln!(writer, "/// The colormap is released under the CC0 license public domain dedication.").unwrap();
         write!(writer,
             "pub const {0}: crate::gradient::Gradient<{1}, [(f32,{1});{2}]> = crate::gradient::Gradient([",
             name.to_uppercase(), color_type, number_of_colors).unwrap();
