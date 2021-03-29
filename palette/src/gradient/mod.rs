@@ -4,7 +4,7 @@
 //! default).
 
 use std::cmp::max;
-use std::ops::Index;
+use core::marker::PhantomData;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::{One, Zero};
@@ -16,55 +16,13 @@ use crate::{from_f64, FromF64};
 #[cfg(feature = "named_gradients")]
 pub mod named;
 
-/// Types which represent an ordered collection of known size
-pub trait ArrayLike : Index<usize>{
-    /// Returns the number of elements in the collection, also referred to as its 'length'.
-    fn len(&self) -> usize;
-    /// Returns a reference to the element at the position i or None if out of bounds.
-    fn get(&self, i: usize) -> Option<&Self::Output>;
-    /// Returns a pointer to the first element of the collection, or None if it is empty.
-    fn first(&self) -> Option<&Self::Output> {
-        self.get(0)
-    }
-    /// Returns a pointer to the last element of the collection, or None if it is empty.
-    fn last(&self) -> Option<&Self::Output> {
-        if !self.is_empty() {
-            self.get(self.len() - 1)
-        } else {
-            None
-        }
-    }
-    /// Returns true if the collection contains no elements.
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-}
-
-impl<T> ArrayLike for Vec<T> {
-    fn len(&self) -> usize {
-        self.len()
-    }
-    fn get(&self, i: usize) -> Option<&T> {
-        self.as_slice().get(i)
-    }
-}
-
-impl<T, const N: usize> ArrayLike for [T;N] {
-    fn len(&self) -> usize {
-        <[T]>::len(self)
-    }
-    fn get(&self, i: usize) -> Option<&T> {
-        <[T]>::get(self,i)
-    }
-}
-
 impl<C,T> From<T> for Gradient<C,T>
 where
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     fn from(col: T) -> Self {
-        Gradient(col)
+        Gradient(col, PhantomData)
     }
 }
 
@@ -77,21 +35,22 @@ where
 /// the domain of the gradient will have the same color as the closest control
 /// point.
 #[derive(Clone, Debug)]
-pub struct Gradient<C, T = Vec<(<C as Mix>::Scalar, C)>>(T)
+pub struct Gradient<C, T = Vec<(<C as Mix>::Scalar, C)>>(T, PhantomData<C>)
 where
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>;
+    T: AsRef<[(C::Scalar, C)]>;
 
 impl<C,T> Gradient<C,T>
 where
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     /// Get a color from the gradient. The color of the closest control point
     /// will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C {
         let &(mut min, ref min_color) = self
             .0
+            .as_ref()
             .get(0)
             .expect("a Gradient must contain at least one color");
         let mut min_color = min_color;
@@ -103,10 +62,11 @@ where
 
         let &(mut max, ref max_color) = self
             .0
+            .as_ref()
             .last()
             .expect("a Gradient must contain at least one color");
         let mut max_color = max_color;
-        let mut max_index = self.0.len() - 1;
+        let mut max_index = self.0.as_ref().len() - 1;
 
         if i >= max {
             return max_color.clone();
@@ -115,7 +75,7 @@ where
         while min_index < max_index - 1 {
             let index = min_index + (max_index - min_index) / 2;
 
-            let (p, ref color) = self.0[index];
+            let (p, ref color) = self.0.as_ref()[index];
 
             if i <= p {
                 max = p;
@@ -137,10 +97,10 @@ where
     /// be at least one color and they are expected to be ordered by their
     /// position value.
     pub fn with_domain(colors: T) -> Gradient<C, T> {
-        assert!(!colors.is_empty());
+        assert!(!colors.as_ref().is_empty());
 
         //Maybe sort the colors?
-        Gradient(colors)
+        Gradient(colors, PhantomData)
     }
 
     /// Take `n` evenly spaced colors from the gradient, as an iterator. The
@@ -196,10 +156,12 @@ where
     pub fn domain(&self) -> (C::Scalar, C::Scalar) {
         let &(min, _) = self
             .0
+            .as_ref()
             .get(0)
             .expect("a Gradient must contain at least one color");
         let &(max, _) = self
             .0
+            .as_ref()
             .last()
             .expect("a Gradient must contain at least one color");
         (min, max)
@@ -221,7 +183,7 @@ impl<C: Mix + Clone> Gradient<C> {
             *p = from_f64::<C::Scalar>(i as f64) * step_size;
         }
 
-        Gradient(points)
+        Gradient(points, PhantomData)
     }
 }
 
@@ -230,7 +192,7 @@ impl<C: Mix + Clone> Gradient<C> {
 pub struct Take<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     gradient: MaybeSlice<'a, C, T>,
     from: C::Scalar,
@@ -244,7 +206,7 @@ impl<'a, C, T> Iterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     type Item = C;
 
@@ -277,14 +239,14 @@ impl<'a, C, T> ExactSizeIterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {}
 
 impl<'a, C, T> DoubleEndedIterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.from_head + self.from_end < self.len {
@@ -309,7 +271,7 @@ where
 pub struct Slice<'a, C,T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     gradient: &'a Gradient<C,T>,
     range: Range<C::Scalar>,
@@ -318,7 +280,7 @@ where
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     /// Get a color from the gradient slice. The color of the closest domain
     /// limit will be returned if `i` is outside the domain.
@@ -353,7 +315,7 @@ where
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)> + Clone
+    T: AsRef<[(C::Scalar, C)]> + Clone
 {
     /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
     pub fn take(&self, n: usize) -> Take<C, T> {
@@ -544,7 +506,7 @@ where
 enum MaybeSlice<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     NotSlice(&'a Gradient<C, T>),
     Slice(Slice<'a, C, T>),
@@ -553,7 +515,7 @@ where
 impl<'a, C, T> MaybeSlice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: ArrayLike<Output = (C::Scalar, C)>
+    T: AsRef<[(C::Scalar, C)]>
 {
     fn get(&self, i: C::Scalar) -> C {
         match *self {

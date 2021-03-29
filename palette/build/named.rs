@@ -95,7 +95,7 @@ pub fn build_gradients(writer: &mut File) {
                 .unwrap_or_else(|| panic!("couldn't get the {}th blue-value for {}", i, name));
             write!(writer, "({:.10},{}{{red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData}}),", (i as f32/number_of_colors as f32), color_type, red, green, blue).unwrap();
         }
-        write!(writer, "]);\n").unwrap();
+        write!(writer, "], ::core::marker::PhantomData);\n").unwrap();
     }
 }
 
