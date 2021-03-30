@@ -532,6 +532,7 @@ mod tests {
     use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
     use crate::{FloatComponent, Limited};
 
+    #[derive(FromColorUnclamped, WithAlpha)]
     #[palette(
         skip_derives(Xyz, Luma),
         white_point = "S::WhitePoint",
@@ -540,7 +541,6 @@ mod tests {
         palette_internal,
         palette_internal_not_base_type
     )]
-    #[derive(FromColorUnclamped, WithAlpha)]
     struct WithXyz<S: RgbSpace>(PhantomData<S>);
 
     impl<S: RgbSpace> Clone for WithXyz<S> {
@@ -601,6 +601,7 @@ mod tests {
         }
     }
 
+    #[derive(Copy, Clone, FromColorUnclamped, WithAlpha)]
     #[palette(
         skip_derives(Lch, Luma),
         white_point = "crate::white_point::E",
@@ -609,7 +610,6 @@ mod tests {
         palette_internal,
         palette_internal_not_base_type
     )]
-    #[derive(Copy, Clone, FromColorUnclamped, WithAlpha)]
     struct WithoutXyz<T: FloatComponent>(PhantomData<T>);
 
     impl<T: FloatComponent> Limited for WithoutXyz<T> {
