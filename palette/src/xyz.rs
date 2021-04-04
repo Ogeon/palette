@@ -15,7 +15,7 @@ use crate::matrix::{multiply_rgb_to_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, ComponentWise, FloatComponent, Lab, Limited,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent, Lab,
     Luma, Mix, Pixel, RelativeContrast, Shade, Yxy,
 };
 
@@ -302,13 +302,13 @@ impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alp
     }
 }
 
-impl<Wp, T> Limited for Xyz<Wp, T>
+impl<Wp, T> Clamp for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         let xyz_ref: Self = Wp::get_xyz();
         self.x >= T::zero() && self.x <= xyz_ref.x &&
         self.y >= T::zero() && self.y <= xyz_ref.y &&
@@ -801,13 +801,13 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Xyz<D65, f64>;
-            limited {
+            clamped {
                 x: 0.0 => X_N,
                 y: 0.0 => Y_N,
                 z: 0.0 => Z_N
             }
-            limited_min {}
-            unlimited {}
+            clamped_min {}
+            unclamped {}
         }
     }
 

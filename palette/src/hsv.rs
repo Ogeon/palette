@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::float::Float;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, FromF64, GetHue,
-    Hsl, Hue, Hwb, Limited, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, FromF64,
+    GetHue, Hsl, Hue, Hwb, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
@@ -333,13 +333,13 @@ impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
     }
 }
 
-impl<S, T> Limited for Hsv<S, T>
+impl<S, T> Clamp for Hsv<S, T>
 where
     T: FloatComponent,
     S: RgbStandard,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.value >= T::zero() && self.value <= T::one()
     }
@@ -832,12 +832,12 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Hsv<crate::encoding::Srgb, f64>;
-            limited {
+            clamped {
                 saturation: 0.0 => 1.0,
                 value: 0.0 => 1.0
             }
-            limited_min {}
-            unlimited {
+            clamped_min {}
+            unclamped {
                 hue: -360.0 => 360.0
             }
         }

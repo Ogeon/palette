@@ -279,7 +279,7 @@ use core::fmt::{self, Display, Formatter};
 #[doc(hidden)]
 pub use palette_derive::FromColorUnclamped;
 
-use crate::Limited;
+use crate::Clamp;
 
 /// The error type for a color conversion that converted a color into a color
 /// with invalid values.
@@ -324,10 +324,10 @@ pub trait IntoColor<T>: Sized {
     /// Convert into T with values clamped to the color defined bounds
     ///
     /// ```
-    /// use palette::{Lch, Srgb, Limited, IntoColor};
+    /// use palette::{Clamp, IntoColor, Lch, Srgb};
     ///
     /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color();
-    /// assert!(rgb.is_valid());
+    /// assert!(rgb.is_within_bounds());
     /// ```
     fn into_color(self) -> T;
 }
@@ -342,10 +342,10 @@ pub trait IntoColorUnclamped<T>: Sized {
     ///
     /// ```
     /// use palette::convert::IntoColorUnclamped;
-    /// use palette::{Lch, Srgb, Limited};
+    /// use palette::{Clamp, Lch, Srgb};
     ///
     ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color_unclamped();
-    ///assert!(!rgb.is_valid());
+    ///assert!(!rgb.is_within_bounds());
     ///```
     fn into_color_unclamped(self) -> T;
 }
@@ -377,7 +377,7 @@ pub trait TryIntoColor<T>: Sized {
 
 ///A trait for converting one color from another, in a possibly lossy way.
 ///
-/// `U: FromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
+/// `U: FromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Clamp`.
 ///
 /// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version of this trait.
 /// See [`TryFromColor`](crate::convert::TryFromColor) for a trait that gives an error when the result
@@ -394,7 +394,7 @@ pub trait TryIntoColor<T>: Sized {
 /// * `From<Self>` and `Into<Self>` are blanket implemented, while `FromColor<Self>` and
 /// `IntoColor<Self>` have to be manually implemented. This allows additional flexibility,
 /// such as allowing implementing `FromColor<Rgb<S2, T>> for Rgb<S1, T>`.
-/// * Implementing `FromColorUnclamped` and `Limited` is enough to get all the other conversion
+/// * Implementing `FromColorUnclamped` and `Clamp` is enough to get all the other conversion
 /// traits, while `From` and `Into` would not be possible to blanket implement in the same way.
 /// This also reduces the work that needs to be done by macros.
 ///
@@ -404,10 +404,10 @@ pub trait FromColor<T>: Sized {
     /// Convert from T with values clamped to the color defined bounds.
     ///
     /// ```
-    /// use palette::{Lch, Srgb, Limited, FromColor};
+    /// use palette::{Clamp, FromColor, Lch, Srgb};
     ///
     /// let rgb = Srgb::from_color(Lch::new(50.0, 100.0, -175.0));
-    /// assert!(rgb.is_valid());
+    /// assert!(rgb.is_within_bounds());
     /// ```
     fn from_color(t: T) -> Self;
 }
@@ -425,17 +425,17 @@ pub trait FromColorUnclamped<T>: Sized {
     ///
     /// ```
     /// use palette::convert::FromColorUnclamped;
-    /// use palette::{Lch, Srgb, Limited};
+    /// use palette::{Clamp, Lch, Srgb};
     ///
     /// let rgb = Srgb::from_color_unclamped(Lch::new(50.0, 100.0, -175.0));
-    /// assert!(!rgb.is_valid());
+    /// assert!(!rgb.is_within_bounds());
     /// ```
     fn from_color_unclamped(val: T) -> Self;
 }
 
 /// A trait for fallible conversion of one color from another.
 ///
-/// `U: TryFromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Limited`.
+/// `U: TryFromColor<T>` is implemented for every type `U: FromColorUnclamped<T> + Clamp`.
 ///
 /// See [`FromColor`](crate::convert::FromColor) for a lossy version of this trait.
 /// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version.
@@ -464,12 +464,12 @@ pub trait TryFromColor<T>: Sized {
 
 impl<T, U> FromColor<T> for U
 where
-    U: FromColorUnclamped<T> + Limited,
+    U: FromColorUnclamped<T> + Clamp,
 {
     #[inline]
     fn from_color(t: T) -> Self {
         let mut this = Self::from_color_unclamped(t);
-        if !this.is_valid() {
+        if !this.is_within_bounds() {
             this.clamp_self();
         }
         this
@@ -478,12 +478,12 @@ where
 
 impl<T, U> TryFromColor<T> for U
 where
-    U: FromColorUnclamped<T> + Limited,
+    U: FromColorUnclamped<T> + Clamp,
 {
     #[inline]
     fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>> {
         let this = Self::from_color_unclamped(t);
-        if this.is_valid() {
+        if this.is_within_bounds() {
             Ok(this)
         } else {
             Err(OutOfBounds::new(this))
@@ -530,7 +530,7 @@ mod tests {
     use crate::luma::{Luma, LumaStandard};
     use crate::rgb::{Rgb, RgbSpace};
     use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
-    use crate::{FloatComponent, Limited};
+    use crate::{Clamp, FloatComponent};
 
     #[derive(FromColorUnclamped, WithAlpha)]
     #[palette(
@@ -551,8 +551,8 @@ mod tests {
 
     impl<S: RgbSpace> Copy for WithXyz<S> {}
 
-    impl<S: RgbSpace> Limited for WithXyz<S> {
-        fn is_valid(&self) -> bool {
+    impl<S: RgbSpace> Clamp for WithXyz<S> {
+        fn is_within_bounds(&self) -> bool {
             true
         }
 
@@ -612,8 +612,8 @@ mod tests {
     )]
     struct WithoutXyz<T: FloatComponent>(PhantomData<T>);
 
-    impl<T: FloatComponent> Limited for WithoutXyz<T> {
-        fn is_valid(&self) -> bool {
+    impl<T: FloatComponent> Clamp for WithoutXyz<T> {
+        fn is_within_bounds(&self) -> bool {
             true
         }
 
