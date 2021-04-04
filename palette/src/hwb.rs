@@ -33,7 +33,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///
 /// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
-#[derive(Debug, PartialEq, Eq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -159,6 +159,25 @@ where
     pub fn max_blackness() -> T {
         T::max_intensity()
     }
+}
+
+impl<S, T> PartialEq for Hwb<S, T>
+where
+    T: FloatComponent + PartialEq,
+    S: RgbStandard,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.hue == other.hue
+            && self.whiteness == other.whiteness
+            && self.blackness == other.blackness
+    }
+}
+
+impl<S, T> Eq for Hwb<S, T>
+where
+    T: FloatComponent + Eq,
+    S: RgbStandard,
+{
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.

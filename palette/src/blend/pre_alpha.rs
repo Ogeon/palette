@@ -27,7 +27,7 @@ use crate::{clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
 ///
 /// Note that converting to and from premultiplied alpha will cause the alpha
 /// component to be clamped to [0.0, 1.0].
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C, T: Float> {
@@ -38,6 +38,23 @@ pub struct PreAlpha<C, T: Float> {
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
     /// opaque.
     pub alpha: T,
+}
+
+impl<C, T> PartialEq for PreAlpha<C, T>
+where
+    T: Float + PartialEq,
+    C: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.color == other.color && self.alpha == other.alpha
+    }
+}
+
+impl<C, T> Eq for PreAlpha<C, T>
+where
+    T: Float + Eq,
+    C: Eq,
+{
 }
 
 impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T>

@@ -33,7 +33,7 @@ pub type Laba<Wp = D65, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///
 /// The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.
-#[derive(Debug, PartialEq, Eq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -150,6 +150,23 @@ where
     pub fn max_b() -> T {
         from_f64(127.0)
     }
+}
+
+impl<Wp, T> PartialEq for Lab<Wp, T>
+where
+    T: FloatComponent + PartialEq,
+    Wp: WhitePoint,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.l == other.l && self.a == other.a && self.b == other.b
+    }
+}
+
+impl<Wp, T> Eq for Lab<Wp, T>
+where
+    T: FloatComponent + Eq,
+    Wp: WhitePoint,
+{
 }
 
 ///<span id="Laba"></span>[`Laba`](crate::Laba) implementations.

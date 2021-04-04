@@ -32,7 +32,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 /// Conversions and operations on this color space depend on the defined white
 /// point
-#[derive(Debug, PartialEq, Eq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -155,6 +155,23 @@ where
         let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
         xyz_ref.z
     }
+}
+
+impl<Wp, T> PartialEq for Xyz<Wp, T>
+where
+    T: FloatComponent + PartialEq,
+    Wp: WhitePoint,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+impl<Wp, T> Eq for Xyz<Wp, T>
+where
+    T: FloatComponent + Eq,
+    Wp: WhitePoint,
+{
 }
 
 ///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.

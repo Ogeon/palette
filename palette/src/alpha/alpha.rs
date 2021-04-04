@@ -19,7 +19,7 @@ use crate::{
 };
 
 /// An alpha component wrapper for colors.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
@@ -42,6 +42,23 @@ impl<C, T: Component> Alpha<C, T> {
     pub fn max_alpha() -> T {
         T::max_intensity()
     }
+}
+
+impl<C, T> PartialEq for Alpha<C, T>
+where
+    T: Component + PartialEq,
+    C: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.color == other.color && self.alpha == other.alpha
+    }
+}
+
+impl<C, T> Eq for Alpha<C, T>
+where
+    T: Component + Eq,
+    C: Eq,
+{
 }
 
 impl<C1: WithAlpha<T>, C2, T: Component> FromColorUnclamped<C1> for Alpha<C2, T>
@@ -215,7 +232,7 @@ impl<C: Default, T: Component> Default for Alpha<C, T> {
 impl<C, T> AbsDiffEq for Alpha<C, T>
 where
     C: AbsDiffEq<Epsilon = T::Epsilon>,
-    T: AbsDiffEq,
+    T: AbsDiffEq + Component,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -233,7 +250,7 @@ where
 impl<C, T> RelativeEq for Alpha<C, T>
 where
     C: RelativeEq<Epsilon = T::Epsilon>,
-    T: RelativeEq,
+    T: RelativeEq + Component,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -255,7 +272,7 @@ where
 impl<C, T> UlpsEq for Alpha<C, T>
 where
     C: UlpsEq<Epsilon = T::Epsilon>,
-    T: UlpsEq,
+    T: UlpsEq + Component,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
