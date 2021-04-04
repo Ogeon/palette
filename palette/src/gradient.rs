@@ -3,7 +3,7 @@
 //! This module is only available if the `std` feature is enabled (this is the
 //! default).
 
-use std::cmp::max;
+use core::cmp::max;
 use core::marker::PhantomData;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -16,10 +16,10 @@ use crate::{from_f64, FromF64};
 #[cfg(feature = "named_gradients")]
 pub mod named;
 
-impl<C,T> From<T> for Gradient<C,T>
+impl<C, T> From<T> for Gradient<C, T>
 where
     C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     fn from(col: T) -> Self {
         Gradient(col, PhantomData)
@@ -40,10 +40,10 @@ where
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>;
 
-impl<C,T> Gradient<C,T>
+impl<C, T> Gradient<C, T>
 where
     C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     /// Get a color from the gradient. The color of the closest control point
     /// will be returned if `i` is outside the domain.
@@ -131,7 +131,7 @@ where
     ///     assert_relative_eq!(c1, c2);
     /// }
     /// ```
-    pub fn take(&self, n: usize) -> Take<C,T> {
+    pub fn take(&self, n: usize) -> Take<C, T> {
         let (min, max) = self.domain();
 
         Take {
@@ -145,7 +145,7 @@ where
     }
 
     /// Slice this gradient to limit its domain.
-    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C,T> {
+    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C, T> {
         Slice {
             gradient: self,
             range: range.into(),
@@ -192,7 +192,7 @@ impl<C: Mix + Clone> Gradient<C> {
 pub struct Take<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     gradient: MaybeSlice<'a, C, T>,
     from: C::Scalar,
@@ -206,7 +206,7 @@ impl<'a, C, T> Iterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     type Item = C;
 
@@ -239,14 +239,15 @@ impl<'a, C, T> ExactSizeIterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>
-{}
+    T: AsRef<[(C::Scalar, C)]>,
+{
+}
 
 impl<'a, C, T> DoubleEndedIterator for Take<'a, C, T>
 where
     C::Scalar: FromF64,
     C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.from_head + self.from_end < self.len {
@@ -268,19 +269,19 @@ where
 
 /// A slice of a Gradient that limits its domain.
 #[derive(Clone, Debug)]
-pub struct Slice<'a, C,T = Vec<(<C as Mix>::Scalar, C)>>
+pub struct Slice<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
-    gradient: &'a Gradient<C,T>,
+    gradient: &'a Gradient<C, T>,
     range: Range<C::Scalar>,
 }
 
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     /// Get a color from the gradient slice. The color of the closest domain
     /// limit will be returned if `i` is outside the domain.
@@ -290,7 +291,7 @@ where
 
     /// Slice this gradient slice to further limit its domain. Ranges outside
     /// the domain will be clamped to the nearest domain limit.
-    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C,T> {
+    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C, T> {
         Slice {
             gradient: self.gradient,
             range: self.range.constrain(&range.into()),
@@ -315,7 +316,7 @@ where
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]> + Clone
+    T: AsRef<[(C::Scalar, C)]> + Clone,
 {
     /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
     pub fn take(&self, n: usize) -> Take<C, T> {
@@ -506,7 +507,7 @@ where
 enum MaybeSlice<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     NotSlice(&'a Gradient<C, T>),
     Slice(Slice<'a, C, T>),
@@ -515,7 +516,7 @@ where
 impl<'a, C, T> MaybeSlice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>
+    T: AsRef<[(C::Scalar, C)]>,
 {
     fn get(&self, i: C::Scalar) -> C {
         match *self {
