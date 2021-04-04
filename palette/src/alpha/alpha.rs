@@ -46,7 +46,7 @@ impl<C, T: Component> Alpha<C, T> {
 
 impl<C, T> PartialEq for Alpha<C, T>
 where
-    T: Component + PartialEq,
+    T: PartialEq,
     C: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
@@ -56,7 +56,7 @@ where
 
 impl<C, T> Eq for Alpha<C, T>
 where
-    T: Component + Eq,
+    T: Eq,
     C: Eq,
 {
 }
@@ -232,7 +232,7 @@ impl<C: Default, T: Component> Default for Alpha<C, T> {
 impl<C, T> AbsDiffEq for Alpha<C, T>
 where
     C: AbsDiffEq<Epsilon = T::Epsilon>,
-    T: AbsDiffEq + Component,
+    T: AbsDiffEq,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -250,7 +250,7 @@ where
 impl<C, T> RelativeEq for Alpha<C, T>
 where
     C: RelativeEq<Epsilon = T::Epsilon>,
-    T: RelativeEq + Component,
+    T: RelativeEq,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -272,7 +272,7 @@ where
 impl<C, T> UlpsEq for Alpha<C, T>
 where
     C: UlpsEq<Epsilon = T::Epsilon>,
-    T: UlpsEq + Component,
+    T: UlpsEq,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
