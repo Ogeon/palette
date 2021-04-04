@@ -27,7 +27,7 @@ use crate::{clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
 ///
 /// Note that converting to and from premultiplied alpha will cause the alpha
 /// component to be clamped to [0.0, 1.0].
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C, T: Float> {

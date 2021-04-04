@@ -32,7 +32,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 /// Conversions and operations on this color space depend on the defined white
 /// point
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, PartialEq, Eq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,

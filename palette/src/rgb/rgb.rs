@@ -43,7 +43,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// linear, meaning that gamma correction is required when converting to and
 /// from a displayable RGB, such as sRGB. See the [`pixel`](crate::encoding::pixel)
 /// module for encoding formats.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, PartialEq, Eq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
