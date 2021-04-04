@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::float::Float;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, Alpha, Component, FloatComponent, FromF64, GetHue, Hsv, Hue, Limited,
-    Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
+    clamp, contrast_ratio, Alpha, Clamp, Component, FloatComponent, FromF64, GetHue, Hsv, Hue, Mix,
+    Pixel, RelativeContrast, RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -265,13 +265,13 @@ impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
     }
 }
 
-impl<S, T> Limited for Hwb<S, T>
+impl<S, T> Clamp for Hwb<S, T>
 where
     T: FloatComponent,
     S: RgbStandard,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.blackness >= T::zero() && self.blackness <= T::one() &&
         self.whiteness >= T::zero() && self.whiteness <= T::one() &&
         self.whiteness + self.blackness <= T::one()
@@ -725,7 +725,7 @@ where
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use crate::{FromColor, Limited, Srgb};
+    use crate::{Clamp, FromColor, Srgb};
 
     #[test]
     fn red() {

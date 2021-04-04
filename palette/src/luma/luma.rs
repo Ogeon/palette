@@ -18,8 +18,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::{
-    clamp, contrast_ratio, Alpha, Blend, Component, ComponentWise, FloatComponent, FromComponent,
-    Limited, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
+    clamp, contrast_ratio, Alpha, Blend, Clamp, Component, ComponentWise, FloatComponent,
+    FromComponent, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -318,12 +318,12 @@ impl<S: LumaStandard, T: Component, A: Component> Into<(T, A)> for Alpha<Luma<S,
     }
 }
 
-impl<S, T> Limited for Luma<S, T>
+impl<S, T> Clamp for Luma<S, T>
 where
     T: Component,
     S: LumaStandard,
 {
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.luma >= T::zero() && self.luma <= T::max_intensity()
     }
 
@@ -851,11 +851,11 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Luma<Srgb, f64>;
-            limited {
+            clamped {
                 luma: 0.0 => 1.0
             }
-            limited_min {}
-            unlimited {}
+            clamped_min {}
+            unclamped {}
         }
     }
 

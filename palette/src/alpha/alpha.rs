@@ -14,7 +14,7 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
-    clamp, Blend, Component, ComponentWise, GetHue, Hue, Limited, Mix, Pixel, Saturate, Shade,
+    clamp, Blend, Clamp, Component, ComponentWise, GetHue, Hue, Mix, Pixel, Saturate, Shade,
     WithAlpha,
 };
 
@@ -147,9 +147,9 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     }
 }
 
-impl<C: Limited, T: Component> Limited for Alpha<C, T> {
-    fn is_valid(&self) -> bool {
-        self.color.is_valid() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
+impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
+    fn is_within_bounds(&self) -> bool {
+        self.color.is_within_bounds() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
     }
 
     fn clamp(&self) -> Alpha<C, T> {

@@ -14,8 +14,8 @@ use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, ComponentWise, FloatComponent, GetHue,
-    LabHue, Lch, Limited, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
+    GetHue, LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -279,13 +279,13 @@ impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alp
     }
 }
 
-impl<Wp, T> Limited for Lab<Wp, T>
+impl<Wp, T> Clamp for Lab<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.l >= T::zero() && self.l <= from_f64(100.0) &&
         self.a >= from_f64(-128.0) && self.a <= from_f64(127.0) &&
         self.b >= from_f64(-128.0) && self.b <= from_f64(127.0)
@@ -811,13 +811,13 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Lab<D65, f64>;
-            limited {
+            clamped {
                 l: 0.0 => 100.0,
                 a: -128.0 => 127.0,
                 b: -128.0 => 127.0
             }
-            limited_min {}
-            unlimited {}
+            clamped_min {}
+            unclamped {}
         }
     }
 

@@ -23,8 +23,8 @@ use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::{
-    clamp, contrast_ratio, from_f64, Blend, Component, ComponentWise, FloatComponent,
-    FromComponent, GetHue, Limited, Mix, Pixel, RelativeContrast, Shade,
+    clamp, contrast_ratio, from_f64, Blend, Clamp, Component, ComponentWise, FloatComponent,
+    FromComponent, GetHue, Mix, Pixel, RelativeContrast, Shade,
 };
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
@@ -471,13 +471,13 @@ where
     }
 }
 
-impl<S, T> Limited for Rgb<S, T>
+impl<S, T> Clamp for Rgb<S, T>
 where
     S: RgbStandard,
     T: Component,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.red >= T::zero() && self.red <= T::max_intensity() &&
         self.green >= T::zero() && self.green <= T::max_intensity() &&
         self.blue >= T::zero() && self.blue <= T::max_intensity()
@@ -1198,13 +1198,13 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Rgb<Srgb, f64>;
-            limited {
+            clamped {
                 red: 0.0 => 1.0,
                 green: 0.0 => 1.0,
                 blue: 0.0 => 1.0
             }
-            limited_min {}
-            unlimited {}
+            clamped_min {}
+            unclamped {}
         }
     }
 

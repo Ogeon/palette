@@ -13,7 +13,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, Alpha, Component, ComponentWise, FloatComponent, Limited, Luma, Mix,
+    clamp, contrast_ratio, Alpha, Clamp, Component, ComponentWise, FloatComponent, Luma, Mix,
     Pixel, RelativeContrast, Shade, Xyz,
 };
 
@@ -259,13 +259,13 @@ where
     }
 }
 
-impl<Wp, T> Limited for Yxy<Wp, T>
+impl<Wp, T> Clamp for Yxy<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.x >= T::zero() && self.x <= T::one() &&
         self.y >= T::zero() && self.y <= T::one() &&
         self.luma >= T::zero() && self.luma <= T::one()
@@ -755,13 +755,13 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Yxy<D65, f64>;
-            limited {
+            clamped {
                 x: 0.0 => 1.0,
                 y: 0.0 => 1.0,
                 luma: 0.0 => 1.0
             }
-            limited_min {}
-            unlimited {}
+            clamped_min {}
+            unclamped {}
         }
     }
 

@@ -14,8 +14,8 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromColor, GetHue, Hue, Lab,
-    LabHue, Limited, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
+    Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -256,12 +256,12 @@ impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, LabHue<T>, A)>
     }
 }
 
-impl<Wp, T> Limited for Lch<Wp, T>
+impl<Wp, T> Clamp for Lch<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint,
 {
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.l >= T::zero() && self.l <= from_f64(100.0) && self.chroma >= T::zero()
     }
 
@@ -680,13 +680,13 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Lch<D65, f64>;
-            limited {
+            clamped {
                 l: 0.0 => 100.0
             }
-            limited_min {
+            clamped_min {
                 chroma: 0.0 => 200.0
             }
-            unlimited {
+            unclamped {
                 hue: -360.0 => 360.0
             }
         }

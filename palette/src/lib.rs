@@ -266,53 +266,53 @@ macro_rules! assert_ranges {
 
     (
         $ty:ident < $($ty_params:ty),+ >;
-        limited {$($limited:ident: $limited_from:expr => $limited_to:expr),+}
-        limited_min {$($limited_min:ident: $limited_min_from:expr => $limited_min_to:expr),*}
-        unlimited {$($unlimited:ident: $unlimited_from:expr => $unlimited_to:expr),*}
+        clamped {$($clamped:ident: $clamped_from:expr => $clamped_to:expr),+}
+        clamped_min {$($clamped_min:ident: $clamped_min_from:expr => $clamped_min_to:expr),*}
+        unclamped {$($unclamped:ident: $unclamped_from:expr => $unclamped_to:expr),*}
     ) => (
         {
             use core::iter::repeat;
-            use crate::Limited;
+            use crate::Clamp;
 
             {
-                print!("checking below limits ... ");
+                print!("checking below clamp bounds... ");
                 $(
-                    let from = $limited_from;
-                    let to = $limited_to;
+                    let from = $clamped_from;
+                    let to = $clamped_to;
                     let diff = to - from;
-                    let $limited = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                    let $clamped = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
                 )+
 
                 $(
-                    let from = $limited_min_from;
-                    let to = $limited_min_to;
+                    let from = $clamped_min_from;
+                    let to = $clamped_min_to;
                     let diff = to - from;
-                    let $limited_min = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                    let $clamped_min = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
                 )*
 
                 $(
-                    let from = $unlimited_from;
-                    let to = $unlimited_to;
+                    let from = $unclamped_from;
+                    let to = $unclamped_to;
                     let diff = to - from;
-                    let $unlimited = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
+                    let $unclamped = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
                 )*
 
-                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let c: $ty<$($ty_params),+> = $ty {
-                        $($limited: $limited.into(),)+
-                        $($limited_min: $limited_min.into(),)*
-                        $($unlimited: $unlimited.into(),)*
+                        $($clamped: $clamped.into(),)+
+                        $($clamped_min: $clamped_min.into(),)*
+                        $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
                     let expected: $ty<$($ty_params),+> = $ty {
-                        $($limited: $limited_from.into(),)+
-                        $($limited_min: $limited_min_from.into(),)*
-                        $($unlimited: $unlimited.into(),)*
+                        $($clamped: $clamped_from.into(),)+
+                        $($clamped_min: $clamped_min_from.into(),)*
+                        $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
 
-                    assert!(!c.is_valid());
+                    assert!(!c.is_within_bounds());
                     assert_relative_eq!(clamped, expected);
                 }
 
@@ -320,38 +320,38 @@ macro_rules! assert_ranges {
             }
 
             {
-                print!("checking within limits ... ");
+                print!("checking within clamp bounds... ");
                 $(
-                    let from = $limited_from;
-                    let to = $limited_to;
+                    let from = $clamped_from;
+                    let to = $clamped_to;
                     let diff = to - from;
-                    let $limited = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                    let $clamped = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
                 )+
 
                 $(
-                    let from = $limited_min_from;
-                    let to = $limited_min_to;
+                    let from = $clamped_min_from;
+                    let to = $clamped_min_to;
                     let diff = to - from;
-                    let $limited_min = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                    let $clamped_min = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
                 )*
 
                 $(
-                    let from = $unlimited_from;
-                    let to = $unlimited_to;
+                    let from = $unclamped_from;
+                    let to = $unclamped_to;
                     let diff = to - from;
-                    let $unlimited = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
+                    let $unclamped = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
                 )*
 
-                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let c: $ty<$($ty_params),+> = $ty {
-                        $($limited: $limited.into(),)+
-                        $($limited_min: $limited_min.into(),)*
-                        $($unlimited: $unlimited.into(),)*
+                        $($clamped: $clamped.into(),)+
+                        $($clamped_min: $clamped_min.into(),)*
+                        $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
 
-                    assert!(c.is_valid());
+                    assert!(c.is_within_bounds());
                     assert_relative_eq!(clamped, c);
                 }
 
@@ -359,44 +359,44 @@ macro_rules! assert_ranges {
             }
 
             {
-                print!("checking above limits ... ");
+                print!("checking above clamp bounds... ");
                 $(
-                    let from = $limited_from;
-                    let to = $limited_to;
+                    let from = $clamped_from;
+                    let to = $clamped_to;
                     let diff = to - from;
-                    let $limited = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                    let $clamped = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
                 )+
 
                 $(
-                    let from = $limited_min_from;
-                    let to = $limited_min_to;
+                    let from = $clamped_min_from;
+                    let to = $clamped_min_to;
                     let diff = to - from;
-                    let $limited_min = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                    let $clamped_min = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
                 )*
 
                 $(
-                    let from = $unlimited_from;
-                    let to = $unlimited_to;
+                    let from = $unclamped_from;
+                    let to = $unclamped_to;
                     let diff = to - from;
-                    let $unlimited = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
+                    let $unclamped = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
                 )*
 
-                for assert_ranges!(@make_tuple (), $($limited,)+ $($limited_min,)* $($unlimited,)* ) in repeat(()) $(.zip($limited))+ $(.zip($limited_min))* $(.zip($unlimited))* {
+                for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let c: $ty<$($ty_params),+> = $ty {
-                        $($limited: $limited.into(),)+
-                        $($limited_min: $limited_min.into(),)*
-                        $($unlimited: $unlimited.into(),)*
+                        $($clamped: $clamped.into(),)+
+                        $($clamped_min: $clamped_min.into(),)*
+                        $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
                     let clamped = c.clamp();
                     let expected: $ty<$($ty_params),+> = $ty {
-                        $($limited: $limited_to.into(),)+
-                        $($limited_min: $limited_min.into(),)*
-                        $($unlimited: $unlimited.into(),)*
+                        $($clamped: $clamped_to.into(),)+
+                        $($clamped_min: $clamped_min.into(),)*
+                        $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
 
-                    assert!(!c.is_valid());
+                    assert!(!c.is_within_bounds());
                     assert_relative_eq!(clamped, expected);
                 }
 
@@ -457,11 +457,12 @@ fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
 }
 
 /// A trait for clamping and checking if colors are within their ranges.
-pub trait Limited {
-    /// Check if the color's components are within the expected ranges.
-    fn is_valid(&self) -> bool;
+pub trait Clamp {
+    /// Check if the color's components are within the expected clamped range
+    /// bounds.
+    fn is_within_bounds(&self) -> bool;
 
-    /// Return a new color where the components has been clamped to the nearest
+    /// Return a new color where the components have been clamped to the nearest
     /// valid values.
     fn clamp(&self) -> Self;
 

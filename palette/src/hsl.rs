@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::float::Float;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Component, FloatComponent, FromF64, GetHue, Hsv, Hue,
-    Limited, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromF64, GetHue, Hsv,
+    Hue, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -324,13 +324,13 @@ impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
     }
 }
 
-impl<S, T> Limited for Hsl<S, T>
+impl<S, T> Clamp for Hsl<S, T>
 where
     T: FloatComponent,
     S: RgbStandard,
 {
     #[rustfmt::skip]
-    fn is_valid(&self) -> bool {
+    fn is_within_bounds(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::one() &&
         self.lightness >= T::zero() && self.lightness <= T::one()
     }
@@ -817,12 +817,12 @@ mod test {
     fn ranges() {
         assert_ranges! {
             Hsl<crate::encoding::Srgb, f64>;
-            limited {
+            clamped {
                 saturation: 0.0 => 1.0,
                 lightness: 0.0 => 1.0
             }
-            limited_min {}
-            unlimited {
+            clamped_min {}
+            unclamped {
                 hue: -360.0 => 360.0
             }
         }
