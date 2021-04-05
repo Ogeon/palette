@@ -28,7 +28,7 @@ pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
 /// it's a cylindrical color space, like [HSL](crate::Hsl) and
 /// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -149,6 +149,23 @@ where
     pub fn max_extended_chroma() -> T {
         from_f64(crate::float::Float::sqrt(128.0f64 * 128.0 + 128.0 * 128.0))
     }
+}
+
+impl<Wp, T> PartialEq for Lch<Wp, T>
+where
+    T: FloatComponent + PartialEq,
+    Wp: WhitePoint,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.l == other.l && self.chroma == other.chroma && self.hue == other.hue
+    }
+}
+
+impl<Wp, T> Eq for Lch<Wp, T>
+where
+    T: FloatComponent + Eq,
+    Wp: WhitePoint,
+{
 }
 
 ///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.

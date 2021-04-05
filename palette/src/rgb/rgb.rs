@@ -43,7 +43,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// linear, meaning that gamma correction is required when converting to and
 /// from a displayable RGB, such as sRGB. See the [`pixel`](crate::encoding::pixel)
 /// module for encoding formats.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -152,6 +152,23 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     pub fn max_blue() -> T {
         T::max_intensity()
     }
+}
+
+impl<S, T> PartialEq for Rgb<S, T>
+where
+    T: Component + PartialEq,
+    S: RgbStandard,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.red == other.red && self.green == other.green && self.blue == other.blue
+    }
+}
+
+impl<S, T> Eq for Rgb<S, T>
+where
+    T: Component + Eq,
+    S: RgbStandard,
+{
 }
 
 /// Convenience functions to convert between a packed `u32` and `Rgb`.

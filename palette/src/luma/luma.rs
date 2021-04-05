@@ -33,7 +33,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 /// perceived to be. It's basically the `Y` component of [CIE
 /// XYZ](crate::Xyz). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -164,6 +164,23 @@ where
             color.luma,
         )))
     }
+}
+
+impl<S, T> PartialEq for Luma<S, T>
+where
+    T: Component + PartialEq,
+    S: LumaStandard,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.luma == other.luma
+    }
+}
+
+impl<S, T> Eq for Luma<S, T>
+where
+    T: Component + Eq,
+    S: LumaStandard,
+{
 }
 
 ///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.

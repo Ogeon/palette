@@ -19,7 +19,7 @@ use crate::{
 };
 
 /// An alpha component wrapper for colors.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
@@ -42,6 +42,23 @@ impl<C, T: Component> Alpha<C, T> {
     pub fn max_alpha() -> T {
         T::max_intensity()
     }
+}
+
+impl<C, T> PartialEq for Alpha<C, T>
+where
+    T: PartialEq,
+    C: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.color == other.color && self.alpha == other.alpha
+    }
+}
+
+impl<C, T> Eq for Alpha<C, T>
+where
+    T: Eq,
+    C: Eq,
+{
 }
 
 impl<C1: WithAlpha<T>, C2, T: Component> FromColorUnclamped<C1> for Alpha<C2, T>

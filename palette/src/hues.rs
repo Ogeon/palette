@@ -119,6 +119,8 @@ macro_rules! make_hues {
             }
         }
 
+        impl<T: Float + FromF64 + Eq> Eq for $name<T> {}
+
         impl<T: Float> Add<$name<T>> for $name<T> {
             type Output = $name<T>;
 

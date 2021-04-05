@@ -35,7 +35,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///
 /// See [HSV](crate::Hsv) for a very similar color space, with brightness
 /// instead of lightness.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -156,6 +156,23 @@ where
     pub fn max_lightness() -> T {
         T::max_intensity()
     }
+}
+
+impl<S, T> PartialEq for Hsl<S, T>
+where
+    T: FloatComponent + PartialEq,
+    S: RgbStandard,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.hue == other.hue && self.saturation == other.saturation && self.lightness == other.lightness
+    }
+}
+
+impl<S, T> Eq for Hsl<S, T>
+where
+    T: FloatComponent + Eq,
+    S: RgbStandard,
+{
 }
 
 ///<span id="Hsla"></span>[`Hsla`](crate::Hsla) implementations.

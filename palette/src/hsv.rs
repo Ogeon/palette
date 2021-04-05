@@ -32,7 +32,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 /// _lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
 /// and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 /// not the same lightness.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -153,6 +153,23 @@ where
     pub fn max_value() -> T {
         T::max_intensity()
     }
+}
+
+impl<S, T> PartialEq for Hsv<S, T>
+where
+    T: FloatComponent + PartialEq,
+    S: RgbStandard,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.hue == other.hue && self.saturation == other.saturation && self.value == other.value
+    }
+}
+
+impl<S, T> Eq for Hsv<S, T>
+where
+    T: FloatComponent + Eq,
+    S: RgbStandard,
+{
 }
 
 ///<span id="Hsva"></span>[`Hsva`](crate::Hsva) implementations.
