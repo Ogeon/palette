@@ -11,6 +11,7 @@ pub mod gamma;
 pub mod linear;
 pub mod pixel;
 pub mod srgb;
+pub mod itu;
 
 /// A transfer function to and from linear space.
 pub trait TransferFn: 'static {
