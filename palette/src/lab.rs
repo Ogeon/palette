@@ -347,9 +347,26 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Lab<Wp, T> {
+    fn lighten(&self, factor: T) -> Lab<Wp, T> {
+        let difference = if factor >= T::zero() {
+            T::from_f64(100.0) - self.l
+        } else {
+            self.l
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Lab {
-            l: self.l + amount * from_f64(100.0),
+            l: (self.l + delta).max(T::zero()),
+            a: self.a,
+            b: self.b,
+            white_point: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Lab<Wp, T> {
+        Lab {
+            l: (self.l + T::from_f64(100.0) * amount).max(T::zero()),
             a: self.a,
             b: self.b,
             white_point: PhantomData,

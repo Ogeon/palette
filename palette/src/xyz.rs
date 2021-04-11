@@ -372,10 +372,27 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Xyz<Wp, T> {
+    fn lighten(&self, factor: T) -> Xyz<Wp, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.y
+        } else {
+            self.y
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Xyz {
             x: self.x,
-            y: self.y + amount,
+            y: (self.y + delta).max(T::zero()),
+            z: self.z,
+            white_point: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Xyz<Wp, T> {
+        Xyz {
+            x: self.x,
+            y: (self.y + T::max_intensity() * amount).max(T::zero()),
             z: self.z,
             white_point: PhantomData,
         }

@@ -320,9 +320,26 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Lch<Wp, T> {
+    fn lighten(&self, factor: T) -> Lch<Wp, T> {
+        let difference = if factor >= T::zero() {
+            T::from_f64(100.0) - self.l
+        } else {
+            self.l
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Lch {
-            l: self.l + amount * from_f64(100.0),
+            l: (self.l + delta).max(T::zero()),
+            chroma: self.chroma,
+            hue: self.hue,
+            white_point: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Lch<Wp, T> {
+        Lch {
+            l: (self.l + T::from_f64(100.0) * amount).max(T::zero()),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
@@ -425,9 +442,26 @@ where
     type Scalar = T;
 
     fn saturate(&self, factor: T) -> Lch<Wp, T> {
+        let difference = if factor >= T::zero() {
+            Self::max_chroma() - self.chroma
+        } else {
+            self.chroma
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Lch {
             l: self.l,
-            chroma: self.chroma * (T::one() + factor),
+            chroma: (self.chroma + delta).max(T::zero()),
+            hue: self.hue,
+            white_point: PhantomData,
+        }
+    }
+
+    fn saturate_fixed(&self, amount: T) -> Lch<Wp, T> {
+        Lch {
+            l: self.l,
+            chroma: (self.chroma + Self::max_chroma() * amount).max(T::zero()),
             hue: self.hue,
             white_point: PhantomData,
         }

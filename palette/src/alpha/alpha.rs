@@ -121,9 +121,16 @@ impl<C: Mix> Mix for Alpha<C, C::Scalar> {
 impl<C: Shade> Shade for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
-    fn lighten(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    fn lighten(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
-            color: self.color.lighten(amount),
+            color: self.color.lighten(factor),
+            alpha: self.alpha,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+        Alpha {
+            color: self.color.lighten_fixed(amount),
             alpha: self.alpha,
         }
     }
@@ -159,6 +166,13 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     fn saturate(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.saturate(factor),
+            alpha: self.alpha,
+        }
+    }
+
+    fn saturate_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+        Alpha {
+            color: self.color.saturate_fixed(amount),
             alpha: self.alpha,
         }
     }

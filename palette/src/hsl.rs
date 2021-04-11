@@ -164,7 +164,9 @@ where
     S: RgbStandard,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue && self.saturation == other.saturation && self.lightness == other.lightness
+        self.hue == other.hue
+            && self.saturation == other.saturation
+            && self.lightness == other.lightness
     }
 }
 
@@ -391,11 +393,28 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Hsl<S, T> {
+    fn lighten(&self, factor: T) -> Hsl<S, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.lightness
+        } else {
+            self.lightness
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
-            lightness: self.lightness + amount,
+            lightness: (self.lightness + delta).max(T::zero()),
+            standard: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Hsl<S, T> {
+        Hsl {
+            hue: self.hue,
+            saturation: self.saturation,
+            lightness: (self.lightness + T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
         }
     }
@@ -449,9 +468,26 @@ where
     type Scalar = T;
 
     fn saturate(&self, factor: T) -> Hsl<S, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.saturation
+        } else {
+            self.saturation
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Hsl {
             hue: self.hue,
-            saturation: self.saturation * (T::one() + factor),
+            saturation: (self.saturation + delta).max(T::zero()),
+            lightness: self.lightness,
+            standard: PhantomData,
+        }
+    }
+
+    fn saturate_fixed(&self, amount: T) -> Hsl<S, T> {
+        Hsl {
+            hue: self.hue,
+            saturation: (self.saturation + T::max_intensity() * amount).max(T::zero()),
             lightness: self.lightness,
             standard: PhantomData,
         }

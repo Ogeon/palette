@@ -401,11 +401,28 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Hsv<S, T> {
+    fn lighten(&self, factor: T) -> Hsv<S, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.value
+        } else {
+            self.value
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
-            value: self.value + amount,
+            value: (self.value + delta).max(T::zero()),
+            standard: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Hsv<S, T> {
+        Hsv {
+            hue: self.hue,
+            saturation: self.saturation,
+            value: (self.value + T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
         }
     }
@@ -459,9 +476,26 @@ where
     type Scalar = T;
 
     fn saturate(&self, factor: T) -> Hsv<S, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.saturation
+        } else {
+            self.saturation
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Hsv {
             hue: self.hue,
-            saturation: self.saturation * (T::one() + factor),
+            saturation: (self.saturation + delta).max(T::zero()),
+            value: self.value,
+            standard: PhantomData,
+        }
+    }
+
+    fn saturate_fixed(&self, amount: T) -> Hsv<S, T> {
+        Hsv {
+            hue: self.hue,
+            saturation: (self.saturation + T::max_intensity() * amount).max(T::zero()),
             value: self.value,
             standard: PhantomData,
         }

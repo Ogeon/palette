@@ -539,11 +539,41 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Rgb<S, T> {
+    fn lighten(&self, factor: T) -> Rgb<S, T> {
+        let difference_red = if factor >= T::zero() {
+            T::max_intensity() - self.red
+        } else {
+            self.red
+        };
+        let delta_red = difference_red.max(T::zero()) * factor;
+
+        let difference_green = if factor >= T::zero() {
+            T::max_intensity() - self.green
+        } else {
+            self.green
+        };
+        let delta_green = difference_green.max(T::zero()) * factor;
+
+        let difference_blue = if factor >= T::zero() {
+            T::max_intensity() - self.blue
+        } else {
+            self.blue
+        };
+        let delta_blue = difference_blue.max(T::zero()) * factor;
+
         Rgb {
-            red: self.red + amount,
-            green: self.green + amount,
-            blue: self.blue + amount,
+            red: (self.red + delta_red).max(T::zero()),
+            green: (self.green + delta_green).max(T::zero()),
+            blue: (self.blue + delta_blue).max(T::zero()),
+            standard: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Rgb<S, T> {
+        Rgb {
+            red: (self.red + T::max_intensity() * amount).max(T::zero()),
+            green: (self.green + T::max_intensity() * amount).max(T::zero()),
+            blue: (self.blue + T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
         }
     }
