@@ -5,7 +5,7 @@ use crate::white_point::WhitePoint;
 use crate::{Component, FloatComponent, FromComponent, Yxy};
 
 pub use self::packed::{channels, Packed, RgbChannels};
-pub use self::rgb::{Rgb, Rgba};
+pub use self::rgb::{FromHexError, Rgb, Rgba};
 
 mod packed;
 mod rgb;
@@ -16,8 +16,10 @@ pub type Srgb<T = f32> = Rgb<encoding::Srgb, T>;
 pub type Srgba<T = f32> = Rgba<encoding::Srgb, T>;
 
 /// Linear sRGB.
+#[doc(alias = "linear")]
 pub type LinSrgb<T = f32> = Rgb<Linear<encoding::Srgb>, T>;
 /// Linear sRGB with an alpha component.
+#[doc(alias = "linear")]
 pub type LinSrgba<T = f32> = Rgba<Linear<encoding::Srgb>, T>;
 
 /// Gamma 2.2 encoded sRGB.

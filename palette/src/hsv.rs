@@ -42,6 +42,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
     skip_derives(Rgb, Hsl, Hwb, Hsv)
 )]
 #[repr(C)]
+#[doc(alias = "hsb")]
 pub struct Hsv<S = Srgb, T = f32>
 where
     T: FloatComponent,

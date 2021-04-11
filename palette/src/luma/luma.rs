@@ -42,6 +42,8 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
     skip_derives(Xyz, Yxy, Luma)
 )]
 #[repr(C)]
+#[doc(alias = "gray")]
+#[doc(alias = "grey")]
 pub struct Luma<S = Srgb, T = f32>
 where
     T: Component,

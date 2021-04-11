@@ -1031,9 +1031,12 @@ where
     }
 }
 
+/// Error type for parsing a string of hexadecimal characters to an `Rgb` color.
 #[derive(Debug)]
 pub enum FromHexError {
+    /// An error occurred while parsing the string into a valid integer.
     ParseIntError(ParseIntError),
+    /// The hex value was not in a valid 3 or 6 character format.
     HexFormatError(&'static str),
 }
 

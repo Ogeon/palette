@@ -12,10 +12,9 @@ use crate::Pixel;
 /// express each value of the Red, Green, Blue, and Alpha components in the
 /// RGBA color.
 ///
-/// Note that conversion from float to integer component types in `palette` maps
-/// the floating point value to the integer's value range and then rounds the
-/// result before casting to the integer type. An example of the difference in
-/// conversion methods is shown below.
+/// Note that conversion from float to integer component types in `palette`
+/// rounds to nearest even: an `Rgb` component of `0.5` will convert to
+/// `0x80`/`128`, not `0x7F`/`127`.
 ///
 /// ```
 /// use approx::assert_relative_eq;
@@ -25,9 +24,9 @@ use crate::Pixel;
 /// let packed: Packed = Srgb::new(0.5, 0.0, 0.5).into_format().into();
 /// assert_eq!(0xFF80_0080, packed.color);
 ///
-/// let unpacked: Srgba<u8> = Packed::<Rgba>::from(0x80FF_FF80).into();
+/// let unpacked: Srgba<u8> = Packed::<Rgba>::from(0xFFFF_FF80).into();
 /// assert_relative_eq!(
-///     Srgba::new(0.5, 1.0, 1.0, 0.5),
+///     Srgba::new(1.0, 1.0, 1.0, 0.5),
 ///     unpacked.into_format(),
 ///     epsilon = 0.01
 /// );
@@ -62,7 +61,7 @@ use crate::Pixel;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Pixel)]
 #[palette(palette_internal)]
 #[repr(C)]
-pub struct Packed<C: RgbChannels = channels::Argb> {
+pub struct Packed<C = channels::Argb> {
     /// The sRGB color packed into a `u32`.
     pub color: u32,
 
