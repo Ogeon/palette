@@ -13,8 +13,10 @@ pub type SrgbLuma<T = f32> = Luma<Srgb, T>;
 pub type SrgbLumaa<T = f32> = Lumaa<Srgb, T>;
 
 /// Linear luminance.
+#[doc(alias = "linear")]
 pub type LinLuma<Wp = D65, T = f32> = Luma<Linear<Wp>, T>;
 /// Linear luminance with an alpha component.
+#[doc(alias = "linear")]
 pub type LinLumaa<Wp = D65, T = f32> = Lumaa<Linear<Wp>, T>;
 
 /// Gamma 2.2 encoded luminance.

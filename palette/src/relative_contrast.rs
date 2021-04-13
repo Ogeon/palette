@@ -22,12 +22,15 @@ use crate::{from_f64, FromF64};
 /// ```rust
 /// use std::str::FromStr;
 /// use palette::{Srgb, RelativeContrast};
+/// # fn main() -> Result<(), palette::rgb::FromHexError> {
 ///
 /// // the rustdoc "DARK" theme background and text colors
-/// let my_background_rgb: Srgb<f32> = Srgb::from_str("#353535").unwrap().into_format();
-/// let my_foreground_rgb = Srgb::from_str("#ddd").unwrap().into_format();
+/// let my_background_rgb: Srgb<f32> = Srgb::from(0x353535).into_format();
+/// let my_foreground_rgb = Srgb::from_str("#ddd")?.into_format();
 ///
 /// assert!(my_background_rgb.has_enhanced_contrast_text(&my_foreground_rgb));
+/// # Ok(())
+/// # }
 /// ```
 ///
 /// The possible range of contrast ratios is from 1:1 to 21:1. There is a
@@ -47,7 +50,7 @@ use crate::{from_f64, FromF64};
 /// [Success Criterion 1.4.6 Contrast (Enhanced) (Level AAA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced)
 ///
 /// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
-
+#[doc(alias = "wcag")]
 pub trait RelativeContrast {
     /// The type of the contrast ratio.
     type Scalar: FromF64 + PartialOrd;

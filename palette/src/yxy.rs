@@ -37,6 +37,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
     skip_derives(Xyz, Yxy, Luma)
 )]
 #[repr(C)]
+#[doc(alias = "xyY")]
 pub struct Yxy<Wp = D65, T = f32>
 where
     T: FloatComponent,
