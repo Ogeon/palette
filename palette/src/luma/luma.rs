@@ -381,9 +381,24 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Luma<S, T> {
+    fn lighten(&self, factor: T) -> Luma<S, T> {
+        let difference = if factor >= T::zero() {
+            T::max_intensity() - self.luma
+        } else {
+            self.luma
+        };
+
+        let delta = difference.max(T::zero()) * factor;
+
         Luma {
-            luma: (self.luma + amount).max(T::zero()),
+            luma: (self.luma + delta).max(T::zero()),
+            standard: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Luma<S, T> {
+        Luma {
+            luma: (self.luma + T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
         }
     }

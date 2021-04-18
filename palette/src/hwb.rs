@@ -340,11 +340,34 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, amount: T) -> Hwb<S, T> {
+    fn lighten(&self, factor: T) -> Hwb<S, T> {
+        let difference_whiteness = if factor >= T::zero() {
+            T::max_intensity() - self.whiteness
+        } else {
+            self.whiteness
+        };
+        let delta_whiteness = difference_whiteness.max(T::zero()) * factor;
+
+        let difference_blackness = if factor >= T::zero() {
+            self.blackness
+        } else {
+            T::max_intensity() - self.blackness
+        };
+        let delta_blackness = difference_blackness.max(T::zero()) * factor;
+
         Hwb {
             hue: self.hue,
-            whiteness: self.whiteness + amount,
-            blackness: self.blackness - amount,
+            whiteness: (self.whiteness + delta_whiteness).max(T::zero()),
+            blackness: (self.blackness - delta_blackness).max(T::zero()),
+            standard: PhantomData,
+        }
+    }
+
+    fn lighten_fixed(&self, amount: T) -> Hwb<S, T> {
+        Hwb {
+            hue: self.hue,
+            whiteness: (self.whiteness + T::max_intensity() * amount).max(T::zero()),
+            blackness: (self.blackness - T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
         }
     }

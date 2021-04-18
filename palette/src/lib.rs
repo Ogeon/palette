@@ -474,7 +474,6 @@ pub trait Clamp {
 ///
 /// ```
 /// use approx::assert_relative_eq;
-///
 /// use palette::{LinSrgb, Mix};
 ///
 /// let a = LinSrgb::new(0.0, 0.5, 1.0);
@@ -490,7 +489,7 @@ pub trait Mix {
 
     /// Mix the color with an other color, by `factor`.
     ///
-    /// `factor` sould be between `0.0` and `1.0`, where `0.0` will result in
+    /// `factor` should be between `0.0` and `1.0`, where `0.0` will result in
     /// the same color as `self` and `1.0` will result in the same color as
     /// `other`.
     fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
@@ -498,26 +497,78 @@ pub trait Mix {
 
 /// The `Shade` trait allows a color to be lightened or darkened.
 ///
-/// ```
-/// use approx::assert_relative_eq;
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
 ///
-/// use palette::{LinSrgb, Shade};
+/// The relative functions, [`lighten`](Shade::lighten) and
+/// [`darken`](Shade::darken), scale the lightness towards the maximum lightness
+/// value and minimum lightness value, respectively. This means that for a color
+/// with 50% lightness, if `lighten(0.5)` is applied to it, the color will scale
+/// halfway to the maximum value of 100% resulting in a new lightness value of
+/// 75%. `darken(0.5)` applied to the original color will result in a new color
+/// with lightness of 25% since the lightness moves halfway toward the minimum
+/// value of 0%.
 ///
-/// let a = LinSrgb::new(0.4, 0.4, 0.4);
-/// let b = LinSrgb::new(0.6, 0.6, 0.6);
-///
-/// assert_relative_eq!(a.lighten(0.1), b.darken(0.1));
-/// ```
+/// The fixed or absolute functions, [`lighten_fixed`](Shade::lighten_fixed) and
+/// [`darken_fixed`](Shade::darken_fixed), increase or descrease the lightness
+/// value by an amount that is independent of the current lightness of the
+/// color. So for a color with 50% lightness, if `lighten_fixed(0.5)` is
+/// applied to it, the color will have 50% lightness added to its lightness
+/// value resulting in a new value of 100%. `darken_fixed(0.5)` will result in a
+/// new color with lightness of 0% since 50% lightness is subtracted from the
+/// original value of 50%.
 pub trait Shade: Sized {
-    /// The type of the lighten/darken amount.
+    /// The type of the lighten/darken modifier.
     type Scalar: Float;
 
-    /// Lighten the color by `amount`.
-    fn lighten(&self, amount: Self::Scalar) -> Self;
+    /// Scale the color towards the maximum lightness by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, Shade};
+    ///
+    /// let color = Hsl::new(0.0, 1.0, 0.5);
+    /// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);
+    /// ```
+    fn lighten(&self, factor: Self::Scalar) -> Self;
 
-    /// Darken the color by `amount`.
-    fn darken(&self, amount: Self::Scalar) -> Self {
-        self.lighten(-amount)
+    /// Lighten the color by `amount`, a value ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, Shade};
+    ///
+    /// let color = Hsl::new(0.0, 1.0, 0.4);
+    /// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);
+    /// ```
+    fn lighten_fixed(&self, amount: Self::Scalar) -> Self;
+
+    /// Scale the color towards the minimum lightness by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Shade};
+    ///
+    /// let color = Hsv::new(0.0, 1.0, 0.5);
+    /// assert_relative_eq!(color.darken(0.5).value, 0.25);
+    /// ```
+    fn darken(&self, factor: Self::Scalar) -> Self {
+        self.lighten(-factor)
+    }
+
+    /// Darken the color by `amount`, a value ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Shade};
+    ///
+    /// let color = Hsv::new(0.0, 1.0, 0.4);
+    /// assert_relative_eq!(color.darken_fixed(0.2).value, 0.2);
+    /// ```
+    fn darken_fixed(&self, amount: Self::Scalar) -> Self {
+        self.lighten_fixed(-amount)
     }
 }
 
@@ -525,7 +576,6 @@ pub trait Shade: Sized {
 ///
 /// ```
 /// use approx::assert_relative_eq;
-///
 /// use palette::{GetHue, LinSrgb};
 ///
 /// let red = LinSrgb::new(1.0f32, 0.0, 0.0);
@@ -566,26 +616,92 @@ pub trait Hue: GetHue {
 /// A trait for colors where the saturation (or chroma) can be manipulated
 /// without conversion.
 ///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative functions, [`saturate`](Saturate::saturate) and
+/// [`saturate`](Saturate::desaturate), scale the saturation towards the maximum
+/// saturation value and minimum saturation value, respectively. This means that
+/// for a color with 50% saturation, if `saturate(0.5)` is applied to it, the
+/// color will scale halfway to the maximum value of 100% resulting in a new
+/// saturation value of 75%. `desaturate(0.5)` applied to the original color
+/// will result in a new color with 25% saturation since the saturation moves
+/// halfway toward the minimum value of 0%.
+///
+/// The fixed or absolute functions,
+/// [`saturate_fixed`](Saturate::saturate_fixed) and
+/// [`desaturate_fixed`](Saturate::desaturate_fixed), increase or descrease the
+/// saturation by an amount that is independent of the current saturation of the
+/// color. So for a color with 50% saturation, if `saturate_fixed(0.5)` is
+/// applied to it, the color will have 50% saturation added to its saturation
+/// value resulting in a new value of 100%. `desaturate_fixed(0.5)` will result
+/// in a new color with saturation of 0% since 50% saturation is subtracted from
+/// the original value of 50%.
+///
 /// ```
 /// use approx::assert_relative_eq;
-///
 /// use palette::{Hsv, Saturate};
 ///
-/// let a = Hsv::new(0.0, 0.25, 1.0);
-/// let b = Hsv::new(0.0, 1.0, 1.0);
+/// let a = Hsv::new(0.0, 0.5, 1.0);
 ///
-/// assert_relative_eq!(a.saturate(1.0), b.desaturate(0.5));
+/// assert_relative_eq!(a.saturate(0.5).saturation, 0.75);
+/// assert_relative_eq!(a.desaturate_fixed(0.5).saturation, 0.0);
+///
 /// ```
 pub trait Saturate: Sized {
-    /// The type of the (de)saturation factor.
+    /// The type of the (de)saturation modifier.
     type Scalar: Float;
 
-    /// Increase the saturation by `factor`.
+    /// Scale the color towards the maximum saturation by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, Saturate};
+    ///
+    /// let color = Hsl::new(0.0, 0.5, 0.5);
+    /// assert_relative_eq!(color.saturate(0.5).saturation, 0.75);
+    /// ```
     fn saturate(&self, factor: Self::Scalar) -> Self;
 
-    /// Decrease the saturation by `factor`.
+    /// Increase the saturation by `amount`, a value ranging from `0.0` to
+    /// `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, Saturate};
+    ///
+    /// let color = Hsl::new(0.0, 0.4, 0.5);
+    /// assert_relative_eq!(color.saturate_fixed(0.2).saturation, 0.6);
+    /// ```
+    fn saturate_fixed(&self, amount: Self::Scalar) -> Self;
+
+    /// Scale the color towards the minimum saturation by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Saturate};
+    ///
+    /// let color = Hsv::new(0.0, 0.5, 0.5);
+    /// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);
+    /// ```
     fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
+    }
+
+    /// Increase the saturation by `amount`, a value ranging from `0.0` to
+    /// `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Saturate};
+    ///
+    /// let color = Hsv::new(0.0, 0.4, 0.5);
+    /// assert_relative_eq!(color.desaturate_fixed(0.2).saturation, 0.2);
+    /// ```
+    fn desaturate_fixed(&self, amount: Self::Scalar) -> Self {
+        self.saturate_fixed(-amount)
     }
 }
 
