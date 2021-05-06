@@ -242,6 +242,7 @@ pub use hsv::{Hsv, Hsva};
 pub use hwb::{Hwb, Hwba};
 pub use lab::{Lab, Laba};
 pub use lch::{Lch, Lcha};
+pub use luv::{Luv, Luva};
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Packed, RgbChannels, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
@@ -251,7 +252,7 @@ pub use color_difference::ColorDifference;
 pub use component::*;
 pub use convert::{FromColor, IntoColor};
 pub use encoding::pixel::Pixel;
-pub use hues::{LabHue, RgbHue};
+pub use hues::{LabHue, LuvHue, RgbHue};
 pub use matrix::Mat3;
 pub use relative_contrast::{contrast_ratio, RelativeContrast};
 
@@ -426,6 +427,7 @@ mod hwb;
 mod lab;
 mod lch;
 pub mod luma;
+mod luv;
 pub mod rgb;
 mod xyz;
 mod yxy;
@@ -442,6 +444,7 @@ mod relative_contrast;
 pub mod white_point;
 
 pub mod float;
+mod luv_bounds;
 
 #[doc(hidden)]
 pub mod matrix;

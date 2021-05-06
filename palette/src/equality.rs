@@ -2,7 +2,7 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::float::Float;
 use crate::white_point::WhitePoint;
-use crate::{from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, RgbHue, Xyz, Yxy};
+use crate::{from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, Luv, RgbHue, Xyz, Yxy};
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
@@ -64,6 +64,7 @@ macro_rules! impl_eq {
 impl_eq!(Xyz, [x, y, z]);
 impl_eq!(Yxy, [y, x, luma]);
 impl_eq!(Lab, [l, a, b]);
+impl_eq!(Luv, [l, u, v]);
 impl_eq!(Lch, [l, chroma, hue]);
 
 // For hues, the difference is calculated and compared to zero. However due to

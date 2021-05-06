@@ -16,7 +16,7 @@ use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent, Lab,
-    Luma, Mix, Pixel, RelativeContrast, Shade, Yxy,
+    Luma, Luv, Mix, Pixel, RelativeContrast, Shade, Yxy, 
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -38,7 +38,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Rgb, Lab, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Luma)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
@@ -283,6 +283,44 @@ where
         Xyz::with_wp(convert(x), convert(y), convert(z)) * Wp::get_xyz()
     }
 }
+
+impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Xyz<Wp, T>
+where
+    T: FloatComponent,
+    Wp: WhitePoint,
+{
+    fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
+	let from_f64 = T::from_f64;
+	//let kappa: T = from_f64(903.3);   // Alternatively, (29 / 3)^3
+	// let epsilon = from_f64(0.008856); // Altenatively, (6/29)^3
+
+	let kappa: T = from_f64(29.0 / 3.0).powi(3);   // Alternatively, (29 / 3)^3
+	//let epsilon = from_f64(6.0 / 29.0).powi(3); // Altenatively, (6/29)^3
+
+	let w: Xyz<Wp, T> = Wp::get_xyz();
+	let ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();
+	let u_ref = from_f64(4.0) * w.x * ref_denom_recip;
+	let v_ref = from_f64(9.0) * w.y * ref_denom_recip;
+
+	if color.l < from_f64(1e-5) {
+	    return Xyz::with_wp(T::zero(), T::zero(), T::zero());
+	}
+
+	let y = if color.l > from_f64(8.0) {
+	    ((color.l + from_f64(16.0)) * from_f64(116.0).recip()).powi(3)
+	} else {
+	    color.l * kappa.recip()
+	} * w.y;
+
+	let u_prime = color.u / (from_f64(13.0) * color.l) + u_ref;
+	let v_prime = color.v / (from_f64(13.0) * color.l) + v_ref;
+
+	let x = y * from_f64(2.25) * u_prime / v_prime;
+	let z = y * (from_f64(3.0) - from_f64(0.75) * u_prime - from_f64(5.0) * v_prime) / v_prime;
+        Xyz::with_wp(x, y, z)
+    }
+}
+
 
 impl<Wp, T, S> FromColorUnclamped<Luma<S, T>> for Xyz<Wp, T>
 where

@@ -529,7 +529,7 @@ mod tests {
     use crate::encoding::linear::Linear;
     use crate::luma::{Luma, LumaStandard};
     use crate::rgb::{Rgb, RgbSpace};
-    use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+    use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Luv, Xyz, Yxy};
     use crate::{Clamp, FloatComponent};
 
     #[derive(FromColorUnclamped, WithAlpha)]
@@ -675,6 +675,9 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
+        let luv: Hsl<_, f64> = Default::default();
+        WithXyz::<crate::encoding::Srgb>::from_color(luv);
+
         let rgb: Rgb<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
@@ -708,6 +711,9 @@ mod tests {
 
         let lch: Alpha<Lch<_, f64>, u8> = Alpha::from(Lch::default());
         WithXyz::<crate::encoding::Srgb>::from_color(lch);
+
+        let luv: Alpha<Luv<_, f64>, u8> = Alpha::from(Luv::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(luv);
 
         let rgb: Alpha<Rgb<_, f64>, u8> = Alpha::from(Rgb::default());
         WithXyz::<crate::encoding::Srgb>::from_color(rgb);
@@ -743,6 +749,9 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
+        let luv: Hsl<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
+
         let rgb: Rgb<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
@@ -777,6 +786,9 @@ mod tests {
         let lch: Lch<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
+        let luv: Luv<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
+
         let rgb: Rgb<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
@@ -802,6 +814,7 @@ mod tests {
         let _yxy: Yxy<_, f64> = color.into_color();
         let _lab: Lab<_, f64> = color.into_color();
         let _lch: Lch<_, f64> = color.into_color();
+        let _luv: Luv<_, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
@@ -819,6 +832,7 @@ mod tests {
         let _yxy: Yxy<_, f64> = color.into_color();
         let _lab: Lab<_, f64> = color.into_color();
         let _lch: Lch<_, f64> = color.into_color();
+        let _luv: Luv<_, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
@@ -835,6 +849,7 @@ mod tests {
         let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
         let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
         let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
+        let _luv: Alpha<Luv<_, f64>, u8> = color.into_color();
         let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
@@ -852,6 +867,7 @@ mod tests {
         let _yxy: Alpha<Yxy<_, f64>, u8> = color.into_color();
         let _lab: Alpha<Lab<_, f64>, u8> = color.into_color();
         let _lch: Alpha<Lch<_, f64>, u8> = color.into_color();
+        let _luv: Alpha<Luv<_, f64>, u8> = color.into_color();
         let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
@@ -875,6 +891,9 @@ mod tests {
 
         let lch: Lch<crate::white_point::E, f64> = Default::default();
         WithoutXyz::<f64>::from_color(lch);
+
+        let luv: Luv<crate::white_point::E, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(luv);
 
         let rgb: Rgb<_, f64> = Default::default();
         WithoutXyz::<f64>::from_color(rgb);
@@ -901,6 +920,7 @@ mod tests {
         let _yxy: Yxy<crate::white_point::E, f64> = color.into_color();
         let _lab: Lab<crate::white_point::E, f64> = color.into_color();
         let _lch: Lch<crate::white_point::E, f64> = color.into_color();
+        let _luv: Luv<crate::white_point::E, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
