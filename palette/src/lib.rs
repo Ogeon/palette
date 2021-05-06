@@ -238,6 +238,7 @@ pub use blend::Blend;
 pub use gradient::Gradient;
 
 pub use hsl::{Hsl, Hsla};
+pub use hsluv::{Hsluv, Hsluva};
 pub use hsv::{Hsv, Hsva};
 pub use hwb::{Hwb, Hwba};
 pub use lab::{Lab, Laba};
@@ -421,6 +422,7 @@ mod random_sampling;
 
 mod alpha;
 mod hsl;
+mod hsluv;
 mod hsv;
 mod hwb;
 mod lab;
@@ -442,6 +444,7 @@ mod relative_contrast;
 pub mod white_point;
 
 pub mod float;
+mod luv_bounds;
 
 #[doc(hidden)]
 pub mod matrix;

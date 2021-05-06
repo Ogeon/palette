@@ -8,14 +8,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::color_difference::ColorDifference;
+use crate::{color_difference::ColorDifference, luv_bounds::LuvBounds};
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
-    Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    Hsluv, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -34,7 +34,7 @@ pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Lab, Lch)
+    skip_derives(Xyz, Lab, Lch, Hsluv)
 )]
 #[repr(C)]
 pub struct Lch<Wp = D65, T = f32>
@@ -134,6 +134,18 @@ where
     /// Return the `chroma` value minimum.
     pub fn min_chroma() -> T {
         T::zero()
+    }
+
+    /// Return the maximum `chroma` value that is representable for
+    /// the given lightness and hue values.
+    pub fn max_chroma_for_lh(&self) -> T {
+        LuvBounds::from_lightness(self.l).max_chroma_at_hue(self.hue)
+    }
+
+    /// Return the maximum `chroma` value that is representable for
+    /// all hue values, given a particular lightness.
+    pub fn max_safe_chroma_for_all_hues(&self) -> T {
+        LuvBounds::from_lightness(self.l).max_safe_chroma()
     }
 
     /// Return the `chroma` value maximum. This value does not cover the entire
@@ -241,6 +253,23 @@ where
             chroma: (color.a * color.a + color.b * color.b).sqrt(),
             hue: color.get_hue().unwrap_or(LabHue::from(T::zero())),
             white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Lch<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Hsluv<Wp, T>) -> Self {
+        if color.l > T::from_f64(99.999999) {
+            Lch::with_wp(T::from_f64(100.0), T::zero(), color.hue)
+        } else if color.l < T::from_f64(1e-6) {
+            Lch::with_wp(T::zero(), T::zero(), color.hue)
+        } else {
+            let max_chroma = color.max_chroma_for_lh();
+            Lch::with_wp(color.l, color.saturation * max_chroma / T::from_f64(100.0), color.hue)
         }
     }
 }
