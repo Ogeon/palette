@@ -1,5 +1,7 @@
 //! Utility functions for computing in-gamut regions for CIELuv color space.
 use crate::{FloatComponent, LabHue};
+#[allow(unused)]
+use num_traits::Float;
 use num_traits::{Pow, ToPrimitive};
 
 /// Boundary line in the u-v plane of the Luv color space.
