@@ -108,7 +108,7 @@ impl LuvBounds {
 
 #[cfg(test)]
 mod tests {
-    use super::{BoundaryLine, LuvBounds};
+    use super::BoundaryLine;
 
     #[test]
     fn boundary_intersect() {
