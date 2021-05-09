@@ -48,10 +48,14 @@ where
     /// give the brightest white.
     pub l: T,
 
-    /// u* goes from -100 to 100.
+    /// The range of valid u\* varies depending on the values of L\*
+    /// and v\*, but at its limits u\* is within the interval (-84.0,
+    /// 176.0).
     pub u: T,
 
-    /// v* goes from -100 to 100.
+    /// The range of valid v\* varies depending on the values of L\*
+    /// and u\*, but at its limits v\* is within the interval (-135.0,
+    /// 108.0).
     pub v: T,
 
     /// The white point associated with the color's illuminant and observer.
@@ -238,11 +242,9 @@ where
 
 	let u_prime: T = from_f64(4.0) * color.x * prime_denom_recip;
 	let u_ref_prime = from_f64(4.0) * w.x * prime_ref_denom_recip;
-	dbg!(u_ref_prime.to_f64().unwrap());
 
 	let v_prime: T = from_f64(9.0) * color.y * prime_denom_recip;
 	let v_ref_prime = from_f64(9.0) * w.y * prime_ref_denom_recip;
-	dbg!(v_ref_prime.to_f64().unwrap());
 
 	let y_r = color.y / w.y;
 	let l = if y_r > epsilon {
@@ -291,7 +293,7 @@ where
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-	self.l >= T::zero() && self.l <= Self::max_l() &&
+	self.l >= Self::min_l() && self.l <= Self::max_l() &&
 	self.u >= Self::min_u() && self.u <= Self::max_u() &&
 	self.v >= Self::min_v() && self.v <= Self::max_v()
     }
@@ -303,7 +305,7 @@ where
     }
 
     fn clamp_self(&mut self) {
-	self.l = clamp(self.l, T::zero(), from_f64(100.0));
+	self.l = clamp(self.l, Self::min_l(), Self::max_l());
 	self.u = clamp(self.u, Self::min_u(), Self::max_u());
 	self.v = clamp(self.v, Self::min_v(), Self::max_v());
     }

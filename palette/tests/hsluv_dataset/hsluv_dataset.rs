@@ -7,13 +7,12 @@ use serde_json;
 
 use palette::convert::IntoColorUnclamped;
 use palette::white_point::D65;
-use palette::{Lch, Luv, Xyz};
+use palette::{Luv, Xyz};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 struct HsluvExample {
     name: String,
-    lch: Lch<D65, f64>,
     luv: Luv<D65, f64>,
     xyz: Xyz<D65, f64>,
 }
@@ -29,13 +28,11 @@ fn load_data() -> Examples {
     let m = raw_data.as_object().expect("failed to parse dataset");
     m.iter().map(|(k, v)| {
 	let colors = v.as_object().unwrap();
-	let lch_data: Vec<f64> = colors["lch"].as_array().unwrap().iter().flat_map(|x| x.as_f64()).collect();
 	let luv_data: Vec<f64> = colors["luv"].as_array().unwrap().iter().flat_map(|x| x.as_f64()).collect();
 	let xyz_data: Vec<f64> = colors["xyz"].as_array().unwrap().iter().flat_map(|x| x.as_f64()).collect();
 
 	(k.clone(), HsluvExample {
 	    name: k.clone(),
-	    lch: Lch::new(lch_data[0], lch_data[1], lch_data[2]),
 	    luv: Luv::new(luv_data[0], luv_data[1], luv_data[2]),
 	    xyz: Xyz::new(xyz_data[0], xyz_data[1], xyz_data[2]),
 	})
@@ -50,7 +47,6 @@ lazy_static! {
 #[test]
 pub fn run_xyz_to_luv_tests() {
     for (_, v) in TEST_DATA.iter() {
-	println!("{:?}", v.xyz);
 	let to_luv: Luv<D65, f64> = v.xyz.into_color_unclamped();
 	assert_relative_eq!(to_luv, v.luv, epsilon = 0.1);
     }

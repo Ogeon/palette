@@ -8,7 +8,7 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::{color_difference::ColorDifference};
+use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
