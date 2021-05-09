@@ -1,5 +1,6 @@
-//! Utility functions for computing in-gamut regions for CIELuv color space.
-use crate::{FloatComponent, LabHue};
+//! Utility functions for computing in-gamut regions for the CIELUV
+//! color space.
+use crate::{FloatComponent, LuvHue};
 #[allow(unused)]
 use num_traits::Float;
 use num_traits::{Pow, ToPrimitive};
@@ -31,7 +32,7 @@ impl BoundaryLine {
 }
 
 /// `LuvBounds` represents the convex polygon formed by the in-gamut
-/// region in the uv plane at a given lightness.
+/// region in the u*-v* plane at a given lightness L*.
 pub struct LuvBounds {
     bounds: [BoundaryLine; 6],
 }
@@ -71,7 +72,7 @@ impl LuvBounds {
 
     /// Given a particular hue, return the distance to the boundary at
     /// the angle determined by the hue.
-    pub fn max_chroma_at_hue<T: FloatComponent>(&self, hue: LabHue<T>) -> T {
+    pub fn max_chroma_at_hue<T: FloatComponent>(&self, hue: LuvHue<T>) -> T {
         let mut min_chroma = f64::MAX;
         let h = hue.to_positive_radians().to_f64().unwrap();
 
