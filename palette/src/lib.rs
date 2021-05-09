@@ -444,7 +444,6 @@ mod relative_contrast;
 pub mod white_point;
 
 pub mod float;
-mod luv_bounds;
 
 #[doc(hidden)]
 pub mod matrix;

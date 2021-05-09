@@ -8,7 +8,7 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::{color_difference::ColorDifference, luv_bounds::LuvBounds};
+use crate::{color_difference::ColorDifference};
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
@@ -134,18 +134,6 @@ where
     /// Return the `chroma` value minimum.
     pub fn min_chroma() -> T {
         T::zero()
-    }
-
-    /// Return the maximum `chroma` value that is representable for
-    /// the given lightness and hue values.
-    pub fn max_chroma_for_lh(&self) -> T {
-        LuvBounds::from_lightness(self.l).max_chroma_at_hue(self.hue)
-    }
-
-    /// Return the maximum `chroma` value that is representable for
-    /// all hue values, given a particular lightness.
-    pub fn max_safe_chroma_for_all_hues(&self) -> T {
-        LuvBounds::from_lightness(self.l).max_safe_chroma()
     }
 
     /// Return the `chroma` value maximum. This value does not cover the entire
