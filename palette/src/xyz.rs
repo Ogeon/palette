@@ -291,11 +291,8 @@ where
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
 	let from_f64 = T::from_f64;
-	//let kappa: T = from_f64(903.3);   // Alternatively, (29 / 3)^3
-	// let epsilon = from_f64(0.008856); // Altenatively, (6/29)^3
 
-	let kappa: T = from_f64(29.0 / 3.0).powi(3);   // Alternatively, (29 / 3)^3
-	//let epsilon = from_f64(6.0 / 29.0).powi(3); // Altenatively, (6/29)^3
+	let kappa: T = from_f64(29.0 / 3.0).powi(3);
 
 	let w: Xyz<Wp, T> = Wp::get_xyz();
 	let ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();

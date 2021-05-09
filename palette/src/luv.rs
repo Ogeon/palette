@@ -172,7 +172,7 @@ where
     T: FloatComponent,
     A: Component,
 {
-    /// CIE L\*a\*v\* and transparency and white point D65.
+    /// CIE L\*u\*v\* and transparency and white point D65.
     pub fn new(l: T, u: T, v: T, alpha: A) -> Self {
 	Alpha {
 	    color: Luv::new(l, u, v),
@@ -226,10 +226,6 @@ where
 	let from_f64 = T::from_f64;
 	let w: Xyz<Wp, T> = Wp::get_xyz();
 
-	// let kappa: T = from_f64(903.3);   // Alternatively, (29 / 3)^3
-	// let epsilon = from_f64(0.008856); // Altenatively, (6/29)^3
-
-	// Alternatively, we can use the exact values here:
 	let kappa = from_f64(29.0/3.0).powi(3);
 	let epsilon = from_f64(6.0/29.0).powi(3);
 
