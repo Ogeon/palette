@@ -1,7 +1,6 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use num_traits::ToPrimitive;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -697,12 +696,12 @@ where
     Wp: WhitePoint,
     Standard: Distribution<T>,
 {
-    // `u` and `v` both range from (-100.0, 100.0)
+
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
 	Luv {
 	    l: rng.gen() * from_f64(100.0),
-	    u: Luv::min_u() + rng.gen() * (Luv::max_u() - Luv::min_u()),
-	    v: Luv::min_v() + rng.gen() * (Luv::max_v() - Luv::min_v()),
+	    u: rng.gen() * from_f64(260.0) - from_f64(84.0),
+	    v: rng.gen() * from_f64(243.0) - from_f64(135.0),
 	    white_point: PhantomData,
 	}
     }
@@ -792,19 +791,19 @@ mod test {
      assert_relative_eq!(u, v, epsilon = 0.01);
     }
 
-    // #[test]
-    // fn green() {
-    //  let u = Luv::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-    //  let v = Luv::new(87.73704, -86.184654, 83.18117);
-    //  assert_relative_eq!(u, v, epsilon = 0.01);
-    // }
+    #[test]
+    fn green() {
+     let u = Luv::from_color(LinSrgb::new(0.0, 1.0, 0.0));
+     let v = Luv::new(87.73703, -83.07975, 107.40136);
+     assert_relative_eq!(u, v, epsilon = 0.01);
+    }
 
-    // #[test]
-    // fn blue() {
-    //  let u = Luv::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-    //  let v = Luv::new(32.302586, 79.19668, -107.863686);
-    //  assert_relative_eq!(u, v, epsilon = 0.01);
-    // }
+    #[test]
+    fn blue() {
+     let u = Luv::from_color(LinSrgb::new(0.0, 0.0, 1.0));
+     let v = Luv::new(32.30087, -9.40241, -130.35109);
+     assert_relative_eq!(u, v, epsilon = 0.01);
+    }
 
     #[test]
     fn ranges() {
