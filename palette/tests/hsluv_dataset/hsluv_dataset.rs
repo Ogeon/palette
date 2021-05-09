@@ -7,12 +7,13 @@ use serde_json;
 
 use palette::convert::IntoColorUnclamped;
 use palette::white_point::D65;
-use palette::{Luv, Xyz};
+use palette::{Lchuv, Luv, LuvHue, Xyz};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 struct HsluvExample {
     name: String,
+    lchuv: Lchuv<D65, f64>,
     luv: Luv<D65, f64>,
     xyz: Xyz<D65, f64>,
 }
@@ -34,6 +35,12 @@ fn load_data() -> Examples {
                 .iter()
                 .flat_map(|x| x.as_f64())
                 .collect();
+            let lchuv_data: Vec<f64> = colors["lch"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .flat_map(|x| x.as_f64())
+                .collect();
             let xyz_data: Vec<f64> = colors["xyz"]
                 .as_array()
                 .unwrap()
@@ -46,6 +53,7 @@ fn load_data() -> Examples {
                 HsluvExample {
                     name: k.clone(),
                     luv: Luv::new(luv_data[0], luv_data[1], luv_data[2]),
+                    lchuv: Lchuv::new(lchuv_data[0], lchuv_data[1], lchuv_data[2]),
                     xyz: Xyz::new(xyz_data[0], xyz_data[1], xyz_data[2]),
                 },
             )
@@ -70,5 +78,24 @@ pub fn run_luv_to_xyz_tests() {
     for (_, v) in TEST_DATA.iter() {
         let to_xyz: Xyz<D65, f64> = v.luv.into_color_unclamped();
         assert_relative_eq!(to_xyz, v.xyz, epsilon = 0.001);
+    }
+}
+
+#[test]
+pub fn run_lchuv_to_luv_tests() {
+    for (_, v) in TEST_DATA.iter() {
+        let to_luv: Luv<D65, f64> = v.lchuv.into_color_unclamped();
+        assert_relative_eq!(to_luv, v.luv, epsilon = 0.1);
+    }
+}
+
+#[test]
+pub fn run_luv_to_lchuv_tests() {
+    for (_, v) in TEST_DATA.iter() {
+        let mut to_lchuv: Lchuv<D65, f64> = v.luv.into_color_unclamped();
+        if to_lchuv.chroma < 1e-8 {
+            to_lchuv.hue = LuvHue::from_degrees(0.0);
+        }
+        assert_relative_eq!(to_lchuv, v.lchuv, epsilon = 0.001);
     }
 }

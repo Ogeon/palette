@@ -13,7 +13,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    GetHue, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    GetHue, Lchuv, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -36,7 +36,7 @@ pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Luv)
+    skip_derives(Xyz, Luv, Lchuv)
 )]
 #[repr(C)]
 pub struct Luv<Wp = D65, T = f32>
@@ -218,6 +218,18 @@ where
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         color
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Luv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
+        let (sin_hue, cos_hue) = color.hue.to_radians().sin_cos();
+        let chroma = color.chroma.max(T::zero());
+        Luv::with_wp(color.l, chroma * cos_hue, chroma * sin_hue)
     }
 }
 
@@ -848,9 +860,9 @@ mod test {
     #[cfg(feature = "random")]
     test_uniform_distribution! {
     Luv<D65, f32> {
-        l: (0.0, 100.0),
-        u: (-84.0, 176.0),
-        v: (-135.0, 108.0)
+    l: (0.0, 100.0),
+    u: (-84.0, 176.0),
+    v: (-135.0, 108.0)
     },
     min: Luv::new(0.0f32, -84.0, -135.0),
     max: Luv::new(100.0, 176.0, 108.0)

@@ -20,7 +20,7 @@ macro_rules! make_hues {
         /// number (like `f32`). This makes many calculations easier, but may
         /// also have some surprising effects if it's expected to act as a
         /// linear number.
-        #[derive(Clone, Copy, Debug, Default)]
+            #[derive(Clone, Copy, Debug, Default)]
         #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
         #[repr(C)]
         pub struct $name<T: Float = f32>(T);
@@ -256,7 +256,7 @@ macro_rules! make_hues {
             Standard: Distribution<T>,
         {
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $name<T> {
-                    $name(rng.gen() * from_f64(360.0))
+                $name(rng.gen() * from_f64(360.0))
             }
         }
     )+)
@@ -293,145 +293,83 @@ fn normalize_angle_positive<T: Float + FromF64>(deg: T) -> T {
     deg - ((deg / c360).floor() * c360)
 }
 
-#[cfg(feature = "random")]
-pub struct UniformLabHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    hue: Uniform<T>,
-}
-
-#[cfg(feature = "random")]
-impl<T> SampleUniform for LabHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    type Sampler = UniformLabHue<T>;
-}
-
-#[cfg(feature = "random")]
-impl<T> UniformSampler for UniformLabHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    type X = LabHue<T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = *low_b.borrow();
-        let normalized_low = LabHue::to_positive_degrees(low);
-        let high = *high_b.borrow();
-        let normalized_high = LabHue::to_positive_degrees(high);
-
-        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-            normalized_high + from_f64(360.0)
-        } else {
-            normalized_high
-        };
-
-        UniformLabHue {
-            hue: Uniform::new(normalized_low, normalized_high),
+macro_rules! impl_uniform {
+    (  $uni_ty: ident , $base_ty: ident) => {
+        #[cfg(feature = "random")]
+        pub struct $uni_ty<T>
+        where
+            T: Float + FromF64 + SampleUniform,
+        {
+            hue: Uniform<T>,
         }
-    }
 
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = *low_b.borrow();
-        let normalized_low = LabHue::to_positive_degrees(low);
-        let high = *high_b.borrow();
-        let normalized_high = LabHue::to_positive_degrees(high);
-
-        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-            normalized_high + from_f64(360.0)
-        } else {
-            normalized_high
-        };
-
-        UniformLabHue {
-            hue: Uniform::new_inclusive(normalized_low, normalized_high),
+        #[cfg(feature = "random")]
+        impl<T> SampleUniform for $base_ty<T>
+        where
+            T: Float + FromF64 + SampleUniform,
+        {
+            type Sampler = $uni_ty<T>;
         }
-    }
 
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> LabHue<T> {
-        LabHue::from(self.hue.sample(rng) * from_f64(360.0))
-    }
-}
+        #[cfg(feature = "random")]
+        impl<T> UniformSampler for $uni_ty<T>
+        where
+            T: Float + FromF64 + SampleUniform,
+        {
+            type X = $base_ty<T>;
 
-#[cfg(feature = "random")]
-pub struct UniformRgbHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    hue: Uniform<T>,
-}
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            where
+                B1: SampleBorrow<Self::X> + Sized,
+                B2: SampleBorrow<Self::X> + Sized,
+            {
+                let low = *low_b.borrow();
+                let normalized_low = $base_ty::to_positive_degrees(low);
+                let high = *high_b.borrow();
+                let normalized_high = $base_ty::to_positive_degrees(high);
 
-#[cfg(feature = "random")]
-impl<T> SampleUniform for RgbHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    type Sampler = UniformRgbHue<T>;
-}
+                let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+                    normalized_high + from_f64(360.0)
+                } else {
+                    normalized_high
+                };
 
-#[cfg(feature = "random")]
-impl<T> UniformSampler for UniformRgbHue<T>
-where
-    T: Float + FromF64 + SampleUniform,
-{
-    type X = RgbHue<T>;
+                $uni_ty {
+                    hue: Uniform::new(normalized_low, normalized_high),
+                }
+            }
 
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = *low_b.borrow();
-        let normalized_low = RgbHue::to_positive_degrees(low);
-        let high = *high_b.borrow();
-        let normalized_high = RgbHue::to_positive_degrees(high);
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            where
+                B1: SampleBorrow<Self::X> + Sized,
+                B2: SampleBorrow<Self::X> + Sized,
+            {
+                let low = *low_b.borrow();
+                let normalized_low = $base_ty::to_positive_degrees(low);
+                let high = *high_b.borrow();
+                let normalized_high = $base_ty::to_positive_degrees(high);
 
-        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-            normalized_high + from_f64(360.0)
-        } else {
-            normalized_high
-        };
+                let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
+                    normalized_high + from_f64(360.0)
+                } else {
+                    normalized_high
+                };
 
-        UniformRgbHue {
-            hue: Uniform::new(normalized_low, normalized_high),
+                $uni_ty {
+                    hue: Uniform::new_inclusive(normalized_low, normalized_high),
+                }
+            }
+
+            fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $base_ty<T> {
+                $base_ty::from(self.hue.sample(rng) * from_f64(360.0))
+            }
         }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = *low_b.borrow();
-        let normalized_low = RgbHue::to_positive_degrees(low);
-        let high = *high_b.borrow();
-        let normalized_high = RgbHue::to_positive_degrees(high);
-
-        let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-            normalized_high + from_f64(360.0)
-        } else {
-            normalized_high
-        };
-
-        UniformRgbHue {
-            hue: Uniform::new_inclusive(normalized_low, normalized_high),
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> RgbHue<T> {
-        RgbHue::from(self.hue.sample(rng) * from_f64(360.0))
-    }
+    };
 }
+
+impl_uniform!(UniformLabHue, LabHue);
+impl_uniform!(UniformRgbHue, RgbHue);
+impl_uniform!(UniformLuvHue, LuvHue);
 
 #[cfg(test)]
 mod test {
