@@ -131,22 +131,22 @@ where
 
     /// Return the `u` value minimum.
     pub fn min_u() -> T {
-	from_f64(-100.0)
+	from_f64(-84.0)
     }
 
     /// Return the `u` value maximum.
     pub fn max_u() -> T {
-	from_f64(100.0)
+	from_f64(176.0)
     }
 
     /// Return the `v` value minimum.
     pub fn min_v() -> T {
-	from_f64(-100.0)
+	from_f64(-135.0)
     }
 
     /// Return the `v` value maximum.
     pub fn max_v() -> T {
-	from_f64(100.0)
+	from_f64(108.0)
     }
 }
 
@@ -296,9 +296,9 @@ where
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-	self.l >= T::zero() && self.l <= from_f64(100.0) &&
-	self.u >= from_f64(-100.0) && self.u <= from_f64(100.0) &&
-	self.v >= from_f64(-100.0) && self.v <= from_f64(100.0)
+	self.l >= T::zero() && self.l <= Self::max_l() &&
+	self.u >= Self::min_u() && self.u <= Self::max_u() &&
+	self.v >= Self::min_v() && self.v <= Self::max_v()
     }
 
     fn clamp(&self) -> Luv<Wp, T> {
@@ -309,8 +309,8 @@ where
 
     fn clamp_self(&mut self) {
 	self.l = clamp(self.l, T::zero(), from_f64(100.0));
-	self.u = clamp(self.u, from_f64(-100.0), from_f64(100.0));
-	self.v = clamp(self.v, from_f64(-100.0), from_f64(100.0));
+	self.u = clamp(self.u, Self::min_u(), Self::max_u());
+	self.v = clamp(self.v, Self::min_v(), Self::max_v());
     }
 }
 
@@ -701,8 +701,8 @@ where
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
 	Luv {
 	    l: rng.gen() * from_f64(100.0),
-	    u: rng.gen() * from_f64(255.0) - from_f64(100.0),
-	    v: rng.gen() * from_f64(255.0) - from_f64(100.0),
+	    u: Luv::min_u() + rng.gen() * (Luv::max_u() - Luv::min_u()),
+	    v: Luv::min_v() + rng.gen() * (Luv::max_v() - Luv::min_v()),
 	    white_point: PhantomData,
 	}
     }
@@ -785,12 +785,12 @@ mod test {
     use crate::white_point::D65;
     use crate::{FromColor, LinSrgb};
 
-    // #[test]
-    // fn red() {
-    //  let u = Luv::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-    //  let v = Luv::new(53.23288, 80.09246, 67.2031);
-    //  assert_relative_eq!(u, v, epsilon = 0.01);
-    // }
+    #[test]
+    fn red() {
+     let u = Luv::from_color(LinSrgb::new(1.0, 0.0, 0.0));
+     let v = Luv::new(53.237116, 175.0098, 37.7650);
+     assert_relative_eq!(u, v, epsilon = 0.01);
+    }
 
     // #[test]
     // fn green() {
@@ -812,8 +812,8 @@ mod test {
 	    Luv<D65, f64>;
 	    clamped {
 		l: 0.0 => 100.0,
-		u: -100.0 => 100.0,
-		v: -100.0 => 100.0
+		u: -84.0 => 176.0,
+		v: -135.0 => 108.0
 	    }
 	    clamped_min {}
 	    unclamped {}
@@ -826,37 +826,37 @@ mod test {
     #[test]
     fn check_min_max_components() {
 	assert_relative_eq!(Luv::<D65, f32>::min_l(), 0.0);
-	assert_relative_eq!(Luv::<D65, f32>::min_u(), -100.0);
-	assert_relative_eq!(Luv::<D65, f32>::min_v(), -100.0);
+	assert_relative_eq!(Luv::<D65, f32>::min_u(), -84.0);
+	assert_relative_eq!(Luv::<D65, f32>::min_v(), -135.0);
 	assert_relative_eq!(Luv::<D65, f32>::max_l(), 100.0);
-	assert_relative_eq!(Luv::<D65, f32>::max_u(), 100.0);
-	assert_relative_eq!(Luv::<D65, f32>::max_v(), 100.0);
+	assert_relative_eq!(Luv::<D65, f32>::max_u(), 176.0);
+	assert_relative_eq!(Luv::<D65, f32>::max_v(), 108.0);
     }
 
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-	let serialized = ::serde_json::to_string(&Luv::new(0.3, 0.8, 0.1)).unwrap();
+	let serialized = ::serde_json::to_string(&Luv::new(80.0, 20.0, 30.0)).unwrap();
 
-	assert_eq!(serialized, r#"{"l":0.3,"u":0.8,"v":0.1}"#);
+	assert_eq!(serialized, r#"{"l":80.0,"u":20.0,"v":30.0}"#);
     }
 
     #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
-	let deserialized: Luv = ::serde_json::from_str(r#"{"l":0.3,"u":0.8,"v":0.1}"#).unwrap();
+	let deserialized: Luv = ::serde_json::from_str(r#"{"l":80.0,"u":20.0,"v":30.0}"#).unwrap();
 
-	assert_eq!(deserialized, Luv::new(0.3, 0.8, 0.1));
+	assert_eq!(deserialized, Luv::new(80.0, 20.0, 30.0));
     }
 
     #[cfg(feature = "random")]
     test_uniform_distribution! {
 	Luv<D65, f32> {
 	    l: (0.0, 100.0),
-	    u: (-100.0, 100.0),
-	    v: (-100.0, 100.0)
+	    u: (-84.0, 176.0),
+	    v: (-135.0, 108.0)
 	},
-	min: Luv::new(0.0f32, -100.0, -100.0),
-	max: Luv::new(100.0, 100.0, 100.0)
+	min: Luv::new(0.0f32, -84.0, -135.0),
+	max: Luv::new(100.0, 176.0, 108.0)
     }
 }
