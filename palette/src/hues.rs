@@ -270,6 +270,9 @@ make_hues! {
     /// different from the hue of RGB based color spaces.
     struct LabHue;
 
+    /// A hue type for the CIE L\*u\*v\* family of color spaces.
+    struct LuvHue;
+
     /// A hue type for the RGB family of color spaces.
     ///
     /// It's measured in degrees and uses the three additive primaries _red_,
