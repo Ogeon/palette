@@ -258,8 +258,10 @@ where
     Wp: WhitePoint,
 {
     fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l() && self.l <= Self::max_l() && 
-	    self.chroma >= Self::min_chroma() && self.chroma <= Self::max_chroma()
+        self.l >= Self::min_l()
+            && self.l <= Self::max_l()
+            && self.chroma >= Self::min_chroma()
+            && self.chroma <= Self::max_chroma()
     }
 
     fn clamp(&self) -> Lchuv<Wp, T> {
