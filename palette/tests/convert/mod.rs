@@ -12,6 +12,14 @@ pub fn xyz_yxy_conversion() {
 pub fn color_difference_ciede() {
     data_ciede_2000::run_tests();
 }
+#[test]
+pub fn color_mine_from_lab() {
+    data_color_mine::run_from_lab_tests();
+}
+#[test]
+pub fn color_mine_from_lch() {
+    data_color_mine::run_from_lch_tests();
+}
 
 #[test]
 pub fn color_mine_from_xyz() {
