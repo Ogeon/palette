@@ -529,7 +529,7 @@ mod tests {
     use crate::encoding::linear::Linear;
     use crate::luma::{Luma, LumaStandard};
     use crate::rgb::{Rgb, RgbSpace};
-    use crate::{Alpha, Hsl, Hsv, Hwb, Lab, Lch, Luv, Xyz, Yxy};
+    use crate::{Alpha, Hsl, Hsluv, Hsv, Hwb, Lab, Lch, Luv, Xyz, Yxy};
     use crate::{Clamp, FloatComponent};
 
     #[derive(FromColorUnclamped, WithAlpha)]
@@ -684,6 +684,9 @@ mod tests {
         let hsl: Hsl<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(hsl);
 
+        let hsluv: Hsluv<_, f64> = Default::default();
+        WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
+
         let hsv: Hsv<_, f64> = Default::default();
         WithXyz::<crate::encoding::Srgb>::from_color(hsv);
 
@@ -720,6 +723,9 @@ mod tests {
 
         let hsl: Alpha<Hsl<_, f64>, u8> = Alpha::from(Hsl::default());
         WithXyz::<crate::encoding::Srgb>::from_color(hsl);
+
+        let hsluv: Alpha<Hsluv<_, f64>, u8> = Alpha::from(Hsluv::default());
+        WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
 
         let hsv: Alpha<Hsv<_, f64>, u8> = Alpha::from(Hsv::default());
         WithXyz::<crate::encoding::Srgb>::from_color(hsv);
@@ -758,6 +764,9 @@ mod tests {
         let hsl: Hsl<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
 
+        let hsluv: Hsluv<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
+
         let hsv: Hsv<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
 
@@ -795,6 +804,9 @@ mod tests {
         let hsl: Hsl<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
 
+        let hsluv: Hsluv<_, f64> = Default::default();
+        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
+
         let hsv: Hsv<_, f64> = Default::default();
         Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
 
@@ -817,6 +829,7 @@ mod tests {
         let _luv: Luv<_, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsluv: Hsluv<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
         let _luma: Luma<crate::encoding::Srgb, f64> = color.into_color();
@@ -835,6 +848,7 @@ mod tests {
         let _luv: Luv<_, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsluv: Hsluv<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
         let _luma: Luma<crate::encoding::Srgb, f64> = color.into_color();
@@ -852,6 +866,7 @@ mod tests {
         let _luv: Alpha<Luv<_, f64>, u8> = color.into_color();
         let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
+        let _hsluv: Alpha<Hsluv<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
         let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
         let _luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> = color.into_color();
@@ -870,6 +885,7 @@ mod tests {
         let _luv: Alpha<Luv<_, f64>, u8> = color.into_color();
         let _rgb: Alpha<Rgb<_, f64>, u8> = color.into_color();
         let _hsl: Alpha<Hsl<_, f64>, u8> = color.into_color();
+        let _hsluv: Alpha<Hsluv<_, f64>, u8> = color.into_color();
         let _hsv: Alpha<Hsv<_, f64>, u8> = color.into_color();
         let _hwb: Alpha<Hwb<_, f64>, u8> = color.into_color();
         let _luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> = color.into_color();
@@ -901,6 +917,9 @@ mod tests {
         let hsl: Hsl<_, f64> = Default::default();
         WithoutXyz::<f64>::from_color(hsl);
 
+        let hsluv: Hsluv<_, f64> = Default::default();
+        WithoutXyz::<f64>::from_color(hsluv);
+
         let hsv: Hsv<_, f64> = Default::default();
         WithoutXyz::<f64>::from_color(hsv);
 
@@ -923,6 +942,7 @@ mod tests {
         let _luv: Luv<crate::white_point::E, f64> = color.into_color();
         let _rgb: Rgb<_, f64> = color.into_color();
         let _hsl: Hsl<_, f64> = color.into_color();
+        let _hsluv: Hsluv<_, f64> = color.into_color();
         let _hsv: Hsv<_, f64> = color.into_color();
         let _hwb: Hwb<_, f64> = color.into_color();
         let _luma: Luma<Linear<crate::white_point::E>, f64> = color.into_color();

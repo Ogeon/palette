@@ -10,10 +10,11 @@ use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
+use crate::luv_bounds::LuvBounds;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
-    Hue, Luv, LuvHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    Hsluv, Hue, Luv, LuvHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -32,7 +33,7 @@ pub type Lchuva<Wp = D65, T = f32> = Alpha<Lchuv<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Luv, Lchuv)
+    skip_derives(Luv, Lchuv, Hsluv)
 )]
 #[repr(C)]
 pub struct Lchuv<Wp = D65, T = f32>
@@ -221,6 +222,24 @@ where
             hue: color.get_hue().unwrap_or(LuvHue::from(T::zero())),
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Lchuv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Hsluv<Wp, T>) -> Self {
+        // Apply the given saturation as a percentage of the max
+        // chroma for that hue.
+        let max_chroma = LuvBounds::from_lightness(color.l).max_chroma_at_hue(color.hue);
+
+        Lchuv::with_wp(
+            color.l,
+            color.saturation * max_chroma * T::from_f64(0.01),
+            color.hue,
+        )
     }
 }
 
