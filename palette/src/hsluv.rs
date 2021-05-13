@@ -11,6 +11,8 @@ use crate::{
     RelativeContrast, Saturate, Shade, Xyz,
 };
 
+use crate::{impl_color_add, impl_color_sub};
+
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
 pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
@@ -424,121 +426,8 @@ where
     }
 }
 
-impl<Wp, T> Add<Hsluv<Wp, T>> for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Hsluv<Wp, T>;
-
-    fn add(self, other: Hsluv<Wp, T>) -> Self::Output {
-        Hsluv {
-            hue: self.hue + other.hue,
-            saturation: self.saturation + other.saturation,
-            l: self.l + other.l,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Hsluv<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Hsluv {
-            hue: self.hue + c,
-            saturation: self.saturation + c,
-            l: self.l + c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Hsluv<Wp, T>> for Hsluv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Hsluv<Wp, T>) {
-        self.hue += other.hue;
-        self.saturation += other.saturation;
-        self.l += other.l;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Hsluv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.hue += c;
-        self.saturation += c;
-        self.l += c;
-    }
-}
-
-impl<Wp, T> Sub<Hsluv<Wp, T>> for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Hsluv<Wp, T>;
-
-    fn sub(self, other: Hsluv<Wp, T>) -> Self::Output {
-        Hsluv {
-            hue: self.hue - other.hue,
-            saturation: self.saturation - other.saturation,
-            l: self.l - other.l,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Hsluv<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Hsluv {
-            hue: self.hue - c,
-            saturation: self.saturation - c,
-            l: self.l - c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Hsluv<Wp, T>> for Hsluv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Hsluv<Wp, T>) {
-        self.hue -= other.hue;
-        self.saturation -= other.saturation;
-        self.l -= other.l;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Hsluv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.hue -= c;
-        self.saturation -= c;
-        self.l -= c;
-    }
-}
+impl_color_add!(Hsluv, [hue, saturation, l], white_point);
+impl_color_sub!(Hsluv, [hue, saturation, l], white_point);
 
 impl<Wp, T, P> AsRef<P> for Hsluv<Wp, T>
 where
@@ -614,6 +503,23 @@ mod test {
                 hue: -360.0 => 360.0
             }
         }
+    }
+
+    /// Check that the arithmetic operations (add/sub) are all
+    /// implemented.
+    #[test]
+    fn test_arithmetic() {
+	let hsl = Hsluv::new(120.0, 40.0, 30.0);
+	let hsl2 = Hsluv::new(200.0, 30.0, 40.0);
+	let mut _hsl3 = hsl + hsl2;
+	_hsl3 += hsl2;
+	let mut _hsl4 = hsl2 + 0.3;
+	_hsl4 += 0.1;
+
+	_hsl3 = hsl2 - hsl;
+	_hsl3 = _hsl4 - 0.1;
+	_hsl4 -= _hsl3;
+	_hsl3 -= 0.1;
     }
 
     #[test]

@@ -8,6 +8,8 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::{impl_color_add, impl_color_sub};
+
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::luv_bounds::LuvBounds;
@@ -432,121 +434,8 @@ where
     }
 }
 
-impl<Wp, T> Add<Lchuv<Wp, T>> for Lchuv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lchuv<Wp, T>;
-
-    fn add(self, other: Lchuv<Wp, T>) -> Self::Output {
-        Lchuv {
-            l: self.l + other.l,
-            chroma: self.chroma + other.chroma,
-            hue: self.hue + other.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Lchuv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lchuv<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Lchuv {
-            l: self.l + c,
-            chroma: self.chroma + c,
-            hue: self.hue + c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Lchuv<Wp, T>> for Lchuv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Lchuv<Wp, T>) {
-        self.l += other.l;
-        self.chroma += other.chroma;
-        self.hue += other.hue;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Lchuv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.l += c;
-        self.chroma += c;
-        self.hue += c;
-    }
-}
-
-impl<Wp, T> Sub<Lchuv<Wp, T>> for Lchuv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lchuv<Wp, T>;
-
-    fn sub(self, other: Lchuv<Wp, T>) -> Self::Output {
-        Lchuv {
-            l: self.l - other.l,
-            chroma: self.chroma - other.chroma,
-            hue: self.hue - other.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Lchuv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lchuv<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Lchuv {
-            l: self.l - c,
-            chroma: self.chroma - c,
-            hue: self.hue - c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Lchuv<Wp, T>> for Lchuv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Lchuv<Wp, T>) {
-        self.l -= other.l;
-        self.chroma -= other.chroma;
-        self.hue -= other.hue;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Lchuv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.l -= c;
-        self.chroma -= c;
-        self.hue -= c;
-    }
-}
+impl_color_add!(Lchuv, [l, chroma, hue], white_point);
+impl_color_sub!(Lchuv, [l, chroma, hue], white_point);
 
 impl<Wp, T, P> AsRef<P> for Lchuv<Wp, T>
 where
@@ -695,6 +584,23 @@ mod test {
                 hue: -360.0 => 360.0
             }
         }
+    }
+
+    /// Check that the arithmetic operations (add/sub) are all
+    /// implemented.
+    #[test]
+    fn test_arithmetic() {
+	let lchuv = Lchuv::new(120.0, 40.0, 30.0);
+	let lchuv2 = Lchuv::new(200.0, 30.0, 40.0);
+	let mut _lchuv3 = lchuv + lchuv2;
+	_lchuv3 += lchuv2;
+	let mut _lchuv4 = lchuv2 + 0.3;
+	_lchuv4 += 0.1;
+
+	_lchuv3 = lchuv2 - lchuv;
+	_lchuv3 = _lchuv4 - 0.1;
+	_lchuv4 -= _lchuv3;
+	_lchuv3 -= 0.1;
     }
 
     raw_pixel_conversion_tests!(Lchuv<D65>: l, chroma, hue);
