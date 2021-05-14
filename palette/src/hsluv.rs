@@ -509,17 +509,17 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-	let hsl = Hsluv::new(120.0, 40.0, 30.0);
-	let hsl2 = Hsluv::new(200.0, 30.0, 40.0);
-	let mut _hsl3 = hsl + hsl2;
-	_hsl3 += hsl2;
-	let mut _hsl4 = hsl2 + 0.3;
-	_hsl4 += 0.1;
+        let hsl = Hsluv::new(120.0, 40.0, 30.0);
+        let hsl2 = Hsluv::new(200.0, 30.0, 40.0);
+        let mut _hsl3 = hsl + hsl2;
+        _hsl3 += hsl2;
+        let mut _hsl4 = hsl2 + 0.3;
+        _hsl4 += 0.1;
 
-	_hsl3 = hsl2 - hsl;
-	_hsl3 = _hsl4 - 0.1;
-	_hsl4 -= _hsl3;
-	_hsl3 -= 0.1;
+        _hsl3 = hsl2 - hsl;
+        _hsl3 = _hsl4 - 0.1;
+        _hsl4 -= _hsl3;
+        _hsl3 -= 0.1;
     }
 
     #[test]
@@ -554,10 +554,7 @@ mod test {
     fn serialize() {
         let serialized = ::serde_json::to_string(&Hsluv::new(120.0, 80.0, 60.0)).unwrap();
 
-        assert_eq!(
-            serialized,
-            r#"{"hue":120.0,"saturation":80.0,"l":60.0}"#
-        );
+        assert_eq!(serialized, r#"{"hue":120.0,"saturation":80.0,"l":60.0}"#);
     }
 
     #[cfg(feature = "serializing")]

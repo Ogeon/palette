@@ -590,17 +590,17 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-	let lchuv = Lchuv::new(120.0, 40.0, 30.0);
-	let lchuv2 = Lchuv::new(200.0, 30.0, 40.0);
-	let mut _lchuv3 = lchuv + lchuv2;
-	_lchuv3 += lchuv2;
-	let mut _lchuv4 = lchuv2 + 0.3;
-	_lchuv4 += 0.1;
+        let lchuv = Lchuv::new(120.0, 40.0, 30.0);
+        let lchuv2 = Lchuv::new(200.0, 30.0, 40.0);
+        let mut _lchuv3 = lchuv + lchuv2;
+        _lchuv3 += lchuv2;
+        let mut _lchuv4 = lchuv2 + 0.3;
+        _lchuv4 += 0.1;
 
-	_lchuv3 = lchuv2 - lchuv;
-	_lchuv3 = _lchuv4 - 0.1;
-	_lchuv4 -= _lchuv3;
-	_lchuv3 -= 0.1;
+        _lchuv3 = lchuv2 - lchuv;
+        _lchuv3 = _lchuv4 - 0.1;
+        _lchuv4 -= _lchuv3;
+        _lchuv3 -= 0.1;
     }
 
     raw_pixel_conversion_tests!(Lchuv<D65>: l, chroma, hue);

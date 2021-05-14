@@ -719,17 +719,17 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-	let luv = Luv::new(120.0, 40.0, 30.0);
-	let luv2 = Luv::new(200.0, 30.0, 40.0);
-	let mut _luv3 = luv + luv2;
-	_luv3 += luv2;
-	let mut _luv4 = luv2 + 0.3;
-	_luv4 += 0.1;
+        let luv = Luv::new(120.0, 40.0, 30.0);
+        let luv2 = Luv::new(200.0, 30.0, 40.0);
+        let mut _luv3 = luv + luv2;
+        _luv3 += luv2;
+        let mut _luv4 = luv2 + 0.3;
+        _luv4 += 0.1;
 
-	_luv3 = luv2 - luv;
-	_luv3 = _luv4 - 0.1;
-	_luv4 -= _luv3;
-	_luv3 -= 0.1;
+        _luv3 = luv2 - luv;
+        _luv3 = _luv4 - 0.1;
+        _luv4 -= _luv3;
+        _luv3 -= 0.1;
     }
 
     raw_pixel_conversion_tests!(Luv<D65>: l, u, v);

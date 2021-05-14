@@ -52,22 +52,29 @@ impl LuvBounds {
         let sub1 = (l + 16.0).pow(3.0) / 1560896.0;
         let sub2 = if sub1 > EPSILON { sub1 } else { l / KAPPA };
 
-	let line = |c: usize, t: f64| {
+        let line = |c: usize, t: f64| {
             let m: &[f64; 3] = &M[c];
             let top1 = (284517.0 * m[0] - 94839.0 * m[2]) * sub2;
-            let top2 = (838422.0 * m[2] + 769860.0 * m[1] + 731718.0 * m[0]) * l * sub2
-                - 769860.0 * t * l;
+            let top2 =
+                (838422.0 * m[2] + 769860.0 * m[1] + 731718.0 * m[0]) * l * sub2 - 769860.0 * t * l;
             let bottom = (632260.0 * m[2] - 126452.0 * m[1]) * sub2 + 126452.0 * t;
 
             BoundaryLine {
                 slope: top1 / bottom,
                 intercept: top2 / bottom,
             }
-	};
+        };
 
-        Self { bounds: [line(0, 0.0), line(0, 1.0),
-			line(1, 0.0), line(1, 1.0),
-			line(2, 0.0), line(2, 1.0)]}
+        Self {
+            bounds: [
+                line(0, 0.0),
+                line(0, 1.0),
+                line(1, 0.0),
+                line(1, 1.0),
+                line(2, 0.0),
+                line(2, 1.0),
+            ],
+        }
     }
 
     /// Given a particular hue, return the distance to the boundary at
