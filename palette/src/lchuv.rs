@@ -8,8 +8,6 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::{impl_color_add, impl_color_sub};
-
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::luv_bounds::LuvBounds;

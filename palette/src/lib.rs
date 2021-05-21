@@ -438,9 +438,6 @@ mod yxy;
 
 mod hues;
 
-#[macro_use]
-mod arithmetic;
-
 pub mod chromatic_adaptation;
 mod color_difference;
 mod component;

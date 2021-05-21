@@ -11,8 +11,6 @@ use crate::{
     RelativeContrast, Saturate, Shade, Xyz,
 };
 
-use crate::{impl_color_add, impl_color_sub};
-
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
 pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
