@@ -16,7 +16,6 @@ use crate::{
     GetHue, Lchuv, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
-
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
 /// implementation in `Alpha`](crate::Alpha#Luva).
 pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
