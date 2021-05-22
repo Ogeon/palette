@@ -24,5 +24,11 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
+#[cfg(feature = "nightly")]
+#[no_mangle]
+pub unsafe fn __aeabi_unwind_cpp_pr0() -> () {
+    loop {}
+}
+
 #[cfg(not(feature = "nightly"))]
 fn main() {}
