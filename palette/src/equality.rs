@@ -3,7 +3,8 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use crate::float::Float;
 use crate::white_point::WhitePoint;
 use crate::{
-    from_f64, FloatComponent, FromF64, Lab, LabHue, Lch, Lchuv, Luv, LuvHue, RgbHue, Xyz, Yxy,
+    from_f64, FloatComponent, FromF64, Hsluv, Lab, LabHue, Lch, Lchuv, Luv, LuvHue, RgbHue, Xyz,
+    Yxy,
 };
 
 macro_rules! impl_eq {
@@ -69,6 +70,7 @@ impl_eq!(Lab, [l, a, b]);
 impl_eq!(Luv, [l, u, v]);
 impl_eq!(Lch, [l, chroma, hue]);
 impl_eq!(Lchuv, [l, chroma, hue]);
+impl_eq!(Hsluv, [hue, saturation, l]);
 
 // For hues, the difference is calculated and compared to zero. However due to
 // the way floating point's work this is not so simple.
