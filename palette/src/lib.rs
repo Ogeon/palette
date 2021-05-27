@@ -238,10 +238,12 @@ pub use blend::Blend;
 pub use gradient::Gradient;
 
 pub use hsl::{Hsl, Hsla};
+pub use hsluv::{Hsluv, Hsluva};
 pub use hsv::{Hsv, Hsva};
 pub use hwb::{Hwb, Hwba};
 pub use lab::{Lab, Laba};
 pub use lch::{Lch, Lcha};
+pub use lchuv::{Lchuv, Lchuva};
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use luv::{Luv, Luva};
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Packed, RgbChannels, Srgb, Srgba};
@@ -422,10 +424,12 @@ mod random_sampling;
 
 mod alpha;
 mod hsl;
+mod hsluv;
 mod hsv;
 mod hwb;
 mod lab;
 mod lch;
+mod lchuv;
 pub mod luma;
 mod luv;
 pub mod rgb;
@@ -440,6 +444,7 @@ mod component;
 pub mod convert;
 pub mod encoding;
 mod equality;
+mod luv_bounds;
 mod relative_contrast;
 pub mod white_point;
 

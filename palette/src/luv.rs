@@ -13,7 +13,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    GetHue, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    GetHue, Lchuv, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -36,7 +36,7 @@ pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Luv)
+    skip_derives(Xyz, Luv, Lchuv)
 )]
 #[repr(C)]
 pub struct Luv<Wp = D65, T = f32>
@@ -218,6 +218,18 @@ where
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         color
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Luv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
+        let (sin_hue, cos_hue) = color.hue.to_radians().sin_cos();
+        let chroma = color.chroma.max(T::zero());
+        Luv::with_wp(color.l, chroma * cos_hue, chroma * sin_hue)
     }
 }
 
@@ -416,121 +428,8 @@ where
     }
 }
 
-impl<Wp, T> Add<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn add(self, other: Luv<Wp, T>) -> Self::Output {
-        Luv {
-            l: self.l + other.l,
-            u: self.u + other.u,
-            v: self.v + other.v,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Luv {
-            l: self.l + c,
-            u: self.u + c,
-            v: self.v + c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Luv<Wp, T>) {
-        self.l += other.l;
-        self.u += other.u;
-        self.v += other.v;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Luv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.l += c;
-        self.u += c;
-        self.v += c;
-    }
-}
-
-impl<Wp, T> Sub<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn sub(self, other: Luv<Wp, T>) -> Self::Output {
-        Luv {
-            l: self.l - other.l,
-            u: self.u - other.u,
-            v: self.v - other.v,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Luv {
-            l: self.l - c,
-            u: self.u - c,
-            v: self.v - c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Luv<Wp, T>) {
-        self.l -= other.l;
-        self.u -= other.u;
-        self.v -= other.v;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Luv<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.l -= c;
-        self.u -= c;
-        self.v -= c;
-    }
-}
+impl_color_add!(Luv, [l, u, v], white_point);
+impl_color_sub!(Luv, [l, u, v], white_point);
 
 impl<Wp, T> Mul<Luv<Wp, T>> for Luv<Wp, T>
 where
@@ -815,6 +714,22 @@ mod test {
             unclamped {}
         }
     }
+    /// Check that the arithmetic operations (add/sub) are all
+    /// implemented.
+    #[test]
+    fn test_arithmetic() {
+        let luv = Luv::new(120.0, 40.0, 30.0);
+        let luv2 = Luv::new(200.0, 30.0, 40.0);
+        let mut _luv3 = luv + luv2;
+        _luv3 += luv2;
+        let mut _luv4 = luv2 + 0.3;
+        _luv4 += 0.1;
+
+        _luv3 = luv2 - luv;
+        _luv3 = _luv4 - 0.1;
+        _luv4 -= _luv3;
+        _luv3 -= 0.1;
+    }
 
     raw_pixel_conversion_tests!(Luv<D65>: l, u, v);
     raw_pixel_conversion_fail_tests!(Luv<D65>: l, u, v);
@@ -848,9 +763,9 @@ mod test {
     #[cfg(feature = "random")]
     test_uniform_distribution! {
     Luv<D65, f32> {
-        l: (0.0, 100.0),
-        u: (-84.0, 176.0),
-        v: (-135.0, 108.0)
+    l: (0.0, 100.0),
+    u: (-84.0, 176.0),
+    v: (-135.0, 108.0)
     },
     min: Luv::new(0.0f32, -84.0, -135.0),
     max: Luv::new(100.0, 176.0, 108.0)
