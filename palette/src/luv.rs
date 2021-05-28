@@ -674,6 +674,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Zeroable for Luv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Pod for Luv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use super::Luv;

@@ -752,6 +752,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Zeroable for Yxy<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Pod for Yxy<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use super::Yxy;

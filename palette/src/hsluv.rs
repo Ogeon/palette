@@ -553,6 +553,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Zeroable for Hsluv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Pod for Hsluv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use super::Hsluv;

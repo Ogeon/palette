@@ -563,6 +563,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Zeroable for Lchuv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> bytemuck::Pod for Lchuv<Wp, T>
+where
+    Wp: WhitePoint,
+    T: FloatComponent + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use crate::white_point::D65;

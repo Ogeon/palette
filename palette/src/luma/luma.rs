@@ -876,6 +876,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Zeroable for Luma<S, T>
+where
+    S: LumaStandard,
+    T: Component + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Pod for Luma<S, T>
+where
+    S: LumaStandard,
+    T: Component + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use crate::encoding::Srgb;

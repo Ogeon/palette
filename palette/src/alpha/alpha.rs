@@ -2,6 +2,8 @@ use core::fmt;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "bytemuck")]
+use bytemuck::{Pod, Zeroable};
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -581,6 +583,108 @@ where
             alpha: self.alpha.sample(rng),
         }
     }
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<C: Zeroable, T: Zeroable> Zeroable for Alpha<C, T> {}
+
+// The `Pod` trait may only be implemented for `Alpha` if both `C` and `T` are
+// `Pod` AND if they also have the similar memory alignment requirements.
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> Pod for Alpha<crate::rgb::Rgb<S, T>, T>
+where
+    S: crate::rgb::RgbStandard,
+    T: Component + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> Pod for Alpha<crate::luma::Luma<S, T>, T>
+where
+    S: crate::luma::LumaStandard,
+    T: Component + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> Pod for Alpha<crate::hsl::Hsl<S, T>, T>
+where
+    S: crate::rgb::RgbStandard,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::hsluv::Hsluv<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> Pod for Alpha<crate::hsv::Hsv<S, T>, T>
+where
+    S: crate::rgb::RgbStandard,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> Pod for Alpha<crate::hwb::Hwb<S, T>, T>
+where
+    S: crate::rgb::RgbStandard,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::lab::Lab<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::lch::Lch<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::lchuv::Lchuv<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::luv::Luv<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::xyz::Xyz<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<Wp, T> Pod for Alpha<crate::yxy::Yxy<Wp, T>, T>
+where
+    Wp: crate::white_point::WhitePoint,
+    T: crate::FloatComponent + Pod,
+{
 }
 
 #[cfg(test)]
