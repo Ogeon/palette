@@ -583,6 +583,27 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<C, T> bytemuck::Zeroable for Alpha<C, T>
+where
+    C: bytemuck::Zeroable,
+    T: bytemuck::Zeroable,
+{
+}
+
+// Safety:
+//  It is a requirement of `Pixel<T>` that the in-memory representation of
+//  `C` is made of `T`s.
+//  Because `T` is `Pod`, `Alpha<C, T>` is `Pod` as well because no internal
+//  padding can be introduced during monomorphization.
+#[cfg(feature = "bytemuck")]
+unsafe impl<C, T> bytemuck::Pod for Alpha<C, T>
+where
+    T: bytemuck::Pod,
+    C: bytemuck::Pod + Pixel<T>,
+{
+}
+
 #[cfg(test)]
 mod test {
     use crate::encoding::Srgb;

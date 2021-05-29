@@ -48,6 +48,10 @@ version = "1"
 features = ["serde_derive"]
 optional = true
 
+[dependencies.bytemuck]
+version = "1"
+optional = true
+
 [dev-dependencies]
 csv = "1"
 lazy_static = "1"

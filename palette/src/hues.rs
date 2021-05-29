@@ -259,6 +259,11 @@ macro_rules! make_hues {
                 $name(rng.gen() * from_f64(360.0))
             }
         }
+
+        #[cfg(feature = "bytemuck")]
+        unsafe impl<T: Float + bytemuck::Zeroable> bytemuck::Zeroable for $name<T> {}
+        #[cfg(feature = "bytemuck")]
+        unsafe impl<T: Float + bytemuck::Pod> bytemuck::Pod for $name<T> {}
     )+)
 }
 

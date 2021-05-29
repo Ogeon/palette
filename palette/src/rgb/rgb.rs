@@ -1236,6 +1236,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Zeroable for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: Component + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Pod for Rgb<S, T>
+where
+    S: RgbStandard,
+    T: Component + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use core::str::FromStr;

@@ -58,7 +58,7 @@ use crate::Pixel;
 /// assert_eq!(colors[0].color, 0x7F0080);
 /// assert_eq!(colors[1].color, 0x60BBCC);
 /// ```
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Pixel)]
+#[derive(Debug, PartialEq, Eq, Pixel)]
 #[palette(palette_internal)]
 #[repr(C)]
 pub struct Packed<C = channels::Argb> {
@@ -70,6 +70,14 @@ pub struct Packed<C = channels::Argb> {
     /// [RgbChannels](crate::RgbChannels).
     #[palette(unsafe_zero_sized)]
     pub channel_order: PhantomData<C>,
+}
+
+impl<C> Copy for Packed<C> {}
+
+impl<C> Clone for Packed<C> {
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 /// Splits and combines RGB(A) types with some channel ordering. Channels may be
@@ -158,6 +166,11 @@ where
         C::combine_rgb((bytes[0], bytes[1], bytes[2], bytes[3]))
     }
 }
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<C> bytemuck::Zeroable for Packed<C> {}
+#[cfg(feature = "bytemuck")]
+unsafe impl<C: 'static> bytemuck::Pod for Packed<C> {}
 
 #[cfg(test)]
 mod test {

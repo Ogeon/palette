@@ -389,6 +389,24 @@ impl<C, T: Float> DerefMut for PreAlpha<C, T> {
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<C, T> bytemuck::Zeroable for PreAlpha<C, T>
+where
+    C: bytemuck::Zeroable,
+    T: Float + bytemuck::Zeroable,
+{
+}
+
+// Safety:
+//  See `Alpha<C, T>`'s implementation of `Pod`.
+#[cfg(feature = "bytemuck")]
+unsafe impl<C, T> bytemuck::Pod for PreAlpha<C, T>
+where
+    C: bytemuck::Pod + Pixel<T>,
+    T: Float + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 #[cfg(feature = "serializing")]
 mod test {

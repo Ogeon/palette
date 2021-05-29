@@ -825,6 +825,22 @@ where
     }
 }
 
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Zeroable for Hsv<S, T>
+where
+    S: RgbStandard,
+    T: FloatComponent + bytemuck::Zeroable,
+{
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<S, T> bytemuck::Pod for Hsv<S, T>
+where
+    S: RgbStandard,
+    T: FloatComponent + bytemuck::Pod,
+{
+}
+
 #[cfg(test)]
 mod test {
     use super::Hsv;
