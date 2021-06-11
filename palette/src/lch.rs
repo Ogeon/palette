@@ -239,7 +239,7 @@ where
         Lch {
             l: color.l,
             chroma: (color.a * color.a + color.b * color.b).sqrt(),
-            hue: color.get_hue().unwrap_or(LabHue::from(T::zero())),
+            hue: color.get_hue().unwrap_or_else(|| LabHue::from(T::zero())),
             white_point: PhantomData,
         }
     }

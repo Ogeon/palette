@@ -80,7 +80,7 @@ pub fn build_gradients(writer: &mut File) {
                 .next()
                 .unwrap_or_else(|| panic!("less lines than stated colors in gradient {}", name))
                 .unwrap_or_else(|_| panic!("couldn't read the {}th line of color {}", i, name));
-            let mut rgb = color.split(",");
+            let mut rgb = color.split(',');
             let red: f32 = rgb
                 .next()
                 .and_then(|r| r.trim().parse().ok())
@@ -95,7 +95,7 @@ pub fn build_gradients(writer: &mut File) {
                 .unwrap_or_else(|| panic!("couldn't get the {}th blue-value for {}", i, name));
             write!(writer, "({:.10},{}{{red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData}}),", (i as f32/number_of_colors as f32), color_type, red, green, blue).unwrap();
         }
-        write!(writer, "], ::core::marker::PhantomData);\n").unwrap();
+        writeln!(writer, "], ::core::marker::PhantomData);").unwrap();
     }
 }
 

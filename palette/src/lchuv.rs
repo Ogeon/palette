@@ -219,7 +219,7 @@ where
         Lchuv {
             l: color.l,
             chroma: color.u.hypot(color.v),
-            hue: color.get_hue().unwrap_or(LuvHue::from(T::zero())),
+            hue: color.get_hue().unwrap_or_else(|| LuvHue::from(T::zero())),
             white_point: PhantomData,
         }
     }
