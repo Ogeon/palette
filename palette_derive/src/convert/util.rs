@@ -133,7 +133,7 @@ pub fn get_convert_color_type(
                 parse_quote!(#color_path<_S, #component>)
             }
         }
-        "Oklab" => parse_quote!(#color_path<#component>),
+        "Oklab" | "Oklch" => parse_quote!(#color_path<#component>),
         _ => parse_quote!(#color_path<#white_point, #component>),
     }
 }

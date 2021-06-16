@@ -38,8 +38,8 @@ mod meta;
 mod util;
 
 const COLOR_TYPES: &[&str] = &[
-    "Rgb", "Luma", "Hsl", "Hsluv", "Hsv", "Hwb", "Lab", "Lch", "Lchuv", "Luv", "Oklab", "Xyz",
-    "Yxy",
+    "Rgb", "Luma", "Hsl", "Hsluv", "Hsv", "Hwb", "Lab", "Lch", "Lchuv", "Luv", "Oklab", "Oklch",
+    "Xyz", "Yxy",
 ];
 
 const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
@@ -54,6 +54,7 @@ const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
     ("Lchuv", "Luv"),
     ("Luv", "Xyz"),
     ("Oklab", "Xyz"),
+    ("Oklch", "Oklab"),
     ("Yxy", "Xyz"),
 ];
 

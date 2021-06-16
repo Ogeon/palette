@@ -159,7 +159,7 @@ fn prepare_from_impl(
 
         let mut into_generics = generics.clone();
 
-        if color_name == "Oklab" {
+        if matches!(color_name, "Oklab" | "Oklch") {
             generics.make_where_clause().predicates.push(parse_quote!(
                 #nearest_color_ty: #from_trait_path<#color_ty>
             ));

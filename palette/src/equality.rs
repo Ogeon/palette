@@ -3,8 +3,8 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use crate::float::Float;
 use crate::white_point::WhitePoint;
 use crate::{
-    from_f64, FloatComponent, FromF64, Hsluv, Lab, LabHue, Lch, Lchuv, Luv, LuvHue, RgbHue, Xyz,
-    Yxy,
+    from_f64, FloatComponent, FromF64, Hsluv, Lab, LabHue, Lch, Lchuv, Luv, LuvHue, OklabHue,
+    RgbHue, Xyz, Yxy,
 };
 
 macro_rules! impl_eq {
@@ -153,3 +153,4 @@ macro_rules! impl_eq_hue {
 impl_eq_hue!(LabHue);
 impl_eq_hue!(RgbHue);
 impl_eq_hue!(LuvHue);
+impl_eq_hue!(OklabHue);

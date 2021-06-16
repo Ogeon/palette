@@ -380,6 +380,7 @@ macro_rules! impl_uniform {
 impl_uniform!(UniformLabHue, LabHue);
 impl_uniform!(UniformRgbHue, RgbHue);
 impl_uniform!(UniformLuvHue, LuvHue);
+impl_uniform!(UniformOklabHue, OklabHue);
 
 #[cfg(test)]
 mod test {

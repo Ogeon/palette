@@ -16,7 +16,7 @@ use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    GetHue, Mat3, Mix, OklabHue, Pixel, RelativeContrast, Shade, Xyz,
+    GetHue, Mat3, Mix, OklabHue, Oklch, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 #[rustfmt::skip]
@@ -70,7 +70,7 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
     palette_internal,
     white_point = "D65",
     component = "T",
-    skip_derives(Oklab, Xyz)
+    skip_derives(Oklab, Oklch, Xyz)
 )]
 #[repr(C)]
 pub struct Oklab<T = f32>
@@ -251,6 +251,19 @@ where
         } = multiply_xyz::<_, D65, _>(&m2, &l_m_s_);
 
         Self::new(l, a, b)
+    }
+}
+
+impl<T> FromColorUnclamped<Oklch<T>> for Oklab<T>
+where
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Oklch<T>) -> Self {
+        Oklab {
+            l: color.l,
+            a: color.chroma.max(T::zero()) * color.hue.to_radians().cos(),
+            b: color.chroma.max(T::zero()) * color.hue.to_radians().sin(),
+        }
     }
 }
 

@@ -8,7 +8,7 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::convert::FromColorUnclamped;
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
@@ -16,7 +16,7 @@ use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    Lab, Luma, Luv, Mix, Oklab, Pixel, RelativeContrast, Shade, Yxy,
+    Lab, Luma, Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast, Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -38,7 +38,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Oklch, Luma)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32>
@@ -337,6 +337,16 @@ where
         let Xyz { x, y, z, .. } = multiply_xyz::<_, D65, _>(&m1_inv, &lms);
 
         Self::with_wp(x, y, z)
+    }
+}
+
+impl<T> FromColorUnclamped<Oklch<T>> for Xyz<D65, T>
+where
+    T: FloatComponent,
+{
+    fn from_color_unclamped(color: Oklch<T>) -> Self {
+        let oklab: Oklab<T> = color.into_color_unclamped();
+        Self::from_color_unclamped(oklab)
     }
 }
 
