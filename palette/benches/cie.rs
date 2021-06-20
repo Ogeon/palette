@@ -19,7 +19,7 @@ use data_color_mine::{load_data, ColorMine};
 
 fn cie_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Cie family");
-    let colormine: Vec<ColorMine> = load_data();
+    let colormine: Vec<ColorMine<f32>> = load_data();
     let lab: Vec<Lab> = colormine
         .iter()
         .map(|x| Lab::from_color_unclamped(x.xyz))

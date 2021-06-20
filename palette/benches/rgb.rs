@@ -39,7 +39,7 @@ use data_color_mine::{load_data, ColorMine};
 
 fn rgb_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Rgb family");
-    let colormine: Vec<ColorMine> = load_data();
+    let colormine: Vec<ColorMine<f32>> = load_data();
     let rgb_u8: Vec<Srgb<u8>> = colormine.iter().map(|x| x.rgb.into_format()).collect();
 
     let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
