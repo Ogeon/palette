@@ -9,75 +9,81 @@ use serde_derive::Deserialize;
 
 use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 use palette::white_point::D65;
-use palette::{Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
+use palette::{FloatComponent, Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
 
 #[derive(Deserialize, PartialEq)]
-pub struct ColorMineRaw {
+pub struct ColorMineRaw<F = f64> {
     pub color: String,
     pub hex: String,
     pub rgbu8_r: u8,
     pub rgbu8_g: u8,
     pub rgbu8_b: u8,
-    pub rgb_r: f64,
-    pub rgb_g: f64,
-    pub rgb_b: f64,
-    pub cmy_c: f64,
-    pub cmy_m: f64,
-    pub cmy_y: f64,
-    pub cmyk_c: f64,
-    pub cmyk_m: f64,
-    pub cmyk_y: f64,
-    pub cmyk_k: f64,
-    pub xyz_x: f64,
-    pub xyz_y: f64,
-    pub xyz_z: f64,
-    pub lab_l: f64,
-    pub lab_a_unscaled: f64,
-    pub lab_b_unscaled: f64,
-    pub lab_a: f64,
-    pub lab_b: f64,
-    pub lch_l: f64,
-    pub lch_c_unscaled: f64,
-    pub lch_c: f64,
-    pub lch_h: f64,
-    pub hunterlab_l: f64,
-    pub hunterlab_a: f64,
-    pub hunterlab_b: f64,
-    pub yxy_luma: f64,
-    pub yxy_x: f64,
-    pub yxy_y: f64,
-    pub luv_l: f64,
-    pub luv_u: f64,
-    pub luv_v: f64,
-    pub hsl_h: f64,
-    pub hsl_s: f64,
-    pub hsl_l: f64,
-    pub hsv_h: f64,
-    pub hsv_s: f64,
-    pub hsv_v: f64,
-    pub hwb_h: f64,
-    pub hwb_w: f64,
-    pub hwb_b: f64,
-    pub lab_l_unscaled: f64,
-    pub lch_l_unscaled: f64,
-    pub lch_h_normalized: f64,
+    pub rgb_r: F,
+    pub rgb_g: F,
+    pub rgb_b: F,
+    pub cmy_c: F,
+    pub cmy_m: F,
+    pub cmy_y: F,
+    pub cmyk_c: F,
+    pub cmyk_m: F,
+    pub cmyk_y: F,
+    pub cmyk_k: F,
+    pub xyz_x: F,
+    pub xyz_y: F,
+    pub xyz_z: F,
+    pub lab_l: F,
+    pub lab_a_unscaled: F,
+    pub lab_b_unscaled: F,
+    pub lab_a: F,
+    pub lab_b: F,
+    pub lch_l: F,
+    pub lch_c_unscaled: F,
+    pub lch_c: F,
+    pub lch_h: F,
+    pub hunterlab_l: F,
+    pub hunterlab_a: F,
+    pub hunterlab_b: F,
+    pub yxy_luma: F,
+    pub yxy_x: F,
+    pub yxy_y: F,
+    pub luv_l: F,
+    pub luv_u: F,
+    pub luv_v: F,
+    pub hsl_h: F,
+    pub hsl_s: F,
+    pub hsl_l: F,
+    pub hsv_h: F,
+    pub hsv_s: F,
+    pub hsv_v: F,
+    pub hwb_h: F,
+    pub hwb_w: F,
+    pub hwb_b: F,
+    pub lab_l_unscaled: F,
+    pub lch_l_unscaled: F,
+    pub lch_h_normalized: F,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct ColorMine {
-    pub xyz: Xyz<D65, f64>,
-    pub yxy: Yxy<D65, f64>,
-    pub lab: Lab<D65, f64>,
-    pub lch: Lch<D65, f64>,
-    pub rgb: Srgb<f64>,
-    pub linear_rgb: LinSrgb<f64>,
-    pub hsl: Hsl<::palette::encoding::Srgb, f64>,
-    pub hsv: Hsv<::palette::encoding::Srgb, f64>,
-    pub hwb: Hwb<::palette::encoding::Srgb, f64>,
+#[derive(Clone, PartialEq, Debug)]
+pub struct ColorMine<F>
+where
+    F: FloatComponent,
+{
+    pub xyz: Xyz<D65, F>,
+    pub yxy: Yxy<D65, F>,
+    pub lab: Lab<D65, F>,
+    pub lch: Lch<D65, F>,
+    pub rgb: Srgb<F>,
+    pub linear_rgb: LinSrgb<F>,
+    pub hsl: Hsl<::palette::encoding::Srgb, F>,
+    pub hsv: Hsv<::palette::encoding::Srgb, F>,
+    pub hwb: Hwb<::palette::encoding::Srgb, F>,
 }
 
-impl From<ColorMineRaw> for ColorMine {
-    fn from(src: ColorMineRaw) -> ColorMine {
+impl<F> From<ColorMineRaw<F>> for ColorMine<F>
+where
+    F: FloatComponent,
+{
+    fn from(src: ColorMineRaw<F>) -> ColorMine<F> {
         ColorMine {
             xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
             yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
@@ -93,9 +99,12 @@ impl From<ColorMineRaw> for ColorMine {
 }
 
 macro_rules! impl_from_color {
-    ($self_ty:ty) => {
-        impl From<$self_ty> for ColorMine {
-            fn from(color: $self_ty) -> ColorMine {
+    ($component:ident, $self_ty:ty) => {
+        impl<$component> From<$self_ty> for ColorMine<$component>
+        where
+            $component: FloatComponent,
+        {
+            fn from(color: $self_ty) -> ColorMine<$component> {
                 ColorMine {
                     xyz: color.into_color_unclamped(),
                     yxy: color.into_color_unclamped(),
@@ -113,9 +122,12 @@ macro_rules! impl_from_color {
 }
 
 macro_rules! impl_from_rgb_derivative {
-    ($self_ty:ty) => {
-        impl From<$self_ty> for ColorMine {
-            fn from(color: $self_ty) -> ColorMine {
+    ($component:ident, $self_ty:ty) => {
+        impl<$component> From<$self_ty> for ColorMine<$component>
+        where
+            $component: FloatComponent,
+        {
+            fn from(color: $self_ty) -> ColorMine<$component> {
                 ColorMine {
                     xyz: color.into_color_unclamped(),
                     yxy: color.into_color_unclamped(),
@@ -132,8 +144,11 @@ macro_rules! impl_from_rgb_derivative {
     };
 }
 
-impl From<LinSrgb<f64>> for ColorMine {
-    fn from(color: LinSrgb<f64>) -> ColorMine {
+impl<F> From<LinSrgb<F>> for ColorMine<F>
+where
+    F: FloatComponent,
+{
+    fn from(color: LinSrgb<F>) -> ColorMine<F> {
         ColorMine {
             xyz: color.into_color_unclamped(),
             yxy: color.into_color_unclamped(),
@@ -148,33 +163,36 @@ impl From<LinSrgb<f64>> for ColorMine {
     }
 }
 
-impl_from_color!(Srgb<f64>);
-impl_from_color!(Xyz<D65, f64>);
-impl_from_color!(Yxy<D65, f64>);
-impl_from_color!(Lab<D65, f64>);
-impl_from_color!(Lch<D65, f64>);
+impl_from_color!(F, Srgb<F>);
+impl_from_color!(F, Xyz<D65, F>);
+impl_from_color!(F, Yxy<D65, F>);
+impl_from_color!(F, Lab<D65, F>);
+impl_from_color!(F, Lch<D65, F>);
 
-impl_from_rgb_derivative!(Hsl<::palette::encoding::Srgb, f64>);
-impl_from_rgb_derivative!(Hsv<::palette::encoding::Srgb, f64>);
-impl_from_rgb_derivative!(Hwb<::palette::encoding::Srgb, f64>);
+impl_from_rgb_derivative!(F, Hsl<::palette::encoding::Srgb, F>);
+impl_from_rgb_derivative!(F, Hsv<::palette::encoding::Srgb, F>);
+impl_from_rgb_derivative!(F, Hwb<::palette::encoding::Srgb, F>);
 
 lazy_static! {
-    static ref TEST_DATA: Vec<ColorMine> = load_data();
+    static ref TEST_DATA: Vec<ColorMine<f64>> = load_data();
 }
 
-pub fn load_data() -> Vec<ColorMine> {
+pub fn load_data<F>() -> Vec<ColorMine<F>>
+where
+    F: FloatComponent + for<'a> serde::Deserialize<'a>,
+{
     let mut rdr = csv::Reader::from_path("tests/convert/data_color_mine.csv")
         .expect("csv file could not be loaded in tests for color mine data");
-    let mut color_data: Vec<ColorMine> = Vec::new();
+    let mut color_data: Vec<ColorMine<F>> = Vec::new();
     for record in rdr.deserialize() {
-        let r: ColorMineRaw =
+        let r: ColorMineRaw<F> =
             record.expect("color data could not be decoded in tests for color mine data");
         color_data.push(r.into())
     }
     color_data
 }
 
-fn check_equal_cie(src: &mut ColorMine, tgt: &ColorMine) {
+fn check_equal_cie(src: &mut ColorMine<f64>, tgt: &ColorMine<f64>) {
     assert_relative_eq!(src.xyz, tgt.xyz, epsilon = 0.05);
     assert_relative_eq!(src.yxy, tgt.yxy, epsilon = 0.05);
 
@@ -190,9 +208,8 @@ fn check_equal_cie(src: &mut ColorMine, tgt: &ColorMine) {
         src.lch.hue = tgt.lch.hue;
     }
     assert_relative_eq!(src.lch, tgt.lch, epsilon = 7.0);
-
 }
-fn check_equal_rgb(src: &ColorMine, tgt: &ColorMine) {
+fn check_equal_rgb(src: &ColorMine<f64>, tgt: &ColorMine<f64>) {
     assert_relative_eq!(src.rgb, tgt.rgb, epsilon = 0.05);
     assert_relative_eq!(src.hsl, tgt.hsl, epsilon = 0.05);
     assert_relative_eq!(src.hsv, tgt.hsv, epsilon = 0.05);
@@ -226,7 +243,7 @@ pub fn run_from_linear_rgb_tests() {
 pub fn run_from_hsl_tests() {
     for expected in TEST_DATA.iter() {
         let result = ColorMine::from(expected.hsl);
-        check_equal_rgb(& result, expected);
+        check_equal_rgb(&result, expected);
     }
 }
 pub fn run_from_hsv_tests() {
