@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, Throughput};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use palette::convert::FromColorUnclamped;
 use palette::{Lab, Lch, Xyz, Yxy};
 
@@ -28,8 +28,6 @@ fn cie_conversion(c: &mut Criterion) {
         .iter()
         .map(|x| Lch::from_color_unclamped(x.xyz))
         .collect();
-
-    group.throughput(Throughput::Elements(colormine.len() as u64));
 
     group.bench_with_input("xyz to lab", &colormine, |b, colormine| {
         b.iter(|| {

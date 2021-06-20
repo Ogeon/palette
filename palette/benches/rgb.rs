@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, Throughput};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use palette::convert::FromColorUnclamped;
 use palette::encoding;
 use palette::{Hsl, Hsv, Hwb, IntoColor, LinSrgb, Srgb};
@@ -45,8 +45,6 @@ fn rgb_conversion(c: &mut Criterion) {
     let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
     let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
     let linear_hwb: Vec<LinHwb> = colormine.iter().map(|x| x.hwb.into_color()).collect();
-
-    group.throughput(Throughput::Elements(colormine.len() as u64));
 
     group.bench_with_input("rgb to linsrgb", &colormine, |b, colormine| {
         b.iter(|| {
