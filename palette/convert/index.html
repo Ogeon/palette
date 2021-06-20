@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Traits for converting between color spaces."><meta name="keywords" content="rust, rustlang, rust-lang, convert"><title>palette::convert - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module convert</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../index.html">palette</a></p><div id="sidebar-vars" data-name="convert" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">palette</a>::<wbr><a class="mod" href="">convert</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/palette/convert.rs.html#1-950" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Traits for converting between color spaces.</p>
+<h1 id="deriving" class="section-header"><a href="#deriving">Deriving</a></h1>
+<p><code>FromColorUnclamped</code> can be derived in a mostly automatic way.
+The default minimum requirement is to implement <code>FromColorUnclamped&lt;Xyz&gt;</code>, but it can
+also be customized to make use of generics and have other manual implementations.</p>
+<p>It is also recommended to derive or implement <a href="../trait.WithAlpha.html"><code>WithAlpha</code></a>,
+to be able to convert between all <code>Alpha</code> wrapped color types.</p>
+<h2 id="configuration-attributes" class="section-header"><a href="#configuration-attributes">Configuration Attributes</a></h2>
+<p>The derives can be configured using one or more <code>#[palette(...)]</code> attributes.
+They can be attached to either the item itself, or to the fields.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">palette</span>(
+    <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
+    <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;S&quot;</span>,
+    <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;&lt;S::Space as RgbSpace&gt;::WhitePoint&quot;</span>,
+)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromColorUnclamped</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ExampleType</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbStandard</span>, <span class="ident">T</span>: <span class="ident">Component</span><span class="op">&gt;</span> {
+    <span class="comment">// ...</span>
+    <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">alpha</span>)]</span>
+    <span class="ident">alpha</span>: <span class="ident">T</span>,
+    <span class="ident">standard</span>: <span class="ident">std::marker::PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
+}
+</pre></div>
+<h3 id="item-attributes" class="section-header"><a href="#item-attributes">Item Attributes</a></h3>
+<ul>
+<li>
+<p><code>skip_derives(Luma, Rgb)</code>: No conversion derives will be implemented for these colors.
+They are instead to be implemented manually, and serve as the basis for the automatic
+implementations.</p>
+</li>
+<li>
+<p><code>white_point = &quot;some::white_point::Type&quot;</code>: Sets the white
+point type that should be used when deriving. The default is <code>D65</code>, but it
+may be any other type, including type parameters.</p>
+</li>
+<li>
+<p><code>component = &quot;some::component::Type&quot;</code>: Sets the color
+component type that should be used when deriving. The default is <code>f32</code>, but
+it may be any other type, including type parameters.</p>
+</li>
+<li>
+<p><code>rgb_standard = &quot;some::rgb_standard::Type&quot;</code>: Sets the RGB standard
+type that should be used when deriving. The default is to either use <code>Srgb</code>
+or a best effort to convert between standards, but sometimes it has to be set
+to a specific type. This also accepts type parameters.</p>
+</li>
+</ul>
+<h2 id="field-attributes" class="section-header"><a href="#field-attributes">Field Attributes</a></h2>
+<ul>
+<li><code>alpha</code>: Specifies field as the color’s transparency value.</li>
+</ul>
+<h2 id="examples" class="section-header"><a href="#examples">Examples</a></h2>
+<p>Minimum requirements implementation:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">palette::convert::FromColorUnclamped</span>;
+<span class="kw">use</span> <span class="ident">palette</span>::{<span class="ident">Srgb</span>, <span class="ident">Xyz</span>, <span class="ident">IntoColor</span>};
+
+<span class="doccomment">/// A custom version of Xyz that stores integer values from 0 to 100.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">FromColorUnclamped</span>)]</span>
+<span class="kw">struct</span> <span class="ident">Xyz100</span> {
+    <span class="ident">x</span>: <span class="ident">u8</span>,
+    <span class="ident">y</span>: <span class="ident">u8</span>,
+    <span class="ident">z</span>: <span class="ident">u8</span>,
+}
+
+<span class="comment">// We have to implement at least one &quot;manual&quot; conversion. The default</span>
+<span class="comment">// is to and from `Xyz`, but it can be customized with `skip_derives(...)`.</span>
+<span class="kw">impl</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz100</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz100</span> {
+        <span class="ident">Xyz100</span> {
+            <span class="ident">x</span>: (<span class="ident">color</span>.<span class="ident">x</span> <span class="op">*</span> <span class="number">100.0</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">y</span>: (<span class="ident">color</span>.<span class="ident">y</span> <span class="op">*</span> <span class="number">100.0</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">z</span>: (<span class="ident">color</span>.<span class="ident">z</span> <span class="op">*</span> <span class="number">100.0</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz100</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz100</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span> {
+        <span class="ident">Xyz::new</span>(
+            <span class="ident">color</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f32</span> <span class="op">/</span> <span class="number">100.0</span>,
+            <span class="ident">color</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f32</span> <span class="op">/</span> <span class="number">100.0</span>,
+            <span class="ident">color</span>.<span class="ident">z</span> <span class="kw">as</span> <span class="ident">f32</span> <span class="op">/</span> <span class="number">100.0</span>,
+        )
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="comment">// Start with an Xyz100 color.</span>
+    <span class="kw">let</span> <span class="ident">xyz</span> <span class="op">=</span> <span class="ident">Xyz100</span> {
+        <span class="ident">x</span>: <span class="number">59</span>,
+        <span class="ident">y</span>: <span class="number">75</span>,
+        <span class="ident">z</span>: <span class="number">42</span>,
+    };
+
+    <span class="comment">// Convert the color to sRGB.</span>
+    <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Srgb</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">into_color</span>();
+
+    <span class="macro">assert_eq!</span>(<span class="ident">rgb</span>.<span class="ident">into_format</span>(), <span class="ident">Srgb::new</span>(<span class="number">196u8</span>, <span class="number">238</span>, <span class="number">154</span>));
+}</pre></div>
+<p>With generic components:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">approx</span>;
+
+<span class="kw">use</span> <span class="ident">palette::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
+<span class="kw">use</span> <span class="ident">palette::encoding::Linear</span>;
+<span class="kw">use</span> <span class="ident">palette::white_point::D65</span>;
+<span class="kw">use</span> <span class="ident">palette::convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>};
+<span class="kw">use</span> <span class="ident">palette</span>::{<span class="ident">FloatComponent</span>, <span class="ident">Hsv</span>, <span class="ident">Pixel</span>, <span class="ident">Srgb</span>, <span class="ident">IntoColor</span>};
+
+<span class="doccomment">/// sRGB, but with a reversed memory layout.</span>
+<span class="attribute">#[<span class="ident">palette</span>(
+    <span class="ident">skip_derives</span>(<span class="ident">Rgb</span>),
+    <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
+    <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;palette::encoding::Srgb&quot;</span>
+)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Pixel</span>, <span class="ident">FromColorUnclamped</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="comment">// Makes sure the memory layout is as we want it.</span>
+<span class="kw">struct</span> <span class="ident">Bgr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="ident">blue</span>: <span class="ident">T</span>,
+    <span class="ident">green</span>: <span class="ident">T</span>,
+    <span class="ident">red</span>: <span class="ident">T</span>,
+}
+
+<span class="comment">// It converts from and into any linear Rgb type that has the</span>
+<span class="comment">// D65 white point, which is the default if we don&#39;t specify</span>
+<span class="comment">// anything else with the `white_point` attribute argument.</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Bgr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
+    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span><span class="op">&gt;</span>
+{
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Bgr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">Srgb::new</span>(<span class="ident">color</span>.<span class="ident">red</span>, <span class="ident">color</span>.<span class="ident">green</span>, <span class="ident">color</span>.<span class="ident">blue</span>)
+            .<span class="ident">into_color_unclamped</span>()
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Bgr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
+    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span><span class="op">&gt;</span>
+{
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Bgr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">Srgb::from_color_unclamped</span>(<span class="ident">color</span>);
+        <span class="ident">Bgr</span> {
+            <span class="ident">blue</span>: <span class="ident">color</span>.<span class="ident">blue</span>,
+            <span class="ident">green</span>: <span class="ident">color</span>.<span class="ident">green</span>,
+            <span class="ident">red</span>: <span class="ident">color</span>.<span class="ident">red</span>,
+        }
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec!</span>[
+        <span class="number">0.0f64</span>,
+        <span class="number">0.0</span>,
+        <span class="number">0.0</span>,
+        <span class="number">0.0</span>,
+        <span class="number">0.5</span>,
+        <span class="number">0.25</span>,
+    ];
+    <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Bgr::from_raw_slice</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>)[<span class="number">1</span>].<span class="ident">into_color</span>();
+
+    <span class="macro">assert_relative_eq!</span>(<span class="ident">hsv</span>, <span class="ident">Hsv::new</span>(<span class="number">90.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>));
+}</pre></div>
+<p>With alpha component:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">approx</span>;
+
+<span class="kw">use</span> <span class="ident">palette</span>::{<span class="ident">LinSrgba</span>, <span class="ident">Srgb</span>, <span class="ident">IntoColor</span>, <span class="ident">WithAlpha</span>};
+<span class="kw">use</span> <span class="ident">palette::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
+<span class="kw">use</span> <span class="ident">palette::encoding::Linear</span>;
+<span class="kw">use</span> <span class="ident">palette::white_point::D65</span>;
+<span class="kw">use</span> <span class="ident">palette::convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>};
+
+<span class="doccomment">/// CSS style sRGB.</span>
+<span class="attribute">#[<span class="ident">palette</span>(
+    <span class="ident">skip_derives</span>(<span class="ident">Rgb</span>),
+    <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;palette::encoding::Srgb&quot;</span>
+)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
+<span class="kw">struct</span> <span class="ident">CssRgb</span> {
+    <span class="ident">red</span>: <span class="ident">u8</span>,
+    <span class="ident">green</span>: <span class="ident">u8</span>,
+    <span class="ident">blue</span>: <span class="ident">u8</span>,
+    <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">alpha</span>)]</span>
+    <span class="ident">alpha</span>: <span class="ident">f32</span>,
+}
+
+<span class="comment">// We will write a conversion function for opaque RGB and</span>
+<span class="comment">// `impl_default_conversions` will take care of preserving</span>
+<span class="comment">// the transparency for us.</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CssRgb</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
+    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">f32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CssRgb</span>{
+        <span class="kw">let</span> <span class="ident">srgb</span> <span class="op">=</span> <span class="ident">Srgb::from_color_unclamped</span>(<span class="ident">color</span>)
+            .<span class="ident">into_format</span>();
+
+        <span class="ident">CssRgb</span> {
+            <span class="ident">red</span>: <span class="ident">srgb</span>.<span class="ident">red</span>,
+            <span class="ident">green</span>: <span class="ident">srgb</span>.<span class="ident">green</span>,
+            <span class="ident">blue</span>: <span class="ident">srgb</span>.<span class="ident">blue</span>,
+            <span class="ident">alpha</span>: <span class="number">1.0</span>
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">CssRgb</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">f32</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
+    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">CssRgb</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">f32</span><span class="op">&gt;</span>{
+        <span class="ident">Srgb::new</span>(<span class="ident">color</span>.<span class="ident">red</span>, <span class="ident">color</span>.<span class="ident">green</span>, <span class="ident">color</span>.<span class="ident">blue</span>)
+            .<span class="ident">into_format</span>()
+            .<span class="ident">into_color_unclamped</span>()
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">css_color</span> <span class="op">=</span> <span class="ident">CssRgb</span> {
+        <span class="ident">red</span>: <span class="number">187</span>,
+        <span class="ident">green</span>: <span class="number">0</span>,
+        <span class="ident">blue</span>: <span class="number">255</span>,
+        <span class="ident">alpha</span>: <span class="number">0.3</span>,
+    };
+    <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">LinSrgba</span> <span class="op">=</span> <span class="ident">css_color</span>.<span class="ident">into_color</span>();
+
+    <span class="macro">assert_relative_eq!</span>(<span class="ident">color</span>, <span class="ident">LinSrgba::new</span>(<span class="number">0.496933</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.3</span>));
+}</pre></div>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.OutOfBounds.html" title="palette::convert::OutOfBounds struct">OutOfBounds</a></td><td class="docblock-short"><p>The error type for a color conversion that converted a color into a color
+with invalid values.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.FromColor.html" title="palette::convert::FromColor trait">FromColor</a></td><td class="docblock-short"><p>A trait for converting one color from another, in a possibly lossy way.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.FromColorUnclamped.html" title="palette::convert::FromColorUnclamped trait">FromColorUnclamped</a></td><td class="docblock-short"><p>A trait for unchecked conversion of one color from another.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.IntoColor.html" title="palette::convert::IntoColor trait">IntoColor</a></td><td class="docblock-short"><p>A trait for converting a color into another, in a possibly lossy way.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.IntoColorUnclamped.html" title="palette::convert::IntoColorUnclamped trait">IntoColorUnclamped</a></td><td class="docblock-short"><p>A trait for unchecked conversion of a color into another.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.TryFromColor.html" title="palette::convert::TryFromColor trait">TryFromColor</a></td><td class="docblock-short"><p>A trait for fallible conversion of one color from another.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.TryIntoColor.html" title="palette::convert::TryIntoColor trait">TryIntoColor</a></td><td class="docblock-short"><p>A trait for fallible conversion of a color into another.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script></body></html>

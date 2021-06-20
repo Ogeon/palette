@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["gamma","Gamma encoding."],["linear","Linear encoding"],["pixel","Pixel encodings and pixel format conversion."],["srgb","The sRGB standard."]],"trait":[["TransferFn","A transfer function to and from linear space."]]});
