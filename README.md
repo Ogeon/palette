@@ -1,6 +1,5 @@
 # palette
 
-[![Build Status](https://travis-ci.org/Ogeon/palette.svg?branch=master)](https://travis-ci.org/Ogeon/palette)
 [![Crates.io](https://img.shields.io/crates/v/palette.svg)](https://crates.io/crates/palette/)
 [![Docs.rs](https://docs.rs/palette/badge.svg)](https://docs.rs/palette)
 
@@ -10,7 +9,7 @@ A Rust library that makes linear color calculations and conversion easy and acce
 
 [Released](https://docs.rs/palette/0.5.0/palette/)
 
-[Master branch](https://ogeon.github.io/docs/palette/master/palette/index.html)
+[Master branch](https://ogeon.github.io/palette/palette/index.html)
 
 ## Cargo.toml Entries
 
@@ -47,7 +46,7 @@ features = ["libm"] # Makes it use libm instead of std for float math
 
 ## It's Never "Just RGB"
 
-Colors in, for example, images, are often "gamma corrected", or converted using some non-linear transfer function into a format like sRGB before being stored or displayed. This is done as a compression method and to prevent banding, and is also a bit of a legacy from the ages of the CRT monitors, where the output from the electron gun was nonlinear. The problem is that these formats are *non-linear color spaces*, which means that many operations that you may want to perform on colors (addition, subtraction, multiplication, linear interpolation, etc.) will work unexpectedly when performed in such a non-linear color space. As such, the compression has to be reverted to restore linearity and make sure that many operations on the colors are accurate. 
+Colors in, for example, images, are often "gamma corrected", or converted using some non-linear transfer function into a format like sRGB before being stored or displayed. This is done as a compression method and to prevent banding, and is also a bit of a legacy from the ages of the CRT monitors, where the output from the electron gun was nonlinear. The problem is that these formats are *non-linear color spaces*, which means that many operations that you may want to perform on colors (addition, subtraction, multiplication, linear interpolation, etc.) will work unexpectedly when performed in such a non-linear color space. As such, the compression has to be reverted to restore linearity and make sure that many operations on the colors are accurate.
 
 But, even when colors *are* 'linear', there is yet more to explore.
 
