@@ -156,14 +156,15 @@
 <span id="153">153</span>
 <span id="154">154</span>
 <span id="155">155</span>
+<span id="156">156</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::float::Float</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point::WhitePoint</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">from_f64</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromF64</span>, <span class="ident">Hsluv</span>, <span class="ident">Lab</span>, <span class="ident">LabHue</span>, <span class="ident">Lch</span>, <span class="ident">Lchuv</span>, <span class="ident">Luv</span>, <span class="ident">LuvHue</span>, <span class="ident">RgbHue</span>, <span class="ident">Xyz</span>,
-    <span class="ident">Yxy</span>,
+    <span class="ident">from_f64</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromF64</span>, <span class="ident">Hsluv</span>, <span class="ident">Lab</span>, <span class="ident">LabHue</span>, <span class="ident">Lch</span>, <span class="ident">Lchuv</span>, <span class="ident">Luv</span>, <span class="ident">LuvHue</span>, <span class="ident">OklabHue</span>,
+    <span class="ident">RgbHue</span>, <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
 };
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_eq</span> {
@@ -312,6 +313,7 @@
 <span class="macro">impl_eq_hue!</span>(<span class="ident">LabHue</span>);
 <span class="macro">impl_eq_hue!</span>(<span class="ident">RgbHue</span>);
 <span class="macro">impl_eq_hue!</span>(<span class="ident">LuvHue</span>);
+<span class="macro">impl_eq_hue!</span>(<span class="ident">OklabHue</span>);
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

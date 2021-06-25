@@ -756,6 +756,10 @@
 <span id="753">753</span>
 <span id="754">754</span>
 <span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -1005,6 +1009,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lchuv</span>::{<span class="ident">Lchuv</span>, <span class="ident">Lchuva</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">luma</span>::{<span class="ident">GammaLuma</span>, <span class="ident">GammaLumaa</span>, <span class="ident">LinLuma</span>, <span class="ident">LinLumaa</span>, <span class="ident">SrgbLuma</span>, <span class="ident">SrgbLumaa</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">luv</span>::{<span class="ident">Luv</span>, <span class="ident">Luva</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">oklab</span>::{<span class="ident">Oklab</span>, <span class="ident">Oklaba</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">oklch</span>::{<span class="ident">Oklch</span>, <span class="ident">Oklcha</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rgb</span>::{<span class="ident">GammaSrgb</span>, <span class="ident">GammaSrgba</span>, <span class="ident">LinSrgb</span>, <span class="ident">LinSrgba</span>, <span class="ident">Packed</span>, <span class="ident">RgbChannels</span>, <span class="ident">Srgb</span>, <span class="ident">Srgba</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">xyz</span>::{<span class="ident">Xyz</span>, <span class="ident">Xyza</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">yxy</span>::{<span class="ident">Yxy</span>, <span class="ident">Yxya</span>};
@@ -1013,7 +1019,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">convert</span>::{<span class="ident">FromColor</span>, <span class="ident">IntoColor</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">encoding::pixel::Pixel</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hues</span>::{<span class="ident">LabHue</span>, <span class="ident">LuvHue</span>, <span class="ident">RgbHue</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hues</span>::{<span class="ident">LabHue</span>, <span class="ident">LuvHue</span>, <span class="ident">OklabHue</span>, <span class="ident">RgbHue</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">matrix::Mat3</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">relative_contrast</span>::{<span class="ident">contrast_ratio</span>, <span class="ident">RelativeContrast</span>};
 
@@ -1191,6 +1197,8 @@
 <span class="kw">mod</span> <span class="ident">lchuv</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">luma</span>;
 <span class="kw">mod</span> <span class="ident">luv</span>;
+<span class="kw">mod</span> <span class="ident">oklab</span>;
+<span class="kw">mod</span> <span class="ident">oklch</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">rgb</span>;
 <span class="kw">mod</span> <span class="ident">xyz</span>;
 <span class="kw">mod</span> <span class="ident">yxy</span>;
