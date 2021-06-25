@@ -283,6 +283,11 @@ make_hues! {
     /// It's measured in degrees and uses the three additive primaries _red_,
     /// _green_ and _blue_.
     struct RgbHue;
+
+    /// A hue type for the Oklab color space.
+    ///
+    /// It's measured in degrees.
+    struct OklabHue;
 }
 
 #[inline]
@@ -375,6 +380,7 @@ macro_rules! impl_uniform {
 impl_uniform!(UniformLabHue, LabHue);
 impl_uniform!(UniformRgbHue, RgbHue);
 impl_uniform!(UniformLuvHue, LuvHue);
+impl_uniform!(UniformOklabHue, OklabHue);
 
 #[cfg(test)]
 mod test {
