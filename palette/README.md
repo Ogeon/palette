@@ -82,7 +82,7 @@ let my_new_rgb = Srgb::from_color(my_hsl);
 ```
 
 This image shows the starting color and the results of the two changes:
-![The result of each step in the "converting" example.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_converting.png)
+![The result of each step in the "converting" example.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_converting.png)
 
 Most of the common color spaces are already implemented in Palette, but some situations may require something more customized. The conversion traits make it possible to integrate custom color types into the system. For example, this can be used for adding new color spaces or making a simpler user-facing API.
 
@@ -109,7 +109,7 @@ fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
 
 | Before | After |
 |--------|-------|
-| ![The fruit image before swapping the red and blue color channels.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/example-data/input/fruits-128.png) | ![The fruit image with the red and blue color channels swapped.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_pixels_and_buffers.png) |
+| ![The fruit image before swapping the red and blue color channels.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/example-data/input/fruits-128.png) | ![The fruit image with the red and blue color channels swapped.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_pixels_and_buffers.png) |
 
 It's also possible to create a single color from a slice or array. Let's say we are using something that implements `AsMut<[u8; 3]>`:
 
@@ -148,7 +148,7 @@ let new_hsv = transform_color(&Hsv::new(0.00, 0.82, 0.34), 0.8);
 ```
 
 This image shows the transition from the color to `new_color` in HSL and HSV:
-![Gradients showing the transition from the starting color to the modified color in HSL and HSV.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_color_operations_1.png)
+![Gradients showing the transition from the starting color to the modified color in HSL and HSV.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_color_operations_1.png)
 
 In addition to the operator traits, the SVG blend functions have also been implemented.
 
@@ -177,7 +177,7 @@ fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
 
 | Image 1 | Image 2 | Result |
 |---------|---------|--------|
-| ![A photo of various fruit.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/example-data/input/fruits-128.png) | ![A photo of kitten in a strawhat.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/example-data/input/cat-128.png) |![Image 2 blended over Image 1 with 50% transparency.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_color_operations_2.png)
+| ![A photo of various fruit.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/example-data/input/fruits-128.png) | ![A photo of kitten in a strawhat.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/example-data/input/cat-128.png) |![Image 2 blended over Image 1 with 50% transparency.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_color_operations_2.png)
 
 There's also the option to explicitly convert to and from premultiplied alpha, to avoid converting back and forth more than necessary, using `Blend::into_premultiplied` and `Blend::from_premultiplied`.
 
@@ -198,7 +198,7 @@ let taken_colors: Vec<_> = gradient.take(10).collect();
 ```
 
 Here's the gradient as both its continuous form and as the 10 colors from `.take(10)`:
-![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_gradients_1.png)
+![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_1.png)
 
 There's also support for arbitrary spacing between the input points:
 
@@ -215,7 +215,7 @@ let taken_colors: Vec<_> = gradient.take(10).collect();
 ```
 
 Here's the gradient after the middle point has been moved more towards the beginning:
-![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/b80bcb4f130b745acdd8ba747ca05554fa3c0906/gfx/readme_gradients_2.png)
+![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_2.png)
 
 ### Customizing Color Spaces
 
