@@ -955,6 +955,11 @@
 <span id="952">952</span>
 <span id="953">953</span>
 <span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
@@ -1197,7 +1202,12 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="kw-2">mut</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="comment">// Avoid negative numbers</span>
+        <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">=</span> <span class="ident">rgb</span>.<span class="ident">red</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
+        <span class="ident">rgb</span>.<span class="ident">green</span> <span class="op">=</span> <span class="ident">rgb</span>.<span class="ident">green</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
+        <span class="ident">rgb</span>.<span class="ident">blue</span> <span class="op">=</span> <span class="ident">rgb</span>.<span class="ident">blue</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
+
         <span class="kw">let</span> (<span class="ident">max</span>, <span class="ident">min</span>, <span class="ident">sep</span>, <span class="ident">coeff</span>) <span class="op">=</span> {
             <span class="kw">let</span> (<span class="ident">max</span>, <span class="ident">min</span>, <span class="ident">sep</span>, <span class="ident">coeff</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">&gt;</span> <span class="ident">rgb</span>.<span class="ident">green</span> {
                 (<span class="ident">rgb</span>.<span class="ident">red</span>, <span class="ident">rgb</span>.<span class="ident">green</span>, <span class="ident">rgb</span>.<span class="ident">green</span> <span class="op">-</span> <span class="ident">rgb</span>.<span class="ident">blue</span>, <span class="ident">T::zero</span>())

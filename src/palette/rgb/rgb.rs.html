@@ -1691,7 +1691,7 @@
         )
     }
 
-    <span class="doccomment">/// Convert linear RGB to nonlinear RGB.</span>
+    <span class="doccomment">/// Convert linear RGB to non-linear RGB.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">color</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S::Space</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Rgb::new</span>(
             <span class="ident">S::TransferFn::from_linear</span>(<span class="ident">color</span>.<span class="ident">red</span>),
@@ -1736,7 +1736,7 @@
 
 <span class="doccomment">/// &lt;span id=&quot;Rgba&quot;&gt;&lt;/span&gt;[`Rgba`](crate::rgb::Rgba) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbStandard</span>, <span class="ident">T</span>: <span class="ident">Component</span>, <span class="ident">A</span>: <span class="ident">Component</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Nonlinear RGB.</span>
+    <span class="doccomment">/// Non-linear RGB.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">red</span>: <span class="ident">T</span>, <span class="ident">green</span>: <span class="ident">T</span>, <span class="ident">blue</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
             <span class="ident">color</span>: <span class="ident">Rgb::new</span>(<span class="ident">red</span>, <span class="ident">green</span>, <span class="ident">blue</span>),
@@ -1821,7 +1821,7 @@
         )
     }
 
-    <span class="doccomment">/// Convert linear RGB to nonlinear RGB with transparency.</span>
+    <span class="doccomment">/// Convert linear RGB to non-linear RGB with transparency.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S::Space</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(
             <span class="ident">S::TransferFn::from_linear</span>(<span class="ident">color</span>.<span class="ident">red</span>),

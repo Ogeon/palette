@@ -760,6 +760,13 @@
 <span id="757">757</span>
 <span id="758">758</span>
 <span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -767,26 +774,26 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # It&#39;s Never &quot;Just RGB&quot;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Colors in, for example, images, are often &quot;gamma corrected&quot;, or converted</span>
-<span class="doccomment">//! using some non-linear transfer function into a format like sRGB before being</span>
-<span class="doccomment">//! stored or displayed. This is done as a compression method and to prevent banding,</span>
-<span class="doccomment">//! and is also a bit of a legacy from the ages of the CRT monitors, where the</span>
-<span class="doccomment">//! output from the electron gun was nonlinear. The problem is that these formats</span>
-<span class="doccomment">//! are *non-linear color spaces*, which means that many operations that you may want</span>
-<span class="doccomment">//! to perform on colors (addition, subtraction, multiplication, linear interpolation,</span>
-<span class="doccomment">//! etc.) will work unexpectedly when performed in such a non-linear color space. As</span>
-<span class="doccomment">//! such, the compression has to be reverted to restore linearity and make sure that</span>
-<span class="doccomment">//! many operations on the colors are accurate.</span>
+<span class="doccomment">//! Colors in images are often &quot;gamma corrected&quot;, or converted using some</span>
+<span class="doccomment">//! non-linear transfer function into a format like sRGB before being stored or</span>
+<span class="doccomment">//! displayed. This is done as a compression method and to prevent banding; it&#39;s</span>
+<span class="doccomment">//! also a bit of a legacy from the ages of the CRT monitors, where the output</span>
+<span class="doccomment">//! from the electron gun was non-linear. The problem is that these formats are</span>
+<span class="doccomment">//! *non-linear color spaces*, which means that many operations that you may</span>
+<span class="doccomment">//! want to perform on colors (addition, subtraction, multiplication, linear</span>
+<span class="doccomment">//! interpolation, etc.) will work unexpectedly when performed in such a</span>
+<span class="doccomment">//! non-linear color space. Thus, the compression has to be reverted to restore</span>
+<span class="doccomment">//! linearity and ensure that many operations on the colors behave as expected.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For example, this does not work:</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! ```rust,compile_fail</span>
 <span class="doccomment">//! // An alias for Rgb&lt;Srgb&gt;, which is what most pictures store.</span>
 <span class="doccomment">//! use palette::Srgb;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let orangeish = Srgb::new(1.0, 0.6, 0.0);</span>
 <span class="doccomment">//! let blueish = Srgb::new(0.0, 0.2, 1.0);</span>
-<span class="doccomment">//! // let whateve_it_becomes = orangeish + blueish;</span>
+<span class="doccomment">//! let whatever_it_becomes = orangeish + blueish; // Does not compile</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Instead, they have to be made linear before adding:</span>
@@ -797,61 +804,56 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();</span>
 <span class="doccomment">//! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();</span>
-<span class="doccomment">//! let whateve_it_becomes = orangeish + blueish;</span>
+<span class="doccomment">//! let whatever_it_becomes = orangeish + blueish;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Encode the result back into sRGB and create a byte array</span>
-<span class="doccomment">//! let pixel: [u8; 3] = Srgb::from_linear(whateve_it_becomes)</span>
+<span class="doccomment">//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes)</span>
 <span class="doccomment">//!     .into_format()</span>
 <span class="doccomment">//!     .into_raw();</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! But, even when colors *are* &#39;linear&#39;, there is yet more to explore.</span>
+<span class="doccomment">//! See the [rgb] module for a deeper dive into RGB and (non-)linearity.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The most common way that colors are defined, especially for computer</span>
-<span class="doccomment">//! storage, is in terms of so-called *tristimulus values*, meaning that</span>
-<span class="doccomment">//! all colors are defined as a vector of three values which may represent</span>
-<span class="doccomment">//! any color. The reason colors can generally be stored as only a three</span>
-<span class="doccomment">//! dimensional vector, and not an *n* dimensional one, where *n* is some</span>
-<span class="doccomment">//! number of possible frequencies of light, is because our eyes contain</span>
-<span class="doccomment">//! only three types of cones. Each of these cones have different sensitivity</span>
-<span class="doccomment">//! curves to different wavelengths of light, giving us three &quot;dimensions&quot;</span>
-<span class="doccomment">//! of sensitivity to color. These cones are often called the S, M, and L</span>
-<span class="doccomment">//! (for small, medium, and large) cones, and their sensitivity curves</span>
-<span class="doccomment">//! *roughly* position them as most sensitive to &quot;red&quot;, &quot;green&quot;, and &quot;blue&quot;</span>
-<span class="doccomment">//! parts of the spectrum. As such, we can choose only three values to</span>
-<span class="doccomment">//! represent any possible color that a human is able to see. An interesting</span>
-<span class="doccomment">//! consequence of this is that humans can see two different objects which</span>
-<span class="doccomment">//! are emitting *completely different actual light spectra* as the *exact</span>
-<span class="doccomment">//! same perceptual color* so long as those wavelengths, when transformed</span>
-<span class="doccomment">//! by the sensitivity curves of our cones, end up resulting in the same</span>
-<span class="doccomment">//! S, M, and L values sent to our brains.</span>
+<span class="doccomment">//! # Color Spaces</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! A **color space** (which simply refers to a set of standards by which</span>
-<span class="doccomment">//! we map a set of arbitrary values to real-world colors) which uses</span>
-<span class="doccomment">//! tristimulus values is often defined in terms of</span>
+<span class="doccomment">//! &quot;RGB&quot; and other tristimulus based spaces like CIE Xyz are probably the most</span>
+<span class="doccomment">//! widely known color spaces. These spaces are great when you want to perform</span>
+<span class="doccomment">//! physically based math on color (like in a 2D or 3D rendering program) but</span>
+<span class="doccomment">//! there are also color spaces that are not defined in terms of tristimulus</span>
+<span class="doccomment">//! values.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! 1. Its **primaries**</span>
-<span class="doccomment">//! 2. Its **reference white** or **white point**</span>
+<span class="doccomment">//! You have probably used a color picker with a rainbow wheel and a brightness</span>
+<span class="doccomment">//! slider. That may have been an HSV or an HSL color picker, where the color is</span>
+<span class="doccomment">//! encoded as hue, saturation and brightness/lightness. Even though these</span>
+<span class="doccomment">//! spaces are defined using 3 values, they *aren&#39;t* based on tristimulus</span>
+<span class="doccomment">//! values, since those three values don&#39;t have a direct relation to human</span>
+<span class="doccomment">//! vision (i.e. our L, M, and S cones).</span>
+<span class="doccomment">//! Such color spaces are excellent when it comes to humans intuitively</span>
+<span class="doccomment">//! selecting color values, and as such are the go-to choice when this</span>
+<span class="doccomment">//! interaction is needed. They can then be converted into other color spaces</span>
+<span class="doccomment">//! to perform modifications to them.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The **primaries** together represent the total *gamut* (i.e. displayable</span>
-<span class="doccomment">//! range of colors) of that color space, while the **white point** defines</span>
-<span class="doccomment">//! which concrete tristimulus value corresponds to a real, physical white</span>
-<span class="doccomment">//! reflecting object being lit by a known light source and observed by the</span>
-<span class="doccomment">//! &#39;standard observer&#39; (i.e. a standardized model of human color perception).</span>
+<span class="doccomment">//! There&#39;s also a group of color spaces that are designed to be perceptually</span>
+<span class="doccomment">//! uniform, meaning that the perceptual change is equal to the numerical</span>
+<span class="doccomment">//! change. An example of this is the CIE L\*a\*b\* color space. These color</span>
+<span class="doccomment">//! spaces are excellent when you want to &quot;blend&quot; between colors in a</span>
+<span class="doccomment">//! *perceptually pleasing* manner rather than based on *physical light intensity*.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The informal &quot;RGB&quot; color space is such a tristimulus color space, since</span>
-<span class="doccomment">//! it is defined by three values, but it is underspecified since we don&#39;t</span>
-<span class="doccomment">//! know which primaries are being used (i.e. how exactly are the canonical</span>
-<span class="doccomment">//! &quot;red&quot;, &quot;green&quot;, and &quot;blue&quot; defined?), nor its white point. In most cases,</span>
-<span class="doccomment">//! when people talk about &quot;RGB&quot; or &quot;Linear RGB&quot; colors, what they are</span>
-<span class="doccomment">//! *actually* talking about is the &quot;Linear sRGB&quot; color space, which uses the</span>
-<span class="doccomment">//! primaries and white point defined in the sRGB standard, but which *does</span>
-<span class="doccomment">//! not* have the (non-linear) sRGB *transfer function* applied.</span>
+<span class="doccomment">//! Selecting the proper color space can have a big impact on how the resulting</span>
+<span class="doccomment">//! image looks (as illustrated by some of the programs in `examples`), and</span>
+<span class="doccomment">//! Palette makes the conversion between them as easy as a call to `from_color`</span>
+<span class="doccomment">//! or `into_color`.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This library takes these things into account, and attempts to provide an</span>
-<span class="doccomment">//! interface which will let those who don&#39;t care so much about the intricacies</span>
-<span class="doccomment">//! of color still use colors correctly, while also allowing the advanced user</span>
-<span class="doccomment">//! a high degree of flexibility in how they use it.</span>
+<span class="doccomment">//! This example takes an sRGB color, converts it to CIE L\*C\*h°, a color space</span>
+<span class="doccomment">//! similar to the colloquial HSL/HSV color spaces, shifts its hue by 180° and</span>
+<span class="doccomment">//! converts it back to RGB:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! use palette::{FromColor, Hue, IntoColor, Lch, Srgb};</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_color();</span>
+<span class="doccomment">//! let new_color = Srgb::from_color(lch_color.shift_hue(180.0));</span>
+<span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Transparency</span>
 <span class="doccomment">//!</span>
@@ -1520,6 +1522,18 @@
 <span class="kw">fn</span> <span class="ident">from_f64</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
     <span class="ident">T::from_f64</span>(<span class="ident">c</span>)
 }
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doctest</span>)]</span>
+<span class="macro">macro_rules!</span> <span class="ident">doctest</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">str</span>: <span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">str</span>]</span>
+        <span class="kw">mod</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {}
+    };
+}
+
+<span class="comment">// Makes doctest run tests on README.md.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doctest</span>)]</span>
+<span class="macro">doctest!</span>(<span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>), <span class="ident">readme</span>);
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

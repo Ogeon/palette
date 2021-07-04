@@ -1,7 +1,60 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="RGB types, spaces and standards."><meta name="keywords" content="rust, rustlang, rust-lang, rgb"><title>palette::rgb - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module rgb</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"><a href="../index.html">palette</a></p><div id="sidebar-vars" data-name="rgb" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">palette</a>::<wbr><a class="mod" href="">rgb</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/palette/rgb.rs.html#1-135" title="goto source code">[src]</a></span></h1><div class="docblock"><p>RGB types, spaces and standards.</p>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">palette</a>::<wbr><a class="mod" href="">rgb</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/palette/rgb.rs.html#1-195" title="goto source code">[src]</a></span></h1><div class="docblock"><p>RGB types, spaces and standards.</p>
+<h1 id="linear-and-non-linear-rgb" class="section-header"><a href="#linear-and-non-linear-rgb">Linear And Non-linear RGB</a></h1>
+<p>Colors in images are often “gamma corrected”, or converted using some
+non-linear transfer function into a format like sRGB before being stored or
+displayed. This is done as a compression method and to prevent banding; it’s
+also a bit of a legacy from the ages of the CRT monitors, where the output
+from the electron gun was non-linear. The problem is that these formats are
+<em>non-linear color spaces</em>, which means that many operations that you may
+want to perform on colors (addition, subtraction, multiplication, linear
+interpolation, etc.) will work unexpectedly when performed in such a
+non-linear color space. Thus, the compression has to be reverted to restore
+linearity and ensure that many operations on the colors behave as expected.</p>
+<p>But, even when colors <em>are</em> ‘linear’, there is yet more to explore.</p>
+<p>The most common way that colors are defined, especially for computer
+storage, is in terms of so-called <em>tristimulus values</em>, meaning that all
+colors can be represented as a vector of three values.
+The reason colors can generally be stored as only a three-dimensional
+vector, and not an <em>N</em>-dimensional one, where <em>N</em> is some number of possible
+wavelengths of light, is because our eyes contain only three types of cones.
+Each of these cones has its own sensitivity curve in response to the
+wavelengths of visible light, giving us three “dimensions” of sensitivity to color.
+These cones are often called the L, M, and S (for long, medium, and short)
+cones, and their sensitivity curves <em>roughly</em> position them as most
+sensitive to “red”, “green”, and “blue” parts of the spectrum. As such, we
+can choose only three values to represent any possible color that a human is
+able to see. An interesting consequence of this is that humans can see two
+different objects which are emitting <em>completely different actual light
+spectra</em> as the <em>exact same perceptual color</em> so long as those wavelengths,
+when transformed by the sensitivity curves of our cones, end up resulting in
+the same L, M, and S values sent to our brains.</p>
+<p>A <strong>color space</strong> (which simply refers to a set of standards by which we map
+a set of arbitrary values to real-world colors) which uses tristimulus
+values is often defined in terms of</p>
+<ol>
+<li>Its <strong>primaries</strong></li>
+<li>Its <strong>reference white</strong> or <strong>white point</strong></li>
+</ol>
+<p>The <strong>primaries</strong> together represent the total <em>gamut</em> (i.e. displayable
+range of colors) of that color space. The <strong>white point</strong> defines a
+concrete tristimulus value that corresponds to a real, physical white
+reflecting object being lit by a known light source and observed by the
+‘standard observer’ (i.e. a standardized model of human color perception).</p>
+<p>The informal “RGB” color space is such a tristimulus color space, since it
+is defined by three values, but it is underspecified since we don’t know
+which primaries are being used (i.e. how exactly are the canonical “red”,
+“green”, and “blue” defined?), nor its white point. In most cases, when
+people talk about “RGB” or “Linear RGB” colors, what they are <em>actually</em>
+talking about is the “Linear sRGB” color space, which uses the primaries and
+white point defined in the sRGB standard, but which <em>does not</em> have the
+(non-linear) sRGB <em>transfer function</em> applied.</p>
+<p>Palette takes these details into account and encodes them as type
+parameters, with sRGB as the default. The goal is to make it easy to use
+colors correctly and still allow advanced users a high degree of
+flexibility.</p>
 </div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
 <table><tr class="module-item"><td><a class="mod" href="channels/index.html" title="palette::rgb::channels mod">channels</a></td><td class="docblock-short"><p>Channel orderings for packed RGBA types.</p>
 </td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
@@ -23,7 +76,7 @@ ordered as <code>Abgr</code>, <code>Argb</code>, <code>Bgra</code>, or <code>Rgb
 </td></tr><tr class="module-item"><td><a class="type" href="type.LinSrgba.html" title="palette::rgb::LinSrgba type">LinSrgba</a></td><td class="docblock-short"><p>Linear sRGB with an alpha component.</p>
 </td></tr><tr class="module-item"><td><a class="type" href="type.Rgba.html" title="palette::rgb::Rgba type">Rgba</a></td><td class="docblock-short"><p>Generic RGB with an alpha component. See the <a href="../struct.Alpha.html#Rgba"><code>Rgba</code> implementation in
 <code>Alpha</code></a>.</p>
-</td></tr><tr class="module-item"><td><a class="type" href="type.Srgb.html" title="palette::rgb::Srgb type">Srgb</a></td><td class="docblock-short"><p>Nonlinear sRGB.</p>
-</td></tr><tr class="module-item"><td><a class="type" href="type.Srgba.html" title="palette::rgb::Srgba type">Srgba</a></td><td class="docblock-short"><p>Nonlinear sRGB with an alpha component.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.Srgb.html" title="palette::rgb::Srgb type">Srgb</a></td><td class="docblock-short"><p>Non-linear sRGB.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.Srgba.html" title="palette::rgb::Srgba type">Srgba</a></td><td class="docblock-short"><p>Non-linear sRGB with an alpha component.</p>
 </td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script></body></html>
