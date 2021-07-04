@@ -82,6 +82,7 @@ let my_new_rgb = Srgb::from_color(my_hsl);
 ```
 
 This image shows the starting color and the results of the two changes:
+
 ![The result of each step in the "converting" example.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_converting.png)
 
 Most of the common color spaces are already implemented in Palette, but some situations may require something more customized. The conversion traits make it possible to integrate custom color types into the system. For example, this can be used for adding new color spaces or making a simpler user-facing API.
@@ -148,6 +149,7 @@ let new_hsv = transform_color(&Hsv::new(0.00, 0.82, 0.34), 0.8);
 ```
 
 This image shows the transition from the color to `new_color` in HSL and HSV:
+
 ![Gradients showing the transition from the starting color to the modified color in HSL and HSV.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_color_operations_1.png)
 
 In addition to the operator traits, the SVG blend functions have also been implemented.
@@ -198,6 +200,7 @@ let taken_colors: Vec<_> = gradient.take(10).collect();
 ```
 
 Here's the gradient as both its continuous form and as the 10 colors from `.take(10)`:
+
 ![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_1.png)
 
 There's also support for arbitrary spacing between the input points:
@@ -215,6 +218,7 @@ let taken_colors: Vec<_> = gradient.take(10).collect();
 ```
 
 Here's the gradient after the middle point has been moved more towards the beginning:
+
 ![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_2.png)
 
 ### Customizing Color Spaces
