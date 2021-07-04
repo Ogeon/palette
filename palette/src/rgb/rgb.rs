@@ -210,7 +210,7 @@ impl<S: RgbStandard, T: FloatComponent> Rgb<S, T> {
         )
     }
 
-    /// Convert linear RGB to nonlinear RGB.
+    /// Convert linear RGB to non-linear RGB.
     pub fn from_linear(color: Rgb<Linear<S::Space>, T>) -> Rgb<S, T> {
         Rgb::new(
             S::TransferFn::from_linear(color.red),
@@ -255,7 +255,7 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
 
 /// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
 impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
-    /// Nonlinear RGB.
+    /// Non-linear RGB.
     pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
             color: Rgb::new(red, green, blue),
@@ -340,7 +340,7 @@ impl<S: RgbStandard, T: FloatComponent, A: Component> Alpha<Rgb<S, T>, A> {
         )
     }
 
-    /// Convert linear RGB to nonlinear RGB with transparency.
+    /// Convert linear RGB to non-linear RGB with transparency.
     pub fn from_linear(color: Alpha<Rgb<Linear<S::Space>, T>, A>) -> Self {
         Self::new(
             S::TransferFn::from_linear(color.red),

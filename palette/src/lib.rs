@@ -4,26 +4,26 @@
 //!
 //! # It's Never "Just RGB"
 //!
-//! Colors in, for example, images, are often "gamma corrected", or converted
-//! using some non-linear transfer function into a format like sRGB before being
-//! stored or displayed. This is done as a compression method and to prevent banding,
-//! and is also a bit of a legacy from the ages of the CRT monitors, where the
-//! output from the electron gun was nonlinear. The problem is that these formats
-//! are *non-linear color spaces*, which means that many operations that you may want
-//! to perform on colors (addition, subtraction, multiplication, linear interpolation,
-//! etc.) will work unexpectedly when performed in such a non-linear color space. As
-//! such, the compression has to be reverted to restore linearity and make sure that
-//! many operations on the colors are accurate.
+//! Colors in images are often "gamma corrected", or converted using some
+//! non-linear transfer function into a format like sRGB before being stored or
+//! displayed. This is done as a compression method and to prevent banding; it's
+//! also a bit of a legacy from the ages of the CRT monitors, where the output
+//! from the electron gun was non-linear. The problem is that these formats are
+//! *non-linear color spaces*, which means that many operations that you may
+//! want to perform on colors (addition, subtraction, multiplication, linear
+//! interpolation, etc.) will work unexpectedly when performed in such a
+//! non-linear color space. Thus, the compression has to be reverted to restore
+//! linearity and ensure that many operations on the colors behave as expected.
 //!
 //! For example, this does not work:
 //!
-//! ```rust
+//! ```rust,compile_fail
 //! // An alias for Rgb<Srgb>, which is what most pictures store.
 //! use palette::Srgb;
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0);
 //! let blueish = Srgb::new(0.0, 0.2, 1.0);
-//! // let whateve_it_becomes = orangeish + blueish;
+//! let whatever_it_becomes = orangeish + blueish; // Does not compile
 //! ```
 //!
 //! Instead, they have to be made linear before adding:
@@ -34,61 +34,56 @@
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
-//! let whateve_it_becomes = orangeish + blueish;
+//! let whatever_it_becomes = orangeish + blueish;
 //!
 //! // Encode the result back into sRGB and create a byte array
-//! let pixel: [u8; 3] = Srgb::from_linear(whateve_it_becomes)
+//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes)
 //!     .into_format()
 //!     .into_raw();
 //! ```
 //!
-//! But, even when colors *are* 'linear', there is yet more to explore.
+//! See the [rgb] module for a deeper dive into RGB and (non-)linearity.
 //!
-//! The most common way that colors are defined, especially for computer
-//! storage, is in terms of so-called *tristimulus values*, meaning that
-//! all colors are defined as a vector of three values which may represent
-//! any color. The reason colors can generally be stored as only a three
-//! dimensional vector, and not an *n* dimensional one, where *n* is some
-//! number of possible frequencies of light, is because our eyes contain
-//! only three types of cones. Each of these cones have different sensitivity
-//! curves to different wavelengths of light, giving us three "dimensions"
-//! of sensitivity to color. These cones are often called the S, M, and L
-//! (for small, medium, and large) cones, and their sensitivity curves
-//! *roughly* position them as most sensitive to "red", "green", and "blue"
-//! parts of the spectrum. As such, we can choose only three values to
-//! represent any possible color that a human is able to see. An interesting
-//! consequence of this is that humans can see two different objects which
-//! are emitting *completely different actual light spectra* as the *exact
-//! same perceptual color* so long as those wavelengths, when transformed
-//! by the sensitivity curves of our cones, end up resulting in the same
-//! S, M, and L values sent to our brains.
+//! # Color Spaces
 //!
-//! A **color space** (which simply refers to a set of standards by which
-//! we map a set of arbitrary values to real-world colors) which uses
-//! tristimulus values is often defined in terms of
+//! "RGB" and other tristimulus based spaces like CIE Xyz are probably the most
+//! widely known color spaces. These spaces are great when you want to perform
+//! physically based math on color (like in a 2D or 3D rendering program) but
+//! there are also color spaces that are not defined in terms of tristimulus
+//! values.
 //!
-//! 1. Its **primaries**
-//! 2. Its **reference white** or **white point**
+//! You have probably used a color picker with a rainbow wheel and a brightness
+//! slider. That may have been an HSV or an HSL color picker, where the color is
+//! encoded as hue, saturation and brightness/lightness. Even though these
+//! spaces are defined using 3 values, they *aren't* based on tristimulus
+//! values, since those three values don't have a direct relation to human
+//! vision (i.e. our L, M, and S cones).
+//! Such color spaces are excellent when it comes to humans intuitively
+//! selecting color values, and as such are the go-to choice when this
+//! interaction is needed. They can then be converted into other color spaces
+//! to perform modifications to them.
 //!
-//! The **primaries** together represent the total *gamut* (i.e. displayable
-//! range of colors) of that color space, while the **white point** defines
-//! which concrete tristimulus value corresponds to a real, physical white
-//! reflecting object being lit by a known light source and observed by the
-//! 'standard observer' (i.e. a standardized model of human color perception).
+//! There's also a group of color spaces that are designed to be perceptually
+//! uniform, meaning that the perceptual change is equal to the numerical
+//! change. An example of this is the CIE L\*a\*b\* color space. These color
+//! spaces are excellent when you want to "blend" between colors in a
+//! *perceptually pleasing* manner rather than based on *physical light intensity*.
 //!
-//! The informal "RGB" color space is such a tristimulus color space, since
-//! it is defined by three values, but it is underspecified since we don't
-//! know which primaries are being used (i.e. how exactly are the canonical
-//! "red", "green", and "blue" defined?), nor its white point. In most cases,
-//! when people talk about "RGB" or "Linear RGB" colors, what they are
-//! *actually* talking about is the "Linear sRGB" color space, which uses the
-//! primaries and white point defined in the sRGB standard, but which *does
-//! not* have the (non-linear) sRGB *transfer function* applied.
+//! Selecting the proper color space can have a big impact on how the resulting
+//! image looks (as illustrated by some of the programs in `examples`), and
+//! Palette makes the conversion between them as easy as a call to `from_color`
+//! or `into_color`.
 //!
-//! This library takes these things into account, and attempts to provide an
-//! interface which will let those who don't care so much about the intricacies
-//! of color still use colors correctly, while also allowing the advanced user
-//! a high degree of flexibility in how they use it.
+//! This example takes an sRGB color, converts it to CIE L\*C\*h°, a color space
+//! similar to the colloquial HSL/HSV color spaces, shifts its hue by 180° and
+//! converts it back to RGB:
+//!
+//! ```
+//! use palette::{FromColor, Hue, IntoColor, Lch, Srgb};
+//!
+//! let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_color();
+//! let new_color = Srgb::from_color(lch_color.shift_hue(180.0));
+//! ```
 //!
 //! # Transparency
 //!
@@ -757,3 +752,15 @@ impl FromF64 for f64 {
 fn from_f64<T: FromF64>(c: f64) -> T {
     T::from_f64(c)
 }
+
+#[cfg(doctest)]
+macro_rules! doctest {
+    ($str: expr, $name: ident) => {
+        #[doc = $str]
+        mod $name {}
+    };
+}
+
+// Makes doctest run tests on README.md.
+#[cfg(doctest)]
+doctest!(include_str!("../README.md"), readme);

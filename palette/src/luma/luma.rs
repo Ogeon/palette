@@ -146,7 +146,7 @@ where
         Luma::new(S::TransferFn::into_linear(self.luma))
     }
 
-    /// Convert linear luminance to nonlinear luminance.
+    /// Convert linear luminance to non-linear luminance.
     pub fn from_linear(color: Luma<Linear<S::WhitePoint>, T>) -> Luma<S, T> {
         Luma::new(S::TransferFn::from_linear(color.luma))
     }
@@ -246,7 +246,7 @@ where
         )
     }
 
-    /// Convert linear luminance to nonlinear luminance with transparency.
+    /// Convert linear luminance to non-linear luminance with transparency.
     pub fn from_linear(color: Alpha<Luma<Linear<S::WhitePoint>, T>, A>) -> Alpha<Luma<S, T>, A> {
         Alpha::<Luma<S, T>, A>::new(S::TransferFn::from_linear(color.luma), color.alpha)
     }

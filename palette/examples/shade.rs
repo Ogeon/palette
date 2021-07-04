@@ -11,10 +11,10 @@ fn main() {
     let mut image = RgbImage::new(220, 193);
 
     for i in 0..11 {
-        let rgb1 = Srgb::from_linear(rgb.darken(0.05 * i as f32))
+        let rgb1 = Srgb::from_linear(rgb.darken(0.1 * i as f32))
             .into_format()
             .into_raw();
-        let rgb2 = Srgb::from_linear(rgb.lighten(0.05 * i as f32))
+        let rgb2 = Srgb::from_linear(rgb.lighten(0.1 * i as f32))
             .into_format()
             .into_raw();
 
@@ -38,10 +38,10 @@ fn main() {
             }
         }
 
-        let lab1 = Srgb::from_linear(lab.darken(0.05 * i as f32).into_color())
+        let lab1 = Srgb::from_linear(lab.darken(0.1 * i as f32).into_color())
             .into_format()
             .into_raw();
-        let lab2 = Srgb::from_linear(lab.lighten(0.05 * i as f32).into_color())
+        let lab2 = Srgb::from_linear(lab.lighten(0.1 * i as f32).into_color())
             .into_format()
             .into_raw();
 
@@ -65,10 +65,10 @@ fn main() {
             }
         }
 
-        let hsv1 = Srgb::from_linear(hsv.darken(0.05 * i as f32).into_color())
+        let hsv1 = Srgb::from_linear(hsv.darken(0.1 * i as f32).into_color())
             .into_format()
             .into_raw();
-        let hsv2 = Srgb::from_linear(hsv.lighten(0.05 * i as f32).into_color())
+        let hsv2 = Srgb::from_linear(hsv.lighten(0.1 * i as f32).into_color())
             .into_format()
             .into_raw();
 

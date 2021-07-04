@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        toolchain: [stable, beta, nightly]
+        toolchain: [1.48.0, stable, beta, nightly]
     runs-on: ${{ matrix.os }}
     env:
       RUSTFLAGS: -D warnings

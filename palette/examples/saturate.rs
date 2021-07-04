@@ -10,7 +10,7 @@ fn main() {
     let width = image.width();
     let height = image.height();
 
-    //Increase the saturation by 80% (!) as HSL in the left half, and as LCh
+    //Increase the saturation by 30% towards full saturation as HSL in the left half, and as LCh
     //in the right half. Notice the strong yellow tone in the HSL part.
     {
         let mut sub_image = image.sub_image(0, 0, width / 2, height);
@@ -21,7 +21,7 @@ fn main() {
                     .into_format()
                     .into_color();
 
-                let saturated = color.saturate(0.8);
+                let saturated = color.saturate(0.3);
                 sub_image.put_pixel(
                     x,
                     y,
@@ -40,7 +40,7 @@ fn main() {
                     .into_format()
                     .into_color();
 
-                let saturated = color.saturate(0.8);
+                let saturated = color.saturate(0.3);
                 sub_image.put_pixel(
                     x,
                     y,

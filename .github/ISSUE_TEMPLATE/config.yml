@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+ - name: Questions and discussions
+   url: https://github.com/Ogeon/palette/discussions
+   about: Ask questions or discuss Pallete in general here.
