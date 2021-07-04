@@ -1,0 +1,21 @@
+name: Prepare release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The new version number
+        required: true
+
+jobs:
+  compile_and_test:
+    name: Update version and release notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0 # We want the full history and all tags
+      - name: Generate release notes
+        uses: .github/actions/generate_release_notes
+        with:
+          version: ${{ github.event.inputs.version }}
+      - run: git diff -- CHANGELOG.md

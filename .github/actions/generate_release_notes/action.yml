@@ -1,0 +1,15 @@
+name: 'Generate Release Notes'
+description: 'Generate release notes from merged pull requests'
+inputs:
+  version:
+    description: 'The next version to be released'
+    required: true
+  token:
+    description: 'An access token for Github API calls'
+    default: ${{ github.token }}
+  file:
+    description: 'The change log file to update (default is CHANGELOG.md)'
+    default: CHANGELOG.md
+runs:
+  using: 'node12'
+  main: 'build/index.js'
