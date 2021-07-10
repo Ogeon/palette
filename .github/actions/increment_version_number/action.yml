@@ -1,0 +1,13 @@
+name: 'Increment Version Number'
+description: 'Finds mentions of the old version number in the project and increments them.'
+inputs:
+  version:
+    description: 'The new version number.'
+    required: true
+  crate:
+    description: 'An optional path to the crate directory, where Cargo.toml can be found. Defaults to the current directory.'
+  dependencies:
+    description: 'An optional, JSON encoded mapping of dependency versions to change. Example: "example_crate": "1.2.3"}.'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

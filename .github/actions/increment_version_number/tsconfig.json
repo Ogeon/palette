@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "alwaysStrict": true,
+        "moduleResolution": "node",
+        "module": "CommonJS",
+        "target": "ES2019",
+    },
+    "compileOnSave": true
+}

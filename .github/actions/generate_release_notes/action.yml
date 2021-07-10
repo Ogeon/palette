@@ -12,4 +12,4 @@ inputs:
     default: CHANGELOG.md
 runs:
   using: 'node12'
-  main: 'build/index.js'
+  main: 'dist/index.js'
