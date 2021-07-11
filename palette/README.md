@@ -9,7 +9,7 @@ A color management and conversion library that focuses on maintaining correctnes
 * Color operations implemented as traits, such as arithmetic, lighten/darken, hue shifting, mixing/interpolating, and SVG blend functions.
 * Provides types for creating gradients.
 * Color spaces can be customized, using type parameters, to support different levels of precision, linearity, white points, RGB standards, etc.
-* Supports `#[no_std]`, with gradients and dynamic named colors disabled.
+* Supports `#[no_std]`, with only gradients disabled.
 * Optional `serde` and `rand` integration.
 
 ## Minimum Supported Rust Version (MSRV)
@@ -39,7 +39,8 @@ features = ["libm"] # Uses libm instead of std for floating point math
 These features are enabled by default:
 
 * `"named"` - Enables color constants, located in the `named` module.
-* `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors. This requires the standard library.
+* `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors.
+* `"named_gradients"`- Enables gradient constants, located in `gradient::named`. This requires the standard library.
 * `"std"` - Enables use of the standard library.
 
 These features are disabled by default:
@@ -53,9 +54,8 @@ These features are disabled by default:
 
 Palette supports `#![no_std]` environments by disabling the `"std"` feature. However, there are some things that are unavailable without the standard library:
 
-* Gradients are unavailable, because they depend heavily on Vectors
-* The `"named_from_str"` feature requires the standard library as well
-* Serialization using `serde` is unavailable
+* Gradients are unavailable, because they depend heavily on Vectors.
+* Serialization using `serde` is unavailable.
 
 It uses [`libm`] to provide the floating-point operations that are typically in `std`.
 
