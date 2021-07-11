@@ -8,8 +8,6 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::color_difference::ColorDifference;
-use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::matrix::multiply_xyz;
@@ -61,9 +59,9 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
 
 /// The [Oklab color space](https://bottosson.github.io/posts/oklab/).
 ///
-/// Oklab is a perceptually-uniform color space similar in structure to [L\*a\*b\*](crate::Lab), but
-/// with better perceptual uniformity. It assumes a D65 whitepoint and normal well-lit viewing
-/// conditions.
+/// Oklab is a perceptually-uniform color space similar in structure to
+/// [L\*a\*b\*](crate::Lab), but tries to have a better perceptual uniformity.
+/// It assumes a D65 whitepoint and normal well-lit viewing conditions.
 #[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -367,33 +365,6 @@ where
         } else {
             Some(OklabHue::from_radians(self.b.atan2(self.a)))
         }
-    }
-}
-
-impl<T> ColorDifference for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    fn get_color_difference(&self, other: &Self) -> Self::Scalar {
-        // Color difference calculation requires Lab and chroma components. This
-        // function handles the conversion into those components which are then
-        // passed to `get_ciede_difference()` where calculation is completed.
-        let self_params = LabColorDiff {
-            l: self.l,
-            a: self.a,
-            b: self.b,
-            chroma: (self.a * self.a + self.b * self.b).sqrt(),
-        };
-        let other_params = LabColorDiff {
-            l: other.l,
-            a: other.a,
-            b: other.b,
-            chroma: (other.a * other.a + other.b * other.b).sqrt(),
-        };
-
-        get_ciede_difference(&self_params, &other_params)
     }
 }
 
