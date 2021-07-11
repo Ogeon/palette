@@ -15,12 +15,12 @@ jobs:
         with:
           fetch-depth: 0 # We want the full history and all tags
       - name: Increment version for palette_derived
-        uses: .github/actions/increment_version_number
+        uses: ./.github/actions/increment_version_number
         with:
           version: ${{ github.event.inputs.version }}
           crate: palette_derived
       - name: Increment version for palette
-        uses: .github/actions/increment_version_number
+        uses: ./.github/actions/increment_version_number
         with:
           version: ${{ github.event.inputs.version }}
           crate: palette
@@ -28,7 +28,7 @@ jobs:
       - name: Increment version in README.md
         run: 'sed -i ''s/\[Released\](https:\/\/docs.rs\/palette\/.*\/palette\/)/[Released](https:\/\/docs.rs\/palette\/${{ github.event.inputs.version }}\/palette\/)/'' README.md'
       - name: Generate release notes
-        uses: .github/actions/generate_release_notes
+        uses: ./.github/actions/generate_release_notes
         with:
           version: ${{ github.event.inputs.version }}
       - run: git diff

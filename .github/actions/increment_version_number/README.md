@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Increment version for my_crate
-        uses: .github/actions/increment_version_number
+        uses: ./.github/actions/increment_version_number
         with:
           version: ${{ github.event.inputs.version }}
           crate: my_crate # Optional, for when the root directory isn't the crate directory.

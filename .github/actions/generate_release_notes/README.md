@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0 # We want the full history and all tags
       - name: Generate release notes
-        uses: .github/actions/generate_release_notes
+        uses: ./.github/actions/generate_release_notes
         with:
           version: ${{ github.event.inputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }} # Optional, defaults to ${{ github.token }}
