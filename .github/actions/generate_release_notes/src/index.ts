@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as fs from 'fs/promises';
+import { promises as fs } from 'fs';
 import { generate } from './generate';
 
 const token = core.getInput('token', { required: true });

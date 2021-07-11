@@ -1,6 +1,6 @@
 import * as toml from '@toml-tools/lexer';
 import { IToken } from 'chevrotain';
-import * as fs from 'fs/promises';
+import { promises as fs } from 'fs';
 import * as tomlStringify from '@iarna/toml/stringify';
 
 interface TokenPrimitive {
