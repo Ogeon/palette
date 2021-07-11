@@ -22,4 +22,4 @@ default-features = false
 [dependencies.palette]
 path = "../palette"
 default-features = false
-features = ["libm", "named"]
+features = ["libm", "named_from_str"]
