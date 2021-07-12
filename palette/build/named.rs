@@ -76,6 +76,7 @@ pub fn build_gradients(writer: &mut File) {
             .parse()
             .unwrap_or_else(|_| panic!("couldn't parse the number of colors for color {}", name));
         writeln!(writer, "/// New matplotlib colormap by Nathaniel J. Smith, Stefan van der Walt, and (in the case of viridis) Eric Firing.").unwrap();
+        writeln!(writer, "///").unwrap();
         writeln!(writer, "/// This gradient is perfectly perceptually-uniform, both in regular form and also when converted to black-and-white.").unwrap();
         writeln!(
             writer,
