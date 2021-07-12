@@ -8,7 +8,6 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::color_difference::{get_ciede_difference, ColorDifference, LabColorDiff};
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
@@ -352,52 +351,6 @@ where
             chroma: self.chroma,
             hue: self.hue + amount.into(),
         }
-    }
-}
-
-/// CIEDE2000 distance metric for color difference.
-impl<T> ColorDifference for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    fn get_color_difference(&self, other: &Oklch<T>) -> Self::Scalar {
-        // Prepare a* and b* from Oklch components to calculate color difference
-        let self_a = clamp(
-            self.chroma.max(T::zero()) * self.hue.to_radians().cos(),
-            from_f64(0.0),
-            from_f64(1.0),
-        );
-        let self_b = clamp(
-            self.chroma.max(T::zero()) * self.hue.to_radians().sin(),
-            from_f64(0.0),
-            from_f64(1.0),
-        );
-        let other_a = clamp(
-            other.chroma.max(T::zero()) * other.hue.to_radians().cos(),
-            from_f64(0.0),
-            from_f64(1.0),
-        );
-        let other_b = clamp(
-            other.chroma.max(T::zero()) * other.hue.to_radians().sin(),
-            from_f64(0.0),
-            from_f64(1.0),
-        );
-        let self_params = LabColorDiff {
-            l: self.l,
-            a: self_a,
-            b: self_b,
-            chroma: self.chroma,
-        };
-        let other_params = LabColorDiff {
-            l: other.l,
-            a: other_a,
-            b: other_b,
-            chroma: other.chroma,
-        };
-
-        get_ciede_difference(&self_params, &other_params)
     }
 }
 
