@@ -34,7 +34,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          message: Prepare release ${{ github.event.inputs.version }}
+          commit-message: Prepare release ${{ github.event.inputs.version }}
           branch: prepare_${{ github.event.inputs.version }}
           delete-branch: true
           title: Version ${{ github.event.inputs.version }}
