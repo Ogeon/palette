@@ -1,26 +1,50 @@
 # Changelog
 
+## Version 0.6.0 - 2021-07-12
+
+* [#235][235]: Upgrade phf to 0.9 and enable named_from_str for no_std.
+* [#200][200]: Add Oklab support. Closes [#222][222].
+* [#231][231]: Update `approx` and `find-crate` dependencies.
+* [#229][229]: Implement `bytemuck::Zeroable` and `bytemuck::Pod` for every color type.
+* [#225][225]: Add Hsluv support. Closes [#112][112].
+* [#223][223]: Add Lchuv support.
+* [#221][221]: Add CIE Luv support.
+* [#217][217]: Implement relative and absolute methods for Lighten/Darken, Saturate. Closes [#215][215].
+* [#216][216]: Add doc alias, doc cleanups, remove trait from Packed struct.
+* [#211][211]: Implement PartialEq/Eq for all colorspaces, Alpha, PreAlpha, and LabHue/RgbHue. Closes [#206][206].
+* [#210][210]: Rename Limited trait to Clamp. Closes [#209][209].
+* [#205][205]: Generalizing gradients and add constant gradients. Closes [#62][62].
+* [#190][190]: Convert documentation to intra doc links, add default whitepoint for Lab/Lch, make code fixups. Closes [#177][177].
+* [#189][189]: Correct scaling on random distribution of Lab/Lch.
+* [#188][188]: Allow HSV, HSL and HWB to represent nonlinear RGB. Closes [#160][160], [#187][187].
+* [#184][184]: Optimize into_component for float_to_uint, u8 to f32/f64.
+* [#183][183]: Optimize matrix functions, color conversion performance.
+* [#176][176]: Rewrite the conversion traits to work more like From and Into. Closes [#41][41], [#111][111].
+* [#175][175]: Add feature "random" for random color generation using `rand` crate. Closes [#174][174].
+* [#173][173]: Add functions to get min/max component values for all color types, alpha.
+* [#170][170]: Add `{into,from}_u32` methods for RGB/A, Packed struct for u32 representations of RGBA. Closes [#144][144].
+* [#164][164]: Implement WCAG contrast ratio calculations.
+* [#162][162]: Implement CIEDE2000 color difference for Lab/Lch. Closes [#143][143].
+* [#161][161]: Split the Component trait into more specific traits.
+* [#157][157]: Implement `FromStr` method for `Rgb<S, u8>`. Closes [#148][148].
+* [#158][158]: Make `Take` iterator for gradient inclusive of both end colors, add tests.
+* [#154][154]: Add DoubleEndedIterator impl for gradient::Take. Closes [#153][153].
+* [#137][137]: Add some missing `From` impls between `Srgb` and `LinSrgb` types.
+
 ## Version 0.5.0 - 2019-11-17
 
 * [#149][149]: Use libm through num_traits, and update all dependencies.
-* [#146][146]: bump syn, quote and proc-macro2 to version 1.0.
 * [#142][142]: Make libm optional. Closes [#116][116].
-* [#141][141]: Also test no_std with a target without std support.
-* [#140][140]: Add a basic test crate for no_std. Closes [#139][139].
 * [#138][138]: Fix no_std build failure.
 * [#136][136]: Update dependencies and remove --release flag from feature tests.
-* [#135][135]: Round to nearest instead of down when converting components to integers..
-* [#132][132]: Add the dyn keyword where trait objects are used.
+* [#135][135]: Round to nearest instead of down when converting components to integers.
 * [#127][127]: fix no_std. Closes [#125][125].
 * [#124][124]: Update approx dependency to 0.3.
-* [#122][122]: Update to syn 0.15.
-* [#120][120]: Fix grammar in readme.
 * [#119][119]: Remove the color enum. Closes [#72][72].
 * [#118][118]: Implement assign ops. Closes [#94][94].
 * [#110][110]: No std support. Closes [#108][108].
-* [#106][106]: Add Extended Conversion Trait .
+* [#106][106]: Add Extended Conversion Trait.
 * [#104][104]: Update image and approx crate dependency. Closes [#101][101], [#100][100].
-* [#103][103]: Use Generics::make_where_clause helper.
 
 ## Version 0.4.1 - 2018-08-02
 
@@ -81,94 +105,130 @@
 
 The first published version.
 
-[149]: https://github.com/Ogeon/palette/pull/149
-[146]: https://github.com/Ogeon/palette/pull/146
-[142]: https://github.com/Ogeon/palette/pull/142
-[141]: https://github.com/Ogeon/palette/pull/141
-[140]: https://github.com/Ogeon/palette/pull/140
-[138]: https://github.com/Ogeon/palette/pull/138
-[136]: https://github.com/Ogeon/palette/pull/136
-[135]: https://github.com/Ogeon/palette/pull/135
-[132]: https://github.com/Ogeon/palette/pull/132
-[127]: https://github.com/Ogeon/palette/pull/127
-[124]: https://github.com/Ogeon/palette/pull/124
-[122]: https://github.com/Ogeon/palette/pull/122
-[120]: https://github.com/Ogeon/palette/pull/120
-[119]: https://github.com/Ogeon/palette/pull/119
-[118]: https://github.com/Ogeon/palette/pull/118
-[110]: https://github.com/Ogeon/palette/pull/110
-[113]: https://github.com/Ogeon/palette/pull/113
-[106]: https://github.com/Ogeon/palette/pull/106
-[104]: https://github.com/Ogeon/palette/pull/104
-[103]: https://github.com/Ogeon/palette/pull/103
-[99]: https://github.com/Ogeon/palette/pull/99
-[98]: https://github.com/Ogeon/palette/pull/98
-[97]: https://github.com/Ogeon/palette/pull/97
-[96]: https://github.com/Ogeon/palette/pull/96
-[93]: https://github.com/Ogeon/palette/pull/93
-[92]: https://github.com/Ogeon/palette/pull/92
-[90]: https://github.com/Ogeon/palette/pull/90
-[89]: https://github.com/Ogeon/palette/pull/89
-[84]: https://github.com/Ogeon/palette/pull/84
-[81]: https://github.com/Ogeon/palette/pull/81
-[78]: https://github.com/Ogeon/palette/pull/78
-[60]: https://github.com/Ogeon/palette/pull/60
-[76]: https://github.com/Ogeon/palette/pull/76
-[63]: https://github.com/Ogeon/palette/pull/63
-[61]: https://github.com/Ogeon/palette/pull/61
-[56]: https://github.com/Ogeon/palette/pull/56
-[39]: https://github.com/Ogeon/palette/pull/39
-[54]: https://github.com/Ogeon/palette/pull/54
-[52]: https://github.com/Ogeon/palette/pull/52
-[53]: https://github.com/Ogeon/palette/pull/53
-[51]: https://github.com/Ogeon/palette/pull/51
-[48]: https://github.com/Ogeon/palette/pull/48
-[47]: https://github.com/Ogeon/palette/pull/47
-[43]: https://github.com/Ogeon/palette/pull/43
+[9]: https://github.com/Ogeon/palette/pull/9
+[12]: https://github.com/Ogeon/palette/pull/12
+[18]: https://github.com/Ogeon/palette/pull/18
+[22]: https://github.com/Ogeon/palette/pull/22
+[23]: https://github.com/Ogeon/palette/pull/23
+[24]: https://github.com/Ogeon/palette/pull/24
+[25]: https://github.com/Ogeon/palette/pull/25
+[26]: https://github.com/Ogeon/palette/pull/26
+[29]: https://github.com/Ogeon/palette/pull/29
+[30]: https://github.com/Ogeon/palette/pull/30
 [34]: https://github.com/Ogeon/palette/pull/34
 [35]: https://github.com/Ogeon/palette/pull/35
-[30]: https://github.com/Ogeon/palette/pull/30
-[29]: https://github.com/Ogeon/palette/pull/29
-[26]: https://github.com/Ogeon/palette/pull/26
-[25]: https://github.com/Ogeon/palette/pull/25
-[22]: https://github.com/Ogeon/palette/pull/22
-[24]: https://github.com/Ogeon/palette/pull/24
-[23]: https://github.com/Ogeon/palette/pull/23
-[18]: https://github.com/Ogeon/palette/pull/18
-[12]: https://github.com/Ogeon/palette/pull/12
-[9]: https://github.com/Ogeon/palette/pull/9
-[116]: https://github.com/Ogeon/palette/issues/116
-[139]: https://github.com/Ogeon/palette/issues/139
-[125]: https://github.com/Ogeon/palette/issues/125
-[72]: https://github.com/Ogeon/palette/issues/72
-[94]: https://github.com/Ogeon/palette/issues/94
-[108]: https://github.com/Ogeon/palette/issues/108
-[101]: https://github.com/Ogeon/palette/issues/101
-[100]: https://github.com/Ogeon/palette/issues/100
-[87]: https://github.com/Ogeon/palette/issues/87
-[80]: https://github.com/Ogeon/palette/issues/80
-[91]: https://github.com/Ogeon/palette/issues/91
-[85]: https://github.com/Ogeon/palette/issues/85
-[86]: https://github.com/Ogeon/palette/issues/86
-[83]: https://github.com/Ogeon/palette/issues/83
-[75]: https://github.com/Ogeon/palette/issues/75
-[82]: https://github.com/Ogeon/palette/issues/82
-[74]: https://github.com/Ogeon/palette/issues/74
-[66]: https://github.com/Ogeon/palette/issues/66
-[31]: https://github.com/Ogeon/palette/issues/31
-[58]: https://github.com/Ogeon/palette/issues/58
-[49]: https://github.com/Ogeon/palette/issues/49
-[14]: https://github.com/Ogeon/palette/issues/14
+[39]: https://github.com/Ogeon/palette/pull/39
+[43]: https://github.com/Ogeon/palette/pull/43
+[47]: https://github.com/Ogeon/palette/pull/47
+[48]: https://github.com/Ogeon/palette/pull/48
+[51]: https://github.com/Ogeon/palette/pull/51
+[52]: https://github.com/Ogeon/palette/pull/52
+[53]: https://github.com/Ogeon/palette/pull/53
+[54]: https://github.com/Ogeon/palette/pull/54
+[56]: https://github.com/Ogeon/palette/pull/56
+[60]: https://github.com/Ogeon/palette/pull/60
+[61]: https://github.com/Ogeon/palette/pull/61
+[63]: https://github.com/Ogeon/palette/pull/63
+[76]: https://github.com/Ogeon/palette/pull/76
+[78]: https://github.com/Ogeon/palette/pull/78
+[81]: https://github.com/Ogeon/palette/pull/81
+[84]: https://github.com/Ogeon/palette/pull/84
+[89]: https://github.com/Ogeon/palette/pull/89
+[90]: https://github.com/Ogeon/palette/pull/90
+[92]: https://github.com/Ogeon/palette/pull/92
+[93]: https://github.com/Ogeon/palette/pull/93
+[96]: https://github.com/Ogeon/palette/pull/96
+[97]: https://github.com/Ogeon/palette/pull/97
+[98]: https://github.com/Ogeon/palette/pull/98
+[99]: https://github.com/Ogeon/palette/pull/99
+[104]: https://github.com/Ogeon/palette/pull/104
+[106]: https://github.com/Ogeon/palette/pull/106
+[110]: https://github.com/Ogeon/palette/pull/110
+[113]: https://github.com/Ogeon/palette/pull/113
+[118]: https://github.com/Ogeon/palette/pull/118
+[119]: https://github.com/Ogeon/palette/pull/119
+[124]: https://github.com/Ogeon/palette/pull/124
+[127]: https://github.com/Ogeon/palette/pull/127
+[135]: https://github.com/Ogeon/palette/pull/135
+[136]: https://github.com/Ogeon/palette/pull/136
+[137]: https://github.com/Ogeon/palette/pull/137
+[138]: https://github.com/Ogeon/palette/pull/138
+[142]: https://github.com/Ogeon/palette/pull/142
+[149]: https://github.com/Ogeon/palette/pull/149
+[154]: https://github.com/Ogeon/palette/pull/154
+[157]: https://github.com/Ogeon/palette/pull/157
+[158]: https://github.com/Ogeon/palette/pull/158
+[161]: https://github.com/Ogeon/palette/pull/161
+[162]: https://github.com/Ogeon/palette/pull/162
+[164]: https://github.com/Ogeon/palette/pull/164
+[170]: https://github.com/Ogeon/palette/pull/170
+[173]: https://github.com/Ogeon/palette/pull/173
+[175]: https://github.com/Ogeon/palette/pull/175
+[176]: https://github.com/Ogeon/palette/pull/176
+[183]: https://github.com/Ogeon/palette/pull/183
+[184]: https://github.com/Ogeon/palette/pull/184
+[188]: https://github.com/Ogeon/palette/pull/188
+[189]: https://github.com/Ogeon/palette/pull/189
+[190]: https://github.com/Ogeon/palette/pull/190
+[200]: https://github.com/Ogeon/palette/pull/200
+[205]: https://github.com/Ogeon/palette/pull/205
+[210]: https://github.com/Ogeon/palette/pull/210
+[211]: https://github.com/Ogeon/palette/pull/211
+[216]: https://github.com/Ogeon/palette/pull/216
+[217]: https://github.com/Ogeon/palette/pull/217
+[221]: https://github.com/Ogeon/palette/pull/221
+[223]: https://github.com/Ogeon/palette/pull/223
+[225]: https://github.com/Ogeon/palette/pull/225
+[229]: https://github.com/Ogeon/palette/pull/229
+[231]: https://github.com/Ogeon/palette/pull/231
+[235]: https://github.com/Ogeon/palette/pull/235
+[2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
-[32]: https://github.com/Ogeon/palette/issues/32
-[44]: https://github.com/Ogeon/palette/issues/44
-[46]: https://github.com/Ogeon/palette/issues/46
+[4]: https://github.com/Ogeon/palette/issues/4
 [5]: https://github.com/Ogeon/palette/issues/5
-[33]: https://github.com/Ogeon/palette/issues/33
+[7]: https://github.com/Ogeon/palette/issues/7
+[11]: https://github.com/Ogeon/palette/issues/11
+[13]: https://github.com/Ogeon/palette/issues/13
+[14]: https://github.com/Ogeon/palette/issues/14
 [15]: https://github.com/Ogeon/palette/issues/15
 [19]: https://github.com/Ogeon/palette/issues/19
-[11]: https://github.com/Ogeon/palette/issues/11
-[7]: https://github.com/Ogeon/palette/issues/7
-[13]: https://github.com/Ogeon/palette/issues/13
-[4]: https://github.com/Ogeon/palette/issues/4
-[2]: https://github.com/Ogeon/palette/issues/2
+[31]: https://github.com/Ogeon/palette/issues/31
+[32]: https://github.com/Ogeon/palette/issues/32
+[33]: https://github.com/Ogeon/palette/issues/33
+[41]: https://github.com/Ogeon/palette/issues/41
+[44]: https://github.com/Ogeon/palette/issues/44
+[46]: https://github.com/Ogeon/palette/issues/46
+[49]: https://github.com/Ogeon/palette/issues/49
+[58]: https://github.com/Ogeon/palette/issues/58
+[62]: https://github.com/Ogeon/palette/issues/62
+[66]: https://github.com/Ogeon/palette/issues/66
+[72]: https://github.com/Ogeon/palette/issues/72
+[74]: https://github.com/Ogeon/palette/issues/74
+[75]: https://github.com/Ogeon/palette/issues/75
+[80]: https://github.com/Ogeon/palette/issues/80
+[82]: https://github.com/Ogeon/palette/issues/82
+[83]: https://github.com/Ogeon/palette/issues/83
+[85]: https://github.com/Ogeon/palette/issues/85
+[86]: https://github.com/Ogeon/palette/issues/86
+[87]: https://github.com/Ogeon/palette/issues/87
+[91]: https://github.com/Ogeon/palette/issues/91
+[94]: https://github.com/Ogeon/palette/issues/94
+[100]: https://github.com/Ogeon/palette/issues/100
+[101]: https://github.com/Ogeon/palette/issues/101
+[108]: https://github.com/Ogeon/palette/issues/108
+[111]: https://github.com/Ogeon/palette/issues/111
+[112]: https://github.com/Ogeon/palette/issues/112
+[116]: https://github.com/Ogeon/palette/issues/116
+[125]: https://github.com/Ogeon/palette/issues/125
+[143]: https://github.com/Ogeon/palette/issues/143
+[144]: https://github.com/Ogeon/palette/issues/144
+[148]: https://github.com/Ogeon/palette/issues/148
+[153]: https://github.com/Ogeon/palette/issues/153
+[160]: https://github.com/Ogeon/palette/issues/160
+[174]: https://github.com/Ogeon/palette/issues/174
+[177]: https://github.com/Ogeon/palette/issues/177
+[187]: https://github.com/Ogeon/palette/issues/187
+[206]: https://github.com/Ogeon/palette/issues/206
+[209]: https://github.com/Ogeon/palette/issues/209
+[215]: https://github.com/Ogeon/palette/issues/215
+[222]: https://github.com/Ogeon/palette/issues/222

@@ -1,11 +1,12 @@
 [package]
 name = "palette"
-version = "0.5.0" #automatically updated
+version = "0.6.0" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = [
     "scripts/*",
     "examples/*",
     "tests/*",
+    "benches/*",
     "res/*",
     ".travis.yml",
     ".gitignore",
@@ -14,7 +15,7 @@ exclude = [
     "version.sh"
 ]
 description = "Convert and manage colors with a focus on correctness, flexibility and ease of use."
-documentation = "https://docs.rs/palette/0.5.0/palette/"
+documentation = "https://docs.rs/palette/0.6.0/palette/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "conversion", "linear", "pixel", "rgb"]
@@ -38,7 +39,7 @@ libm = ["num-traits/libm"]
 bench = false
 
 [dependencies]
-palette_derive = { version = "0.5.0", path = "../palette_derive" }
+palette_derive = { version = "0.6.0", path = "../palette_derive" }
 num-traits = { version = "0.2", default-features = false }
 approx = { version = "0.5", default-features = false }
 
