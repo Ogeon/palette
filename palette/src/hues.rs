@@ -23,15 +23,23 @@ macro_rules! make_hues {
         #[derive(Clone, Copy, Debug, Default)]
         #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
         #[repr(C)]
-        pub struct $name<T: Float = f32>(T);
+        pub struct $name<T = f32>(T);
 
-        impl<T: Float + FromF64> $name<T> {
+        impl<T> $name<T> {
             /// Create a new hue from degrees.
             #[inline]
             pub fn from_degrees(degrees: T) -> $name<T> {
                 $name(degrees)
             }
 
+            /// Get the internal representation, without normalizing it.
+            #[inline]
+            pub fn to_raw_degrees(self) -> T {
+                self.0
+            }
+        }
+
+        impl<T: Float + FromF64> $name<T> {
             /// Create a new hue from radians, instead of degrees.
             #[inline]
             pub fn from_radians(radians: T) -> $name<T> {
@@ -62,12 +70,6 @@ macro_rules! make_hues {
                 normalize_angle_positive(self.0).to_radians()
             }
 
-            /// Get the internal representation, without normalizing it.
-            #[inline]
-            pub fn to_raw_degrees(self) -> T {
-                self.0
-            }
-
             /// Get the internal representation as radians, without normalizing it.
             #[inline]
             pub fn to_raw_radians(self) -> T {
@@ -75,7 +77,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float> From<T> for $name<T> {
+        impl<T> From<T> for $name<T> {
             #[inline]
             fn from(degrees: T) -> $name<T> {
                 $name(degrees)
@@ -121,7 +123,7 @@ macro_rules! make_hues {
 
         impl<T: Float + FromF64 + Eq> Eq for $name<T> {}
 
-        impl<T: Float> Add<$name<T>> for $name<T> {
+        impl<T: Add<Output=T>> Add<$name<T>> for $name<T> {
             type Output = $name<T>;
 
             #[inline]
@@ -130,7 +132,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float> Add<T> for $name<T> {
+        impl<T: Add<Output=T>> Add<T> for $name<T> {
             type Output = $name<T>;
 
             #[inline]
@@ -157,14 +159,14 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float + AddAssign> AddAssign<$name<T>> for $name<T> {
+        impl<T: AddAssign> AddAssign<$name<T>> for $name<T> {
             #[inline]
             fn add_assign(&mut self, other: $name<T>) {
                 self.0 += other.0;
             }
         }
 
-        impl<T: Float + AddAssign> AddAssign<T> for $name<T> {
+        impl<T: AddAssign> AddAssign<T> for $name<T> {
             #[inline]
             fn add_assign(&mut self, other: T) {
                 self.0 += other;
@@ -185,7 +187,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float> Sub<$name<T>> for $name<T> {
+        impl<T: Sub<Output=T>> Sub<$name<T>> for $name<T> {
             type Output = $name<T>;
 
             #[inline]
@@ -194,7 +196,7 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float> Sub<T> for $name<T> {
+        impl<T: Sub<Output=T>> Sub<T> for $name<T> {
             type Output = $name<T>;
 
             #[inline]
@@ -221,14 +223,14 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: Float + SubAssign> SubAssign<$name<T>> for $name<T> {
+        impl<T: SubAssign> SubAssign<$name<T>> for $name<T> {
             #[inline]
             fn sub_assign(&mut self, other: $name<T>) {
                 self.0 -= other.0;
             }
         }
 
-        impl<T: Float + SubAssign> SubAssign<T> for $name<T> {
+        impl<T: SubAssign> SubAssign<T> for $name<T> {
             #[inline]
             fn sub_assign(&mut self, other: T) {
                 self.0 -= other;
@@ -261,9 +263,9 @@ macro_rules! make_hues {
         }
 
         #[cfg(feature = "bytemuck")]
-        unsafe impl<T: Float + bytemuck::Zeroable> bytemuck::Zeroable for $name<T> {}
+        unsafe impl<T: bytemuck::Zeroable> bytemuck::Zeroable for $name<T> {}
         #[cfg(feature = "bytemuck")]
-        unsafe impl<T: Float + bytemuck::Pod> bytemuck::Pod for $name<T> {}
+        unsafe impl<T: bytemuck::Pod> bytemuck::Pod for $name<T> {}
     )+)
 }
 

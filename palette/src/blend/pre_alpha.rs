@@ -30,7 +30,7 @@ use crate::{clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
-pub struct PreAlpha<C, T: Float> {
+pub struct PreAlpha<C, T> {
     /// The premultiplied color components (`original.color * original.alpha`).
     #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
@@ -42,7 +42,7 @@ pub struct PreAlpha<C, T: Float> {
 
 impl<C, T> PartialEq for PreAlpha<C, T>
 where
-    T: Float + PartialEq,
+    T: PartialEq,
     C: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
@@ -52,7 +52,7 @@ where
 
 impl<C, T> Eq for PreAlpha<C, T>
 where
-    T: Float + Eq,
+    T: Eq,
     C: Eq,
 {
 }
@@ -119,7 +119,7 @@ impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
     }
 }
 
-impl<C: ComponentWise<Scalar = T>, T: Float> ComponentWise for PreAlpha<C, T> {
+impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for PreAlpha<C, T> {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(
@@ -128,20 +128,20 @@ impl<C: ComponentWise<Scalar = T>, T: Float> ComponentWise for PreAlpha<C, T> {
         mut f: F,
     ) -> PreAlpha<C, T> {
         PreAlpha {
-            alpha: f(self.alpha, other.alpha),
+            alpha: f(self.alpha.clone(), other.alpha.clone()),
             color: self.color.component_wise(&other.color, f),
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> PreAlpha<C, T> {
         PreAlpha {
-            alpha: f(self.alpha),
+            alpha: f(self.alpha.clone()),
             color: self.color.component_wise_self(f),
         }
     }
 }
 
-unsafe impl<T: Float, C: Pixel<T>> Pixel<T> for PreAlpha<C, T> {
+unsafe impl<T, C: Pixel<T>> Pixel<T> for PreAlpha<C, T> {
     const CHANNELS: usize = C::CHANNELS + 1;
 }
 
@@ -157,8 +157,8 @@ impl<C: Default, T: Float> Default for PreAlpha<C, T> {
 impl<C, T> AbsDiffEq for PreAlpha<C, T>
 where
     C: AbsDiffEq<Epsilon = T::Epsilon>,
-    T: AbsDiffEq + Float,
-    T::Epsilon: Copy,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -167,7 +167,7 @@ where
     }
 
     fn abs_diff_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon) -> bool {
-        self.color.abs_diff_eq(&other.color, epsilon)
+        self.color.abs_diff_eq(&other.color, epsilon.clone())
             && self.alpha.abs_diff_eq(&other.alpha, epsilon)
     }
 }
@@ -175,8 +175,8 @@ where
 impl<C, T> RelativeEq for PreAlpha<C, T>
 where
     C: RelativeEq<Epsilon = T::Epsilon>,
-    T: RelativeEq + Float,
-    T::Epsilon: Copy,
+    T: RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -188,7 +188,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.color.relative_eq(&other.color, epsilon, max_relative)
+        self.color
+            .relative_eq(&other.color, epsilon.clone(), max_relative.clone())
             && self.alpha.relative_eq(&other.alpha, epsilon, max_relative)
     }
 }
@@ -196,21 +197,21 @@ where
 impl<C, T> UlpsEq for PreAlpha<C, T>
 where
     C: UlpsEq<Epsilon = T::Epsilon>,
-    T: UlpsEq + Float,
-    T::Epsilon: Copy,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.color.ulps_eq(&other.color, epsilon, max_ulps)
+        self.color.ulps_eq(&other.color, epsilon.clone(), max_ulps)
             && self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
-impl<C: Add, T: Float> Add for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C: Add, T: Add> Add for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn add(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
@@ -220,33 +221,33 @@ impl<C: Add, T: Float> Add for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Add<T>> Add<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<T: Add + Clone, C: Add<T>> Add<T> for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn add(self, c: T) -> Self::Output {
         PreAlpha {
-            color: self.color + c,
+            color: self.color + c.clone(),
             alpha: self.alpha + c,
         }
     }
 }
 
-impl<C: AddAssign, T: Float + AddAssign> AddAssign for PreAlpha<C, T> {
+impl<C: AddAssign, T: AddAssign> AddAssign for PreAlpha<C, T> {
     fn add_assign(&mut self, other: PreAlpha<C, T>) {
         self.color += other.color;
         self.alpha += other.alpha;
     }
 }
 
-impl<T: Float + AddAssign, C: AddAssign<T>> AddAssign<T> for PreAlpha<C, T> {
+impl<T: AddAssign + Clone, C: AddAssign<T>> AddAssign<T> for PreAlpha<C, T> {
     fn add_assign(&mut self, c: T) {
-        self.color += c;
+        self.color += c.clone();
         self.alpha += c;
     }
 }
 
-impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C: Sub, T: Sub> Sub for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn sub(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
@@ -256,33 +257,33 @@ impl<C: Sub, T: Float> Sub for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<T: Sub + Clone, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn sub(self, c: T) -> Self::Output {
         PreAlpha {
-            color: self.color - c,
+            color: self.color - c.clone(),
             alpha: self.alpha - c,
         }
     }
 }
 
-impl<C: SubAssign, T: Float + SubAssign> SubAssign for PreAlpha<C, T> {
+impl<C: SubAssign, T: SubAssign> SubAssign for PreAlpha<C, T> {
     fn sub_assign(&mut self, other: PreAlpha<C, T>) {
         self.color -= other.color;
         self.alpha -= other.alpha;
     }
 }
 
-impl<T: Float + SubAssign, C: SubAssign<T>> SubAssign<T> for PreAlpha<C, T> {
+impl<T: SubAssign + Clone, C: SubAssign<T>> SubAssign<T> for PreAlpha<C, T> {
     fn sub_assign(&mut self, c: T) {
-        self.color -= c;
+        self.color -= c.clone();
         self.alpha -= c;
     }
 }
 
-impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C: Mul, T: Mul> Mul for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn mul(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
@@ -292,33 +293,33 @@ impl<C: Mul, T: Float> Mul for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<T: Mul + Clone, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn mul(self, c: T) -> Self::Output {
         PreAlpha {
-            color: self.color * c,
+            color: self.color * c.clone(),
             alpha: self.alpha * c,
         }
     }
 }
 
-impl<C: MulAssign, T: Float + MulAssign> MulAssign for PreAlpha<C, T> {
+impl<C: MulAssign, T: MulAssign> MulAssign for PreAlpha<C, T> {
     fn mul_assign(&mut self, other: PreAlpha<C, T>) {
         self.color *= other.color;
         self.alpha *= other.alpha;
     }
 }
 
-impl<T: Float + MulAssign, C: MulAssign<T>> MulAssign<T> for PreAlpha<C, T> {
+impl<T: MulAssign + Clone, C: MulAssign<T>> MulAssign<T> for PreAlpha<C, T> {
     fn mul_assign(&mut self, c: T) {
-        self.color *= c;
+        self.color *= c.clone();
         self.alpha *= c;
     }
 }
 
-impl<C: Div, T: Float> Div for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<C: Div, T: Div> Div for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn div(self, other: PreAlpha<C, T>) -> Self::Output {
         PreAlpha {
@@ -328,27 +329,27 @@ impl<C: Div, T: Float> Div for PreAlpha<C, T> {
     }
 }
 
-impl<T: Float, C: Div<T>> Div<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T>;
+impl<T: Div + Clone, C: Div<T>> Div<T> for PreAlpha<C, T> {
+    type Output = PreAlpha<C::Output, T::Output>;
 
     fn div(self, c: T) -> Self::Output {
         PreAlpha {
-            color: self.color / c,
+            color: self.color / c.clone(),
             alpha: self.alpha / c,
         }
     }
 }
 
-impl<C: DivAssign, T: Float + DivAssign> DivAssign for PreAlpha<C, T> {
+impl<C: DivAssign, T: DivAssign> DivAssign for PreAlpha<C, T> {
     fn div_assign(&mut self, other: PreAlpha<C, T>) {
         self.color /= other.color;
         self.alpha /= other.alpha;
     }
 }
 
-impl<T: Float + DivAssign, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
+impl<T: DivAssign + Clone, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
     fn div_assign(&mut self, c: T) {
-        self.color /= c;
+        self.color /= c.clone();
         self.alpha /= c;
     }
 }
@@ -356,7 +357,6 @@ impl<T: Float + DivAssign, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
 impl<C, T, P> AsRef<P> for PreAlpha<C, T>
 where
     C: Pixel<T>,
-    T: Float,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -367,7 +367,6 @@ where
 impl<C, T, P> AsMut<P> for PreAlpha<C, T>
 where
     C: Pixel<T>,
-    T: Float,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -375,7 +374,7 @@ where
     }
 }
 
-impl<C, T: Float> Deref for PreAlpha<C, T> {
+impl<C, T> Deref for PreAlpha<C, T> {
     type Target = C;
 
     fn deref(&self) -> &C {
@@ -383,7 +382,7 @@ impl<C, T: Float> Deref for PreAlpha<C, T> {
     }
 }
 
-impl<C, T: Float> DerefMut for PreAlpha<C, T> {
+impl<C, T> DerefMut for PreAlpha<C, T> {
     fn deref_mut(&mut self) -> &mut C {
         &mut self.color
     }
@@ -393,7 +392,7 @@ impl<C, T: Float> DerefMut for PreAlpha<C, T> {
 unsafe impl<C, T> bytemuck::Zeroable for PreAlpha<C, T>
 where
     C: bytemuck::Zeroable,
-    T: Float + bytemuck::Zeroable,
+    T: bytemuck::Zeroable,
 {
 }
 
@@ -403,7 +402,7 @@ where
 unsafe impl<C, T> bytemuck::Pod for PreAlpha<C, T>
 where
     C: bytemuck::Pod + Pixel<T>,
-    T: Float + bytemuck::Pod,
+    T: bytemuck::Pod,
 {
 }
 

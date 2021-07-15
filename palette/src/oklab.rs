@@ -1,5 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use num_traits::Zero;
 
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
@@ -14,11 +15,11 @@ use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
     clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    GetHue, Mat3, Mix, OklabHue, Oklch, Pixel, RelativeContrast, Shade, Xyz,
+    FromF64, GetHue, Mat3, Mix, OklabHue, Oklch, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 #[rustfmt::skip]
-fn m1<T: FloatComponent>() -> Mat3<T> {
+fn m1<T: FromF64>() -> Mat3<T> {
     [
         from_f64(0.8189330101), from_f64(0.3618667424), from_f64(-0.1288597137),
         from_f64(0.0329845436), from_f64(0.9293118715), from_f64(0.0361456387),
@@ -27,7 +28,7 @@ fn m1<T: FloatComponent>() -> Mat3<T> {
 }
 
 #[rustfmt::skip]
-pub(crate) fn m1_inv<T: FloatComponent>() -> Mat3<T> {
+pub(crate) fn m1_inv<T: FromF64>() -> Mat3<T> {
     [
         from_f64(1.2270138511), from_f64(-0.5577999807), from_f64(0.2812561490),
         from_f64(-0.0405801784), from_f64(1.1122568696), from_f64(-0.0716766787),
@@ -36,7 +37,7 @@ pub(crate) fn m1_inv<T: FloatComponent>() -> Mat3<T> {
 }
 
 #[rustfmt::skip]
-fn m2<T: FloatComponent>() -> Mat3<T> {
+fn m2<T: FromF64>() -> Mat3<T> {
     [
         from_f64(0.2104542553), from_f64(0.7936177850), from_f64(-0.0040720468),
         from_f64(1.9779984951), from_f64(-2.4285922050), from_f64(0.4505937099),
@@ -45,7 +46,7 @@ fn m2<T: FloatComponent>() -> Mat3<T> {
 }
 
 #[rustfmt::skip]
-pub(crate) fn m2_inv<T: FloatComponent>() -> Mat3<T> {
+pub(crate) fn m2_inv<T: FromF64>() -> Mat3<T> {
     [
         from_f64(0.9999999985), from_f64(0.3963377922), from_f64(0.2158037581),
         from_f64(1.0000000089), from_f64(-0.1055613423), from_f64(-0.0638541748),
@@ -71,10 +72,7 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
     skip_derives(Oklab, Oklch, Xyz)
 )]
 #[repr(C)]
-pub struct Oklab<T = f32>
-where
-    T: FloatComponent,
-{
+pub struct Oklab<T = f32> {
     /// L is the lightness of the color. 0 gives absolute black and 1 gives the brightest white.
     pub l: T,
 
@@ -85,21 +83,25 @@ where
     pub b: T,
 }
 
-impl<T> Copy for Oklab<T> where T: FloatComponent {}
+impl<T> Copy for Oklab<T> where T: Copy {}
 
 impl<T> Clone for Oklab<T>
 where
-    T: FloatComponent,
+    T: Clone,
 {
     fn clone(&self) -> Oklab<T> {
-        *self
+        Oklab {
+            l: self.l.clone(),
+            a: self.a.clone(),
+            b: self.b.clone(),
+        }
     }
 }
 
 impl<T> AbsDiffEq for Oklab<T>
 where
-    T: FloatComponent + AbsDiffEq,
-    T::Epsilon: Copy + FloatComponent,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -108,48 +110,46 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.l.abs_diff_eq(&other.l, epsilon)
-            && self.a.abs_diff_eq(&other.a, epsilon)
+        self.l.abs_diff_eq(&other.l, epsilon.clone())
+            && self.a.abs_diff_eq(&other.a, epsilon.clone())
             && self.b.abs_diff_eq(&other.b, epsilon)
     }
 }
 
 impl<T> RelativeEq for Oklab<T>
 where
-    T: FloatComponent + RelativeEq,
-    T::Epsilon: Copy + FloatComponent,
+    T: RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> T::Epsilon {
         T::default_max_relative()
     }
 
+    #[rustfmt::skip]
     fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.l.relative_eq(&other.l, epsilon, max_relative)
-            && self.a.relative_eq(&other.a, epsilon, max_relative)
+        self.l.relative_eq(&other.l, epsilon.clone(), max_relative.clone())
+            && self.a.relative_eq(&other.a, epsilon.clone(), max_relative.clone())
             && self.b.relative_eq(&other.b, epsilon, max_relative)
     }
 }
 
 impl<T> UlpsEq for Oklab<T>
 where
-    T: FloatComponent + UlpsEq,
-    T::Epsilon: Copy + FloatComponent,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.l.ulps_eq(&other.l, epsilon, max_ulps)
-            && self.a.ulps_eq(&other.a, epsilon, max_ulps)
+        self.l.ulps_eq(&other.l, epsilon.clone(), max_ulps.clone())
+            && self.a.ulps_eq(&other.a, epsilon.clone(), max_ulps.clone())
             && self.b.ulps_eq(&other.b, epsilon, max_ulps)
     }
 }
 
-impl<T> Oklab<T>
-where
-    T: FloatComponent,
-{
+impl<T> Oklab<T> {
     /// Create an Oklab color.
     pub fn new(l: T, a: T, b: T) -> Self {
         Self { l, a, b }
@@ -164,7 +164,12 @@ where
     pub fn from_components((l, a, b): (T, T, T)) -> Self {
         Self::new(l, a, b)
     }
+}
 
+impl<T> Oklab<T>
+where
+    T: FromF64,
+{
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
         from_f64(0.0)
@@ -197,11 +202,7 @@ where
 }
 
 ///<span id="Oklaba"></span>[`Oklaba`](crate::Oklaba) implementations.
-impl<T, A> Alpha<Oklab<T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Oklab<T>, A> {
     /// Oklab and transparency.
     pub fn new(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
@@ -212,7 +213,7 @@ where
 
     /// Convert to a `(L, a, b, alpha)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.l, self.a, self.b, self.alpha)
+        (self.color.l, self.color.a, self.color.b, self.alpha)
     }
 
     /// Convert from a `(L, a, b, alpha)` tuple.
@@ -221,10 +222,7 @@ where
     }
 }
 
-impl<T> FromColorUnclamped<Oklab<T>> for Oklab<T>
-where
-    T: FloatComponent,
-{
+impl<T> FromColorUnclamped<Oklab<T>> for Oklab<T> {
     fn from_color_unclamped(color: Self) -> Self {
         color
     }
@@ -265,51 +263,51 @@ where
     }
 }
 
-impl<T: FloatComponent> From<(T, T, T)> for Oklab<T> {
+impl<T> From<(T, T, T)> for Oklab<T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T: FloatComponent> Into<(T, T, T)> for Oklab<T> {
-    fn into(self) -> (T, T, T) {
-        self.into_components()
+impl<T> From<Oklab<T>> for (T, T, T) {
+    fn from(color: Oklab<T>) -> (T, T, T) {
+        color.into_components()
     }
 }
 
-impl<T: FloatComponent, A: Component> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
+impl<T, A: Component> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Oklab<T>, A> {
-    fn into(self) -> (T, T, T, A) {
-        self.into_components()
+impl<T, A: Component> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
+    fn from(color: Alpha<Oklab<T>, A>) -> (T, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<T> Clamp for Oklab<T>
 where
-    T: FloatComponent,
+    T: FromF64 + PartialOrd + Clone,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-        self.l >= from_f64(0.0) && self.l <= from_f64(1.0) &&
-        self.a >= from_f64(-1.0) && self.a <= from_f64(1.0) &&
-        self.b >= from_f64(-1.0) && self.b <= from_f64(1.0)
+        self.l >= Self::min_l() && self.l <= Self::max_l() &&
+        self.a >= Self::min_a() && self.a <= Self::max_a() &&
+        self.b >= Self::min_b() && self.b <= Self::max_b()
     }
 
     fn clamp(&self) -> Self {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, from_f64(0.0), from_f64(1.0));
-        self.a = clamp(self.a, from_f64(-1.0), from_f64(1.0));
-        self.b = clamp(self.b, from_f64(-1.0), from_f64(1.0));
+        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+        self.a = clamp(self.a.clone(), Self::min_a(), Self::max_a());
+        self.b = clamp(self.b.clone(), Self::min_b(), Self::max_b());
     }
 }
 
@@ -338,18 +336,18 @@ where
 
     fn lighten(&self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
-            from_f64::<T>(1.0) - self.l
+            Self::max_l() - self.l
         } else {
             self.l
         };
 
         let delta = difference.max(T::zero()) * factor;
 
-        Self::new((self.l + delta).max(T::zero()), self.a, self.b)
+        Self::new((self.l + delta).max(Self::min_l()), self.a, self.b)
     }
 
     fn lighten_fixed(&self, amount: T) -> Self {
-        Self::new(self.l + amount, self.a, self.b)
+        Self::new((self.l + amount).max(Self::min_l()), self.a, self.b)
     }
 }
 
@@ -385,192 +383,20 @@ where
 
 impl<T> Default for Oklab<T>
 where
-    T: FloatComponent,
+    T: Zero,
 {
     fn default() -> Self {
         Self::new(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl<T> Add for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        Self::new(self.l + other.l, self.a + other.a, self.b + other.b)
-    }
-}
-
-impl<T> Add<T> for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn add(self, c: T) -> Self::Output {
-        Self::new(self.l + c, self.a + c, self.b + c)
-    }
-}
-
-impl<T> AddAssign for Oklab<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    fn add_assign(&mut self, other: Self) {
-        self.l += other.l;
-        self.a += other.a;
-        self.b += other.b;
-    }
-}
-
-impl<T> AddAssign<T> for Oklab<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    fn add_assign(&mut self, c: T) {
-        self.l += c;
-        self.a += c;
-        self.b += c;
-    }
-}
-
-impl<T> Sub for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        Self::new(self.l - other.l, self.a - other.a, self.b - other.b)
-    }
-}
-
-impl<T> Sub<T> for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn sub(self, c: T) -> Self::Output {
-        Self::new(self.l - c, self.a - c, self.b - c)
-    }
-}
-
-impl<T> SubAssign for Oklab<T>
-where
-    T: FloatComponent + SubAssign,
-{
-    fn sub_assign(&mut self, other: Self) {
-        self.l -= other.l;
-        self.a -= other.a;
-        self.b -= other.b;
-    }
-}
-
-impl<T> SubAssign<T> for Oklab<T>
-where
-    T: FloatComponent + SubAssign,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.l -= c;
-        self.a -= c;
-        self.b -= c;
-    }
-}
-
-impl<T> Mul for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn mul(self, other: Self) -> Self::Output {
-        Self::new(self.l * other.l, self.a * other.a, self.b * other.b)
-    }
-}
-
-impl<T> Mul<T> for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn mul(self, c: T) -> Self::Output {
-        Self::new(self.l * c, self.a * c, self.b * c)
-    }
-}
-
-impl<T> MulAssign for Oklab<T>
-where
-    T: FloatComponent + MulAssign,
-{
-    fn mul_assign(&mut self, other: Self) {
-        self.l *= other.l;
-        self.a *= other.a;
-        self.b *= other.b;
-    }
-}
-
-impl<T> MulAssign<T> for Oklab<T>
-where
-    T: FloatComponent + MulAssign,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.l *= c;
-        self.a *= c;
-        self.b *= c;
-    }
-}
-
-impl<T> Div for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn div(self, other: Self) -> Self::Output {
-        Self::new(self.l / other.l, self.a / other.a, self.b / other.b)
-    }
-}
-
-impl<T> Div<T> for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Output = Self;
-
-    fn div(self, c: T) -> Self::Output {
-        Self::new(self.l / c, self.a / c, self.b / c)
-    }
-}
-
-impl<T> DivAssign for Oklab<T>
-where
-    T: FloatComponent + DivAssign,
-{
-    fn div_assign(&mut self, other: Self) {
-        self.l /= other.l;
-        self.a /= other.a;
-        self.b /= other.b;
-    }
-}
-
-impl<T> DivAssign<T> for Oklab<T>
-where
-    T: FloatComponent + DivAssign,
-{
-    fn div_assign(&mut self, c: T) {
-        self.l /= c;
-        self.a /= c;
-        self.b /= c;
-    }
-}
+impl_color_add!(Oklab<T>, [l, a, b]);
+impl_color_sub!(Oklab<T>, [l, a, b]);
+impl_color_mul!(Oklab<T>, [l, a, b]);
+impl_color_div!(Oklab<T>, [l, a, b]);
 
 impl<T, P> AsRef<P> for Oklab<T>
 where
-    T: FloatComponent,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -580,7 +406,6 @@ where
 
 impl<T, P> AsMut<P> for Oklab<T>
 where
-    T: FloatComponent,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -683,10 +508,10 @@ where {
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<T> bytemuck::Zeroable for Oklab<T> where T: FloatComponent + bytemuck::Zeroable {}
+unsafe impl<T> bytemuck::Zeroable for Oklab<T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<T> bytemuck::Pod for Oklab<T> where T: FloatComponent + bytemuck::Pod {}
+unsafe impl<T> bytemuck::Pod for Oklab<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

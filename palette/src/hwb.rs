@@ -1,6 +1,6 @@
 use core::any::TypeId;
 use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, DivAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
@@ -13,11 +13,10 @@ use rand::Rng;
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
-use crate::float::Float;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, Alpha, Clamp, Component, FloatComponent, FromF64, GetHue, Hsv, Hue, Mix,
-    Pixel, RelativeContrast, RgbHue, Shade, Xyz,
+    clamp, contrast_ratio, Alpha, Clamp, Component, FloatComponent, GetHue, Hsv, Hue, Mix, Pixel,
+    RelativeContrast, RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -38,16 +37,11 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 #[palette(
     palette_internal,
     rgb_standard = "S",
-    white_point = "<S::Space as RgbSpace>::WhitePoint",
     component = "T",
     skip_derives(Hsv, Hwb)
 )]
 #[repr(C)]
-pub struct Hwb<S = Srgb, T = f32>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
+pub struct Hwb<S = Srgb, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc. Same as the hue for HSL and HSV.
     #[palette(unsafe_same_layout_as = "T")]
@@ -73,27 +67,23 @@ where
     pub standard: PhantomData<S>,
 }
 
-impl<S, T> Copy for Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-}
+impl<S, T> Copy for Hwb<S, T> where T: Copy {}
 
 impl<S, T> Clone for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Clone,
 {
     fn clone(&self) -> Hwb<S, T> {
-        *self
+        Hwb {
+            hue: self.hue.clone(),
+            whiteness: self.whiteness.clone(),
+            blackness: self.blackness.clone(),
+            standard: PhantomData,
+        }
     }
 }
 
-impl<T> Hwb<Srgb, T>
-where
-    T: FloatComponent,
-{
+impl<T> Hwb<Srgb, T> {
     /// HWB for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
         Hwb {
@@ -105,11 +95,7 @@ where
     }
 }
 
-impl<S, T> Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
+impl<S, T> Hwb<S, T> {
     /// Linear HWB.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<S, T> {
         Hwb {
@@ -139,7 +125,12 @@ where
             standard: PhantomData,
         }
     }
+}
 
+impl<S, T> Hwb<S, T>
+where
+    T: Component,
+{
     /// Return the `whiteness` value minimum.
     pub fn min_whiteness() -> T {
         T::zero()
@@ -163,8 +154,8 @@ where
 
 impl<S, T> PartialEq for Hwb<S, T>
 where
-    T: FloatComponent + PartialEq,
-    S: RgbStandard,
+    T: PartialEq,
+    RgbHue<T>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.hue == other.hue
@@ -175,17 +166,13 @@ where
 
 impl<S, T> Eq for Hwb<S, T>
 where
-    T: FloatComponent + Eq,
-    S: RgbStandard,
+    T: Eq,
+    RgbHue<T>: Eq,
 {
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
-impl<T, A> Alpha<Hwb<Srgb, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Hwb<Srgb, T>, A> {
     /// HWB and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
@@ -196,12 +183,7 @@ where
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
-impl<S, T, A> Alpha<Hwb<S, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    S: RgbStandard,
-{
+impl<S, T, A> Alpha<Hwb<S, T>, A> {
     /// Linear HWB and transparency.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
@@ -212,7 +194,12 @@ where
 
     /// Convert to a `(hue, whiteness, blackness, alpha)` tuple.
     pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
-        (self.hue, self.whiteness, self.blackness, self.alpha)
+        (
+            self.color.hue,
+            self.color.whiteness,
+            self.color.blackness,
+            self.alpha,
+        )
     }
 
     /// Convert from a `(hue, whiteness, blackness, alpha)` tuple.
@@ -243,7 +230,6 @@ where
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hwb<S, T>
 where
-    S: RgbStandard,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Hsv<S, T>) -> Self {
@@ -256,44 +242,39 @@ where
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>> From<(H, T, T)> for Hwb<S, T> {
+impl<S, T, H: Into<RgbHue<T>>> From<(H, T, T)> for Hwb<S, T> {
     fn from(components: (H, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent> Into<(RgbHue<T>, T, T)> for Hwb<S, T> {
-    fn into(self) -> (RgbHue<T>, T, T) {
-        self.into_components()
+impl<S, T> From<Hwb<S, T>> for (RgbHue<T>, T, T) {
+    fn from(color: Hwb<S, T>) -> (RgbHue<T>, T, T) {
+        color.into_components()
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
-    for Alpha<Hwb<S, T>, A>
-{
+impl<S, T, H: Into<RgbHue<T>>, A> From<(H, T, T, A)> for Alpha<Hwb<S, T>, A> {
     fn from(components: (H, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
-    for Alpha<Hwb<S, T>, A>
-{
-    fn into(self) -> (RgbHue<T>, T, T, A) {
-        self.into_components()
+impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
+    fn from(color: Alpha<Hwb<S, T>, A>) -> (RgbHue<T>, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<S, T> Clamp for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Component + DivAssign,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-        self.blackness >= T::zero() && self.blackness <= T::one() &&
-        self.whiteness >= T::zero() && self.whiteness <= T::one() &&
-        self.whiteness + self.blackness <= T::one()
+        self.blackness >= Self::min_blackness() && self.blackness <= Self::max_blackness() &&
+        self.whiteness >= Self::min_whiteness() && self.whiteness <= Self::max_blackness() &&
+        self.whiteness + self.blackness <= T::max_intensity()
     }
 
     fn clamp(&self) -> Hwb<S, T> {
@@ -303,12 +284,20 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.whiteness = self.whiteness.max(T::zero());
-        self.blackness = self.blackness.max(T::zero());
+        self.whiteness = if self.whiteness < Self::min_whiteness() {
+            Self::min_whiteness()
+        } else {
+            self.whiteness
+        };
+        self.blackness = if self.blackness < Self::min_blackness() {
+            Self::min_blackness()
+        } else {
+            self.blackness
+        };
         let sum = self.blackness + self.whiteness;
-        if sum > T::one() {
-            self.whiteness = self.whiteness / sum;
-            self.blackness = self.blackness / sum;
+        if sum > T::max_intensity() {
+            self.whiteness /= sum;
+            self.blackness /= sum;
         }
     }
 }
@@ -316,7 +305,6 @@ where
 impl<S, T> Mix for Hwb<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -336,7 +324,6 @@ where
 impl<S, T> Shade for Hwb<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -375,13 +362,12 @@ where
 
 impl<S, T> GetHue for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Component,
 {
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        if self.whiteness + self.blackness >= T::one() {
+        if self.whiteness + self.blackness >= T::max_intensity() {
             None
         } else {
             Some(self.hue)
@@ -391,8 +377,7 @@ where
 
 impl<S, T> Hue for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Component,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hwb<S, T> {
         Hwb {
@@ -415,134 +400,22 @@ where
 
 impl<S, T> Default for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Component,
 {
     fn default() -> Hwb<S, T> {
-        Hwb::with_wp(RgbHue::from(T::zero()), T::zero(), T::one())
+        Hwb::with_wp(
+            RgbHue::from(T::zero()),
+            Self::min_whiteness(),
+            Self::max_blackness(),
+        )
     }
 }
 
-impl<S, T> Add<Hwb<S, T>> for Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hwb<S, T>;
-
-    fn add(self, other: Hwb<S, T>) -> Self::Output {
-        Hwb {
-            hue: self.hue + other.hue,
-            whiteness: self.whiteness + other.whiteness,
-            blackness: self.blackness + other.blackness,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Add<T> for Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hwb<S, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Hwb {
-            hue: self.hue + c,
-            whiteness: self.whiteness + c,
-            blackness: self.blackness + c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> AddAssign<Hwb<S, T>> for Hwb<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: RgbStandard,
-{
-    fn add_assign(&mut self, other: Hwb<S, T>) {
-        self.hue += other.hue;
-        self.whiteness += other.whiteness;
-        self.blackness += other.blackness;
-    }
-}
-
-impl<S, T> AddAssign<T> for Hwb<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: RgbStandard,
-{
-    fn add_assign(&mut self, c: T) {
-        self.hue += c;
-        self.whiteness += c;
-        self.blackness += c;
-    }
-}
-
-impl<S, T> Sub<Hwb<S, T>> for Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hwb<S, T>;
-
-    fn sub(self, other: Hwb<S, T>) -> Self::Output {
-        Hwb {
-            hue: self.hue - other.hue,
-            whiteness: self.whiteness - other.whiteness,
-            blackness: self.blackness - other.blackness,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Sub<T> for Hwb<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hwb<S, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Hwb {
-            hue: self.hue - c,
-            whiteness: self.whiteness - c,
-            blackness: self.blackness - c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> SubAssign<Hwb<S, T>> for Hwb<S, T>
-where
-    T: FloatComponent + SubAssign,
-    S: RgbStandard,
-{
-    fn sub_assign(&mut self, other: Hwb<S, T>) {
-        self.hue -= other.hue;
-        self.whiteness -= other.whiteness;
-        self.blackness -= other.blackness;
-    }
-}
-
-impl<S, T> SubAssign<T> for Hwb<S, T>
-where
-    T: FloatComponent + SubAssign,
-    S: RgbStandard,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.hue -= c;
-        self.whiteness -= c;
-        self.blackness -= c;
-    }
-}
+impl_color_add!(Hwb<S, T>, [hue, whiteness, blackness], standard);
+impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 
 impl<S, T, P> AsRef<P> for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -552,8 +425,6 @@ where
 
 impl<S, T, P> AsMut<P> for Hwb<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -563,9 +434,9 @@ where
 
 impl<S, T> AbsDiffEq for Hwb<S, T>
 where
-    T: FloatComponent + AbsDiffEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: Component + AbsDiffEq,
+    RgbHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -573,14 +444,15 @@ where
         T::default_epsilon()
     }
 
+    #[rustfmt::skip]
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        let equal_shade = self.whiteness.abs_diff_eq(&other.whiteness, epsilon)
-            && self.blackness.abs_diff_eq(&other.blackness, epsilon);
+        let equal_shade = self.whiteness.abs_diff_eq(&other.whiteness, epsilon.clone())
+            && self.blackness.abs_diff_eq(&other.blackness, epsilon.clone());
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::one()
-            || other.blackness + other.whiteness >= T::one();
+        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
+            || other.blackness + other.whiteness >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -591,31 +463,28 @@ where
 
 impl<S, T> RelativeEq for Hwb<S, T>
 where
-    T: FloatComponent + RelativeEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: Component + RelativeEq,
+    RgbHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
     }
 
+    #[rustfmt::skip]
     fn relative_eq(
         &self,
         other: &Self,
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        let equal_shade = self
-            .whiteness
-            .relative_eq(&other.whiteness, epsilon, max_relative)
-            && self
-                .blackness
-                .relative_eq(&other.blackness, epsilon, max_relative);
+        let equal_shade = self.whiteness.relative_eq(&other.whiteness, epsilon.clone(), max_relative.clone())
+            && self.blackness.relative_eq(&other.blackness, epsilon.clone(), max_relative.clone());
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::one()
-            || other.blackness + other.whiteness >= T::one();
+        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
+            || other.blackness + other.whiteness >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -626,22 +495,23 @@ where
 
 impl<S, T> UlpsEq for Hwb<S, T>
 where
-    T: FloatComponent + UlpsEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: Component + UlpsEq,
+    RgbHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
+    #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon, max_ulps)
-            && self.blackness.ulps_eq(&other.blackness, epsilon, max_ulps);
+        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon.clone(), max_ulps.clone())
+            && self.blackness.ulps_eq(&other.blackness, epsilon.clone(), max_ulps.clone());
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::one()
-            || other.blackness + other.whiteness >= T::one();
+        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
+            || other.blackness + other.whiteness >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -671,7 +541,6 @@ where
 impl<S, T> Distribution<Hwb<S, T>> for Standard
 where
     T: FloatComponent,
-    S: RgbStandard,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
@@ -683,7 +552,6 @@ where
 pub struct UniformHwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard,
 {
     sampler: crate::hsv::UniformHsv<S, T>,
     space: PhantomData<S>,
@@ -693,7 +561,6 @@ where
 impl<S, T> SampleUniform for Hwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard,
 {
     type Sampler = UniformHwb<S, T>;
 }
@@ -702,7 +569,6 @@ where
 impl<S, T> UniformSampler for UniformHwb<S, T>
 where
     T: FloatComponent + SampleUniform,
-    S: RgbStandard,
 {
     type X = Hwb<S, T>;
 
@@ -765,20 +631,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Zeroable for Hwb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<S, T> bytemuck::Zeroable for Hwb<S, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Pod for Hwb<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<S: 'static, T> bytemuck::Pod for Hwb<S, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

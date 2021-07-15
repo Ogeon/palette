@@ -14,25 +14,22 @@ Note: The xyz and yxy conversions do not use the updated conversion formula. So 
 use approx::assert_relative_eq;
 use csv;
 use lazy_static::lazy_static;
-use num_traits::{NumCast, ToPrimitive};
 use serde_derive::Deserialize;
 
 use palette::convert::IntoColorUnclamped;
-use palette::float::Float;
 use palette::white_point::WhitePoint;
-use palette::{FloatComponent, Lab, Lch, Xyz};
+use palette::{FromF64, Lab, Lch, Xyz};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
 impl WhitePoint for PointerWP {
-    fn get_xyz<Wp: WhitePoint, T: FloatComponent>() -> Xyz<Wp, T> {
-        Xyz::with_wp(flt(0.980722647624), T::one(), flt(1.182254189827))
+    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+        Xyz::with_wp(
+            FromF64::from_f64(0.980722647624),
+            FromF64::from_f64(1.0),
+            FromF64::from_f64(1.182254189827),
+        )
     }
-}
-
-/// A convenience function to convert a constant number to Float Type
-fn flt<T: Float, P: ToPrimitive>(prim: P) -> T {
-    NumCast::from(prim).unwrap()
 }
 
 #[derive(Deserialize, PartialEq)]

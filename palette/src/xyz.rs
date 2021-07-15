@@ -1,6 +1,7 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -15,7 +16,7 @@ use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, Component, ComponentWise, FloatComponent,
+    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, ComponentWise, FloatComponent, FromF64,
     Lab, Luma, Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast, Shade, Yxy,
 };
 
@@ -41,11 +42,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Oklch, Luma)
 )]
 #[repr(C)]
-pub struct Xyz<Wp = D65, T = f32>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+pub struct Xyz<Wp = D65, T = f32> {
     /// X is the scale of what can be seen as a response curve for the cone
     /// cells in the human eye. Its range depends
     /// on the white point and goes from 0.0 to 0.95047 for the default D65.
@@ -66,27 +63,23 @@ where
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-}
+impl<Wp, T> Copy for Xyz<Wp, T> where T: Copy {}
 
 impl<Wp, T> Clone for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     fn clone(&self) -> Xyz<Wp, T> {
-        *self
+        Xyz {
+            x: self.x.clone(),
+            y: self.y.clone(),
+            z: self.z.clone(),
+            white_point: PhantomData,
+        }
     }
 }
 
-impl<T> Xyz<D65, T>
-where
-    T: FloatComponent,
-{
+impl<T> Xyz<D65, T> {
     /// CIE XYZ with white point D65.
     pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
         Xyz {
@@ -98,11 +91,7 @@ where
     }
 }
 
-impl<Wp, T> Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> Xyz<Wp, T> {
     /// CIE XYZ.
     pub fn with_wp(x: T, y: T, z: T) -> Xyz<Wp, T> {
         Xyz {
@@ -122,7 +111,13 @@ where
     pub fn from_components((x, y, z): (T, T, T)) -> Self {
         Self::with_wp(x, y, z)
     }
+}
 
+impl<Wp, T> Xyz<Wp, T>
+where
+    T: Zero + FromF64,
+    Wp: WhitePoint,
+{
     /// Return the `x` value minimum.
     pub fn min_x() -> T {
         T::zero()
@@ -157,29 +152,8 @@ where
     }
 }
 
-impl<Wp, T> PartialEq for Xyz<Wp, T>
-where
-    T: FloatComponent + PartialEq,
-    Wp: WhitePoint,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
-    }
-}
-
-impl<Wp, T> Eq for Xyz<Wp, T>
-where
-    T: FloatComponent + Eq,
-    Wp: WhitePoint,
-{
-}
-
 ///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
-impl<T, A> Alpha<Xyz<D65, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Xyz<D65, T>, A> {
     /// CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
@@ -190,12 +164,7 @@ where
 }
 
 ///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
-impl<Wp, T, A> Alpha<Xyz<Wp, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    Wp: WhitePoint,
-{
+impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
     /// CIE XYZ and transparency.
     pub fn with_wp(x: T, y: T, z: T, alpha: A) -> Self {
         Alpha {
@@ -206,7 +175,7 @@ where
 
     /// Convert to a `(X, Y, Z, alpha)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.x, self.y, self.z, self.alpha)
+        (self.color.x, self.color.y, self.color.z, self.alpha)
     }
 
     /// Convert from a `(X, Y, Z, alpha)` tuple.
@@ -215,11 +184,7 @@ where
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent,
-{
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         color
     }
@@ -241,7 +206,6 @@ where
 impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
         let mut xyz = Xyz {
@@ -361,61 +325,58 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> From<(T, T, T)> for Xyz<Wp, T> {
+impl<Wp, T> From<(T, T, T)> for Xyz<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> Into<(T, T, T)> for Xyz<Wp, T> {
-    fn into(self) -> (T, T, T) {
-        self.into_components()
+impl<Wp, T> From<Xyz<Wp, T>> for (T, T, T) {
+    fn from(color: Xyz<Wp, T>) -> (T, T, T) {
+        color.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> From<(T, T, T, A)> for Alpha<Xyz<Wp, T>, A> {
+impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Xyz<Wp, T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Xyz<Wp, T>, A> {
-    fn into(self) -> (T, T, T, A) {
-        self.into_components()
+impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
+    fn from(color: Alpha<Xyz<Wp, T>, A>) -> (T, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<Wp, T> Clamp for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Zero + FromF64 + PartialOrd + Clone,
     Wp: WhitePoint,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-        let xyz_ref: Self = Wp::get_xyz();
-        self.x >= T::zero() && self.x <= xyz_ref.x &&
-        self.y >= T::zero() && self.y <= xyz_ref.y &&
-        self.z >= T::zero() && self.z <= xyz_ref.z
+        self.x >= Self::min_x() && self.x <= Self::max_x() &&
+        self.y >= Self::min_y() && self.y <= Self::max_y() &&
+        self.z >= T::zero() && self.z <= Self::max_z()
     }
 
     fn clamp(&self) -> Xyz<Wp, T> {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        let xyz_ref: Self = Wp::get_xyz();
-        self.x = clamp(self.x, T::zero(), xyz_ref.x);
-        self.y = clamp(self.y, T::zero(), xyz_ref.y);
-        self.z = clamp(self.z, T::zero(), xyz_ref.z);
+        self.x = clamp(self.x.clone(), Self::min_x(), Self::max_x());
+        self.y = clamp(self.y.clone(), Self::min_y(), Self::max_y());
+        self.z = clamp(self.z.clone(), Self::min_z(), Self::max_z());
     }
 }
 
 impl<Wp, T> Mix for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -440,7 +401,7 @@ where
 
     fn lighten(&self, factor: T) -> Xyz<Wp, T> {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.y
+            Self::max_y() - self.y
         } else {
             self.y
         };
@@ -449,7 +410,7 @@ where
 
         Xyz {
             x: self.x,
-            y: (self.y + delta).max(T::zero()),
+            y: (self.y + delta).max(Self::min_y()),
             z: self.z,
             white_point: PhantomData,
         }
@@ -458,7 +419,7 @@ where
     fn lighten_fixed(&self, amount: T) -> Xyz<Wp, T> {
         Xyz {
             x: self.x,
-            y: (self.y + T::max_intensity() * amount).max(T::zero()),
+            y: (self.y + Self::max_y() * amount).max(Self::min_y()),
             z: self.z,
             white_point: PhantomData,
         }
@@ -467,25 +428,24 @@ where
 
 impl<Wp, T> ComponentWise for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Xyz<Wp, T>, mut f: F) -> Xyz<Wp, T> {
         Xyz {
-            x: f(self.x, other.x),
-            y: f(self.y, other.y),
-            z: f(self.z, other.z),
+            x: f(self.x.clone(), other.x.clone()),
+            y: f(self.y.clone(), other.y.clone()),
+            z: f(self.z.clone(), other.z.clone()),
             white_point: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Xyz<Wp, T> {
         Xyz {
-            x: f(self.x),
-            y: f(self.y),
-            z: f(self.z),
+            x: f(self.x.clone()),
+            y: f(self.y.clone()),
+            z: f(self.z.clone()),
             white_point: PhantomData,
         }
     }
@@ -493,250 +453,20 @@ where
 
 impl<Wp, T> Default for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero,
 {
     fn default() -> Xyz<Wp, T> {
         Xyz::with_wp(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl<Wp, T> Add<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn add(self, other: Xyz<Wp, T>) -> Self::Output {
-        Xyz {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Xyz {
-            x: self.x + c,
-            y: self.y + c,
-            z: self.z + c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Xyz<Wp, T>) {
-        self.x += other.x;
-        self.y += other.y;
-        self.z += other.z;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Xyz<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.x += c;
-        self.y += c;
-        self.z += c;
-    }
-}
-
-impl<Wp, T> Sub<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn sub(self, other: Xyz<Wp, T>) -> Self::Output {
-        Xyz {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Xyz {
-            x: self.x - c,
-            y: self.y - c,
-            z: self.z - c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Xyz<Wp, T>) {
-        self.x -= other.x;
-        self.y -= other.y;
-        self.z -= other.z;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Xyz<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.x -= c;
-        self.y -= c;
-        self.z -= c;
-    }
-}
-
-impl<Wp, T> Mul<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn mul(self, other: Xyz<Wp, T>) -> Self::Output {
-        Xyz {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            z: self.z * other.z,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Mul<T> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn mul(self, c: T) -> Self::Output {
-        Xyz {
-            x: self.x * c,
-            y: self.y * c,
-            z: self.z * c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> MulAssign<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, other: Xyz<Wp, T>) {
-        self.x *= other.x;
-        self.y *= other.y;
-        self.z *= other.z;
-    }
-}
-
-impl<Wp, T> MulAssign<T> for Xyz<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.x *= c;
-        self.y *= c;
-        self.z *= c;
-    }
-}
-
-impl<Wp, T> Div<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn div(self, other: Xyz<Wp, T>) -> Self::Output {
-        Xyz {
-            x: self.x / other.x,
-            y: self.y / other.y,
-            z: self.z / other.z,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Div<T> for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Xyz<Wp, T>;
-
-    fn div(self, c: T) -> Self::Output {
-        Xyz {
-            x: self.x / c,
-            y: self.y / c,
-            z: self.z / c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> DivAssign<Xyz<Wp, T>> for Xyz<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, other: Xyz<Wp, T>) {
-        self.x /= other.x;
-        self.y /= other.y;
-        self.z /= other.z;
-    }
-}
-
-impl<Wp, T> DivAssign<T> for Xyz<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, c: T) {
-        self.x /= c;
-        self.y /= c;
-        self.z /= c;
-    }
-}
+impl_color_add!(Xyz<Wp, T>, [x, y, z], white_point);
+impl_color_sub!(Xyz<Wp, T>, [x, y, z], white_point);
+impl_color_mul!(Xyz<Wp, T>, [x, y, z], white_point);
+impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
 
 impl<Wp, T, P> AsRef<P> for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -746,8 +476,6 @@ where
 
 impl<Wp, T, P> AsMut<P> for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -757,7 +485,6 @@ where
 
 impl<Wp, T> RelativeContrast for Xyz<Wp, T>
 where
-    Wp: WhitePoint,
     T: FloatComponent,
 {
     type Scalar = T;
@@ -770,25 +497,25 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Xyz<Wp, T>> for Standard
 where
-    T: FloatComponent,
+    T: FromF64 + Mul<Output = T>,
     Wp: WhitePoint,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
         let xyz_ref: Xyz<Wp, T> = Wp::get_xyz();
         Xyz {
-            x: rng.gen() * xyz_ref.x,
-            y: rng.gen() * xyz_ref.y,
-            z: rng.gen() * xyz_ref.z,
+            x: rng.gen(),
+            y: rng.gen(),
+            z: rng.gen(),
             white_point: PhantomData,
-        }
+        } * xyz_ref
     }
 }
 
 #[cfg(feature = "random")]
 pub struct UniformXyz<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
     Wp: WhitePoint,
 {
     x: Uniform<T>,
@@ -800,7 +527,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Xyz<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
     Wp: WhitePoint,
 {
     type Sampler = UniformXyz<Wp, T>;
@@ -809,7 +536,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformXyz<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
     Wp: WhitePoint,
 {
     type X = Xyz<Wp, T>;
@@ -819,13 +546,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformXyz {
-            x: Uniform::new::<_, T>(low.x, high.x),
-            y: Uniform::new::<_, T>(low.y, high.y),
-            z: Uniform::new::<_, T>(low.z, high.z),
+            x: Uniform::new::<_, T>(low.x.clone(), high.x.clone()),
+            y: Uniform::new::<_, T>(low.y.clone(), high.y.clone()),
+            z: Uniform::new::<_, T>(low.z.clone(), high.z.clone()),
             white_point: PhantomData,
         }
     }
@@ -835,13 +562,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformXyz {
-            x: Uniform::new_inclusive::<_, T>(low.x, high.x),
-            y: Uniform::new_inclusive::<_, T>(low.y, high.y),
-            z: Uniform::new_inclusive::<_, T>(low.z, high.z),
+            x: Uniform::new_inclusive::<_, T>(low.x.clone(), high.x.clone()),
+            y: Uniform::new_inclusive::<_, T>(low.y.clone(), high.y.clone()),
+            z: Uniform::new_inclusive::<_, T>(low.z.clone(), high.z.clone()),
             white_point: PhantomData,
         }
     }
@@ -857,20 +584,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Zeroable for Xyz<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<Wp, T> bytemuck::Zeroable for Xyz<Wp, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Pod for Xyz<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<Wp: 'static, T> bytemuck::Pod for Xyz<Wp, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

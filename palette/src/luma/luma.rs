@@ -4,6 +4,7 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -37,18 +38,14 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    white_point = "S::WhitePoint",
+    luma_standard = "S",
     component = "T",
     skip_derives(Xyz, Yxy, Luma)
 )]
 #[repr(C)]
 #[doc(alias = "gray")]
 #[doc(alias = "grey")]
-pub struct Luma<S = Srgb, T = f32>
-where
-    T: Component,
-    S: LumaStandard,
-{
+pub struct Luma<S = Srgb, T = f32> {
     /// The lightness of the color. 0.0 is black and 1.0 is white.
     pub luma: T,
 
@@ -58,28 +55,18 @@ where
     pub standard: PhantomData<S>,
 }
 
-impl<S, T> Copy for Luma<S, T>
-where
-    T: Component,
-    S: LumaStandard,
-{
-}
+impl<S, T: Copy> Copy for Luma<S, T> {}
 
-impl<S, T> Clone for Luma<S, T>
-where
-    T: Component,
-    S: LumaStandard,
-{
+impl<S, T: Clone> Clone for Luma<S, T> {
     fn clone(&self) -> Luma<S, T> {
-        *self
+        Luma {
+            luma: self.luma.clone(),
+            standard: PhantomData,
+        }
     }
 }
 
-impl<S, T> Luma<S, T>
-where
-    T: Component,
-    S: LumaStandard,
-{
+impl<S, T> Luma<S, T> {
     /// Create a luminance color.
     pub fn new(luma: T) -> Luma<S, T> {
         Luma {
@@ -91,7 +78,8 @@ where
     /// Convert into another component type.
     pub fn into_format<U>(self) -> Luma<S, U>
     where
-        U: Component + FromComponent<T>,
+        T: Component,
+        U: FromComponent<T>,
     {
         Luma {
             luma: U::from_component(self.luma),
@@ -118,6 +106,22 @@ where
         Self::new(luma)
     }
 
+    fn reinterpret_as<S2>(self) -> Luma<S2, T>
+    where
+        S: LumaStandard,
+        S2: LumaStandard<WhitePoint = S::WhitePoint>,
+    {
+        Luma {
+            luma: self.luma,
+            standard: PhantomData,
+        }
+    }
+}
+
+impl<S, T> Luma<S, T>
+where
+    T: Component,
+{
     /// Return the `luma` value minimum.
     pub fn min_luma() -> T {
         T::zero()
@@ -126,13 +130,6 @@ where
     /// Return the `luma` value maximum.
     pub fn max_luma() -> T {
         T::max_intensity()
-    }
-
-    fn reinterpret_as<S2: LumaStandard<WhitePoint = S::WhitePoint>>(&self) -> Luma<S2, T> {
-        Luma {
-            luma: self.luma,
-            standard: PhantomData,
-        }
     }
 }
 
@@ -170,28 +167,17 @@ where
 
 impl<S, T> PartialEq for Luma<S, T>
 where
-    T: Component + PartialEq,
-    S: LumaStandard,
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.luma == other.luma
     }
 }
 
-impl<S, T> Eq for Luma<S, T>
-where
-    T: Component + Eq,
-    S: LumaStandard,
-{
-}
+impl<S, T> Eq for Luma<S, T> where T: Eq {}
 
 ///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
-impl<S, T, A> Alpha<Luma<S, T>, A>
-where
-    T: Component,
-    A: Component,
-    S: LumaStandard,
-{
+impl<S, T, A> Alpha<Luma<S, T>, A> {
     /// Create a luminance color with transparency.
     pub fn new(luma: T, alpha: A) -> Self {
         Alpha {
@@ -203,8 +189,10 @@ where
     /// Convert into another component type.
     pub fn into_format<U, B>(self) -> Alpha<Luma<S, U>, B>
     where
-        U: Component + FromComponent<T>,
-        B: Component + FromComponent<A>,
+        T: Component,
+        A: Component,
+        U: FromComponent<T>,
+        B: FromComponent<A>,
     {
         Alpha::<Luma<S, U>, B>::new(U::from_component(self.luma), B::from_component(self.alpha))
     }
@@ -222,7 +210,7 @@ where
 
     /// Convert to a `(luma, alpha)` tuple.
     pub fn into_components(self) -> (T, A) {
-        (self.luma, self.alpha)
+        (self.color.luma, self.alpha)
     }
 
     /// Convert from a `(luma, alpha)` tuple.
@@ -235,7 +223,6 @@ where
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: FloatComponent,
-    A: Component,
     S: LumaStandard,
 {
     /// Convert the color to linear luminance with transparency.
@@ -313,37 +300,36 @@ where
     }
 }
 
-impl<S: LumaStandard, T: Component> From<(T,)> for Luma<S, T> {
+impl<S, T> From<(T,)> for Luma<S, T> {
     fn from(components: (T,)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: LumaStandard, T: Component> Into<(T,)> for Luma<S, T> {
-    fn into(self) -> (T,) {
-        self.into_components()
+impl<S, T> From<Luma<S, T>> for (T,) {
+    fn from(color: Luma<S, T>) -> (T,) {
+        color.into_components()
     }
 }
 
-impl<S: LumaStandard, T: Component, A: Component> From<(T, A)> for Alpha<Luma<S, T>, A> {
+impl<S, T, A> From<(T, A)> for Alpha<Luma<S, T>, A> {
     fn from(components: (T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: LumaStandard, T: Component, A: Component> Into<(T, A)> for Alpha<Luma<S, T>, A> {
-    fn into(self) -> (T, A) {
-        self.into_components()
+impl<S, T, A> From<Alpha<Luma<S, T>, A>> for (T, A) {
+    fn from(color: Alpha<Luma<S, T>, A>) -> (T, A) {
+        color.into_components()
     }
 }
 
 impl<S, T> Clamp for Luma<S, T>
 where
     T: Component,
-    S: LumaStandard,
 {
     fn is_within_bounds(&self) -> bool {
-        self.luma >= T::zero() && self.luma <= T::max_intensity()
+        self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
 
     fn clamp(&self) -> Luma<S, T> {
@@ -353,7 +339,7 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.luma = clamp(self.luma, T::zero(), T::max_intensity());
+        self.luma = clamp(self.luma, Self::min_luma(), Self::max_luma());
     }
 }
 
@@ -426,21 +412,20 @@ where
 
 impl<S, T> ComponentWise for Luma<S, T>
 where
-    T: Component,
-    S: LumaStandard,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luma<S, T>, mut f: F) -> Luma<S, T> {
         Luma {
-            luma: f(self.luma, other.luma),
+            luma: f(self.luma.clone(), other.luma.clone()),
             standard: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Luma<S, T> {
         Luma {
-            luma: f(self.luma),
+            luma: f(self.luma.clone()),
             standard: PhantomData,
         }
     }
@@ -448,8 +433,7 @@ where
 
 impl<S, T> Default for Luma<S, T>
 where
-    T: Component,
-    S: LumaStandard,
+    T: Zero,
 {
     fn default() -> Luma<S, T> {
         Luma::new(T::zero())
@@ -458,9 +442,8 @@ where
 
 impl<S, T> Add<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + Add,
+    T: Add,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Add>::Output: Component,
 {
     type Output = Luma<S, <T as Add>::Output>;
 
@@ -474,9 +457,8 @@ where
 
 impl<S, T> Add<T> for Luma<S, T>
 where
-    T: Component + Add,
+    T: Add,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Add>::Output: Component,
 {
     type Output = Luma<S, <T as Add>::Output>;
 
@@ -490,7 +472,7 @@ where
 
 impl<S, T> AddAssign<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + AddAssign,
+    T: AddAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn add_assign(&mut self, other: Luma<S, T>) {
@@ -500,7 +482,7 @@ where
 
 impl<S, T> AddAssign<T> for Luma<S, T>
 where
-    T: Component + AddAssign,
+    T: AddAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn add_assign(&mut self, c: T) {
@@ -510,9 +492,8 @@ where
 
 impl<S, T> Sub<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + Sub,
+    T: Sub,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Sub>::Output: Component,
 {
     type Output = Luma<S, <T as Sub>::Output>;
 
@@ -526,9 +507,8 @@ where
 
 impl<S, T> Sub<T> for Luma<S, T>
 where
-    T: Component + Sub,
+    T: Sub,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Sub>::Output: Component,
 {
     type Output = Luma<S, <T as Sub>::Output>;
 
@@ -542,7 +522,7 @@ where
 
 impl<S, T> SubAssign<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + SubAssign,
+    T: SubAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn sub_assign(&mut self, other: Luma<S, T>) {
@@ -552,7 +532,7 @@ where
 
 impl<S, T> SubAssign<T> for Luma<S, T>
 where
-    T: Component + SubAssign,
+    T: SubAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn sub_assign(&mut self, c: T) {
@@ -562,9 +542,8 @@ where
 
 impl<S, T> Mul<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + Mul,
+    T: Mul,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Mul>::Output: Component,
 {
     type Output = Luma<S, <T as Mul>::Output>;
 
@@ -578,9 +557,8 @@ where
 
 impl<S, T> Mul<T> for Luma<S, T>
 where
-    T: Component + Mul,
+    T: Mul,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Mul>::Output: Component,
 {
     type Output = Luma<S, <T as Mul>::Output>;
 
@@ -594,7 +572,7 @@ where
 
 impl<S, T> MulAssign<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + MulAssign,
+    T: MulAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn mul_assign(&mut self, other: Luma<S, T>) {
@@ -604,7 +582,7 @@ where
 
 impl<S, T> MulAssign<T> for Luma<S, T>
 where
-    T: Component + MulAssign,
+    T: MulAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn mul_assign(&mut self, c: T) {
@@ -614,9 +592,8 @@ where
 
 impl<S, T> Div<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + Div,
+    T: Div,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Div>::Output: Component,
 {
     type Output = Luma<S, <T as Div>::Output>;
 
@@ -630,9 +607,8 @@ where
 
 impl<S, T> Div<T> for Luma<S, T>
 where
-    T: Component + Div,
+    T: Div,
     S: LumaStandard<TransferFn = LinearFn>,
-    <T as Div>::Output: Component,
 {
     type Output = Luma<S, <T as Div>::Output>;
 
@@ -646,7 +622,7 @@ where
 
 impl<S, T> DivAssign<Luma<S, T>> for Luma<S, T>
 where
-    T: Component + DivAssign,
+    T: DivAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn div_assign(&mut self, other: Luma<S, T>) {
@@ -656,7 +632,7 @@ where
 
 impl<S, T> DivAssign<T> for Luma<S, T>
 where
-    T: Component + DivAssign,
+    T: DivAssign,
     S: LumaStandard<TransferFn = LinearFn>,
 {
     fn div_assign(&mut self, c: T) {
@@ -666,8 +642,6 @@ where
 
 impl<S, T, P> AsRef<P> for Luma<S, T>
 where
-    T: Component,
-    S: LumaStandard,
     P: RawPixel<T> + ?Sized,
 {
     /// Convert to a raw pixel format.
@@ -687,8 +661,6 @@ where
 
 impl<S, T, P> AsMut<P> for Luma<S, T>
 where
-    T: Component,
-    S: LumaStandard,
     P: RawPixel<T> + ?Sized,
 {
     /// Convert to a raw pixel format.
@@ -711,9 +683,7 @@ where
 
 impl<S, T> AbsDiffEq for Luma<S, T>
 where
-    T: Component + AbsDiffEq,
-    T::Epsilon: Copy,
-    S: LumaStandard + PartialEq,
+    T: AbsDiffEq,
 {
     type Epsilon = T::Epsilon;
 
@@ -728,9 +698,7 @@ where
 
 impl<S, T> RelativeEq for Luma<S, T>
 where
-    T: Component + RelativeEq,
-    T::Epsilon: Copy,
-    S: LumaStandard + PartialEq,
+    T: RelativeEq,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -748,9 +716,7 @@ where
 
 impl<S, T> UlpsEq for Luma<S, T>
 where
-    T: Component + UlpsEq,
-    T::Epsilon: Copy,
-    S: LumaStandard + PartialEq,
+    T: UlpsEq,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -763,8 +729,7 @@ where
 
 impl<S, T> fmt::LowerHex for Luma<S, T>
 where
-    T: Component + fmt::LowerHex,
-    S: LumaStandard,
+    T: fmt::LowerHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
@@ -774,8 +739,7 @@ where
 
 impl<S, T> fmt::UpperHex for Luma<S, T>
 where
-    T: Component + fmt::UpperHex,
-    S: LumaStandard,
+    T: fmt::UpperHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
@@ -801,8 +765,6 @@ where
 #[cfg(feature = "random")]
 impl<S, T> Distribution<Luma<S, T>> for Standard
 where
-    T: Component,
-    S: LumaStandard,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luma<S, T> {
@@ -816,8 +778,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformLuma<S, T>
 where
-    T: Component + SampleUniform,
-    S: LumaStandard,
+    T: SampleUniform,
 {
     luma: Uniform<T>,
     standard: PhantomData<S>,
@@ -826,8 +787,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> SampleUniform for Luma<S, T>
 where
-    T: Component + SampleUniform,
-    S: LumaStandard,
+    T: SampleUniform + Clone,
 {
     type Sampler = UniformLuma<S, T>;
 }
@@ -835,8 +795,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> UniformSampler for UniformLuma<S, T>
 where
-    T: Component + SampleUniform,
-    S: LumaStandard,
+    T: SampleUniform + Clone,
 {
     type X = Luma<S, T>;
 
@@ -845,11 +804,11 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformLuma {
-            luma: Uniform::new::<_, T>(low.luma, high.luma),
+            luma: Uniform::new::<_, T>(low.luma.clone(), high.luma.clone()),
             standard: PhantomData,
         }
     }
@@ -859,11 +818,11 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformLuma {
-            luma: Uniform::new_inclusive::<_, T>(low.luma, high.luma),
+            luma: Uniform::new_inclusive::<_, T>(low.luma.clone(), high.luma.clone()),
             standard: PhantomData,
         }
     }
@@ -877,20 +836,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Zeroable for Luma<S, T>
-where
-    S: LumaStandard,
-    T: Component + bytemuck::Zeroable,
-{
-}
+unsafe impl<S, T> bytemuck::Zeroable for Luma<S, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Pod for Luma<S, T>
-where
-    S: LumaStandard,
-    T: Component + bytemuck::Pod,
-{
-}
+unsafe impl<S: 'static, T> bytemuck::Pod for Luma<S, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

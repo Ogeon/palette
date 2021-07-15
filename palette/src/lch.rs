@@ -1,6 +1,7 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -10,12 +11,12 @@ use rand::Rng;
 
 use crate::color_difference::ColorDifference;
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
+use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
-    Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Float, FloatComponent, FromColor, FromF64,
+    GetHue, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -34,14 +35,10 @@ pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Lab, Lch)
+    skip_derives(Lab, Lch)
 )]
 #[repr(C)]
-pub struct Lch<Wp = D65, T = f32>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+pub struct Lch<Wp = D65, T = f32> {
     /// L\* is the lightness of the color. 0.0 gives absolute black and 100.0
     /// gives the brightest white.
     pub l: T,
@@ -64,27 +61,23 @@ where
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-}
+impl<Wp, T> Copy for Lch<Wp, T> where T: Copy {}
 
 impl<Wp, T> Clone for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     fn clone(&self) -> Lch<Wp, T> {
-        *self
+        Lch {
+            l: self.l.clone(),
+            chroma: self.chroma.clone(),
+            hue: self.hue.clone(),
+            white_point: PhantomData,
+        }
     }
 }
 
-impl<T> Lch<D65, T>
-where
-    T: FloatComponent,
-{
+impl<T> Lch<D65, T> {
     /// CIE L\*C\*h° with white point D65.
     pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<D65, T> {
         Lch {
@@ -96,11 +89,7 @@ where
     }
 }
 
-impl<Wp, T> Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> Lch<Wp, T> {
     /// CIE L\*C\*h°.
     pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<Wp, T> {
         Lch {
@@ -120,7 +109,12 @@ where
     pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
         Self::with_wp(l, chroma, hue)
     }
+}
 
+impl<Wp, T> Lch<Wp, T>
+where
+    T: Zero + FromF64,
+{
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
         T::zero()
@@ -151,29 +145,8 @@ where
     }
 }
 
-impl<Wp, T> PartialEq for Lch<Wp, T>
-where
-    T: FloatComponent + PartialEq,
-    Wp: WhitePoint,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.l == other.l && self.chroma == other.chroma && self.hue == other.hue
-    }
-}
-
-impl<Wp, T> Eq for Lch<Wp, T>
-where
-    T: FloatComponent + Eq,
-    Wp: WhitePoint,
-{
-}
-
 ///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
-impl<T, A> Alpha<Lch<D65, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Lch<D65, T>, A> {
     /// CIE L\*C\*h° and transparency with white point D65.
     pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
@@ -184,12 +157,7 @@ where
 }
 
 ///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
-impl<Wp, T, A> Alpha<Lch<Wp, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    Wp: WhitePoint,
-{
+impl<Wp, T, A> Alpha<Lch<Wp, T>, A> {
     /// CIE L\*C\*h° and transparency.
     pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
@@ -200,7 +168,7 @@ where
 
     /// Convert to a `(L\*, C\*, h°, alpha)` tuple.
     pub fn into_components(self) -> (T, T, LabHue<T>, A) {
-        (self.l, self.chroma, self.hue, self.alpha)
+        (self.color.l, self.color.chroma, self.color.hue, self.alpha)
     }
 
     /// Convert from a `(L\*, C\*, h°, alpha)` tuple.
@@ -209,30 +177,14 @@ where
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lch<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent,
-{
+impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lch<Wp, T> {
     fn from_color_unclamped(color: Lch<Wp, T>) -> Self {
         color
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Lch<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent,
-{
-    fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
-        let lab: Lab<Wp, T> = color.into_color_unclamped();
-        Self::from_color_unclamped(lab)
-    }
-}
-
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lch<Wp, T>
 where
-    Wp: WhitePoint,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
@@ -245,59 +197,55 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, H: Into<LabHue<T>>> From<(T, T, H)> for Lch<Wp, T> {
+impl<Wp, T, H: Into<LabHue<T>>> From<(T, T, H)> for Lch<Wp, T> {
     fn from(components: (T, T, H)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> Into<(T, T, LabHue<T>)> for Lch<Wp, T> {
-    fn into(self) -> (T, T, LabHue<T>) {
-        self.into_components()
+impl<Wp, T> From<Lch<Wp, T>> for (T, T, LabHue<T>) {
+    fn from(color: Lch<Wp, T>) -> (T, T, LabHue<T>) {
+        color.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, H: Into<LabHue<T>>, A: Component> From<(T, T, H, A)>
-    for Alpha<Lch<Wp, T>, A>
-{
+impl<Wp, T, H: Into<LabHue<T>>, A> From<(T, T, H, A)> for Alpha<Lch<Wp, T>, A> {
     fn from(components: (T, T, H, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, LabHue<T>, A)>
-    for Alpha<Lch<Wp, T>, A>
-{
-    fn into(self) -> (T, T, LabHue<T>, A) {
-        self.into_components()
+impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
+    fn from(color: Alpha<Lch<Wp, T>, A>) -> (T, T, LabHue<T>, A) {
+        color.into_components()
     }
 }
 
 impl<Wp, T> Clamp for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero + FromF64 + PartialOrd + Clone,
 {
     fn is_within_bounds(&self) -> bool {
-        self.l >= T::zero() && self.l <= from_f64(100.0) && self.chroma >= T::zero()
+        self.l >= Self::min_l() && self.l <= Self::max_l() && self.chroma >= Self::min_chroma()
     }
 
     fn clamp(&self) -> Lch<Wp, T> {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, T::zero(), from_f64(100.0));
-        self.chroma = self.chroma.max(T::zero())
+        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+        if self.chroma < Self::min_chroma() {
+            self.chroma = Self::min_chroma()
+        }
     }
 }
 
 impl<Wp, T> Mix for Lch<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -316,13 +264,12 @@ where
 impl<Wp, T> Shade for Lch<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
     fn lighten(&self, factor: T) -> Lch<Wp, T> {
         let difference = if factor >= T::zero() {
-            T::from_f64(100.0) - self.l
+            Self::max_l() - self.l
         } else {
             self.l
         };
@@ -330,7 +277,7 @@ where
         let delta = difference.max(T::zero()) * factor;
 
         Lch {
-            l: (self.l + delta).max(T::zero()),
+            l: (self.l + delta).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
@@ -339,7 +286,7 @@ where
 
     fn lighten_fixed(&self, amount: T) -> Lch<Wp, T> {
         Lch {
-            l: (self.l + T::from_f64(100.0) * amount).max(T::zero()),
+            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
@@ -349,8 +296,7 @@ where
 
 impl<Wp, T> GetHue for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Float + FromF64 + PartialOrd,
 {
     type Hue = LabHue<T>;
 
@@ -365,8 +311,7 @@ where
 
 impl<Wp, T> Hue for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Float + FromF64 + PartialOrd,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Lch<Wp, T> {
         Lch {
@@ -391,7 +336,6 @@ where
 impl<Wp, T> ColorDifference for Lch<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -399,23 +343,23 @@ where
         // Prepare a* and b* from Lch components to calculate color difference
         let self_a = clamp(
             self.chroma.max(T::zero()) * self.hue.to_radians().cos(),
-            from_f64(-128.0),
-            from_f64(127.0),
+            Lab::<Wp, T>::min_a(),
+            Lab::<Wp, T>::max_a(),
         );
         let self_b = clamp(
             self.chroma.max(T::zero()) * self.hue.to_radians().sin(),
-            from_f64(-128.0),
-            from_f64(127.0),
+            Lab::<Wp, T>::min_b(),
+            Lab::<Wp, T>::max_b(),
         );
         let other_a = clamp(
             other.chroma.max(T::zero()) * other.hue.to_radians().cos(),
-            from_f64(-128.0),
-            from_f64(127.0),
+            Lab::<Wp, T>::min_a(),
+            Lab::<Wp, T>::max_a(),
         );
         let other_b = clamp(
             other.chroma.max(T::zero()) * other.hue.to_radians().sin(),
-            from_f64(-128.0),
-            from_f64(127.0),
+            Lab::<Wp, T>::min_b(),
+            Lab::<Wp, T>::max_b(),
         );
         let self_params = LabColorDiff {
             l: self.l,
@@ -437,7 +381,6 @@ where
 impl<Wp, T> Saturate for Lch<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -452,7 +395,7 @@ where
 
         Lch {
             l: self.l,
-            chroma: (self.chroma + delta).max(T::zero()),
+            chroma: (self.chroma + delta).max(Self::min_chroma()),
             hue: self.hue,
             white_point: PhantomData,
         }
@@ -461,7 +404,7 @@ where
     fn saturate_fixed(&self, amount: T) -> Lch<Wp, T> {
         Lch {
             l: self.l,
-            chroma: (self.chroma + Self::max_chroma() * amount).max(T::zero()),
+            chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
             hue: self.hue,
             white_point: PhantomData,
         }
@@ -470,134 +413,18 @@ where
 
 impl<Wp, T> Default for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero,
 {
     fn default() -> Lch<Wp, T> {
         Lch::with_wp(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
-impl<Wp, T> Add<Lch<Wp, T>> for Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lch<Wp, T>;
-
-    fn add(self, other: Lch<Wp, T>) -> Self::Output {
-        Lch {
-            l: self.l + other.l,
-            chroma: self.chroma + other.chroma,
-            hue: self.hue + other.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lch<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Lch {
-            l: self.l + c,
-            chroma: self.chroma + c,
-            hue: self.hue + c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Lch<Wp, T>> for Lch<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Lch<Wp, T>) {
-        self.l += other.l;
-        self.chroma += other.chroma;
-        self.hue += other.hue;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Lch<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.l += c;
-        self.chroma += c;
-        self.hue += c;
-    }
-}
-
-impl<Wp, T> Sub<Lch<Wp, T>> for Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lch<Wp, T>;
-
-    fn sub(self, other: Lch<Wp, T>) -> Self::Output {
-        Lch {
-            l: self.l - other.l,
-            chroma: self.chroma - other.chroma,
-            hue: self.hue - other.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Lch<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Lch<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Lch {
-            l: self.l - c,
-            chroma: self.chroma - c,
-            hue: self.hue - c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Lch<Wp, T>> for Lch<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Lch<Wp, T>) {
-        self.l -= other.l;
-        self.chroma -= other.chroma;
-        self.hue -= other.hue;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Lch<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.l -= c;
-        self.chroma -= c;
-        self.hue -= c;
-    }
-}
+impl_color_add!(Lch<Wp, T>, [l, chroma, hue], white_point);
+impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
 
 impl<Wp, T, P> AsRef<P> for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -607,8 +434,6 @@ where
 
 impl<Wp, T, P> AsMut<P> for Lch<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -635,13 +460,12 @@ where
 impl<Wp, T> Distribution<Lch<Wp, T>> for Standard
 where
     T: FloatComponent,
-    Wp: WhitePoint,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
         Lch {
-            l: rng.gen() * from_f64(100.0),
-            chroma: crate::Float::sqrt(rng.gen()) * from_f64(128.0),
+            l: rng.gen() * Lch::<Wp, T>::max_l(),
+            chroma: crate::Float::sqrt(rng.gen()) * Lch::<Wp, T>::max_chroma(),
             hue: rng.gen::<LabHue<T>>(),
             white_point: PhantomData,
         }
@@ -652,7 +476,6 @@ where
 pub struct UniformLch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     l: Uniform<T>,
     chroma: Uniform<T>,
@@ -664,7 +487,6 @@ where
 impl<Wp, T> SampleUniform for Lch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     type Sampler = UniformLch<Wp, T>;
 }
@@ -673,7 +495,6 @@ where
 impl<Wp, T> UniformSampler for UniformLch<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     type X = Lch<Wp, T>;
 
@@ -723,20 +544,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Zeroable for Lch<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<Wp, T> bytemuck::Zeroable for Lch<Wp, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Pod for Lch<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<Wp: 'static, T> bytemuck::Pod for Lch<Wp, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
