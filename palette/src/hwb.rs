@@ -84,22 +84,30 @@ where
 }
 
 impl<T> Hwb<Srgb, T> {
-    /// HWB for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<Srgb, T> {
-        Hwb {
-            hue: hue.into(),
-            whiteness,
-            blackness,
-            standard: PhantomData,
-        }
+    /// Create an sRGB HWB color. This method can be used instead of `Hwb::new`
+    /// to help type inference.
+    pub fn new_srgb<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Self {
+        Self::new_const(hue.into(), whiteness, blackness)
+    }
+
+    /// Create an sRGB HWB color. This is the same as `Hwb::new_srgb` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_srgb_const(hue: RgbHue<T>, whiteness: T, blackness: T) -> Self {
+        Self::new_const(hue, whiteness, blackness)
     }
 }
 
 impl<S, T> Hwb<S, T> {
-    /// Linear HWB.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Hwb<S, T> {
+    /// Create an HWB color.
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T) -> Self {
+        Self::new_const(hue.into(), whiteness, blackness)
+    }
+
+    /// Create an HWB color. This is the same as `Hwb::new` without the generic
+    /// hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_const(hue: RgbHue<T>, whiteness: T, blackness: T) -> Self {
         Hwb {
-            hue: hue.into(),
+            hue,
             whiteness,
             blackness,
             standard: PhantomData,
@@ -113,7 +121,7 @@ impl<S, T> Hwb<S, T> {
 
     /// Convert from a `(hue, whiteness, blackness)` tuple.
     pub fn from_components<H: Into<RgbHue<T>>>((hue, whiteness, blackness): (H, T, T)) -> Self {
-        Self::with_wp(hue, whiteness, blackness)
+        Self::new(hue, whiteness, blackness)
     }
 
     #[inline]
@@ -173,21 +181,32 @@ where
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
 impl<T, A> Alpha<Hwb<Srgb, T>, A> {
-    /// HWB and transparency for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
-        Alpha {
-            color: Hwb::new(hue, whiteness, blackness),
-            alpha,
-        }
+    /// Create an sRGB HWB color with transparency. This method can be used
+    /// instead of `Hwba::new` to help type inference.
+    pub fn new_srgb<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
+        Self::new_const(hue.into(), whiteness, blackness, alpha)
+    }
+
+    /// Create an sRGB HWB color with transparency. This is the same as
+    /// `Hwba::new_srgb` without the generic hue type. It's temporary until `const
+    /// fn` supports traits.
+    pub const fn new_srgb_const(hue: RgbHue<T>, whiteness: T, blackness: T, alpha: A) -> Self {
+        Self::new_const(hue, whiteness, blackness, alpha)
     }
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
 impl<S, T, A> Alpha<Hwb<S, T>, A> {
-    /// Linear HWB and transparency.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
+    /// Create an HWB color with transparency.
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
+        Self::new_const(hue.into(), whiteness, blackness, alpha)
+    }
+
+    /// Create an HWB color with transparency. This is the same as `Hwba::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_const(hue: RgbHue<T>, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
-            color: Hwb::with_wp(hue, whiteness, blackness),
+            color: Hwb::new_const(hue, whiteness, blackness),
             alpha,
         }
     }
@@ -206,7 +225,7 @@ impl<S, T, A> Alpha<Hwb<S, T>, A> {
     pub fn from_components<H: Into<RgbHue<T>>>(
         (hue, whiteness, blackness, alpha): (H, T, T, A),
     ) -> Self {
-        Self::with_wp(hue, whiteness, blackness, alpha)
+        Self::new(hue, whiteness, blackness, alpha)
     }
 }
 
@@ -403,7 +422,7 @@ where
     T: Component,
 {
     fn default() -> Hwb<S, T> {
-        Hwb::with_wp(
+        Hwb::new(
             RgbHue::from(T::zero()),
             Self::min_whiteness(),
             Self::max_blackness(),
@@ -580,12 +599,12 @@ where
         let low_input = Hsv::from_color_unclamped(*low_b.borrow());
         let high_input = Hsv::from_color_unclamped(*high_b.borrow());
 
-        let low = Hsv::with_wp(
+        let low = Hsv::new(
             low_input.hue,
             low_input.saturation.min(high_input.saturation),
             low_input.value.min(high_input.value),
         );
-        let high = Hsv::with_wp(
+        let high = Hsv::new(
             high_input.hue,
             low_input.saturation.max(high_input.saturation),
             low_input.value.max(high_input.value),
@@ -606,12 +625,12 @@ where
         let low_input = Hsv::from_color_unclamped(*low_b.borrow());
         let high_input = Hsv::from_color_unclamped(*high_b.borrow());
 
-        let low = Hsv::with_wp(
+        let low = Hsv::new(
             low_input.hue,
             low_input.saturation.min(high_input.saturation),
             low_input.value.min(high_input.value),
         );
-        let high = Hsv::with_wp(
+        let high = Hsv::new(
             high_input.hue,
             low_input.saturation.max(high_input.saturation),
             low_input.value.max(high_input.value),
@@ -644,68 +663,68 @@ mod test {
     #[test]
     fn red() {
         let a = Hwb::from_color(Srgb::new(1.0, 0.0, 0.0));
-        let b = Hwb::new(0.0, 0.0, 0.0);
+        let b = Hwb::new_srgb(0.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn orange() {
         let a = Hwb::from_color(Srgb::new(1.0, 0.5, 0.0));
-        let b = Hwb::new(30.0, 0.0, 0.0);
+        let b = Hwb::new_srgb(30.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn green() {
         let a = Hwb::from_color(Srgb::new(0.0, 1.0, 0.0));
-        let b = Hwb::new(120.0, 0.0, 0.0);
+        let b = Hwb::new_srgb(120.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn blue() {
         let a = Hwb::from_color(Srgb::new(0.0, 0.0, 1.0));
-        let b = Hwb::new(240.0, 0.0, 0.0);
+        let b = Hwb::new_srgb(240.0, 0.0, 0.0);
         assert_relative_eq!(a, b);
     }
 
     #[test]
     fn purple() {
         let a = Hwb::from_color(Srgb::new(0.5, 0.0, 1.0));
-        let b = Hwb::new(270.0, 0.0, 0.0);
+        let b = Hwb::new_srgb(270.0, 0.0, 0.0);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
 
     #[test]
     fn clamp_invalid() {
-        let expected = Hwb::new(240.0, 0.0, 0.0);
+        let expected = Hwb::new_srgb(240.0, 0.0, 0.0);
 
-        let a = Hwb::new(240.0, -3.0, -4.0);
+        let a = Hwb::new_srgb(240.0, -3.0, -4.0);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
 
     #[test]
     fn clamp_none() {
-        let expected = Hwb::new(240.0, 0.3, 0.7);
+        let expected = Hwb::new_srgb(240.0, 0.3, 0.7);
 
-        let a = Hwb::new(240.0, 0.3, 0.7);
+        let a = Hwb::new_srgb(240.0, 0.3, 0.7);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
     #[test]
     fn clamp_over_one() {
-        let expected = Hwb::new(240.0, 0.2, 0.8);
+        let expected = Hwb::new_srgb(240.0, 0.2, 0.8);
 
-        let a = Hwb::new(240.0, 5.0, 20.0);
+        let a = Hwb::new_srgb(240.0, 5.0, 20.0);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
     #[test]
     fn clamp_under_one() {
-        let expected = Hwb::new(240.0, 0.3, 0.1);
+        let expected = Hwb::new_srgb(240.0, 0.3, 0.1);
 
-        let a = Hwb::new(240.0, 0.3, 0.1);
+        let a = Hwb::new_srgb(240.0, 0.3, 0.1);
         let calc_a = a.clamp();
         assert_relative_eq!(expected, calc_a);
     }
@@ -726,7 +745,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Hwb::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Hwb::new_srgb(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(serialized, r#"{"hue":0.3,"whiteness":0.8,"blackness":0.1}"#);
     }

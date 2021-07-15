@@ -87,7 +87,7 @@ impl<S, T: Clone> Clone for Rgb<S, T> {
 
 impl<S, T> Rgb<S, T> {
     /// Create an RGB color.
-    pub fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
+    pub const fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
         Rgb {
             red,
             green,
@@ -265,7 +265,7 @@ where
 /// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
 impl<S, T, A> Alpha<Rgb<S, T>, A> {
     /// Non-linear RGB.
-    pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
+    pub const fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
             color: Rgb::new(red, green, blue),
             alpha,

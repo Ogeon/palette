@@ -176,7 +176,7 @@ mod test {
     use crate::chromatic_adaptation::AdaptInto;
     use crate::encoding::{Linear, Srgb};
     use crate::rgb::Rgb;
-    use crate::white_point::D50;
+    use crate::white_point::{D50, D65};
     use crate::Xyz;
 
     #[test]
@@ -194,9 +194,9 @@ mod test {
     #[test]
     fn matrix_multiply_xyz() {
         let inp1 = [0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.2, 0.1, 0.3];
-        let inp2 = Xyz::new(0.4, 0.6, 0.8);
+        let inp2 = Xyz::<D65>::new(0.4, 0.6, 0.8);
 
-        let expected = Xyz::new(0.4, 0.32, 0.38);
+        let expected = Xyz::<D65>::new(0.4, 0.32, 0.38);
 
         let computed = multiply_xyz(&inp1, &inp2);
         assert_relative_eq!(expected, computed)

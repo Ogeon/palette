@@ -14,13 +14,13 @@ pub struct Srgb;
 
 impl Primaries for Srgb {
     fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(from_f64(0.6400), from_f64(0.3300), from_f64(0.212656))
+        Yxy::new(from_f64(0.6400), from_f64(0.3300), from_f64(0.212656))
     }
     fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(from_f64(0.3000), from_f64(0.6000), from_f64(0.715158))
+        Yxy::new(from_f64(0.3000), from_f64(0.6000), from_f64(0.715158))
     }
     fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T> {
-        Yxy::with_wp(from_f64(0.1500), from_f64(0.0600), from_f64(0.072186))
+        Yxy::new(from_f64(0.1500), from_f64(0.0600), from_f64(0.072186))
     }
 }
 

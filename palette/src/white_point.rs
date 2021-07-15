@@ -33,7 +33,7 @@ pub trait WhitePoint: 'static {
 pub struct A;
 impl WhitePoint for A {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(1.09850), from_f64(1.0), from_f64(0.35585))
+        Xyz::new(from_f64(1.09850), from_f64(1.0), from_f64(0.35585))
     }
 }
 /// CIE standard illuminant B
@@ -44,7 +44,7 @@ impl WhitePoint for A {
 pub struct B;
 impl WhitePoint for B {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.99072), from_f64(1.0), from_f64(0.85223))
+        Xyz::new(from_f64(0.99072), from_f64(1.0), from_f64(0.85223))
     }
 }
 /// CIE standard illuminant C
@@ -55,7 +55,7 @@ impl WhitePoint for B {
 pub struct C;
 impl WhitePoint for C {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.98074), from_f64(1.0), from_f64(1.18232))
+        Xyz::new(from_f64(0.98074), from_f64(1.0), from_f64(1.18232))
     }
 }
 /// CIE D series standard illuminant - D50
@@ -66,7 +66,7 @@ impl WhitePoint for C {
 pub struct D50;
 impl WhitePoint for D50 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.96422), from_f64(1.0), from_f64(0.82521))
+        Xyz::new(from_f64(0.96422), from_f64(1.0), from_f64(0.82521))
     }
 }
 /// CIE D series standard illuminant - D55
@@ -77,7 +77,7 @@ impl WhitePoint for D50 {
 pub struct D55;
 impl WhitePoint for D55 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.95682), from_f64(1.0), from_f64(0.92149))
+        Xyz::new(from_f64(0.95682), from_f64(1.0), from_f64(0.92149))
     }
 }
 /// CIE D series standard illuminant - D65
@@ -88,7 +88,7 @@ impl WhitePoint for D55 {
 pub struct D65;
 impl WhitePoint for D65 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.95047), from_f64(1.0), from_f64(1.08883))
+        Xyz::new(from_f64(0.95047), from_f64(1.0), from_f64(1.08883))
     }
 }
 /// CIE D series standard illuminant - D75
@@ -99,7 +99,7 @@ impl WhitePoint for D65 {
 pub struct D75;
 impl WhitePoint for D75 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.94972), from_f64(1.0), from_f64(1.22638))
+        Xyz::new(from_f64(0.94972), from_f64(1.0), from_f64(1.22638))
     }
 }
 /// CIE standard illuminant E
@@ -110,7 +110,7 @@ impl WhitePoint for D75 {
 pub struct E;
 impl WhitePoint for E {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(1.0), from_f64(1.0), from_f64(1.0))
+        Xyz::new(from_f64(1.0), from_f64(1.0), from_f64(1.0))
     }
 }
 /// CIE fluorescent illuminant series - F2
@@ -120,7 +120,7 @@ impl WhitePoint for E {
 pub struct F2;
 impl WhitePoint for F2 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.99186), from_f64(1.0), from_f64(0.67393))
+        Xyz::new(from_f64(0.99186), from_f64(1.0), from_f64(0.67393))
     }
 }
 /// CIE fluorescent illuminant series - F7
@@ -130,7 +130,7 @@ impl WhitePoint for F2 {
 pub struct F7;
 impl WhitePoint for F7 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.95041), from_f64(1.0), from_f64(1.08747))
+        Xyz::new(from_f64(0.95041), from_f64(1.0), from_f64(1.08747))
     }
 }
 /// CIE fluorescent illuminant series - F11
@@ -140,7 +140,7 @@ impl WhitePoint for F7 {
 pub struct F11;
 impl WhitePoint for F11 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(1.00962), from_f64(1.0), from_f64(0.64350))
+        Xyz::new(from_f64(1.00962), from_f64(1.0), from_f64(0.64350))
     }
 }
 /// CIE D series standard illuminant - D50
@@ -151,7 +151,7 @@ impl WhitePoint for F11 {
 pub struct D50Degree10;
 impl WhitePoint for D50Degree10 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.9672), from_f64(1.0), from_f64(0.8143))
+        Xyz::new(from_f64(0.9672), from_f64(1.0), from_f64(0.8143))
     }
 }
 /// CIE D series standard illuminant - D55
@@ -162,7 +162,7 @@ impl WhitePoint for D50Degree10 {
 pub struct D55Degree10;
 impl WhitePoint for D55Degree10 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.958), from_f64(1.0), from_f64(0.9093))
+        Xyz::new(from_f64(0.958), from_f64(1.0), from_f64(0.9093))
     }
 }
 /// CIE D series standard illuminant - D65
@@ -173,7 +173,7 @@ impl WhitePoint for D55Degree10 {
 pub struct D65Degree10;
 impl WhitePoint for D65Degree10 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.9481), from_f64(1.0), from_f64(1.073))
+        Xyz::new(from_f64(0.9481), from_f64(1.0), from_f64(1.073))
     }
 }
 /// CIE D series standard illuminant - D75
@@ -184,6 +184,6 @@ impl WhitePoint for D65Degree10 {
 pub struct D75Degree10;
 impl WhitePoint for D75Degree10 {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(from_f64(0.94416), from_f64(1.0), from_f64(1.2064))
+        Xyz::new(from_f64(0.94416), from_f64(1.0), from_f64(1.2064))
     }
 }

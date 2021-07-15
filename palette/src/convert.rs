@@ -583,7 +583,7 @@ mod tests {
 
     impl<S: RgbSpace> FromColorUnclamped<WithXyz<S>> for Xyz<S::WhitePoint, f64> {
         fn from_color_unclamped(_color: WithXyz<S>) -> Xyz<S::WhitePoint, f64> {
-            Xyz::with_wp(0.0, 1.0, 0.0)
+            Xyz::new(0.0, 1.0, 0.0)
         }
     }
 
@@ -640,7 +640,7 @@ mod tests {
 
     impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for Lch<crate::white_point::E, T> {
         fn from_color_unclamped(_color: WithoutXyz<T>) -> Lch<crate::white_point::E, T> {
-            Lch::with_wp(T::one(), T::zero(), T::zero())
+            Lch::new(T::one(), T::zero(), T::zero())
         }
     }
 

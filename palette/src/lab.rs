@@ -77,21 +77,9 @@ where
     }
 }
 
-impl<T> Lab<D65, T> {
-    /// CIE L\*a\*b\* with white point D65.
-    pub fn new(l: T, a: T, b: T) -> Lab<D65, T> {
-        Lab {
-            l,
-            a,
-            b,
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lab<Wp, T> {
-    /// CIE L\*a\*b\*.
-    pub fn with_wp(l: T, a: T, b: T) -> Lab<Wp, T> {
+    /// Create a CIE L\*a\*b\* color.
+    pub const fn new(l: T, a: T, b: T) -> Lab<Wp, T> {
         Lab {
             l,
             a,
@@ -107,7 +95,7 @@ impl<Wp, T> Lab<Wp, T> {
 
     /// Convert from a `(L\*, a\*, b\*)` tuple.
     pub fn from_components((l, a, b): (T, T, T)) -> Self {
-        Self::with_wp(l, a, b)
+        Self::new(l, a, b)
     }
 }
 
@@ -147,22 +135,11 @@ where
 }
 
 ///<span id="Laba"></span>[`Laba`](crate::Laba) implementations.
-impl<T, A> Alpha<Lab<D65, T>, A> {
-    /// CIE L\*a\*b\* and transparency and white point D65.
-    pub fn new(l: T, a: T, b: T, alpha: A) -> Self {
+impl<Wp, T, A> Alpha<Lab<Wp, T>, A> {
+    /// Create a CIE L\*a\*b\* with transparency.
+    pub const fn new(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Lab::new(l, a, b),
-            alpha,
-        }
-    }
-}
-
-///<span id="Laba"></span>[`Laba`](crate::Laba) implementations.
-impl<Wp, T, A> Alpha<Lab<Wp, T>, A> {
-    /// CIE L\*a\*b\* and transparency.
-    pub fn with_wp(l: T, a: T, b: T, alpha: A) -> Self {
-        Alpha {
-            color: Lab::with_wp(l, a, b),
             alpha,
         }
     }
@@ -174,7 +151,7 @@ impl<Wp, T, A> Alpha<Lab<Wp, T>, A> {
 
     /// Convert from a `(L\*, a\*, b\*, alpha)` tuple.
     pub fn from_components((l, a, b, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(l, a, b, alpha)
+        Self::new(l, a, b, alpha)
     }
 }
 
@@ -407,7 +384,7 @@ where
     T: Zero,
 {
     fn default() -> Lab<Wp, T> {
-        Lab::with_wp(T::zero(), T::zero(), T::zero())
+        Lab::new(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -599,7 +576,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Lab::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Lab::<D65>::new(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(serialized, r#"{"l":0.3,"a":0.8,"b":0.1}"#);
     }

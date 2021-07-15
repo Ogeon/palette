@@ -28,8 +28,8 @@ macro_rules! make_hues {
         impl<T> $name<T> {
             /// Create a new hue from degrees.
             #[inline]
-            pub fn from_degrees(degrees: T) -> $name<T> {
-                $name(degrees)
+            pub const fn from_degrees(degrees: T) -> Self {
+                Self(degrees)
             }
 
             /// Get the internal representation, without normalizing it.
@@ -42,8 +42,8 @@ macro_rules! make_hues {
         impl<T: Float + FromF64> $name<T> {
             /// Create a new hue from radians, instead of degrees.
             #[inline]
-            pub fn from_radians(radians: T) -> $name<T> {
-                $name(radians.to_degrees())
+            pub fn from_radians(radians: T) -> Self {
+                Self(radians.to_degrees())
             }
 
             /// Get the hue as degrees, in the range `(-180, 180]`.

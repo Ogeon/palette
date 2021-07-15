@@ -77,25 +77,19 @@ where
     }
 }
 
-impl<T> Lch<D65, T> {
-    /// CIE L\*C\*h° with white point D65.
-    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<D65, T> {
-        Lch {
-            l,
-            chroma,
-            hue: hue.into(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lch<Wp, T> {
-    /// CIE L\*C\*h°.
-    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Lch<Wp, T> {
+    /// Create a CIE L\*C\*h° color.
+    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Self {
+        Self::new_const(l, chroma, hue.into())
+    }
+
+    /// Create a CIE L\*C\*h° color. This is the same as `Lch::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_const(l: T, chroma: T, hue: LabHue<T>) -> Self {
         Lch {
             l,
             chroma,
-            hue: hue.into(),
+            hue,
             white_point: PhantomData,
         }
     }
@@ -107,7 +101,7 @@ impl<Wp, T> Lch<Wp, T> {
 
     /// Convert from a `(L\*, C\*, h°)` tuple.
     pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
-        Self::with_wp(l, chroma, hue)
+        Self::new(l, chroma, hue)
     }
 }
 
@@ -146,22 +140,18 @@ where
 }
 
 ///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
-impl<T, A> Alpha<Lch<D65, T>, A> {
-    /// CIE L\*C\*h° and transparency with white point D65.
-    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
-        Alpha {
-            color: Lch::new(l, chroma, hue),
-            alpha,
-        }
-    }
-}
-
-///<span id="Lcha"></span>[`Lcha`](crate::Lcha) implementations.
 impl<Wp, T, A> Alpha<Lch<Wp, T>, A> {
-    /// CIE L\*C\*h° and transparency.
-    pub fn with_wp<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
+    /// Create a CIE L\*C\*h° color with transparency.
+    pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
+        Self::new_const(l, chroma, hue.into(), alpha)
+    }
+
+    /// Create a CIE L\*C\*h° color with transparency. This is the same as
+    /// `Lcha::new` without the generic hue type. It's temporary until `const
+    /// fn` supports traits.
+    pub const fn new_const(l: T, chroma: T, hue: LabHue<T>, alpha: A) -> Self {
         Alpha {
-            color: Lch::with_wp(l, chroma, hue),
+            color: Lch::new_const(l, chroma, hue),
             alpha,
         }
     }
@@ -173,7 +163,7 @@ impl<Wp, T, A> Alpha<Lch<Wp, T>, A> {
 
     /// Convert from a `(L\*, C\*, h°, alpha)` tuple.
     pub fn from_components<H: Into<LabHue<T>>>((l, chroma, hue, alpha): (T, T, H, A)) -> Self {
-        Self::with_wp(l, chroma, hue, alpha)
+        Self::new(l, chroma, hue, alpha)
     }
 }
 
@@ -416,7 +406,7 @@ where
     T: Zero,
 {
     fn default() -> Lch<Wp, T> {
-        Lch::with_wp(T::zero(), T::zero(), LabHue::from(T::zero()))
+        Lch::new(T::zero(), T::zero(), LabHue::from(T::zero()))
     }
 }
 
@@ -585,7 +575,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Lch::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Lch::<D65>::new(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(serialized, r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#);
     }

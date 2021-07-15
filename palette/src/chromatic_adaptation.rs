@@ -15,7 +15,7 @@
 //! use palette::chromatic_adaptation::AdaptInto;
 //!
 //!
-//! let a = Xyz::<A, f32>::with_wp(0.315756, 0.162732, 0.015905);
+//! let a = Xyz::<A, f32>::new(0.315756, 0.162732, 0.015905);
 //!
 //! //Will convert Xyz<A, f32> to Xyz<C, f32> using Bradford chromatic adaptation
 //! let c: Xyz<C, f32> = a.adapt_into();
@@ -254,11 +254,11 @@ mod test {
 
     #[test]
     fn chromatic_adaptation_from_a_to_c() {
-        let input_a = Xyz::<A, f32>::with_wp(0.315756, 0.162732, 0.015905);
+        let input_a = Xyz::<A, f32>::new(0.315756, 0.162732, 0.015905);
 
-        let expected_bradford = Xyz::<C, f32>::with_wp(0.257963, 0.139776, 0.058825);
-        let expected_vonkries = Xyz::<C, f32>::with_wp(0.268446, 0.159139, 0.052843);
-        let expected_xyz_scaling = Xyz::<C, f32>::with_wp(0.281868, 0.162732, 0.052844);
+        let expected_bradford = Xyz::<C, f32>::new(0.257963, 0.139776, 0.058825);
+        let expected_vonkries = Xyz::<C, f32>::new(0.268446, 0.159139, 0.052843);
+        let expected_xyz_scaling = Xyz::<C, f32>::new(0.281868, 0.162732, 0.052844);
 
         let computed_bradford: Xyz<C, f32> = Xyz::adapt_from(input_a);
         assert_relative_eq!(expected_bradford, computed_bradford, epsilon = 0.0001);
@@ -272,11 +272,11 @@ mod test {
 
     #[test]
     fn chromatic_adaptation_into_a_to_c() {
-        let input_a = Xyz::<A, f32>::with_wp(0.315756, 0.162732, 0.015905);
+        let input_a = Xyz::<A, f32>::new(0.315756, 0.162732, 0.015905);
 
-        let expected_bradford = Xyz::<C, f32>::with_wp(0.257963, 0.139776, 0.058825);
-        let expected_vonkries = Xyz::<C, f32>::with_wp(0.268446, 0.159139, 0.052843);
-        let expected_xyz_scaling = Xyz::<C, f32>::with_wp(0.281868, 0.162732, 0.052844);
+        let expected_bradford = Xyz::<C, f32>::new(0.257963, 0.139776, 0.058825);
+        let expected_vonkries = Xyz::<C, f32>::new(0.268446, 0.159139, 0.052843);
+        let expected_xyz_scaling = Xyz::<C, f32>::new(0.281868, 0.162732, 0.052844);
 
         let computed_bradford: Xyz<C, f32> = input_a.adapt_into();
         assert_relative_eq!(expected_bradford, computed_bradford, epsilon = 0.0001);

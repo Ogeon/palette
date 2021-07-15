@@ -81,22 +81,30 @@ impl<S, T: Clone> Clone for Hsl<S, T> {
 }
 
 impl<T> Hsl<Srgb, T> {
-    /// HSL for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<Srgb, T> {
-        Hsl {
-            hue: hue.into(),
-            saturation,
-            lightness,
-            standard: PhantomData,
-        }
+    /// Create an sRGB HSL color. This method can be used instead of `Hsl::new`
+    /// to help type inference.
+    pub fn new_srgb<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Self {
+        Self::new_const(hue.into(), saturation, lightness)
+    }
+
+    /// Create an sRGB HSL color. This is the same as `Hsl::new_srgb` without
+    /// the generic hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_srgb_const(hue: RgbHue<T>, saturation: T, lightness: T) -> Self {
+        Self::new_const(hue, saturation, lightness)
     }
 }
 
 impl<S, T> Hsl<S, T> {
-    /// Linear HSL.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Hsl<S, T> {
+    /// Create an HSL color.
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T) -> Self {
+        Self::new_const(hue.into(), saturation, lightness)
+    }
+
+    /// Create an HSL color. This is the same as `Hsl::new` without the generic
+    /// hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_const(hue: RgbHue<T>, saturation: T, lightness: T) -> Self {
         Hsl {
-            hue: hue.into(),
+            hue,
             saturation,
             lightness,
             standard: PhantomData,
@@ -110,7 +118,7 @@ impl<S, T> Hsl<S, T> {
 
     /// Convert from a `(hue, saturation, lightness)` tuple.
     pub fn from_components<H: Into<RgbHue<T>>>((hue, saturation, lightness): (H, T, T)) -> Self {
-        Self::with_wp(hue, saturation, lightness)
+        Self::new(hue, saturation, lightness)
     }
 
     #[inline]
@@ -170,21 +178,33 @@ where
 
 ///<span id="Hsla"></span>[`Hsla`](crate::Hsla) implementations.
 impl<T, A> Alpha<Hsl<Srgb, T>, A> {
-    /// HSL and transparency for linear sRGB.
-    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
-        Alpha {
-            color: Hsl::new(hue, saturation, lightness),
-            alpha,
-        }
+    /// Create an sRGB HSL color with transparency. This method can be used
+    /// instead of `Hsla::new` to help type inference.
+    pub fn new_srgb<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
+        Self::new_const(hue.into(), saturation, lightness, alpha)
+    }
+
+    /// Create an sRGB HSL color with transparency. This is the same as
+    /// `Hsla::new_srgb` without the generic hue type. It's temporary until
+    /// `const fn` supports traits.
+    pub const fn new_srgb_const(hue: RgbHue<T>, saturation: T, lightness: T, alpha: A) -> Self {
+        Self::new_const(hue, saturation, lightness, alpha)
     }
 }
 
 ///<span id="Hsla"></span>[`Hsla`](crate::Hsla) implementations.
 impl<S, T, A> Alpha<Hsl<S, T>, A> {
-    /// Linear HSL and transparency.
-    pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
+    /// Create an HSL color with transparency.
+    pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
+        Self::new_const(hue.into(), saturation, lightness, alpha)
+    }
+
+    /// Create an HSL color with transparency. This is the same as `Hsla::new`
+    /// without the generic hue type. It's temporary until `const fn` supports
+    /// traits.
+    pub const fn new_const(hue: RgbHue<T>, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
-            color: Hsl::with_wp(hue, saturation, lightness),
+            color: Hsl::new_const(hue, saturation, lightness),
             alpha,
         }
     }
@@ -203,7 +223,7 @@ impl<S, T, A> Alpha<Hsl<S, T>, A> {
     pub fn from_components<H: Into<RgbHue<T>>>(
         (hue, saturation, lightness, alpha): (H, T, T, A),
     ) -> Self {
-        Self::with_wp(hue, saturation, lightness, alpha)
+        Self::new(hue, saturation, lightness, alpha)
     }
 }
 
@@ -479,7 +499,7 @@ where
     T: Zero,
 {
     fn default() -> Hsl<S, T> {
-        Hsl::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
+        Hsl::new(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
@@ -684,8 +704,8 @@ mod test {
     #[test]
     fn red() {
         let a = Hsl::from_color(Srgb::new(1.0, 0.0, 0.0));
-        let b = Hsl::new(0.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new(0.0, 1.0, 1.0));
+        let b = Hsl::new_srgb(0.0, 1.0, 0.5);
+        let c = Hsl::from_color(Hsv::new_srgb(0.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -694,8 +714,8 @@ mod test {
     #[test]
     fn orange() {
         let a = Hsl::from_color(Srgb::new(1.0, 0.5, 0.0));
-        let b = Hsl::new(30.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new(30.0, 1.0, 1.0));
+        let b = Hsl::new_srgb(30.0, 1.0, 0.5);
+        let c = Hsl::from_color(Hsv::new_srgb(30.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -704,8 +724,8 @@ mod test {
     #[test]
     fn green() {
         let a = Hsl::from_color(Srgb::new(0.0, 1.0, 0.0));
-        let b = Hsl::new(120.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new(120.0, 1.0, 1.0));
+        let b = Hsl::new_srgb(120.0, 1.0, 0.5);
+        let c = Hsl::from_color(Hsv::new_srgb(120.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -714,8 +734,8 @@ mod test {
     #[test]
     fn blue() {
         let a = Hsl::from_color(Srgb::new(0.0, 0.0, 1.0));
-        let b = Hsl::new(240.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new(240.0, 1.0, 1.0));
+        let b = Hsl::new_srgb(240.0, 1.0, 0.5);
+        let c = Hsl::from_color(Hsv::new_srgb(240.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -724,8 +744,8 @@ mod test {
     #[test]
     fn purple() {
         let a = Hsl::from_color(Srgb::new(0.5, 0.0, 1.0));
-        let b = Hsl::new(270.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new(270.0, 1.0, 1.0));
+        let b = Hsl::new_srgb(270.0, 1.0, 0.5);
+        let c = Hsl::from_color(Hsv::new_srgb(270.0, 1.0, 1.0));
 
         assert_relative_eq!(a, b);
         assert_relative_eq!(a, c);
@@ -762,7 +782,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Hsl::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Hsl::new_srgb(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(
             serialized,

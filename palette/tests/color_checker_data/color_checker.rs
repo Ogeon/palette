@@ -26,9 +26,9 @@ pub struct ColorCheckerData {
 impl From<ColorCheckerRaw> for ColorCheckerData {
     fn from(src: ColorCheckerRaw) -> ColorCheckerData {
         ColorCheckerData {
-            yxy: Yxy::with_wp(src.yxy_x, src.yxy_y, src.yxy_luma),
-            xyz: Xyz::with_wp(src.xyz_x, src.xyz_y, src.xyz_z),
-            lab: Lab::with_wp(src.lab_l, src.lab_a, src.lab_b),
+            yxy: Yxy::new(src.yxy_x, src.yxy_y, src.yxy_luma),
+            xyz: Xyz::new(src.xyz_x, src.xyz_y, src.xyz_z),
+            lab: Lab::new(src.lab_l, src.lab_a, src.lab_b),
         }
     }
 }
