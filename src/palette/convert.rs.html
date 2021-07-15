@@ -951,6 +951,8 @@
 <span id="948">948</span>
 <span id="949">949</span>
 <span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Traits for converting between color spaces.</span>
 <span class="doccomment">//!</span>
@@ -971,16 +973,15 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! # use palette::rgb::{RgbStandard, RgbSpace};</span>
 <span class="doccomment">//! # use palette::convert::FromColorUnclamped;</span>
-<span class="doccomment">//! # use palette::{Xyz, Component, FloatComponent};</span>
+<span class="doccomment">//! # use palette::{Xyz, FloatComponent};</span>
 <span class="doccomment">//! #</span>
 <span class="doccomment">//! #[palette(</span>
 <span class="doccomment">//!     component = &quot;T&quot;,</span>
 <span class="doccomment">//!     rgb_standard = &quot;S&quot;,</span>
-<span class="doccomment">//!     white_point = &quot;&lt;S::Space as RgbSpace&gt;::WhitePoint&quot;,</span>
 <span class="doccomment">//! )]</span>
 <span class="doccomment">//! #[derive(FromColorUnclamped)]</span>
 <span class="doccomment">//! #[repr(C)]</span>
-<span class="doccomment">//! struct ExampleType&lt;S: RgbStandard, T: Component&gt; {</span>
+<span class="doccomment">//! struct ExampleType&lt;S, T&gt; {</span>
 <span class="doccomment">//!     // ...</span>
 <span class="doccomment">//!     #[palette(alpha)]</span>
 <span class="doccomment">//!     alpha: T,</span>
@@ -1026,6 +1027,9 @@
 <span class="doccomment">//! type that should be used when deriving. The default is to either use `Srgb`</span>
 <span class="doccomment">//! or a best effort to convert between standards, but sometimes it has to be set</span>
 <span class="doccomment">//! to a specific type. This also accepts type parameters.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard</span>
+<span class="doccomment">//! type that should be used when deriving, similar to `rgb_standard`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Field Attributes</span>
 <span class="doccomment">//!</span>

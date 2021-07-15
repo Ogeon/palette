@@ -499,6 +499,8 @@
 <span id="496">496</span>
 <span id="497">497</span>
 <span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::cmp::PartialEq</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -525,15 +527,23 @@
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
         <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
         <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span>(<span class="ident">T</span>);
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span>(<span class="ident">T</span>);
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Create a new hue from degrees.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_degrees</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">degrees</span>)
             }
 
+            <span class="doccomment">/// Get the internal representation, without normalizing it.</span>
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_raw_degrees</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+                <span class="self">self</span>.<span class="number">0</span>
+            }
+        }
+
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Create a new hue from radians, instead of degrees.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_radians</span>(<span class="ident">radians</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -564,12 +574,6 @@
                 <span class="ident">normalize_angle_positive</span>(<span class="self">self</span>.<span class="number">0</span>).<span class="ident">to_radians</span>()
             }
 
-            <span class="doccomment">/// Get the internal representation, without normalizing it.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_raw_degrees</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-                <span class="self">self</span>.<span class="number">0</span>
-            }
-
             <span class="doccomment">/// Get the internal representation as radians, without normalizing it.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_raw_radians</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
@@ -577,7 +581,7 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">degrees</span>)
@@ -623,7 +627,7 @@
 
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">Eq</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -632,7 +636,7 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -659,14 +663,14 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
                 <span class="self">self</span>.<span class="number">0</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) {
                 <span class="self">self</span>.<span class="number">0</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>;
@@ -687,7 +691,7 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -696,7 +700,7 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -723,14 +727,14 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
                 <span class="self">self</span>.<span class="number">0</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) {
                 <span class="self">self</span>.<span class="number">0</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>;
@@ -763,9 +767,9 @@
         }
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">bytemuck::Zeroable</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">bytemuck::Pod</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">bytemuck::Pod</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
     )<span class="op">+</span>)
 }
 
