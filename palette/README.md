@@ -146,8 +146,8 @@ where
     color.mix(&new_color, amount)
 }
 
-let new_hsl = transform_color(&Hsl::new(0.00, 0.70, 0.20), 0.8);
-let new_hsv = transform_color(&Hsv::new(0.00, 0.82, 0.34), 0.8);
+let new_hsl = transform_color(&Hsl::new_srgb(0.00, 0.70, 0.20), 0.8);
+let new_hsv = transform_color(&Hsv::new_srgb(0.00, 0.82, 0.34), 0.8);
 ```
 
 This image shows the transition from the color to `new_color` in HSL and HSV:

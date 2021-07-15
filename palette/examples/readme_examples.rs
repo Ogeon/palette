@@ -66,7 +66,7 @@ fn color_operations_1() {
     }
 
     // Write example image
-    let hsl_color = Hsl::new(0.00, 0.70, 0.20);
+    let hsl_color = Hsl::new_srgb(0.00, 0.70, 0.20);
     let hsl_color_at = |amount| {
         use palette::FromColor;
 
@@ -74,7 +74,7 @@ fn color_operations_1() {
         palette::Srgb::from_color(color).into_format()
     };
 
-    let hsv_color = Hsv::new(0.00, 0.82, 0.34);
+    let hsv_color = Hsv::new_srgb(0.00, 0.82, 0.34);
     let hsv_color_at = |amount| {
         use palette::FromColor;
 

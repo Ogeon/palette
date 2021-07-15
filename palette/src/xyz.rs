@@ -79,21 +79,9 @@ where
     }
 }
 
-impl<T> Xyz<D65, T> {
-    /// CIE XYZ with white point D65.
-    pub fn new(x: T, y: T, z: T) -> Xyz<D65, T> {
-        Xyz {
-            x,
-            y,
-            z,
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Xyz<Wp, T> {
-    /// CIE XYZ.
-    pub fn with_wp(x: T, y: T, z: T) -> Xyz<Wp, T> {
+    /// Create a CIE XYZ color.
+    pub const fn new(x: T, y: T, z: T) -> Xyz<Wp, T> {
         Xyz {
             x,
             y,
@@ -109,7 +97,7 @@ impl<Wp, T> Xyz<Wp, T> {
 
     /// Convert from a `(X, Y, Z)` tuple.
     pub fn from_components((x, y, z): (T, T, T)) -> Self {
-        Self::with_wp(x, y, z)
+        Self::new(x, y, z)
     }
 }
 
@@ -153,22 +141,11 @@ where
 }
 
 ///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
-impl<T, A> Alpha<Xyz<D65, T>, A> {
-    /// CIE Yxy and transparency with white point D65.
-    pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
-        Alpha {
-            color: Xyz::new(x, y, luma),
-            alpha,
-        }
-    }
-}
-
-///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
 impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
-    /// CIE XYZ and transparency.
-    pub fn with_wp(x: T, y: T, z: T, alpha: A) -> Self {
+    /// Create a CIE XYZ color with transparency.
+    pub const fn new(x: T, y: T, z: T, alpha: A) -> Self {
         Alpha {
-            color: Xyz::with_wp(x, y, z),
+            color: Xyz::new(x, y, z),
             alpha,
         }
     }
@@ -180,7 +157,7 @@ impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
 
     /// Convert from a `(X, Y, Z, alpha)` tuple.
     pub fn from_components((x, y, z, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(x, y, z, alpha)
+        Self::new(x, y, z, alpha)
     }
 }
 
@@ -244,7 +221,7 @@ where
             }
         }
 
-        Xyz::with_wp(convert(x), convert(y), convert(z)) * Wp::get_xyz()
+        Xyz::new(convert(x), convert(y), convert(z)) * Wp::get_xyz()
     }
 }
 
@@ -264,7 +241,7 @@ where
         let v_ref = from_f64(9.0) * w.y * ref_denom_recip;
 
         if color.l < from_f64(1e-5) {
-            return Xyz::with_wp(T::zero(), T::zero(), T::zero());
+            return Xyz::new(T::zero(), T::zero(), T::zero());
         }
 
         let y = if color.l > from_f64(8.0) {
@@ -278,7 +255,7 @@ where
 
         let x = y * from_f64(2.25) * u_prime / v_prime;
         let z = y * (from_f64(3.0) - from_f64(0.75) * u_prime - from_f64(5.0) * v_prime) / v_prime;
-        Xyz::with_wp(x, y, z)
+        Xyz::new(x, y, z)
     }
 }
 
@@ -290,17 +267,14 @@ where
         let m1_inv = oklab::m1_inv();
         let m2_inv = oklab::m2_inv();
 
-        let Xyz {
-            x: l_,
-            y: m_,
-            z: s_,
-            ..
-        } = multiply_xyz::<_, D65, _>(&m2_inv, &Xyz::new(color.l, color.a, color.b));
+        let Self {
+            x: l, y: m, z: s, ..
+        } = multiply_xyz(&m2_inv, &Self::new(color.l, color.a, color.b));
 
-        let lms = Xyz::new(l_.powi(3), m_.powi(3), s_.powi(3));
-        let Xyz { x, y, z, .. } = multiply_xyz::<_, D65, _>(&m1_inv, &lms);
+        let lms = Self::new(l.powi(3), m.powi(3), s.powi(3));
+        let Self { x, y, z, .. } = multiply_xyz(&m1_inv, &lms);
 
-        Self::with_wp(x, y, z)
+        Self::new(x, y, z)
     }
 }
 
@@ -456,7 +430,7 @@ where
     T: Zero,
 {
     fn default() -> Xyz<Wp, T> {
-        Xyz::with_wp(T::zero(), T::zero(), T::zero())
+        Xyz::new(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -604,7 +578,7 @@ mod test {
 
     #[test]
     fn luma() {
-        let a = Xyz::from_color(LinLuma::new(0.5));
+        let a = Xyz::<D65>::from_color(LinLuma::new(0.5));
         let b = Xyz::new(0.475235, 0.5, 0.544415);
         assert_relative_eq!(a, b, epsilon = 0.0001);
     }
@@ -660,7 +634,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Xyz::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Xyz::<D65>::new(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(serialized, r#"{"x":0.3,"y":0.8,"z":0.1}"#);
     }

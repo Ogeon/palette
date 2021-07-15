@@ -75,21 +75,9 @@ where
     }
 }
 
-impl<T> Yxy<D65, T> {
-    /// CIE Yxy with white point D65.
-    pub fn new(x: T, y: T, luma: T) -> Yxy<D65, T> {
-        Yxy {
-            x,
-            y,
-            luma,
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Yxy<Wp, T> {
-    /// CIE Yxy.
-    pub fn with_wp(x: T, y: T, luma: T) -> Yxy<Wp, T> {
+    /// Create a CIE Yxy color.
+    pub const fn new(x: T, y: T, luma: T) -> Yxy<Wp, T> {
         Yxy {
             x,
             y,
@@ -105,7 +93,7 @@ impl<Wp, T> Yxy<Wp, T> {
 
     /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn from_components((x, y, luma): (T, T, T)) -> Self {
-        Self::with_wp(x, y, luma)
+        Self::new(x, y, luma)
     }
 }
 
@@ -145,21 +133,11 @@ where
 }
 
 ///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
-impl<T, A> Alpha<Yxy<D65, T>, A> {
-    /// CIE Yxy and transparency with white point D65.
-    pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
+impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
+    /// Create a CIE Yxy color with transparency.
+    pub const fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
             color: Yxy::new(x, y, luma),
-            alpha,
-        }
-    }
-}
-///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
-impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
-    /// CIE Yxy and transparency.
-    pub fn with_wp(x: T, y: T, luma: T, alpha: A) -> Self {
-        Alpha {
-            color: Yxy::with_wp(x, y, luma),
             alpha,
         }
     }
@@ -171,7 +149,7 @@ impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
 
     /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn from_components((x, y, luma, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(x, y, luma, alpha)
+        Self::new(x, y, luma, alpha)
     }
 }
 
@@ -491,7 +469,7 @@ mod test {
 
     #[test]
     fn luma() {
-        let a = Yxy::from_color(LinLuma::new(0.5));
+        let a = Yxy::<D65>::from_color(LinLuma::new(0.5));
         let b = Yxy::new(0.312727, 0.329023, 0.5);
         assert_relative_eq!(a, b, epsilon = 0.000001);
     }
@@ -547,7 +525,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Yxy::new(0.3, 0.8, 0.1)).unwrap();
+        let serialized = ::serde_json::to_string(&Yxy::<D65>::new(0.3, 0.8, 0.1)).unwrap();
 
         assert_eq!(serialized, r#"{"x":0.3,"y":0.8,"luma":0.1}"#);
     }

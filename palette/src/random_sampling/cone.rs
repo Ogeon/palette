@@ -141,16 +141,16 @@ mod test {
     fn sample_max_min() {
         let a = sample_hsv(RgbHue::from(0.0), 0.0, 0.0);
         let b = sample_hsv(RgbHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsv::new(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsv::new(360.0, 1.0, 1.0), b);
+        assert_relative_eq!(Hsv::new_srgb(0.0, 0.0, 0.0), a);
+        assert_relative_eq!(Hsv::new_srgb(360.0, 1.0, 1.0), b);
         let a = sample_hsl(RgbHue::from(0.0), 0.0, 0.0);
         let b = sample_hsl(RgbHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsl::new(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsl::new(360.0, 1.0, 1.0), b);
+        assert_relative_eq!(Hsl::new_srgb(0.0, 0.0, 0.0), a);
+        assert_relative_eq!(Hsl::new_srgb(360.0, 1.0, 1.0), b);
         let a = sample_hsluv(LuvHue::from(0.0), 0.0, 0.0);
         let b = sample_hsluv(LuvHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsluv::new(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsluv::new(360.0, 100.0, 100.0), b);
+        assert_relative_eq!(Hsluv::<D65>::new(0.0, 0.0, 0.0), a);
+        assert_relative_eq!(Hsluv::<D65>::new(360.0, 100.0, 100.0), b);
     }
 
     #[cfg(feature = "random")]

@@ -24,7 +24,7 @@ use palette::{FromF64, Lab, Lch, Xyz};
 pub struct PointerWP;
 impl WhitePoint for PointerWP {
     fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::with_wp(
+        Xyz::new(
             FromF64::from_f64(0.980722647624),
             FromF64::from_f64(1.0),
             FromF64::from_f64(1.182254189827),
@@ -54,8 +54,8 @@ struct PointerData {
 impl From<PointerDataRaw> for PointerData {
     fn from(src: PointerDataRaw) -> PointerData {
         PointerData {
-            lch: Lch::with_wp(src.lch_l, src.lch_c, src.lch_h),
-            lab: Lab::with_wp(src.lab_l, src.lab_a, src.lab_b),
+            lch: Lch::new(src.lch_l, src.lch_c, src.lch_h),
+            lab: Lab::new(src.lab_l, src.lab_a, src.lab_b),
         }
     }
 }

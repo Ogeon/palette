@@ -68,7 +68,7 @@ impl<S, T: Clone> Clone for Luma<S, T> {
 
 impl<S, T> Luma<S, T> {
     /// Create a luminance color.
-    pub fn new(luma: T) -> Luma<S, T> {
+    pub const fn new(luma: T) -> Luma<S, T> {
         Luma {
             luma,
             standard: PhantomData,
@@ -179,7 +179,7 @@ impl<S, T> Eq for Luma<S, T> where T: Eq {}
 ///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A> {
     /// Create a luminance color with transparency.
-    pub fn new(luma: T, alpha: A) -> Self {
+    pub const fn new(luma: T, alpha: A) -> Self {
         Alpha {
             color: Luma::new(luma),
             alpha,

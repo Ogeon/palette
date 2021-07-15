@@ -91,9 +91,9 @@ where
             lch: Lch::new(src.lch_l_unscaled, src.lch_c_unscaled, src.lch_h_normalized),
             rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b),
             linear_rgb: Srgb::new(src.rgb_r, src.rgb_g, src.rgb_b).into_linear(),
-            hsl: Hsl::new(src.hsl_h, src.hsl_s, src.hsl_l),
-            hsv: Hsv::new(src.hsv_h, src.hsv_s, src.hsv_v),
-            hwb: Hwb::new(src.hwb_h, src.hwb_w, src.hwb_b),
+            hsl: Hsl::new_srgb(src.hsl_h, src.hsl_s, src.hsl_l),
+            hsv: Hsv::new_srgb(src.hsv_h, src.hsv_s, src.hsv_v),
+            hwb: Hwb::new_srgb(src.hwb_h, src.hwb_w, src.hwb_b),
         }
     }
 }

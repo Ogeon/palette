@@ -42,7 +42,15 @@ pub fn build_colors(writer: &mut File) {
             .unwrap_or_else(|| panic!("couldn't get blue for {}", name));
 
         writeln!(writer, "\n///<div style=\"display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: {0};\"></div>", name).unwrap();
-        writeln!(writer, "pub const {}: crate::rgb::Srgb<u8> = crate::rgb::Srgb {{ red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData }};", name.to_uppercase(), red, green, blue).unwrap();
+        writeln!(
+            writer,
+            "pub const {}: crate::rgb::Srgb<u8> = crate::rgb::Srgb::new({}, {}, {});",
+            name.to_uppercase(),
+            red,
+            green,
+            blue
+        )
+        .unwrap();
 
         entries.push((name.to_owned(), name.to_uppercase()));
     }
@@ -104,7 +112,16 @@ pub fn build_gradients(writer: &mut File) {
                 .next()
                 .and_then(|r| r.trim().parse().ok())
                 .unwrap_or_else(|| panic!("couldn't get the {}th blue-value for {}", i, name));
-            write!(writer, "({:.10},{}{{red: {}, green: {}, blue: {}, standard: ::core::marker::PhantomData}}),", (i as f32/number_of_colors as f32), color_type, red, green, blue).unwrap();
+            write!(
+                writer,
+                "({:.10},{}::new({}, {}, {})),",
+                (i as f32 / number_of_colors as f32),
+                color_type,
+                red,
+                green,
+                blue
+            )
+            .unwrap();
         }
         writeln!(writer, "], ::core::marker::PhantomData);").unwrap();
     }

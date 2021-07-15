@@ -534,7 +534,7 @@ pub trait Shade: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsl, Shade};
     ///
-    /// let color = Hsl::new(0.0, 1.0, 0.5);
+    /// let color = Hsl::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);
     /// ```
     fn lighten(&self, factor: Self::Scalar) -> Self;
@@ -545,7 +545,7 @@ pub trait Shade: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsl, Shade};
     ///
-    /// let color = Hsl::new(0.0, 1.0, 0.4);
+    /// let color = Hsl::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);
     /// ```
     fn lighten_fixed(&self, amount: Self::Scalar) -> Self;
@@ -557,7 +557,7 @@ pub trait Shade: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsv, Shade};
     ///
-    /// let color = Hsv::new(0.0, 1.0, 0.5);
+    /// let color = Hsv::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.darken(0.5).value, 0.25);
     /// ```
     fn darken(&self, factor: Self::Scalar) -> Self {
@@ -570,7 +570,7 @@ pub trait Shade: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsv, Shade};
     ///
-    /// let color = Hsv::new(0.0, 1.0, 0.4);
+    /// let color = Hsv::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.darken_fixed(0.2).value, 0.2);
     /// ```
     fn darken_fixed(&self, amount: Self::Scalar) -> Self {
@@ -648,7 +648,7 @@ pub trait Hue: GetHue {
 /// use approx::assert_relative_eq;
 /// use palette::{Hsv, Saturate};
 ///
-/// let a = Hsv::new(0.0, 0.5, 1.0);
+/// let a = Hsv::new_srgb(0.0, 0.5, 1.0);
 ///
 /// assert_relative_eq!(a.saturate(0.5).saturation, 0.75);
 /// assert_relative_eq!(a.desaturate_fixed(0.5).saturation, 0.0);
@@ -665,7 +665,7 @@ pub trait Saturate: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsl, Saturate};
     ///
-    /// let color = Hsl::new(0.0, 0.5, 0.5);
+    /// let color = Hsl::new_srgb(0.0, 0.5, 0.5);
     /// assert_relative_eq!(color.saturate(0.5).saturation, 0.75);
     /// ```
     fn saturate(&self, factor: Self::Scalar) -> Self;
@@ -677,7 +677,7 @@ pub trait Saturate: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsl, Saturate};
     ///
-    /// let color = Hsl::new(0.0, 0.4, 0.5);
+    /// let color = Hsl::new_srgb(0.0, 0.4, 0.5);
     /// assert_relative_eq!(color.saturate_fixed(0.2).saturation, 0.6);
     /// ```
     fn saturate_fixed(&self, amount: Self::Scalar) -> Self;
@@ -689,7 +689,7 @@ pub trait Saturate: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsv, Saturate};
     ///
-    /// let color = Hsv::new(0.0, 0.5, 0.5);
+    /// let color = Hsv::new_srgb(0.0, 0.5, 0.5);
     /// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);
     /// ```
     fn desaturate(&self, factor: Self::Scalar) -> Self {
@@ -703,7 +703,7 @@ pub trait Saturate: Sized {
     /// use approx::assert_relative_eq;
     /// use palette::{Hsv, Saturate};
     ///
-    /// let color = Hsv::new(0.0, 0.4, 0.5);
+    /// let color = Hsv::new_srgb(0.0, 0.4, 0.5);
     /// assert_relative_eq!(color.desaturate_fixed(0.2).saturation, 0.2);
     /// ```
     fn desaturate_fixed(&self, amount: Self::Scalar) -> Self {

@@ -77,25 +77,20 @@ where
     }
 }
 
-impl<T> Lchuv<D65, T> {
-    /// CIE L\*C\*uv h°uv with white point D65.
-    pub fn new<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H) -> Lchuv<D65, T> {
-        Lchuv {
-            l,
-            chroma,
-            hue: hue.into(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lchuv<Wp, T> {
-    /// CIE L\*C\*uv h°uv
-    pub fn with_wp<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H) -> Lchuv<Wp, T> {
+    /// Create a CIE L\*C\*uv h°uv color.
+    pub fn new<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H) -> Self {
+        Self::new_const(l, chroma, hue.into())
+    }
+
+    /// Create a CIE L\*C\*uv h°uv color. This is the same as `Lchuv::new`
+    /// without the generic hue type. It's temporary until `const fn` supports
+    /// traits.
+    pub const fn new_const(l: T, chroma: T, hue: LuvHue<T>) -> Self {
         Lchuv {
             l,
             chroma,
-            hue: hue.into(),
+            hue,
             white_point: PhantomData,
         }
     }
@@ -107,7 +102,7 @@ impl<Wp, T> Lchuv<Wp, T> {
 
     /// Convert from a `(L\*, C\*uv, h°uv)` tuple.
     pub fn from_components<H: Into<LuvHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
-        Self::with_wp(l, chroma, hue)
+        Self::new(l, chroma, hue)
     }
 }
 
@@ -137,22 +132,18 @@ where
 }
 
 ///<span id="Lchuva"></span>[`Lchuva`](crate::Lchuva) implementations.
-impl<T, A> Alpha<Lchuv<D65, T>, A> {
-    /// CIE L\*C\*uv h°uv and transparency with white point D65.
-    pub fn new<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
-        Alpha {
-            color: Lchuv::new(l, chroma, hue),
-            alpha,
-        }
-    }
-}
-
-///<span id="Lchuva"></span>[`Lchuva`](crate::Lchuva) implementations.
 impl<Wp, T, A> Alpha<Lchuv<Wp, T>, A> {
-    /// CIE L\*C\*uv h°uv and transparency.
-    pub fn with_wp<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
+    /// Create a CIE L\*C\*uv h°uv color with transparency.
+    pub fn new<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
+        Self::new_const(l, chroma, hue.into(), alpha)
+    }
+
+    /// Create a CIE L\*C\*uv h°uv color with transparency. This is the same as
+    /// `Lchuva::new` without the generic hue type. It's temporary until `const
+    /// fn` supports traits.
+    pub const fn new_const(l: T, chroma: T, hue: LuvHue<T>, alpha: A) -> Self {
         Alpha {
-            color: Lchuv::with_wp(l, chroma, hue),
+            color: Lchuv::new_const(l, chroma, hue),
             alpha,
         }
     }
@@ -164,7 +155,7 @@ impl<Wp, T, A> Alpha<Lchuv<Wp, T>, A> {
 
     /// Convert from a `(L\*, C\*uv, h°uv, alpha)` tuple.
     pub fn from_components<H: Into<LuvHue<T>>>((l, chroma, hue, alpha): (T, T, H, A)) -> Self {
-        Self::with_wp(l, chroma, hue, alpha)
+        Self::new(l, chroma, hue, alpha)
     }
 }
 
@@ -197,7 +188,7 @@ where
         // chroma for that hue.
         let max_chroma = LuvBounds::from_lightness(color.l).max_chroma_at_hue(color.hue);
 
-        Lchuv::with_wp(
+        Lchuv::new(
             color.l,
             color.saturation * max_chroma * T::from_f64(0.01),
             color.hue,
@@ -379,7 +370,7 @@ where
     T: Zero,
 {
     fn default() -> Lchuv<Wp, T> {
-        Lchuv::with_wp(T::zero(), T::zero(), LuvHue::from(T::zero()))
+        Lchuv::new(T::zero(), T::zero(), LuvHue::from(T::zero()))
     }
 }
 
@@ -537,7 +528,7 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-        let lchuv = Lchuv::new(120.0, 40.0, 30.0);
+        let lchuv = Lchuv::<D65>::new(120.0, 40.0, 30.0);
         let lchuv2 = Lchuv::new(200.0, 30.0, 40.0);
         let mut _lchuv3 = lchuv + lchuv2;
         _lchuv3 += lchuv2;
@@ -564,7 +555,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Lchuv::new(80.0, 70.0, 130.0)).unwrap();
+        let serialized = ::serde_json::to_string(&Lchuv::<D65>::new(80.0, 70.0, 130.0)).unwrap();
 
         assert_eq!(serialized, r#"{"l":80.0,"chroma":70.0,"hue":130.0}"#);
     }

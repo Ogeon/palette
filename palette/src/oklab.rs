@@ -151,7 +151,7 @@ where
 
 impl<T> Oklab<T> {
     /// Create an Oklab color.
-    pub fn new(l: T, a: T, b: T) -> Self {
+    pub const fn new(l: T, a: T, b: T) -> Self {
         Self { l, a, b }
     }
 
@@ -203,8 +203,8 @@ where
 
 ///<span id="Oklaba"></span>[`Oklaba`](crate::Oklaba) implementations.
 impl<T, A> Alpha<Oklab<T>, A> {
-    /// Oklab and transparency.
-    pub fn new(l: T, a: T, b: T, alpha: A) -> Self {
+    /// Create an Oklab color with transparency.
+    pub const fn new(l: T, a: T, b: T, alpha: A) -> Self {
         Alpha {
             color: Oklab::new(l, a, b),
             alpha,
@@ -238,13 +238,13 @@ where
 
         let Xyz {
             x: l, y: m, z: s, ..
-        } = multiply_xyz::<_, D65, _>(&m1, &color);
+        } = multiply_xyz::<D65, D65, T>(&m1, &color);
 
         let l_m_s_ = Xyz::new(l.cbrt(), m.cbrt(), s.cbrt());
 
         let Xyz {
             x: l, y: a, z: b, ..
-        } = multiply_xyz::<_, D65, _>(&m2, &l_m_s_);
+        } = multiply_xyz::<D65, D65, T>(&m2, &l_m_s_);
 
         Self::new(l, a, b)
     }

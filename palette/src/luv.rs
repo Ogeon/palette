@@ -78,21 +78,9 @@ where
     }
 }
 
-impl<T> Luv<D65, T> {
-    /// CIE L\*u\*v\* with white point D65.
-    pub fn new(l: T, u: T, v: T) -> Luv<D65, T> {
-        Luv {
-            l,
-            u,
-            v,
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Luv<Wp, T> {
-    /// CIE L\*u\*v\*.
-    pub fn with_wp(l: T, u: T, v: T) -> Luv<Wp, T> {
+    /// Create a CIE L\*u\*v\* color.
+    pub const fn new(l: T, u: T, v: T) -> Self {
         Luv {
             l,
             u,
@@ -108,7 +96,7 @@ impl<Wp, T> Luv<Wp, T> {
 
     /// Convert from a `(L\*, u\*, v\*)` tuple.
     pub fn from_components((l, u, v): (T, T, T)) -> Self {
-        Self::with_wp(l, u, v)
+        Self::new(l, u, v)
     }
 }
 
@@ -148,22 +136,11 @@ where
 }
 
 ///<span id="Luva"></span>[`Luva`](crate::Luva) implementations.
-impl<T, A> Alpha<Luv<D65, T>, A> {
-    /// CIE L\*u\*v\* and transparency and white point D65.
-    pub fn new(l: T, u: T, v: T, alpha: A) -> Self {
+impl<Wp, T, A> Alpha<Luv<Wp, T>, A> {
+    /// Create a CIE L\*u\*v\* color with transparency.
+    pub const fn new(l: T, u: T, v: T, alpha: A) -> Self {
         Alpha {
             color: Luv::new(l, u, v),
-            alpha,
-        }
-    }
-}
-
-///<span id="Luva"></span>[`Luva`](crate::Luva) implementations.
-impl<Wp, T, A> Alpha<Luv<Wp, T>, A> {
-    /// CIE L\*u\*v\* and transparency.
-    pub fn with_wp(l: T, u: T, v: T, alpha: A) -> Self {
-        Alpha {
-            color: Luv::with_wp(l, u, v),
             alpha,
         }
     }
@@ -175,7 +152,7 @@ impl<Wp, T, A> Alpha<Luv<Wp, T>, A> {
 
     /// Convert from u `(L\*, u\*, v\*, alpha)` tuple.
     pub fn from_components((l, u, v, alpha): (T, T, T, A)) -> Self {
-        Self::with_wp(l, u, v, alpha)
+        Self::new(l, u, v, alpha)
     }
 }
 
@@ -192,7 +169,7 @@ where
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
         let (sin_hue, cos_hue) = color.hue.to_radians().sin_cos();
         let chroma = color.chroma.max(T::zero());
-        Luv::with_wp(color.l, chroma * cos_hue, chroma * sin_hue)
+        Luv::new(color.l, chroma * cos_hue, chroma * sin_hue)
     }
 }
 
@@ -210,7 +187,7 @@ where
 
         let prime_denom = color.x + from_f64(15.0) * color.y + from_f64(3.0) * color.z;
         if prime_denom == from_f64(0.0) {
-            return Luv::with_wp(T::zero(), T::zero(), T::zero());
+            return Luv::new(T::zero(), T::zero(), T::zero());
         }
         let prime_denom_recip = prime_denom.recip();
         let prime_ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();
@@ -381,7 +358,7 @@ where
     T: Zero,
 {
     fn default() -> Luv<Wp, T> {
-        Luv::with_wp(T::zero(), T::zero(), T::zero())
+        Luv::new(T::zero(), T::zero(), T::zero())
     }
 }
 
@@ -559,7 +536,7 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-        let luv = Luv::new(120.0, 40.0, 30.0);
+        let luv = Luv::<D65>::new(120.0, 40.0, 30.0);
         let luv2 = Luv::new(200.0, 30.0, 40.0);
         let mut _luv3 = luv + luv2;
         _luv3 += luv2;
@@ -588,7 +565,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Luv::new(80.0, 20.0, 30.0)).unwrap();
+        let serialized = ::serde_json::to_string(&Luv::<D65>::new(80.0, 20.0, 30.0)).unwrap();
 
         assert_eq!(serialized, r#"{"l":80.0,"u":20.0,"v":30.0}"#);
     }

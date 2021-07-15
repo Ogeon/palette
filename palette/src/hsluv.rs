@@ -81,23 +81,17 @@ where
     }
 }
 
-impl<T> Hsluv<D65, T> {
-    /// HSLuv with standard D65 whitepoint
-    pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Hsluv<D65, T> {
-        Hsluv {
-            hue: hue.into(),
-            saturation,
-            l,
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Hsluv<Wp, T> {
-    /// HSLuv with custom whitepoint.
-    pub fn with_wp<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Hsluv<Wp, T> {
+    /// Create an HSLuv color.
+    pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Self {
+        Self::new_const(hue.into(), saturation, l)
+    }
+
+    /// Create an HSLuv color. This is the same as `Hsluv::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub const fn new_const(hue: LuvHue<T>, saturation: T, l: T) -> Self {
         Hsluv {
-            hue: hue.into(),
+            hue,
             saturation,
             l,
             white_point: PhantomData,
@@ -111,7 +105,7 @@ impl<Wp, T> Hsluv<Wp, T> {
 
     /// Convert from a `(hue, saturation, l)` tuple.
     pub fn from_components<H: Into<LuvHue<T>>>((hue, saturation, l): (H, T, T)) -> Self {
-        Self::with_wp(hue, saturation, l)
+        Self::new(hue, saturation, l)
     }
 }
 
@@ -141,22 +135,18 @@ where
 }
 
 ///<span id="Hsluva"></span>[`Hsluva`](crate::Hsluva) implementations.
-impl<T, A> Alpha<Hsluv<D65, T>, A> {
-    /// HSLuv and transparency with standard D65 whitepoint.
-    pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T, alpha: A) -> Self {
-        Alpha {
-            color: Hsluv::new(hue, saturation, l),
-            alpha,
-        }
-    }
-}
-
-///<span id="Hsluva"></span>[`Hsluva`](crate::Hsluva) implementations.
 impl<Wp, T, A> Alpha<Hsluv<Wp, T>, A> {
-    /// HSLuv and transparency.
-    pub fn with_wp<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T, alpha: A) -> Self {
+    /// Create an HSLuv color with transparency.
+    pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T, alpha: A) -> Self {
+        Self::new_const(hue.into(), saturation, l, alpha)
+    }
+
+    /// Create an HSLuv color with transparency. This is the same as
+    /// `Hsluva::new` without the generic hue type. It's temporary until `const
+    /// fn` supports traits.
+    pub const fn new_const(hue: LuvHue<T>, saturation: T, l: T, alpha: A) -> Self {
         Alpha {
-            color: Hsluv::with_wp(hue, saturation, l),
+            color: Hsluv::new_const(hue, saturation, l),
             alpha,
         }
     }
@@ -173,7 +163,7 @@ impl<Wp, T, A> Alpha<Hsluv<Wp, T>, A> {
 
     /// Convert from a `(hue, saturation, l, alpha)` tuple.
     pub fn from_components<H: Into<LuvHue<T>>>((hue, saturation, l, alpha): (H, T, T, A)) -> Self {
-        Self::with_wp(hue, saturation, l, alpha)
+        Self::new(hue, saturation, l, alpha)
     }
 }
 
@@ -192,7 +182,7 @@ where
         // saturation at a particular hue.
         let max_chroma = LuvBounds::from_lightness(color.l).max_chroma_at_hue(color.hue);
 
-        Hsluv::with_wp(
+        Hsluv::new(
             color.hue,
             color.chroma / max_chroma * T::from_f64(100.0),
             color.l,
@@ -386,7 +376,7 @@ where
     T: Zero,
 {
     fn default() -> Hsluv<Wp, T> {
-        Hsluv::with_wp(LuvHue::from(T::zero()), T::zero(), T::zero())
+        Hsluv::new(LuvHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
@@ -524,7 +514,7 @@ mod test {
         for hue in (0..=20).map(|x| x as f64 * 18.0) {
             for sat in (0..=20).map(|x| x as f64 * 5.0) {
                 for l in (1..=20).map(|x| x as f64 * 5.0) {
-                    let hsluv = Hsluv::new(hue, sat, l);
+                    let hsluv = Hsluv::<D65, _>::new(hue, sat, l);
                     let lchuv = Lchuv::from_color(hsluv);
                     let mut to_hsluv = Hsluv::from_color(lchuv);
                     if to_hsluv.l < 1e-8 {
@@ -555,7 +545,7 @@ mod test {
     /// implemented.
     #[test]
     fn test_arithmetic() {
-        let hsl = Hsluv::new(120.0, 40.0, 30.0);
+        let hsl = Hsluv::<D65>::new(120.0, 40.0, 30.0);
         let hsl2 = Hsluv::new(200.0, 30.0, 40.0);
         let mut _hsl3 = hsl + hsl2;
         _hsl3 += hsl2;
@@ -572,7 +562,7 @@ mod test {
     fn saturate() {
         for sat in (0..=10).map(|s| s as f64 * 10.0) {
             for a in (0..=10).map(|l| l as f64 * 10.0) {
-                let hsl = Hsluv::new(150.0, sat, a);
+                let hsl = Hsluv::<D65, _>::new(150.0, sat, a);
                 let hsl_sat_fixed = hsl.saturate_fixed(0.1);
                 let expected_sat_fixed = Hsluv::new(150.0, (sat + 10.0).min(100.0), a);
                 assert_relative_eq!(hsl_sat_fixed, expected_sat_fixed);
@@ -598,7 +588,7 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Hsluv::new(120.0, 80.0, 60.0)).unwrap();
+        let serialized = ::serde_json::to_string(&Hsluv::<D65>::new(120.0, 80.0, 60.0)).unwrap();
 
         assert_eq!(serialized, r#"{"hue":120.0,"saturation":80.0,"l":60.0}"#);
     }
