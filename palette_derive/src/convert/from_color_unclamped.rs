@@ -5,6 +5,7 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{parse_quote, DeriveInput, Generics, Ident, Result, Type};
 
+use crate::convert::util::WhitePointSource;
 use crate::meta::{
     parse_field_attributes, parse_namespaced_attributes, FieldAttributes, IdentOrIndex,
     TypeItemAttributes,
@@ -14,8 +15,7 @@ use crate::util;
 use crate::COLOR_TYPES;
 
 use super::util::{
-    add_float_component_where_clause, add_white_point_where_clause, component_type,
-    find_in_generics, find_nearest_color, get_convert_color_type, white_point_type,
+    component_type, find_in_generics, find_nearest_color, get_convert_color_type, white_point_type,
 };
 
 pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn::parse::Error>> {
@@ -26,7 +26,7 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         attrs,
         ..
     } = syn::parse(item).map_err(|error| vec![error])?;
-    let mut generics = original_generics.clone();
+    let generics = original_generics.clone();
 
     let mut item_meta: TypeItemAttributes = parse_namespaced_attributes(attrs)?;
 
@@ -39,38 +39,59 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         )]);
     };
 
-    let (generic_component, generic_white_point) = find_in_generics(
-        item_meta.component.as_ref(),
-        item_meta.white_point.as_ref(),
-        &original_generics,
-    );
+    let generic_white_point = item_meta.white_point.as_ref().map_or(false, |white_point| {
+        find_in_generics(white_point, &original_generics)
+    });
 
-    let white_point = white_point_type(item_meta.white_point.clone(), item_meta.internal);
+    let generic_rgb_standard = item_meta
+        .rgb_standard
+        .as_ref()
+        .map_or(false, |rgb_standard| {
+            find_in_generics(rgb_standard, &original_generics)
+        });
+
+    let generic_luma_standard = item_meta
+        .luma_standard
+        .as_ref()
+        .map_or(false, |luma_standard| {
+            find_in_generics(luma_standard, &original_generics)
+        });
+
+    let (white_point, white_point_source) = white_point_type(
+        item_meta.white_point.clone(),
+        item_meta.rgb_standard.clone(),
+        item_meta.luma_standard.clone(),
+        item_meta.internal,
+    );
     let component = component_type(item_meta.component.clone());
 
     let alpha_field = fields_meta.alpha_property;
-
-    if generic_component {
-        add_float_component_where_clause(&component, &mut generics, item_meta.internal);
-    }
-
-    if generic_white_point {
-        add_white_point_where_clause(&white_point, &mut generics, item_meta.internal);
-    }
 
     // Assume conversion from Xyz by default
     if item_meta.skip_derives.is_empty() {
         item_meta.skip_derives.insert("Xyz".into());
     }
 
+    let wp_source_trait_bound = match white_point_source {
+        Some(WhitePointSource::WhitePoint) if generic_white_point => {
+            Some(WhitePointSource::WhitePoint)
+        }
+        Some(WhitePointSource::RgbStandard) if generic_rgb_standard => {
+            Some(WhitePointSource::RgbStandard)
+        }
+        Some(WhitePointSource::LumaStandard) if generic_luma_standard => {
+            Some(WhitePointSource::LumaStandard)
+        }
+        _ => None,
+    };
+
     let all_from_impl_params = prepare_from_impl(
         &item_meta.skip_derives,
         &component,
         &white_point,
-        item_meta.rgb_standard.as_ref(),
         &item_meta,
         &generics,
-        generic_component,
+        wp_source_trait_bound,
     )
     .map_err(|error| vec![error])?;
 
@@ -100,15 +121,12 @@ fn prepare_from_impl(
     skip: &HashSet<String>,
     component: &Type,
     white_point: &Type,
-    rgb_standard: Option<&Type>,
     meta: &TypeItemAttributes,
     generics: &Generics,
-    generic_component: bool,
+    wp_source_trait_bound: Option<WhitePointSource>,
 ) -> Result<Vec<FromImplParameters>> {
     let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
     let linear_path = util::path(&["encoding", "Linear"], meta.internal);
-    let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
-    let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
 
     let mut parameters = Vec::new();
 
@@ -116,15 +134,13 @@ fn prepare_from_impl(
         let nearest_color_name = find_nearest_color(color_name, skip)?;
 
         let mut generics = generics.clone();
-        if generic_component {
-            add_float_component_where_clause(&component, &mut generics, meta.internal)
-        }
 
-        let color_ty = get_convert_color_type(
+        let (color_ty, mut used_input) = get_convert_color_type(
             color_name,
             white_point,
             component,
-            rgb_standard,
+            meta.rgb_standard.as_ref(),
+            meta.luma_standard.as_ref(),
             &mut generics,
             meta.internal,
         );
@@ -135,11 +151,11 @@ fn prepare_from_impl(
             _ => None,
         };
 
-        let rgb_standard = rgb_standard.cloned().or(target_color_rgb_standard);
-
         let nearest_color_ty: Type = match nearest_color_name {
             "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
-                let rgb_standard = rgb_standard
+                let rgb_standard = meta.rgb_standard
+                    .clone()
+                    .or(target_color_rgb_standard)
                     .ok_or_else(|| {
                         syn::parse::Error::new(
                             Span::call_site(),
@@ -153,27 +169,55 @@ fn prepare_from_impl(
 
                 parse_quote!(#nearest_color_path::<#rgb_standard, #component>)
             }
-            "Luma" => parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>),
-            _ => parse_quote!(#nearest_color_path::<#white_point, #component>),
+            "Luma" => {
+                if let Some(luma_standard) = meta.luma_standard.as_ref() {
+                    parse_quote!(#nearest_color_path::<#luma_standard, #component>)
+                } else {
+                    used_input.white_point = true;
+                    parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>)
+                }
+            }
+            _ => {
+                used_input.white_point = true;
+                parse_quote!(#nearest_color_path::<#white_point, #component>)
+            }
         };
 
-        let mut into_generics = generics.clone();
+        if used_input.white_point {
+            match wp_source_trait_bound {
+                Some(WhitePointSource::WhitePoint) => {
+                    let white_point_path =
+                        util::path(&["white_point", "WhitePoint"], meta.internal);
+                    let white_point = meta.white_point.as_ref();
+                    generics
+                        .make_where_clause()
+                        .predicates
+                        .push(parse_quote!(#white_point: #white_point_path))
+                }
 
-        if matches!(color_name, "Oklab" | "Oklch") {
-            generics.make_where_clause().predicates.push(parse_quote!(
-                #nearest_color_ty: #from_trait_path<#color_ty>
-            ));
-            into_generics
-                .make_where_clause()
-                .predicates
-                .push(parse_quote!(
-                    #nearest_color_ty: #into_trait_path<#color_ty>
-                ));
+                Some(WhitePointSource::RgbStandard) => {
+                    let rgb_standard_path = util::path(&["rgb", "RgbStandard"], meta.internal);
+                    let rgb_standard = meta.rgb_standard.as_ref();
+                    generics
+                        .make_where_clause()
+                        .predicates
+                        .push(parse_quote!(#rgb_standard: #rgb_standard_path))
+                }
+
+                Some(WhitePointSource::LumaStandard) => {
+                    let luma_standard_path = util::path(&["luma", "LumaStandard"], meta.internal);
+                    let luma_standard = meta.luma_standard.as_ref();
+                    generics
+                        .make_where_clause()
+                        .predicates
+                        .push(parse_quote!(#luma_standard: #luma_standard_path))
+                }
+                None => {}
+            }
         }
 
         parameters.push(FromImplParameters {
             generics,
-            into_generics,
             color_ty,
             nearest_color_ty,
         });
@@ -184,7 +228,6 @@ fn prepare_from_impl(
 
 struct FromImplParameters {
     generics: Generics,
-    into_generics: Generics,
     color_ty: Type,
     nearest_color_ty: Type,
 }
@@ -206,25 +249,50 @@ fn generate_from_implementations(
         let FromImplParameters {
             color_ty,
             generics,
-            into_generics,
             nearest_color_ty,
         } = parameters;
 
-        let (impl_generics, _, where_clause) = generics.split_for_impl();
+        {
+            let mut generics = generics.clone();
 
-        implementations.push(quote! {
-            #[automatically_derived]
-            impl #impl_generics #from_trait_path<#color_ty> for #ident #type_generics #where_clause {
-                fn from_color_unclamped(color: #color_ty) -> Self {
-                    use #from_trait_path;
-                    use #into_trait_path;
-                    #nearest_color_ty::from_color_unclamped(color).into_color_unclamped()
-                }
+            {
+                let where_clause = generics.make_where_clause();
+                where_clause
+                    .predicates
+                    .push(parse_quote!(#nearest_color_ty: #from_trait_path<#color_ty>));
+                where_clause
+                    .predicates
+                    .push(parse_quote!(#nearest_color_ty: #into_trait_path<Self>));
             }
-        });
+
+            let (impl_generics, _, where_clause) = generics.split_for_impl();
+
+            implementations.push(quote! {
+                #[automatically_derived]
+                impl #impl_generics #from_trait_path<#color_ty> for #ident #type_generics #where_clause {
+                    fn from_color_unclamped(color: #color_ty) -> Self {
+                        use #from_trait_path;
+                        use #into_trait_path;
+                        #nearest_color_ty::from_color_unclamped(color).into_color_unclamped()
+                    }
+                }
+            });
+        }
 
         if !meta.internal || meta.internal_not_base_type {
-            let (impl_generics, _, where_clause) = into_generics.split_for_impl();
+            let mut generics = generics.clone();
+
+            {
+                let where_clause = generics.make_where_clause();
+                where_clause
+                    .predicates
+                    .push(parse_quote!(#nearest_color_ty: #from_trait_path<#ident #type_generics>));
+                where_clause
+                    .predicates
+                    .push(parse_quote!(#nearest_color_ty: #into_trait_path<Self>));
+            }
+
+            let (impl_generics, _, where_clause) = generics.split_for_impl();
 
             implementations.push(quote! {
                 #[automatically_derived]
@@ -249,7 +317,6 @@ fn generate_from_alpha_implementation(
 ) -> TokenStream2 {
     let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
     let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
-    let component_trait_path = util::path(&["Component"], meta.internal);
     let alpha_path = util::path(&["Alpha"], meta.internal);
 
     let mut impl_generics = generics.clone();
@@ -260,9 +327,6 @@ fn generate_from_alpha_implementation(
         where_clause
             .predicates
             .push(parse_quote!(_C: #into_trait_path<Self>));
-        where_clause
-            .predicates
-            .push(parse_quote!(_A: #component_trait_path));
     }
 
     let (_, type_generics, _) = generics.split_for_impl();

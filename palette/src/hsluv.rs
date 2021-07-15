@@ -1,6 +1,7 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -9,12 +10,14 @@ use rand::distributions::Distribution;
 use rand::Rng;
 
 use crate::encoding::pixel::RawPixel;
+#[cfg(feature = "random")]
+use crate::float::Float;
 use crate::luv_bounds::LuvBounds;
 use crate::{
     clamp, contrast_ratio,
     convert::FromColorUnclamped,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, Component, FloatComponent, GetHue, Hue, Lchuv, LuvHue, Mix, Pixel,
+    Alpha, Clamp, FloatComponent, FromF64, GetHue, Hue, Lchuv, LuvHue, Mix, Pixel,
     RelativeContrast, Saturate, Shade, Xyz,
 };
 
@@ -40,11 +43,7 @@ pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
     skip_derives(Lchuv, Hsluv)
 )]
 #[repr(C)]
-pub struct Hsluv<Wp = D65, T = f32>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+pub struct Hsluv<Wp = D65, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
     #[palette(unsafe_same_layout_as = "T")]
@@ -66,27 +65,23 @@ where
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-}
+impl<Wp, T> Copy for Hsluv<Wp, T> where T: Copy {}
 
 impl<Wp, T> Clone for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     fn clone(&self) -> Hsluv<Wp, T> {
-        *self
+        Hsluv {
+            hue: self.hue.clone(),
+            saturation: self.saturation.clone(),
+            l: self.l.clone(),
+            white_point: PhantomData,
+        }
     }
 }
 
-impl<T> Hsluv<D65, T>
-where
-    T: FloatComponent,
-{
+impl<T> Hsluv<D65, T> {
     /// HSLuv with standard D65 whitepoint
     pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Hsluv<D65, T> {
         Hsluv {
@@ -98,11 +93,7 @@ where
     }
 }
 
-impl<Wp, T> Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> Hsluv<Wp, T> {
     /// HSLuv with custom whitepoint.
     pub fn with_wp<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Hsluv<Wp, T> {
         Hsluv {
@@ -122,7 +113,12 @@ where
     pub fn from_components<H: Into<LuvHue<T>>>((hue, saturation, l): (H, T, T)) -> Self {
         Self::with_wp(hue, saturation, l)
     }
+}
 
+impl<Wp, T> Hsluv<Wp, T>
+where
+    T: Zero + FromF64,
+{
     /// Return the `saturation` value minimum.
     pub fn min_saturation() -> T {
         T::zero()
@@ -144,29 +140,8 @@ where
     }
 }
 
-impl<Wp, T> PartialEq for Hsluv<Wp, T>
-where
-    T: FloatComponent + PartialEq,
-    Wp: WhitePoint,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue && self.saturation == other.saturation && self.l == other.l
-    }
-}
-
-impl<Wp, T> Eq for Hsluv<Wp, T>
-where
-    T: FloatComponent + Eq,
-    Wp: WhitePoint,
-{
-}
-
 ///<span id="Hsluva"></span>[`Hsluva`](crate::Hsluva) implementations.
-impl<T, A> Alpha<Hsluv<D65, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Hsluv<D65, T>, A> {
     /// HSLuv and transparency with standard D65 whitepoint.
     pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T, alpha: A) -> Self {
         Alpha {
@@ -177,12 +152,7 @@ where
 }
 
 ///<span id="Hsluva"></span>[`Hsluva`](crate::Hsluva) implementations.
-impl<Wp, T, A> Alpha<Hsluv<Wp, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    Wp: WhitePoint,
-{
+impl<Wp, T, A> Alpha<Hsluv<Wp, T>, A> {
     /// HSLuv and transparency.
     pub fn with_wp<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T, alpha: A) -> Self {
         Alpha {
@@ -193,7 +163,12 @@ where
 
     /// Convert to a `(hue, saturation, l, alpha)` tuple.
     pub fn into_components(self) -> (LuvHue<T>, T, T, A) {
-        (self.hue, self.saturation, self.l, self.alpha)
+        (
+            self.color.hue,
+            self.color.saturation,
+            self.color.l,
+            self.alpha,
+        )
     }
 
     /// Convert from a `(hue, saturation, l, alpha)` tuple.
@@ -202,11 +177,7 @@ where
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Hsluv<Wp, T> {
     fn from_color_unclamped(hsluv: Hsluv<Wp, T>) -> Self {
         hsluv
     }
@@ -215,7 +186,6 @@ where
 impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Hsluv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
         // convert the chroma to a saturation based on the max
@@ -230,38 +200,33 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, H: Into<LuvHue<T>>> From<(H, T, T)> for Hsluv<Wp, T> {
+impl<Wp, T, H: Into<LuvHue<T>>> From<(H, T, T)> for Hsluv<Wp, T> {
     fn from(components: (H, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> Into<(LuvHue<T>, T, T)> for Hsluv<Wp, T> {
-    fn into(self) -> (LuvHue<T>, T, T) {
-        self.into_components()
+impl<Wp, T> From<Hsluv<Wp, T>> for (LuvHue<T>, T, T) {
+    fn from(color: Hsluv<Wp, T>) -> (LuvHue<T>, T, T) {
+        color.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, H: Into<LuvHue<T>>, A: Component> From<(H, T, T, A)>
-    for Alpha<Hsluv<Wp, T>, A>
-{
+impl<Wp, T, H: Into<LuvHue<T>>, A> From<(H, T, T, A)> for Alpha<Hsluv<Wp, T>, A> {
     fn from(components: (H, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(LuvHue<T>, T, T, A)>
-    for Alpha<Hsluv<Wp, T>, A>
-{
-    fn into(self) -> (LuvHue<T>, T, T, A) {
-        self.into_components()
+impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
+    fn from(color: Alpha<Hsluv<Wp, T>, A>) -> (LuvHue<T>, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<Wp, T> Clamp for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero + FromF64 + PartialOrd + Clone,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
@@ -270,25 +235,24 @@ where
     }
 
     fn clamp(&self) -> Hsluv<Wp, T> {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
         self.saturation = clamp(
-            self.saturation,
+            self.saturation.clone(),
             Self::min_saturation(),
             Self::max_saturation(),
         );
-        self.l = clamp(self.l, Self::min_l(), Self::max_l());
+        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
     }
 }
 
 impl<Wp, T> Mix for Hsluv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -308,7 +272,6 @@ where
 impl<Wp, T> Shade for Hsluv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -341,8 +304,7 @@ where
 
 impl<Wp, T> GetHue for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero + PartialOrd + Clone,
 {
     type Hue = LuvHue<T>;
 
@@ -350,30 +312,29 @@ where
         if self.saturation <= T::zero() {
             None
         } else {
-            Some(self.hue)
+            Some(self.hue.clone())
         }
     }
 }
 
 impl<Wp, T> Hue for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero + PartialOrd + Clone,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsluv<Wp, T> {
         Hsluv {
             hue: hue.into(),
-            saturation: self.saturation,
-            l: self.l,
+            saturation: self.saturation.clone(),
+            l: self.l.clone(),
             white_point: PhantomData,
         }
     }
 
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsluv<Wp, T> {
         Hsluv {
-            hue: self.hue + amount.into(),
-            saturation: self.saturation,
-            l: self.l,
+            hue: self.hue.clone() + amount.into(),
+            saturation: self.saturation.clone(),
+            l: self.l.clone(),
             white_point: PhantomData,
         }
     }
@@ -382,7 +343,6 @@ where
 impl<Wp, T> Saturate for Hsluv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -423,21 +383,18 @@ where
 
 impl<Wp, T> Default for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero,
 {
     fn default() -> Hsluv<Wp, T> {
         Hsluv::with_wp(LuvHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
-impl_color_add!(Hsluv, [hue, saturation, l], white_point);
-impl_color_sub!(Hsluv, [hue, saturation, l], white_point);
+impl_color_add!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
+impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 
 impl<Wp, T, P> AsRef<P> for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -447,8 +404,6 @@ where
 
 impl<Wp, T, P> AsMut<P> for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -476,7 +431,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformHsluv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Float + FromF64 + SampleUniform,
     Wp: WhitePoint,
 {
     hue: crate::hues::UniformLuvHue<T>,
@@ -488,7 +443,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Hsluv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Float + FromF64 + SampleUniform,
     Wp: WhitePoint,
 {
     type Sampler = UniformHsluv<Wp, T>;
@@ -497,7 +452,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformHsluv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Float + FromF64 + SampleUniform,
     Wp: WhitePoint,
 {
     type X = Hsluv<Wp, T>;
@@ -554,20 +509,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Zeroable for Hsluv<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<Wp, T> bytemuck::Zeroable for Hsluv<Wp, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Pod for Hsluv<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<Wp: 'static, T> bytemuck::Pod for Hsluv<Wp, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

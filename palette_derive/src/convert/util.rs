@@ -7,85 +7,71 @@ use syn::{parse_quote, GenericParam, Generics, Ident, Path, Result, Type, TypePa
 use crate::util;
 use crate::{COLOR_TYPES, PREFERRED_CONVERSION_SOURCE};
 
-pub fn find_in_generics(
-    component: Option<&Type>,
-    white_point: Option<&Type>,
-    generics: &Generics,
-) -> (bool, bool) {
-    let mut generic_component = false;
-    let mut generic_white_point = false;
-
+pub fn find_in_generics(type_to_find: &Type, generics: &Generics) -> bool {
     for param in &generics.params {
         if let GenericParam::Type(ref param) = *param {
-            if let Some(&Type::Path(TypePath {
+            if let &Type::Path(TypePath {
                 qself: None,
                 path:
                     Path {
-                        segments: ref component,
+                        segments: ref type_path,
                         leading_colon,
                     },
-            })) = component
+            }) = type_to_find
             {
-                let first = component.first();
+                let first = type_path.first();
                 let is_ident_path = leading_colon.is_none()
-                    && component.len() == 1
+                    && type_path.len() == 1
                     && first.unwrap().arguments.is_empty()
                     && first.unwrap().ident == param.ident;
 
                 if is_ident_path {
-                    generic_component = true;
-                }
-            }
-
-            if let Some(&Type::Path(TypePath {
-                qself: None,
-                path:
-                    Path {
-                        segments: ref white_point,
-                        leading_colon,
-                    },
-            })) = white_point
-            {
-                let first = white_point.first();
-                let is_ident_path = leading_colon.is_none()
-                    && white_point.len() == 1
-                    && first.unwrap().arguments.is_empty()
-                    && first.unwrap().ident == param.ident;
-
-                if is_ident_path {
-                    generic_white_point = true;
+                    return true;
                 }
             }
         }
     }
 
-    (generic_component, generic_white_point)
+    false
 }
 
-pub fn white_point_type(white_point: Option<Type>, internal: bool) -> Type {
-    white_point.unwrap_or_else(|| util::path_type(&["white_point", "D65"], internal))
+pub fn white_point_type(
+    white_point: Option<Type>,
+    rgb_standard: Option<Type>,
+    luma_standard: Option<Type>,
+    internal: bool,
+) -> (Type, Option<WhitePointSource>) {
+    white_point
+        .map(|white_point| (white_point, Some(WhitePointSource::WhitePoint)))
+        .or_else(|| {
+            rgb_standard.map(|rgb_standard| {
+                let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
+                let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
+                (
+                    parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
+                    Some(WhitePointSource::RgbStandard),
+                )
+            })
+        })
+        .or_else(|| {
+            luma_standard.map(|luma_standard| {
+                let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
+                (
+                    parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
+                    Some(WhitePointSource::LumaStandard),
+                )
+            })
+        })
+        .unwrap_or_else(|| {
+            (
+                util::path_type(&["white_point", "D65"], internal),
+                None,
+            )
+        })
 }
 
 pub fn component_type(component: Option<Type>) -> Type {
     component.unwrap_or_else(|| parse_quote!(f32))
-}
-
-pub fn add_float_component_where_clause(component: &Type, generics: &mut Generics, internal: bool) {
-    let component_trait_path = util::path(&["FloatComponent"], internal);
-
-    generics
-        .make_where_clause()
-        .predicates
-        .push(parse_quote!(#component: #component_trait_path));
-}
-
-pub fn add_white_point_where_clause(white_point: &Type, generics: &mut Generics, internal: bool) {
-    let white_point_trait_path = util::path(&["white_point", "WhitePoint"], internal);
-
-    generics
-        .make_where_clause()
-        .predicates
-        .push(parse_quote!(#white_point: #white_point_trait_path));
 }
 
 pub fn get_convert_color_type(
@@ -93,30 +79,45 @@ pub fn get_convert_color_type(
     white_point: &Type,
     component: &Type,
     rgb_standard: Option<&Type>,
+    luma_standard: Option<&Type>,
     generics: &mut Generics,
     internal: bool,
-) -> Type {
+) -> (Type, UsedInput) {
     let color_path = util::color_path(color, internal);
 
     match color {
         "Luma" => {
             let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
-            generics.params.push(GenericParam::Type(
-                Ident::new("_S", Span::call_site()).into(),
-            ));
 
-            generics
-                .make_where_clause()
-                .predicates
-                .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
-            parse_quote!(#color_path<_S, #component>)
+            if let Some(luma_standard) = luma_standard {
+                (
+                    parse_quote!(#color_path<#luma_standard, #component>),
+                    UsedInput::default(),
+                )
+            } else {
+                generics.params.push(GenericParam::Type(
+                    Ident::new("_S", Span::call_site()).into(),
+                ));
+
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
+                (
+                    parse_quote!(#color_path<_S, #component>),
+                    UsedInput { white_point: true },
+                )
+            }
         }
         "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
             let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
             let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
 
             if let Some(rgb_standard) = rgb_standard {
-                parse_quote!(#color_path<#rgb_standard, #component>)
+                (
+                    parse_quote!(#color_path<#rgb_standard, #component>),
+                    UsedInput::default(),
+                )
             } else {
                 generics.params.push(GenericParam::Type(
                     Ident::new("_S", Span::call_site()).into(),
@@ -130,11 +131,17 @@ pub fn get_convert_color_type(
                     .predicates
                     .push(parse_quote!(_S::Space: #rgb_space_path<WhitePoint = #white_point>));
 
-                parse_quote!(#color_path<_S, #component>)
+                (
+                    parse_quote!(#color_path<_S, #component>),
+                    UsedInput { white_point: true },
+                )
             }
         }
-        "Oklab" | "Oklch" => parse_quote!(#color_path<#component>),
-        _ => parse_quote!(#color_path<#white_point, #component>),
+        "Oklab" | "Oklch" => (parse_quote!(#color_path<#component>), UsedInput::default()),
+        _ => (
+            parse_quote!(#color_path<#white_point, #component>),
+            UsedInput { white_point: true },
+        ),
     }
 }
 
@@ -204,4 +211,16 @@ pub fn find_nearest_color<'a>(color: &'a str, skip: &HashSet<String>) -> Result<
             ),
         ))
     }
+}
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub enum WhitePointSource {
+    WhitePoint,
+    RgbStandard,
+    LumaStandard,
+}
+
+#[derive(Debug, Default)]
+pub struct UsedInput {
+    pub white_point: bool,
 }

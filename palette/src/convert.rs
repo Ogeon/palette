@@ -17,16 +17,15 @@
 //! ```
 //! # use palette::rgb::{RgbStandard, RgbSpace};
 //! # use palette::convert::FromColorUnclamped;
-//! # use palette::{Xyz, Component, FloatComponent};
+//! # use palette::{Xyz, FloatComponent};
 //! #
 //! #[palette(
 //!     component = "T",
 //!     rgb_standard = "S",
-//!     white_point = "<S::Space as RgbSpace>::WhitePoint",
 //! )]
 //! #[derive(FromColorUnclamped)]
 //! #[repr(C)]
-//! struct ExampleType<S: RgbStandard, T: Component> {
+//! struct ExampleType<S, T> {
 //!     // ...
 //!     #[palette(alpha)]
 //!     alpha: T,
@@ -72,6 +71,9 @@
 //! type that should be used when deriving. The default is to either use `Srgb`
 //! or a best effort to convert between standards, but sometimes it has to be set
 //! to a specific type. This also accepts type parameters.
+//!
+//! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard
+//! type that should be used when deriving, similar to `rgb_standard`.
 //!
 //! ## Field Attributes
 //!

@@ -3,6 +3,7 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -13,12 +14,13 @@ use rand::Rng;
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
-use crate::float::Float;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, FromF64,
-    GetHue, Hsl, Hue, Hwb, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
+    Hsl, Hue, Hwb, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
+#[cfg(feature = "random")]
+use crate::{float::Float, FromF64};
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
 /// `Alpha`](crate::Alpha#Hsva).
@@ -36,18 +38,13 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    white_point = "<S::Space as RgbSpace>::WhitePoint",
     rgb_standard = "S",
     component = "T",
     skip_derives(Rgb, Hsl, Hwb, Hsv)
 )]
 #[repr(C)]
 #[doc(alias = "hsb")]
-pub struct Hsv<S = Srgb, T = f32>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
+pub struct Hsv<S = Srgb, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
     #[palette(unsafe_same_layout_as = "T")]
@@ -69,27 +66,23 @@ where
     pub standard: PhantomData<S>,
 }
 
-impl<S, T> Copy for Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-}
+impl<S, T> Copy for Hsv<S, T> where T: Copy {}
 
 impl<S, T> Clone for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Clone,
 {
     fn clone(&self) -> Hsv<S, T> {
-        *self
+        Hsv {
+            hue: self.hue.clone(),
+            saturation: self.saturation.clone(),
+            value: self.value.clone(),
+            standard: PhantomData,
+        }
     }
 }
 
-impl<T> Hsv<Srgb, T>
-where
-    T: FloatComponent,
-{
+impl<T> Hsv<Srgb, T> {
     /// HSV for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T) -> Hsv<Srgb, T> {
         Hsv {
@@ -101,11 +94,7 @@ where
     }
 }
 
-impl<S, T> Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
+impl<S, T> Hsv<S, T> {
     /// Linear HSV.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T) -> Hsv<S, T> {
         Hsv {
@@ -135,6 +124,12 @@ where
             standard: PhantomData,
         }
     }
+}
+
+impl<S, T> Hsv<S, T>
+where
+    T: Component,
+{
     /// Return the `saturation` value minimum.
     pub fn min_saturation() -> T {
         T::zero()
@@ -158,8 +153,8 @@ where
 
 impl<S, T> PartialEq for Hsv<S, T>
 where
-    T: FloatComponent + PartialEq,
-    S: RgbStandard,
+    T: PartialEq,
+    RgbHue<T>: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.hue == other.hue && self.saturation == other.saturation && self.value == other.value
@@ -168,17 +163,13 @@ where
 
 impl<S, T> Eq for Hsv<S, T>
 where
-    T: FloatComponent + Eq,
-    S: RgbStandard,
+    T: Eq,
+    RgbHue<T>: Eq,
 {
 }
 
 ///<span id="Hsva"></span>[`Hsva`](crate::Hsva) implementations.
-impl<T, A> Alpha<Hsv<Srgb, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Hsv<Srgb, T>, A> {
     /// HSV and transparency for linear sRGB.
     pub fn new<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
@@ -189,12 +180,7 @@ where
 }
 
 ///<span id="Hsva"></span>[`Hsva`](crate::Hsva) implementations.
-impl<S, T, A> Alpha<Hsv<S, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    S: RgbStandard,
-{
+impl<S, T, A> Alpha<Hsv<S, T>, A> {
     /// Linear HSV and transparency.
     pub fn with_wp<H: Into<RgbHue<T>>>(hue: H, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
@@ -205,7 +191,12 @@ where
 
     /// Convert to a `(hue, saturation, value, alpha)` tuple.
     pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
-        (self.hue, self.saturation, self.value, self.alpha)
+        (
+            self.color.hue,
+            self.color.saturation,
+            self.color.value,
+            self.alpha,
+        )
     }
 
     /// Convert from a `(hue, saturation, value, alpha)` tuple.
@@ -237,7 +228,6 @@ where
 impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     fn from_color_unclamped(mut rgb: Rgb<S, T>) -> Self {
         // Avoid negative numbers
@@ -281,7 +271,6 @@ where
 impl<S, T> FromColorUnclamped<Hsl<S, T>> for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
         let x = hsl.saturation
@@ -309,7 +298,6 @@ where
 impl<S, T> FromColorUnclamped<Hwb<S, T>> for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     fn from_color_unclamped(hwb: Hwb<S, T>) -> Self {
         let inv = T::one() - hwb.blackness;
@@ -328,43 +316,38 @@ where
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsv<S, T> {
+impl<S, T, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsv<S, T> {
     fn from(components: (H, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent> Into<(RgbHue<T>, T, T)> for Hsv<S, T> {
-    fn into(self) -> (RgbHue<T>, T, T) {
-        self.into_components()
+impl<S, T> From<Hsv<S, T>> for (RgbHue<T>, T, T) {
+    fn from(color: Hsv<S, T>) -> (RgbHue<T>, T, T) {
+        color.into_components()
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, H: Into<RgbHue<T>>, A: Component> From<(H, T, T, A)>
-    for Alpha<Hsv<S, T>, A>
-{
+impl<S, T, H: Into<RgbHue<T>>, A> From<(H, T, T, A)> for Alpha<Hsv<S, T>, A> {
     fn from(components: (H, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: FloatComponent, A: Component> Into<(RgbHue<T>, T, T, A)>
-    for Alpha<Hsv<S, T>, A>
-{
-    fn into(self) -> (RgbHue<T>, T, T, A) {
-        self.into_components()
+impl<S, T, A> From<Alpha<Hsv<S, T>, A>> for (RgbHue<T>, T, T, A) {
+    fn from(color: Alpha<Hsv<S, T>, A>) -> (RgbHue<T>, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<S, T> Clamp for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Component,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-        self.saturation >= T::zero() && self.saturation <= T::one() &&
-        self.value >= T::zero() && self.value <= T::one()
+        self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
+        self.value >= Self::min_value() && self.value <= Self::max_value()
     }
 
     fn clamp(&self) -> Hsv<S, T> {
@@ -374,15 +357,18 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.saturation = clamp(self.saturation, T::zero(), T::one());
-        self.value = clamp(self.value, T::zero(), T::one());
+        self.saturation = clamp(
+            self.saturation,
+            Self::min_saturation(),
+            Self::max_saturation(),
+        );
+        self.value = clamp(self.value, Self::min_value(), Self::max_value());
     }
 }
 
 impl<S, T> Mix for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -402,13 +388,12 @@ where
 impl<S, T> Shade for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     type Scalar = T;
 
     fn lighten(&self, factor: T) -> Hsv<S, T> {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.value
+            Self::max_value() - self.value
         } else {
             self.value
         };
@@ -418,7 +403,7 @@ where
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
-            value: (self.value + delta).max(T::zero()),
+            value: (self.value + delta).max(Self::min_value()),
             standard: PhantomData,
         }
     }
@@ -427,7 +412,7 @@ where
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
-            value: (self.value + T::max_intensity() * amount).max(T::zero()),
+            value: (self.value + Self::max_value() * amount).max(Self::min_value()),
             standard: PhantomData,
         }
     }
@@ -435,8 +420,7 @@ where
 
 impl<S, T> GetHue for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Zero + PartialOrd + Clone,
 {
     type Hue = RgbHue<T>;
 
@@ -444,30 +428,29 @@ where
         if self.saturation <= T::zero() || self.value <= T::zero() {
             None
         } else {
-            Some(self.hue)
+            Some(self.hue.clone())
         }
     }
 }
 
 impl<S, T> Hue for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Zero + PartialOrd + Clone,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsv<S, T> {
         Hsv {
             hue: hue.into(),
-            saturation: self.saturation,
-            value: self.value,
+            saturation: self.saturation.clone(),
+            value: self.value.clone(),
             standard: PhantomData,
         }
     }
 
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsv<S, T> {
         Hsv {
-            hue: self.hue + amount.into(),
-            saturation: self.saturation,
-            value: self.value,
+            hue: self.hue.clone() + amount.into(),
+            saturation: self.saturation.clone(),
+            value: self.value.clone(),
             standard: PhantomData,
         }
     }
@@ -476,7 +459,6 @@ where
 impl<S, T> Saturate for Hsv<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
 {
     type Scalar = T;
 
@@ -509,134 +491,18 @@ where
 
 impl<S, T> Default for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Zero,
 {
     fn default() -> Hsv<S, T> {
         Hsv::with_wp(RgbHue::from(T::zero()), T::zero(), T::zero())
     }
 }
 
-impl<S, T> Add<Hsv<S, T>> for Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hsv<S, T>;
-
-    fn add(self, other: Hsv<S, T>) -> Self::Output {
-        Hsv {
-            hue: self.hue + other.hue,
-            saturation: self.saturation + other.saturation,
-            value: self.value + other.value,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Add<T> for Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hsv<S, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Hsv {
-            hue: self.hue + c,
-            saturation: self.saturation + c,
-            value: self.value + c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> AddAssign<Hsv<S, T>> for Hsv<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: RgbStandard,
-{
-    fn add_assign(&mut self, other: Hsv<S, T>) {
-        self.hue += other.hue;
-        self.saturation += other.saturation;
-        self.value += other.value;
-    }
-}
-
-impl<S, T> AddAssign<T> for Hsv<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: RgbStandard,
-{
-    fn add_assign(&mut self, c: T) {
-        self.hue += c;
-        self.saturation += c;
-        self.value += c;
-    }
-}
-
-impl<S, T> Sub<Hsv<S, T>> for Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hsv<S, T>;
-
-    fn sub(self, other: Hsv<S, T>) -> Self::Output {
-        Hsv {
-            hue: self.hue - other.hue,
-            saturation: self.saturation - other.saturation,
-            value: self.value - other.value,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Sub<T> for Hsv<S, T>
-where
-    T: FloatComponent,
-    S: RgbStandard,
-{
-    type Output = Hsv<S, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Hsv {
-            hue: self.hue - c,
-            saturation: self.saturation - c,
-            value: self.value - c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> SubAssign<Hsv<S, T>> for Hsv<S, T>
-where
-    T: FloatComponent + SubAssign,
-    S: RgbStandard,
-{
-    fn sub_assign(&mut self, other: Hsv<S, T>) {
-        self.hue -= other.hue;
-        self.saturation -= other.saturation;
-        self.value -= other.value;
-    }
-}
-
-impl<S, T> SubAssign<T> for Hsv<S, T>
-where
-    T: FloatComponent + SubAssign,
-    S: RgbStandard,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.hue -= c;
-        self.saturation -= c;
-        self.value -= c;
-    }
-}
+impl_color_add!(Hsv<S, T>, [hue, saturation, value], standard);
+impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
 
 impl<S, T, P> AsRef<P> for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -646,8 +512,6 @@ where
 
 impl<S, T, P> AsMut<P> for Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -657,9 +521,9 @@ where
 
 impl<S, T> AbsDiffEq for Hsv<S, T>
 where
-    T: FloatComponent + AbsDiffEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: AbsDiffEq,
+    RgbHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -667,18 +531,19 @@ where
         T::default_epsilon()
     }
 
+    #[rustfmt::skip]
     fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.hue.abs_diff_eq(&other.hue, epsilon)
-            && self.saturation.abs_diff_eq(&other.saturation, epsilon)
+        self.hue.abs_diff_eq(&other.hue, epsilon.clone())
+            && self.saturation.abs_diff_eq(&other.saturation, epsilon.clone())
             && self.value.abs_diff_eq(&other.value, epsilon)
     }
 }
 
 impl<S, T> RelativeEq for Hsv<S, T>
 where
-    T: FloatComponent + RelativeEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: RelativeEq,
+    RgbHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -691,17 +556,17 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.hue.relative_eq(&other.hue, epsilon, max_relative) &&
-            self.saturation.relative_eq(&other.saturation, epsilon, max_relative) &&
-            self.value.relative_eq(&other.value, epsilon, max_relative)
+        self.hue.relative_eq(&other.hue, epsilon.clone(), max_relative.clone())
+            && self.saturation.relative_eq(&other.saturation, epsilon.clone(), max_relative.clone())
+            && self.value.relative_eq(&other.value, epsilon, max_relative)
     }
 }
 
 impl<S, T> UlpsEq for Hsv<S, T>
 where
-    T: FloatComponent + UlpsEq,
-    T::Epsilon: Copy + Float + FromF64,
-    S: RgbStandard + PartialEq,
+    T: UlpsEq,
+    RgbHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -709,8 +574,8 @@ where
 
     #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.hue.ulps_eq(&other.hue, epsilon, max_ulps) &&
-            self.saturation.ulps_eq(&other.saturation, epsilon, max_ulps) &&
+        self.hue.ulps_eq(&other.hue, epsilon.clone(), max_ulps) &&
+            self.saturation.ulps_eq(&other.saturation, epsilon.clone(), max_ulps) &&
             self.value.ulps_eq(&other.value, epsilon, max_ulps)
     }
 }
@@ -733,8 +598,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> Distribution<Hsv<S, T>> for Standard
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Float + FromF64,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsv<S, T> {
@@ -745,8 +609,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformHsv<S, T>
 where
-    T: FloatComponent + SampleUniform,
-    S: RgbStandard,
+    T: Float + FromF64 + SampleUniform,
 {
     hue: crate::hues::UniformRgbHue<T>,
     u1: Uniform<T>,
@@ -757,8 +620,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> SampleUniform for Hsv<S, T>
 where
-    T: FloatComponent + SampleUniform,
-    S: RgbStandard,
+    T: Float + FromF64 + SampleUniform,
 {
     type Sampler = UniformHsv<S, T>;
 }
@@ -766,8 +628,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> UniformSampler for UniformHsv<S, T>
 where
-    T: FloatComponent + SampleUniform,
-    S: RgbStandard,
+    T: Float + FromF64 + SampleUniform,
 {
     type X = Hsv<S, T>;
 
@@ -831,20 +692,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Zeroable for Hsv<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<S, T> bytemuck::Zeroable for Hsv<S, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Pod for Hsv<S, T>
-where
-    S: RgbStandard,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<S: 'static, T> bytemuck::Pod for Hsv<S, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

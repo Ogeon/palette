@@ -2,7 +2,7 @@ pub mod channels;
 
 use core::marker::PhantomData;
 
-use crate::rgb::{Rgb, RgbStandard, Rgba};
+use crate::rgb::{Rgb, Rgba};
 use crate::Pixel;
 
 /// RGBA color packed into a 32-bit unsigned integer. Defaults to ARGB
@@ -84,18 +84,18 @@ impl<C> Clone for Packed<C> {
 /// ordered as `Abgr`, `Argb`, `Bgra`, or `Rgba`.
 pub trait RgbChannels {
     /// Split RGBA components into a `(u8, u8, u8, u8)` tuple.
-    fn split_rgb<S: RgbStandard>(rgb: Rgba<S, u8>) -> (u8, u8, u8, u8);
+    fn split_rgb<S>(rgb: Rgba<S, u8>) -> (u8, u8, u8, u8);
     /// Create an RGBA color from a `(u8, u8, u8, u8)` tuple.
-    fn combine_rgb<S: RgbStandard>(channels: (u8, u8, u8, u8)) -> Rgba<S, u8>;
+    fn combine_rgb<S>(channels: (u8, u8, u8, u8)) -> Rgba<S, u8>;
 }
 
-impl<S: RgbStandard> From<Rgb<S, u8>> for u32 {
+impl<S> From<Rgb<S, u8>> for u32 {
     fn from(color: Rgb<S, u8>) -> Self {
         Rgb::into_u32::<channels::Argb>(color)
     }
 }
 
-impl<S: RgbStandard> From<Rgba<S, u8>> for u32 {
+impl<S> From<Rgba<S, u8>> for u32 {
     fn from(color: Rgba<S, u8>) -> Self {
         Rgba::into_u32::<channels::Rgba>(color)
     }
@@ -112,7 +112,6 @@ impl<C: RgbChannels> From<u32> for Packed<C> {
 
 impl<S, C> From<Rgb<S, u8>> for Packed<C>
 where
-    S: RgbStandard,
     C: RgbChannels,
 {
     fn from(color: Rgb<S, u8>) -> Self {
@@ -122,7 +121,6 @@ where
 
 impl<S, C> From<Rgba<S, u8>> for Packed<C>
 where
-    S: RgbStandard,
     C: RgbChannels,
 {
     fn from(color: Rgba<S, u8>) -> Self {
@@ -134,7 +132,7 @@ where
     }
 }
 
-impl<S: RgbStandard> From<u32> for Rgb<S, u8> {
+impl<S> From<u32> for Rgb<S, u8> {
     fn from(color: u32) -> Self {
         Self::from_u32::<channels::Argb>(color)
     }
@@ -142,7 +140,6 @@ impl<S: RgbStandard> From<u32> for Rgb<S, u8> {
 
 impl<S, C> From<Packed<C>> for Rgb<S, u8>
 where
-    S: RgbStandard,
     C: RgbChannels,
 {
     fn from(packed: Packed<C>) -> Self {
@@ -150,7 +147,7 @@ where
     }
 }
 
-impl<S: RgbStandard> From<u32> for Rgba<S, u8> {
+impl<S> From<u32> for Rgba<S, u8> {
     fn from(color: u32) -> Self {
         Self::from_u32::<channels::Rgba>(color)
     }
@@ -158,7 +155,6 @@ impl<S: RgbStandard> From<u32> for Rgba<S, u8> {
 
 impl<S, C> From<Packed<C>> for Rgba<S, u8>
 where
-    S: RgbStandard,
     C: RgbChannels,
 {
     fn from(packed: Packed<C>) -> Self {

@@ -1,5 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Sub, SubAssign};
+use num_traits::Zero;
 
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
@@ -12,8 +13,8 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
-    Hue, Mix, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, FloatComponent, FromColor, FromF64, GetHue, Hue,
+    Mix, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -30,7 +31,7 @@ pub type Oklcha<T = f32> = Alpha<Oklch<T>, T>;
 ///
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions,
 /// like Oklab.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -39,10 +40,7 @@ pub type Oklcha<T = f32> = Alpha<Oklch<T>, T>;
     skip_derives(Oklab, Oklch, Xyz)
 )]
 #[repr(C)]
-pub struct Oklch<T = f32>
-where
-    T: FloatComponent,
-{
+pub struct Oklch<T = f32> {
     /// L is the lightness of the color. 0 gives absolute black and 1 gives the brightest white.
     pub l: T,
 
@@ -55,21 +53,42 @@ where
     pub hue: OklabHue<T>,
 }
 
-impl<T> Copy for Oklch<T> where T: FloatComponent {}
+impl<T> Copy for Oklch<T> where T: Copy {}
 
 impl<T> Clone for Oklch<T>
 where
-    T: FloatComponent,
+    T: Clone,
 {
     fn clone(&self) -> Oklch<T> {
-        *self
+        Oklch {
+            l: self.l.clone(),
+            chroma: self.chroma.clone(),
+            hue: self.hue.clone(),
+        }
     }
+}
+
+impl<T> PartialEq for Oklch<T>
+where
+    T: PartialEq,
+    OklabHue<T>: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.l == other.l && self.chroma == other.chroma && self.hue == other.hue
+    }
+}
+
+impl<T> Eq for Oklch<T>
+where
+    T: Eq,
+    OklabHue<T>: Eq,
+{
 }
 
 impl<T> AbsDiffEq for Oklch<T>
 where
     T: FloatComponent + AbsDiffEq,
-    T::Epsilon: Copy + FloatComponent,
+    T::Epsilon: FloatComponent,
 {
     type Epsilon = T::Epsilon;
 
@@ -87,7 +106,7 @@ where
 impl<T> RelativeEq for Oklch<T>
 where
     T: FloatComponent + RelativeEq,
-    T::Epsilon: Copy + FloatComponent,
+    T::Epsilon: FloatComponent,
 {
     fn default_max_relative() -> T::Epsilon {
         T::default_max_relative()
@@ -105,7 +124,7 @@ where
 impl<T> UlpsEq for Oklch<T>
 where
     T: FloatComponent + UlpsEq,
-    T::Epsilon: Copy + FloatComponent,
+    T::Epsilon: FloatComponent,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -118,10 +137,7 @@ where
     }
 }
 
-impl<T> Oklch<T>
-where
-    T: FloatComponent,
-{
+impl<T> Oklch<T> {
     /// Create an Oklch color.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H) -> Oklch<T> {
         Oklch {
@@ -140,7 +156,12 @@ where
     pub fn from_components<H: Into<OklabHue<T>>>((l, chroma, hue): (T, T, H)) -> Self {
         Self::new(l, chroma, hue)
     }
+}
 
+impl<T> Oklch<T>
+where
+    T: Zero + FromF64,
+{
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
         T::zero()
@@ -162,14 +183,8 @@ where
     }
 }
 
-impl<T> Eq for Oklch<T> where T: FloatComponent + Eq {}
-
 ///<span id="Oklcha"></span>[`Oklcha`](crate::Oklcha) implementations.
-impl<T, A> Alpha<Oklch<T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Oklch<T>, A> {
     /// Oklch and transparency.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
@@ -180,7 +195,7 @@ where
 
     /// Convert to a `(L, C, h, alpha)` tuple.
     pub fn into_components(self) -> (T, T, OklabHue<T>, A) {
-        (self.l, self.chroma, self.hue, self.alpha)
+        (self.color.l, self.color.chroma, self.color.hue, self.alpha)
     }
 
     /// Convert from a `(L, C, h, alpha)` tuple.
@@ -189,10 +204,7 @@ where
     }
 }
 
-impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T>
-where
-    T: FloatComponent,
-{
+impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T> {
     fn from_color_unclamped(color: Oklch<T>) -> Self {
         color
     }
@@ -221,52 +233,50 @@ where
     }
 }
 
-impl<T: FloatComponent, H: Into<OklabHue<T>>> From<(T, T, H)> for Oklch<T> {
+impl<T, H: Into<OklabHue<T>>> From<(T, T, H)> for Oklch<T> {
     fn from(components: (T, T, H)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T: FloatComponent> Into<(T, T, OklabHue<T>)> for Oklch<T> {
-    fn into(self) -> (T, T, OklabHue<T>) {
-        self.into_components()
+impl<T> From<Oklch<T>> for (T, T, OklabHue<T>) {
+    fn from(color: Oklch<T>) -> (T, T, OklabHue<T>) {
+        color.into_components()
     }
 }
 
-impl<T: FloatComponent, H: Into<OklabHue<T>>, A: Component> From<(T, T, H, A)>
-    for Alpha<Oklch<T>, A>
-{
+impl<T, H: Into<OklabHue<T>>, A> From<(T, T, H, A)> for Alpha<Oklch<T>, A> {
     fn from(components: (T, T, H, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T: FloatComponent, A: Component> Into<(T, T, OklabHue<T>, A)> for Alpha<Oklch<T>, A> {
-    fn into(self) -> (T, T, OklabHue<T>, A) {
-        self.into_components()
+impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
+    fn from(color: Alpha<Oklch<T>, A>) -> (T, T, OklabHue<T>, A) {
+        color.into_components()
     }
 }
 
 impl<T> Clamp for Oklch<T>
 where
-    T: FloatComponent,
+    T: Zero + FromF64 + PartialOrd + Clone,
 {
     fn is_within_bounds(&self) -> bool {
-        self.l >= from_f64(0.0)
-            && self.l <= from_f64(1.0)
-            && self.chroma >= from_f64(0.0)
-            && self.chroma <= from_f64(1.0)
+        self.l >= Self::min_l()
+            && self.l <= Self::max_l()
+            && self.chroma >= Self::min_chroma()
+            && self.chroma <= Self::max_chroma()
     }
 
     fn clamp(&self) -> Oklch<T> {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, from_f64(0.0), from_f64(1.0));
-        self.chroma = clamp(self.chroma, from_f64(0.0), from_f64(1.0));
+        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+        self.chroma = clamp(self.chroma.clone(), Self::min_chroma(), Self::max_chroma());
     }
 }
 
@@ -295,7 +305,7 @@ where
 
     fn lighten(&self, factor: T) -> Oklch<T> {
         let difference = if factor >= T::zero() {
-            T::from_f64(1.0) - self.l
+            Self::max_l() - self.l
         } else {
             self.l
         };
@@ -303,7 +313,7 @@ where
         let delta = difference.max(T::zero()) * factor;
 
         Oklch {
-            l: (self.l + delta).max(T::zero()),
+            l: (self.l + delta).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
         }
@@ -311,7 +321,7 @@ where
 
     fn lighten_fixed(&self, amount: T) -> Oklch<T> {
         Oklch {
-            l: (self.l + T::from_f64(1.0) * amount).max(T::zero()),
+            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
         }
@@ -320,7 +330,7 @@ where
 
 impl<T> GetHue for Oklch<T>
 where
-    T: FloatComponent,
+    T: Zero + PartialOrd + Clone,
 {
     type Hue = OklabHue<T>;
 
@@ -328,28 +338,28 @@ where
         if self.chroma <= T::zero() {
             None
         } else {
-            Some(self.hue)
+            Some(self.hue.clone())
         }
     }
 }
 
 impl<T> Hue for Oklch<T>
 where
-    T: FloatComponent,
+    T: Zero + PartialOrd + Clone,
 {
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Oklch<T> {
         Oklch {
-            l: self.l,
-            chroma: self.chroma,
+            l: self.l.clone(),
+            chroma: self.chroma.clone(),
             hue: hue.into(),
         }
     }
 
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Oklch<T> {
         Oklch {
-            l: self.l,
-            chroma: self.chroma,
-            hue: self.hue + amount.into(),
+            l: self.l.clone(),
+            chroma: self.chroma.clone(),
+            hue: self.hue.clone() + amount.into(),
         }
     }
 }
@@ -371,7 +381,7 @@ where
 
         Oklch {
             l: self.l,
-            chroma: (self.chroma + delta).max(T::zero()),
+            chroma: (self.chroma + delta).max(Self::min_chroma()),
             hue: self.hue,
         }
     }
@@ -379,7 +389,7 @@ where
     fn saturate_fixed(&self, amount: T) -> Oklch<T> {
         Oklch {
             l: self.l,
-            chroma: (self.chroma + Self::max_chroma() * amount).max(T::zero()),
+            chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
             hue: self.hue,
         }
     }
@@ -387,121 +397,18 @@ where
 
 impl<T> Default for Oklch<T>
 where
-    T: FloatComponent,
+    T: Zero,
 {
     fn default() -> Oklch<T> {
         Oklch::new(T::zero(), T::zero(), OklabHue::from(T::zero()))
     }
 }
 
-impl<T> Add<Oklch<T>> for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Output = Oklch<T>;
-
-    fn add(self, other: Oklch<T>) -> Self::Output {
-        Oklch {
-            l: self.l + other.l,
-            chroma: self.chroma + other.chroma,
-            hue: self.hue + other.hue,
-        }
-    }
-}
-
-impl<T> Add<T> for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Output = Oklch<T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Oklch {
-            l: self.l + c,
-            chroma: self.chroma + c,
-            hue: self.hue + c,
-        }
-    }
-}
-
-impl<T> AddAssign<Oklch<T>> for Oklch<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    fn add_assign(&mut self, other: Oklch<T>) {
-        self.l += other.l;
-        self.chroma += other.chroma;
-        self.hue += other.hue;
-    }
-}
-
-impl<T> AddAssign<T> for Oklch<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    fn add_assign(&mut self, c: T) {
-        self.l += c;
-        self.chroma += c;
-        self.hue += c;
-    }
-}
-
-impl<T> Sub<Oklch<T>> for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Output = Oklch<T>;
-
-    fn sub(self, other: Oklch<T>) -> Self::Output {
-        Oklch {
-            l: self.l - other.l,
-            chroma: self.chroma - other.chroma,
-            hue: self.hue - other.hue,
-        }
-    }
-}
-
-impl<T> Sub<T> for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Output = Oklch<T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Oklch {
-            l: self.l - c,
-            chroma: self.chroma - c,
-            hue: self.hue - c,
-        }
-    }
-}
-
-impl<T> SubAssign<Oklch<T>> for Oklch<T>
-where
-    T: FloatComponent + SubAssign,
-{
-    fn sub_assign(&mut self, other: Oklch<T>) {
-        self.l -= other.l;
-        self.chroma -= other.chroma;
-        self.hue -= other.hue;
-    }
-}
-
-impl<T> SubAssign<T> for Oklch<T>
-where
-    T: FloatComponent + SubAssign,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.l -= c;
-        self.chroma -= c;
-        self.hue -= c;
-    }
-}
+impl_color_add!(Oklch<T>, [l, chroma, hue]);
+impl_color_sub!(Oklch<T>, [l, chroma, hue]);
 
 impl<T, P> AsRef<P> for Oklch<T>
 where
-    T: FloatComponent,
-
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -511,8 +418,6 @@ where
 
 impl<T, P> AsMut<P> for Oklch<T>
 where
-    T: FloatComponent,
-
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {

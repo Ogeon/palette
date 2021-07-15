@@ -1,5 +1,6 @@
 use crate::Component;
 
+use num_traits::Zero;
 #[doc(hidden)]
 pub use palette_derive::WithAlpha;
 
@@ -67,7 +68,7 @@ mod alpha;
 ///
 /// assert_eq!(transparent.alpha, 10);
 /// ```
-pub trait WithAlpha<A: Component>: Sized {
+pub trait WithAlpha<A>: Sized {
     /// The opaque color type, without any transparency.
     ///
     /// This is typically `Self`.
@@ -142,7 +143,10 @@ pub trait WithAlpha<A: Component>: Sized {
     /// let opaque: Srgba<u8> = color.opaque();
     /// assert_eq!(opaque.alpha, 255);
     /// ```
-    fn opaque(self) -> Self::WithAlpha {
+    fn opaque(self) -> Self::WithAlpha
+    where
+        A: Component,
+    {
         self.with_alpha(A::max_intensity())
     }
 
@@ -157,7 +161,10 @@ pub trait WithAlpha<A: Component>: Sized {
     /// let transparent: Srgba<u8> = color.transparent();
     /// assert_eq!(transparent.alpha, 0);
     /// ```
-    fn transparent(self) -> Self::WithAlpha {
+    fn transparent(self) -> Self::WithAlpha
+    where
+        A: Zero,
+    {
         self.with_alpha(A::zero())
     }
 }

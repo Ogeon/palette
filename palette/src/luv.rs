@@ -1,6 +1,7 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -12,8 +13,8 @@ use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    GetHue, Lchuv, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, contrast_ratio, from_f64, Alpha, Clamp, ComponentWise, FloatComponent, FromF64, GetHue,
+    Lchuv, LuvHue, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -39,11 +40,7 @@ pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
     skip_derives(Xyz, Luv, Lchuv)
 )]
 #[repr(C)]
-pub struct Luv<Wp = D65, T = f32>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+pub struct Luv<Wp = D65, T = f32> {
     /// L\* is the lightness of the color. 0.0 gives absolute black and 100
     /// give the brightest white.
     pub l: T,
@@ -65,27 +62,23 @@ where
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-}
+impl<Wp, T> Copy for Luv<Wp, T> where T: Copy {}
 
 impl<Wp, T> Clone for Luv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     fn clone(&self) -> Luv<Wp, T> {
-        *self
+        Luv {
+            l: self.l.clone(),
+            u: self.u.clone(),
+            v: self.v.clone(),
+            white_point: PhantomData,
+        }
     }
 }
 
-impl<T> Luv<D65, T>
-where
-    T: FloatComponent,
-{
+impl<T> Luv<D65, T> {
     /// CIE L\*u\*v\* with white point D65.
     pub fn new(l: T, u: T, v: T) -> Luv<D65, T> {
         Luv {
@@ -97,11 +90,7 @@ where
     }
 }
 
-impl<Wp, T> Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> Luv<Wp, T> {
     /// CIE L\*u\*v\*.
     pub fn with_wp(l: T, u: T, v: T) -> Luv<Wp, T> {
         Luv {
@@ -121,7 +110,12 @@ where
     pub fn from_components((l, u, v): (T, T, T)) -> Self {
         Self::with_wp(l, u, v)
     }
+}
 
+impl<Wp, T> Luv<Wp, T>
+where
+    T: Zero + FromF64,
+{
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
         T::zero()
@@ -153,29 +147,8 @@ where
     }
 }
 
-impl<Wp, T> PartialEq for Luv<Wp, T>
-where
-    T: FloatComponent + PartialEq,
-    Wp: WhitePoint,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.l == other.l && self.u == other.u && self.v == other.v
-    }
-}
-
-impl<Wp, T> Eq for Luv<Wp, T>
-where
-    T: FloatComponent + Eq,
-    Wp: WhitePoint,
-{
-}
-
 ///<span id="Luva"></span>[`Luva`](crate::Luva) implementations.
-impl<T, A> Alpha<Luv<D65, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Luv<D65, T>, A> {
     /// CIE L\*u\*v\* and transparency and white point D65.
     pub fn new(l: T, u: T, v: T, alpha: A) -> Self {
         Alpha {
@@ -186,12 +159,7 @@ where
 }
 
 ///<span id="Luva"></span>[`Luva`](crate::Luva) implementations.
-impl<Wp, T, A> Alpha<Luv<Wp, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    Wp: WhitePoint,
-{
+impl<Wp, T, A> Alpha<Luv<Wp, T>, A> {
     /// CIE L\*u\*v\* and transparency.
     pub fn with_wp(l: T, u: T, v: T, alpha: A) -> Self {
         Alpha {
@@ -202,7 +170,7 @@ where
 
     /// Convert to u `(L\*, u\*, v\*, alpha)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.l, self.u, self.v, self.alpha)
+        (self.color.l, self.color.u, self.color.v, self.alpha)
     }
 
     /// Convert from u `(L\*, u\*, v\*, alpha)` tuple.
@@ -211,11 +179,7 @@ where
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Luv<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent,
-{
+impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Luv<Wp, T> {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         color
     }
@@ -223,7 +187,6 @@ where
 
 impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Luv<Wp, T>
 where
-    Wp: WhitePoint,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
@@ -274,34 +237,33 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> From<(T, T, T)> for Luv<Wp, T> {
+impl<Wp, T> From<(T, T, T)> for Luv<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> Into<(T, T, T)> for Luv<Wp, T> {
-    fn into(self) -> (T, T, T) {
-        self.into_components()
+impl<Wp, T> From<Luv<Wp, T>> for (T, T, T) {
+    fn from(color: Luv<Wp, T>) -> (T, T, T) {
+        color.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> From<(T, T, T, A)> for Alpha<Luv<Wp, T>, A> {
+impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Luv<Wp, T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Luv<Wp, T>, A> {
-    fn into(self) -> (T, T, T, A) {
-        self.into_components()
+impl<Wp, T, A> From<Alpha<Luv<Wp, T>, A>> for (T, T, T, A) {
+    fn from(color: Alpha<Luv<Wp, T>, A>) -> (T, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<Wp, T> Clamp for Luv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero + FromF64 + PartialOrd + Clone,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
@@ -311,22 +273,21 @@ where
     }
 
     fn clamp(&self) -> Luv<Wp, T> {
-        let mut c = *self;
+        let mut c = self.clone();
         c.clamp_self();
         c
     }
 
     fn clamp_self(&mut self) {
-        self.l = clamp(self.l, Self::min_l(), Self::max_l());
-        self.u = clamp(self.u, Self::min_u(), Self::max_u());
-        self.v = clamp(self.v, Self::min_v(), Self::max_v());
+        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+        self.u = clamp(self.u.clone(), Self::min_u(), Self::max_u());
+        self.v = clamp(self.v.clone(), Self::min_v(), Self::max_v());
     }
 }
 
 impl<Wp, T> Mix for Luv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -345,13 +306,12 @@ where
 impl<Wp, T> Shade for Luv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
     fn lighten(&self, factor: T) -> Luv<Wp, T> {
         let difference = if factor >= T::zero() {
-            T::from_f64(100.0) - self.l
+            Self::max_l() - self.l
         } else {
             self.l
         };
@@ -359,7 +319,7 @@ where
         let delta = difference.max(T::zero()) * factor;
 
         Luv {
-            l: (self.l + delta).max(T::zero()),
+            l: (self.l + delta).max(Self::min_l()),
             u: self.u,
             v: self.v,
             white_point: PhantomData,
@@ -368,7 +328,7 @@ where
 
     fn lighten_fixed(&self, amount: T) -> Luv<Wp, T> {
         Luv {
-            l: (self.l + T::from_f64(100.0) * amount).max(T::zero()),
+            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             u: self.u,
             v: self.v,
             white_point: PhantomData,
@@ -379,7 +339,6 @@ where
 impl<Wp, T> GetHue for Luv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Hue = LuvHue<T>;
 
@@ -395,7 +354,6 @@ where
 impl<Wp, T> ComponentWise for Luv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -420,137 +378,20 @@ where
 
 impl<Wp, T> Default for Luv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Zero,
 {
     fn default() -> Luv<Wp, T> {
         Luv::with_wp(T::zero(), T::zero(), T::zero())
     }
 }
 
-impl_color_add!(Luv, [l, u, v], white_point);
-impl_color_sub!(Luv, [l, u, v], white_point);
-
-impl<Wp, T> Mul<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn mul(self, other: Luv<Wp, T>) -> Self::Output {
-        Luv {
-            l: self.l * other.l,
-            u: self.u * other.u,
-            v: self.v * other.v,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Mul<T> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn mul(self, c: T) -> Self::Output {
-        Luv {
-            l: self.l * c,
-            u: self.u * c,
-            v: self.v * c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> MulAssign<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, other: Luv<Wp, T>) {
-        self.l *= other.l;
-        self.u *= other.u;
-        self.v *= other.v;
-    }
-}
-
-impl<Wp, T> MulAssign<T> for Luv<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.l *= c;
-        self.u *= c;
-        self.v *= c;
-    }
-}
-
-impl<Wp, T> Div<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn div(self, other: Luv<Wp, T>) -> Self::Output {
-        Luv {
-            l: self.l / other.l,
-            u: self.u / other.u,
-            v: self.v / other.v,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Div<T> for Luv<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Luv<Wp, T>;
-
-    fn div(self, c: T) -> Self::Output {
-        Luv {
-            l: self.l / c,
-            u: self.u / c,
-            v: self.v / c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> DivAssign<Luv<Wp, T>> for Luv<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, other: Luv<Wp, T>) {
-        self.l /= other.l;
-        self.u /= other.u;
-        self.v /= other.v;
-    }
-}
-
-impl<Wp, T> DivAssign<T> for Luv<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, c: T) {
-        self.l /= c;
-        self.u /= c;
-        self.v /= c;
-    }
-}
+impl_color_add!(Luv<Wp, T>, [l, u, v], white_point);
+impl_color_sub!(Luv<Wp, T>, [l, u, v], white_point);
+impl_color_mul!(Luv<Wp, T>, [l, u, v], white_point);
+impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
 
 impl<Wp, T, P> AsRef<P> for Luv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -560,8 +401,6 @@ where
 
 impl<Wp, T, P> AsMut<P> for Luv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -590,7 +429,6 @@ where
 impl<Wp, T> Distribution<Luv<Wp, T>> for Standard
 where
     T: FloatComponent,
-    Wp: WhitePoint,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
@@ -607,7 +445,6 @@ where
 pub struct UniformLuv<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     l: Uniform<T>,
     u: Uniform<T>,
@@ -619,7 +456,6 @@ where
 impl<Wp, T> SampleUniform for Luv<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     type Sampler = UniformLuv<Wp, T>;
 }
@@ -628,7 +464,6 @@ where
 impl<Wp, T> UniformSampler for UniformLuv<Wp, T>
 where
     T: FloatComponent + SampleUniform,
-    Wp: WhitePoint,
 {
     type X = Luv<Wp, T>;
 
@@ -675,20 +510,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Zeroable for Luv<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<Wp, T> bytemuck::Zeroable for Luv<Wp, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Pod for Luv<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<Wp: 'static, T> bytemuck::Pod for Luv<Wp, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

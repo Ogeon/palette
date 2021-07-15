@@ -2,9 +2,7 @@ use core::marker::PhantomData;
 
 use crate::float::Float;
 use crate::hues::{LuvHue, RgbHue};
-use crate::rgb::RgbStandard;
-use crate::white_point::WhitePoint;
-use crate::{from_f64, FloatComponent, Hsl, Hsluv, Hsv};
+use crate::{from_f64, FromF64, Hsl, Hsluv, Hsv};
 
 // Based on https://stackoverflow.com/q/4778147 and https://math.stackexchange.com/q/18686,
 // picking A = (0, 0), B = (0, 1), C = (1, 1) gives us:
@@ -19,8 +17,7 @@ use crate::{from_f64, FloatComponent, Hsl, Hsluv, Hsv};
 
 pub fn sample_hsv<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsv<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Float,
 {
     let (value, saturation) = (Float::cbrt(r1), Float::sqrt(r2));
 
@@ -34,8 +31,7 @@ where
 
 pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Float + FromF64,
 {
     let (saturation, lightness) = if r1 <= from_f64::<T>(0.5) {
         // Scale it up to [0, 1]
@@ -63,8 +59,7 @@ where
 
 pub fn sample_hsluv<Wp, T>(hue: LuvHue<T>, r1: T, r2: T) -> Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Float + FromF64,
 {
     let (saturation, l) = if r1 <= from_f64::<T>(0.5) {
         // Scale it up to [0, 1]
@@ -92,8 +87,7 @@ where
 
 pub fn invert_hsl_sample<S, T>(color: Hsl<S, T>) -> (T, T)
 where
-    T: FloatComponent,
-    S: RgbStandard,
+    T: Float + FromF64,
 {
     let r1 = if color.lightness <= from_f64::<T>(0.5) {
         // ((x * 2)^3) / 2 = x^3 * 4.
@@ -114,8 +108,7 @@ where
 
 pub fn invert_hsluv_sample<Wp, T>(color: Hsluv<Wp, T>) -> (T, T)
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Float + FromF64,
 {
     let lightness: T = color.l / from_f64::<T>(100.0);
     let r1 = if lightness <= from_f64::<T>(0.5) {

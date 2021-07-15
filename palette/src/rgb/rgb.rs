@@ -6,6 +6,7 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 use core::str::FromStr;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::Zero;
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -48,12 +49,11 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 #[palette(
     palette_internal,
     rgb_standard = "S",
-    white_point = "<S::Space as RgbSpace>::WhitePoint",
     component = "T",
     skip_derives(Xyz, Hsv, Hsl, Luma, Rgb)
 )]
 #[repr(C)]
-pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
+pub struct Rgb<S = Srgb, T = f32> {
     /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8)
     /// is the highest displayable amount.
     pub red: T,
@@ -72,15 +72,20 @@ pub struct Rgb<S: RgbStandard = Srgb, T: Component = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S: RgbStandard, T: Component> Copy for Rgb<S, T> {}
+impl<S, T: Copy> Copy for Rgb<S, T> {}
 
-impl<S: RgbStandard, T: Component> Clone for Rgb<S, T> {
+impl<S, T: Clone> Clone for Rgb<S, T> {
     fn clone(&self) -> Rgb<S, T> {
-        *self
+        Rgb {
+            red: self.red.clone(),
+            green: self.green.clone(),
+            blue: self.blue.clone(),
+            standard: PhantomData,
+        }
     }
 }
 
-impl<S: RgbStandard, T: Component> Rgb<S, T> {
+impl<S, T> Rgb<S, T> {
     /// Create an RGB color.
     pub fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
         Rgb {
@@ -94,7 +99,8 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     /// Convert into another component type.
     pub fn into_format<U>(self) -> Rgb<S, U>
     where
-        U: Component + FromComponent<T>,
+        T: Component,
+        U: FromComponent<T>,
     {
         Rgb {
             red: U::from_component(self.red),
@@ -122,7 +128,12 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
     pub fn from_components((red, green, blue): (T, T, T)) -> Self {
         Self::new(red, green, blue)
     }
+}
 
+impl<S, T> Rgb<S, T>
+where
+    T: Component,
+{
     /// Return the `red` value minimum.
     pub fn min_red() -> T {
         T::zero()
@@ -156,20 +167,14 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
 
 impl<S, T> PartialEq for Rgb<S, T>
 where
-    T: Component + PartialEq,
-    S: RgbStandard,
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.red == other.red && self.green == other.green && self.blue == other.blue
     }
 }
 
-impl<S, T> Eq for Rgb<S, T>
-where
-    T: Component + Eq,
-    S: RgbStandard,
-{
-}
+impl<S, T> Eq for Rgb<S, T> where T: Eq {}
 
 /// Convenience functions to convert between a packed `u32` and `Rgb`.
 ///
@@ -182,7 +187,7 @@ where
 /// let integer = u32::from(rgb);
 /// assert_eq!(0xFF607F00, integer);
 /// ```
-impl<S: RgbStandard> Rgb<S, u8> {
+impl<S> Rgb<S, u8> {
     /// Convert to a packed `u32` with with specifiable component order.
     /// Defaults to ARGB ordering (0xAARRGGBB).
     ///
@@ -238,11 +243,15 @@ impl<S: RgbStandard, T: FloatComponent> Rgb<S, T> {
     }
 }
 
-impl<S: RgbStandard, T: Component> Rgb<S, T> {
+impl<S, T> Rgb<S, T>
+where
+    S: RgbStandard,
+{
     #[inline]
-    fn reinterpret_as<St: RgbStandard>(self) -> Rgb<St, T>
+    fn reinterpret_as<St>(self) -> Rgb<St, T>
     where
         S::Space: RgbSpace<WhitePoint = <St::Space as RgbSpace>::WhitePoint>,
+        St: RgbStandard,
     {
         Rgb {
             red: self.red,
@@ -254,7 +263,7 @@ impl<S: RgbStandard, T: Component> Rgb<S, T> {
 }
 
 /// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
-impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
+impl<S, T, A> Alpha<Rgb<S, T>, A> {
     /// Non-linear RGB.
     pub fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
@@ -266,8 +275,10 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
     /// Convert into another component type.
     pub fn into_format<U, B>(self) -> Alpha<Rgb<S, U>, B>
     where
-        U: Component + FromComponent<T>,
-        B: Component + FromComponent<A>,
+        T: Component,
+        A: Component,
+        U: FromComponent<T>,
+        B: FromComponent<A>,
     {
         Alpha::<Rgb<S, U>, B>::new(
             U::from_component(self.red),
@@ -290,7 +301,12 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
 
     /// Convert to a `(red, green, blue, alpha)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.red, self.green, self.blue, self.alpha)
+        (
+            self.color.red,
+            self.color.green,
+            self.color.blue,
+            self.alpha,
+        )
     }
 
     /// Convert from a `(red, green, blue, alpha)` tuple.
@@ -310,7 +326,7 @@ impl<S: RgbStandard, T: Component, A: Component> Alpha<Rgb<S, T>, A> {
 /// let integer = u32::from(rgba);
 /// assert_eq!(0x607F00FF, integer);
 /// ```
-impl<S: RgbStandard> Rgba<S, u8> {
+impl<S> Rgba<S, u8> {
     /// Convert to a packed `u32` with with specifiable component order.
     /// Defaults to ARGB ordering (0xAARRGGBB).
     ///
@@ -329,7 +345,7 @@ impl<S: RgbStandard> Rgba<S, u8> {
 }
 
 /// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
-impl<S: RgbStandard, T: FloatComponent, A: Component> Alpha<Rgb<S, T>, A> {
+impl<S: RgbStandard, T: FloatComponent, A> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
     pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
         Alpha::<Rgb<Linear<S::Space>, T>, A>::new(
@@ -404,7 +420,6 @@ where
 
 impl<S, T> FromColorUnclamped<Hsl<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard,
     T: FloatComponent,
 {
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
@@ -438,7 +453,6 @@ where
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard,
     T: FloatComponent,
 {
     fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
@@ -490,7 +504,6 @@ where
 
 impl<S, T> Clamp for Rgb<S, T>
 where
-    S: RgbStandard,
     T: Component,
 {
     #[rustfmt::skip]
@@ -581,7 +594,6 @@ where
 
 impl<S, T> GetHue for Rgb<S, T>
 where
-    S: RgbStandard<TransferFn = LinearFn>,
     T: FloatComponent,
 {
     type Hue = RgbHue<T>;
@@ -622,25 +634,24 @@ where
 
 impl<S, T> ComponentWise for Rgb<S, T>
 where
-    S: RgbStandard,
-    T: Component,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Rgb<S, T>, mut f: F) -> Rgb<S, T> {
         Rgb {
-            red: f(self.red, other.red),
-            green: f(self.green, other.green),
-            blue: f(self.blue, other.blue),
+            red: f(self.red.clone(), other.red.clone()),
+            green: f(self.green.clone(), other.green.clone()),
+            blue: f(self.blue.clone(), other.blue.clone()),
             standard: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Rgb<S, T> {
         Rgb {
-            red: f(self.red),
-            green: f(self.green),
-            blue: f(self.blue),
+            red: f(self.red.clone()),
+            green: f(self.green.clone()),
+            blue: f(self.blue.clone()),
             standard: PhantomData,
         }
     }
@@ -648,8 +659,7 @@ where
 
 impl<S, T> Default for Rgb<S, T>
 where
-    T: Component,
-    S: RgbStandard,
+    T: Zero,
 {
     fn default() -> Rgb<S, T> {
         Rgb::new(T::zero(), T::zero(), T::zero())
@@ -659,8 +669,7 @@ where
 impl<S, T> Add<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Add,
-    <T as Add>::Output: Component,
+    T: Add,
 {
     type Output = Rgb<S, <T as Add>::Output>;
 
@@ -677,15 +686,14 @@ where
 impl<S, T> Add<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Add,
-    <T as Add>::Output: Component,
+    T: Add + Clone,
 {
     type Output = Rgb<S, <T as Add>::Output>;
 
     fn add(self, c: T) -> Self::Output {
         Rgb {
-            red: self.red + c,
-            green: self.green + c,
+            red: self.red + c.clone(),
+            green: self.green + c.clone(),
             blue: self.blue + c,
             standard: PhantomData,
         }
@@ -695,7 +703,7 @@ where
 impl<S, T> AddAssign<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + AddAssign,
+    T: AddAssign,
 {
     fn add_assign(&mut self, other: Rgb<S, T>) {
         self.red += other.red;
@@ -707,11 +715,11 @@ where
 impl<S, T> AddAssign<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + AddAssign,
+    T: AddAssign + Clone,
 {
     fn add_assign(&mut self, c: T) {
-        self.red += c;
-        self.green += c;
+        self.red += c.clone();
+        self.green += c.clone();
         self.blue += c;
     }
 }
@@ -719,8 +727,7 @@ where
 impl<S, T> Sub<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Sub,
-    <T as Sub>::Output: Component,
+    T: Sub,
 {
     type Output = Rgb<S, <T as Sub>::Output>;
 
@@ -737,15 +744,14 @@ where
 impl<S, T> Sub<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Sub,
-    <T as Sub>::Output: Component,
+    T: Sub + Clone,
 {
     type Output = Rgb<S, <T as Sub>::Output>;
 
     fn sub(self, c: T) -> Self::Output {
         Rgb {
-            red: self.red - c,
-            green: self.green - c,
+            red: self.red - c.clone(),
+            green: self.green - c.clone(),
             blue: self.blue - c,
             standard: PhantomData,
         }
@@ -755,7 +761,7 @@ where
 impl<S, T> SubAssign<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + SubAssign,
+    T: SubAssign,
 {
     fn sub_assign(&mut self, other: Rgb<S, T>) {
         self.red -= other.red;
@@ -767,11 +773,11 @@ where
 impl<S, T> SubAssign<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + SubAssign,
+    T: SubAssign + Clone,
 {
     fn sub_assign(&mut self, c: T) {
-        self.red -= c;
-        self.green -= c;
+        self.red -= c.clone();
+        self.green -= c.clone();
         self.blue -= c;
     }
 }
@@ -779,8 +785,7 @@ where
 impl<S, T> Mul<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Mul,
-    <T as Mul>::Output: Component,
+    T: Mul,
 {
     type Output = Rgb<S, <T as Mul>::Output>;
 
@@ -797,15 +802,14 @@ where
 impl<S, T> Mul<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Mul,
-    <T as Mul>::Output: Component,
+    T: Mul + Clone,
 {
     type Output = Rgb<S, <T as Mul>::Output>;
 
     fn mul(self, c: T) -> Self::Output {
         Rgb {
-            red: self.red * c,
-            green: self.green * c,
+            red: self.red * c.clone(),
+            green: self.green * c.clone(),
             blue: self.blue * c,
             standard: PhantomData,
         }
@@ -815,7 +819,7 @@ where
 impl<S, T> MulAssign<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + MulAssign,
+    T: MulAssign,
 {
     fn mul_assign(&mut self, other: Rgb<S, T>) {
         self.red *= other.red;
@@ -827,11 +831,11 @@ where
 impl<S, T> MulAssign<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + MulAssign,
+    T: MulAssign + Clone,
 {
     fn mul_assign(&mut self, c: T) {
-        self.red *= c;
-        self.green *= c;
+        self.red *= c.clone();
+        self.green *= c.clone();
         self.blue *= c;
     }
 }
@@ -839,8 +843,7 @@ where
 impl<S, T> Div<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Div,
-    <T as Div>::Output: Component,
+    T: Div,
 {
     type Output = Rgb<S, <T as Div>::Output>;
 
@@ -857,15 +860,14 @@ where
 impl<S, T> Div<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + Div,
-    <T as Div>::Output: Component,
+    T: Div + Clone,
 {
     type Output = Rgb<S, <T as Div>::Output>;
 
     fn div(self, c: T) -> Self::Output {
         Rgb {
-            red: self.red / c,
-            green: self.green / c,
+            red: self.red / c.clone(),
+            green: self.green / c.clone(),
             blue: self.blue / c,
             standard: PhantomData,
         }
@@ -875,7 +877,7 @@ where
 impl<S, T> DivAssign<Rgb<S, T>> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + DivAssign,
+    T: DivAssign,
 {
     fn div_assign(&mut self, other: Rgb<S, T>) {
         self.red /= other.red;
@@ -887,44 +889,43 @@ where
 impl<S, T> DivAssign<T> for Rgb<S, T>
 where
     S: RgbStandard<TransferFn = LinearFn>,
-    T: Component + DivAssign,
+    T: DivAssign + Clone,
 {
     fn div_assign(&mut self, c: T) {
-        self.red /= c;
-        self.green /= c;
+        self.red /= c.clone();
+        self.green /= c.clone();
         self.blue /= c;
     }
 }
 
-impl<S: RgbStandard, T: Component> From<(T, T, T)> for Rgb<S, T> {
+impl<S, T> From<(T, T, T)> for Rgb<S, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: Component> Into<(T, T, T)> for Rgb<S, T> {
-    fn into(self) -> (T, T, T) {
-        self.into_components()
+impl<S, T> From<Rgb<S, T>> for (T, T, T) {
+    fn from(color: Rgb<S, T>) -> (T, T, T) {
+        color.into_components()
     }
 }
 
-impl<S: RgbStandard, T: Component, A: Component> From<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
+impl<S, T, A> From<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<S: RgbStandard, T: Component, A: Component> Into<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
-    fn into(self) -> (T, T, T, A) {
-        self.into_components()
+impl<S, T, A> From<Alpha<Rgb<S, T>, A>> for (T, T, T, A) {
+    fn from(color: Alpha<Rgb<S, T>, A>) -> (T, T, T, A) {
+        color.into_components()
     }
 }
 
 impl<S, T> AbsDiffEq for Rgb<S, T>
 where
-    T: Component + AbsDiffEq,
-    T::Epsilon: Copy,
-    S: RgbStandard + PartialEq,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -933,17 +934,16 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.red.abs_diff_eq(&other.red, epsilon)
-            && self.green.abs_diff_eq(&other.green, epsilon)
+        self.red.abs_diff_eq(&other.red, epsilon.clone())
+            && self.green.abs_diff_eq(&other.green, epsilon.clone())
             && self.blue.abs_diff_eq(&other.blue, epsilon)
     }
 }
 
 impl<S, T> RelativeEq for Rgb<S, T>
 where
-    T: Component + RelativeEq,
-    T::Epsilon: Copy,
-    S: RgbStandard + PartialEq,
+    T: RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -956,17 +956,16 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.red.relative_eq(&other.red, epsilon, max_relative) &&
-            self.green.relative_eq(&other.green, epsilon, max_relative) &&
+        self.red.relative_eq(&other.red, epsilon.clone(), max_relative.clone()) &&
+            self.green.relative_eq(&other.green, epsilon.clone(), max_relative.clone()) &&
             self.blue.relative_eq(&other.blue, epsilon, max_relative)
     }
 }
 
 impl<S, T> UlpsEq for Rgb<S, T>
 where
-    T: Component + UlpsEq,
-    T::Epsilon: Copy,
-    S: RgbStandard + PartialEq,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -974,16 +973,14 @@ where
 
     #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.red.ulps_eq(&other.red, epsilon, max_ulps) &&
-            self.green.ulps_eq(&other.green, epsilon, max_ulps) &&
+        self.red.ulps_eq(&other.red, epsilon.clone(), max_ulps) &&
+            self.green.ulps_eq(&other.green, epsilon.clone(), max_ulps) &&
             self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
     }
 }
 
 impl<S, T, P> AsRef<P> for Rgb<S, T>
 where
-    T: Component,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     /// Convert to a raw pixel format.
@@ -1003,8 +1000,6 @@ where
 
 impl<S, T, P> AsMut<P> for Rgb<S, T>
 where
-    T: Component,
-    S: RgbStandard,
     P: RawPixel<T> + ?Sized,
 {
     /// Convert to a raw pixel format.
@@ -1027,8 +1022,7 @@ where
 
 impl<S, T> fmt::LowerHex for Rgb<S, T>
 where
-    T: Component + fmt::LowerHex,
-    S: RgbStandard,
+    T: fmt::LowerHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
@@ -1045,8 +1039,7 @@ where
 
 impl<S, T> fmt::UpperHex for Rgb<S, T>
 where
-    T: Component + fmt::UpperHex,
-    S: RgbStandard,
+    T: fmt::UpperHex,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let size = f.width().unwrap_or(::core::mem::size_of::<T>() * 2);
@@ -1104,7 +1097,7 @@ impl std::error::Error for FromHexError {
     }
 }
 
-impl<S: RgbStandard> FromStr for Rgb<S, u8> {
+impl<S> FromStr for Rgb<S, u8> {
     type Err = FromHexError;
 
     // Parses a color hex code of format '#ff00bb' or '#abc' into a
@@ -1151,8 +1144,6 @@ where
 #[cfg(feature = "random")]
 impl<S, T> Distribution<Rgb<S, T>> for Standard
 where
-    T: Component,
-    S: RgbStandard,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rgb<S, T> {
@@ -1168,8 +1159,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformRgb<S, T>
 where
-    T: Component + SampleUniform,
-    S: RgbStandard,
+    T: SampleUniform,
 {
     red: Uniform<T>,
     green: Uniform<T>,
@@ -1180,8 +1170,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> SampleUniform for Rgb<S, T>
 where
-    T: Component + SampleUniform,
-    S: RgbStandard,
+    T: SampleUniform + Clone,
 {
     type Sampler = UniformRgb<S, T>;
 }
@@ -1189,8 +1178,7 @@ where
 #[cfg(feature = "random")]
 impl<S, T> UniformSampler for UniformRgb<S, T>
 where
-    T: Component + SampleUniform,
-    S: RgbStandard,
+    T: SampleUniform + Clone,
 {
     type X = Rgb<S, T>;
 
@@ -1199,13 +1187,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformRgb {
-            red: Uniform::new::<_, T>(low.red, high.red),
-            green: Uniform::new::<_, T>(low.green, high.green),
-            blue: Uniform::new::<_, T>(low.blue, high.blue),
+            red: Uniform::new::<_, T>(low.red.clone(), high.red.clone()),
+            green: Uniform::new::<_, T>(low.green.clone(), high.green.clone()),
+            blue: Uniform::new::<_, T>(low.blue.clone(), high.blue.clone()),
             standard: PhantomData,
         }
     }
@@ -1215,13 +1203,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformRgb {
-            red: Uniform::new_inclusive::<_, T>(low.red, high.red),
-            green: Uniform::new_inclusive::<_, T>(low.green, high.green),
-            blue: Uniform::new_inclusive::<_, T>(low.blue, high.blue),
+            red: Uniform::new_inclusive::<_, T>(low.red.clone(), high.red.clone()),
+            green: Uniform::new_inclusive::<_, T>(low.green.clone(), high.green.clone()),
+            blue: Uniform::new_inclusive::<_, T>(low.blue.clone(), high.blue.clone()),
             standard: PhantomData,
         }
     }
@@ -1237,20 +1225,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Zeroable for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: Component + bytemuck::Zeroable,
-{
-}
+unsafe impl<S, T> bytemuck::Zeroable for Rgb<S, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<S, T> bytemuck::Pod for Rgb<S, T>
-where
-    S: RgbStandard,
-    T: Component + bytemuck::Pod,
-{
-}
+unsafe impl<S: 'static, T> bytemuck::Pod for Rgb<S, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

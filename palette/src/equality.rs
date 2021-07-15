@@ -1,7 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::float::Float;
-use crate::white_point::WhitePoint;
 use crate::{
     from_f64, FloatComponent, FromF64, Hsluv, Lab, LabHue, Lch, Lchuv, Luv, LuvHue, OklabHue,
     RgbHue, Xyz, Yxy,
@@ -9,10 +8,21 @@ use crate::{
 
 macro_rules! impl_eq {
     (  $self_ty: ident , [$($element: ident),+]) => {
+
+        impl<Wp, T> PartialEq for $self_ty<Wp, T>
+        where
+            T: FloatComponent + PartialEq,
+        {
+            fn eq(&self, other: &Self) -> bool {
+                $( self.$element == other.$element )&&+
+            }
+        }
+
+        impl<S, T> Eq for $self_ty<S, T> where T: FloatComponent + Eq {}
+
         impl<Wp, T> AbsDiffEq for $self_ty<Wp, T>
         where T: FloatComponent + AbsDiffEq,
-            T::Epsilon: Copy + FloatComponent,
-            Wp: WhitePoint + PartialEq
+            T::Epsilon: Clone + FloatComponent,
         {
             type Epsilon = T::Epsilon;
 
@@ -21,44 +31,42 @@ macro_rules! impl_eq {
             }
 
             fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-                $( self.$element.abs_diff_eq(&other.$element, epsilon) )&&+
+                $( self.$element.abs_diff_eq(&other.$element, epsilon.clone()) )&&+
             }
             fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-                $( self.$element.abs_diff_ne(&other.$element, epsilon) )||+
+                $( self.$element.abs_diff_ne(&other.$element, epsilon.clone()) )||+
             }
         }
 
         impl<Wp, T> RelativeEq for $self_ty<Wp, T>
         where T: FloatComponent + RelativeEq,
-            T::Epsilon: Copy + FloatComponent,
-            Wp: WhitePoint + PartialEq
+            T::Epsilon: Clone + FloatComponent,
         {
             fn default_max_relative() -> T::Epsilon {
                 T::default_max_relative()
             }
 
             fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-                $( self.$element.relative_eq(&other.$element, epsilon, max_relative) )&&+
+                $( self.$element.relative_eq(&other.$element, epsilon.clone(), max_relative) )&&+
             }
             fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-                $( self.$element.relative_ne(&other.$element, epsilon, max_relative) )||+
+                $( self.$element.relative_ne(&other.$element, epsilon.clone(), max_relative) )||+
             }
         }
 
         impl<Wp, T> UlpsEq for $self_ty<Wp, T>
         where T: FloatComponent + UlpsEq,
-            T::Epsilon: Copy + FloatComponent,
-            Wp: WhitePoint + PartialEq
+            T::Epsilon: Clone + FloatComponent,
         {
             fn default_max_ulps() -> u32 {
                 T::default_max_ulps()
             }
 
             fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-                $( self.$element.ulps_eq(&other.$element, epsilon, max_ulps) )&&+
+                $( self.$element.ulps_eq(&other.$element, epsilon.clone(), max_ulps) )&&+
             }
             fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-                $( self.$element.ulps_ne(&other.$element, epsilon, max_ulps) )||+
+                $( self.$element.ulps_ne(&other.$element, epsilon.clone(), max_ulps) )||+
             }
         }
     }

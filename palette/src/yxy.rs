@@ -38,11 +38,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 )]
 #[repr(C)]
 #[doc(alias = "xyY")]
-pub struct Yxy<Wp = D65, T = f32>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+pub struct Yxy<Wp = D65, T = f32> {
     /// x chromaticity co-ordinate derived from XYZ color space as X/(X+Y+Z).
     /// Typical range is between 0 and 1
     pub x: T,
@@ -63,27 +59,23 @@ where
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-}
+impl<Wp, T> Copy for Yxy<Wp, T> where T: Copy {}
 
 impl<Wp, T> Clone for Yxy<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     fn clone(&self) -> Yxy<Wp, T> {
-        *self
+        Yxy {
+            x: self.x.clone(),
+            y: self.y.clone(),
+            luma: self.luma.clone(),
+            white_point: PhantomData,
+        }
     }
 }
 
-impl<T> Yxy<D65, T>
-where
-    T: FloatComponent,
-{
+impl<T> Yxy<D65, T> {
     /// CIE Yxy with white point D65.
     pub fn new(x: T, y: T, luma: T) -> Yxy<D65, T> {
         Yxy {
@@ -95,11 +87,7 @@ where
     }
 }
 
-impl<Wp, T> Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
+impl<Wp, T> Yxy<Wp, T> {
     /// CIE Yxy.
     pub fn with_wp(x: T, y: T, luma: T) -> Yxy<Wp, T> {
         Yxy {
@@ -119,7 +107,12 @@ where
     pub fn from_components((x, y, luma): (T, T, T)) -> Self {
         Self::with_wp(x, y, luma)
     }
+}
 
+impl<Wp, T> Yxy<Wp, T>
+where
+    T: Component,
+{
     /// Return the `x` value minimum.
     pub fn min_x() -> T {
         T::zero()
@@ -151,29 +144,8 @@ where
     }
 }
 
-impl<Wp, T> PartialEq for Yxy<Wp, T>
-where
-    T: FloatComponent + PartialEq,
-    Wp: WhitePoint,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.luma == other.luma && self.x == other.x && self.y == other.y
-    }
-}
-
-impl<Wp, T> Eq for Yxy<Wp, T>
-where
-    T: FloatComponent + Eq,
-    Wp: WhitePoint,
-{
-}
-
 ///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
-impl<T, A> Alpha<Yxy<D65, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-{
+impl<T, A> Alpha<Yxy<D65, T>, A> {
     /// CIE Yxy and transparency with white point D65.
     pub fn new(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
@@ -183,12 +155,7 @@ where
     }
 }
 ///<span id="Yxya"></span>[`Yxya`](crate::Yxya) implementations.
-impl<Wp, T, A> Alpha<Yxy<Wp, T>, A>
-where
-    T: FloatComponent,
-    A: Component,
-    Wp: WhitePoint,
-{
+impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
     /// CIE Yxy and transparency.
     pub fn with_wp(x: T, y: T, luma: T, alpha: A) -> Self {
         Alpha {
@@ -199,7 +166,7 @@ where
 
     /// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn into_components(self) -> (T, T, T, A) {
-        (self.x, self.y, self.luma, self.alpha)
+        (self.color.x, self.color.y, self.color.luma, self.alpha)
     }
 
     /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
@@ -208,35 +175,31 @@ where
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> From<(T, T, T)> for Yxy<Wp, T> {
+impl<Wp, T> From<(T, T, T)> for Yxy<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent> Into<(T, T, T)> for Yxy<Wp, T> {
-    fn into(self) -> (T, T, T) {
-        self.into_components()
+impl<Wp, T> From<Yxy<Wp, T>> for (T, T, T) {
+    fn from(color: Yxy<Wp, T>) -> (T, T, T) {
+        color.into_components()
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> From<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
+impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<Wp: WhitePoint, T: FloatComponent, A: Component> Into<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
-    fn into(self) -> (T, T, T, A) {
-        self.into_components()
+impl<Wp, T, A> From<Alpha<Yxy<Wp, T>, A>> for (T, T, T, A) {
+    fn from(color: Alpha<Yxy<Wp, T>, A>) -> (T, T, T, A) {
+        color.into_components()
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent,
-{
+impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T> {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
         color
     }
@@ -244,7 +207,6 @@ where
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Yxy<Wp, T>
 where
-    Wp: WhitePoint,
     T: FloatComponent,
 {
     fn from_color_unclamped(xyz: Xyz<Wp, T>) -> Self {
@@ -284,9 +246,9 @@ where
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
-        self.x >= T::zero() && self.x <= T::one() &&
-        self.y >= T::zero() && self.y <= T::one() &&
-        self.luma >= T::zero() && self.luma <= T::one()
+        self.x >= Self::min_x() && self.x <= Self::max_x() &&
+        self.y >= Self::min_y() && self.y <= Self::max_y() &&
+        self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
 
     fn clamp(&self) -> Yxy<Wp, T> {
@@ -296,16 +258,15 @@ where
     }
 
     fn clamp_self(&mut self) {
-        self.x = clamp(self.x, T::zero(), T::one());
-        self.y = clamp(self.y, T::zero(), T::one());
-        self.luma = clamp(self.luma, T::zero(), T::one());
+        self.x = clamp(self.x, Self::min_x(), Self::max_x());
+        self.y = clamp(self.y, Self::min_y(), Self::max_y());
+        self.luma = clamp(self.luma, Self::min_luma(), Self::max_luma());
     }
 }
 
 impl<Wp, T> Mix for Yxy<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
@@ -324,13 +285,12 @@ where
 impl<Wp, T> Shade for Yxy<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     type Scalar = T;
 
     fn lighten(&self, factor: T) -> Yxy<Wp, T> {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.luma
+            Self::max_luma() - self.luma
         } else {
             self.luma
         };
@@ -340,7 +300,7 @@ where
         Yxy {
             x: self.x,
             y: self.y,
-            luma: (self.luma + delta).max(T::zero()),
+            luma: (self.luma + delta).max(Self::min_luma()),
             white_point: PhantomData,
         }
     }
@@ -349,7 +309,7 @@ where
         Yxy {
             x: self.x,
             y: self.y,
-            luma: (self.luma + T::max_intensity() * amount).max(T::zero()),
+            luma: (self.luma + Self::max_luma() * amount).max(Self::min_luma()),
             white_point: PhantomData,
         }
     }
@@ -357,25 +317,24 @@ where
 
 impl<Wp, T> ComponentWise for Yxy<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Yxy<Wp, T>, mut f: F) -> Yxy<Wp, T> {
         Yxy {
-            x: f(self.x, other.x),
-            y: f(self.y, other.y),
-            luma: f(self.luma, other.luma),
+            x: f(self.x.clone(), other.x.clone()),
+            y: f(self.y.clone(), other.y.clone()),
+            luma: f(self.luma.clone(), other.luma.clone()),
             white_point: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Yxy<Wp, T> {
         Yxy {
-            x: f(self.x),
-            y: f(self.y),
-            luma: f(self.luma),
+            x: f(self.x.clone()),
+            y: f(self.y.clone()),
+            luma: f(self.luma.clone()),
             white_point: PhantomData,
         }
     }
@@ -398,242 +357,13 @@ where
     }
 }
 
-impl<Wp, T> Add<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn add(self, other: Yxy<Wp, T>) -> Self::Output {
-        Yxy {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            luma: self.luma + other.luma,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Add<T> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn add(self, c: T) -> Self::Output {
-        Yxy {
-            x: self.x + c,
-            y: self.y + c,
-            luma: self.luma + c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> AddAssign<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, other: Yxy<Wp, T>) {
-        self.x += other.x;
-        self.y += other.y;
-        self.luma += other.luma;
-    }
-}
-
-impl<Wp, T> AddAssign<T> for Yxy<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint,
-{
-    fn add_assign(&mut self, c: T) {
-        self.x += c;
-        self.y += c;
-        self.luma += c;
-    }
-}
-
-impl<Wp, T> Sub<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn sub(self, other: Yxy<Wp, T>) -> Self::Output {
-        Yxy {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            luma: self.luma - other.luma,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Sub<T> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Yxy {
-            x: self.x - c,
-            y: self.y - c,
-            luma: self.luma - c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SubAssign<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, other: Yxy<Wp, T>) {
-        self.x -= other.x;
-        self.y -= other.y;
-        self.luma -= other.luma;
-    }
-}
-
-impl<Wp, T> SubAssign<T> for Yxy<Wp, T>
-where
-    T: FloatComponent + SubAssign,
-    Wp: WhitePoint,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.x -= c;
-        self.y -= c;
-        self.luma -= c;
-    }
-}
-
-impl<Wp, T> Mul<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn mul(self, other: Yxy<Wp, T>) -> Self::Output {
-        Yxy {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            luma: self.luma * other.luma,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Mul<T> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn mul(self, c: T) -> Self::Output {
-        Yxy {
-            x: self.x * c,
-            y: self.y * c,
-            luma: self.luma * c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> MulAssign<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, other: Yxy<Wp, T>) {
-        self.x *= other.x;
-        self.y *= other.y;
-        self.luma *= other.luma;
-    }
-}
-
-impl<Wp, T> MulAssign<T> for Yxy<Wp, T>
-where
-    T: FloatComponent + MulAssign,
-    Wp: WhitePoint,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.x *= c;
-        self.y *= c;
-        self.luma *= c;
-    }
-}
-
-impl<Wp, T> Div<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn div(self, other: Yxy<Wp, T>) -> Self::Output {
-        Yxy {
-            x: self.x / other.x,
-            y: self.y / other.y,
-            luma: self.luma / other.luma,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Div<T> for Yxy<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint,
-{
-    type Output = Yxy<Wp, T>;
-
-    fn div(self, c: T) -> Self::Output {
-        Yxy {
-            x: self.x / c,
-            y: self.y / c,
-            luma: self.luma / c,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> DivAssign<Yxy<Wp, T>> for Yxy<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, other: Yxy<Wp, T>) {
-        self.x /= other.x;
-        self.y /= other.y;
-        self.luma /= other.luma;
-    }
-}
-
-impl<Wp, T> DivAssign<T> for Yxy<Wp, T>
-where
-    T: FloatComponent + DivAssign,
-    Wp: WhitePoint,
-{
-    fn div_assign(&mut self, c: T) {
-        self.x /= c;
-        self.y /= c;
-        self.luma /= c;
-    }
-}
+impl_color_add!(Yxy<Wp, T>, [x, y, luma], white_point);
+impl_color_sub!(Yxy<Wp, T>, [x, y, luma], white_point);
+impl_color_mul!(Yxy<Wp, T>, [x, y, luma], white_point);
+impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
 
 impl<Wp, T, P> AsRef<P> for Yxy<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_ref(&self) -> &P {
@@ -643,8 +373,6 @@ where
 
 impl<Wp, T, P> AsMut<P> for Yxy<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     P: RawPixel<T> + ?Sized,
 {
     fn as_mut(&mut self) -> &mut P {
@@ -654,7 +382,6 @@ where
 
 impl<Wp, T> RelativeContrast for Yxy<Wp, T>
 where
-    Wp: WhitePoint,
     T: FloatComponent,
 {
     type Scalar = T;
@@ -667,8 +394,6 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Yxy<Wp, T>> for Standard
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Yxy<Wp, T> {
@@ -684,7 +409,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformYxy<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
     Wp: WhitePoint,
 {
     x: Uniform<T>,
@@ -696,7 +421,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Yxy<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
     Wp: WhitePoint,
 {
     type Sampler = UniformYxy<Wp, T>;
@@ -705,7 +430,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformYxy<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
     Wp: WhitePoint,
 {
     type X = Yxy<Wp, T>;
@@ -715,13 +440,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformYxy {
-            x: Uniform::new::<_, T>(low.x, high.x),
-            y: Uniform::new::<_, T>(low.y, high.y),
-            luma: Uniform::new::<_, T>(low.luma, high.luma),
+            x: Uniform::new::<_, T>(low.x.clone(), high.x.clone()),
+            y: Uniform::new::<_, T>(low.y.clone(), high.y.clone()),
+            luma: Uniform::new::<_, T>(low.luma.clone(), high.luma.clone()),
             white_point: PhantomData,
         }
     }
@@ -731,13 +456,13 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow();
+        let high = high_b.borrow();
 
         UniformYxy {
-            x: Uniform::new_inclusive::<_, T>(low.x, high.x),
-            y: Uniform::new_inclusive::<_, T>(low.y, high.y),
-            luma: Uniform::new_inclusive::<_, T>(low.luma, high.luma),
+            x: Uniform::new_inclusive::<_, T>(low.x.clone(), high.x.clone()),
+            y: Uniform::new_inclusive::<_, T>(low.y.clone(), high.y.clone()),
+            luma: Uniform::new_inclusive::<_, T>(low.luma.clone(), high.luma.clone()),
             white_point: PhantomData,
         }
     }
@@ -753,20 +478,10 @@ where
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Zeroable for Yxy<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Zeroable,
-{
-}
+unsafe impl<Wp, T> bytemuck::Zeroable for Yxy<Wp, T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<Wp, T> bytemuck::Pod for Yxy<Wp, T>
-where
-    Wp: WhitePoint,
-    T: FloatComponent + bytemuck::Pod,
-{
-}
+unsafe impl<Wp: 'static, T> bytemuck::Pod for Yxy<Wp, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

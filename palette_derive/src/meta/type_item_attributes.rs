@@ -14,6 +14,7 @@ pub struct TypeItemAttributes {
     pub component: Option<Type>,
     pub white_point: Option<Type>,
     pub rgb_standard: Option<Type>,
+    pub luma_standard: Option<Type>,
 }
 
 impl AttributeArgumentParser for TypeItemAttributes {
@@ -49,7 +50,7 @@ impl AttributeArgumentParser for TypeItemAttributes {
                 if let Err(span) = result {
                     return Err(::syn::parse::Error::new(
                         span,
-                        "expected `skip` to have a list of color type names, like `skip(Xyz, Luma, Rgb)`",
+                        "expected `skip_derives` to have a list of color type names, like `skip_derives(Xyz, Luma, Rgb)`",
                     ));
                 }
             }
@@ -119,6 +120,29 @@ impl AttributeArgumentParser for TypeItemAttributes {
                     return Err(::syn::parse::Error::new(
                         argument.span(),
                         "`rgb_standard` appears more than once",
+                    ));
+                }
+            }
+            Some("luma_standard") => {
+                if self.luma_standard.is_none() {
+                    let result = if let Meta::NameValue(MetaNameValue {
+                        lit: Lit::Str(ty), ..
+                    }) = argument
+                    {
+                        self.luma_standard = Some(ty.parse()?);
+                        Ok(())
+                    } else {
+                        Err(argument.span())
+                    };
+
+                    if let Err(span) = result {
+                        let message = "expected `luma_standard` to be a type or type parameter in a string, like `luma_standard = \"T\"`";
+                        return Err(::syn::parse::Error::new(span, message));
+                    }
+                } else {
+                    return Err(::syn::parse::Error::new(
+                        argument.span(),
+                        "`luma_standard` appears more than once",
                     ));
                 }
             }
