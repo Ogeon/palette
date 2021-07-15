@@ -77,13 +77,13 @@
 
 <span class="kw">impl</span> <span class="ident">Primaries</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
     <span class="kw">fn</span> <span class="ident">red</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::with_wp</span>(<span class="ident">from_f64</span>(<span class="number">0.6400</span>), <span class="ident">from_f64</span>(<span class="number">0.3300</span>), <span class="ident">from_f64</span>(<span class="number">0.212656</span>))
+        <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.6400</span>), <span class="ident">from_f64</span>(<span class="number">0.3300</span>), <span class="ident">from_f64</span>(<span class="number">0.212656</span>))
     }
     <span class="kw">fn</span> <span class="ident">green</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::with_wp</span>(<span class="ident">from_f64</span>(<span class="number">0.3000</span>), <span class="ident">from_f64</span>(<span class="number">0.6000</span>), <span class="ident">from_f64</span>(<span class="number">0.715158</span>))
+        <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.3000</span>), <span class="ident">from_f64</span>(<span class="number">0.6000</span>), <span class="ident">from_f64</span>(<span class="number">0.715158</span>))
     }
     <span class="kw">fn</span> <span class="ident">blue</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::with_wp</span>(<span class="ident">from_f64</span>(<span class="number">0.1500</span>), <span class="ident">from_f64</span>(<span class="number">0.0600</span>), <span class="ident">from_f64</span>(<span class="number">0.072186</span>))
+        <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.1500</span>), <span class="ident">from_f64</span>(<span class="number">0.0600</span>), <span class="ident">from_f64</span>(<span class="number">0.072186</span>))
     }
 }
 

@@ -586,6 +586,15 @@
 <span id="583">583</span>
 <span id="584">584</span>
 <span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -728,12 +737,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an Oklch color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">chroma</span>: <span class="ident">T</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Oklch</span> {
-            <span class="ident">l</span>,
-            <span class="ident">chroma</span>,
-            <span class="ident">hue</span>: <span class="ident">hue</span>.<span class="ident">into</span>(),
-        }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">chroma</span>: <span class="ident">T</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">l</span>, <span class="ident">chroma</span>, <span class="ident">hue</span>.<span class="ident">into</span>())
+    }
+
+    <span class="doccomment">/// Create an Oklch color. This is the same as `Oklch::new` without the</span>
+    <span class="doccomment">/// generic hue type. It&#39;s temporary until `const fn` supports traits.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">chroma</span>: <span class="ident">T</span>, <span class="ident">hue</span>: <span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">Oklch</span> { <span class="ident">l</span>, <span class="ident">chroma</span>, <span class="ident">hue</span> }
     }
 
     <span class="doccomment">/// Convert to a `(L, C, h)` tuple.</span>
@@ -774,10 +785,17 @@
 
 <span class="doccomment">///&lt;span id=&quot;Oklcha&quot;&gt;&lt;/span&gt;[`Oklcha`](crate::Oklcha) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Oklch and transparency.</span>
+    <span class="doccomment">/// Create an Oklch color with transparency.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">chroma</span>: <span class="ident">T</span>, <span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">l</span>, <span class="ident">chroma</span>, <span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">alpha</span>)
+    }
+
+    <span class="doccomment">/// Create an Oklch color with transparency. This is the same as</span>
+    <span class="doccomment">/// `Oklcha::new` without the generic hue type. It&#39;s temporary until `const</span>
+    <span class="doccomment">/// fn` supports traits.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">chroma</span>: <span class="ident">T</span>, <span class="ident">hue</span>: <span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">Oklch::new</span>(<span class="ident">l</span>, <span class="ident">chroma</span>, <span class="ident">hue</span>),
+            <span class="ident">color</span>: <span class="ident">Oklch::new_const</span>(<span class="ident">l</span>, <span class="ident">chroma</span>, <span class="ident">hue</span>),
             <span class="ident">alpha</span>,
         }
     }

@@ -532,8 +532,8 @@
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Create a new hue from degrees.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_degrees</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">degrees</span>)
+            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_degrees</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="self">Self</span>(<span class="ident">degrees</span>)
             }
 
             <span class="doccomment">/// Get the internal representation, without normalizing it.</span>
@@ -546,8 +546,8 @@
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Create a new hue from radians, instead of degrees.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_radians</span>(<span class="ident">radians</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">radians</span>.<span class="ident">to_degrees</span>())
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_radians</span>(<span class="ident">radians</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="self">Self</span>(<span class="ident">radians</span>.<span class="ident">to_degrees</span>())
             }
 
             <span class="doccomment">/// Get the hue as degrees, in the range `(-180, 180]`.</span>

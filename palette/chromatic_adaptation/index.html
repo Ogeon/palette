@@ -16,7 +16,7 @@ is the default), VonKries and XyzScaling</p>
 <span class="kw">use</span> <span class="ident">palette::chromatic_adaptation::AdaptInto</span>;
 
 
-<span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::with_wp</span>(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
+<span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
 
 <span class="comment">//Will convert Xyz&lt;A, f32&gt; to Xyz&lt;C, f32&gt; using Bradford chromatic adaptation</span>
 <span class="kw">let</span> <span class="ident">c</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">adapt_into</span>();

@@ -1539,7 +1539,7 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
-            <span class="ident">Xyz::with_wp</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
+            <span class="ident">Xyz::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
         }
     }
 
@@ -1596,7 +1596,7 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="ident">Lch::with_wp</span>(<span class="ident">T::one</span>(), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
+            <span class="ident">Lch::new</span>(<span class="ident">T::one</span>(), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
         }
     }
 
