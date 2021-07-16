@@ -74,12 +74,11 @@ mod raw;
 /// use std::marker::PhantomData;
 ///
 /// use palette::{Pixel, RgbHue};
-/// use palette::rgb::RgbStandard;
 /// use palette::encoding::Srgb;
 ///
 /// #[derive(PartialEq, Debug, Pixel)]
 /// #[repr(C)]
-/// struct MyCoolColor<S: RgbStandard> {
+/// struct MyCoolColor<S> {
 ///     #[palette(unsafe_zero_sized)]
 ///     standard: PhantomData<S>,
 ///     // RgbHue is a wrapper with `#[repr(C)]`, so it can safely

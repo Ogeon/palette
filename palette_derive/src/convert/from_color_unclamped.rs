@@ -14,9 +14,7 @@ use crate::util;
 
 use crate::COLOR_TYPES;
 
-use super::util::{
-    component_type, find_in_generics, find_nearest_color, get_convert_color_type, white_point_type,
-};
+use super::util::{component_type, find_nearest_color, get_convert_color_type, white_point_type};
 
 pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn::parse::Error>> {
     let DeriveInput {
@@ -39,31 +37,14 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         )]);
     };
 
-    let generic_white_point = item_meta.white_point.as_ref().map_or(false, |white_point| {
-        find_in_generics(white_point, &original_generics)
-    });
-
-    let generic_rgb_standard = item_meta
-        .rgb_standard
-        .as_ref()
-        .map_or(false, |rgb_standard| {
-            find_in_generics(rgb_standard, &original_generics)
-        });
-
-    let generic_luma_standard = item_meta
-        .luma_standard
-        .as_ref()
-        .map_or(false, |luma_standard| {
-            find_in_generics(luma_standard, &original_generics)
-        });
-
+    let component = component_type(item_meta.component.clone());
     let (white_point, white_point_source) = white_point_type(
-        item_meta.white_point.clone(),
-        item_meta.rgb_standard.clone(),
-        item_meta.luma_standard.clone(),
+        item_meta.white_point.as_ref(),
+        item_meta.rgb_standard.as_ref(),
+        item_meta.luma_standard.as_ref(),
+        &component,
         item_meta.internal,
     );
-    let component = component_type(item_meta.component.clone());
 
     let alpha_field = fields_meta.alpha_property;
 
@@ -72,26 +53,13 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         item_meta.skip_derives.insert("Xyz".into());
     }
 
-    let wp_source_trait_bound = match white_point_source {
-        Some(WhitePointSource::WhitePoint) if generic_white_point => {
-            Some(WhitePointSource::WhitePoint)
-        }
-        Some(WhitePointSource::RgbStandard) if generic_rgb_standard => {
-            Some(WhitePointSource::RgbStandard)
-        }
-        Some(WhitePointSource::LumaStandard) if generic_luma_standard => {
-            Some(WhitePointSource::LumaStandard)
-        }
-        _ => None,
-    };
-
     let all_from_impl_params = prepare_from_impl(
         &item_meta.skip_derives,
         &component,
         &white_point,
         &item_meta,
         &generics,
-        wp_source_trait_bound,
+        white_point_source,
     )
     .map_err(|error| vec![error])?;
 
@@ -123,7 +91,7 @@ fn prepare_from_impl(
     white_point: &Type,
     meta: &TypeItemAttributes,
     generics: &Generics,
-    wp_source_trait_bound: Option<WhitePointSource>,
+    white_point_source: Option<WhitePointSource>,
 ) -> Result<Vec<FromImplParameters>> {
     let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
     let linear_path = util::path(&["encoding", "Linear"], meta.internal);
@@ -177,6 +145,9 @@ fn prepare_from_impl(
                     parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>)
                 }
             }
+            "Oklab" | "Oklch" => {
+                parse_quote!(#nearest_color_path::<#component>)
+            }
             _ => {
                 used_input.white_point = true;
                 parse_quote!(#nearest_color_path::<#white_point, #component>)
@@ -184,33 +155,30 @@ fn prepare_from_impl(
         };
 
         if used_input.white_point {
-            match wp_source_trait_bound {
+            match white_point_source {
                 Some(WhitePointSource::WhitePoint) => {
                     let white_point_path =
                         util::path(&["white_point", "WhitePoint"], meta.internal);
-                    let white_point = meta.white_point.as_ref();
                     generics
                         .make_where_clause()
                         .predicates
-                        .push(parse_quote!(#white_point: #white_point_path))
+                        .push(parse_quote!(#white_point: #white_point_path<#component>))
                 }
-
                 Some(WhitePointSource::RgbStandard) => {
                     let rgb_standard_path = util::path(&["rgb", "RgbStandard"], meta.internal);
                     let rgb_standard = meta.rgb_standard.as_ref();
                     generics
                         .make_where_clause()
                         .predicates
-                        .push(parse_quote!(#rgb_standard: #rgb_standard_path))
+                        .push(parse_quote!(#rgb_standard: #rgb_standard_path<#component>));
                 }
-
                 Some(WhitePointSource::LumaStandard) => {
                     let luma_standard_path = util::path(&["luma", "LumaStandard"], meta.internal);
                     let luma_standard = meta.luma_standard.as_ref();
                     generics
                         .make_where_clause()
                         .predicates
-                        .push(parse_quote!(#luma_standard: #luma_standard_path))
+                        .push(parse_quote!(#luma_standard: #luma_standard_path<#component>));
                 }
                 None => {}
             }

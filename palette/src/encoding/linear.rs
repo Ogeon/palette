@@ -12,12 +12,18 @@ use crate::white_point::WhitePoint;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Linear<S>(PhantomData<S>);
 
-impl<S: RgbSpace> RgbStandard for Linear<S> {
-    type Space = S;
+impl<T, Sp> RgbStandard<T> for Linear<Sp>
+where
+    Sp: RgbSpace<T>,
+{
+    type Space = Sp;
     type TransferFn = LinearFn;
 }
 
-impl<Wp: WhitePoint> LumaStandard for Linear<Wp> {
+impl<T, Wp> LumaStandard<T> for Linear<Wp>
+where
+    Wp: WhitePoint<T>,
+{
     type WhitePoint = Wp;
     type TransferFn = LinearFn;
 }

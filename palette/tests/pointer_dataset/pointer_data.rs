@@ -17,18 +17,14 @@ use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
 use palette::convert::IntoColorUnclamped;
-use palette::white_point::WhitePoint;
-use palette::{FromF64, Lab, Lch, Xyz};
+use palette::white_point::{Any, WhitePoint};
+use palette::{Lab, Lch, Xyz};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
-impl WhitePoint for PointerWP {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
-        Xyz::new(
-            FromF64::from_f64(0.980722647624),
-            FromF64::from_f64(1.0),
-            FromF64::from_f64(1.182254189827),
-        )
+impl WhitePoint<f64> for PointerWP {
+    fn get_xyz() -> Xyz<Any, f64> {
+        Xyz::new(0.980722647624, 1.0, 1.182254189827)
     }
 }
 

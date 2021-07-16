@@ -404,7 +404,7 @@ where
 impl<Wp, T> RelativeContrast for Hsluv<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
 {
     type Scalar = T;
 
@@ -422,7 +422,6 @@ where
 pub struct UniformHsluv<Wp, T>
 where
     T: Float + FromF64 + SampleUniform,
-    Wp: WhitePoint,
 {
     hue: crate::hues::UniformLuvHue<T>,
     u1: Uniform<T>,
@@ -434,7 +433,6 @@ where
 impl<Wp, T> SampleUniform for Hsluv<Wp, T>
 where
     T: Float + FromF64 + SampleUniform,
-    Wp: WhitePoint,
 {
     type Sampler = UniformHsluv<Wp, T>;
 }
@@ -443,7 +441,6 @@ where
 impl<Wp, T> UniformSampler for UniformHsluv<Wp, T>
 where
     T: Float + FromF64 + SampleUniform,
-    Wp: WhitePoint,
 {
     type X = Hsluv<Wp, T>;
 

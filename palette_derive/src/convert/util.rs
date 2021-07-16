@@ -2,53 +2,26 @@ use std::collections::{HashMap, HashSet};
 
 use proc_macro2::Span;
 use syn::spanned::Spanned;
-use syn::{parse_quote, GenericParam, Generics, Ident, Path, Result, Type, TypePath};
+use syn::{parse_quote, GenericParam, Generics, Ident, Result, Type};
 
 use crate::util;
 use crate::{COLOR_TYPES, PREFERRED_CONVERSION_SOURCE};
 
-pub fn find_in_generics(type_to_find: &Type, generics: &Generics) -> bool {
-    for param in &generics.params {
-        if let GenericParam::Type(ref param) = *param {
-            if let &Type::Path(TypePath {
-                qself: None,
-                path:
-                    Path {
-                        segments: ref type_path,
-                        leading_colon,
-                    },
-            }) = type_to_find
-            {
-                let first = type_path.first();
-                let is_ident_path = leading_colon.is_none()
-                    && type_path.len() == 1
-                    && first.unwrap().arguments.is_empty()
-                    && first.unwrap().ident == param.ident;
-
-                if is_ident_path {
-                    return true;
-                }
-            }
-        }
-    }
-
-    false
-}
-
 pub fn white_point_type(
-    white_point: Option<Type>,
-    rgb_standard: Option<Type>,
-    luma_standard: Option<Type>,
+    white_point: Option<&Type>,
+    rgb_standard: Option<&Type>,
+    luma_standard: Option<&Type>,
+    component: &Type,
     internal: bool,
 ) -> (Type, Option<WhitePointSource>) {
     white_point
-        .map(|white_point| (white_point, Some(WhitePointSource::WhitePoint)))
+        .map(|white_point| (white_point.clone(), Some(WhitePointSource::WhitePoint)))
         .or_else(|| {
             rgb_standard.map(|rgb_standard| {
                 let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
                 let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
                 (
-                    parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
+                    parse_quote!(<<#rgb_standard as #rgb_standard_path<#component>>::Space as #rgb_space_path<#component>>::WhitePoint),
                     Some(WhitePointSource::RgbStandard),
                 )
             })
@@ -57,7 +30,7 @@ pub fn white_point_type(
             luma_standard.map(|luma_standard| {
                 let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
                 (
-                    parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
+                    parse_quote!(<#luma_standard as #luma_standard_path<#component>>::WhitePoint),
                     Some(WhitePointSource::LumaStandard),
                 )
             })
@@ -99,10 +72,9 @@ pub fn get_convert_color_type(
                     Ident::new("_S", Span::call_site()).into(),
                 ));
 
-                generics
-                    .make_where_clause()
-                    .predicates
-                    .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
+                generics.make_where_clause().predicates.push(
+                    parse_quote!(_S: #luma_standard_path<#component, WhitePoint = #white_point>),
+                );
                 (
                     parse_quote!(#color_path<_S, #component>),
                     UsedInput { white_point: true },
@@ -126,10 +98,10 @@ pub fn get_convert_color_type(
 
                 where_clause
                     .predicates
-                    .push(parse_quote!(_S: #rgb_standard_path));
-                where_clause
-                    .predicates
-                    .push(parse_quote!(_S::Space: #rgb_space_path<WhitePoint = #white_point>));
+                    .push(parse_quote!(_S: #rgb_standard_path<#component>));
+                where_clause.predicates.push(
+                    parse_quote!(_S::Space: #rgb_space_path<#component, WhitePoint = #white_point>),
+                );
 
                 (
                     parse_quote!(#color_path<_S, #component>),

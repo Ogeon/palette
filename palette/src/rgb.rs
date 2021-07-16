@@ -61,7 +61,7 @@
 //! flexibility.
 
 use crate::encoding::{self, Gamma, Linear, TransferFn};
-use crate::white_point::WhitePoint;
+use crate::white_point::{Any, WhitePoint};
 use crate::{Component, FloatComponent, FromComponent, Yxy};
 
 pub use self::packed::{channels, Packed, RgbChannels};
@@ -88,46 +88,59 @@ pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
 /// An RGB space and a transfer function.
-pub trait RgbStandard: 'static {
+pub trait RgbStandard<T>: 'static {
     /// The RGB color space.
-    type Space: RgbSpace;
+    type Space: RgbSpace<T>;
 
     /// The transfer function for the color components.
     type TransferFn: TransferFn;
 }
 
-impl<S: RgbSpace, T: TransferFn> RgbStandard for (S, T) {
-    type Space = S;
-    type TransferFn = T;
+impl<T, Sp, Tf> RgbStandard<T> for (Sp, Tf)
+where
+    Sp: RgbSpace<T>,
+    Tf: TransferFn,
+{
+    type Space = Sp;
+    type TransferFn = Tf;
 }
 
-impl<P: Primaries, W: WhitePoint, T: TransferFn> RgbStandard for (P, W, T) {
-    type Space = (P, W);
-    type TransferFn = T;
+impl<T, Pr, Wp, Tf> RgbStandard<T> for (Pr, Wp, Tf)
+where
+    Pr: Primaries<T>,
+    Wp: WhitePoint<T>,
+    Tf: TransferFn,
+{
+    type Space = (Pr, Wp);
+    type TransferFn = Tf;
 }
 
 /// A set of primaries and a white point.
-pub trait RgbSpace: 'static {
+pub trait RgbSpace<T>: 'static {
     /// The primaries of the RGB color space.
-    type Primaries: Primaries;
+    type Primaries: Primaries<T>;
 
     /// The white point of the RGB color space.
-    type WhitePoint: WhitePoint;
+    type WhitePoint: WhitePoint<T>;
 }
 
-impl<P: Primaries, W: WhitePoint> RgbSpace for (P, W) {
+impl<T, P, W> RgbSpace<T> for (P, W)
+where
+    P: Primaries<T>,
+    W: WhitePoint<T>,
+{
     type Primaries = P;
     type WhitePoint = W;
 }
 
 /// Represents the red, green and blue primaries of an RGB space.
-pub trait Primaries: 'static {
+pub trait Primaries<T>: 'static {
     /// Primary red.
-    fn red<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
+    fn red() -> Yxy<Any, T>;
     /// Primary green.
-    fn green<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
+    fn green() -> Yxy<Any, T>;
     /// Primary blue.
-    fn blue<Wp: WhitePoint, T: FloatComponent>() -> Yxy<Wp, T>;
+    fn blue() -> Yxy<Any, T>;
 }
 
 impl<T, U> From<LinSrgb<T>> for Srgb<U>
