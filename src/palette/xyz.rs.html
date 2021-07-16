@@ -661,6 +661,26 @@
 <span id="658">658</span>
 <span id="659">659</span>
 <span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -680,8 +700,8 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">oklab</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromF64</span>,
-    <span class="ident">Lab</span>, <span class="ident">Luma</span>, <span class="ident">Luv</span>, <span class="ident">Mix</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Yxy</span>,
+    <span class="ident">clamp</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">oklab</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">Lab</span>, <span class="ident">Luma</span>,
+    <span class="ident">Luv</span>, <span class="ident">Mix</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Yxy</span>,
 };
 
 <span class="doccomment">/// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in</span>
@@ -763,12 +783,26 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>)
     }
+
+    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
+    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
+    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
+    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
+    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">Xyz::new</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">z</span>)
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Return the `x` value minimum.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_x</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
@@ -777,8 +811,7 @@
 
     <span class="doccomment">/// Return the `x` value maximum.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_x</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">xyz_ref</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
-        <span class="ident">xyz_ref</span>.<span class="ident">x</span>
+        <span class="ident">Wp::get_xyz</span>().<span class="ident">x</span>
     }
 
     <span class="doccomment">/// Return the `y` value minimum.</span>
@@ -788,8 +821,7 @@
 
     <span class="doccomment">/// Return the `y` value maximum.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_y</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">xyz_ref</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
-        <span class="ident">xyz_ref</span>.<span class="ident">y</span>
+        <span class="ident">Wp::get_xyz</span>().<span class="ident">y</span>
     }
 
     <span class="doccomment">/// Return the `z` value minimum.</span>
@@ -799,8 +831,7 @@
 
     <span class="doccomment">/// Return the `z` value maximum.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_z</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">xyz_ref</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
-        <span class="ident">xyz_ref</span>.<span class="ident">z</span>
+        <span class="ident">Wp::get_xyz</span>().<span class="ident">z</span>
     }
 }
 
@@ -823,6 +854,20 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>, <span class="ident">alpha</span>)
     }
+
+    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
+    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
+    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
+    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
+    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
+        <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">z</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
@@ -834,9 +879,9 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
-    <span class="ident">S</span>: <span class="ident">RgbStandard</span>,
-    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span><span class="op">&gt;</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">S::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">transform_matrix</span> <span class="op">=</span> <span class="ident">rgb_to_xyz_matrix</span>::<span class="op">&lt;</span><span class="ident">S::Space</span>, <span class="ident">T</span><span class="op">&gt;</span>();
@@ -865,7 +910,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="comment">// Recip call shows performance benefits in benchmarks for this function</span>
@@ -885,21 +930,21 @@
             }
         }
 
-        <span class="ident">Xyz::new</span>(<span class="ident">convert</span>(<span class="ident">x</span>), <span class="ident">convert</span>(<span class="ident">y</span>), <span class="ident">convert</span>(<span class="ident">z</span>)) <span class="op">*</span> <span class="ident">Wp::get_xyz</span>()
+        <span class="ident">Xyz::new</span>(<span class="ident">convert</span>(<span class="ident">x</span>), <span class="ident">convert</span>(<span class="ident">y</span>), <span class="ident">convert</span>(<span class="ident">z</span>)) <span class="op">*</span> <span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">from_f64</span> <span class="op">=</span> <span class="ident">T::from_f64</span>;
 
         <span class="kw">let</span> <span class="ident">kappa</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">29.0</span> <span class="op">/</span> <span class="number">3.0</span>).<span class="ident">powi</span>(<span class="number">3</span>);
 
-        <span class="kw">let</span> <span class="ident">w</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
+        <span class="kw">let</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
         <span class="kw">let</span> <span class="ident">ref_denom_recip</span> <span class="op">=</span> (<span class="ident">w</span>.<span class="ident">x</span> <span class="op">+</span> <span class="ident">from_f64</span>(<span class="number">15.0</span>) <span class="op">*</span> <span class="ident">w</span>.<span class="ident">y</span> <span class="op">+</span> <span class="ident">from_f64</span>(<span class="number">3.0</span>) <span class="op">*</span> <span class="ident">w</span>.<span class="ident">z</span>).<span class="ident">recip</span>();
         <span class="kw">let</span> <span class="ident">u_ref</span> <span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">4.0</span>) <span class="op">*</span> <span class="ident">w</span>.<span class="ident">x</span> <span class="op">*</span> <span class="ident">ref_denom_recip</span>;
         <span class="kw">let</span> <span class="ident">v_ref</span> <span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">9.0</span>) <span class="op">*</span> <span class="ident">w</span>.<span class="ident">y</span> <span class="op">*</span> <span class="ident">ref_denom_recip</span>;
@@ -931,14 +976,12 @@
         <span class="kw">let</span> <span class="ident">m1_inv</span> <span class="op">=</span> <span class="ident">oklab::m1_inv</span>();
         <span class="kw">let</span> <span class="ident">m2_inv</span> <span class="op">=</span> <span class="ident">oklab::m2_inv</span>();
 
-        <span class="kw">let</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">Xyz</span> {
             <span class="ident">x</span>: <span class="ident">l</span>, <span class="ident">y</span>: <span class="ident">m</span>, <span class="ident">z</span>: <span class="ident">s</span>, ..
-        } <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="kw-2">&amp;</span><span class="ident">m2_inv</span>, <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::new</span>(<span class="ident">color</span>.<span class="ident">l</span>, <span class="ident">color</span>.<span class="ident">a</span>, <span class="ident">color</span>.<span class="ident">b</span>));
+        } <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="kw-2">&amp;</span><span class="ident">m2_inv</span>, <span class="kw-2">&amp;</span><span class="ident">Xyz::new</span>(<span class="ident">color</span>.<span class="ident">l</span>, <span class="ident">color</span>.<span class="ident">a</span>, <span class="ident">color</span>.<span class="ident">b</span>));
 
-        <span class="kw">let</span> <span class="ident">lms</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">l</span>.<span class="ident">powi</span>(<span class="number">3</span>), <span class="ident">m</span>.<span class="ident">powi</span>(<span class="number">3</span>), <span class="ident">s</span>.<span class="ident">powi</span>(<span class="number">3</span>));
-        <span class="kw">let</span> <span class="self">Self</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>, .. } <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="kw-2">&amp;</span><span class="ident">m1_inv</span>, <span class="kw-2">&amp;</span><span class="ident">lms</span>);
-
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>)
+        <span class="kw">let</span> <span class="ident">lms</span> <span class="op">=</span> <span class="ident">Xyz::new</span>(<span class="ident">l</span>.<span class="ident">powi</span>(<span class="number">3</span>), <span class="ident">m</span>.<span class="ident">powi</span>(<span class="number">3</span>), <span class="ident">s</span>.<span class="ident">powi</span>(<span class="number">3</span>));
+        <span class="ident">multiply_xyz</span>(<span class="kw-2">&amp;</span><span class="ident">m1_inv</span>, <span class="kw-2">&amp;</span><span class="ident">lms</span>).<span class="ident">with_white_point</span>()
     }
 }
 
@@ -954,12 +997,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
-    <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span><span class="op">&gt;</span>,
+    <span class="self">Self</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Wp::get_xyz</span>() <span class="op">*</span> <span class="ident">color</span>.<span class="ident">luma</span>
+        <span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>::<span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="ident">color</span>.<span class="ident">luma</span>
     }
 }
 
@@ -989,14 +1032,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">x</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_x</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_x</span>() <span class="op">&amp;&amp;</span>
         <span class="self">self</span>.<span class="ident">y</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_y</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_y</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">z</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">z</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_z</span>()
+        <span class="self">self</span>.<span class="ident">z</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_z</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">z</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_z</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
@@ -1033,7 +1076,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Shade</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
@@ -1135,12 +1178,12 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">xyz_ref</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
+        <span class="kw">let</span> <span class="ident">xyz_ref</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>();
         <span class="ident">Xyz</span> {
             <span class="ident">x</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
             <span class="ident">y</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
@@ -1154,7 +1197,6 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformXyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="ident">x</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">y</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
@@ -1166,7 +1208,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformXyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
@@ -1175,7 +1216,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformXyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
@@ -1314,12 +1354,12 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
     <span class="macro">test_uniform_distribution!</span> {
         <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span> {
-            <span class="ident">x</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span>().<span class="ident">x</span>),
-            <span class="ident">y</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span>().<span class="ident">y</span>),
-            <span class="ident">z</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span>().<span class="ident">z</span>)
+            <span class="ident">x</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>().<span class="ident">x</span>),
+            <span class="ident">y</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>().<span class="ident">y</span>),
+            <span class="ident">z</span>: (<span class="number">0.0</span>, <span class="ident">D65::get_xyz</span>().<span class="ident">z</span>)
         },
         <span class="ident">min</span>: <span class="ident">Xyz::new</span>(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-        <span class="ident">max</span>: <span class="ident">D65::get_xyz</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span>()
+        <span class="ident">max</span>: <span class="ident">D65::get_xyz</span>().<span class="ident">with_white_point</span>()
     }
 }
 </pre></div>

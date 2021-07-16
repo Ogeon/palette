@@ -552,6 +552,30 @@
 <span id="549">549</span>
 <span id="550">550</span>
 <span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -650,6 +674,20 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>)
     }
+
+    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
+    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
+    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
+    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
+    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">Yxy::new</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">luma</span>)
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -705,6 +743,20 @@
     <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>)
+    }
+
+    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
+    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
+    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
+    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
+    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
+        <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">luma</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
     }
 }
 
@@ -762,7 +814,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">S</span>: <span class="ident">LumaStandard</span>,
+    <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Yxy</span> {
@@ -775,7 +827,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -876,7 +927,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="comment">// The default for x and y are the white point x and y ( from the default D65).</span>
@@ -885,7 +936,7 @@
         <span class="comment">// outside the usual color gamut and might cause scaling issues.</span>
         <span class="ident">Yxy</span> {
             <span class="ident">luma</span>: <span class="ident">T::zero</span>(),
-            ..<span class="ident">Wp::get_xyz</span>().<span class="ident">into_color_unclamped</span>()
+            ..<span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>().<span class="ident">into_color_unclamped</span>()
         }
     }
 }
@@ -943,7 +994,6 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="ident">x</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">y</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
@@ -955,7 +1005,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
@@ -964,7 +1013,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span>,
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 

@@ -40,6 +40,10 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Luminance types.</span>
 
@@ -68,17 +72,21 @@
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">GammaLumaa</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lumaa</span><span class="op">&lt;</span><span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// A white point and a transfer function.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LumaStandard</span>: <span class="lifetime">&#39;static</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="lifetime">&#39;static</span> {
     <span class="doccomment">/// The white point of the color space.</span>
-    <span class="kw">type</span> <span class="ident">WhitePoint</span>: <span class="ident">WhitePoint</span>;
+    <span class="kw">type</span> <span class="ident">WhitePoint</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// The transfer function for the luminance component.</span>
     <span class="kw">type</span> <span class="ident">TransferFn</span>: <span class="ident">TransferFn</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">TransferFn</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span> <span class="kw">for</span> (<span class="ident">Wp</span>, <span class="ident">T</span>) {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Wp</span>, <span class="ident">Tf</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">Wp</span>, <span class="ident">Tf</span>)
+<span class="kw">where</span>
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Tf</span>: <span class="ident">TransferFn</span>,
+{
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

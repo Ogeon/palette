@@ -40,6 +40,12 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Linear encoding</span>
 
@@ -55,12 +61,18 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> <span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">S</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Sp</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">Sp</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Sp</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+{
+    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Sp</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span> <span class="kw">for</span> <span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+{
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span>;
 }

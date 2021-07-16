@@ -952,7 +952,6 @@
 <span id="949">949</span>
 <span id="950">950</span>
 <span id="951">951</span>
-<span id="952">952</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Traits for converting between color spaces.</span>
 <span class="doccomment">//!</span>
@@ -988,19 +987,19 @@
 <span class="doccomment">//!     standard: std::marker::PhantomData&lt;S&gt;,</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;&gt; for ExampleType&lt;S, T&gt;</span>
+<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;Xyz&lt;&lt;S::Space as RgbSpace&lt;T&gt;&gt;::WhitePoint, T&gt;&gt; for ExampleType&lt;S, T&gt;</span>
 <span class="doccomment">//! # where</span>
-<span class="doccomment">//! #   S: RgbStandard,</span>
+<span class="doccomment">//! #   S: RgbStandard&lt;T&gt;,</span>
 <span class="doccomment">//! #   T: FloatComponent</span>
 <span class="doccomment">//! # {</span>
-<span class="doccomment">//! #   fn from_color_unclamped(color: Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;) -&gt; Self {</span>
+<span class="doccomment">//! #   fn from_color_unclamped(color: Xyz&lt;&lt;S::Space as RgbSpace&lt;T&gt;&gt;::WhitePoint, T&gt;) -&gt; Self {</span>
 <span class="doccomment">//! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}</span>
 <span class="doccomment">//! #   }</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! #</span>
-<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;ExampleType&lt;S, T&gt;&gt; for Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;</span>
+<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;ExampleType&lt;S, T&gt;&gt; for Xyz&lt;&lt;S::Space as RgbSpace&lt;T&gt;&gt;::WhitePoint, T&gt;</span>
 <span class="doccomment">//! # where</span>
-<span class="doccomment">//! #   S: RgbStandard,</span>
+<span class="doccomment">//! #   S: RgbStandard&lt;T&gt;,</span>
 <span class="doccomment">//! #   T: FloatComponent</span>
 <span class="doccomment">//! # {</span>
 <span class="doccomment">//! #   fn from_color_unclamped(color: ExampleType&lt;S, T&gt;) -&gt; Self {</span>
@@ -1120,8 +1119,8 @@
 <span class="doccomment">//! impl&lt;S, T&gt; FromColorUnclamped&lt;Bgr&lt;T&gt;&gt; for Rgb&lt;S, T&gt;</span>
 <span class="doccomment">//! where</span>
 <span class="doccomment">//!     T: FloatComponent,</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;</span>
+<span class="doccomment">//!     S: RgbStandard&lt;T&gt;,</span>
+<span class="doccomment">//!     S::Space: RgbSpace&lt;T, WhitePoint = D65&gt;</span>
 <span class="doccomment">//! {</span>
 <span class="doccomment">//!     fn from_color_unclamped(color: Bgr&lt;T&gt;) -&gt; Rgb&lt;S, T&gt; {</span>
 <span class="doccomment">//!         Srgb::new(color.red, color.green, color.blue)</span>
@@ -1132,8 +1131,8 @@
 <span class="doccomment">//! impl&lt;S, T&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; for Bgr&lt;T&gt;</span>
 <span class="doccomment">//! where</span>
 <span class="doccomment">//!     T: FloatComponent,</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;</span>
+<span class="doccomment">//!     S: RgbStandard&lt;T&gt;,</span>
+<span class="doccomment">//!     S::Space: RgbSpace&lt;T, WhitePoint = D65&gt;</span>
 <span class="doccomment">//! {</span>
 <span class="doccomment">//!     fn from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; Bgr&lt;T&gt; {</span>
 <span class="doccomment">//!         let color = Srgb::from_color_unclamped(color);</span>
@@ -1191,8 +1190,8 @@
 <span class="doccomment">//! // the transparency for us.</span>
 <span class="doccomment">//! impl&lt;S&gt; FromColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt; for CssRgb</span>
 <span class="doccomment">//! where</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,</span>
+<span class="doccomment">//!     S: RgbStandard&lt;f32&gt;,</span>
+<span class="doccomment">//!     S::Space: RgbSpace&lt;f32, WhitePoint = D65&gt;,</span>
 <span class="doccomment">//! {</span>
 <span class="doccomment">//!     fn from_color_unclamped(color: Rgb&lt;S, f32&gt;) -&gt; CssRgb{</span>
 <span class="doccomment">//!         let srgb = Srgb::from_color_unclamped(color)</span>
@@ -1209,8 +1208,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! impl&lt;S&gt; FromColorUnclamped&lt;CssRgb&gt; for Rgb&lt;S, f32&gt;</span>
 <span class="doccomment">//! where</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,</span>
+<span class="doccomment">//!     S: RgbStandard&lt;f32&gt;,</span>
+<span class="doccomment">//!     S::Space: RgbSpace&lt;f32, WhitePoint = D65&gt;,</span>
 <span class="doccomment">//! {</span>
 <span class="doccomment">//!     fn from_color_unclamped(color: CssRgb) -&gt; Rgb&lt;S, f32&gt;{</span>
 <span class="doccomment">//!         Srgb::new(color.red, color.green, color.blue)</span>
@@ -1493,23 +1492,22 @@
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
     <span class="attribute">#[<span class="ident">palette</span>(
         <span class="ident">skip_derives</span>(<span class="ident">Xyz</span>, <span class="ident">Luma</span>),
-        <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;S::WhitePoint&quot;</span>,
         <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;f64&quot;</span>,
         <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;Linear&lt;S&gt;&quot;</span>,
         <span class="ident">palette_internal</span>,
         <span class="ident">palette_internal_not_base_type</span>
     )]</span>
-    <span class="kw">struct</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>);
+    <span class="kw">struct</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>);
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
             <span class="kw-2">*</span><span class="self">self</span>
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {}
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {}
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
             <span class="bool-val">true</span>
         }
@@ -1523,27 +1521,27 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">S2</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">S1</span>: <span class="ident">RgbSpace</span>,
-        <span class="ident">S2</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">S1::WhitePoint</span><span class="op">&gt;</span>,
+        <span class="ident">S1</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>,
+        <span class="ident">S2</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">S1::WhitePoint</span><span class="op">&gt;</span>,
     {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
             <span class="ident">WithXyz</span>(<span class="ident">PhantomData</span>)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
             <span class="ident">WithXyz</span>(<span class="ident">PhantomData</span>)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
             <span class="ident">Xyz::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
         <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span>
     {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -1551,7 +1549,7 @@
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
         <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span>
     {
         <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {

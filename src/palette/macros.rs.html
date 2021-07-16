@@ -649,6 +649,9 @@
 <span id="646">646</span>
 <span id="647">647</span>
 <span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="macro">macro_rules!</span> <span class="ident">raw_pixel_conversion_tests</span> {
@@ -831,8 +834,9 @@
                 }
 
                 $({
-                    <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
-                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span> <span class="op">-</span> <span class="ident">min</span>;
+                    <span class="kw">let</span> <span class="ident">min</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
+                    <span class="kw">let</span> <span class="ident">max</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span>;
+                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>;
                     <span class="kw">let</span> <span class="ident">normalized</span> <span class="op">=</span> (<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">-</span> <span class="ident">min</span>) <span class="op">/</span> <span class="ident">range</span>;
                     <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>[((<span class="ident">normalized</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="ident">BINS</span> <span class="op">-</span> <span class="number">1</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                 })<span class="op">+</span>
@@ -864,8 +868,9 @@
                 }
 
                 $({
-                    <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
-                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span> <span class="op">-</span> <span class="ident">min</span>;
+                    <span class="kw">let</span> <span class="ident">min</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
+                    <span class="kw">let</span> <span class="ident">max</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span>;
+                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>;
                     <span class="kw">let</span> <span class="ident">normalized</span> <span class="op">=</span> (<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">-</span> <span class="ident">min</span>) <span class="op">/</span> <span class="ident">range</span>;
                     <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>[((<span class="ident">normalized</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="ident">BINS</span> <span class="op">-</span> <span class="number">1</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                 })<span class="op">+</span>
@@ -897,8 +902,9 @@
                 }
 
                 $({
-                    <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
-                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span> <span class="op">-</span> <span class="ident">min</span>;
+                    <span class="kw">let</span> <span class="ident">min</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_min</span>;
+                    <span class="kw">let</span> <span class="ident">max</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_max</span>;
+                    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>;
                     <span class="kw">let</span> <span class="ident">normalized</span> <span class="op">=</span> (<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">-</span> <span class="ident">min</span>) <span class="op">/</span> <span class="ident">range</span>;
                     <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>[((<span class="ident">normalized</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="ident">BINS</span> <span class="op">-</span> <span class="number">1</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                 })<span class="op">+</span>

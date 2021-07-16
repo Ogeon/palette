@@ -59,7 +59,6 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
-<span id="59">59</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! The sRGB standard.</span>
 
@@ -67,37 +66,36 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::float::Float</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::luma::LumaStandard</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Primaries</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">from_f64</span>, <span class="ident">FromF64</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FloatComponent</span>, <span class="ident">Yxy</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">Any</span>, <span class="ident">D65</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">from_f64</span>, <span class="ident">FromF64</span>, <span class="ident">Yxy</span>};
 
 <span class="doccomment">/// The sRGB color space.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Srgb</span>;
 
-<span class="kw">impl</span> <span class="ident">Primaries</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">fn</span> <span class="ident">red</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">Primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+    <span class="kw">fn</span> <span class="ident">red</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.6400</span>), <span class="ident">from_f64</span>(<span class="number">0.3300</span>), <span class="ident">from_f64</span>(<span class="number">0.212656</span>))
     }
-    <span class="kw">fn</span> <span class="ident">green</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">green</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.3000</span>), <span class="ident">from_f64</span>(<span class="number">0.6000</span>), <span class="ident">from_f64</span>(<span class="number">0.715158</span>))
     }
-    <span class="kw">fn</span> <span class="ident">blue</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="ident">WhitePoint</span>, <span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">blue</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy::new</span>(<span class="ident">from_f64</span>(<span class="number">0.1500</span>), <span class="ident">from_f64</span>(<span class="number">0.0600</span>), <span class="ident">from_f64</span>(<span class="number">0.072186</span>))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">RgbSpace</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
     <span class="kw">type</span> <span class="ident">Primaries</span> <span class="op">=</span> <span class="ident">Srgb</span>;
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
 }
 
-<span class="kw">impl</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
     <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Srgb</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
 }
 
-<span class="kw">impl</span> <span class="ident">LumaStandard</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
 }
