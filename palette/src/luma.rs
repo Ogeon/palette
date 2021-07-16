@@ -25,15 +25,19 @@ pub type GammaLuma<T = f32> = Luma<Gamma<D65>, T>;
 pub type GammaLumaa<T = f32> = Lumaa<Gamma<D65>, T>;
 
 /// A white point and a transfer function.
-pub trait LumaStandard: 'static {
+pub trait LumaStandard<T>: 'static {
     /// The white point of the color space.
-    type WhitePoint: WhitePoint;
+    type WhitePoint: WhitePoint<T>;
 
     /// The transfer function for the luminance component.
     type TransferFn: TransferFn;
 }
 
-impl<Wp: WhitePoint, T: TransferFn> LumaStandard for (Wp, T) {
+impl<T, Wp, Tf> LumaStandard<T> for (Wp, Tf)
+where
+    Wp: WhitePoint<T>,
+    Tf: TransferFn,
+{
     type WhitePoint = Wp;
-    type TransferFn = T;
+    type TransferFn = Tf;
 }

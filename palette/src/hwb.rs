@@ -125,7 +125,7 @@ impl<S, T> Hwb<S, T> {
     }
 
     #[inline]
-    fn reinterpret_as<St: RgbStandard>(self) -> Hwb<St, T> {
+    fn reinterpret_as<St: RgbStandard<T>>(self) -> Hwb<St, T> {
         Hwb {
             hue: self.hue,
             whiteness: self.whiteness,
@@ -231,9 +231,9 @@ impl<S, T, A> Alpha<Hwb<S, T>, A> {
 
 impl<S1, S2, T> FromColorUnclamped<Hwb<S1, T>> for Hwb<S2, T>
 where
-    S1: RgbStandard,
-    S2: RgbStandard,
-    S1::Space: RgbSpace<WhitePoint = <S2::Space as RgbSpace>::WhitePoint>,
+    S1: RgbStandard<T>,
+    S2: RgbStandard<T>,
+    S1::Space: RgbSpace<T, WhitePoint = <S2::Space as RgbSpace<T>>::WhitePoint>,
     T: FloatComponent,
 {
     fn from_color_unclamped(hwb: Hwb<S1, T>) -> Self {
@@ -542,7 +542,7 @@ where
 impl<S, T> RelativeContrast for Hwb<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
+    S: RgbStandard<T>,
 {
     type Scalar = T;
 

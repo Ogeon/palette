@@ -23,12 +23,20 @@ use crate::{from_f64, FromF64};
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Gamma<S, N: Number = F2p2>(PhantomData<(S, N)>);
 
-impl<S: RgbSpace, N: Number> RgbStandard for Gamma<S, N> {
-    type Space = S;
+impl<T, Sp, N> RgbStandard<T> for Gamma<Sp, N>
+where
+    Sp: RgbSpace<T>,
+    N: Number,
+{
+    type Space = Sp;
     type TransferFn = GammaFn<N>;
 }
 
-impl<Wp: WhitePoint, N: Number> LumaStandard for Gamma<Wp, N> {
+impl<T, Wp, N> LumaStandard<T> for Gamma<Wp, N>
+where
+    Wp: WhitePoint<T>,
+    N: Number,
+{
     type WhitePoint = Wp;
     type TransferFn = GammaFn<N>;
 }

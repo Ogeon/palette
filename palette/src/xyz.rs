@@ -16,8 +16,8 @@ use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, ComponentWise, FloatComponent, FromF64,
-    Lab, Luma, Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast, Shade, Yxy,
+    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, ComponentWise, FloatComponent, Lab, Luma,
+    Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast, Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -99,12 +99,26 @@ impl<Wp, T> Xyz<Wp, T> {
     pub fn from_components((x, y, z): (T, T, T)) -> Self {
         Self::new(x, y, z)
     }
+
+    /// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn't change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color's appearance.
+    #[inline]
+    pub fn with_white_point<NewWp>(self) -> Xyz<NewWp, T> {
+        Xyz::new(self.x, self.y, self.z)
+    }
 }
 
 impl<Wp, T> Xyz<Wp, T>
 where
-    T: Zero + FromF64,
-    Wp: WhitePoint,
+    T: Zero,
+    Wp: WhitePoint<T>,
 {
     /// Return the `x` value minimum.
     pub fn min_x() -> T {
@@ -113,8 +127,7 @@ where
 
     /// Return the `x` value maximum.
     pub fn max_x() -> T {
-        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
-        xyz_ref.x
+        Wp::get_xyz().x
     }
 
     /// Return the `y` value minimum.
@@ -124,8 +137,7 @@ where
 
     /// Return the `y` value maximum.
     pub fn max_y() -> T {
-        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
-        xyz_ref.y
+        Wp::get_xyz().y
     }
 
     /// Return the `z` value minimum.
@@ -135,8 +147,7 @@ where
 
     /// Return the `z` value maximum.
     pub fn max_z() -> T {
-        let xyz_ref: Xyz<Wp, _> = Wp::get_xyz();
-        xyz_ref.z
+        Wp::get_xyz().z
     }
 }
 
@@ -159,6 +170,20 @@ impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
     pub fn from_components((x, y, z, alpha): (T, T, T, A)) -> Self {
         Self::new(x, y, z, alpha)
     }
+
+    /// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn't change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color's appearance.
+    #[inline]
+    pub fn with_white_point<NewWp>(self) -> Alpha<Xyz<NewWp, T>, A> {
+        Alpha::<Xyz<NewWp, T>, A>::new(self.color.x, self.color.y, self.color.z, self.alpha)
+    }
 }
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
@@ -170,9 +195,9 @@ impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
 impl<Wp, T, S> FromColorUnclamped<Rgb<S, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
-    S: RgbStandard,
-    S::Space: RgbSpace<WhitePoint = Wp>,
+    Wp: WhitePoint<T>,
+    S: RgbStandard<T>,
+    S::Space: RgbSpace<T, WhitePoint = Wp>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S::Space, T>();
@@ -201,7 +226,7 @@ where
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         // Recip call shows performance benefits in benchmarks for this function
@@ -221,21 +246,21 @@ where
             }
         }
 
-        Xyz::new(convert(x), convert(y), convert(z)) * Wp::get_xyz()
+        Xyz::new(convert(x), convert(y), convert(z)) * Wp::get_xyz().with_white_point()
     }
 }
 
 impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         let from_f64 = T::from_f64;
 
         let kappa: T = from_f64(29.0 / 3.0).powi(3);
 
-        let w: Xyz<Wp, T> = Wp::get_xyz();
+        let w = Wp::get_xyz();
         let ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();
         let u_ref = from_f64(4.0) * w.x * ref_denom_recip;
         let v_ref = from_f64(9.0) * w.y * ref_denom_recip;
@@ -267,14 +292,12 @@ where
         let m1_inv = oklab::m1_inv();
         let m2_inv = oklab::m2_inv();
 
-        let Self {
+        let Xyz {
             x: l, y: m, z: s, ..
-        } = multiply_xyz(&m2_inv, &Self::new(color.l, color.a, color.b));
+        } = multiply_xyz(&m2_inv, &Xyz::new(color.l, color.a, color.b));
 
-        let lms = Self::new(l.powi(3), m.powi(3), s.powi(3));
-        let Self { x, y, z, .. } = multiply_xyz(&m1_inv, &lms);
-
-        Self::new(x, y, z)
+        let lms = Xyz::new(l.powi(3), m.powi(3), s.powi(3));
+        multiply_xyz(&m1_inv, &lms).with_white_point()
     }
 }
 
@@ -290,12 +313,12 @@ where
 
 impl<Wp, T, S> FromColorUnclamped<Luma<S, T>> for Xyz<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
-    S: LumaStandard<WhitePoint = Wp>,
+    Self: Mul<T, Output = Self>,
+    Wp: WhitePoint<T>,
+    S: LumaStandard<T, WhitePoint = Wp>,
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
-        Wp::get_xyz() * color.luma
+        Wp::get_xyz().with_white_point::<Wp>() * color.luma
     }
 }
 
@@ -325,14 +348,14 @@ impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Xyz<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
-    Wp: WhitePoint,
+    T: Zero + PartialOrd + Clone,
+    Wp: WhitePoint<T>,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
         self.x >= Self::min_x() && self.x <= Self::max_x() &&
         self.y >= Self::min_y() && self.y <= Self::max_y() &&
-        self.z >= T::zero() && self.z <= Self::max_z()
+        self.z >= Self::min_z() && self.z <= Self::max_z()
     }
 
     fn clamp(&self) -> Xyz<Wp, T> {
@@ -369,7 +392,7 @@ where
 impl<Wp, T> Shade for Xyz<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
 {
     type Scalar = T;
 
@@ -471,12 +494,12 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Xyz<Wp, T>> for Standard
 where
-    T: FromF64 + Mul<Output = T>,
-    Wp: WhitePoint,
+    T: Mul<Output = T>,
+    Wp: WhitePoint<T>,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
-        let xyz_ref: Xyz<Wp, T> = Wp::get_xyz();
+        let xyz_ref: Xyz<Wp, T> = Wp::get_xyz().with_white_point();
         Xyz {
             x: rng.gen(),
             y: rng.gen(),
@@ -490,7 +513,6 @@ where
 pub struct UniformXyz<Wp, T>
 where
     T: SampleUniform,
-    Wp: WhitePoint,
 {
     x: Uniform<T>,
     y: Uniform<T>,
@@ -502,7 +524,6 @@ where
 impl<Wp, T> SampleUniform for Xyz<Wp, T>
 where
     T: Clone + SampleUniform,
-    Wp: WhitePoint,
 {
     type Sampler = UniformXyz<Wp, T>;
 }
@@ -511,7 +532,6 @@ where
 impl<Wp, T> UniformSampler for UniformXyz<Wp, T>
 where
     T: Clone + SampleUniform,
-    Wp: WhitePoint,
 {
     type X = Xyz<Wp, T>;
 
@@ -650,11 +670,11 @@ mod test {
     #[cfg(feature = "random")]
     test_uniform_distribution! {
         Xyz<D65, f32> {
-            x: (0.0, D65::get_xyz::<D65, f32>().x),
-            y: (0.0, D65::get_xyz::<D65, f32>().y),
-            z: (0.0, D65::get_xyz::<D65, f32>().z)
+            x: (0.0, D65::get_xyz().x),
+            y: (0.0, D65::get_xyz().y),
+            z: (0.0, D65::get_xyz().z)
         },
         min: Xyz::new(0.0f32, 0.0, 0.0),
-        max: D65::get_xyz::<D65, f32>()
+        max: D65::get_xyz().with_white_point()
     }
 }

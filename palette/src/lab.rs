@@ -163,7 +163,7 @@ impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lab<Wp, T> {
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Lab<Wp, T>
 where
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
@@ -172,7 +172,7 @@ where
             mut y,
             mut z,
             ..
-        } = color / Wp::get_xyz();
+        } = color / Wp::get_xyz().with_white_point();
 
         fn convert<T: FloatComponent>(c: T) -> T {
             let epsilon = from_f64::<T>(6.0 / 29.0).powi(3);
@@ -355,25 +355,24 @@ where
 
 impl<Wp, T> ComponentWise for Lab<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Lab<Wp, T>, mut f: F) -> Lab<Wp, T> {
         Lab {
-            l: f(self.l, other.l),
-            a: f(self.a, other.a),
-            b: f(self.b, other.b),
+            l: f(self.l.clone(), other.l.clone()),
+            a: f(self.a.clone(), other.a.clone()),
+            b: f(self.b.clone(), other.b.clone()),
             white_point: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Lab<Wp, T> {
         Lab {
-            l: f(self.l),
-            a: f(self.a),
-            b: f(self.b),
+            l: f(self.l.clone()),
+            a: f(self.a.clone()),
+            b: f(self.b.clone()),
             white_point: PhantomData,
         }
     }
@@ -413,7 +412,7 @@ where
 
 impl<Wp, T> RelativeContrast for Lab<Wp, T>
 where
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
     T: FloatComponent,
 {
     type Scalar = T;

@@ -175,12 +175,12 @@ where
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Luv<Wp, T>
 where
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         let from_f64 = T::from_f64;
-        let w: Xyz<Wp, T> = Wp::get_xyz();
+        let w = Wp::get_xyz();
 
         let kappa = from_f64(29.0 / 3.0).powi(3);
         let epsilon = from_f64(6.0 / 29.0).powi(3);
@@ -387,7 +387,7 @@ where
 
 impl<Wp, T> RelativeContrast for Luv<Wp, T>
 where
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
     T: FloatComponent,
 {
     type Scalar = T;

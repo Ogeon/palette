@@ -122,7 +122,7 @@ impl<S, T> Hsl<S, T> {
     }
 
     #[inline]
-    fn reinterpret_as<St: RgbStandard>(self) -> Hsl<St, T> {
+    fn reinterpret_as<St: RgbStandard<T>>(self) -> Hsl<St, T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
@@ -230,9 +230,9 @@ impl<S, T, A> Alpha<Hsl<S, T>, A> {
 impl<S1, S2, T> FromColorUnclamped<Hsl<S1, T>> for Hsl<S2, T>
 where
     T: FloatComponent,
-    S1: RgbStandard,
-    S2: RgbStandard,
-    S1::Space: RgbSpace<WhitePoint = <S2::Space as RgbSpace>::WhitePoint>,
+    S1: RgbStandard<T>,
+    S2: RgbStandard<T>,
+    S1::Space: RgbSpace<T, WhitePoint = <S2::Space as RgbSpace<T>>::WhitePoint>,
 {
     fn from_color_unclamped(hsl: Hsl<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
@@ -588,7 +588,7 @@ where
 impl<S, T> RelativeContrast for Hsl<S, T>
 where
     T: FloatComponent,
-    S: RgbStandard,
+    S: RgbStandard<T>,
 {
     type Scalar = T;
 

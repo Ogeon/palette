@@ -95,6 +95,20 @@ impl<Wp, T> Yxy<Wp, T> {
     pub fn from_components((x, y, luma): (T, T, T)) -> Self {
         Self::new(x, y, luma)
     }
+
+    /// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn't change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color's appearance.
+    #[inline]
+    pub fn with_white_point<NewWp>(self) -> Yxy<NewWp, T> {
+        Yxy::new(self.x, self.y, self.luma)
+    }
 }
 
 impl<Wp, T> Yxy<Wp, T>
@@ -150,6 +164,20 @@ impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
     /// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
     pub fn from_components((x, y, luma, alpha): (T, T, T, A)) -> Self {
         Self::new(x, y, luma, alpha)
+    }
+
+    /// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn't change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color's appearance.
+    #[inline]
+    pub fn with_white_point<NewWp>(self) -> Alpha<Yxy<NewWp, T>, A> {
+        Alpha::<Yxy<NewWp, T>, A>::new(self.color.x, self.color.y, self.color.luma, self.alpha)
     }
 }
 
@@ -207,7 +235,7 @@ where
 impl<T, S> FromColorUnclamped<Luma<S, T>> for Yxy<S::WhitePoint, T>
 where
     T: FloatComponent,
-    S: LumaStandard,
+    S: LumaStandard<T>,
 {
     fn from_color_unclamped(luma: Luma<S, T>) -> Self {
         Yxy {
@@ -220,7 +248,6 @@ where
 impl<Wp, T> Clamp for Yxy<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
 {
     #[rustfmt::skip]
     fn is_within_bounds(&self) -> bool {
@@ -321,7 +348,7 @@ where
 impl<Wp, T> Default for Yxy<Wp, T>
 where
     T: FloatComponent,
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
 {
     fn default() -> Yxy<Wp, T> {
         // The default for x and y are the white point x and y ( from the default D65).
@@ -330,7 +357,7 @@ where
         // outside the usual color gamut and might cause scaling issues.
         Yxy {
             luma: T::zero(),
-            ..Wp::get_xyz().into_color_unclamped()
+            ..Wp::get_xyz().with_white_point().into_color_unclamped()
         }
     }
 }
@@ -388,7 +415,6 @@ where
 pub struct UniformYxy<Wp, T>
 where
     T: SampleUniform,
-    Wp: WhitePoint,
 {
     x: Uniform<T>,
     y: Uniform<T>,
@@ -400,7 +426,6 @@ where
 impl<Wp, T> SampleUniform for Yxy<Wp, T>
 where
     T: Clone + SampleUniform,
-    Wp: WhitePoint,
 {
     type Sampler = UniformYxy<Wp, T>;
 }
@@ -409,7 +434,6 @@ where
 impl<Wp, T> UniformSampler for UniformYxy<Wp, T>
 where
     T: Clone + SampleUniform,
-    Wp: WhitePoint,
 {
     type X = Yxy<Wp, T>;
 

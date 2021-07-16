@@ -238,13 +238,13 @@ where
 
         let Xyz {
             x: l, y: m, z: s, ..
-        } = multiply_xyz::<D65, D65, T>(&m1, &color);
+        } = multiply_xyz(&m1, &color.with_white_point());
 
         let l_m_s_ = Xyz::new(l.cbrt(), m.cbrt(), s.cbrt());
 
         let Xyz {
             x: l, y: a, z: b, ..
-        } = multiply_xyz::<D65, D65, T>(&m2, &l_m_s_);
+        } = multiply_xyz(&m2, &l_m_s_);
 
         Self::new(l, a, b)
     }

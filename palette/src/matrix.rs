@@ -7,7 +7,7 @@ use crate::convert::IntoColorUnclamped;
 use crate::encoding::Linear;
 use crate::float::Float;
 use crate::rgb::{Primaries, Rgb, RgbSpace};
-use crate::white_point::WhitePoint;
+use crate::white_point::{Any, WhitePoint};
 use crate::{FloatComponent, Xyz};
 
 /// A 9 element array representing a 3x3 matrix.
@@ -15,10 +15,7 @@ pub type Mat3<T> = [T; 9];
 
 /// Multiply the 3x3 matrix with an XYZ color.
 #[inline]
-pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: FloatComponent>(
-    c: &Mat3<T>,
-    f: &Xyz<Swp, T>,
-) -> Xyz<Dwp, T> {
+pub fn multiply_xyz<T: FloatComponent>(c: &Mat3<T>, f: &Xyz<Any, T>) -> Xyz<Any, T> {
     // Input Mat3 is destructured to avoid panic paths
     let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
 
@@ -41,7 +38,7 @@ pub fn multiply_xyz<Swp: WhitePoint, Dwp: WhitePoint, T: FloatComponent>(
 }
 /// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
 #[inline]
-pub fn multiply_xyz_to_rgb<S: RgbSpace, T: FloatComponent>(
+pub fn multiply_xyz_to_rgb<S: RgbSpace<T>, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Xyz<S::WhitePoint, T>,
 ) -> Rgb<Linear<S>, T> {
@@ -58,7 +55,7 @@ pub fn multiply_xyz_to_rgb<S: RgbSpace, T: FloatComponent>(
 }
 /// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
 #[inline]
-pub fn multiply_rgb_to_xyz<S: RgbSpace, T: FloatComponent>(
+pub fn multiply_rgb_to_xyz<S: RgbSpace<T>, T: FloatComponent>(
     c: &Mat3<T>,
     f: &Rgb<Linear<S>, T>,
 ) -> Xyz<S::WhitePoint, T> {
@@ -134,17 +131,17 @@ pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
 
 /// Generates the Srgb to Xyz transformation matrix for a given white point.
 #[inline]
-pub fn rgb_to_xyz_matrix<S: RgbSpace, T: FloatComponent>() -> Mat3<T> {
-    let r: Xyz<S::WhitePoint, T> = S::Primaries::red().into_color_unclamped();
-    let g: Xyz<S::WhitePoint, T> = S::Primaries::green().into_color_unclamped();
-    let b: Xyz<S::WhitePoint, T> = S::Primaries::blue().into_color_unclamped();
+pub fn rgb_to_xyz_matrix<S: RgbSpace<T>, T: FloatComponent>() -> Mat3<T> {
+    let r = S::Primaries::red().into_color_unclamped();
+    let g = S::Primaries::green().into_color_unclamped();
+    let b = S::Primaries::blue().into_color_unclamped();
 
     // Destructuring has some performance benefits, don't change unless measured
     let [t0, t1, t2, t3, t4, t5, t6, t7, t8] = mat3_from_primaries(r, g, b);
 
     let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(
         &matrix_inverse(&[t0, t1, t2, t3, t4, t5, t6, t7, t8]),
-        &S::WhitePoint::get_xyz(),
+        &S::WhitePoint::get_xyz().with_white_point(),
     );
 
     [
@@ -162,7 +159,7 @@ pub fn rgb_to_xyz_matrix<S: RgbSpace, T: FloatComponent>() -> Mat3<T> {
 
 #[rustfmt::skip]
 #[inline]
-fn mat3_from_primaries<T: FloatComponent, Wp: WhitePoint>(r: Xyz<Wp, T>, g: Xyz<Wp, T>, b: Xyz<Wp, T>) -> Mat3<T> {
+fn mat3_from_primaries<T: FloatComponent>(r: Xyz<Any, T>, g: Xyz<Any, T>, b: Xyz<Any, T>) -> Mat3<T> {
     [
         r.x, g.x, b.x,
         r.y, g.y, b.y,
@@ -176,7 +173,7 @@ mod test {
     use crate::chromatic_adaptation::AdaptInto;
     use crate::encoding::{Linear, Srgb};
     use crate::rgb::Rgb;
-    use crate::white_point::{D50, D65};
+    use crate::white_point::D50;
     use crate::Xyz;
 
     #[test]
@@ -194,9 +191,9 @@ mod test {
     #[test]
     fn matrix_multiply_xyz() {
         let inp1 = [0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.2, 0.1, 0.3];
-        let inp2 = Xyz::<D65>::new(0.4, 0.6, 0.8);
+        let inp2 = Xyz::new(0.4, 0.6, 0.8);
 
-        let expected = Xyz::<D65>::new(0.4, 0.32, 0.38);
+        let expected = Xyz::new(0.4, 0.32, 0.38);
 
         let computed = multiply_xyz(&inp1, &inp2);
         assert_relative_eq!(expected, computed)

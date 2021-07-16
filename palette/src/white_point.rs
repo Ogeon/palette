@@ -8,6 +8,14 @@
 
 use crate::{from_f64, FromF64, Xyz};
 
+/// Represents an unspecified reference white point.
+///
+/// Some color spaces (such as `Xyz` and `Yxy`) or operations don't necessarily
+/// need a known intended white point. `Any` may be used as a placeholder type
+/// in those situations.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Any;
+
 /// WhitePoint defines the Xyz color co-ordinates for a given white point.
 ///
 /// A white point (often referred to as reference white or target white in
@@ -18,9 +26,9 @@ use crate::{from_f64, FromF64, Xyz};
 /// Custom white points can be easily defined on an empty struct with the
 /// tristimulus values and can be used in place of the ones defined in this
 /// library.
-pub trait WhitePoint: 'static {
+pub trait WhitePoint<T>: 'static {
     /// Get the Xyz chromaticity co-ordinates for the white point.
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T>;
+    fn get_xyz() -> Xyz<Any, T>;
 }
 
 /// CIE standard illuminant A
@@ -31,8 +39,8 @@ pub trait WhitePoint: 'static {
 /// CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct A;
-impl WhitePoint for A {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for A {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.09850), from_f64(1.0), from_f64(0.35585))
     }
 }
@@ -42,8 +50,8 @@ impl WhitePoint for A {
 /// temperature (CCT) of 4874 K Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct B;
-impl WhitePoint for B {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for B {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.99072), from_f64(1.0), from_f64(0.85223))
     }
 }
@@ -53,8 +61,8 @@ impl WhitePoint for B {
 /// 6774 K Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct C;
-impl WhitePoint for C {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for C {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.98074), from_f64(1.0), from_f64(1.18232))
     }
 }
@@ -64,8 +72,8 @@ impl WhitePoint for C {
 /// 5000K for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50;
-impl WhitePoint for D50 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D50 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.96422), from_f64(1.0), from_f64(0.82521))
     }
 }
@@ -75,8 +83,8 @@ impl WhitePoint for D50 {
 /// 5500K for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55;
-impl WhitePoint for D55 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D55 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95682), from_f64(1.0), from_f64(0.92149))
     }
 }
@@ -86,8 +94,8 @@ impl WhitePoint for D55 {
 /// for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65;
-impl WhitePoint for D65 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D65 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95047), from_f64(1.0), from_f64(1.08883))
     }
 }
@@ -97,8 +105,8 @@ impl WhitePoint for D65 {
 /// 7500K for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75;
-impl WhitePoint for D75 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D75 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.94972), from_f64(1.0), from_f64(1.22638))
     }
 }
@@ -108,8 +116,8 @@ impl WhitePoint for D75 {
 /// Uses the CIE 1932 2° Standard Observer
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct E;
-impl WhitePoint for E {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for E {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.0), from_f64(1.0), from_f64(1.0))
     }
 }
@@ -118,8 +126,8 @@ impl WhitePoint for E {
 /// F2 represents a semi-broadband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F2;
-impl WhitePoint for F2 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for F2 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.99186), from_f64(1.0), from_f64(0.67393))
     }
 }
@@ -128,8 +136,8 @@ impl WhitePoint for F2 {
 /// F7 represents a broadband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F7;
-impl WhitePoint for F7 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for F7 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95041), from_f64(1.0), from_f64(1.08747))
     }
 }
@@ -138,8 +146,8 @@ impl WhitePoint for F7 {
 /// F11 represents a narrowband fluorescent lamp for 2° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F11;
-impl WhitePoint for F11 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for F11 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.00962), from_f64(1.0), from_f64(0.64350))
     }
 }
@@ -149,8 +157,8 @@ impl WhitePoint for F11 {
 /// 5000K for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50Degree10;
-impl WhitePoint for D50Degree10 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D50Degree10 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.9672), from_f64(1.0), from_f64(0.8143))
     }
 }
@@ -160,8 +168,8 @@ impl WhitePoint for D50Degree10 {
 /// 5500K for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55Degree10;
-impl WhitePoint for D55Degree10 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D55Degree10 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.958), from_f64(1.0), from_f64(0.9093))
     }
 }
@@ -171,8 +179,8 @@ impl WhitePoint for D55Degree10 {
 /// for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65Degree10;
-impl WhitePoint for D65Degree10 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D65Degree10 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.9481), from_f64(1.0), from_f64(1.073))
     }
 }
@@ -182,8 +190,8 @@ impl WhitePoint for D65Degree10 {
 /// 7500K for 10° Standard Observer.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75Degree10;
-impl WhitePoint for D75Degree10 {
-    fn get_xyz<Wp, T: FromF64>() -> Xyz<Wp, T> {
+impl<T: FromF64> WhitePoint<T> for D75Degree10 {
+    fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.94416), from_f64(1.0), from_f64(1.2064))
     }
 }

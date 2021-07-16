@@ -27,7 +27,7 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::float::Float;
 use crate::from_f64;
 use crate::matrix::{multiply_3x3, multiply_xyz, Mat3};
-use crate::white_point::WhitePoint;
+use crate::white_point::{Any, WhitePoint};
 use crate::{FloatComponent, Xyz};
 
 /// Chromatic adaptation methods implemented in the library
@@ -49,25 +49,25 @@ pub struct ConeResponseMatrices<T: Float> {
 }
 
 /// Generates a conversion matrix to convert the Xyz tristimulus values from
-/// one illuminant to another (Swp -> Dwp)
-pub trait TransformMatrix<Swp, Dwp, T>
+/// one illuminant to another (`source_wp` to `destination_wp`)
+pub trait TransformMatrix<T>
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
 {
     /// Get the cone response functions for the chromatic adaptation method
     fn get_cone_response(&self) -> ConeResponseMatrices<T>;
 
     /// Generates a 3x3 transformation matrix to convert color from one
     /// reference white point to another with the given cone_response
-    fn generate_transform_matrix(&self) -> Mat3<T> {
-        let s_wp: Xyz<Swp, T> = Swp::get_xyz();
-        let t_wp: Xyz<Dwp, T> = Dwp::get_xyz();
+    fn generate_transform_matrix(
+        &self,
+        source_wp: Xyz<Any, T>,
+        destination_wp: Xyz<Any, T>,
+    ) -> Mat3<T> {
         let adapt = self.get_cone_response();
 
-        let resp_src: Xyz<Swp, _> = multiply_xyz(&adapt.ma, &s_wp);
-        let resp_dst: Xyz<Dwp, _> = multiply_xyz(&adapt.ma, &t_wp);
+        let resp_src = multiply_xyz(&adapt.ma, &source_wp);
+        let resp_dst = multiply_xyz(&adapt.ma, &destination_wp);
         let z = T::zero();
         let resp = [
             resp_dst.x / resp_src.x,
@@ -86,11 +86,9 @@ where
     }
 }
 
-impl<Swp, Dwp, T> TransformMatrix<Swp, Dwp, T> for Method
+impl<T> TransformMatrix<T> for Method
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
 {
     #[rustfmt::skip]
     fn get_cone_response(&self) -> ConeResponseMatrices<T> {
@@ -148,8 +146,8 @@ where
 pub trait AdaptFrom<S, Swp, Dwp, T>: Sized
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
+    Swp: WhitePoint<T>,
+    Dwp: WhitePoint<T>,
 {
     /// Convert the source color to the destination color using the bradford
     /// method by default
@@ -158,22 +156,22 @@ where
     }
     /// Convert the source color to the destination color using the specified
     /// method
-    fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> Self;
+    fn adapt_from_using<M: TransformMatrix<T>>(color: S, method: M) -> Self;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptFrom<S, Swp, Dwp, T> for D
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
+    Swp: WhitePoint<T>,
+    Dwp: WhitePoint<T>,
     S: IntoColorUnclamped<Xyz<Swp, T>>,
     D: FromColorUnclamped<Xyz<Dwp, T>>,
 {
-    fn adapt_from_using<M: TransformMatrix<Swp, Dwp, T>>(color: S, method: M) -> D {
-        let src_xyz: Xyz<Swp, T> = color.into_color_unclamped();
-        let transform_matrix = method.generate_transform_matrix();
-        let dst_xyz: Xyz<Dwp, T> = multiply_xyz(&transform_matrix, &src_xyz);
-        D::from_color_unclamped(dst_xyz)
+    fn adapt_from_using<M: TransformMatrix<T>>(color: S, method: M) -> D {
+        let src_xyz = color.into_color_unclamped().with_white_point();
+        let transform_matrix = method.generate_transform_matrix(Swp::get_xyz(), Dwp::get_xyz());
+        let dst_xyz = multiply_xyz(&transform_matrix, &src_xyz);
+        D::from_color_unclamped(dst_xyz.with_white_point())
     }
 }
 
@@ -184,8 +182,8 @@ where
 pub trait AdaptInto<D, Swp, Dwp, T>: Sized
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
+    Swp: WhitePoint<T>,
+    Dwp: WhitePoint<T>,
 {
     /// Convert the source color to the destination color using the bradford
     /// method by default
@@ -194,17 +192,17 @@ where
     }
     /// Convert the source color to the destination color using the specified
     /// method
-    fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D;
+    fn adapt_into_using<M: TransformMatrix<T>>(self, method: M) -> D;
 }
 
 impl<S, D, Swp, Dwp, T> AdaptInto<D, Swp, Dwp, T> for S
 where
     T: FloatComponent,
-    Swp: WhitePoint,
-    Dwp: WhitePoint,
+    Swp: WhitePoint<T>,
+    Dwp: WhitePoint<T>,
     D: AdaptFrom<S, Swp, Dwp, T>,
 {
-    fn adapt_into_using<M: TransformMatrix<Swp, Dwp, T>>(self, method: M) -> D {
+    fn adapt_into_using<M: TransformMatrix<T>>(self, method: M) -> D {
         D::adapt_from_using(self, method)
     }
 }
@@ -212,7 +210,7 @@ where
 #[cfg(test)]
 mod test {
     use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};
-    use crate::white_point::{A, C, D50, D65};
+    use crate::white_point::{WhitePoint, A, C, D50, D65};
     use crate::Xyz;
 
     #[test]
@@ -222,7 +220,7 @@ mod test {
             0.7578869,
         ];
         let xyz_scaling = Method::XyzScaling;
-        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&xyz_scaling);
+        let computed = xyz_scaling.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }
@@ -234,7 +232,7 @@ mod test {
             0.0000000, 0.7578869,
         ];
         let von_kries = Method::VonKries;
-        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&von_kries);
+        let computed = von_kries.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }
@@ -246,7 +244,7 @@ mod test {
             0.0150436, 0.7521316,
         ];
         let bradford = Method::Bradford;
-        let computed = <dyn TransformMatrix<D65, D50, _>>::generate_transform_matrix(&bradford);
+        let computed = bradford.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.0001)
         }

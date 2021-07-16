@@ -108,8 +108,8 @@ impl<S, T> Luma<S, T> {
 
     fn reinterpret_as<S2>(self) -> Luma<S2, T>
     where
-        S: LumaStandard,
-        S2: LumaStandard<WhitePoint = S::WhitePoint>,
+        S: LumaStandard<T>,
+        S2: LumaStandard<T, WhitePoint = S::WhitePoint>,
     {
         Luma {
             luma: self.luma,
@@ -136,7 +136,7 @@ where
 impl<S, T> Luma<S, T>
 where
     T: FloatComponent,
-    S: LumaStandard,
+    S: LumaStandard<T>,
 {
     /// Convert the color to linear luminance.
     pub fn into_linear(self) -> Luma<Linear<S::WhitePoint>, T> {
@@ -149,16 +149,20 @@ where
     }
 
     /// Convert the color to a different encoding.
-    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(self) -> Luma<St, T> {
+    pub fn into_encoding<St>(self) -> Luma<St, T>
+    where
+        St: LumaStandard<T, WhitePoint = S::WhitePoint>,
+    {
         Luma::new(St::TransferFn::from_linear(S::TransferFn::into_linear(
             self.luma,
         )))
     }
 
     /// Convert luminance from a different encoding.
-    pub fn from_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
-        color: Luma<St, T>,
-    ) -> Luma<S, T> {
+    pub fn from_encoding<St>(color: Luma<St, T>) -> Luma<S, T>
+    where
+        St: LumaStandard<T, WhitePoint = S::WhitePoint>,
+    {
         Luma::new(S::TransferFn::from_linear(St::TransferFn::into_linear(
             color.luma,
         )))
@@ -223,7 +227,7 @@ impl<S, T, A> Alpha<Luma<S, T>, A> {
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: FloatComponent,
-    S: LumaStandard,
+    S: LumaStandard<T>,
 {
     /// Convert the color to linear luminance with transparency.
     pub fn into_linear(self) -> Alpha<Luma<Linear<S::WhitePoint>, T>, A> {
@@ -239,9 +243,10 @@ where
     }
 
     /// Convert the color to a different encoding with transparency.
-    pub fn into_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
-        self,
-    ) -> Alpha<Luma<St, T>, A> {
+    pub fn into_encoding<St>(self) -> Alpha<Luma<St, T>, A>
+    where
+        St: LumaStandard<T, WhitePoint = S::WhitePoint>,
+    {
         Alpha::<Luma<St, T>, A>::new(
             St::TransferFn::from_linear(S::TransferFn::into_linear(self.luma)),
             self.alpha,
@@ -249,9 +254,10 @@ where
     }
 
     /// Convert luminance from a different encoding with transparency.
-    pub fn from_encoding<St: LumaStandard<WhitePoint = S::WhitePoint>>(
-        color: Alpha<Luma<St, T>, A>,
-    ) -> Alpha<Luma<S, T>, A> {
+    pub fn from_encoding<St>(color: Alpha<Luma<St, T>, A>) -> Alpha<Luma<S, T>, A>
+    where
+        St: LumaStandard<T, WhitePoint = S::WhitePoint>,
+    {
         Alpha::<Luma<S, T>, A>::new(
             S::TransferFn::from_linear(St::TransferFn::into_linear(color.luma)),
             color.alpha,
@@ -261,8 +267,8 @@ where
 
 impl<S1, S2, T> FromColorUnclamped<Luma<S2, T>> for Luma<S1, T>
 where
-    S1: LumaStandard,
-    S2: LumaStandard<WhitePoint = S1::WhitePoint>,
+    S1: LumaStandard<T>,
+    S2: LumaStandard<T, WhitePoint = S1::WhitePoint>,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Luma<S2, T>) -> Self {
@@ -276,7 +282,7 @@ where
 
 impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Luma<S, T>
 where
-    S: LumaStandard,
+    S: LumaStandard<T>,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
@@ -289,7 +295,7 @@ where
 
 impl<S, T> FromColorUnclamped<Yxy<S::WhitePoint, T>> for Luma<S, T>
 where
-    S: LumaStandard,
+    S: LumaStandard<T>,
     T: FloatComponent,
 {
     fn from_color_unclamped(color: Yxy<S::WhitePoint, T>) -> Self {
@@ -346,7 +352,7 @@ where
 impl<S, T> Mix for Luma<S, T>
 where
     T: FloatComponent,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Scalar = T;
 
@@ -363,7 +369,7 @@ where
 impl<S, T> Shade for Luma<S, T>
 where
     T: FloatComponent,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Scalar = T;
 
@@ -393,7 +399,7 @@ where
 impl<S, T> Blend for Luma<S, T>
 where
     T: FloatComponent,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Color = Luma<S, T>;
 
@@ -443,7 +449,7 @@ where
 impl<S, T> Add<Luma<S, T>> for Luma<S, T>
 where
     T: Add,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Add>::Output>;
 
@@ -458,7 +464,7 @@ where
 impl<S, T> Add<T> for Luma<S, T>
 where
     T: Add,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Add>::Output>;
 
@@ -473,7 +479,7 @@ where
 impl<S, T> AddAssign<Luma<S, T>> for Luma<S, T>
 where
     T: AddAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn add_assign(&mut self, other: Luma<S, T>) {
         self.luma += other.luma;
@@ -483,7 +489,7 @@ where
 impl<S, T> AddAssign<T> for Luma<S, T>
 where
     T: AddAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn add_assign(&mut self, c: T) {
         self.luma += c;
@@ -493,7 +499,7 @@ where
 impl<S, T> Sub<Luma<S, T>> for Luma<S, T>
 where
     T: Sub,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Sub>::Output>;
 
@@ -508,7 +514,7 @@ where
 impl<S, T> Sub<T> for Luma<S, T>
 where
     T: Sub,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Sub>::Output>;
 
@@ -523,7 +529,7 @@ where
 impl<S, T> SubAssign<Luma<S, T>> for Luma<S, T>
 where
     T: SubAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn sub_assign(&mut self, other: Luma<S, T>) {
         self.luma -= other.luma;
@@ -533,7 +539,7 @@ where
 impl<S, T> SubAssign<T> for Luma<S, T>
 where
     T: SubAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn sub_assign(&mut self, c: T) {
         self.luma -= c;
@@ -543,7 +549,7 @@ where
 impl<S, T> Mul<Luma<S, T>> for Luma<S, T>
 where
     T: Mul,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Mul>::Output>;
 
@@ -558,7 +564,7 @@ where
 impl<S, T> Mul<T> for Luma<S, T>
 where
     T: Mul,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Mul>::Output>;
 
@@ -573,7 +579,7 @@ where
 impl<S, T> MulAssign<Luma<S, T>> for Luma<S, T>
 where
     T: MulAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn mul_assign(&mut self, other: Luma<S, T>) {
         self.luma *= other.luma;
@@ -583,7 +589,7 @@ where
 impl<S, T> MulAssign<T> for Luma<S, T>
 where
     T: MulAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn mul_assign(&mut self, c: T) {
         self.luma *= c;
@@ -593,7 +599,7 @@ where
 impl<S, T> Div<Luma<S, T>> for Luma<S, T>
 where
     T: Div,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Div>::Output>;
 
@@ -608,7 +614,7 @@ where
 impl<S, T> Div<T> for Luma<S, T>
 where
     T: Div,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     type Output = Luma<S, <T as Div>::Output>;
 
@@ -623,7 +629,7 @@ where
 impl<S, T> DivAssign<Luma<S, T>> for Luma<S, T>
 where
     T: DivAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn div_assign(&mut self, other: Luma<S, T>) {
         self.luma /= other.luma;
@@ -633,7 +639,7 @@ where
 impl<S, T> DivAssign<T> for Luma<S, T>
 where
     T: DivAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
+    S: LumaStandard<T, TransferFn = LinearFn>,
 {
     fn div_assign(&mut self, c: T) {
         self.luma /= c;
@@ -750,7 +756,7 @@ where
 impl<S, T> RelativeContrast for Luma<S, T>
 where
     T: FloatComponent,
-    S: LumaStandard,
+    S: LumaStandard<T>,
 {
     type Scalar = T;
 

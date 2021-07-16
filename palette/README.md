@@ -287,7 +287,7 @@ impl FromColorUnclamped<Color> for Color {
 // Convert from any kind of f32 sRGB.
 impl<S> FromColorUnclamped<Rgb<S, f32>> for Color
 where
-    S: RgbStandard<Space = encoding::Srgb>,
+    S: RgbStandard<f32, Space = encoding::Srgb>,
 {
     fn from_color_unclamped(color: Rgb<S, f32>) -> Color {
         let srgb = Srgb::from_color_unclamped(color);
@@ -298,7 +298,7 @@ where
 // Convert into any kind of f32 sRGB.
 impl<S> FromColorUnclamped<Color> for Rgb<S, f32>
 where
-    S: RgbStandard<Space = encoding::Srgb>,
+    S: RgbStandard<f32, Space = encoding::Srgb>,
 {
     fn from_color_unclamped(color: Color) -> Self {
         let srgb = Srgb::new(color.r, color.g, color.b);

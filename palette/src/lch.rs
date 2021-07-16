@@ -433,7 +433,7 @@ where
 
 impl<Wp, T> RelativeContrast for Lch<Wp, T>
 where
-    Wp: WhitePoint,
+    Wp: WhitePoint<T>,
     T: FloatComponent,
 {
     type Scalar = T;

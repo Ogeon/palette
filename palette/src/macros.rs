@@ -179,8 +179,9 @@ macro_rules! test_uniform_distribution {
                 }
 
                 $({
-                    let min = $component_min;
-                    let range = $component_max - min;
+                    let min: f32 = $component_min;
+                    let max: f32 = $component_max;
+                    let range = max - min;
                     let normalized = (color.$component - min) / range;
                     $component[((normalized * BINS as f32) as usize).min(BINS - 1)] += 1;
                 })+
@@ -212,8 +213,9 @@ macro_rules! test_uniform_distribution {
                 }
 
                 $({
-                    let min = $component_min;
-                    let range = $component_max - min;
+                    let min: f32 = $component_min;
+                    let max: f32 = $component_max;
+                    let range = max - min;
                     let normalized = (color.$component - min) / range;
                     $component[((normalized * BINS as f32) as usize).min(BINS - 1)] += 1;
                 })+
@@ -245,8 +247,9 @@ macro_rules! test_uniform_distribution {
                 }
 
                 $({
-                    let min = $component_min;
-                    let range = $component_max - min;
+                    let min: f32 = $component_min;
+                    let max: f32 = $component_max;
+                    let range = max - min;
                     let normalized = (color.$component - min) / range;
                     $component[((normalized * BINS as f32) as usize).min(BINS - 1)] += 1;
                 })+
