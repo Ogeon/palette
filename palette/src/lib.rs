@@ -466,10 +466,12 @@ fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
 pub trait Clamp {
     /// Check if the color's components are within the expected clamped range
     /// bounds.
+    #[must_use]
     fn is_within_bounds(&self) -> bool;
 
     /// Return a new color where the components have been clamped to the nearest
     /// valid values.
+    #[must_use]
     fn clamp(&self) -> Self;
 
     /// Clamp the color's components to the nearest valid values.
@@ -498,6 +500,7 @@ pub trait Mix {
     /// `factor` should be between `0.0` and `1.0`, where `0.0` will result in
     /// the same color as `self` and `1.0` will result in the same color as
     /// `other`.
+    #[must_use]
     fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
 }
 
@@ -537,6 +540,7 @@ pub trait Shade: Sized {
     /// let color = Hsl::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);
     /// ```
+    #[must_use]
     fn lighten(&self, factor: Self::Scalar) -> Self;
 
     /// Lighten the color by `amount`, a value ranging from `0.0` to `1.0`.
@@ -548,6 +552,7 @@ pub trait Shade: Sized {
     /// let color = Hsl::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);
     /// ```
+    #[must_use]
     fn lighten_fixed(&self, amount: Self::Scalar) -> Self;
 
     /// Scale the color towards the minimum lightness by `factor`, a value
@@ -560,6 +565,8 @@ pub trait Shade: Sized {
     /// let color = Hsv::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.darken(0.5).value, 0.25);
     /// ```
+    #[must_use]
+    #[inline]
     fn darken(&self, factor: Self::Scalar) -> Self {
         self.lighten(-factor)
     }
@@ -573,6 +580,8 @@ pub trait Shade: Sized {
     /// let color = Hsv::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.darken_fixed(0.2).value, 0.2);
     /// ```
+    #[must_use]
+    #[inline]
     fn darken_fixed(&self, amount: Self::Scalar) -> Self {
         self.lighten_fixed(-amount)
     }
@@ -607,15 +616,18 @@ pub trait GetHue {
     ///
     /// Colors in the gray scale has no well defined hue and should preferably
     /// return `None`.
+    #[must_use]
     fn get_hue(&self) -> Option<Self::Hue>;
 }
 
 /// A trait for colors where the hue can be manipulated without conversion.
 pub trait Hue: GetHue {
     /// Return a new copy of `self`, but with a specific hue.
+    #[must_use]
     fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Self;
 
     /// Return a new copy of `self`, but with the hue shifted by `amount`.
+    #[must_use]
     fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Self;
 }
 
@@ -668,6 +680,7 @@ pub trait Saturate: Sized {
     /// let color = Hsl::new_srgb(0.0, 0.5, 0.5);
     /// assert_relative_eq!(color.saturate(0.5).saturation, 0.75);
     /// ```
+    #[must_use]
     fn saturate(&self, factor: Self::Scalar) -> Self;
 
     /// Increase the saturation by `amount`, a value ranging from `0.0` to
@@ -680,6 +693,7 @@ pub trait Saturate: Sized {
     /// let color = Hsl::new_srgb(0.0, 0.4, 0.5);
     /// assert_relative_eq!(color.saturate_fixed(0.2).saturation, 0.6);
     /// ```
+    #[must_use]
     fn saturate_fixed(&self, amount: Self::Scalar) -> Self;
 
     /// Scale the color towards the minimum saturation by `factor`, a value
@@ -692,6 +706,8 @@ pub trait Saturate: Sized {
     /// let color = Hsv::new_srgb(0.0, 0.5, 0.5);
     /// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);
     /// ```
+    #[must_use]
+    #[inline]
     fn desaturate(&self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
@@ -706,6 +722,8 @@ pub trait Saturate: Sized {
     /// let color = Hsv::new_srgb(0.0, 0.4, 0.5);
     /// assert_relative_eq!(color.desaturate_fixed(0.2).saturation, 0.2);
     /// ```
+    #[must_use]
+    #[inline]
     fn desaturate_fixed(&self, amount: Self::Scalar) -> Self {
         self.saturate_fixed(-amount)
     }
@@ -717,6 +735,7 @@ pub trait ComponentWise {
     type Scalar;
 
     /// Perform a binary operation on this and an other color.
+    #[must_use]
     fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
         &self,
         other: &Self,
@@ -724,12 +743,14 @@ pub trait ComponentWise {
     ) -> Self;
 
     /// Perform a unary operation on this color.
+    #[must_use]
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
 }
 
 /// A trait for infallible conversion from `f64`. The conversion may be lossy.
 pub trait FromF64 {
     /// Creates a value from an `f64` constant.
+    #[must_use]
     fn from_f64(c: f64) -> Self;
 }
 

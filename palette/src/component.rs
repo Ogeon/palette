@@ -8,6 +8,7 @@ pub trait Component: Copy + Zero + PartialOrd {
     /// The highest displayable value this component type can reach. Higher
     /// values are allowed, but they may be lowered to this before
     /// converting to another format.
+    #[must_use]
     fn max_intensity() -> Self;
 }
 
@@ -57,6 +58,7 @@ impl_uint_components!(u8, u16, u32, u64, u128);
 pub trait FromComponent<T: Component> {
     /// Converts `other` into `Self`, while performing the appropriate scaling,
     /// rounding and clamping.
+    #[must_use]
     fn from_component(other: T) -> Self;
 }
 
@@ -80,6 +82,7 @@ impl<T: Component, U: IntoComponent<T> + Component> FromComponent<U> for T {
 pub trait IntoComponent<T: Component> {
     /// Converts `self` into `T`, while performing the appropriate scaling,
     /// rounding and clamping.
+    #[must_use]
     fn into_component(self) -> T;
 }
 

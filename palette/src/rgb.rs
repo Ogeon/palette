@@ -148,6 +148,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
         let non_lin = Srgb::<T>::from_linear(lin_srgb);
         non_lin.into_format()
@@ -159,6 +160,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(srgb: Srgb<T>) -> Self {
         srgb.into_linear().into_format()
     }
@@ -169,6 +171,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
         let non_lin = Srgb::<T>::from_linear(lin_srgb);
         let new_fmt = Srgb::<U>::from_format(non_lin);
@@ -181,6 +184,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(lin_srgba: LinSrgba<T>) -> Self {
         let non_lin = Srgba::<T>::from_linear(lin_srgba);
         non_lin.into_format()
@@ -192,6 +196,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(srgb: Srgb<T>) -> Self {
         srgb.into_linear().into_format().into()
     }
@@ -202,6 +207,7 @@ where
     T: FloatComponent,
     U: Component + FromComponent<T>,
 {
+    #[inline]
     fn from(srgba: Srgba<T>) -> Self {
         srgba.into_linear().into_format()
     }

@@ -49,10 +49,12 @@ where
 pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 
 impl<N: Number> TransferFn for GammaFn<N> {
+    #[inline]
     fn into_linear<T: Float + FromF64>(x: T) -> T {
         x.powf(T::one() / from_f64(N::VALUE))
     }
 
+    #[inline]
     fn from_linear<T: Float + FromF64>(x: T) -> T {
         x.powf(from_f64(N::VALUE))
     }

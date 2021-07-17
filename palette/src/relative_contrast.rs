@@ -56,35 +56,47 @@ pub trait RelativeContrast {
     type Scalar: FromF64 + PartialOrd;
 
     /// Calculate the contrast ratio between two colors.
+    #[must_use]
     fn get_contrast_ratio(&self, other: &Self) -> Self::Scalar;
     /// Verify the contrast between two colors satisfies SC 1.4.3. Contrast
     /// is at least 4.5:1 (Level AA).
+    #[must_use]
+    #[inline]
     fn has_min_contrast_text(&self, other: &Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(4.5)
     }
     /// Verify the contrast between two colors satisfies SC 1.4.3 for large
     /// text. Contrast is at least 3:1 (Level AA).
+    #[must_use]
+    #[inline]
     fn has_min_contrast_large_text(&self, other: &Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(3.0)
     }
     /// Verify the contrast between two colors satisfies SC 1.4.6. Contrast
     /// is at least 7:1 (Level AAA).
+    #[must_use]
+    #[inline]
     fn has_enhanced_contrast_text(&self, other: &Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(7.0)
     }
     /// Verify the contrast between two colors satisfies SC 1.4.6 for large
     /// text. Contrast is at least 4.5:1 (Level AAA).
+    #[must_use]
+    #[inline]
     fn has_enhanced_contrast_large_text(&self, other: &Self) -> bool {
         self.has_min_contrast_text(other)
     }
     /// Verify the contrast between two colors satisfies SC 1.4.11 for graphical
     /// objects. Contrast is at least 3:1 (Level AA).
+    #[must_use]
+    #[inline]
     fn has_min_contrast_graphics(&self, other: &Self) -> bool {
         self.has_min_contrast_large_text(other)
     }
 }
 
 /// Calculate the ratio between two `luma` values.
+#[inline]
 pub fn contrast_ratio<T>(luma1: T, luma2: T) -> T
 where
     T: Component + FromF64 + Add<Output = T> + Div<Output = T>,

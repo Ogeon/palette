@@ -56,6 +56,7 @@ where
     C::Scalar: Float,
 {
     /// Apply this blend function to a pair of colors.
+    #[must_use]
     fn apply_to(
         self,
         source: PreAlpha<C, C::Scalar>,
@@ -69,6 +70,7 @@ where
     C::Scalar: Float,
     F: FnOnce(PreAlpha<C, C::Scalar>, PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>,
 {
+    #[inline]
     fn apply_to(
         self,
         source: PreAlpha<C, C::Scalar>,

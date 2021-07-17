@@ -3,10 +3,11 @@ use crate::from_f64;
 
 /// A trait for calculating the color difference between two colors.
 pub trait ColorDifference {
-    /// The type of the calculated color difference
+    /// The type of the calculated color difference.
     type Scalar: FloatComponent;
 
-    /// Return the difference or distance between two colors
+    /// Return the difference or distance between two colors.
+    #[must_use]
     fn get_color_difference(&self, other: &Self) -> Self::Scalar;
 }
 

@@ -40,6 +40,7 @@ pub trait WhitePoint<T>: 'static {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct A;
 impl<T: FromF64> WhitePoint<T> for A {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.09850), from_f64(1.0), from_f64(0.35585))
     }
@@ -51,6 +52,7 @@ impl<T: FromF64> WhitePoint<T> for A {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct B;
 impl<T: FromF64> WhitePoint<T> for B {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.99072), from_f64(1.0), from_f64(0.85223))
     }
@@ -62,6 +64,7 @@ impl<T: FromF64> WhitePoint<T> for B {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct C;
 impl<T: FromF64> WhitePoint<T> for C {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.98074), from_f64(1.0), from_f64(1.18232))
     }
@@ -73,6 +76,7 @@ impl<T: FromF64> WhitePoint<T> for C {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50;
 impl<T: FromF64> WhitePoint<T> for D50 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.96422), from_f64(1.0), from_f64(0.82521))
     }
@@ -84,6 +88,7 @@ impl<T: FromF64> WhitePoint<T> for D50 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55;
 impl<T: FromF64> WhitePoint<T> for D55 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95682), from_f64(1.0), from_f64(0.92149))
     }
@@ -95,6 +100,7 @@ impl<T: FromF64> WhitePoint<T> for D55 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65;
 impl<T: FromF64> WhitePoint<T> for D65 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95047), from_f64(1.0), from_f64(1.08883))
     }
@@ -106,6 +112,7 @@ impl<T: FromF64> WhitePoint<T> for D65 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75;
 impl<T: FromF64> WhitePoint<T> for D75 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.94972), from_f64(1.0), from_f64(1.22638))
     }
@@ -117,6 +124,7 @@ impl<T: FromF64> WhitePoint<T> for D75 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct E;
 impl<T: FromF64> WhitePoint<T> for E {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.0), from_f64(1.0), from_f64(1.0))
     }
@@ -127,6 +135,7 @@ impl<T: FromF64> WhitePoint<T> for E {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F2;
 impl<T: FromF64> WhitePoint<T> for F2 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.99186), from_f64(1.0), from_f64(0.67393))
     }
@@ -137,6 +146,7 @@ impl<T: FromF64> WhitePoint<T> for F2 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F7;
 impl<T: FromF64> WhitePoint<T> for F7 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.95041), from_f64(1.0), from_f64(1.08747))
     }
@@ -147,6 +157,7 @@ impl<T: FromF64> WhitePoint<T> for F7 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct F11;
 impl<T: FromF64> WhitePoint<T> for F11 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(1.00962), from_f64(1.0), from_f64(0.64350))
     }
@@ -158,6 +169,7 @@ impl<T: FromF64> WhitePoint<T> for F11 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D50Degree10;
 impl<T: FromF64> WhitePoint<T> for D50Degree10 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.9672), from_f64(1.0), from_f64(0.8143))
     }
@@ -169,6 +181,7 @@ impl<T: FromF64> WhitePoint<T> for D50Degree10 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D55Degree10;
 impl<T: FromF64> WhitePoint<T> for D55Degree10 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.958), from_f64(1.0), from_f64(0.9093))
     }
@@ -180,6 +193,7 @@ impl<T: FromF64> WhitePoint<T> for D55Degree10 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D65Degree10;
 impl<T: FromF64> WhitePoint<T> for D65Degree10 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.9481), from_f64(1.0), from_f64(1.073))
     }
@@ -191,6 +205,7 @@ impl<T: FromF64> WhitePoint<T> for D65Degree10 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct D75Degree10;
 impl<T: FromF64> WhitePoint<T> for D75Degree10 {
+    #[inline]
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(from_f64(0.94416), from_f64(1.0), from_f64(1.2064))
     }

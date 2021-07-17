@@ -55,10 +55,12 @@ where
     T: FloatComponent,
 {
     /// Get the cone response functions for the chromatic adaptation method
+    #[must_use]
     fn get_cone_response(&self) -> ConeResponseMatrices<T>;
 
     /// Generates a 3x3 transformation matrix to convert color from one
     /// reference white point to another with the given cone_response
+    #[must_use]
     fn generate_transform_matrix(
         &self,
         source_wp: Xyz<Any, T>,
@@ -91,6 +93,7 @@ where
     T: FloatComponent,
 {
     #[rustfmt::skip]
+    #[inline]
     fn get_cone_response(&self) -> ConeResponseMatrices<T> {
         match *self {
              Method::Bradford => {
@@ -150,12 +153,15 @@ where
     Dwp: WhitePoint<T>,
 {
     /// Convert the source color to the destination color using the bradford
-    /// method by default
+    /// method by default.
+    #[must_use]
+    #[inline]
     fn adapt_from(color: S) -> Self {
         Self::adapt_from_using(color, Method::Bradford)
     }
     /// Convert the source color to the destination color using the specified
-    /// method
+    /// method.
+    #[must_use]
     fn adapt_from_using<M: TransformMatrix<T>>(color: S, method: M) -> Self;
 }
 
@@ -167,6 +173,7 @@ where
     S: IntoColorUnclamped<Xyz<Swp, T>>,
     D: FromColorUnclamped<Xyz<Dwp, T>>,
 {
+    #[inline]
     fn adapt_from_using<M: TransformMatrix<T>>(color: S, method: M) -> D {
         let src_xyz = color.into_color_unclamped().with_white_point();
         let transform_matrix = method.generate_transform_matrix(Swp::get_xyz(), Dwp::get_xyz());
@@ -186,12 +193,15 @@ where
     Dwp: WhitePoint<T>,
 {
     /// Convert the source color to the destination color using the bradford
-    /// method by default
+    /// method by default.
+    #[must_use]
+    #[inline]
     fn adapt_into(self) -> D {
         self.adapt_into_using(Method::Bradford)
     }
     /// Convert the source color to the destination color using the specified
-    /// method
+    /// method.
+    #[must_use]
     fn adapt_into_using<M: TransformMatrix<T>>(self, method: M) -> D;
 }
 
@@ -202,6 +212,7 @@ where
     Dwp: WhitePoint<T>,
     D: AdaptFrom<S, Swp, Dwp, T>,
 {
+    #[inline]
     fn adapt_into_using<M: TransformMatrix<T>>(self, method: M) -> D {
         D::adapt_from_using(self, method)
     }
