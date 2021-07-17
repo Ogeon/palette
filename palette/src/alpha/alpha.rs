@@ -179,20 +179,17 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
 }
 
 impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.color.is_within_bounds() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Alpha<C, T> {
+    #[inline]
+    fn clamp(self) -> Self {
         Alpha {
             color: self.color.clamp(),
             alpha: clamp(self.alpha, T::zero(), T::max_intensity()),
         }
-    }
-
-    fn clamp_self(&mut self) {
-        self.color.clamp_self();
-        self.alpha = clamp(self.alpha, T::zero(), T::max_intensity());
     }
 }
 

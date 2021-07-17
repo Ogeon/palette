@@ -365,24 +365,23 @@ where
     T: Component,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
         self.value >= Self::min_value() && self.value <= Self::max_value()
     }
 
-    fn clamp(&self) -> Hsv<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.saturation = clamp(
-            self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        self.value = clamp(self.value, Self::min_value(), Self::max_value());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            self.hue,
+            clamp(
+                self.saturation,
+                Self::min_saturation(),
+                Self::max_saturation(),
+            ),
+            clamp(self.value, Self::min_value(), Self::max_value()),
+        )
     }
 }
 

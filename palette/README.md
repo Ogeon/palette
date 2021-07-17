@@ -317,17 +317,13 @@ impl Clamp for Color {
             && zero_to_one.contains(&self.a)
     }
 
-    fn clamp(&self) -> Self {
+    fn clamp(self) -> Self {
         Color {
             r: self.r.min(1.0).max(0.0),
             g: self.g.min(1.0).max(0.0),
             b: self.b.min(1.0).max(0.0),
             a: self.a.min(1.0).max(0.0),
         }
-    }
-
-    fn clamp_self(&mut self) {
-        *self = self.clamp();
     }
 }
 

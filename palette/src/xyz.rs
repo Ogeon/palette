@@ -348,26 +348,24 @@ impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Xyz<Wp, T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Zero + PartialOrd,
     Wp: WhitePoint<T>,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.x >= Self::min_x() && self.x <= Self::max_x() &&
         self.y >= Self::min_y() && self.y <= Self::max_y() &&
         self.z >= Self::min_z() && self.z <= Self::max_z()
     }
 
-    fn clamp(&self) -> Xyz<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.x = clamp(self.x.clone(), Self::min_x(), Self::max_x());
-        self.y = clamp(self.y.clone(), Self::min_y(), Self::max_y());
-        self.z = clamp(self.z.clone(), Self::min_z(), Self::max_z());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.x, Self::min_x(), Self::max_x()),
+            clamp(self.y, Self::min_y(), Self::max_y()),
+            clamp(self.z, Self::min_z(), Self::max_z()),
+        )
     }
 }
 

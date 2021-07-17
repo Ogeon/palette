@@ -15,8 +15,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, Alpha, Clamp, Component, FloatComponent, GetHue, Hsv, Hue, Mix, Pixel,
-    RelativeContrast, RgbHue, Shade, Xyz,
+    clamp, clamp_min, contrast_ratio, Alpha, Clamp, Component, FloatComponent, GetHue, Hsv, Hue,
+    Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -290,34 +290,25 @@ where
     T: Component + DivAssign,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.blackness >= Self::min_blackness() && self.blackness <= Self::max_blackness() &&
         self.whiteness >= Self::min_whiteness() && self.whiteness <= Self::max_blackness() &&
         self.whiteness + self.blackness <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Hwb<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
+    #[inline]
+    fn clamp(self) -> Self {
+        let mut whiteness = clamp_min(self.whiteness, Self::min_whiteness());
+        let mut blackness = clamp_min(self.blackness, Self::min_blackness());
 
-    fn clamp_self(&mut self) {
-        self.whiteness = if self.whiteness < Self::min_whiteness() {
-            Self::min_whiteness()
-        } else {
-            self.whiteness
-        };
-        self.blackness = if self.blackness < Self::min_blackness() {
-            Self::min_blackness()
-        } else {
-            self.blackness
-        };
         let sum = self.blackness + self.whiteness;
         if sum > T::max_intensity() {
-            self.whiteness /= sum;
-            self.blackness /= sum;
+            whiteness /= sum;
+            blackness /= sum;
         }
+
+        Self::new(self.hue, whiteness, blackness)
     }
 }
 
@@ -698,35 +689,27 @@ mod test {
     #[test]
     fn clamp_invalid() {
         let expected = Hwb::new_srgb(240.0, 0.0, 0.0);
-
-        let a = Hwb::new_srgb(240.0, -3.0, -4.0);
-        let calc_a = a.clamp();
-        assert_relative_eq!(expected, calc_a);
+        let clamped = Hwb::new_srgb(240.0, -3.0, -4.0).clamp();
+        assert_relative_eq!(expected, clamped);
     }
 
     #[test]
     fn clamp_none() {
         let expected = Hwb::new_srgb(240.0, 0.3, 0.7);
-
-        let a = Hwb::new_srgb(240.0, 0.3, 0.7);
-        let calc_a = a.clamp();
-        assert_relative_eq!(expected, calc_a);
+        let clamped = Hwb::new_srgb(240.0, 0.3, 0.7).clamp();
+        assert_relative_eq!(expected, clamped);
     }
     #[test]
     fn clamp_over_one() {
         let expected = Hwb::new_srgb(240.0, 0.2, 0.8);
-
-        let a = Hwb::new_srgb(240.0, 5.0, 20.0);
-        let calc_a = a.clamp();
-        assert_relative_eq!(expected, calc_a);
+        let clamped = Hwb::new_srgb(240.0, 5.0, 20.0).clamp();
+        assert_relative_eq!(expected, clamped);
     }
     #[test]
     fn clamp_under_one() {
         let expected = Hwb::new_srgb(240.0, 0.3, 0.1);
-
-        let a = Hwb::new_srgb(240.0, 0.3, 0.1);
-        let calc_a = a.clamp();
-        assert_relative_eq!(expected, calc_a);
+        let clamped = Hwb::new_srgb(240.0, 0.3, 0.1).clamp();
+        assert_relative_eq!(expected, clamped);
     }
 
     raw_pixel_conversion_tests!(Hwb<crate::encoding::Srgb>: hue, whiteness, blackness);

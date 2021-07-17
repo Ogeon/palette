@@ -354,20 +354,19 @@ where
     T: Component,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::max_intensity() &&
         self.lightness >= T::zero() && self.lightness <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Hsl<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.saturation = clamp(self.saturation, T::zero(), T::max_intensity());
-        self.lightness = clamp(self.lightness, T::zero(), T::max_intensity());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            self.hue,
+            clamp(self.saturation, T::zero(), T::max_intensity()),
+            clamp(self.lightness, T::zero(), T::max_intensity()),
+        )
     }
 }
 

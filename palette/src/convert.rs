@@ -478,7 +478,7 @@ where
     fn from_color(t: T) -> Self {
         let mut this = Self::from_color_unclamped(t);
         if !this.is_within_bounds() {
-            this.clamp_self();
+            this = this.clamp();
         }
         this
     }
@@ -563,11 +563,9 @@ mod tests {
             true
         }
 
-        fn clamp(&self) -> Self {
-            *self
+        fn clamp(self) -> Self {
+            self
         }
-
-        fn clamp_self(&mut self) {}
     }
 
     impl<S1, S2> FromColorUnclamped<WithXyz<S2>> for WithXyz<S1>
@@ -624,11 +622,9 @@ mod tests {
             true
         }
 
-        fn clamp(&self) -> Self {
-            *self
+        fn clamp(self) -> Self {
+            self
         }
-
-        fn clamp_self(&mut self) {}
     }
 
     impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for WithoutXyz<T> {

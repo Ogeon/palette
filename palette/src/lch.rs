@@ -15,8 +15,8 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Float, FloatComponent, FromColor, FromF64,
-    GetHue, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_min, contrast_ratio, from_f64, Alpha, Clamp, Float, FloatComponent, FromColor,
+    FromF64, GetHue, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -213,23 +213,20 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
 
 impl<Wp, T> Clamp for Lch<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l() && self.l <= Self::max_l() && self.chroma >= Self::min_chroma()
     }
 
-    fn clamp(&self) -> Lch<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        if self.chroma < Self::min_chroma() {
-            self.chroma = Self::min_chroma()
-        }
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp_min(self.chroma, Self::min_chroma()),
+            self.hue,
+        )
     }
 }
 

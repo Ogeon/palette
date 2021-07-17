@@ -216,27 +216,26 @@ impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
 
 impl<Wp, T> Clamp for Hsluv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
         self.l >= Self::min_l() && self.l <= Self::max_l()
     }
 
-    fn clamp(&self) -> Hsluv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.saturation = clamp(
-            self.saturation.clone(),
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            self.hue,
+            clamp(
+                self.saturation,
+                Self::min_saturation(),
+                Self::max_saturation(),
+            ),
+            clamp(self.l, Self::min_l(), Self::max_l()),
+        )
     }
 }
 

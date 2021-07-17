@@ -520,22 +520,20 @@ where
     T: Component,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.red >= T::zero() && self.red <= T::max_intensity() &&
         self.green >= T::zero() && self.green <= T::max_intensity() &&
         self.blue >= T::zero() && self.blue <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Rgb<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.red = clamp(self.red, T::zero(), T::max_intensity());
-        self.green = clamp(self.green, T::zero(), T::max_intensity());
-        self.blue = clamp(self.blue, T::zero(), T::max_intensity());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.red, T::zero(), T::max_intensity()),
+            clamp(self.green, T::zero(), T::max_intensity()),
+            clamp(self.blue, T::zero(), T::max_intensity()),
+        )
     }
 }
 

@@ -334,18 +334,14 @@ impl<S, T> Clamp for Luma<S, T>
 where
     T: Component,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
 
-    fn clamp(&self) -> Luma<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.luma = clamp(self.luma, Self::min_luma(), Self::max_luma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(clamp(self.luma, Self::min_luma(), Self::max_luma()))
     }
 }
 

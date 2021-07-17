@@ -298,13 +298,15 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
-                    let c: $ty<$($ty_params),+> = $ty {
+                    let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
                         $($clamped_min: $clamped_min.into(),)*
                         $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
-                    let clamped = c.clamp();
+
+                    let clamped = color.clamp();
+
                     let expected: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped_from.into(),)+
                         $($clamped_min: $clamped_min_from.into(),)*
@@ -312,7 +314,7 @@ macro_rules! assert_ranges {
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
 
-                    assert!(!c.is_within_bounds());
+                    assert!(!color.is_within_bounds());
                     assert_relative_eq!(clamped, expected);
                 }
 
@@ -343,16 +345,17 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
-                    let c: $ty<$($ty_params),+> = $ty {
+                    let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
                         $($clamped_min: $clamped_min.into(),)*
                         $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
-                    let clamped = c.clamp();
 
-                    assert!(c.is_within_bounds());
-                    assert_relative_eq!(clamped, c);
+                    let clamped = color.clamp();
+
+                    assert!(color.is_within_bounds());
+                    assert_relative_eq!(clamped, color);
                 }
 
                 println!("ok")
@@ -382,13 +385,15 @@ macro_rules! assert_ranges {
                 )*
 
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
-                    let c: $ty<$($ty_params),+> = $ty {
+                    let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
                         $($clamped_min: $clamped_min.into(),)*
                         $($unclamped: $unclamped.into(),)*
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
-                    let clamped = c.clamp();
+
+                    let clamped = color.clamp();
+
                     let expected: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped_to.into(),)+
                         $($clamped_min: $clamped_min.into(),)*
@@ -396,7 +401,7 @@ macro_rules! assert_ranges {
                         ..$ty::default() //This prevents exhaustiveness checking
                     };
 
-                    assert!(!c.is_within_bounds());
+                    assert!(!color.is_within_bounds());
                     assert_relative_eq!(clamped, expected);
                 }
 
@@ -452,13 +457,23 @@ pub mod float;
 #[doc(hidden)]
 pub mod matrix;
 
-fn clamp<T: PartialOrd>(v: T, min: T, max: T) -> T {
-    if v < min {
+#[inline]
+fn clamp<T: PartialOrd>(value: T, min: T, max: T) -> T {
+    if value < min {
         min
-    } else if v > max {
+    } else if value > max {
         max
     } else {
-        v
+        value
+    }
+}
+
+#[inline]
+fn clamp_min<T: PartialOrd>(value: T, min: T) -> T {
+    if value < min {
+        min
+    } else {
+        value
     }
 }
 
@@ -472,10 +487,7 @@ pub trait Clamp {
     /// Return a new color where the components have been clamped to the nearest
     /// valid values.
     #[must_use]
-    fn clamp(&self) -> Self;
-
-    /// Clamp the color's components to the nearest valid values.
-    fn clamp_self(&mut self);
+    fn clamp(self) -> Self;
 }
 
 /// A trait for linear color interpolation.

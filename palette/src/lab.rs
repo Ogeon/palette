@@ -238,25 +238,23 @@ impl<Wp, T, A> From<Alpha<Lab<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Lab<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l() && self.l <= Self::max_l() &&
         self.a >= Self::min_a() && self.a <= Self::max_a() &&
         self.b >= Self::min_b() && self.b <= Self::max_b()
     }
 
-    fn clamp(&self) -> Lab<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.a = clamp(self.a.clone(), Self::min_a(), Self::max_a());
-        self.b = clamp(self.b.clone(), Self::min_b(), Self::max_b());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.a, Self::min_a(), Self::max_a()),
+            clamp(self.b, Self::min_b(), Self::max_b()),
+        )
     }
 }
 

@@ -240,25 +240,23 @@ impl<Wp, T, A> From<Alpha<Luv<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Luv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
-	self.l >= Self::min_l() && self.l <= Self::max_l() &&
-	self.u >= Self::min_u() && self.u <= Self::max_u() &&
-	self.v >= Self::min_v() && self.v <= Self::max_v()
+        self.l >= Self::min_l() && self.l <= Self::max_l() &&
+        self.u >= Self::min_u() && self.u <= Self::max_u() &&
+        self.v >= Self::min_v() && self.v <= Self::max_v()
     }
 
-    fn clamp(&self) -> Luv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.u = clamp(self.u.clone(), Self::min_u(), Self::max_u());
-        self.v = clamp(self.v.clone(), Self::min_v(), Self::max_v());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.u, Self::min_u(), Self::max_u()),
+            clamp(self.v, Self::min_v(), Self::max_v()),
+        )
     }
 }
 

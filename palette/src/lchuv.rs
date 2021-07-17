@@ -222,8 +222,9 @@ impl<Wp, T, A> From<Alpha<Lchuv<Wp, T>, A>> for (T, T, LuvHue<T>, A) {
 
 impl<Wp, T> Clamp for Lchuv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l()
             && self.l <= Self::max_l()
@@ -231,15 +232,13 @@ where
             && self.chroma <= Self::max_chroma()
     }
 
-    fn clamp(&self) -> Lchuv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.chroma = clamp(self.chroma.clone(), Self::min_chroma(), Self::max_chroma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
+            self.hue,
+        )
     }
 }
 

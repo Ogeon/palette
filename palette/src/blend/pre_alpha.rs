@@ -62,6 +62,7 @@ where
     C: ComponentWise<Scalar = T>,
     T: Float,
 {
+    #[inline]
     fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
@@ -77,6 +78,7 @@ where
     C: ComponentWise<Scalar = T>,
     T: Float,
 {
+    #[inline]
     fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
