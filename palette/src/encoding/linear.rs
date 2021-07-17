@@ -3,7 +3,6 @@
 use core::marker::PhantomData;
 
 use crate::encoding::TransferFn;
-use crate::float::Float;
 use crate::luma::LumaStandard;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::white_point::WhitePoint;
@@ -32,14 +31,14 @@ where
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct LinearFn;
 
-impl TransferFn for LinearFn {
+impl<T> TransferFn<T> for LinearFn {
     #[inline(always)]
-    fn into_linear<T: Float>(x: T) -> T {
+    fn into_linear(x: T) -> T {
         x
     }
 
     #[inline(always)]
-    fn from_linear<T: Float>(x: T) -> T {
+    fn from_linear(x: T) -> T {
         x
     }
 }

@@ -93,13 +93,13 @@ pub trait RgbStandard<T>: 'static {
     type Space: RgbSpace<T>;
 
     /// The transfer function for the color components.
-    type TransferFn: TransferFn;
+    type TransferFn: TransferFn<T>;
 }
 
 impl<T, Sp, Tf> RgbStandard<T> for (Sp, Tf)
 where
     Sp: RgbSpace<T>,
-    Tf: TransferFn,
+    Tf: TransferFn<T>,
 {
     type Space = Sp;
     type TransferFn = Tf;
@@ -109,7 +109,7 @@ impl<T, Pr, Wp, Tf> RgbStandard<T> for (Pr, Wp, Tf)
 where
     Pr: Primaries<T>,
     Wp: WhitePoint<T>,
-    Tf: TransferFn,
+    Tf: TransferFn<T>,
 {
     type Space = (Pr, Wp);
     type TransferFn = Tf;

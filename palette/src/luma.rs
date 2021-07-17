@@ -30,13 +30,13 @@ pub trait LumaStandard<T>: 'static {
     type WhitePoint: WhitePoint<T>;
 
     /// The transfer function for the luminance component.
-    type TransferFn: TransferFn;
+    type TransferFn: TransferFn<T>;
 }
 
 impl<T, Wp, Tf> LumaStandard<T> for (Wp, Tf)
 where
     Wp: WhitePoint<T>,
-    Tf: TransferFn,
+    Tf: TransferFn<T>,
 {
     type WhitePoint = Wp;
     type TransferFn = Tf;

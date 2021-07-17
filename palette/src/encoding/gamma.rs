@@ -25,6 +25,7 @@ pub struct Gamma<S, N: Number = F2p2>(PhantomData<(S, N)>);
 
 impl<T, Sp, N> RgbStandard<T> for Gamma<Sp, N>
 where
+    T: Float + FromF64,
     Sp: RgbSpace<T>,
     N: Number,
 {
@@ -34,6 +35,7 @@ where
 
 impl<T, Wp, N> LumaStandard<T> for Gamma<Wp, N>
 where
+    T: Float + FromF64,
     Wp: WhitePoint<T>,
     N: Number,
 {
@@ -48,14 +50,18 @@ where
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 
-impl<N: Number> TransferFn for GammaFn<N> {
+impl<T, N> TransferFn<T> for GammaFn<N>
+where
+    T: Float + FromF64,
+    N: Number,
+{
     #[inline]
-    fn into_linear<T: Float + FromF64>(x: T) -> T {
+    fn into_linear(x: T) -> T {
         x.powf(T::one() / from_f64(N::VALUE))
     }
 
     #[inline]
-    fn from_linear<T: Float + FromF64>(x: T) -> T {
+    fn from_linear(x: T) -> T {
         x.powf(from_f64(N::VALUE))
     }
 }
