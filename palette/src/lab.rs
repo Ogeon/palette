@@ -9,14 +9,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::color_difference::get_ciede_difference;
 use crate::color_difference::ColorDifference;
-use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, ComponentWise, FloatComponent, FromF64, GetHue,
-    LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ComponentWise, FloatComponent,
+    FromF64, GetHue, LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -328,28 +328,13 @@ where
 
 impl<Wp, T> ColorDifference for Lab<Wp, T>
 where
-    T: FloatComponent,
+    T: Float + FromF64,
 {
     type Scalar = T;
 
-    fn get_color_difference(&self, other: &Lab<Wp, T>) -> Self::Scalar {
-        // Color difference calculation requires Lab and chroma components. This
-        // function handles the conversion into those components which are then
-        // passed to `get_ciede_difference()` where calculation is completed.
-        let self_params = LabColorDiff {
-            l: self.l,
-            a: self.a,
-            b: self.b,
-            chroma: (self.a * self.a + self.b * self.b).sqrt(),
-        };
-        let other_params = LabColorDiff {
-            l: other.l,
-            a: other.a,
-            b: other.b,
-            chroma: (other.a * other.a + other.b * other.b).sqrt(),
-        };
-
-        get_ciede_difference(&self_params, &other_params)
+    #[inline]
+    fn get_color_difference(self, other: Lab<Wp, T>) -> Self::Scalar {
+        get_ciede_difference(self.into(), other.into())
     }
 }
 
