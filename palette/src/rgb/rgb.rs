@@ -544,15 +544,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Rgb<S, T>, factor: T) -> Rgb<S, T> {
+    #[inline]
+    fn mix(self, other: Rgb<S, T>, factor: T) -> Rgb<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Rgb {
-            red: self.red + factor * (other.red - self.red),
-            green: self.green + factor * (other.green - self.green),
-            blue: self.blue + factor * (other.blue - self.blue),
-            standard: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 

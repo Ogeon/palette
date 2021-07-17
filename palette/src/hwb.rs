@@ -318,7 +318,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Hwb<S, T>, factor: T) -> Hwb<S, T> {
+    #[inline]
+    fn mix(self, other: Hwb<S, T>, factor: T) -> Hwb<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 

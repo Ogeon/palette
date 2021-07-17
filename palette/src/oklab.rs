@@ -315,14 +315,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Self, factor: T) -> Self {
+    #[inline]
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Self::new(
-            self.l + factor * (other.l - self.l),
-            self.a + factor * (other.a - self.a),
-            self.b + factor * (other.b - self.b),
-        )
+        self + (other - self) * factor
     }
 }
 

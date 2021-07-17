@@ -54,7 +54,7 @@ fn pixels_and_buffers() {
 fn color_operations_1() {
     use palette::{Hsl, Hsv, Hue, Mix, Shade};
 
-    fn transform_color<C>(color: &C, amount: f32) -> C
+    fn transform_color<C>(color: C, amount: f32) -> C
     where
         C: Hue + Shade<Scalar = f32> + Mix<Scalar = f32> + Clone,
         f32: Into<C::Hue>,
@@ -62,7 +62,7 @@ fn color_operations_1() {
         let new_color = color.shift_hue(170.0).lighten(1.0);
 
         // Interpolate between the old and new color.
-        color.mix(&new_color, amount)
+        color.mix(new_color, amount)
     }
 
     // Write example image
@@ -70,7 +70,7 @@ fn color_operations_1() {
     let hsl_color_at = |amount| {
         use palette::FromColor;
 
-        let color = transform_color(&hsl_color, amount);
+        let color = transform_color(hsl_color, amount);
         palette::Srgb::from_color(color).into_format()
     };
 
@@ -78,7 +78,7 @@ fn color_operations_1() {
     let hsv_color_at = |amount| {
         use palette::FromColor;
 
-        let color = transform_color(&hsv_color, amount);
+        let color = transform_color(hsv_color, amount);
         palette::Srgb::from_color(color).into_format()
     };
 

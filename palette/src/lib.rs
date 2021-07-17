@@ -499,9 +499,9 @@ pub trait Clamp {
 /// let a = LinSrgb::new(0.0, 0.5, 1.0);
 /// let b = LinSrgb::new(1.0, 0.5, 0.0);
 ///
-/// assert_relative_eq!(a.mix(&b, 0.0), a);
-/// assert_relative_eq!(a.mix(&b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
-/// assert_relative_eq!(a.mix(&b, 1.0), b);
+/// assert_relative_eq!(a.mix(b, 0.0), a);
+/// assert_relative_eq!(a.mix(b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));
+/// assert_relative_eq!(a.mix(b, 1.0), b);
 /// ```
 pub trait Mix {
     /// The type of the mixing factor.
@@ -513,7 +513,7 @@ pub trait Mix {
     /// the same color as `self` and `1.0` will result in the same color as
     /// `other`.
     #[must_use]
-    fn mix(&self, other: &Self, factor: Self::Scalar) -> Self;
+    fn mix(self, other: Self, factor: Self::Scalar) -> Self;
 }
 
 /// The `Shade` trait allows a color to be lightened or darkened.

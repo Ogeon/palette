@@ -107,14 +107,18 @@ impl<C, T> DerefMut for Alpha<C, T> {
     }
 }
 
-impl<C: Mix> Mix for Alpha<C, C::Scalar> {
+impl<C> Mix for Alpha<C, C::Scalar>
+where
+    C: Mix,
+{
     type Scalar = C::Scalar;
 
-    fn mix(&self, other: &Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
-        Alpha {
-            color: self.color.mix(&other.color, factor),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
-        }
+    #[inline]
+    fn mix(mut self, other: Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+        self.color = self.color.mix(other.color, factor);
+        self.alpha = self.alpha + factor * (other.alpha - self.alpha);
+
+        self
     }
 }
 

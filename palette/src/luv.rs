@@ -266,15 +266,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Luv<Wp, T>, factor: T) -> Luv<Wp, T> {
+    #[inline]
+    fn mix(self, other: Luv<Wp, T>, factor: T) -> Luv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Luv {
-            l: self.l + factor * (other.l - self.l),
-            u: self.u + factor * (other.u - self.u),
-            v: self.v + factor * (other.v - self.v),
-            white_point: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 

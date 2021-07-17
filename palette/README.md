@@ -135,7 +135,7 @@ Palette comes with a number of color operations built in, such as saturate/desat
 ```rust
 use palette::{Hue, Shade, Mix, Hsl, Hsv};
 
-fn transform_color<C>(color: &C, amount: f32) -> C
+fn transform_color<C>(color: C, amount: f32) -> C
 where
     C: Hue + Shade<Scalar=f32> + Mix<Scalar=f32> + Clone,
     f32: Into<C::Hue>,
@@ -143,11 +143,11 @@ where
     let new_color = color.shift_hue(170.0).lighten(1.0);
 
     // Interpolate between the old and new color.
-    color.mix(&new_color, amount)
+    color.mix(new_color, amount)
 }
 
-let new_hsl = transform_color(&Hsl::new_srgb(0.00, 0.70, 0.20), 0.8);
-let new_hsv = transform_color(&Hsv::new_srgb(0.00, 0.82, 0.34), 0.8);
+let new_hsl = transform_color(Hsl::new_srgb(0.00, 0.70, 0.20), 0.8);
+let new_hsv = transform_color(Hsv::new_srgb(0.00, 0.82, 0.34), 0.8);
 ```
 
 This image shows the transition from the color to `new_color` in HSL and HSV:

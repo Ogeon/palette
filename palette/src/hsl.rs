@@ -376,7 +376,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Hsl<S, T>, factor: T) -> Hsl<S, T> {
+    #[inline]
+    fn mix(self, other: Hsl<S, T>, factor: T) -> Hsl<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 

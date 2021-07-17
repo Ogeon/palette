@@ -352,13 +352,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Luma<S, T>, factor: T) -> Luma<S, T> {
+    #[inline]
+    fn mix(self, other: Luma<S, T>, factor: T) -> Luma<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Luma {
-            luma: self.luma + factor * (other.luma - self.luma),
-            standard: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 

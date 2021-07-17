@@ -248,7 +248,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Lchuv<Wp, T>, factor: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn mix(self, other: Lchuv<Wp, T>, factor: T) -> Lchuv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Lchuv {

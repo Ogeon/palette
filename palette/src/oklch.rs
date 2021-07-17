@@ -294,7 +294,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Oklch<T>, factor: T) -> Oklch<T> {
+    #[inline]
+    fn mix(self, other: Oklch<T>, factor: T) -> Oklch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Oklch {
