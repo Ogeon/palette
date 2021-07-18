@@ -338,7 +338,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Hwb<S, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Hwb<S, T> {
         let difference_whiteness = if factor >= T::zero() {
             T::max_intensity() - self.whiteness
         } else {
@@ -361,7 +362,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Hwb<S, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Hwb<S, T> {
         Hwb {
             hue: self.hue,
             whiteness: (self.whiteness + T::max_intensity() * amount).max(T::zero()),

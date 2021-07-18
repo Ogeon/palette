@@ -553,7 +553,7 @@ pub trait Shade: Sized {
     /// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);
     /// ```
     #[must_use]
-    fn lighten(&self, factor: Self::Scalar) -> Self;
+    fn lighten(self, factor: Self::Scalar) -> Self;
 
     /// Lighten the color by `amount`, a value ranging from `0.0` to `1.0`.
     ///
@@ -565,7 +565,7 @@ pub trait Shade: Sized {
     /// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);
     /// ```
     #[must_use]
-    fn lighten_fixed(&self, amount: Self::Scalar) -> Self;
+    fn lighten_fixed(self, amount: Self::Scalar) -> Self;
 
     /// Scale the color towards the minimum lightness by `factor`, a value
     /// ranging from `0.0` to `1.0`.
@@ -579,7 +579,7 @@ pub trait Shade: Sized {
     /// ```
     #[must_use]
     #[inline]
-    fn darken(&self, factor: Self::Scalar) -> Self {
+    fn darken(self, factor: Self::Scalar) -> Self {
         self.lighten(-factor)
     }
 
@@ -594,7 +594,7 @@ pub trait Shade: Sized {
     /// ```
     #[must_use]
     #[inline]
-    fn darken_fixed(&self, amount: Self::Scalar) -> Self {
+    fn darken_fixed(self, amount: Self::Scalar) -> Self {
         self.lighten_fixed(-amount)
     }
 }

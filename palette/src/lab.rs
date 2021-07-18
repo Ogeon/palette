@@ -277,7 +277,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Lab<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Lab<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -294,7 +295,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Lab<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Lab<Wp, T> {
         Lab {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             a: self.a,

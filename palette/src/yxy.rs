@@ -286,7 +286,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Yxy<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Yxy<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_luma() - self.luma
         } else {
@@ -303,7 +304,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Yxy<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Yxy<Wp, T> {
         Yxy {
             x: self.x,
             y: self.y,

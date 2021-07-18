@@ -125,14 +125,16 @@ where
 impl<C: Shade> Shade for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
-    fn lighten(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn lighten(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.lighten(factor),
             alpha: self.alpha,
         }
     }
 
-    fn lighten_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn lighten_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.lighten_fixed(amount),
             alpha: self.alpha,

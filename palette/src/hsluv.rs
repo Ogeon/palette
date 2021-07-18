@@ -265,7 +265,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Hsluv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -282,7 +283,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Hsluv<Wp, T> {
         Hsluv {
             hue: self.hue,
             saturation: self.saturation,

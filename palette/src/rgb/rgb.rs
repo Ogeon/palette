@@ -558,7 +558,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Rgb<S, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Rgb<S, T> {
         let difference_red = if factor >= T::zero() {
             T::max_intensity() - self.red
         } else {
@@ -588,7 +589,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Rgb<S, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Rgb<S, T> {
         Rgb {
             red: (self.red + T::max_intensity() * amount).max(T::zero()),
             green: (self.green + T::max_intensity() * amount).max(T::zero()),
