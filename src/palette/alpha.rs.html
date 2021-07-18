@@ -171,6 +171,13 @@
 <span id="168">168</span>
 <span id="169">169</span>
 <span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::Component</span>;
 
@@ -270,6 +277,7 @@
     <span class="doccomment">/// let transparent = transparent.with_alpha(0.8f32);</span>
     <span class="doccomment">/// assert_eq!(transparent.alpha, 0.8);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">with_alpha</span>(<span class="self">self</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::WithAlpha</span>;
 
     <span class="doccomment">/// Removes the transparency from the color. If `Self::Color` has</span>
@@ -285,6 +293,7 @@
     <span class="doccomment">/// let color = transparent.without_alpha();</span>
     <span class="doccomment">/// assert_eq!(transparent.color, color);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">without_alpha</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Color</span>;
 
     <span class="doccomment">/// Splits the color into separate color and transparency values.</span>
@@ -304,6 +313,7 @@
     <span class="doccomment">/// assert_eq!(transparent.color, color);</span>
     <span class="doccomment">/// assert_eq!(transparent.alpha, alpha);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span><span class="ident">::Color</span>, <span class="ident">A</span>);
 
     <span class="doccomment">/// Transforms the color into a fully opaque color with a transparency</span>
@@ -317,6 +327,8 @@
     <span class="doccomment">/// let opaque: Srgba&lt;u8&gt; = color.opaque();</span>
     <span class="doccomment">/// assert_eq!(opaque.alpha, 255);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">opaque</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::WithAlpha</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">Component</span>,
@@ -335,6 +347,8 @@
     <span class="doccomment">/// let transparent: Srgba&lt;u8&gt; = color.transparent();</span>
     <span class="doccomment">/// assert_eq!(transparent.alpha, 0);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">transparent</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::WithAlpha</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">Zero</span>,

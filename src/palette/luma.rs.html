@@ -77,13 +77,13 @@
     <span class="kw">type</span> <span class="ident">WhitePoint</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// The transfer function for the luminance component.</span>
-    <span class="kw">type</span> <span class="ident">TransferFn</span>: <span class="ident">TransferFn</span>;
+    <span class="kw">type</span> <span class="ident">TransferFn</span>: <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Wp</span>, <span class="ident">Tf</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">Wp</span>, <span class="ident">Tf</span>)
 <span class="kw">where</span>
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Tf</span>: <span class="ident">TransferFn</span>,
+    <span class="ident">Tf</span>: <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;

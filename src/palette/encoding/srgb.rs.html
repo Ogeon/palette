@@ -59,6 +59,18 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! The sRGB standard.</span>
 
@@ -85,23 +97,35 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FromF64</span>,
+{
     <span class="kw">type</span> <span class="ident">Primaries</span> <span class="op">=</span> <span class="ident">Srgb</span>;
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">Float</span>,
+{
     <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Srgb</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">Float</span>,
+{
     <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
 }
 
-<span class="kw">impl</span> <span class="ident">TransferFn</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">fn</span> <span class="ident">into_linear</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span><span class="op">&gt;</span>(<span class="ident">x</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span>,
+{
+    <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
         <span class="comment">// Recip call shows performance benefits in benchmarks for this function</span>
         <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">0.04045</span>) {
             <span class="ident">x</span> <span class="op">*</span> <span class="ident">from_f64</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="number">12.92</span>).<span class="ident">recip</span>()
@@ -110,7 +134,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">from_linear</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span><span class="op">&gt;</span>(<span class="ident">x</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
         <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">0.0031308</span>) {
             <span class="ident">x</span> <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">12.92</span>)
         } <span class="kw">else</span> {

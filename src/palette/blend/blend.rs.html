@@ -434,6 +434,44 @@
 <span id="431">431</span>
 <span id="432">432</span>
 <span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">num_traits</span>::{<span class="ident">One</span>, <span class="ident">Zero</span>};
 
@@ -457,9 +495,11 @@
     <span class="kw">type</span> <span class="ident">Color</span>: <span class="ident">Blend</span><span class="op">&lt;</span><span class="ident">Color</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Color</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ComponentWise</span>;
 
     <span class="doccomment">/// Convert the color to premultiplied alpha.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">into_premultiplied</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span>, <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Convert the color from premultiplied alpha.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_premultiplied</span>(
         <span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span>, <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
@@ -485,6 +525,8 @@
     <span class="doccomment">/// let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);</span>
     <span class="doccomment">/// let c = a.blend(b, blend_mode);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">blend</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">destination</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span><span class="op">&gt;</span>,
@@ -496,6 +538,8 @@
 
     <span class="doccomment">/// Place `self` over `other`. This is the good old common alpha</span>
     <span class="doccomment">/// composition equation.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -515,6 +559,8 @@
 
     <span class="doccomment">/// Results in the parts of `self` that overlaps the visible parts of</span>
     <span class="doccomment">/// `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -532,6 +578,8 @@
 
     <span class="doccomment">/// Results in the parts of `self` that lies outside the visible parts of</span>
     <span class="doccomment">/// `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -548,6 +596,8 @@
     }
 
     <span class="doccomment">/// Place `self` over only the visible parts of `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -566,6 +616,8 @@
     }
 
     <span class="doccomment">/// Results in either `self` or `other`, where they do not overlap.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -590,6 +642,8 @@
 
     <span class="doccomment">/// Add `self` and `other`. This uses the alpha component to regulate the</span>
     <span class="doccomment">/// effect, so it&#39;s not just plain component wise addition.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -607,6 +661,8 @@
 
     <span class="doccomment">/// Multiply `self` with `other`. This uses the alpha component to regulate</span>
     <span class="doccomment">/// the effect, so it&#39;s not just plain component wise multiplication.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -625,6 +681,8 @@
     }
 
     <span class="doccomment">/// Make a color which is at least as light as `self` or `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -642,6 +700,8 @@
 
     <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `other`</span>
     <span class="doccomment">/// is light. This results in an S curve.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -667,6 +727,8 @@
     }
 
     <span class="doccomment">/// Return the darkest parts of `self` and `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -685,6 +747,8 @@
     }
 
     <span class="doccomment">/// Return the lightest parts of `self` and `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -704,6 +768,8 @@
 
     <span class="doccomment">/// Lighten `other` to reflect `self`. Results in `other` if `self` is</span>
     <span class="doccomment">/// black.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -731,6 +797,8 @@
 
     <span class="doccomment">/// Darken `other` to reflect `self`. Results in `other` if `self` is</span>
     <span class="doccomment">/// white.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -759,6 +827,8 @@
     <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `self`</span>
     <span class="doccomment">/// is light. This is similar to `overlay`, but depends on `self` instead</span>
     <span class="doccomment">/// of `other`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -786,6 +856,8 @@
     <span class="doccomment">/// Lighten `other` if `self` is light, or darken `other` as if it&#39;s burned</span>
     <span class="doccomment">/// if `self` is dark. The effect is increased if the components of `self`</span>
     <span class="doccomment">/// is further from 0.5.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -829,6 +901,8 @@
 
     <span class="doccomment">/// Return the absolute difference between `self` and `other`. It&#39;s</span>
     <span class="doccomment">/// basically `abs(self - other)`, but regulated by the alpha component.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
@@ -850,6 +924,8 @@
     <span class="doccomment">/// Similar to `difference`, but appears to result in a lower contrast.</span>
     <span class="doccomment">/// `other` is inverted if `self` is white, and preserved if `self` is</span>
     <span class="doccomment">/// black.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
         <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();

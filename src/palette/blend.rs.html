@@ -80,6 +80,8 @@
 <span id="77">77</span>
 <span id="78">78</span>
 <span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Color blending and blending equations.</span>
 <span class="doccomment">//!</span>
@@ -139,6 +141,7 @@
     <span class="ident">C::Scalar</span>: <span class="ident">Float</span>,
 {
     <span class="doccomment">/// Apply this blend function to a pair of colors.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">apply_to</span>(
         <span class="self">self</span>,
         <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>,
@@ -152,6 +155,7 @@
     <span class="ident">C::Scalar</span>: <span class="ident">Float</span>,
     <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>, <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">apply_to</span>(
         <span class="self">self</span>,
         <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>,

@@ -767,6 +767,39 @@
 <span id="764">764</span>
 <span id="765">765</span>
 <span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -1068,13 +1101,15 @@
                 )<span class="op">*</span>
 
                 <span class="kw">for</span> <span class="macro">assert_ranges!</span>(@<span class="ident">make_tuple</span> (), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>,)<span class="op">+</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>,)<span class="op">*</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>,)<span class="op">*</span> ) <span class="kw">in</span> <span class="ident">repeat</span>(()) $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>))<span class="op">+</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>))<span class="op">*</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>))<span class="op">*</span> {
-                    <span class="kw">let</span> <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
+                    <span class="kw">let</span> <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>.<span class="ident">into</span>(),)<span class="op">+</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         ..<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty::default</span>() <span class="comment">//This prevents exhaustiveness checking</span>
                     };
-                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">clamp</span>();
+
+                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">clamp</span>();
+
                     <span class="kw">let</span> <span class="ident">expected</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_from</span>.<span class="ident">into</span>(),)<span class="op">+</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min_from</span>.<span class="ident">into</span>(),)<span class="op">*</span>
@@ -1082,7 +1117,7 @@
                         ..<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty::default</span>() <span class="comment">//This prevents exhaustiveness checking</span>
                     };
 
-                    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">c</span>.<span class="ident">is_within_bounds</span>());
+                    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">color</span>.<span class="ident">is_within_bounds</span>());
                     <span class="macro">assert_relative_eq!</span>(<span class="ident">clamped</span>, <span class="ident">expected</span>);
                 }
 
@@ -1113,16 +1148,17 @@
                 )<span class="op">*</span>
 
                 <span class="kw">for</span> <span class="macro">assert_ranges!</span>(@<span class="ident">make_tuple</span> (), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>,)<span class="op">+</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>,)<span class="op">*</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>,)<span class="op">*</span> ) <span class="kw">in</span> <span class="ident">repeat</span>(()) $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>))<span class="op">+</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>))<span class="op">*</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>))<span class="op">*</span> {
-                    <span class="kw">let</span> <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
+                    <span class="kw">let</span> <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>.<span class="ident">into</span>(),)<span class="op">+</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         ..<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty::default</span>() <span class="comment">//This prevents exhaustiveness checking</span>
                     };
-                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">clamp</span>();
 
-                    <span class="macro">assert!</span>(<span class="ident">c</span>.<span class="ident">is_within_bounds</span>());
-                    <span class="macro">assert_relative_eq!</span>(<span class="ident">clamped</span>, <span class="ident">c</span>);
+                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">clamp</span>();
+
+                    <span class="macro">assert!</span>(<span class="ident">color</span>.<span class="ident">is_within_bounds</span>());
+                    <span class="macro">assert_relative_eq!</span>(<span class="ident">clamped</span>, <span class="ident">color</span>);
                 }
 
                 <span class="macro">println!</span>(<span class="string">&quot;ok&quot;</span>)
@@ -1152,13 +1188,15 @@
                 )<span class="op">*</span>
 
                 <span class="kw">for</span> <span class="macro">assert_ranges!</span>(@<span class="ident">make_tuple</span> (), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>,)<span class="op">+</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>,)<span class="op">*</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>,)<span class="op">*</span> ) <span class="kw">in</span> <span class="ident">repeat</span>(()) $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>))<span class="op">+</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>))<span class="op">*</span> $(.<span class="ident">zip</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>))<span class="op">*</span> {
-                    <span class="kw">let</span> <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
+                    <span class="kw">let</span> <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>.<span class="ident">into</span>(),)<span class="op">+</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">unclamped</span>.<span class="ident">into</span>(),)<span class="op">*</span>
                         ..<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty::default</span>() <span class="comment">//This prevents exhaustiveness checking</span>
                     };
-                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">clamp</span>();
+
+                    <span class="kw">let</span> <span class="ident">clamped</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">clamp</span>();
+
                     <span class="kw">let</span> <span class="ident">expected</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_params</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_to</span>.<span class="ident">into</span>(),)<span class="op">+</span>
                         $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">clamped_min</span>.<span class="ident">into</span>(),)<span class="op">*</span>
@@ -1166,7 +1204,7 @@
                         ..<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty::default</span>() <span class="comment">//This prevents exhaustiveness checking</span>
                     };
 
-                    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">c</span>.<span class="ident">is_within_bounds</span>());
+                    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">color</span>.<span class="ident">is_within_bounds</span>());
                     <span class="macro">assert_relative_eq!</span>(<span class="ident">clamped</span>, <span class="ident">expected</span>);
                 }
 
@@ -1222,13 +1260,23 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">matrix</span>;
 
-<span class="kw">fn</span> <span class="ident">clamp</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-    <span class="kw">if</span> <span class="ident">v</span> <span class="op">&lt;</span> <span class="ident">min</span> {
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">clamp</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
         <span class="ident">min</span>
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">v</span> <span class="op">&gt;</span> <span class="ident">max</span> {
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">max</span> {
         <span class="ident">max</span>
     } <span class="kw">else</span> {
-        <span class="ident">v</span>
+        <span class="ident">value</span>
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">clamp_min</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
+        <span class="ident">min</span>
+    } <span class="kw">else</span> {
+        <span class="ident">value</span>
     }
 }
 
@@ -1236,14 +1284,13 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Clamp</span> {
     <span class="doccomment">/// Check if the color&#39;s components are within the expected clamped range</span>
     <span class="doccomment">/// bounds.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="doccomment">/// Return a new color where the components have been clamped to the nearest</span>
     <span class="doccomment">/// valid values.</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
-
-    <span class="doccomment">/// Clamp the color&#39;s components to the nearest valid values.</span>
-    <span class="kw">fn</span> <span class="ident">clamp_self</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>);
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// A trait for linear color interpolation.</span>
@@ -1255,9 +1302,9 @@
 <span class="doccomment">/// let a = LinSrgb::new(0.0, 0.5, 1.0);</span>
 <span class="doccomment">/// let b = LinSrgb::new(1.0, 0.5, 0.0);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_relative_eq!(a.mix(&amp;b, 0.0), a);</span>
-<span class="doccomment">/// assert_relative_eq!(a.mix(&amp;b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));</span>
-<span class="doccomment">/// assert_relative_eq!(a.mix(&amp;b, 1.0), b);</span>
+<span class="doccomment">/// assert_relative_eq!(a.mix(b, 0.0), a);</span>
+<span class="doccomment">/// assert_relative_eq!(a.mix(b, 0.5), LinSrgb::new(0.5, 0.5, 0.5));</span>
+<span class="doccomment">/// assert_relative_eq!(a.mix(b, 1.0), b);</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Mix</span> {
     <span class="doccomment">/// The type of the mixing factor.</span>
@@ -1268,7 +1315,8 @@
     <span class="doccomment">/// `factor` should be between `0.0` and `1.0`, where `0.0` will result in</span>
     <span class="doccomment">/// the same color as `self` and `1.0` will result in the same color as</span>
     <span class="doccomment">/// `other`.</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// The `Shade` trait allows a color to be lightened or darkened.</span>
@@ -1307,7 +1355,8 @@
     <span class="doccomment">/// let color = Hsl::new_srgb(0.0, 1.0, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Lighten the color by `amount`, a value ranging from `0.0` to `1.0`.</span>
     <span class="doccomment">///</span>
@@ -1318,7 +1367,8 @@
     <span class="doccomment">/// let color = Hsl::new_srgb(0.0, 1.0, 0.4);</span>
     <span class="doccomment">/// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Scale the color towards the minimum lightness by `factor`, a value</span>
     <span class="doccomment">/// ranging from `0.0` to `1.0`.</span>
@@ -1330,7 +1380,9 @@
     <span class="doccomment">/// let color = Hsv::new_srgb(0.0, 1.0, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.darken(0.5).value, 0.25);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">lighten</span>(<span class="op">-</span><span class="ident">factor</span>)
     }
 
@@ -1343,7 +1395,9 @@
     <span class="doccomment">/// let color = Hsv::new_srgb(0.0, 1.0, 0.4);</span>
     <span class="doccomment">/// assert_relative_eq!(color.darken_fixed(0.2).value, 0.2);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">darken_fixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">darken_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">lighten_fixed</span>(<span class="op">-</span><span class="ident">amount</span>)
     }
 }
@@ -1377,16 +1431,19 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Colors in the gray scale has no well defined hue and should preferably</span>
     <span class="doccomment">/// return `None`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Hue</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A trait for colors where the hue can be manipulated without conversion.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Hue</span>: <span class="ident">GetHue</span> {
     <span class="doccomment">/// Return a new copy of `self`, but with a specific hue.</span>
-    <span class="kw">fn</span> <span class="ident">with_hue</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Hue</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">with_hue</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Hue</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Return a new copy of `self`, but with the hue shifted by `amount`.</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Hue</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">shift_hue</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Hue</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// A trait for colors where the saturation (or chroma) can be manipulated</span>
@@ -1438,7 +1495,8 @@
     <span class="doccomment">/// let color = Hsl::new_srgb(0.0, 0.5, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.saturate(0.5).saturation, 0.75);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">saturate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">saturate</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Increase the saturation by `amount`, a value ranging from `0.0` to</span>
     <span class="doccomment">/// `1.0`.</span>
@@ -1450,7 +1508,8 @@
     <span class="doccomment">/// let color = Hsl::new_srgb(0.0, 0.4, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.saturate_fixed(0.2).saturation, 0.6);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">saturate_fixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">saturate_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Scale the color towards the minimum saturation by `factor`, a value</span>
     <span class="doccomment">/// ranging from `0.0` to `1.0`.</span>
@@ -1462,7 +1521,9 @@
     <span class="doccomment">/// let color = Hsv::new_srgb(0.0, 0.5, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">desaturate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">desaturate</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">saturate</span>(<span class="op">-</span><span class="ident">factor</span>)
     }
 
@@ -1476,7 +1537,9 @@
     <span class="doccomment">/// let color = Hsv::new_srgb(0.0, 0.4, 0.5);</span>
     <span class="doccomment">/// assert_relative_eq!(color.desaturate_fixed(0.2).saturation, 0.2);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">desaturate_fixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">desaturate_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">saturate_fixed</span>(<span class="op">-</span><span class="ident">amount</span>)
     }
 }
@@ -1487,6 +1550,7 @@
     <span class="kw">type</span> <span class="ident">Scalar</span>;
 
     <span class="doccomment">/// Perform a binary operation on this and an other color.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="self">Self</span><span class="ident">::Scalar</span>, <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Scalar</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
@@ -1494,12 +1558,14 @@
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Perform a unary operation on this color.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Scalar</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// A trait for infallible conversion from `f64`. The conversion may be lossy.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromF64</span> {
     <span class="doccomment">/// Creates a value from an `f64` constant.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_f64</span>(<span class="ident">c</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 

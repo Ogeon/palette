@@ -145,6 +145,23 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">Div</span>};
 
@@ -173,10 +190,10 @@
 <span class="doccomment">/// # fn main() -&gt; Result&lt;(), palette::rgb::FromHexError&gt; {</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // the rustdoc &quot;DARK&quot; theme background and text colors</span>
-<span class="doccomment">/// let my_background_rgb: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();</span>
-<span class="doccomment">/// let my_foreground_rgb = Srgb::from_str(&quot;#ddd&quot;)?.into_format();</span>
+<span class="doccomment">/// let background: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();</span>
+<span class="doccomment">/// let foreground = Srgb::from_str(&quot;#ddd&quot;)?.into_format();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert!(my_background_rgb.has_enhanced_contrast_text(&amp;my_foreground_rgb));</span>
+<span class="doccomment">/// assert!(background.has_enhanced_contrast_text(foreground));</span>
 <span class="doccomment">/// # Ok(())</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
@@ -199,40 +216,57 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">alias</span> <span class="op">=</span> <span class="string">&quot;wcag&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RelativeContrast</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RelativeContrast</span>: <span class="ident">Sized</span> {
     <span class="doccomment">/// The type of the contrast ratio.</span>
     <span class="kw">type</span> <span class="ident">Scalar</span>: <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>;
 
     <span class="doccomment">/// Calculate the contrast ratio between two colors.</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Scalar</span>;
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Scalar</span>;
+
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3. Contrast</span>
     <span class="doccomment">/// is at least 4.5:1 (Level AA).</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">has_min_contrast_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>) <span class="op">&gt;</span><span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">4.5</span>)
     }
+
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3 for large</span>
     <span class="doccomment">/// text. Contrast is at least 3:1 (Level AA).</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">has_min_contrast_large_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>) <span class="op">&gt;</span><span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">3.0</span>)
     }
+
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6. Contrast</span>
     <span class="doccomment">/// is at least 7:1 (Level AAA).</span>
-    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>) <span class="op">&gt;</span><span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">7.0</span>)
     }
+
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6 for large</span>
     <span class="doccomment">/// text. Contrast is at least 4.5:1 (Level AAA).</span>
-    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_large_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">other</span>)
     }
+
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.11 for graphical</span>
     <span class="doccomment">/// objects. Contrast is at least 3:1 (Level AA).</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_graphics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">has_min_contrast_graphics</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">other</span>)
     }
 }
 
 <span class="doccomment">/// Calculate the ratio between two `luma` values.</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contrast_ratio</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">luma1</span>: <span class="ident">T</span>, <span class="ident">luma2</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
@@ -256,38 +290,38 @@
         <span class="kw">let</span> <span class="ident">white</span> <span class="op">=</span> <span class="ident">Srgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
         <span class="kw">let</span> <span class="ident">black</span> <span class="op">=</span> <span class="ident">Srgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>), <span class="number">21.0</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">1.0</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">21.0</span>);
         <span class="macro">assert_relative_eq!</span>(
-            <span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>),
-            <span class="ident">black</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>)
+            <span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>),
+            <span class="ident">black</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>)
         );
 
         <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#600&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>), <span class="number">13.41</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>), <span class="number">1.56</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">13.41</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">1.56</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
 
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">white</span>));
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">white</span>));
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="ident">white</span>));
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="ident">white</span>));
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="ident">white</span>));
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="ident">black</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span>);
 
         <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#066&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>), <span class="number">6.79</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>), <span class="number">3.09</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">6.79</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">3.09</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
 
         <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#9f9&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">white</span>), <span class="number">1.22</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="kw-2">&amp;</span><span class="ident">black</span>), <span class="number">17.11</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">1.22</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">17.11</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
     }
 }
 </pre></div>

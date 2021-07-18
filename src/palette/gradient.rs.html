@@ -713,7 +713,7 @@
 
         <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> (<span class="ident">i</span> <span class="op">-</span> <span class="ident">min</span>) <span class="op">/</span> (<span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>);
 
-        <span class="ident">min_color</span>.<span class="ident">mix</span>(<span class="ident">max_color</span>, <span class="ident">factor</span>)
+        <span class="ident">min_color</span>.<span class="ident">clone</span>().<span class="ident">mix</span>(<span class="ident">max_color</span>.<span class="ident">clone</span>(), <span class="ident">factor</span>)
     }
 
     <span class="doccomment">/// Create a gradient of colors with custom spacing and domain. There must</span>

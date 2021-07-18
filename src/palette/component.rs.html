@@ -363,6 +363,9 @@
 <span id="360">360</span>
 <span id="361">361</span>
 <span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">num_traits::Zero</span>;
 
@@ -374,6 +377,7 @@
     <span class="doccomment">/// The highest displayable value this component type can reach. Higher</span>
     <span class="doccomment">/// values are allowed, but they may be lowered to this before</span>
     <span class="doccomment">/// converting to another format.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">max_intensity</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
@@ -423,6 +427,7 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Component</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Converts `other` into `Self`, while performing the appropriate scaling,</span>
     <span class="doccomment">/// rounding and clamping.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_component</span>(<span class="ident">other</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
@@ -446,6 +451,7 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoComponent</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Component</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Converts `self` into `T`, while performing the appropriate scaling,</span>
     <span class="doccomment">/// rounding and clamping.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">into_component</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>;
 }
 

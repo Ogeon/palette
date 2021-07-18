@@ -209,6 +209,12 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! RGB types, spaces and standards.</span>
 <span class="doccomment">//!</span>
@@ -305,13 +311,13 @@
     <span class="kw">type</span> <span class="ident">Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// The transfer function for the color components.</span>
-    <span class="kw">type</span> <span class="ident">TransferFn</span>: <span class="ident">TransferFn</span>;
+    <span class="kw">type</span> <span class="ident">TransferFn</span>: <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Sp</span>, <span class="ident">Tf</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">Sp</span>, <span class="ident">Tf</span>)
 <span class="kw">where</span>
     <span class="ident">Sp</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Tf</span>: <span class="ident">TransferFn</span>,
+    <span class="ident">Tf</span>: <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Sp</span>;
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;
@@ -321,7 +327,7 @@
 <span class="kw">where</span>
     <span class="ident">Pr</span>: <span class="ident">Primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Tf</span>: <span class="ident">TransferFn</span>,
+    <span class="ident">Tf</span>: <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> (<span class="ident">Pr</span>, <span class="ident">Wp</span>);
     <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;
@@ -360,6 +366,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgb</span>: <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">non_lin</span> <span class="op">=</span> <span class="ident">Srgb</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_linear</span>(<span class="ident">lin_srgb</span>);
         <span class="ident">non_lin</span>.<span class="ident">into_format</span>()
@@ -371,6 +378,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgb</span>: <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">srgb</span>.<span class="ident">into_linear</span>().<span class="ident">into_format</span>()
     }
@@ -381,6 +389,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgb</span>: <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">non_lin</span> <span class="op">=</span> <span class="ident">Srgb</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_linear</span>(<span class="ident">lin_srgb</span>);
         <span class="kw">let</span> <span class="ident">new_fmt</span> <span class="op">=</span> <span class="ident">Srgb</span>::<span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span><span class="ident">::from_format</span>(<span class="ident">non_lin</span>);
@@ -393,6 +402,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgba</span>: <span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">non_lin</span> <span class="op">=</span> <span class="ident">Srgba</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_linear</span>(<span class="ident">lin_srgba</span>);
         <span class="ident">non_lin</span>.<span class="ident">into_format</span>()
@@ -404,6 +414,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgb</span>: <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">srgb</span>.<span class="ident">into_linear</span>().<span class="ident">into_format</span>().<span class="ident">into</span>()
     }
@@ -414,6 +425,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">U</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">FromComponent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgba</span>: <span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">srgba</span>.<span class="ident">into_linear</span>().<span class="ident">into_format</span>()
     }

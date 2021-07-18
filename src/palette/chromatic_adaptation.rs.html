@@ -289,6 +289,17 @@
 <span id="286">286</span>
 <span id="287">287</span>
 <span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Convert colors from one reference white point to another</span>
 <span class="doccomment">//!</span>
@@ -347,10 +358,12 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
 {
     <span class="doccomment">/// Get the cone response functions for the chromatic adaptation method</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">get_cone_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConeResponseMatrices</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generates a 3x3 transformation matrix to convert color from one</span>
     <span class="doccomment">/// reference white point to another with the given cone_response</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">generate_transform_matrix</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">source_wp</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>,
@@ -383,6 +396,7 @@
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">get_cone_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConeResponseMatrices</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
              <span class="ident">Method::Bradford</span> <span class="op">=</span><span class="op">&gt;</span> {
@@ -442,12 +456,15 @@
     <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Convert the source color to the destination color using the bradford</span>
-    <span class="doccomment">/// method by default</span>
+    <span class="doccomment">/// method by default.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_from</span>(<span class="ident">color</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::adapt_from_using</span>(<span class="ident">color</span>, <span class="ident">Method::Bradford</span>)
     }
     <span class="doccomment">/// Convert the source color to the destination color using the specified</span>
-    <span class="doccomment">/// method</span>
+    <span class="doccomment">/// method.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_from_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">S</span>, <span class="ident">method</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
@@ -459,6 +476,7 @@
     <span class="ident">S</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Swp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">D</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_from_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">S</span>, <span class="ident">method</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">D</span> {
         <span class="kw">let</span> <span class="ident">src_xyz</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color_unclamped</span>().<span class="ident">with_white_point</span>();
         <span class="kw">let</span> <span class="ident">transform_matrix</span> <span class="op">=</span> <span class="ident">method</span>.<span class="ident">generate_transform_matrix</span>(<span class="ident">Swp::get_xyz</span>(), <span class="ident">Dwp::get_xyz</span>());
@@ -478,12 +496,15 @@
     <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Convert the source color to the destination color using the bradford</span>
-    <span class="doccomment">/// method by default</span>
+    <span class="doccomment">/// method by default.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">D</span> {
         <span class="self">self</span>.<span class="ident">adapt_into_using</span>(<span class="ident">Method::Bradford</span>)
     }
     <span class="doccomment">/// Convert the source color to the destination color using the specified</span>
-    <span class="doccomment">/// method</span>
+    <span class="doccomment">/// method.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_into_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">method</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">D</span>;
 }
 
@@ -494,6 +515,7 @@
     <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">D</span>: <span class="ident">AdaptFrom</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">adapt_into_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">method</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">D</span> {
         <span class="ident">D::adapt_from_using</span>(<span class="self">self</span>, <span class="ident">method</span>)
     }
