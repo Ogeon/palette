@@ -481,7 +481,8 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         contrast_ratio(self.y, other.y)
     }
 }

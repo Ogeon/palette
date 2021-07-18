@@ -25,10 +25,10 @@ use crate::{from_f64, FromF64};
 /// # fn main() -> Result<(), palette::rgb::FromHexError> {
 ///
 /// // the rustdoc "DARK" theme background and text colors
-/// let my_background_rgb: Srgb<f32> = Srgb::from(0x353535).into_format();
-/// let my_foreground_rgb = Srgb::from_str("#ddd")?.into_format();
+/// let background: Srgb<f32> = Srgb::from(0x353535).into_format();
+/// let foreground = Srgb::from_str("#ddd")?.into_format();
 ///
-/// assert!(my_background_rgb.has_enhanced_contrast_text(&my_foreground_rgb));
+/// assert!(background.has_enhanced_contrast_text(foreground));
 /// # Ok(())
 /// # }
 /// ```
@@ -51,46 +51,51 @@ use crate::{from_f64, FromF64};
 ///
 /// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
 #[doc(alias = "wcag")]
-pub trait RelativeContrast {
+pub trait RelativeContrast: Sized {
     /// The type of the contrast ratio.
     type Scalar: FromF64 + PartialOrd;
 
     /// Calculate the contrast ratio between two colors.
     #[must_use]
-    fn get_contrast_ratio(&self, other: &Self) -> Self::Scalar;
+    fn get_contrast_ratio(self, other: Self) -> Self::Scalar;
+
     /// Verify the contrast between two colors satisfies SC 1.4.3. Contrast
     /// is at least 4.5:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_text(&self, other: &Self) -> bool {
+    fn has_min_contrast_text(self, other: Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(4.5)
     }
+
     /// Verify the contrast between two colors satisfies SC 1.4.3 for large
     /// text. Contrast is at least 3:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_large_text(&self, other: &Self) -> bool {
+    fn has_min_contrast_large_text(self, other: Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(3.0)
     }
+
     /// Verify the contrast between two colors satisfies SC 1.4.6. Contrast
     /// is at least 7:1 (Level AAA).
     #[must_use]
     #[inline]
-    fn has_enhanced_contrast_text(&self, other: &Self) -> bool {
+    fn has_enhanced_contrast_text(self, other: Self) -> bool {
         self.get_contrast_ratio(other) >= from_f64(7.0)
     }
+
     /// Verify the contrast between two colors satisfies SC 1.4.6 for large
     /// text. Contrast is at least 4.5:1 (Level AAA).
     #[must_use]
     #[inline]
-    fn has_enhanced_contrast_large_text(&self, other: &Self) -> bool {
+    fn has_enhanced_contrast_large_text(self, other: Self) -> bool {
         self.has_min_contrast_text(other)
     }
+
     /// Verify the contrast between two colors satisfies SC 1.4.11 for graphical
     /// objects. Contrast is at least 3:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_graphics(&self, other: &Self) -> bool {
+    fn has_min_contrast_graphics(self, other: Self) -> bool {
         self.has_min_contrast_large_text(other)
     }
 }
@@ -120,37 +125,37 @@ mod test {
         let white = Srgb::new(1.0, 1.0, 1.0);
         let black = Srgb::new(0.0, 0.0, 0.0);
 
-        assert_relative_eq!(white.get_contrast_ratio(&white), 1.0);
-        assert_relative_eq!(white.get_contrast_ratio(&black), 21.0);
+        assert_relative_eq!(white.get_contrast_ratio(white), 1.0);
+        assert_relative_eq!(white.get_contrast_ratio(black), 21.0);
         assert_relative_eq!(
-            white.get_contrast_ratio(&black),
-            black.get_contrast_ratio(&white)
+            white.get_contrast_ratio(black),
+            black.get_contrast_ratio(white)
         );
 
         let c1 = Srgb::from_str("#600").unwrap().into_format();
 
-        assert_relative_eq!(c1.get_contrast_ratio(&white), 13.41, epsilon = 0.01);
-        assert_relative_eq!(c1.get_contrast_ratio(&black), 1.56, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(white), 13.41, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(black), 1.56, epsilon = 0.01);
 
-        assert!(c1.has_min_contrast_text(&white));
-        assert!(c1.has_min_contrast_large_text(&white));
-        assert!(c1.has_enhanced_contrast_text(&white));
-        assert!(c1.has_enhanced_contrast_large_text(&white));
-        assert!(c1.has_min_contrast_graphics(&white));
-        assert!(c1.has_min_contrast_text(&black) == false);
-        assert!(c1.has_min_contrast_large_text(&black) == false);
-        assert!(c1.has_enhanced_contrast_text(&black) == false);
-        assert!(c1.has_enhanced_contrast_large_text(&black) == false);
-        assert!(c1.has_min_contrast_graphics(&black) == false);
+        assert!(c1.has_min_contrast_text(white));
+        assert!(c1.has_min_contrast_large_text(white));
+        assert!(c1.has_enhanced_contrast_text(white));
+        assert!(c1.has_enhanced_contrast_large_text(white));
+        assert!(c1.has_min_contrast_graphics(white));
+        assert!(c1.has_min_contrast_text(black) == false);
+        assert!(c1.has_min_contrast_large_text(black) == false);
+        assert!(c1.has_enhanced_contrast_text(black) == false);
+        assert!(c1.has_enhanced_contrast_large_text(black) == false);
+        assert!(c1.has_min_contrast_graphics(black) == false);
 
         let c1 = Srgb::from_str("#066").unwrap().into_format();
 
-        assert_relative_eq!(c1.get_contrast_ratio(&white), 6.79, epsilon = 0.01);
-        assert_relative_eq!(c1.get_contrast_ratio(&black), 3.09, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(white), 6.79, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(black), 3.09, epsilon = 0.01);
 
         let c1 = Srgb::from_str("#9f9").unwrap().into_format();
 
-        assert_relative_eq!(c1.get_contrast_ratio(&white), 1.22, epsilon = 0.01);
-        assert_relative_eq!(c1.get_contrast_ratio(&black), 17.11, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(white), 1.22, epsilon = 0.01);
+        assert_relative_eq!(c1.get_contrast_ratio(black), 17.11, epsilon = 0.01);
     }
 }

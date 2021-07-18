@@ -755,7 +755,8 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         let luma1 = self.into_linear();
         let luma2 = other.into_linear();
 
