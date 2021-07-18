@@ -377,7 +377,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Oklch<T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Oklch<T> {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -393,7 +394,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Oklch<T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Oklch<T> {
         Oklch {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),

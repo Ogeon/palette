@@ -169,14 +169,16 @@ impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
 impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
-    fn saturate(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn saturate(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.saturate(factor),
             alpha: self.alpha,
         }
     }
 
-    fn saturate_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn saturate_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.saturate_fixed(amount),
             alpha: self.alpha,

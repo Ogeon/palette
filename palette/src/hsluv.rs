@@ -332,7 +332,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Hsluv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_saturation() - self.saturation
         } else {
@@ -353,7 +354,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Hsluv<Wp, T> {
         Hsluv {
             hue: self.hue,
             saturation: clamp(

@@ -693,7 +693,7 @@ pub trait Saturate: Sized {
     /// assert_relative_eq!(color.saturate(0.5).saturation, 0.75);
     /// ```
     #[must_use]
-    fn saturate(&self, factor: Self::Scalar) -> Self;
+    fn saturate(self, factor: Self::Scalar) -> Self;
 
     /// Increase the saturation by `amount`, a value ranging from `0.0` to
     /// `1.0`.
@@ -706,7 +706,7 @@ pub trait Saturate: Sized {
     /// assert_relative_eq!(color.saturate_fixed(0.2).saturation, 0.6);
     /// ```
     #[must_use]
-    fn saturate_fixed(&self, amount: Self::Scalar) -> Self;
+    fn saturate_fixed(self, amount: Self::Scalar) -> Self;
 
     /// Scale the color towards the minimum saturation by `factor`, a value
     /// ranging from `0.0` to `1.0`.
@@ -720,7 +720,7 @@ pub trait Saturate: Sized {
     /// ```
     #[must_use]
     #[inline]
-    fn desaturate(&self, factor: Self::Scalar) -> Self {
+    fn desaturate(self, factor: Self::Scalar) -> Self {
         self.saturate(-factor)
     }
 
@@ -736,7 +736,7 @@ pub trait Saturate: Sized {
     /// ```
     #[must_use]
     #[inline]
-    fn desaturate_fixed(&self, amount: Self::Scalar) -> Self {
+    fn desaturate_fixed(self, amount: Self::Scalar) -> Self {
         self.saturate_fixed(-amount)
     }
 }

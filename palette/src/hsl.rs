@@ -463,7 +463,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsl<S, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Hsl<S, T> {
         let difference = if factor >= T::zero() {
             T::max_intensity() - self.saturation
         } else {
@@ -480,7 +481,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Hsl<S, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Hsl<S, T> {
         Hsl {
             hue: self.hue,
             saturation: (self.saturation + T::max_intensity() * amount).max(T::zero()),
