@@ -14,8 +14,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, ComponentWise, FloatComponent,
-    FromF64, GetHue, Mat3, Mix, OklabHue, Oklch, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
+    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Mat3, Mix, OklabHue, Oklch,
+    Pixel, RelativeContrast, Shade, Xyz,
 };
 
 #[rustfmt::skip]
@@ -287,7 +288,7 @@ impl<T, A: Component> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<T> Clamp for Oklab<T>
+impl<T> IsWithinBounds for Oklab<T>
 where
     T: FromF64 + PartialOrd,
 {
@@ -298,7 +299,12 @@ where
         self.a >= Self::min_a() && self.a <= Self::max_a() &&
         self.b >= Self::min_b() && self.b <= Self::max_b()
     }
+}
 
+impl<T> Clamp for Oklab<T>
+where
+    T: FromF64 + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -306,6 +312,18 @@ where
             clamp(self.a, Self::min_a(), Self::max_a()),
             clamp(self.b, Self::min_b(), Self::max_b()),
         )
+    }
+}
+
+impl<T> ClampAssign for Oklab<T>
+where
+    T: FromF64 + PartialOrd,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
+        clamp_assign(&mut self.a, Self::min_a(), Self::max_a());
+        clamp_assign(&mut self.b, Self::min_b(), Self::max_b());
     }
 }
 

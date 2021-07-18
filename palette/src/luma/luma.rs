@@ -19,8 +19,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::{
-    clamp, contrast_ratio, Alpha, Blend, Clamp, Component, ComponentWise, FloatComponent,
-    FromComponent, Mix, Pixel, RelativeContrast, Shade, Xyz, Yxy,
+    clamp, clamp_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign, Component,
+    ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Mix, Pixel, RelativeContrast,
+    Shade, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -330,7 +331,7 @@ impl<S, T, A> From<Alpha<Luma<S, T>, A>> for (T, A) {
     }
 }
 
-impl<S, T> Clamp for Luma<S, T>
+impl<S, T> IsWithinBounds for Luma<S, T>
 where
     T: Component,
 {
@@ -338,10 +339,25 @@ where
     fn is_within_bounds(&self) -> bool {
         self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
+}
 
+impl<S, T> Clamp for Luma<S, T>
+where
+    T: Component,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(clamp(self.luma, Self::min_luma(), Self::max_luma()))
+    }
+}
+
+impl<S, T> ClampAssign for Luma<S, T>
+where
+    T: Component,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
     }
 }
 

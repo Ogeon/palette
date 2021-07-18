@@ -13,8 +13,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, Alpha, Clamp, Component, ComponentWise, FloatComponent, Luma, Mix,
-    Pixel, RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component, ComponentWise,
+    FloatComponent, IsWithinBounds, Luma, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -245,9 +245,9 @@ where
     }
 }
 
-impl<Wp, T> Clamp for Yxy<Wp, T>
+impl<Wp, T> IsWithinBounds for Yxy<Wp, T>
 where
-    T: FloatComponent,
+    T: Component,
 {
     #[rustfmt::skip]
     #[inline]
@@ -256,7 +256,12 @@ where
         self.y >= Self::min_y() && self.y <= Self::max_y() &&
         self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
+}
 
+impl<Wp, T> Clamp for Yxy<Wp, T>
+where
+    T: Component,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -264,6 +269,18 @@ where
             clamp(self.y, Self::min_y(), Self::max_y()),
             clamp(self.luma, Self::min_luma(), Self::max_luma()),
         )
+    }
+}
+
+impl<Wp, T> ClampAssign for Yxy<Wp, T>
+where
+    T: Component,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
+        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
+        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
     }
 }
 

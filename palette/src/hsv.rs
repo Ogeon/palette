@@ -16,8 +16,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Component, FloatComponent, FromColor, GetHue,
-    Hsl, Hue, Hwb, Mix, Pixel, RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
+    FloatComponent, FromColor, GetHue, Hsl, Hue, Hwb, IsWithinBounds, Mix, Pixel, RelativeContrast,
+    RgbHue, Saturate, Shade, Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -360,7 +361,7 @@ impl<S, T, A> From<Alpha<Hsv<S, T>, A>> for (RgbHue<T>, T, T, A) {
     }
 }
 
-impl<S, T> Clamp for Hsv<S, T>
+impl<S, T> IsWithinBounds for Hsv<S, T>
 where
     T: Component,
 {
@@ -370,7 +371,12 @@ where
         self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
         self.value >= Self::min_value() && self.value <= Self::max_value()
     }
+}
 
+impl<S, T> Clamp for Hsv<S, T>
+where
+    T: Component,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -382,6 +388,21 @@ where
             ),
             clamp(self.value, Self::min_value(), Self::max_value()),
         )
+    }
+}
+
+impl<S, T> ClampAssign for Hsv<S, T>
+where
+    T: Component,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(
+            &mut self.saturation,
+            Self::min_saturation(),
+            Self::max_saturation(),
+        );
+        clamp_assign(&mut self.value, Self::min_value(), Self::max_value());
     }
 }
 

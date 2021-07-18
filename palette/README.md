@@ -306,17 +306,8 @@ where
     }
 }
 
-// Add the required clamping and validation.
+// Add the required clamping.
 impl Clamp for Color {
-    fn is_within_bounds(&self) -> bool {
-        let zero_to_one = 0.0..=1.0;
-
-        zero_to_one.contains(&self.r)
-            && zero_to_one.contains(&self.g)
-            && zero_to_one.contains(&self.b)
-            && zero_to_one.contains(&self.a)
-    }
-
     fn clamp(self) -> Self {
         Color {
             r: self.r.min(1.0).max(0.0),

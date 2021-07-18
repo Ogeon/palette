@@ -24,8 +24,9 @@ use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::{
-    clamp, contrast_ratio, from_f64, Blend, Clamp, Component, ComponentWise, FloatComponent,
-    FromComponent, GetHue, Mix, Pixel, RelativeContrast, Shade,
+    clamp, clamp_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign, Component,
+    ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Mix, Pixel,
+    RelativeContrast, Shade,
 };
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
@@ -515,25 +516,42 @@ where
     }
 }
 
-impl<S, T> Clamp for Rgb<S, T>
+impl<S, T> IsWithinBounds for Rgb<S, T>
 where
     T: Component,
 {
     #[rustfmt::skip]
     #[inline]
     fn is_within_bounds(&self) -> bool {
-        self.red >= T::zero() && self.red <= T::max_intensity() &&
-        self.green >= T::zero() && self.green <= T::max_intensity() &&
-        self.blue >= T::zero() && self.blue <= T::max_intensity()
+        self.red >= Self::min_red() && self.red <= Self::max_red() &&
+        self.green >= Self::min_green() && self.green <= Self::max_green() &&
+        self.blue >= Self::min_blue() && self.blue <= Self::max_blue()
     }
+}
 
+impl<S, T> Clamp for Rgb<S, T>
+where
+    T: Component,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
-            clamp(self.red, T::zero(), T::max_intensity()),
-            clamp(self.green, T::zero(), T::max_intensity()),
-            clamp(self.blue, T::zero(), T::max_intensity()),
+            clamp(self.red, Self::min_red(), Self::max_red()),
+            clamp(self.green, Self::min_green(), Self::max_green()),
+            clamp(self.blue, Self::min_blue(), Self::max_blue()),
         )
+    }
+}
+
+impl<S, T> ClampAssign for Rgb<S, T>
+where
+    T: Component,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.red, Self::min_red(), Self::max_red());
+        clamp_assign(&mut self.green, Self::min_green(), Self::max_green());
+        clamp_assign(&mut self.blue, Self::min_blue(), Self::max_blue());
     }
 }
 

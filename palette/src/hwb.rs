@@ -15,8 +15,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
-    clamp, clamp_min, contrast_ratio, Alpha, Clamp, Component, FloatComponent, GetHue, Hsv, Hue,
-    Mix, Pixel, RelativeContrast, RgbHue, Shade, Xyz,
+    clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
+    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Mix, Pixel, RelativeContrast, RgbHue, Shade,
+    Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -285,9 +286,9 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
     }
 }
 
-impl<S, T> Clamp for Hwb<S, T>
+impl<S, T> IsWithinBounds for Hwb<S, T>
 where
-    T: Component + DivAssign,
+    T: Component,
 {
     #[rustfmt::skip]
     #[inline]
@@ -296,7 +297,12 @@ where
         self.whiteness >= Self::min_whiteness() && self.whiteness <= Self::max_blackness() &&
         self.whiteness + self.blackness <= T::max_intensity()
     }
+}
 
+impl<S, T> Clamp for Hwb<S, T>
+where
+    T: Component + DivAssign,
+{
     #[inline]
     fn clamp(self) -> Self {
         let mut whiteness = clamp_min(self.whiteness, Self::min_whiteness());
@@ -309,6 +315,23 @@ where
         }
 
         Self::new(self.hue, whiteness, blackness)
+    }
+}
+
+impl<S, T> ClampAssign for Hwb<S, T>
+where
+    T: Component + DivAssign,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+        clamp_min_assign(&mut self.blackness, Self::min_blackness());
+
+        let sum = self.blackness + self.whiteness;
+        if sum > T::max_intensity() {
+            self.whiteness /= sum;
+            self.blackness /= sum;
+        }
     }
 }
 
