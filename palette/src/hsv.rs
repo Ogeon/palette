@@ -459,22 +459,16 @@ impl<S, T> Hue for Hsv<S, T>
 where
     T: Zero + PartialOrd + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsv<S, T> {
-        Hsv {
-            hue: hue.into(),
-            saturation: self.saturation.clone(),
-            value: self.value.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsv<S, T> {
-        Hsv {
-            hue: self.hue.clone() + amount.into(),
-            saturation: self.saturation.clone(),
-            value: self.value.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 

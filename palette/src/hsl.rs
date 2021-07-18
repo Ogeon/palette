@@ -444,22 +444,16 @@ impl<S, T> Hue for Hsl<S, T>
 where
     T: Zero + PartialOrd + Add<Output = T> + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
-        Hsl {
-            hue: hue.into(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsl<S, T> {
-        Hsl {
-            hue: self.hue.clone() + amount.into(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 

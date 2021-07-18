@@ -636,11 +636,11 @@ pub trait GetHue {
 pub trait Hue: GetHue {
     /// Return a new copy of `self`, but with a specific hue.
     #[must_use]
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Self;
+    fn with_hue<H: Into<Self::Hue>>(self, hue: H) -> Self;
 
     /// Return a new copy of `self`, but with the hue shifted by `amount`.
     #[must_use]
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Self;
+    fn shift_hue<H: Into<Self::Hue>>(self, amount: H) -> Self;
 }
 
 /// A trait for colors where the saturation (or chroma) can be manipulated

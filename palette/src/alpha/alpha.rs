@@ -151,17 +151,17 @@ impl<C: GetHue, T> GetHue for Alpha<C, T> {
 }
 
 impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
-    fn with_hue<H: Into<C::Hue>>(&self, hue: H) -> Alpha<C, T> {
+    fn with_hue<H: Into<C::Hue>>(self, hue: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.with_hue(hue),
-            alpha: self.alpha.clone(),
+            alpha: self.alpha,
         }
     }
 
-    fn shift_hue<H: Into<C::Hue>>(&self, amount: H) -> Alpha<C, T> {
+    fn shift_hue<H: Into<C::Hue>>(self, amount: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.shift_hue(amount),
-            alpha: self.alpha.clone(),
+            alpha: self.alpha,
         }
     }
 }

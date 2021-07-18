@@ -358,20 +358,16 @@ impl<T> Hue for Oklch<T>
 where
     T: Zero + PartialOrd + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Oklch<T> {
-        Oklch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: hue.into(),
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Oklch<T> {
-        Oklch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone() + amount.into(),
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
