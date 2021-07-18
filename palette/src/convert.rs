@@ -331,6 +331,7 @@ pub trait IntoColor<T>: Sized {
     /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color();
     /// assert!(rgb.is_within_bounds());
     /// ```
+    #[must_use]
     fn into_color(self) -> T;
 }
 
@@ -349,6 +350,7 @@ pub trait IntoColorUnclamped<T>: Sized {
     ///let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color_unclamped();
     ///assert!(!rgb.is_within_bounds());
     ///```
+    #[must_use]
     fn into_color_unclamped(self) -> T;
 }
 
@@ -374,6 +376,7 @@ pub trait TryIntoColor<T>: Sized {
     ///     }
     /// };
     /// ```
+    #[must_use]
     fn try_into_color(self) -> Result<T, OutOfBounds<T>>;
 }
 
@@ -411,6 +414,7 @@ pub trait FromColor<T>: Sized {
     /// let rgb = Srgb::from_color(Lch::new(50.0, 100.0, -175.0));
     /// assert!(rgb.is_within_bounds());
     /// ```
+    #[must_use]
     fn from_color(t: T) -> Self;
 }
 
@@ -432,6 +436,7 @@ pub trait FromColorUnclamped<T>: Sized {
     /// let rgb = Srgb::from_color_unclamped(Lch::new(50.0, 100.0, -175.0));
     /// assert!(!rgb.is_within_bounds());
     /// ```
+    #[must_use]
     fn from_color_unclamped(val: T) -> Self;
 }
 
@@ -461,6 +466,7 @@ pub trait TryFromColor<T>: Sized {
     ///     }
     /// };
     /// ```
+    #[must_use]
     fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
@@ -472,7 +478,7 @@ where
     fn from_color(t: T) -> Self {
         let mut this = Self::from_color_unclamped(t);
         if !this.is_within_bounds() {
-            this.clamp_self();
+            this = this.clamp();
         }
         this
     }
@@ -557,11 +563,9 @@ mod tests {
             true
         }
 
-        fn clamp(&self) -> Self {
-            *self
+        fn clamp(self) -> Self {
+            self
         }
-
-        fn clamp_self(&mut self) {}
     }
 
     impl<S1, S2> FromColorUnclamped<WithXyz<S2>> for WithXyz<S1>
@@ -618,11 +622,9 @@ mod tests {
             true
         }
 
-        fn clamp(&self) -> Self {
-            *self
+        fn clamp(self) -> Self {
+            self
         }
-
-        fn clamp_self(&mut self) {}
     }
 
     impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for WithoutXyz<T> {
@@ -662,160 +664,160 @@ mod tests {
     #[test]
     fn from_with_xyz() {
         let color: WithXyz<crate::encoding::Srgb> = WithXyz(Default::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(color);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(color);
 
         let xyz: Xyz<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(xyz);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(xyz);
 
         let yxy: Yxy<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(yxy);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(yxy);
 
         let lab: Lab<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(lab);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(lab);
 
         let lch: Lch<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(lch);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
         let luv: Hsl<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(luv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(luv);
 
         let rgb: Rgb<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(rgb);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(hsl);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsl);
 
         let hsluv: Hsluv<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
 
         let hsv: Hsv<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(hsv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(hwb);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hwb);
 
         let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
-        WithXyz::<crate::encoding::Srgb>::from_color(luma);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(luma);
     }
 
     #[test]
     fn from_with_xyz_alpha() {
         let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
             Alpha::from(WithXyz(Default::default()));
-        WithXyz::<crate::encoding::Srgb>::from_color(color);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(color);
 
         let xyz: Alpha<Xyz<_, f64>, u8> = Alpha::from(Xyz::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(xyz);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(xyz);
 
         let yxy: Alpha<Yxy<_, f64>, u8> = Alpha::from(Yxy::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(yxy);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(yxy);
 
         let lab: Alpha<Lab<_, f64>, u8> = Alpha::from(Lab::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(lab);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(lab);
 
         let lch: Alpha<Lch<_, f64>, u8> = Alpha::from(Lch::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(lch);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(lch);
 
         let luv: Alpha<Luv<_, f64>, u8> = Alpha::from(Luv::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(luv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(luv);
 
         let rgb: Alpha<Rgb<_, f64>, u8> = Alpha::from(Rgb::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(rgb);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(rgb);
 
         let hsl: Alpha<Hsl<_, f64>, u8> = Alpha::from(Hsl::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(hsl);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsl);
 
         let hsluv: Alpha<Hsluv<_, f64>, u8> = Alpha::from(Hsluv::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsluv);
 
         let hsv: Alpha<Hsv<_, f64>, u8> = Alpha::from(Hsv::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(hsv);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hsv);
 
         let hwb: Alpha<Hwb<_, f64>, u8> = Alpha::from(Hwb::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(hwb);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(hwb);
 
         let luma: Alpha<Luma<crate::encoding::Srgb, f64>, u8> =
             Alpha::from(Luma::<crate::encoding::Srgb, f64>::default());
-        WithXyz::<crate::encoding::Srgb>::from_color(luma);
+        let _ = WithXyz::<crate::encoding::Srgb>::from_color(luma);
     }
 
     #[test]
     fn from_with_xyz_into_alpha() {
         let color: WithXyz<crate::encoding::Srgb> = WithXyz(Default::default());
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
 
         let xyz: Xyz<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
 
         let yxy: Yxy<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
 
         let lab: Lab<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
 
         let lch: Lch<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
         let luv: Hsl<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
 
         let rgb: Rgb<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
 
         let hsluv: Hsluv<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
 
         let hsv: Hsv<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
 
         let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
     }
 
     #[test]
     fn from_with_xyz_alpha_into_alpha() {
         let color: Alpha<WithXyz<crate::encoding::Srgb>, u8> =
             Alpha::from(WithXyz(Default::default()));
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(color);
 
         let xyz: Xyz<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(xyz);
 
         let yxy: Yxy<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(yxy);
 
         let lab: Lab<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lab);
 
         let lch: Lch<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(lch);
 
         let luv: Luv<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luv);
 
         let rgb: Rgb<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsl);
 
         let hsluv: Hsluv<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsluv);
 
         let hsv: Hsv<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(hwb);
 
         let luma: Luma<crate::encoding::Srgb, f64> = Default::default();
-        Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
+        let _ = Alpha::<WithXyz<crate::encoding::Srgb>, u8>::from_color(luma);
     }
 
     #[test]
@@ -895,40 +897,40 @@ mod tests {
     #[test]
     fn from_without_xyz() {
         let color: WithoutXyz<f64> = WithoutXyz(Default::default());
-        WithoutXyz::<f64>::from_color(color);
+        let _ = WithoutXyz::<f64>::from_color(color);
 
         let xyz: Xyz<crate::white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(xyz);
+        let _ = WithoutXyz::<f64>::from_color(xyz);
 
         let yxy: Yxy<crate::white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(yxy);
+        let _ = WithoutXyz::<f64>::from_color(yxy);
 
         let lab: Lab<crate::white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(lab);
+        let _ = WithoutXyz::<f64>::from_color(lab);
 
         let lch: Lch<crate::white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(lch);
+        let _ = WithoutXyz::<f64>::from_color(lch);
 
         let luv: Luv<crate::white_point::E, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(luv);
+        let _ = WithoutXyz::<f64>::from_color(luv);
 
         let rgb: Rgb<_, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(rgb);
+        let _ = WithoutXyz::<f64>::from_color(rgb);
 
         let hsl: Hsl<_, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(hsl);
+        let _ = WithoutXyz::<f64>::from_color(hsl);
 
         let hsluv: Hsluv<_, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(hsluv);
+        let _ = WithoutXyz::<f64>::from_color(hsluv);
 
         let hsv: Hsv<_, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(hsv);
+        let _ = WithoutXyz::<f64>::from_color(hsv);
 
         let hwb: Hwb<_, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(hwb);
+        let _ = WithoutXyz::<f64>::from_color(hwb);
 
         let luma: Luma<Linear<crate::white_point::E>, f64> = Default::default();
-        WithoutXyz::<f64>::from_color(luma);
+        let _ = WithoutXyz::<f64>::from_color(luma);
     }
 
     #[test]

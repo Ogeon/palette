@@ -268,8 +268,9 @@ impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
 
 impl<T> Clamp for Oklch<T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l()
             && self.l <= Self::max_l()
@@ -277,15 +278,13 @@ where
             && self.chroma <= Self::max_chroma()
     }
 
-    fn clamp(&self) -> Oklch<T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.chroma = clamp(self.chroma.clone(), Self::min_chroma(), Self::max_chroma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
+            self.hue,
+        )
     }
 }
 
@@ -295,7 +294,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Oklch<T>, factor: T) -> Oklch<T> {
+    #[inline]
+    fn mix(self, other: Oklch<T>, factor: T) -> Oklch<T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Oklch {
@@ -312,7 +312,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Oklch<T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Oklch<T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -328,7 +329,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Oklch<T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Oklch<T> {
         Oklch {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
@@ -356,20 +358,16 @@ impl<T> Hue for Oklch<T>
 where
     T: Zero + PartialOrd + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Oklch<T> {
-        Oklch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: hue.into(),
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Oklch<T> {
-        Oklch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone() + amount.into(),
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
@@ -379,7 +377,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Oklch<T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Oklch<T> {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -395,7 +394,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Oklch<T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Oklch<T> {
         Oklch {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
@@ -440,9 +440,10 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

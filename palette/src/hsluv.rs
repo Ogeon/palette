@@ -216,27 +216,26 @@ impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
 
 impl<Wp, T> Clamp for Hsluv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
         self.l >= Self::min_l() && self.l <= Self::max_l()
     }
 
-    fn clamp(&self) -> Hsluv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.saturation = clamp(
-            self.saturation.clone(),
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            self.hue,
+            clamp(
+                self.saturation,
+                Self::min_saturation(),
+                Self::max_saturation(),
+            ),
+            clamp(self.l, Self::min_l(), Self::max_l()),
+        )
     }
 }
 
@@ -246,7 +245,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Hsluv<Wp, T>, factor: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn mix(self, other: Hsluv<Wp, T>, factor: T) -> Hsluv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 
@@ -265,7 +265,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Hsluv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -282,7 +283,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Hsluv<Wp, T> {
         Hsluv {
             hue: self.hue,
             saturation: self.saturation,
@@ -311,22 +313,16 @@ impl<Wp, T> Hue for Hsluv<Wp, T>
 where
     T: Zero + PartialOrd + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsluv<Wp, T> {
-        Hsluv {
-            hue: hue.into(),
-            saturation: self.saturation.clone(),
-            l: self.l.clone(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsluv<Wp, T> {
-        Hsluv {
-            hue: self.hue.clone() + amount.into(),
-            saturation: self.saturation.clone(),
-            l: self.l.clone(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
@@ -336,7 +332,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Hsluv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_saturation() - self.saturation
         } else {
@@ -357,7 +354,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Hsluv<Wp, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Hsluv<Wp, T> {
         Hsluv {
             hue: self.hue,
             saturation: clamp(
@@ -408,11 +406,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

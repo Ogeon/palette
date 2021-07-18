@@ -90,7 +90,7 @@ where
 
         let factor = (i - min) / (max - min);
 
-        min_color.mix(max_color, factor)
+        min_color.clone().mix(max_color.clone(), factor)
     }
 
     /// Create a gradient of colors with custom spacing and domain. There must

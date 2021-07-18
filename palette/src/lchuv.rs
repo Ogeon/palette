@@ -222,8 +222,9 @@ impl<Wp, T, A> From<Alpha<Lchuv<Wp, T>, A>> for (T, T, LuvHue<T>, A) {
 
 impl<Wp, T> Clamp for Lchuv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l()
             && self.l <= Self::max_l()
@@ -231,15 +232,13 @@ where
             && self.chroma <= Self::max_chroma()
     }
 
-    fn clamp(&self) -> Lchuv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.chroma = clamp(self.chroma.clone(), Self::min_chroma(), Self::max_chroma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
+            self.hue,
+        )
     }
 }
 
@@ -249,7 +248,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Lchuv<Wp, T>, factor: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn mix(self, other: Lchuv<Wp, T>, factor: T) -> Lchuv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Lchuv {
@@ -267,7 +267,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Lchuv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -284,7 +285,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Lchuv<Wp, T> {
         Lchuv {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
@@ -313,22 +315,16 @@ impl<Wp, T> Hue for Lchuv<Wp, T>
 where
     T: Zero + PartialOrd + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: hue.into(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone() + amount.into(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
@@ -338,7 +334,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Lchuv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -355,7 +352,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Lchuv<Wp, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Lchuv<Wp, T> {
         Lchuv {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(T::zero()),
@@ -402,9 +400,10 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

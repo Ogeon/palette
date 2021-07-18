@@ -107,28 +107,34 @@ impl<C, T> DerefMut for Alpha<C, T> {
     }
 }
 
-impl<C: Mix> Mix for Alpha<C, C::Scalar> {
+impl<C> Mix for Alpha<C, C::Scalar>
+where
+    C: Mix,
+{
     type Scalar = C::Scalar;
 
-    fn mix(&self, other: &Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
-        Alpha {
-            color: self.color.mix(&other.color, factor),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
-        }
+    #[inline]
+    fn mix(mut self, other: Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+        self.color = self.color.mix(other.color, factor);
+        self.alpha = self.alpha + factor * (other.alpha - self.alpha);
+
+        self
     }
 }
 
 impl<C: Shade> Shade for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
-    fn lighten(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn lighten(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.lighten(factor),
             alpha: self.alpha,
         }
     }
 
-    fn lighten_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn lighten_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.lighten_fixed(amount),
             alpha: self.alpha,
@@ -145,17 +151,17 @@ impl<C: GetHue, T> GetHue for Alpha<C, T> {
 }
 
 impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
-    fn with_hue<H: Into<C::Hue>>(&self, hue: H) -> Alpha<C, T> {
+    fn with_hue<H: Into<C::Hue>>(self, hue: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.with_hue(hue),
-            alpha: self.alpha.clone(),
+            alpha: self.alpha,
         }
     }
 
-    fn shift_hue<H: Into<C::Hue>>(&self, amount: H) -> Alpha<C, T> {
+    fn shift_hue<H: Into<C::Hue>>(self, amount: H) -> Alpha<C, T> {
         Alpha {
             color: self.color.shift_hue(amount),
-            alpha: self.alpha.clone(),
+            alpha: self.alpha,
         }
     }
 }
@@ -163,14 +169,16 @@ impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
 impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
-    fn saturate(&self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn saturate(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.saturate(factor),
             alpha: self.alpha,
         }
     }
 
-    fn saturate_fixed(&self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    #[inline]
+    fn saturate_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
         Alpha {
             color: self.color.saturate_fixed(amount),
             alpha: self.alpha,
@@ -179,20 +187,17 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
 }
 
 impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.color.is_within_bounds() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Alpha<C, T> {
+    #[inline]
+    fn clamp(self) -> Self {
         Alpha {
             color: self.color.clamp(),
             alpha: clamp(self.alpha, T::zero(), T::max_intensity()),
         }
-    }
-
-    fn clamp_self(&mut self) {
-        self.color.clamp_self();
-        self.alpha = clamp(self.alpha, T::zero(), T::max_intensity());
     }
 }
 

@@ -9,14 +9,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::color_difference::get_ciede_difference;
 use crate::color_difference::ColorDifference;
-use crate::color_difference::{get_ciede_difference, LabColorDiff};
-use crate::convert::FromColorUnclamped;
+use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, Float, FloatComponent, FromColor, FromF64,
-    GetHue, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_min, contrast_ratio, from_f64, Alpha, Clamp, Float, FloatComponent, FromColor,
+    FromF64, GetHue, Hue, Lab, LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -213,23 +213,20 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
 
 impl<Wp, T> Clamp for Lch<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l() && self.l <= Self::max_l() && self.chroma >= Self::min_chroma()
     }
 
-    fn clamp(&self) -> Lch<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        if self.chroma < Self::min_chroma() {
-            self.chroma = Self::min_chroma()
-        }
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp_min(self.chroma, Self::min_chroma()),
+            self.hue,
+        )
     }
 }
 
@@ -239,7 +236,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Lch<Wp, T>, factor: T) -> Lch<Wp, T> {
+    #[inline]
+    fn mix(self, other: Lch<Wp, T>, factor: T) -> Lch<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
         Lch {
@@ -257,7 +255,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Lch<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Lch<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -274,7 +273,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Lch<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Lch<Wp, T> {
         Lch {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
@@ -303,68 +303,30 @@ impl<Wp, T> Hue for Lch<Wp, T>
 where
     T: Float + FromF64 + PartialOrd,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Lch<Wp, T> {
-        Lch {
-            l: self.l,
-            chroma: self.chroma,
-            hue: hue.into(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Lch<Wp, T> {
-        Lch {
-            l: self.l,
-            chroma: self.chroma,
-            hue: self.hue + amount.into(),
-            white_point: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
 /// CIEDE2000 distance metric for color difference.
 impl<Wp, T> ColorDifference for Lch<Wp, T>
 where
-    T: FloatComponent,
+    Self: IntoColorUnclamped<Lab<Wp, T>>,
+    T: Float + FromF64,
 {
     type Scalar = T;
 
-    fn get_color_difference(&self, other: &Lch<Wp, T>) -> Self::Scalar {
-        // Prepare a* and b* from Lch components to calculate color difference
-        let self_a = clamp(
-            self.chroma.max(T::zero()) * self.hue.to_radians().cos(),
-            Lab::<Wp, T>::min_a(),
-            Lab::<Wp, T>::max_a(),
-        );
-        let self_b = clamp(
-            self.chroma.max(T::zero()) * self.hue.to_radians().sin(),
-            Lab::<Wp, T>::min_b(),
-            Lab::<Wp, T>::max_b(),
-        );
-        let other_a = clamp(
-            other.chroma.max(T::zero()) * other.hue.to_radians().cos(),
-            Lab::<Wp, T>::min_a(),
-            Lab::<Wp, T>::max_a(),
-        );
-        let other_b = clamp(
-            other.chroma.max(T::zero()) * other.hue.to_radians().sin(),
-            Lab::<Wp, T>::min_b(),
-            Lab::<Wp, T>::max_b(),
-        );
-        let self_params = LabColorDiff {
-            l: self.l,
-            a: self_a,
-            b: self_b,
-            chroma: self.chroma,
-        };
-        let other_params = LabColorDiff {
-            l: other.l,
-            a: other_a,
-            b: other_b,
-            chroma: other.chroma,
-        };
-
-        get_ciede_difference(&self_params, &other_params)
+    #[inline]
+    fn get_color_difference(self, other: Lch<Wp, T>) -> Self::Scalar {
+        get_ciede_difference(self.into(), other.into())
     }
 }
 
@@ -374,7 +336,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Lch<Wp, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Lch<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -391,7 +354,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Lch<Wp, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Lch<Wp, T> {
         Lch {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
@@ -438,9 +402,10 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

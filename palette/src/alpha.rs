@@ -96,6 +96,7 @@ pub trait WithAlpha<A>: Sized {
     /// let transparent = transparent.with_alpha(0.8f32);
     /// assert_eq!(transparent.alpha, 0.8);
     /// ```
+    #[must_use]
     fn with_alpha(self, alpha: A) -> Self::WithAlpha;
 
     /// Removes the transparency from the color. If `Self::Color` has
@@ -111,6 +112,7 @@ pub trait WithAlpha<A>: Sized {
     /// let color = transparent.without_alpha();
     /// assert_eq!(transparent.color, color);
     /// ```
+    #[must_use]
     fn without_alpha(self) -> Self::Color;
 
     /// Splits the color into separate color and transparency values.
@@ -130,6 +132,7 @@ pub trait WithAlpha<A>: Sized {
     /// assert_eq!(transparent.color, color);
     /// assert_eq!(transparent.alpha, alpha);
     /// ```
+    #[must_use]
     fn split(self) -> (Self::Color, A);
 
     /// Transforms the color into a fully opaque color with a transparency
@@ -143,6 +146,8 @@ pub trait WithAlpha<A>: Sized {
     /// let opaque: Srgba<u8> = color.opaque();
     /// assert_eq!(opaque.alpha, 255);
     /// ```
+    #[must_use]
+    #[inline]
     fn opaque(self) -> Self::WithAlpha
     where
         A: Component,
@@ -161,6 +166,8 @@ pub trait WithAlpha<A>: Sized {
     /// let transparent: Srgba<u8> = color.transparent();
     /// assert_eq!(transparent.alpha, 0);
     /// ```
+    #[must_use]
+    #[inline]
     fn transparent(self) -> Self::WithAlpha
     where
         A: Zero,

@@ -289,25 +289,23 @@ impl<T, A: Component> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
 
 impl<T> Clamp for Oklab<T>
 where
-    T: FromF64 + PartialOrd + Clone,
+    T: FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l() && self.l <= Self::max_l() &&
         self.a >= Self::min_a() && self.a <= Self::max_a() &&
         self.b >= Self::min_b() && self.b <= Self::max_b()
     }
 
-    fn clamp(&self) -> Self {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.a = clamp(self.a.clone(), Self::min_a(), Self::max_a());
-        self.b = clamp(self.b.clone(), Self::min_b(), Self::max_b());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.a, Self::min_a(), Self::max_a()),
+            clamp(self.b, Self::min_b(), Self::max_b()),
+        )
     }
 }
 
@@ -317,14 +315,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Self, factor: T) -> Self {
+    #[inline]
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Self::new(
-            self.l + factor * (other.l - self.l),
-            self.a + factor * (other.a - self.a),
-            self.b + factor * (other.b - self.b),
-        )
+        self + (other - self) * factor
     }
 }
 
@@ -334,7 +328,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Self {
+    #[inline]
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -346,7 +341,8 @@ where
         Self::new((self.l + delta).max(Self::min_l()), self.a, self.b)
     }
 
-    fn lighten_fixed(&self, amount: T) -> Self {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Self {
         Self::new((self.l + amount).max(Self::min_l()), self.a, self.b)
     }
 }
@@ -419,11 +415,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

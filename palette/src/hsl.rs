@@ -354,20 +354,19 @@ where
     T: Component,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.saturation >= T::zero() && self.saturation <= T::max_intensity() &&
         self.lightness >= T::zero() && self.lightness <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Hsl<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.saturation = clamp(self.saturation, T::zero(), T::max_intensity());
-        self.lightness = clamp(self.lightness, T::zero(), T::max_intensity());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            self.hue,
+            clamp(self.saturation, T::zero(), T::max_intensity()),
+            clamp(self.lightness, T::zero(), T::max_intensity()),
+        )
     }
 }
 
@@ -377,7 +376,8 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Hsl<S, T>, factor: T) -> Hsl<S, T> {
+    #[inline]
+    fn mix(self, other: Hsl<S, T>, factor: T) -> Hsl<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
         let hue_diff: T = (other.hue - self.hue).to_degrees();
 
@@ -396,7 +396,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Hsl<S, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Hsl<S, T> {
         let difference = if factor >= T::zero() {
             T::max_intensity() - self.lightness
         } else {
@@ -413,7 +414,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Hsl<S, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Hsl<S, T> {
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
@@ -442,22 +444,16 @@ impl<S, T> Hue for Hsl<S, T>
 where
     T: Zero + PartialOrd + Add<Output = T> + Clone,
 {
-    fn with_hue<H: Into<Self::Hue>>(&self, hue: H) -> Hsl<S, T> {
-        Hsl {
-            hue: hue.into(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+        self.hue = hue.into();
+        self
     }
 
-    fn shift_hue<H: Into<Self::Hue>>(&self, amount: H) -> Hsl<S, T> {
-        Hsl {
-            hue: self.hue.clone() + amount.into(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
+    #[inline]
+    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
+        self.hue = self.hue + amount.into();
+        self
     }
 }
 
@@ -467,7 +463,8 @@ where
 {
     type Scalar = T;
 
-    fn saturate(&self, factor: T) -> Hsl<S, T> {
+    #[inline]
+    fn saturate(self, factor: T) -> Hsl<S, T> {
         let difference = if factor >= T::zero() {
             T::max_intensity() - self.saturation
         } else {
@@ -484,7 +481,8 @@ where
         }
     }
 
-    fn saturate_fixed(&self, amount: T) -> Hsl<S, T> {
+    #[inline]
+    fn saturate_fixed(self, amount: T) -> Hsl<S, T> {
         Hsl {
             hue: self.hue,
             saturation: (self.saturation + T::max_intensity() * amount).max(T::zero()),
@@ -592,11 +590,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

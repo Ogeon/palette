@@ -1,17 +1,17 @@
-use crate::component::FloatComponent;
-use crate::from_f64;
+use crate::{convert::IntoColorUnclamped, float::Float, from_f64, FromF64, Lab, Lch};
 
 /// A trait for calculating the color difference between two colors.
 pub trait ColorDifference {
-    /// The type of the calculated color difference
-    type Scalar: FloatComponent;
+    /// The type of the calculated color difference.
+    type Scalar;
 
-    /// Return the difference or distance between two colors
-    fn get_color_difference(&self, other: &Self) -> Self::Scalar;
+    /// Return the difference or distance between two colors.
+    #[must_use]
+    fn get_color_difference(self, other: Self) -> Self::Scalar;
 }
 
 /// Container of components necessary to calculate CIEDE color difference
-pub struct LabColorDiff<T: FloatComponent> {
+pub struct LabColorDiff<T> {
     /// Lab color lightness
     pub l: T,
     /// Lab color a* value
@@ -22,12 +22,44 @@ pub struct LabColorDiff<T: FloatComponent> {
     pub chroma: T,
 }
 
+impl<Wp, T> From<Lab<Wp, T>> for LabColorDiff<T>
+where
+    T: Float,
+{
+    #[inline]
+    fn from(color: Lab<Wp, T>) -> Self {
+        // Color difference calculation requires Lab and chroma components. This
+        // function handles the conversion into those components which are then
+        // passed to `get_ciede_difference()` where calculation is completed.
+        LabColorDiff {
+            l: color.l,
+            a: color.a,
+            b: color.b,
+            chroma: (color.a * color.a + color.b * color.b).sqrt(),
+        }
+    }
+}
+
+impl<Wp, T> From<Lch<Wp, T>> for LabColorDiff<T>
+where
+    T: Clone,
+    Lch<Wp, T>: IntoColorUnclamped<Lab<Wp, T>>,
+{
+    #[inline]
+    fn from(color: Lch<Wp, T>) -> Self {
+        let chroma = color.chroma.clone();
+        let Lab { l, a, b, .. } = color.into_color_unclamped();
+
+        LabColorDiff { l, a, b, chroma }
+    }
+}
+
 /// Calculate the CIEDE2000 color difference for two colors in Lab color space.
 /// There is a "just noticeable difference" between two colors when the delta E
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
 #[rustfmt::skip]
-pub fn get_ciede_difference<T: FloatComponent>(this: &LabColorDiff<T>, other: &LabColorDiff<T>) -> T {
+pub fn get_ciede_difference<T: Float + FromF64>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T {
     let c_bar = (this.chroma + other.chroma) / from_f64(2.0);
     let c_bar_pow_seven = c_bar * c_bar * c_bar * c_bar * c_bar * c_bar * c_bar;
     let twenty_five_pow_seven = from_f64(6103515625.0);

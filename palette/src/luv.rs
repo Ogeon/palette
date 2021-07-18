@@ -240,25 +240,23 @@ impl<Wp, T, A> From<Alpha<Luv<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Luv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
-	self.l >= Self::min_l() && self.l <= Self::max_l() &&
-	self.u >= Self::min_u() && self.u <= Self::max_u() &&
-	self.v >= Self::min_v() && self.v <= Self::max_v()
+        self.l >= Self::min_l() && self.l <= Self::max_l() &&
+        self.u >= Self::min_u() && self.u <= Self::max_u() &&
+        self.v >= Self::min_v() && self.v <= Self::max_v()
     }
 
-    fn clamp(&self) -> Luv<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.u = clamp(self.u.clone(), Self::min_u(), Self::max_u());
-        self.v = clamp(self.v.clone(), Self::min_v(), Self::max_v());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.u, Self::min_u(), Self::max_u()),
+            clamp(self.v, Self::min_v(), Self::max_v()),
+        )
     }
 }
 
@@ -268,15 +266,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Luv<Wp, T>, factor: T) -> Luv<Wp, T> {
+    #[inline]
+    fn mix(self, other: Luv<Wp, T>, factor: T) -> Luv<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Luv {
-            l: self.l + factor * (other.l - self.l),
-            u: self.u + factor * (other.u - self.u),
-            v: self.v + factor * (other.v - self.v),
-            white_point: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 
@@ -286,7 +279,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Luv<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Luv<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -303,7 +297,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Luv<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Luv<Wp, T> {
         Luv {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             u: self.u,
@@ -392,11 +387,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

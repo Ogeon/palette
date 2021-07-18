@@ -9,14 +9,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
+use crate::color_difference::get_ciede_difference;
 use crate::color_difference::ColorDifference;
-use crate::color_difference::{get_ciede_difference, LabColorDiff};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, ComponentWise, FloatComponent, FromF64, GetHue,
-    LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ComponentWise, FloatComponent,
+    FromF64, GetHue, LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -238,25 +238,23 @@ impl<Wp, T, A> From<Alpha<Lab<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> Clamp for Lab<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd + Clone,
+    T: Zero + FromF64 + PartialOrd,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.l >= Self::min_l() && self.l <= Self::max_l() &&
         self.a >= Self::min_a() && self.a <= Self::max_a() &&
         self.b >= Self::min_b() && self.b <= Self::max_b()
     }
 
-    fn clamp(&self) -> Lab<Wp, T> {
-        let mut c = self.clone();
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.l = clamp(self.l.clone(), Self::min_l(), Self::max_l());
-        self.a = clamp(self.a.clone(), Self::min_a(), Self::max_a());
-        self.b = clamp(self.b.clone(), Self::min_b(), Self::max_b());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.l, Self::min_l(), Self::max_l()),
+            clamp(self.a, Self::min_a(), Self::max_a()),
+            clamp(self.b, Self::min_b(), Self::max_b()),
+        )
     }
 }
 
@@ -266,15 +264,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Lab<Wp, T>, factor: T) -> Lab<Wp, T> {
+    #[inline]
+    fn mix(self, other: Lab<Wp, T>, factor: T) -> Lab<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Lab {
-            l: self.l + factor * (other.l - self.l),
-            a: self.a + factor * (other.a - self.a),
-            b: self.b + factor * (other.b - self.b),
-            white_point: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 
@@ -284,7 +277,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Lab<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Lab<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -301,7 +295,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Lab<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Lab<Wp, T> {
         Lab {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             a: self.a,
@@ -328,28 +323,13 @@ where
 
 impl<Wp, T> ColorDifference for Lab<Wp, T>
 where
-    T: FloatComponent,
+    T: Float + FromF64,
 {
     type Scalar = T;
 
-    fn get_color_difference(&self, other: &Lab<Wp, T>) -> Self::Scalar {
-        // Color difference calculation requires Lab and chroma components. This
-        // function handles the conversion into those components which are then
-        // passed to `get_ciede_difference()` where calculation is completed.
-        let self_params = LabColorDiff {
-            l: self.l,
-            a: self.a,
-            b: self.b,
-            chroma: (self.a * self.a + self.b * self.b).sqrt(),
-        };
-        let other_params = LabColorDiff {
-            l: other.l,
-            a: other.a,
-            b: other.b,
-            chroma: (other.a * other.a + other.b * other.b).sqrt(),
-        };
-
-        get_ciede_difference(&self_params, &other_params)
+    #[inline]
+    fn get_color_difference(self, other: Lab<Wp, T>) -> Self::Scalar {
+        get_ciede_difference(self.into(), other.into())
     }
 }
 
@@ -417,11 +397,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

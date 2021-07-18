@@ -250,22 +250,20 @@ where
     T: FloatComponent,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.x >= Self::min_x() && self.x <= Self::max_x() &&
         self.y >= Self::min_y() && self.y <= Self::max_y() &&
         self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
 
-    fn clamp(&self) -> Yxy<Wp, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.x = clamp(self.x, Self::min_x(), Self::max_x());
-        self.y = clamp(self.y, Self::min_y(), Self::max_y());
-        self.luma = clamp(self.luma, Self::min_luma(), Self::max_luma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.x, Self::min_x(), Self::max_x()),
+            clamp(self.y, Self::min_y(), Self::max_y()),
+            clamp(self.luma, Self::min_luma(), Self::max_luma()),
+        )
     }
 }
 
@@ -275,15 +273,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Yxy<Wp, T>, factor: T) -> Yxy<Wp, T> {
+    #[inline]
+    fn mix(self, other: Yxy<Wp, T>, factor: T) -> Yxy<Wp, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Yxy {
-            x: self.x + factor * (other.x - self.x),
-            y: self.y + factor * (other.y - self.y),
-            luma: self.luma + factor * (other.luma - self.luma),
-            white_point: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 
@@ -293,7 +286,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Yxy<Wp, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Yxy<Wp, T> {
         let difference = if factor >= T::zero() {
             Self::max_luma() - self.luma
         } else {
@@ -310,7 +304,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Yxy<Wp, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Yxy<Wp, T> {
         Yxy {
             x: self.x,
             y: self.y,
@@ -391,7 +386,8 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         contrast_ratio(self.luma, other.luma)
     }
 }

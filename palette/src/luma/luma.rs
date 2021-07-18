@@ -334,18 +334,14 @@ impl<S, T> Clamp for Luma<S, T>
 where
     T: Component,
 {
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
     }
 
-    fn clamp(&self) -> Luma<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.luma = clamp(self.luma, Self::min_luma(), Self::max_luma());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(clamp(self.luma, Self::min_luma(), Self::max_luma()))
     }
 }
 
@@ -356,13 +352,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Luma<S, T>, factor: T) -> Luma<S, T> {
+    #[inline]
+    fn mix(self, other: Luma<S, T>, factor: T) -> Luma<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Luma {
-            luma: self.luma + factor * (other.luma - self.luma),
-            standard: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 
@@ -373,7 +366,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Luma<S, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Luma<S, T> {
         let difference = if factor >= T::zero() {
             T::max_intensity() - self.luma
         } else {
@@ -388,7 +382,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Luma<S, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Luma<S, T> {
         Luma {
             luma: (self.luma + T::max_intensity() * amount).max(T::zero()),
             standard: PhantomData,
@@ -760,7 +755,8 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         let luma1 = self.into_linear();
         let luma2 = other.into_linear();
 

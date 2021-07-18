@@ -23,23 +23,35 @@ impl<T: FromF64> Primaries<T> for Srgb {
     }
 }
 
-impl<T: FromF64> RgbSpace<T> for Srgb {
+impl<T> RgbSpace<T> for Srgb
+where
+    T: FromF64,
+{
     type Primaries = Srgb;
     type WhitePoint = D65;
 }
 
-impl<T: FromF64> RgbStandard<T> for Srgb {
+impl<T> RgbStandard<T> for Srgb
+where
+    T: FromF64 + Float,
+{
     type Space = Srgb;
     type TransferFn = Srgb;
 }
 
-impl<T: FromF64> LumaStandard<T> for Srgb {
+impl<T> LumaStandard<T> for Srgb
+where
+    T: FromF64 + Float,
+{
     type WhitePoint = D65;
     type TransferFn = Srgb;
 }
 
-impl TransferFn for Srgb {
-    fn into_linear<T: Float + FromF64>(x: T) -> T {
+impl<T> TransferFn<T> for Srgb
+where
+    T: Float + FromF64,
+{
+    fn into_linear(x: T) -> T {
         // Recip call shows performance benefits in benchmarks for this function
         if x <= from_f64(0.04045) {
             x * from_f64::<T>(12.92).recip()
@@ -48,7 +60,7 @@ impl TransferFn for Srgb {
         }
     }
 
-    fn from_linear<T: Float + FromF64>(x: T) -> T {
+    fn from_linear(x: T) -> T {
         if x <= from_f64(0.0031308) {
             x * from_f64(12.92)
         } else {

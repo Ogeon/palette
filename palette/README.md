@@ -135,19 +135,19 @@ Palette comes with a number of color operations built in, such as saturate/desat
 ```rust
 use palette::{Hue, Shade, Mix, Hsl, Hsv};
 
-fn transform_color<C>(color: &C, amount: f32) -> C
+fn transform_color<C>(color: C, amount: f32) -> C
 where
-    C: Hue + Shade<Scalar=f32> + Mix<Scalar=f32> + Clone,
+    C: Hue + Shade<Scalar=f32> + Mix<Scalar=f32> + Copy,
     f32: Into<C::Hue>,
 {
     let new_color = color.shift_hue(170.0).lighten(1.0);
 
     // Interpolate between the old and new color.
-    color.mix(&new_color, amount)
+    color.mix(new_color, amount)
 }
 
-let new_hsl = transform_color(&Hsl::new_srgb(0.00, 0.70, 0.20), 0.8);
-let new_hsv = transform_color(&Hsv::new_srgb(0.00, 0.82, 0.34), 0.8);
+let new_hsl = transform_color(Hsl::new_srgb(0.00, 0.70, 0.20), 0.8);
+let new_hsv = transform_color(Hsv::new_srgb(0.00, 0.82, 0.34), 0.8);
 ```
 
 This image shows the transition from the color to `new_color` in HSL and HSV:
@@ -317,17 +317,13 @@ impl Clamp for Color {
             && zero_to_one.contains(&self.a)
     }
 
-    fn clamp(&self) -> Self {
+    fn clamp(self) -> Self {
         Color {
             r: self.r.min(1.0).max(0.0),
             g: self.g.min(1.0).max(0.0),
             b: self.b.min(1.0).max(0.0),
             a: self.a.min(1.0).max(0.0),
         }
-    }
-
-    fn clamp_self(&mut self) {
-        *self = self.clamp();
     }
 }
 

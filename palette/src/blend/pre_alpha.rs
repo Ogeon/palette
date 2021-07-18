@@ -62,6 +62,7 @@ where
     C: ComponentWise<Scalar = T>,
     T: Float,
 {
+    #[inline]
     fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
@@ -77,6 +78,7 @@ where
     C: ComponentWise<Scalar = T>,
     T: Float,
 {
+    #[inline]
     fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
@@ -108,14 +110,18 @@ where
     }
 }
 
-impl<C: Mix> Mix for PreAlpha<C, C::Scalar> {
+impl<C> Mix for PreAlpha<C, C::Scalar>
+where
+    C: Mix,
+{
     type Scalar = C::Scalar;
 
-    fn mix(&self, other: &PreAlpha<C, C::Scalar>, factor: C::Scalar) -> PreAlpha<C, C::Scalar> {
-        PreAlpha {
-            color: self.color.mix(&other.color, factor),
-            alpha: self.alpha + factor * (other.alpha - self.alpha),
-        }
+    #[inline]
+    fn mix(mut self, other: PreAlpha<C, C::Scalar>, factor: C::Scalar) -> PreAlpha<C, C::Scalar> {
+        self.color = self.color.mix(other.color, factor);
+        self.alpha = self.alpha + factor * (other.alpha - self.alpha);
+
+        self
     }
 }
 

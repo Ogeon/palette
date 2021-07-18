@@ -520,22 +520,20 @@ where
     T: Component,
 {
     #[rustfmt::skip]
+    #[inline]
     fn is_within_bounds(&self) -> bool {
         self.red >= T::zero() && self.red <= T::max_intensity() &&
         self.green >= T::zero() && self.green <= T::max_intensity() &&
         self.blue >= T::zero() && self.blue <= T::max_intensity()
     }
 
-    fn clamp(&self) -> Rgb<S, T> {
-        let mut c = *self;
-        c.clamp_self();
-        c
-    }
-
-    fn clamp_self(&mut self) {
-        self.red = clamp(self.red, T::zero(), T::max_intensity());
-        self.green = clamp(self.green, T::zero(), T::max_intensity());
-        self.blue = clamp(self.blue, T::zero(), T::max_intensity());
+    #[inline]
+    fn clamp(self) -> Self {
+        Self::new(
+            clamp(self.red, T::zero(), T::max_intensity()),
+            clamp(self.green, T::zero(), T::max_intensity()),
+            clamp(self.blue, T::zero(), T::max_intensity()),
+        )
     }
 }
 
@@ -546,15 +544,10 @@ where
 {
     type Scalar = T;
 
-    fn mix(&self, other: &Rgb<S, T>, factor: T) -> Rgb<S, T> {
+    #[inline]
+    fn mix(self, other: Rgb<S, T>, factor: T) -> Rgb<S, T> {
         let factor = clamp(factor, T::zero(), T::one());
-
-        Rgb {
-            red: self.red + factor * (other.red - self.red),
-            green: self.green + factor * (other.green - self.green),
-            blue: self.blue + factor * (other.blue - self.blue),
-            standard: PhantomData,
-        }
+        self + (other - self) * factor
     }
 }
 
@@ -565,7 +558,8 @@ where
 {
     type Scalar = T;
 
-    fn lighten(&self, factor: T) -> Rgb<S, T> {
+    #[inline]
+    fn lighten(self, factor: T) -> Rgb<S, T> {
         let difference_red = if factor >= T::zero() {
             T::max_intensity() - self.red
         } else {
@@ -595,7 +589,8 @@ where
         }
     }
 
-    fn lighten_fixed(&self, amount: T) -> Rgb<S, T> {
+    #[inline]
+    fn lighten_fixed(self, amount: T) -> Rgb<S, T> {
         Rgb {
             red: (self.red + T::max_intensity() * amount).max(T::zero()),
             green: (self.green + T::max_intensity() * amount).max(T::zero()),
@@ -1144,11 +1139,12 @@ where
 {
     type Scalar = T;
 
-    fn get_contrast_ratio(&self, other: &Self) -> T {
+    #[inline]
+    fn get_contrast_ratio(self, other: Self) -> T {
         use crate::FromColor;
 
-        let xyz1 = Xyz::from_color(*self);
-        let xyz2 = Xyz::from_color(*other);
+        let xyz1 = Xyz::from_color(self);
+        let xyz2 = Xyz::from_color(other);
 
         contrast_ratio(xyz1.y, xyz2.y)
     }

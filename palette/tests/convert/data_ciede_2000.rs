@@ -71,12 +71,12 @@ pub fn run_tests() {
     let data = load_data();
 
     for expected in data.iter() {
-        let result_lab = expected.c1.get_color_difference(&expected.c2);
+        let result_lab = expected.c1.get_color_difference(expected.c2);
         check_equal_lab(result_lab, expected.delta_e);
 
         let lch1: Lch<_, f64> = Lch::from_color_unclamped(expected.c1);
         let lch2: Lch<_, f64> = Lch::from_color_unclamped(expected.c2);
-        let result_lch = lch1.get_color_difference(&lch2);
+        let result_lch = lch1.get_color_difference(lch2);
         check_equal_lch(result_lch, expected.delta_e);
     }
 }
