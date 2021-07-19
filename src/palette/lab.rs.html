@@ -583,6 +583,23 @@
 <span id="580">580</span>
 <span id="581">581</span>
 <span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -595,14 +612,14 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">rand::Rng</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::color_difference::get_ciede_difference</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::color_difference::ColorDifference</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::color_difference</span>::{<span class="ident">get_ciede_difference</span>, <span class="ident">ColorDifference</span>};
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::convert::FromColorUnclamped</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::pixel::RawPixel</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">contrast_ratio</span>, <span class="ident">float::Float</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>,
-    <span class="ident">FromF64</span>, <span class="ident">GetHue</span>, <span class="ident">LabHue</span>, <span class="ident">Lch</span>, <span class="ident">Mix</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>,
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">float::Float</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>,
+    <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromF64</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">LabHue</span>, <span class="ident">Lch</span>, <span class="ident">Mix</span>, <span class="ident">Pixel</span>,
+    <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="doccomment">/// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`</span>
@@ -822,7 +839,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
@@ -833,7 +850,12 @@
         <span class="self">self</span>.<span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_a</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">a</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_a</span>() <span class="op">&amp;&amp;</span>
         <span class="self">self</span>.<span class="ident">b</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_b</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_b</span>()
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+{
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span><span class="ident">::new</span>(
@@ -841,6 +863,18 @@
             <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">a</span>, <span class="self">Self</span><span class="ident">::min_a</span>(), <span class="self">Self</span><span class="ident">::max_a</span>()),
             <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">b</span>, <span class="self">Self</span><span class="ident">::min_b</span>(), <span class="self">Self</span><span class="ident">::max_b</span>()),
         )
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+{
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>(), <span class="self">Self</span><span class="ident">::max_l</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">a</span>, <span class="self">Self</span><span class="ident">::min_a</span>(), <span class="self">Self</span><span class="ident">::max_a</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">b</span>, <span class="self">Self</span><span class="ident">::min_b</span>(), <span class="self">Self</span><span class="ident">::max_b</span>());
     }
 }
 
