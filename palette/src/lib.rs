@@ -272,7 +272,7 @@ macro_rules! assert_ranges {
     ) => (
         {
             use core::iter::repeat;
-            use crate::Clamp;
+            use crate::{Clamp, IsWithinBounds};
 
             {
                 print!("checking below clamp bounds... ");
@@ -469,6 +469,15 @@ fn clamp<T: PartialOrd>(value: T, min: T, max: T) -> T {
 }
 
 #[inline]
+fn clamp_assign<T: PartialOrd>(value: &mut T, min: T, max: T) {
+    if *value < min {
+        *value = min;
+    } else if *value > max {
+        *value = max;
+    }
+}
+
+#[inline]
 fn clamp_min<T: PartialOrd>(value: T, min: T) -> T {
     if value < min {
         min
@@ -477,17 +486,142 @@ fn clamp_min<T: PartialOrd>(value: T, min: T) -> T {
     }
 }
 
-/// A trait for clamping and checking if colors are within their ranges.
-pub trait Clamp {
-    /// Check if the color's components are within the expected clamped range
-    /// bounds.
-    #[must_use]
-    fn is_within_bounds(&self) -> bool;
+#[inline]
+fn clamp_min_assign<T: PartialOrd>(value: &mut T, min: T) {
+    if *value < min {
+        *value = min;
+    }
+}
 
-    /// Return a new color where the components have been clamped to the nearest
-    /// valid values.
+/// Checks if color components are within their expected range bounds.
+///
+/// A color with out-of-bounds components may be clamped with [`Clamp`] or
+/// [`ClampAssign`].
+///
+/// ```
+/// use palette::{Srgb, IsWithinBounds};
+/// let a = Srgb::new(0.4, 0.3, 0.8);
+/// let b = Srgb::new(1.2, 0.3, 0.8);
+/// let c = Srgb::new(-0.6, 0.3, 0.8);
+///
+/// assert!(a.is_within_bounds());
+/// assert!(!b.is_within_bounds());
+/// assert!(!c.is_within_bounds());
+/// ```
+///
+/// `IsWithinBounds` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Srgb, IsWithinBounds};
+///
+/// let my_vec = vec![Srgb::new(0.4, 0.3, 0.8), Srgb::new(0.8, 0.5, 0.1)];
+/// let my_array = [Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];
+/// let my_slice = &[Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];
+///
+/// assert!(my_vec.is_within_bounds());
+/// assert!(!my_array.is_within_bounds());
+/// assert!(!my_slice.is_within_bounds());
+/// ```
+pub trait IsWithinBounds {
+    /// Check if the color's components are within the expected range bounds.
+    ///
+    /// ```
+    /// use palette::{Srgb, IsWithinBounds};
+    /// assert!(Srgb::new(0.8, 0.5, 0.2).is_within_bounds());
+    /// assert!(!Srgb::new(1.3, 0.5, -3.0).is_within_bounds());
+    /// ```
+    fn is_within_bounds(&self) -> bool;
+}
+
+impl<T> IsWithinBounds for [T]
+where
+    T: IsWithinBounds,
+{
+    #[inline]
+    fn is_within_bounds(&self) -> bool {
+        self.iter().all(T::is_within_bounds)
+    }
+}
+
+/// An operator for restricting a color's components to their expected ranges.
+///
+/// [`IsWithinBounds`] can be used to check if the components are within their
+/// range bounds. See also [`ClampAssign`] for a self-modifying version of
+/// `Clamp`.
+///
+/// ```
+/// use palette::{Srgb, IsWithinBounds, Clamp};
+///
+/// let unclamped = Srgb::new(1.3, 0.5, -3.0);
+/// assert!(!unclamped.is_within_bounds());
+///
+/// let clamped = unclamped.clamp();
+/// assert!(clamped.is_within_bounds());
+/// assert_eq!(clamped, Srgb::new(1.0, 0.5, 0.0));
+/// ```
+pub trait Clamp {
+    /// Return a new color where out-of-bounds components have been changed to
+    /// the nearest valid values.
+    ///
+    /// ```
+    /// use palette::{Srgb, Clamp};
+    /// assert_eq!(Srgb::new(1.3, 0.5, -3.0).clamp(), Srgb::new(1.0, 0.5, 0.0));
+    /// ```
     #[must_use]
     fn clamp(self) -> Self;
+}
+
+/// An assigning operator for restricting a color's components to their expected
+/// ranges.
+///
+/// [`IsWithinBounds`] can be used to check if the components are within their
+/// range bounds. See also [`Clamp`] for a moving version of `ClampAssign`.
+///
+/// ```
+/// use palette::{Srgb, IsWithinBounds, ClampAssign};
+///
+/// let mut color = Srgb::new(1.3, 0.5, -3.0);
+/// assert!(!color.is_within_bounds());
+///
+/// color.clamp_assign();
+/// assert!(color.is_within_bounds());
+/// assert_eq!(color, Srgb::new(1.0, 0.5, 0.0));
+/// ```
+///
+/// `ClampAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Srgb, ClampAssign};
+///
+/// let mut my_vec = vec![Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];
+/// let mut my_array = [Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];
+/// let mut my_slice = &mut [Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];
+///
+/// my_vec.clamp_assign();
+/// my_array.clamp_assign();
+/// my_slice.clamp_assign();
+/// ```
+pub trait ClampAssign {
+    /// Changes out-of-bounds components to the nearest valid values.
+    ///
+    /// ```
+    /// use palette::{Srgb, ClampAssign};
+    ///
+    /// let mut color = Srgb::new(1.3, 0.5, -3.0);
+    /// color.clamp_assign();
+    /// assert_eq!(color, Srgb::new(1.0, 0.5, 0.0));
+    /// ```
+    fn clamp_assign(&mut self);
+}
+
+impl<T> ClampAssign for [T]
+where
+    T: ClampAssign,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        self.iter_mut().for_each(T::clamp_assign);
+    }
 }
 
 /// A trait for linear color interpolation.

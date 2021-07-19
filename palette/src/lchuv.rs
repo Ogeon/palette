@@ -14,8 +14,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::luv_bounds::LuvBounds;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, FloatComponent, FromColor, FromF64, GetHue,
-    Hsluv, Hue, Luv, LuvHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, FloatComponent,
+    FromColor, FromF64, GetHue, Hsluv, Hue, IsWithinBounds, Luv, LuvHue, Mix, Pixel,
+    RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -220,7 +221,7 @@ impl<Wp, T, A> From<Alpha<Lchuv<Wp, T>, A>> for (T, T, LuvHue<T>, A) {
     }
 }
 
-impl<Wp, T> Clamp for Lchuv<Wp, T>
+impl<Wp, T> IsWithinBounds for Lchuv<Wp, T>
 where
     T: Zero + FromF64 + PartialOrd,
 {
@@ -231,7 +232,12 @@ where
             && self.chroma >= Self::min_chroma()
             && self.chroma <= Self::max_chroma()
     }
+}
 
+impl<Wp, T> Clamp for Lchuv<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -239,6 +245,17 @@ where
             clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
             self.hue,
         )
+    }
+}
+
+impl<Wp, T> ClampAssign for Lchuv<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
+        clamp_assign(&mut self.chroma, Self::min_chroma(), Self::max_chroma());
     }
 }
 

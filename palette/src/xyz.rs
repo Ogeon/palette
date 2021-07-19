@@ -16,8 +16,9 @@ use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, from_f64, oklab, Alpha, Clamp, ComponentWise, FloatComponent, Lab, Luma,
-    Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast, Shade, Yxy,
+    clamp, clamp_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp, ClampAssign, ComponentWise,
+    FloatComponent, IsWithinBounds, Lab, Luma, Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast,
+    Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -346,7 +347,7 @@ impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<Wp, T> Clamp for Xyz<Wp, T>
+impl<Wp, T> IsWithinBounds for Xyz<Wp, T>
 where
     T: Zero + PartialOrd,
     Wp: WhitePoint<T>,
@@ -358,7 +359,13 @@ where
         self.y >= Self::min_y() && self.y <= Self::max_y() &&
         self.z >= Self::min_z() && self.z <= Self::max_z()
     }
+}
 
+impl<Wp, T> Clamp for Xyz<Wp, T>
+where
+    T: Zero + PartialOrd,
+    Wp: WhitePoint<T>,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -366,6 +373,19 @@ where
             clamp(self.y, Self::min_y(), Self::max_y()),
             clamp(self.z, Self::min_z(), Self::max_z()),
         )
+    }
+}
+
+impl<Wp, T> ClampAssign for Xyz<Wp, T>
+where
+    T: Zero + PartialOrd,
+    Wp: WhitePoint<T>,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
+        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
+        clamp_assign(&mut self.z, Self::min_z(), Self::max_z());
     }
 }
 

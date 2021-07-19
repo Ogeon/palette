@@ -14,8 +14,8 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
-    clamp, Blend, Clamp, Component, ComponentWise, GetHue, Hue, Mix, Pixel, Saturate, Shade,
-    WithAlpha,
+    clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue, Hue,
+    IsWithinBounds, Mix, Pixel, Saturate, Shade, WithAlpha,
 };
 
 /// An alpha component wrapper for colors.
@@ -186,18 +186,30 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     }
 }
 
-impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
+impl<C: IsWithinBounds, T: Component> IsWithinBounds for Alpha<C, T> {
     #[inline]
     fn is_within_bounds(&self) -> bool {
-        self.color.is_within_bounds() && self.alpha >= T::zero() && self.alpha <= T::max_intensity()
+        self.color.is_within_bounds()
+            && self.alpha >= Self::min_alpha()
+            && self.alpha <= Self::max_alpha()
     }
+}
 
+impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
     #[inline]
     fn clamp(self) -> Self {
         Alpha {
             color: self.color.clamp(),
-            alpha: clamp(self.alpha, T::zero(), T::max_intensity()),
+            alpha: clamp(self.alpha, Self::min_alpha(), Self::max_alpha()),
         }
+    }
+}
+
+impl<C: ClampAssign, T: Component> ClampAssign for Alpha<C, T> {
+    #[inline]
+    fn clamp_assign(&mut self) {
+        self.color.clamp_assign();
+        clamp_assign(&mut self.alpha, Self::min_alpha(), Self::max_alpha());
     }
 }
 

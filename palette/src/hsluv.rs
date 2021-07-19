@@ -20,6 +20,7 @@ use crate::{
     Alpha, Clamp, FloatComponent, FromF64, GetHue, Hue, Lchuv, LuvHue, Mix, Pixel,
     RelativeContrast, Saturate, Shade, Xyz,
 };
+use crate::{clamp_assign, ClampAssign, IsWithinBounds};
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
@@ -214,7 +215,7 @@ impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
     }
 }
 
-impl<Wp, T> Clamp for Hsluv<Wp, T>
+impl<Wp, T> IsWithinBounds for Hsluv<Wp, T>
 where
     T: Zero + FromF64 + PartialOrd,
 {
@@ -224,7 +225,12 @@ where
         self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
         self.l >= Self::min_l() && self.l <= Self::max_l()
     }
+}
 
+impl<Wp, T> Clamp for Hsluv<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -236,6 +242,21 @@ where
             ),
             clamp(self.l, Self::min_l(), Self::max_l()),
         )
+    }
+}
+
+impl<Wp, T> ClampAssign for Hsluv<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(
+            &mut self.saturation,
+            Self::min_saturation(),
+            Self::max_saturation(),
+        );
+        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
     }
 }
 

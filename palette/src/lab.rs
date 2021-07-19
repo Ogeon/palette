@@ -9,14 +9,14 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::color_difference::get_ciede_difference;
-use crate::color_difference::ColorDifference;
+use crate::color_difference::{get_ciede_difference, ColorDifference};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ComponentWise, FloatComponent,
-    FromF64, GetHue, LabHue, Lch, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ClampAssign,
+    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, LabHue, Lch, Mix, Pixel,
+    RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -236,7 +236,7 @@ impl<Wp, T, A> From<Alpha<Lab<Wp, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<Wp, T> Clamp for Lab<Wp, T>
+impl<Wp, T> IsWithinBounds for Lab<Wp, T>
 where
     T: Zero + FromF64 + PartialOrd,
 {
@@ -247,7 +247,12 @@ where
         self.a >= Self::min_a() && self.a <= Self::max_a() &&
         self.b >= Self::min_b() && self.b <= Self::max_b()
     }
+}
 
+impl<Wp, T> Clamp for Lab<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -255,6 +260,18 @@ where
             clamp(self.a, Self::min_a(), Self::max_a()),
             clamp(self.b, Self::min_b(), Self::max_b()),
         )
+    }
+}
+
+impl<Wp, T> ClampAssign for Lab<Wp, T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
+        clamp_assign(&mut self.a, Self::min_a(), Self::max_a());
+        clamp_assign(&mut self.b, Self::min_b(), Self::max_b());
     }
 }
 

@@ -13,8 +13,9 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
-    clamp, contrast_ratio, from_f64, Alpha, Clamp, FloatComponent, FromColor, FromF64, GetHue, Hue,
-    Mix, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, FloatComponent,
+    FromColor, FromF64, GetHue, Hue, IsWithinBounds, Mix, Oklab, OklabHue, Pixel, RelativeContrast,
+    Saturate, Shade, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -266,7 +267,7 @@ impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
     }
 }
 
-impl<T> Clamp for Oklch<T>
+impl<T> IsWithinBounds for Oklch<T>
 where
     T: Zero + FromF64 + PartialOrd,
 {
@@ -277,7 +278,12 @@ where
             && self.chroma >= Self::min_chroma()
             && self.chroma <= Self::max_chroma()
     }
+}
 
+impl<T> Clamp for Oklch<T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
@@ -285,6 +291,17 @@ where
             clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
             self.hue,
         )
+    }
+}
+
+impl<T> ClampAssign for Oklch<T>
+where
+    T: Zero + FromF64 + PartialOrd,
+{
+    #[inline]
+    fn clamp_assign(&mut self) {
+        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
+        clamp_assign(&mut self.chroma, Self::min_chroma(), Self::max_chroma());
     }
 }
 
