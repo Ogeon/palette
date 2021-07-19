@@ -16,7 +16,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
     clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue, Hue,
-    IsWithinBounds, Mix, MixAssign, Pixel, Saturate, Shade, WithAlpha,
+    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, WithAlpha,
 };
 
 /// An alpha component wrapper for colors.
@@ -142,11 +142,11 @@ where
     }
 }
 
-impl<C: Shade> Shade for Alpha<C, C::Scalar> {
+impl<C: Lighten> Lighten for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
     #[inline]
-    fn lighten(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    fn lighten(self, factor: C::Scalar) -> Self {
         Alpha {
             color: self.color.lighten(factor),
             alpha: self.alpha,
@@ -154,11 +154,25 @@ impl<C: Shade> Shade for Alpha<C, C::Scalar> {
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    fn lighten_fixed(self, amount: C::Scalar) -> Self {
         Alpha {
             color: self.color.lighten_fixed(amount),
             alpha: self.alpha,
         }
+    }
+}
+
+impl<C: LightenAssign> LightenAssign for Alpha<C, C::Scalar> {
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: C::Scalar) {
+        self.color.lighten_assign(factor);
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: C::Scalar) {
+        self.color.lighten_fixed_assign(amount);
     }
 }
 

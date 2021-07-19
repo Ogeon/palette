@@ -1,4 +1,4 @@
-use palette::{FromColor, Hsv, IntoColor, Lab, LinSrgb, Pixel, Shade, Srgb};
+use palette::{Darken, FromColor, Hsv, IntoColor, Lab, Lighten, LinSrgb, Pixel, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage};
 

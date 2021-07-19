@@ -133,11 +133,11 @@ This makes it possible to use Palette with any other crate that can convert thei
 Palette comes with a number of color operations built in, such as saturate/desaturate, hue shift, etc., in the form of operator traits. That means it's possible to write generic functions that perform these operation on any color space that supports them. The output will vary depending on the color space's characteristics.
 
 ```rust
-use palette::{Hue, Shade, Mix, Hsl, Hsv};
+use palette::{Hue, Lighten, Mix, Hsl, Hsv};
 
 fn transform_color<C>(color: C, amount: f32) -> C
 where
-    C: Hue + Shade<Scalar=f32> + Mix<Scalar=f32> + Copy,
+    C: Hue + Lighten<Scalar=f32> + Mix<Scalar=f32> + Copy,
     f32: Into<C::Hue>,
 {
     let new_color = color.shift_hue(170.0).lighten(1.0);

@@ -13,9 +13,9 @@ use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, ComponentWise,
-    FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, LuvHue, Mix, MixAssign, Pixel,
-    RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
+    LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -304,14 +304,14 @@ where
     }
 }
 
-impl<Wp, T> Shade for Luv<Wp, T>
+impl<Wp, T> Lighten for Luv<Wp, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Luv<Wp, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -329,13 +329,38 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Luv<Wp, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Luv {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             u: self.u,
             v: self.v,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> LightenAssign for Luv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

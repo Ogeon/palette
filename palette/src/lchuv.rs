@@ -14,9 +14,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::luv_bounds::LuvBounds;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, FloatComponent,
-    FromColor, FromF64, GetHue, Hsluv, Hue, IsWithinBounds, Luv, LuvHue, Mix, MixAssign, Pixel,
-    RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    FloatComponent, FromColor, FromF64, GetHue, Hsluv, Hue, IsWithinBounds, Lighten, LightenAssign,
+    Luv, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -296,14 +296,14 @@ where
     }
 }
 
-impl<Wp, T> Shade for Lchuv<Wp, T>
+impl<Wp, T> Lighten for Lchuv<Wp, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Lchuv<Wp, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -321,13 +321,38 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Lchuv<Wp, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Lchuv {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> LightenAssign for Lchuv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

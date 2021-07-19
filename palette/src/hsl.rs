@@ -16,9 +16,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Mix, MixAssign, Pixel, RelativeContrast,
-    RgbHue, Saturate, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    Component, FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, Pixel, RelativeContrast, RgbHue, Saturate, Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -424,7 +424,7 @@ where
     }
 }
 
-impl<S, T> Shade for Hsl<S, T>
+impl<S, T> Lighten for Hsl<S, T>
 where
     T: FloatComponent,
 {
@@ -433,7 +433,7 @@ where
     #[inline]
     fn lighten(self, factor: T) -> Hsl<S, T> {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.lightness
+            Self::max_lightness() - self.lightness
         } else {
             self.lightness
         };
@@ -443,7 +443,7 @@ where
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
-            lightness: (self.lightness + delta).max(T::zero()),
+            lightness: (self.lightness + delta).max(Self::min_lightness()),
             standard: PhantomData,
         }
     }
@@ -453,9 +453,34 @@ where
         Hsl {
             hue: self.hue,
             saturation: self.saturation,
-            lightness: (self.lightness + T::max_intensity() * amount).max(T::zero()),
+            lightness: (self.lightness + Self::max_lightness() * amount).max(Self::min_lightness()),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> LightenAssign for Hsl<S, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_lightness() - self.lightness
+        } else {
+            self.lightness
+        };
+
+        self.lightness += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.lightness, Self::min_lightness());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.lightness += Self::max_lightness() * amount;
+        clamp_min_assign(&mut self.lightness, Self::min_lightness());
     }
 }
 

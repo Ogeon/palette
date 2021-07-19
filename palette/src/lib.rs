@@ -223,6 +223,8 @@ extern crate serde;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
+use core::ops::Neg;
+
 use float::Float;
 
 use luma::Luma;
@@ -681,38 +683,33 @@ pub trait MixAssign {
     fn mix_assign(&mut self, other: Self, factor: Self::Scalar);
 }
 
-/// The `Shade` trait allows a color to be lightened or darkened.
+/// Operators for lightening a color.
 ///
 /// The trait's functions are split into two groups of functions: relative and
 /// fixed/absolute.
 ///
-/// The relative functions, [`lighten`](Shade::lighten) and
-/// [`darken`](Shade::darken), scale the lightness towards the maximum lightness
-/// value and minimum lightness value, respectively. This means that for a color
-/// with 50% lightness, if `lighten(0.5)` is applied to it, the color will scale
-/// halfway to the maximum value of 100% resulting in a new lightness value of
-/// 75%. `darken(0.5)` applied to the original color will result in a new color
-/// with lightness of 25% since the lightness moves halfway toward the minimum
-/// value of 0%.
+/// The relative function, [`lighten`](Lighten::lighten), scales the lightness
+/// towards the maximum lightness value. This means that for a color with 50%
+/// lightness, if `lighten(0.5)` is applied to it, the color will scale halfway
+/// to the maximum value of 100% resulting in a new lightness value of 75%.
 ///
-/// The fixed or absolute functions, [`lighten_fixed`](Shade::lighten_fixed) and
-/// [`darken_fixed`](Shade::darken_fixed), increase or descrease the lightness
-/// value by an amount that is independent of the current lightness of the
-/// color. So for a color with 50% lightness, if `lighten_fixed(0.5)` is
-/// applied to it, the color will have 50% lightness added to its lightness
-/// value resulting in a new value of 100%. `darken_fixed(0.5)` will result in a
-/// new color with lightness of 0% since 50% lightness is subtracted from the
-/// original value of 50%.
-pub trait Shade: Sized {
-    /// The type of the lighten/darken modifier.
-    type Scalar: Float;
+/// The fixed or absolute function, [`lighten_fixed`](Lighten::lighten_fixed),
+/// increase the lightness value by an amount that is independent of the current
+/// lightness of the color. So for a color with 50% lightness, if
+/// `lighten_fixed(0.5)` is applied to it, the color will have 50% lightness
+/// added to its lightness value resulting in a new value of 100%.
+///
+/// See also [`LightenAssign`], [`Darken`] and [`DarkenAssign`].
+pub trait Lighten {
+    /// The type of the lighten modifier.
+    type Scalar;
 
     /// Scale the color towards the maximum lightness by `factor`, a value
     /// ranging from `0.0` to `1.0`.
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsl, Shade};
+    /// use palette::{Hsl, Lighten};
     ///
     /// let color = Hsl::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.lighten(0.5).lightness, 0.75);
@@ -724,43 +721,215 @@ pub trait Shade: Sized {
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsl, Shade};
+    /// use palette::{Hsl, Lighten};
     ///
     /// let color = Hsl::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.lighten_fixed(0.2).lightness, 0.6);
     /// ```
     #[must_use]
     fn lighten_fixed(self, amount: Self::Scalar) -> Self;
+}
+
+/// Assigning operators for lightening a color.
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function, [`lighten_assign`](LightenAssign::lighten_assign),
+/// scales the lightness towards the maximum lightness value. This means that
+/// for a color with 50% lightness, if `lighten_assign(0.5)` is applied to it,
+/// the color will scale halfway to the maximum value of 100% resulting in a new
+/// lightness value of 75%.
+///
+/// The fixed or absolute function,
+/// [`lighten_fixed_assign`](LightenAssign::lighten_fixed_assign), increase the
+/// lightness value by an amount that is independent of the current lightness of
+/// the color. So for a color with 50% lightness, if `lighten_fixed_assign(0.5)`
+/// is applied to it, the color will have 50% lightness added to its lightness
+/// value resulting in a new value of 100%.
+///
+/// See also [`Lighten`], [`Darken`] and [`DarkenAssign`].
+pub trait LightenAssign {
+    /// The type of the lighten modifier.
+    type Scalar;
+
+    /// Scale the color towards the maximum lightness by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, LightenAssign};
+    ///
+    /// let mut color = Hsl::new_srgb(0.0, 1.0, 0.5);
+    /// color.lighten_assign(0.5);
+    /// assert_relative_eq!(color.lightness, 0.75);
+    /// ```
+    fn lighten_assign(&mut self, factor: Self::Scalar);
+
+    /// Lighten the color by `amount`, a value ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsl, LightenAssign};
+    ///
+    /// let mut color = Hsl::new_srgb(0.0, 1.0, 0.4);
+    /// color.lighten_fixed_assign(0.2);
+    /// assert_relative_eq!(color.lightness, 0.6);
+    /// ```
+    fn lighten_fixed_assign(&mut self, amount: Self::Scalar);
+}
+
+impl<T> LightenAssign for [T]
+where
+    T: LightenAssign,
+    T::Scalar: Clone,
+{
+    type Scalar = T::Scalar;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: Self::Scalar) {
+        for color in self {
+            color.lighten_assign(factor.clone());
+        }
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: Self::Scalar) {
+        for color in self {
+            color.lighten_fixed_assign(amount.clone());
+        }
+    }
+}
+
+/// Operators for darkening a color;
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function, [`darken`](Darken::darken), scales the lightness
+/// towards the minimum lightness value. This means that for a color with 50%
+/// lightness, if `darken(0.5)` is applied to it, the color will scale halfway
+/// to the minimum value of 0% resulting in a new lightness value of 25%.
+///
+/// The fixed or absolute function, [`darken_fixed`](Darken::darken_fixed),
+/// decreases the lightness value by an amount that is independent of the
+/// current lightness of the color. So for a color with 50% lightness, if
+/// `darken_fixed(0.5)` is applied to it, the color will have 50% lightness
+/// removed from its lightness value resulting in a new value of 0%.
+///
+/// See also [`DarkenAssign`], [`Lighten`] and [`LightenAssign`].
+pub trait Darken {
+    /// The type of the darken modifier.
+    type Scalar;
 
     /// Scale the color towards the minimum lightness by `factor`, a value
     /// ranging from `0.0` to `1.0`.
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsv, Shade};
+    /// use palette::{Hsv, Darken};
     ///
     /// let color = Hsv::new_srgb(0.0, 1.0, 0.5);
     /// assert_relative_eq!(color.darken(0.5).value, 0.25);
     /// ```
     #[must_use]
-    #[inline]
-    fn darken(self, factor: Self::Scalar) -> Self {
-        self.lighten(-factor)
-    }
+    fn darken(self, factor: Self::Scalar) -> Self;
 
     /// Darken the color by `amount`, a value ranging from `0.0` to `1.0`.
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsv, Shade};
+    /// use palette::{Hsv, Darken};
     ///
     /// let color = Hsv::new_srgb(0.0, 1.0, 0.4);
     /// assert_relative_eq!(color.darken_fixed(0.2).value, 0.2);
     /// ```
     #[must_use]
+    fn darken_fixed(self, amount: Self::Scalar) -> Self;
+}
+
+impl<T> Darken for T
+where
+    T: Lighten,
+    T::Scalar: Neg<Output = T::Scalar>,
+{
+    type Scalar = T::Scalar;
+
+    #[inline]
+    fn darken(self, factor: Self::Scalar) -> Self {
+        self.lighten(-factor)
+    }
+
     #[inline]
     fn darken_fixed(self, amount: Self::Scalar) -> Self {
         self.lighten_fixed(-amount)
+    }
+}
+
+/// Assigning operators for darkening a color;
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function, [`darken_assign`](DarkenAssign::darken_assign),
+/// scales the lightness towards the minimum lightness value. This means that
+/// for a color with 50% lightness, if `darken_assign(0.5)` is applied to it,
+/// the color will scale halfway to the minimum value of 0% resulting in a new
+/// lightness value of 25%.
+///
+/// The fixed or absolute function,
+/// [`darken_fixed_assign`](DarkenAssign::darken_fixed_assign), decreases the
+/// lightness value by an amount that is independent of the current lightness of
+/// the color. So for a color with 50% lightness, if `darken_fixed_assign(0.5)`
+/// is applied to it, the color will have 50% lightness removed from its
+/// lightness value resulting in a new value of 0%.
+///
+/// See also [`Darken`], [`Lighten`] and [`LightenAssign`].
+pub trait DarkenAssign {
+    /// The type of the darken modifier.
+    type Scalar;
+
+    /// Scale the color towards the minimum lightness by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, DarkenAssign};
+    ///
+    /// let mut color = Hsv::new_srgb(0.0, 1.0, 0.5);
+    /// color.darken_assign(0.5);
+    /// assert_relative_eq!(color.value, 0.25);
+    /// ```
+    fn darken_assign(&mut self, factor: Self::Scalar);
+
+    /// Darken the color by `amount`, a value ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, DarkenAssign};
+    ///
+    /// let mut color = Hsv::new_srgb(0.0, 1.0, 0.4);
+    /// color.darken_fixed_assign(0.2);
+    /// assert_relative_eq!(color.value, 0.2);
+    /// ```
+    fn darken_fixed_assign(&mut self, amount: Self::Scalar);
+}
+
+impl<T> DarkenAssign for T
+where
+    T: LightenAssign,
+    T::Scalar: Neg<Output = T::Scalar>,
+{
+    type Scalar = T::Scalar;
+
+    #[inline]
+    fn darken_assign(&mut self, factor: Self::Scalar) {
+        self.lighten_assign(-factor);
+    }
+
+    #[inline]
+    fn darken_fixed_assign(&mut self, amount: Self::Scalar) {
+        self.lighten_fixed_assign(-amount);
     }
 }
 

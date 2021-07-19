@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Mix, MixAssign, Pixel, RelativeContrast,
-    RgbHue, Shade, Xyz,
+    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    Pixel, RelativeContrast, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -372,16 +372,16 @@ where
     }
 }
 
-impl<S, T> Shade for Hwb<S, T>
+impl<S, T> Lighten for Hwb<S, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Hwb<S, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference_whiteness = if factor >= T::zero() {
-            T::max_intensity() - self.whiteness
+            Self::max_whiteness() - self.whiteness
         } else {
             self.whiteness
         };
@@ -390,26 +390,61 @@ where
         let difference_blackness = if factor >= T::zero() {
             self.blackness
         } else {
-            T::max_intensity() - self.blackness
+            Self::max_blackness() - self.blackness
         };
         let delta_blackness = difference_blackness.max(T::zero()) * factor;
 
         Hwb {
             hue: self.hue,
-            whiteness: (self.whiteness + delta_whiteness).max(T::zero()),
-            blackness: (self.blackness - delta_blackness).max(T::zero()),
+            whiteness: (self.whiteness + delta_whiteness).max(Self::min_whiteness()),
+            blackness: (self.blackness - delta_blackness).max(Self::min_blackness()),
             standard: PhantomData,
         }
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Hwb<S, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Hwb {
             hue: self.hue,
-            whiteness: (self.whiteness + T::max_intensity() * amount).max(T::zero()),
-            blackness: (self.blackness - T::max_intensity() * amount).max(T::zero()),
+            whiteness: (self.whiteness + Self::max_whiteness() * amount).max(Self::min_whiteness()),
+            blackness: (self.blackness - Self::max_blackness() * amount).max(Self::min_blackness()),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> LightenAssign for Hwb<S, T>
+where
+    T: FloatComponent + AddAssign + SubAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference_whiteness = if factor >= T::zero() {
+            Self::max_whiteness() - self.whiteness
+        } else {
+            self.whiteness
+        };
+        self.whiteness += difference_whiteness.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+
+        let difference_blackness = if factor >= T::zero() {
+            self.blackness
+        } else {
+            Self::max_blackness() - self.blackness
+        };
+        self.blackness -= difference_blackness.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.blackness, Self::min_blackness());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.whiteness += Self::max_whiteness() * amount;
+        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+
+        self.blackness -= Self::max_blackness() * amount;
+        clamp_min_assign(&mut self.blackness, Self::min_blackness());
     }
 }
 

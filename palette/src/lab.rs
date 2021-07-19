@@ -9,15 +9,17 @@ use rand::distributions::{Distribution, Standard};
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::color_difference::{get_ciede_difference, ColorDifference};
-use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
-use crate::white_point::{WhitePoint, D65};
-use crate::MixAssign;
 use crate::{
-    clamp, clamp_assign, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ClampAssign,
-    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, LabHue, Lch, Mix, Pixel,
-    RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign,
+    color_difference::{get_ciede_difference, ColorDifference},
+    contrast_ratio,
+    convert::FromColorUnclamped,
+    encoding::pixel::RawPixel,
+    float::Float,
+    from_f64,
+    white_point::{WhitePoint, D65},
+    Alpha, Clamp, ClampAssign, ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds,
+    LabHue, Lch, Lighten, LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -302,14 +304,14 @@ where
     }
 }
 
-impl<Wp, T> Shade for Lab<Wp, T>
+impl<Wp, T> Lighten for Lab<Wp, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Lab<Wp, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -327,13 +329,38 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Lab<Wp, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Lab {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             a: self.a,
             b: self.b,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> LightenAssign for Lab<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

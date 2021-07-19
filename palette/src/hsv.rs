@@ -16,9 +16,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, FromColor, GetHue, Hsl, Hue, Hwb, IsWithinBounds, Mix, MixAssign, Pixel,
-    RelativeContrast, RgbHue, Saturate, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    Component, FloatComponent, FromColor, GetHue, Hsl, Hue, Hwb, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, RgbHue, Saturate, Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -443,14 +443,14 @@ where
     }
 }
 
-impl<S, T> Shade for Hsv<S, T>
+impl<S, T> Lighten for Hsv<S, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Hsv<S, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_value() - self.value
         } else {
@@ -468,13 +468,38 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Hsv<S, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Hsv {
             hue: self.hue,
             saturation: self.saturation,
             value: (self.value + Self::max_value() * amount).max(Self::min_value()),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> LightenAssign for Hsv<S, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_value() - self.value
+        } else {
+            self.value
+        };
+
+        self.value += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.value, Self::min_value());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.value += Self::max_value() * amount;
+        clamp_min_assign(&mut self.value, Self::min_value());
     }
 }
 

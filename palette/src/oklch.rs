@@ -13,9 +13,9 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, FloatComponent,
-    FromColor, FromF64, GetHue, Hue, IsWithinBounds, Mix, MixAssign, Oklab, OklabHue, Pixel,
-    RelativeContrast, Saturate, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    FloatComponent, FromColor, FromF64, GetHue, Hue, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -341,14 +341,14 @@ where
     }
 }
 
-impl<T> Shade for Oklch<T>
+impl<T> Lighten for Oklch<T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Oklch<T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -365,12 +365,37 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Oklch<T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Oklch {
             l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             chroma: self.chroma,
             hue: self.hue,
         }
+    }
+}
+
+impl<T> LightenAssign for Oklch<T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

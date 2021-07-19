@@ -14,9 +14,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Mat3, Mix, MixAssign, OklabHue,
-    Oklch, Pixel, RelativeContrast, Shade, Xyz,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
+    Component, ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lighten,
+    LightenAssign, Mat3, Mix, MixAssign, OklabHue, Oklch, Pixel, RelativeContrast, Xyz,
 };
 
 #[rustfmt::skip]
@@ -353,7 +353,7 @@ where
     }
 }
 
-impl<T> Shade for Oklab<T>
+impl<T> Lighten for Oklab<T>
 where
     T: FloatComponent,
 {
@@ -374,7 +374,36 @@ where
 
     #[inline]
     fn lighten_fixed(self, amount: T) -> Self {
-        Self::new((self.l + amount).max(Self::min_l()), self.a, self.b)
+        Self::new(
+            (self.l + Self::max_l() * amount).max(Self::min_l()),
+            self.a,
+            self.b,
+        )
+    }
+}
+
+impl<T> LightenAssign for Oklab<T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

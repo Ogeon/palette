@@ -1,4 +1,4 @@
-use palette::{Hue, IntoColor, Lch, LinSrgb, Pixel, Shade, Srgb};
+use palette::{Darken, Hue, IntoColor, Lch, Lighten, LinSrgb, Pixel, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage, SubImage};
 
@@ -159,7 +159,10 @@ fn main() {
     let _ = std::fs::create_dir("example-data/output");
     match image.save("example-data/output/color_scheme.png") {
         Ok(()) => println!("see 'example-data/output/color_scheme.png' for the result"),
-        Err(e) => println!("failed to write 'example-data/output/color_scheme.png': {}", e),
+        Err(e) => println!(
+            "failed to write 'example-data/output/color_scheme.png': {}",
+            e
+        ),
     }
 }
 

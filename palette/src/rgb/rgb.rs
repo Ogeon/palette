@@ -24,9 +24,9 @@ use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Mix, MixAssign, Pixel,
-    RelativeContrast, Shade,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign,
+    Component, ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, Pixel, RelativeContrast,
 };
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
@@ -583,7 +583,7 @@ where
     }
 }
 
-impl<S, T> Shade for Rgb<S, T>
+impl<S, T> Lighten for Rgb<S, T>
 where
     S: RgbStandard<T, TransferFn = LinearFn>,
     T: FloatComponent,
@@ -591,44 +591,89 @@ where
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Rgb<S, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference_red = if factor >= T::zero() {
-            T::max_intensity() - self.red
+            Self::max_red() - self.red
         } else {
             self.red
         };
         let delta_red = difference_red.max(T::zero()) * factor;
 
         let difference_green = if factor >= T::zero() {
-            T::max_intensity() - self.green
+            Self::max_green() - self.green
         } else {
             self.green
         };
         let delta_green = difference_green.max(T::zero()) * factor;
 
         let difference_blue = if factor >= T::zero() {
-            T::max_intensity() - self.blue
+            Self::max_blue() - self.blue
         } else {
             self.blue
         };
         let delta_blue = difference_blue.max(T::zero()) * factor;
 
         Rgb {
-            red: (self.red + delta_red).max(T::zero()),
-            green: (self.green + delta_green).max(T::zero()),
-            blue: (self.blue + delta_blue).max(T::zero()),
+            red: (self.red + delta_red).max(Self::min_red()),
+            green: (self.green + delta_green).max(Self::min_green()),
+            blue: (self.blue + delta_blue).max(Self::min_blue()),
             standard: PhantomData,
         }
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Rgb<S, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Rgb {
-            red: (self.red + T::max_intensity() * amount).max(T::zero()),
-            green: (self.green + T::max_intensity() * amount).max(T::zero()),
-            blue: (self.blue + T::max_intensity() * amount).max(T::zero()),
+            red: (self.red + Self::max_red() * amount).max(Self::min_red()),
+            green: (self.green + Self::max_green() * amount).max(Self::min_green()),
+            blue: (self.blue + Self::max_blue() * amount).max(Self::min_blue()),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> LightenAssign for Rgb<S, T>
+where
+    S: RgbStandard<T, TransferFn = LinearFn>,
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference_red = if factor >= T::zero() {
+            Self::max_red() - self.red
+        } else {
+            self.red
+        };
+        self.red += difference_red.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.red, Self::min_red());
+
+        let difference_green = if factor >= T::zero() {
+            Self::max_green() - self.green
+        } else {
+            self.green
+        };
+        self.green += difference_green.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.green, Self::min_green());
+
+        let difference_blue = if factor >= T::zero() {
+            Self::max_blue() - self.blue
+        } else {
+            self.blue
+        };
+        self.blue += difference_blue.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.blue, Self::min_blue());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.red += Self::max_red() * amount;
+        clamp_min_assign(&mut self.red, Self::min_red());
+        self.green += Self::max_green() * amount;
+        clamp_min_assign(&mut self.green, Self::min_green());
+        self.blue += Self::max_blue() * amount;
+        clamp_min_assign(&mut self.blue, Self::min_blue());
     }
 }
 
