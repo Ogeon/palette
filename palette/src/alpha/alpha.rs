@@ -2,6 +2,7 @@ use core::fmt;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::{One, Zero};
 #[cfg(feature = "random")]
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
 #[cfg(feature = "random")]
@@ -15,7 +16,7 @@ use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
     clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue, Hue,
-    IsWithinBounds, Mix, Pixel, Saturate, Shade, WithAlpha,
+    IsWithinBounds, Mix, MixAssign, Pixel, Saturate, Shade, WithAlpha,
 };
 
 /// An alpha component wrapper for colors.
@@ -110,15 +111,34 @@ impl<C, T> DerefMut for Alpha<C, T> {
 impl<C> Mix for Alpha<C, C::Scalar>
 where
     C: Mix,
+    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + Clone,
 {
     type Scalar = C::Scalar;
 
     #[inline]
-    fn mix(mut self, other: Alpha<C, C::Scalar>, factor: C::Scalar) -> Alpha<C, C::Scalar> {
-        self.color = self.color.mix(other.color, factor);
-        self.alpha = self.alpha + factor * (other.alpha - self.alpha);
+    fn mix(mut self, other: Self, factor: C::Scalar) -> Self {
+        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+
+        self.color = self.color.mix(other.color, factor.clone());
+        self.alpha = self.alpha.clone() + factor * (other.alpha - self.alpha);
 
         self
+    }
+}
+
+impl<C> MixAssign for Alpha<C, C::Scalar>
+where
+    C: MixAssign,
+    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + AddAssign + Clone,
+{
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: C::Scalar) {
+        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+
+        self.color.mix_assign(other.color, factor.clone());
+        self.alpha += factor * (other.alpha - self.alpha.clone());
     }
 }
 

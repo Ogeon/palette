@@ -17,7 +17,7 @@ use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp,
     ClampAssign, Float, FloatComponent, FromColor, FromF64, GetHue, Hue, IsWithinBounds, Lab,
-    LabHue, Mix, Pixel, RelativeContrast, Saturate, Shade, Xyz,
+    LabHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -254,15 +254,33 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Lch<Wp, T>, factor: T) -> Lch<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_degrees();
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
         Lch {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
             hue: self.hue + factor * hue_diff,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> MixAssign for Lch<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
+        self.l += factor * (other.l - self.l);
+        self.chroma += factor * (other.chroma - self.chroma);
+        self.hue += factor * hue_diff;
     }
 }
 

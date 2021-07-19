@@ -546,8 +546,9 @@ where
 /// An operator for restricting a color's components to their expected ranges.
 ///
 /// [`IsWithinBounds`] can be used to check if the components are within their
-/// range bounds. See also [`ClampAssign`] for a self-modifying version of
-/// `Clamp`.
+/// range bounds.
+///
+/// See also [`ClampAssign`].
 ///
 /// ```
 /// use palette::{Srgb, IsWithinBounds, Clamp};
@@ -575,7 +576,9 @@ pub trait Clamp {
 /// ranges.
 ///
 /// [`IsWithinBounds`] can be used to check if the components are within their
-/// range bounds. See also [`Clamp`] for a moving version of `ClampAssign`.
+/// range bounds.
+///
+/// See also [`Clamp`].
 ///
 /// ```
 /// use palette::{Srgb, IsWithinBounds, ClampAssign};
@@ -624,7 +627,9 @@ where
     }
 }
 
-/// A trait for linear color interpolation.
+/// Linear color interpolation of two colors.
+///
+/// See also [`MixAssign`].
 ///
 /// ```
 /// use approx::assert_relative_eq;
@@ -639,7 +644,7 @@ where
 /// ```
 pub trait Mix {
     /// The type of the mixing factor.
-    type Scalar: Float;
+    type Scalar;
 
     /// Mix the color with an other color, by `factor`.
     ///
@@ -648,6 +653,32 @@ pub trait Mix {
     /// `other`.
     #[must_use]
     fn mix(self, other: Self, factor: Self::Scalar) -> Self;
+}
+
+/// Assigning linear color interpolation of two colors.
+///
+/// See also [`Mix`].
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::{LinSrgb, MixAssign};
+///
+/// let mut a = LinSrgb::new(0.0, 0.5, 1.0);
+/// let b = LinSrgb::new(1.0, 0.5, 0.0);
+///
+/// a.mix_assign(b, 0.5);
+/// assert_relative_eq!(a, LinSrgb::new(0.5, 0.5, 0.5));
+/// ```
+pub trait MixAssign {
+    /// The type of the mixing factor.
+    type Scalar;
+
+    /// Mix the color with an other color, by `factor`.
+    ///
+    /// `factor` should be between `0.0` and `1.0`, where `0.0` will result in
+    /// the same color as `self` and `1.0` will result in the same color as
+    /// `other`.
+    fn mix_assign(&mut self, other: Self, factor: Self::Scalar);
 }
 
 /// The `Shade` trait allows a color to be lightened or darkened.

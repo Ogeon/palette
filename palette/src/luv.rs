@@ -14,8 +14,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, ComponentWise,
-    FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, LuvHue, Mix, Pixel, RelativeContrast,
-    Shade, Xyz,
+    FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, LuvHue, Mix, MixAssign, Pixel,
+    RelativeContrast, Shade, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -285,9 +285,22 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Luv<Wp, T>, factor: T) -> Luv<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<Wp, T> MixAssign for Luv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

@@ -17,8 +17,8 @@ use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp, ClampAssign, ComponentWise,
-    FloatComponent, IsWithinBounds, Lab, Luma, Luv, Mix, Oklab, Oklch, Pixel, RelativeContrast,
-    Shade, Yxy,
+    FloatComponent, IsWithinBounds, Lab, Luma, Luv, Mix, MixAssign, Oklab, Oklch, Pixel,
+    RelativeContrast, Shade, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -396,9 +396,22 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Xyz<Wp, T>, factor: T) -> Xyz<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<Wp, T> MixAssign for Xyz<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

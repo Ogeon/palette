@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Mix, Pixel, RelativeContrast, RgbHue, Shade,
-    Xyz,
+    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Mix, MixAssign, Pixel, RelativeContrast,
+    RgbHue, Shade, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -342,9 +342,9 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Hwb<S, T>, factor: T) -> Hwb<S, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_degrees();
+        let hue_diff = (other.hue - self.hue).to_degrees();
 
         Hwb {
             hue: self.hue + factor * hue_diff,
@@ -352,6 +352,23 @@ where
             blackness: self.blackness + factor * (other.blackness - self.blackness),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> MixAssign for Hwb<S, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
+        self.hue += factor * hue_diff;
+        self.whiteness += factor * (other.whiteness - self.whiteness);
+        self.blackness += factor * (other.blackness - self.blackness);
     }
 }
 
