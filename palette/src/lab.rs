@@ -13,6 +13,7 @@ use crate::color_difference::{get_ciede_difference, ColorDifference};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
+use crate::MixAssign;
 use crate::{
     clamp, clamp_assign, contrast_ratio, float::Float, from_f64, Alpha, Clamp, ClampAssign,
     ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, LabHue, Lch, Mix, Pixel,
@@ -282,9 +283,22 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Lab<Wp, T>, factor: T) -> Lab<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<Wp, T> MixAssign for Lab<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

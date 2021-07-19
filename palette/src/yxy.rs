@@ -14,7 +14,7 @@ use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component, ComponentWise,
-    FloatComponent, IsWithinBounds, Luma, Mix, Pixel, RelativeContrast, Shade, Xyz,
+    FloatComponent, IsWithinBounds, Luma, Mix, MixAssign, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -291,9 +291,22 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Yxy<Wp, T>, factor: T) -> Yxy<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<Wp, T> MixAssign for Yxy<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

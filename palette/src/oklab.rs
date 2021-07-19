@@ -15,8 +15,8 @@ use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Mat3, Mix, OklabHue, Oklch,
-    Pixel, RelativeContrast, Shade, Xyz,
+    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Mat3, Mix, MixAssign, OklabHue,
+    Oklch, Pixel, RelativeContrast, Shade, Xyz,
 };
 
 #[rustfmt::skip]
@@ -337,6 +337,19 @@ where
     fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<T> MixAssign for Oklab<T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

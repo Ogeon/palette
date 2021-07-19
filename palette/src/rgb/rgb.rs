@@ -25,7 +25,7 @@ use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
 use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Mix, Pixel,
+    ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Mix, MixAssign, Pixel,
     RelativeContrast, Shade,
 };
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
@@ -563,9 +563,23 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Rgb<S, T>, factor: T) -> Rgb<S, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<S, T> MixAssign for Rgb<S, T>
+where
+    S: RgbStandard<T, TransferFn = LinearFn>,
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

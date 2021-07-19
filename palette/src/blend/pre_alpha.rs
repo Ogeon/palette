@@ -1,10 +1,11 @@
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use num_traits::{One, Zero};
 
 use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
-use crate::{clamp, Alpha, Blend, ComponentWise, Mix, Pixel};
+use crate::{clamp, Alpha, Blend, ComponentWise, Mix, MixAssign, Pixel};
 
 /// Premultiplied alpha wrapper.
 ///
@@ -113,15 +114,34 @@ where
 impl<C> Mix for PreAlpha<C, C::Scalar>
 where
     C: Mix,
+    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + Clone,
 {
     type Scalar = C::Scalar;
 
     #[inline]
-    fn mix(mut self, other: PreAlpha<C, C::Scalar>, factor: C::Scalar) -> PreAlpha<C, C::Scalar> {
-        self.color = self.color.mix(other.color, factor);
-        self.alpha = self.alpha + factor * (other.alpha - self.alpha);
+    fn mix(mut self, other: Self, factor: C::Scalar) -> Self {
+        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+
+        self.color = self.color.mix(other.color, factor.clone());
+        self.alpha = self.alpha.clone() + factor * (other.alpha - self.alpha);
 
         self
+    }
+}
+
+impl<C> MixAssign for PreAlpha<C, C::Scalar>
+where
+    C: MixAssign,
+    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + AddAssign + Clone,
+{
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: C::Scalar) {
+        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+
+        self.color.mix_assign(other.color, factor.clone());
+        self.alpha += factor * (other.alpha - self.alpha.clone());
     }
 }
 

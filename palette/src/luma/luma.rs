@@ -20,8 +20,8 @@ use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::{
     clamp, clamp_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Mix, Pixel, RelativeContrast,
-    Shade, Xyz, Yxy,
+    ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Mix, MixAssign, Pixel,
+    RelativeContrast, Shade, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -369,9 +369,23 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Luma<S, T>, factor: T) -> Luma<S, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
         self + (other - self) * factor
+    }
+}
+
+impl<S, T> MixAssign for Luma<S, T>
+where
+    T: FloatComponent + AddAssign,
+    S: LumaStandard<T, TransferFn = LinearFn>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        *self += (other - *self) * factor;
     }
 }
 

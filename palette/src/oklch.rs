@@ -14,8 +14,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, FloatComponent,
-    FromColor, FromF64, GetHue, Hue, IsWithinBounds, Mix, Oklab, OklabHue, Pixel, RelativeContrast,
-    Saturate, Shade, Xyz,
+    FromColor, FromF64, GetHue, Hue, IsWithinBounds, Mix, MixAssign, Oklab, OklabHue, Pixel,
+    RelativeContrast, Saturate, Shade, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -312,14 +312,32 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Oklch<T>, factor: T) -> Oklch<T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_degrees();
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
         Oklch {
             l: self.l + factor * (other.l - self.l),
             chroma: self.chroma + factor * (other.chroma - self.chroma),
             hue: self.hue + factor * hue_diff,
         }
+    }
+}
+
+impl<T> MixAssign for Oklch<T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
+        self.l += factor * (other.l - self.l);
+        self.chroma += factor * (other.chroma - self.chroma);
+        self.hue += factor * hue_diff;
     }
 }
 

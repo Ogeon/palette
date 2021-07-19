@@ -17,8 +17,8 @@ use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, FromColor, GetHue, Hsl, Hue, Hwb, IsWithinBounds, Mix, Pixel, RelativeContrast,
-    RgbHue, Saturate, Shade, Xyz,
+    FloatComponent, FromColor, GetHue, Hsl, Hue, Hwb, IsWithinBounds, Mix, MixAssign, Pixel,
+    RelativeContrast, RgbHue, Saturate, Shade, Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -413,9 +413,9 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Hsv<S, T>, factor: T) -> Hsv<S, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_degrees();
+        let hue_diff = (other.hue - self.hue).to_degrees();
 
         Hsv {
             hue: self.hue + factor * hue_diff,
@@ -423,6 +423,23 @@ where
             value: self.value + factor * (other.value - self.value),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> MixAssign for Hsv<S, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
+        self.hue += factor * hue_diff;
+        self.saturation += factor * (other.saturation - self.saturation);
+        self.value += factor * (other.value - self.value);
     }
 }
 

@@ -13,6 +13,7 @@ use crate::encoding::pixel::RawPixel;
 #[cfg(feature = "random")]
 use crate::float::Float;
 use crate::luv_bounds::LuvBounds;
+use crate::MixAssign;
 use crate::{
     clamp, contrast_ratio,
     convert::FromColorUnclamped,
@@ -267,9 +268,9 @@ where
     type Scalar = T;
 
     #[inline]
-    fn mix(self, other: Hsluv<Wp, T>, factor: T) -> Hsluv<Wp, T> {
+    fn mix(self, other: Self, factor: T) -> Self {
         let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff: T = (other.hue - self.hue).to_degrees();
+        let hue_diff = (other.hue - self.hue).to_degrees();
 
         Hsluv {
             hue: self.hue + factor * hue_diff,
@@ -277,6 +278,23 @@ where
             l: self.l + factor * (other.l - self.l),
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> MixAssign for Hsluv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
+        let hue_diff = (other.hue - self.hue).to_degrees();
+
+        self.hue += factor * hue_diff;
+        self.saturation += factor * (other.saturation - self.saturation);
+        self.l += factor * (other.l - self.l);
     }
 }
 

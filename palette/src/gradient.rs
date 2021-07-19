@@ -5,12 +5,13 @@
 
 use core::cmp::max;
 use core::marker::PhantomData;
+use std::ops::Sub;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::{One, Zero};
 
 use crate::float::Float;
-use crate::Mix;
+use crate::{clamp, clamp_min, Mix};
 use crate::{from_f64, FromF64};
 
 #[cfg(feature = "named_gradients")]
@@ -37,17 +38,20 @@ where
 #[derive(Clone, Debug)]
 pub struct Gradient<C, T = Vec<(<C as Mix>::Scalar, C)>>(T, PhantomData<C>)
 where
-    C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>;
+    C: Mix;
 
 impl<C, T> Gradient<C, T>
 where
-    C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>,
+    C: Mix,
 {
     /// Get a color from the gradient. The color of the closest control point
     /// will be returned if `i` is outside the domain.
-    pub fn get(&self, i: C::Scalar) -> C {
+    pub fn get(&self, i: C::Scalar) -> C
+    where
+        C: Clone,
+        C::Scalar: Float,
+        T: AsRef<[(C::Scalar, C)]>,
+    {
         let &(mut min, ref min_color) = self
             .0
             .as_ref()
@@ -96,7 +100,10 @@ where
     /// Create a gradient of colors with custom spacing and domain. There must
     /// be at least one color and they are expected to be ordered by their
     /// position value.
-    pub fn with_domain(colors: T) -> Gradient<C, T> {
+    pub fn with_domain(colors: T) -> Gradient<C, T>
+    where
+        T: AsRef<[(C::Scalar, C)]>,
+    {
         assert!(!colors.as_ref().is_empty());
 
         //Maybe sort the colors?
@@ -131,12 +138,16 @@ where
     ///     assert_relative_eq!(c1, c2);
     /// }
     /// ```
-    pub fn take(&self, n: usize) -> Take<C, T> {
+    pub fn take(&self, n: usize) -> Take<C, T>
+    where
+        C::Scalar: Sub<Output = C::Scalar> + Clone,
+        T: AsRef<[(C::Scalar, C)]>,
+    {
         let (min, max) = self.domain();
 
         Take {
             gradient: MaybeSlice::NotSlice(self),
-            from: min,
+            from: min.clone(),
             diff: max - min,
             len: n,
             from_head: 0,
@@ -153,22 +164,30 @@ where
     }
 
     /// Get the limits of this gradient's domain.
-    pub fn domain(&self) -> (C::Scalar, C::Scalar) {
-        let &(min, _) = self
+    pub fn domain(&self) -> (C::Scalar, C::Scalar)
+    where
+        C::Scalar: Clone,
+        T: AsRef<[(C::Scalar, C)]>,
+    {
+        let (min, _) = self
             .0
             .as_ref()
             .get(0)
             .expect("a Gradient must contain at least one color");
-        let &(max, _) = self
+        let (max, _) = self
             .0
             .as_ref()
             .last()
             .expect("a Gradient must contain at least one color");
-        (min, max)
+        (min.clone(), max.clone())
     }
 }
 
-impl<C: Mix + Clone> Gradient<C> {
+impl<C> Gradient<C>
+where
+    C: Mix,
+    C::Scalar: Float,
+{
     /// Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     /// There must be at least one color.
     pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C>
@@ -191,8 +210,7 @@ impl<C: Mix + Clone> Gradient<C> {
 #[derive(Clone)]
 pub struct Take<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
-    C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>,
+    C: Mix + 'a,
 {
     gradient: MaybeSlice<'a, C, T>,
     from: C::Scalar,
@@ -204,7 +222,7 @@ where
 
 impl<'a, C, T> Iterator for Take<'a, C, T>
 where
-    C::Scalar: FromF64,
+    C::Scalar: Float + FromF64,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -235,17 +253,9 @@ where
     }
 }
 
-impl<'a, C, T> ExactSizeIterator for Take<'a, C, T>
-where
-    C::Scalar: FromF64,
-    C: Mix + Clone,
-    T: AsRef<[(C::Scalar, C)]>,
-{
-}
-
 impl<'a, C, T> DoubleEndedIterator for Take<'a, C, T>
 where
-    C::Scalar: FromF64,
+    C::Scalar: Float + FromF64,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -268,30 +278,49 @@ where
 }
 
 /// A slice of a Gradient that limits its domain.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Slice<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
-    C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>,
+    C: Mix + 'a,
 {
     gradient: &'a Gradient<C, T>,
     range: Range<C::Scalar>,
 }
 
+impl<'a, C, T> Clone for Slice<'a, C, T>
+where
+    C: Mix + 'a,
+    C::Scalar: Clone,
+{
+    fn clone(&self) -> Self {
+        Slice {
+            gradient: self.gradient,
+            range: self.range.clone(),
+        }
+    }
+}
+
 impl<'a, C, T> Slice<'a, C, T>
 where
-    C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>,
+    C: Mix + 'a,
 {
     /// Get a color from the gradient slice. The color of the closest domain
     /// limit will be returned if `i` is outside the domain.
-    pub fn get(&self, i: C::Scalar) -> C {
+    pub fn get(&self, i: C::Scalar) -> C
+    where
+        C: Clone,
+        C::Scalar: Float,
+        T: AsRef<[(C::Scalar, C)]>,
+    {
         self.gradient.get(self.range.clamp(i))
     }
 
     /// Slice this gradient slice to further limit its domain. Ranges outside
     /// the domain will be clamped to the nearest domain limit.
-    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C, T> {
+    pub fn slice<R: Into<Range<C::Scalar>>>(&self, range: R) -> Slice<C, T>
+    where
+        C::Scalar: PartialOrd + Clone,
+    {
         Slice {
             gradient: self.gradient,
             range: self.range.constrain(&range.into()),
@@ -299,32 +328,43 @@ where
     }
 
     /// Get the limits of this gradient slice's domain.
-    pub fn domain(&self) -> (C::Scalar, C::Scalar) {
+    pub fn domain(&self) -> (C::Scalar, C::Scalar)
+    where
+        T: AsRef<[(C::Scalar, C)]>,
+        C::Scalar: Clone,
+    {
         if let Range {
             from: Some(from),
             to: Some(to),
-        } = self.range
+        } = self.range.clone()
         {
             (from, to)
         } else {
             let (from, to) = self.gradient.domain();
-            (self.range.from.unwrap_or(from), self.range.to.unwrap_or(to))
+            (
+                self.range.from.clone().unwrap_or(from),
+                self.range.to.clone().unwrap_or(to),
+            )
         }
     }
 }
 
 impl<'a, C, T> Slice<'a, C, T>
 where
-    C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]> + Clone,
+    C: Mix + 'a,
+    T: Clone,
+    C::Scalar: Sub<Output = C::Scalar> + Clone,
 {
     /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
-    pub fn take(&self, n: usize) -> Take<C, T> {
+    pub fn take(&self, n: usize) -> Take<C, T>
+    where
+        T: AsRef<[(C::Scalar, C)]>,
+    {
         let (min, max) = self.domain();
 
         Take {
             gradient: MaybeSlice::Slice(self.clone()),
-            from: min,
+            from: min.clone(),
             diff: max - min,
             len: n,
             from_head: 0,
@@ -335,45 +375,49 @@ where
 
 /// A domain range for gradient slices.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Range<T: Float> {
+pub struct Range<T> {
     from: Option<T>,
     to: Option<T>,
 }
 
-impl<T: Float> Range<T> {
-    fn clamp(&self, mut x: T) -> T {
-        x = self.from.unwrap_or(x).max(x);
-        self.to.unwrap_or(x).min(x)
+impl<T> Range<T>
+where
+    T: PartialOrd + Clone,
+{
+    fn clamp(&self, x: T) -> T {
+        let min = self.from.clone().unwrap_or(x.clone());
+        let max = self.to.clone().unwrap_or(x.clone());
+        clamp(x, min, max)
     }
 
     fn constrain(&self, other: &Range<T>) -> Range<T> {
-        if let (Some(f), Some(t)) = (other.from, self.to) {
+        if let (Some(f), Some(t)) = (&other.from, &self.to) {
             if f >= t {
                 return Range {
-                    from: self.to,
-                    to: self.to,
+                    from: self.to.clone(),
+                    to: self.to.clone(),
                 };
             }
         }
 
-        if let (Some(t), Some(f)) = (other.to, self.from) {
+        if let (Some(t), Some(f)) = (&other.to, &self.from) {
             if t <= f {
                 return Range {
-                    from: self.from,
-                    to: self.from,
+                    from: self.from.clone(),
+                    to: self.from.clone(),
                 };
             }
         }
 
         Range {
-            from: match (self.from, other.from) {
-                (Some(s), Some(o)) => Some(s.max(o)),
+            from: match (self.from.clone(), other.from.clone()) {
+                (Some(s), Some(o)) => Some(clamp_min(s, o)),
                 (Some(s), None) => Some(s),
                 (None, Some(o)) => Some(o),
                 (None, None) => None,
             },
-            to: match (self.to, other.to) {
-                (Some(s), Some(o)) => Some(s.min(o)),
+            to: match (self.to.clone(), other.to.clone()) {
+                (Some(s), Some(o)) => Some(clamp_max(s, o)),
                 (Some(s), None) => Some(s),
                 (None, Some(o)) => Some(o),
                 (None, None) => None,
@@ -382,7 +426,7 @@ impl<T: Float> Range<T> {
     }
 }
 
-impl<T: Float> From<::std::ops::Range<T>> for Range<T> {
+impl<T> From<::std::ops::Range<T>> for Range<T> {
     fn from(range: ::std::ops::Range<T>) -> Range<T> {
         Range {
             from: Some(range.start),
@@ -391,7 +435,7 @@ impl<T: Float> From<::std::ops::Range<T>> for Range<T> {
     }
 }
 
-impl<T: Float> From<::std::ops::RangeFrom<T>> for Range<T> {
+impl<T> From<::std::ops::RangeFrom<T>> for Range<T> {
     fn from(range: ::std::ops::RangeFrom<T>) -> Range<T> {
         Range {
             from: Some(range.start),
@@ -400,7 +444,7 @@ impl<T: Float> From<::std::ops::RangeFrom<T>> for Range<T> {
     }
 }
 
-impl<T: Float> From<::std::ops::RangeTo<T>> for Range<T> {
+impl<T> From<::std::ops::RangeTo<T>> for Range<T> {
     fn from(range: ::std::ops::RangeTo<T>) -> Range<T> {
         Range {
             from: None,
@@ -409,7 +453,7 @@ impl<T: Float> From<::std::ops::RangeTo<T>> for Range<T> {
     }
 }
 
-impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
+impl<T> From<::std::ops::RangeFull> for Range<T> {
     fn from(_range: ::std::ops::RangeFull) -> Range<T> {
         Range {
             from: None,
@@ -420,8 +464,8 @@ impl<T: Float> From<::std::ops::RangeFull> for Range<T> {
 
 impl<T> AbsDiffEq for Range<T>
 where
-    T: AbsDiffEq + Float,
-    T::Epsilon: Copy,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -430,14 +474,14 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        let from = match (self.from, other.from) {
-            (Some(s), Some(o)) => s.abs_diff_eq(&o, epsilon),
+        let from = match (&self.from, &other.from) {
+            (Some(s), Some(o)) => s.abs_diff_eq(o, epsilon.clone()),
             (None, None) => true,
             _ => false,
         };
 
-        let to = match (self.to, other.to) {
-            (Some(s), Some(o)) => s.abs_diff_eq(&o, epsilon),
+        let to = match (&self.to, &other.to) {
+            (Some(s), Some(o)) => s.abs_diff_eq(o, epsilon),
             (None, None) => true,
             _ => false,
         };
@@ -448,8 +492,8 @@ where
 
 impl<T> RelativeEq for Range<T>
 where
-    T: RelativeEq + Float,
-    T::Epsilon: Copy,
+    T: RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -461,14 +505,14 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        let from = match (self.from, other.from) {
-            (Some(s), Some(o)) => s.relative_eq(&o, epsilon, max_relative),
+        let from = match (&self.from, &other.from) {
+            (Some(s), Some(o)) => s.relative_eq(o, epsilon.clone(), max_relative.clone()),
             (None, None) => true,
             _ => false,
         };
 
-        let to = match (self.to, other.to) {
-            (Some(s), Some(o)) => s.relative_eq(&o, epsilon, max_relative),
+        let to = match (&self.to, &other.to) {
+            (Some(s), Some(o)) => s.relative_eq(o, epsilon, max_relative),
             (None, None) => true,
             _ => false,
         };
@@ -479,22 +523,22 @@ where
 
 impl<T> UlpsEq for Range<T>
 where
-    T: UlpsEq + Float,
-    T::Epsilon: Copy,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Range<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let from = match (self.from, other.from) {
-            (Some(s), Some(o)) => s.ulps_eq(&o, epsilon, max_ulps),
+        let from = match (&self.from, &other.from) {
+            (Some(s), Some(o)) => s.ulps_eq(o, epsilon.clone(), max_ulps),
             (None, None) => true,
             _ => false,
         };
 
-        let to = match (self.to, other.to) {
-            (Some(s), Some(o)) => s.ulps_eq(&o, epsilon, max_ulps),
+        let to = match (&self.to, &other.to) {
+            (Some(s), Some(o)) => s.ulps_eq(o, epsilon, max_ulps),
             (None, None) => true,
             _ => false,
         };
@@ -503,19 +547,31 @@ where
     }
 }
 
-#[derive(Clone)]
 enum MaybeSlice<'a, C, T = Vec<(<C as Mix>::Scalar, C)>>
 where
-    C: Mix + Clone + 'a,
-    T: AsRef<[(C::Scalar, C)]>,
+    C: Mix + 'a,
 {
     NotSlice(&'a Gradient<C, T>),
     Slice(Slice<'a, C, T>),
 }
 
+impl<'a, C, T> Clone for MaybeSlice<'a, C, T>
+where
+    C: Mix + 'a,
+    C::Scalar: Clone,
+{
+    fn clone(&self) -> Self {
+        match self {
+            MaybeSlice::NotSlice(gradient) => MaybeSlice::NotSlice(*gradient),
+            MaybeSlice::Slice(slice) => MaybeSlice::Slice(slice.clone()),
+        }
+    }
+}
+
 impl<'a, C, T> MaybeSlice<'a, C, T>
 where
     C: Mix + Clone + 'a,
+    C::Scalar: Float,
     T: AsRef<[(C::Scalar, C)]>,
 {
     fn get(&self, i: C::Scalar) -> C {
@@ -523,6 +579,15 @@ where
             MaybeSlice::NotSlice(g) => g.get(i),
             MaybeSlice::Slice(ref s) => s.get(i),
         }
+    }
+}
+
+#[inline]
+fn clamp_max<T: PartialOrd>(value: T, max: T) -> T {
+    if value > max {
+        max
+    } else {
+        value
     }
 }
 
