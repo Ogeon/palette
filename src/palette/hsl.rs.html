@@ -863,6 +863,23 @@
 <span id="860">860</span>
 <span id="861">861</span>
 <span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
@@ -883,8 +900,8 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">Component</span>,
-    <span class="ident">FloatComponent</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">Hue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>,
-    <span class="ident">Saturate</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>,
+    <span class="ident">FloatComponent</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">Hue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>,
+    <span class="ident">RgbHue</span>, <span class="ident">Saturate</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>,
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">float::Float</span>, <span class="ident">FromF64</span>};
@@ -1260,9 +1277,9 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw">let</span> <span class="ident">hue_diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
+        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
 
         <span class="ident">Hsl</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>,
@@ -1270,6 +1287,23 @@
             <span class="ident">lightness</span>: <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">lightness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
+{
+    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
+
+        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>;
+        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">saturation</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">saturation</span>);
+        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">lightness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>);
     }
 }
 

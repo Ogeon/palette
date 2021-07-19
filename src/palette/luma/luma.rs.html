@@ -960,6 +960,20 @@
 <span id="957">957</span>
 <span id="958">958</span>
 <span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
@@ -983,8 +997,8 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::luma::LumaStandard</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">Alpha</span>, <span class="ident">Blend</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">Component</span>,
-    <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromComponent</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>,
-    <span class="ident">Shade</span>, <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
+    <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromComponent</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Pixel</span>,
+    <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
 };
 
 <span class="doccomment">/// Luminance with an alpha component. See the [`Lumaa` implementation</span>
@@ -1332,9 +1346,23 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
         <span class="self">self</span> <span class="op">+</span> (<span class="ident">other</span> <span class="op">-</span> <span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
+    <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>,
+{
+    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">other</span> <span class="op">-</span> <span class="kw-2">*</span><span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>;
     }
 }
 

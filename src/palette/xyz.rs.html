@@ -697,6 +697,19 @@
 <span id="694">694</span>
 <span id="695">695</span>
 <span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -717,8 +730,8 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">oklab</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>,
-    <span class="ident">FloatComponent</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lab</span>, <span class="ident">Luma</span>, <span class="ident">Luv</span>, <span class="ident">Mix</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>,
-    <span class="ident">Shade</span>, <span class="ident">Yxy</span>,
+    <span class="ident">FloatComponent</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lab</span>, <span class="ident">Luma</span>, <span class="ident">Luv</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">Pixel</span>,
+    <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>, <span class="ident">Yxy</span>,
 };
 
 <span class="doccomment">/// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in</span>
@@ -1096,9 +1109,22 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
         <span class="self">self</span> <span class="op">+</span> (<span class="ident">other</span> <span class="op">-</span> <span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
+{
+    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">other</span> <span class="op">-</span> <span class="kw-2">*</span><span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>;
     }
 }
 

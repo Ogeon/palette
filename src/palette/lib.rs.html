@@ -934,6 +934,37 @@
 <span id="931">931</span>
 <span id="932">932</span>
 <span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -1483,8 +1514,9 @@
 <span class="doccomment">/// An operator for restricting a color&#39;s components to their expected ranges.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`IsWithinBounds`] can be used to check if the components are within their</span>
-<span class="doccomment">/// range bounds. See also [`ClampAssign`] for a self-modifying version of</span>
-<span class="doccomment">/// `Clamp`.</span>
+<span class="doccomment">/// range bounds.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See also [`ClampAssign`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds, Clamp};</span>
@@ -1512,7 +1544,9 @@
 <span class="doccomment">/// ranges.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`IsWithinBounds`] can be used to check if the components are within their</span>
-<span class="doccomment">/// range bounds. See also [`Clamp`] for a moving version of `ClampAssign`.</span>
+<span class="doccomment">/// range bounds.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See also [`Clamp`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds, ClampAssign};</span>
@@ -1561,7 +1595,9 @@
     }
 }
 
-<span class="doccomment">/// A trait for linear color interpolation.</span>
+<span class="doccomment">/// Linear color interpolation of two colors.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See also [`MixAssign`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use approx::assert_relative_eq;</span>
@@ -1576,7 +1612,7 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Mix</span> {
     <span class="doccomment">/// The type of the mixing factor.</span>
-    <span class="kw">type</span> <span class="ident">Scalar</span>: <span class="ident">Float</span>;
+    <span class="kw">type</span> <span class="ident">Scalar</span>;
 
     <span class="doccomment">/// Mix the color with an other color, by `factor`.</span>
     <span class="doccomment">///</span>
@@ -1585,6 +1621,32 @@
     <span class="doccomment">/// `other`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+}
+
+<span class="doccomment">/// Assigning linear color interpolation of two colors.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See also [`Mix`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use approx::assert_relative_eq;</span>
+<span class="doccomment">/// use palette::{LinSrgb, MixAssign};</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut a = LinSrgb::new(0.0, 0.5, 1.0);</span>
+<span class="doccomment">/// let b = LinSrgb::new(1.0, 0.5, 0.0);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// a.mix_assign(b, 0.5);</span>
+<span class="doccomment">/// assert_relative_eq!(a, LinSrgb::new(0.5, 0.5, 0.5));</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MixAssign</span> {
+    <span class="doccomment">/// The type of the mixing factor.</span>
+    <span class="kw">type</span> <span class="ident">Scalar</span>;
+
+    <span class="doccomment">/// Mix the color with an other color, by `factor`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `factor` should be between `0.0` and `1.0`, where `0.0` will result in</span>
+    <span class="doccomment">/// the same color as `self` and `1.0` will result in the same color as</span>
+    <span class="doccomment">/// `other`.</span>
+    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="self">Self</span><span class="ident">::Scalar</span>);
 }
 
 <span class="doccomment">/// The `Shade` trait allows a color to be lightened or darkened.</span>
