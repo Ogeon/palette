@@ -9,19 +9,17 @@ use rand::distributions::Distribution;
 #[cfg(feature = "random")]
 use rand::Rng;
 
-use crate::encoding::pixel::RawPixel;
 #[cfg(feature = "random")]
 use crate::float::Float;
-use crate::luv_bounds::LuvBounds;
-use crate::MixAssign;
 use crate::{
-    clamp, contrast_ratio,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio,
     convert::FromColorUnclamped,
+    encoding::pixel::RawPixel,
+    luv_bounds::LuvBounds,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, FloatComponent, FromF64, GetHue, Hue, Lchuv, LuvHue, Mix, Pixel,
-    RelativeContrast, Saturate, Shade, Xyz,
+    Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, Hue, IsWithinBounds, Lchuv,
+    Lighten, LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, Xyz,
 };
-use crate::{clamp_assign, ClampAssign, IsWithinBounds};
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
@@ -298,14 +296,14 @@ where
     }
 }
 
-impl<Wp, T> Shade for Hsluv<Wp, T>
+impl<Wp, T> Lighten for Hsluv<Wp, T>
 where
     T: FloatComponent,
 {
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Hsluv<Wp, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_l() - self.l
         } else {
@@ -317,19 +315,44 @@ where
         Hsluv {
             hue: self.hue,
             saturation: self.saturation,
-            l: (self.l + delta).max(T::zero()),
+            l: (self.l + delta).max(Self::min_l()),
             white_point: PhantomData,
         }
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Hsluv<Wp, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Hsluv {
             hue: self.hue,
             saturation: self.saturation,
-            l: (self.l + Self::max_l() * amount).max(T::zero()),
+            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> LightenAssign for Hsluv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_l() - self.l
+        } else {
+            self.l
+        };
+
+        self.l += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.l, Self::min_l());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.l += Self::max_l() * amount;
+        clamp_min_assign(&mut self.l, Self::min_l());
     }
 }
 

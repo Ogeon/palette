@@ -19,9 +19,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::{
-    clamp, clamp_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Mix, MixAssign, Pixel,
-    RelativeContrast, Shade, Xyz, Yxy,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign,
+    Component, ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -389,7 +389,7 @@ where
     }
 }
 
-impl<S, T> Shade for Luma<S, T>
+impl<S, T> Lighten for Luma<S, T>
 where
     T: FloatComponent,
     S: LumaStandard<T, TransferFn = LinearFn>,
@@ -397,9 +397,9 @@ where
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Luma<S, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.luma
+            Self::max_luma() - self.luma
         } else {
             self.luma
         };
@@ -407,17 +407,43 @@ where
         let delta = difference.max(T::zero()) * factor;
 
         Luma {
-            luma: (self.luma + delta).max(T::zero()),
+            luma: (self.luma + delta).max(Self::min_luma()),
             standard: PhantomData,
         }
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Luma<S, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Luma {
-            luma: (self.luma + T::max_intensity() * amount).max(T::zero()),
+            luma: (self.luma + Self::max_luma() * amount).max(Self::min_luma()),
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> LightenAssign for Luma<S, T>
+where
+    T: FloatComponent + AddAssign,
+    S: LumaStandard<T, TransferFn = LinearFn>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_luma() - self.luma
+        } else {
+            self.luma
+        };
+
+        self.luma += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.luma, Self::min_luma());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.luma += Self::max_luma() * amount;
+        clamp_min_assign(&mut self.luma, Self::min_luma());
     }
 }
 

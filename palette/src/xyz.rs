@@ -16,9 +16,9 @@ use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp, ClampAssign, ComponentWise,
-    FloatComponent, IsWithinBounds, Lab, Luma, Luv, Mix, MixAssign, Oklab, Oklch, Pixel,
-    RelativeContrast, Shade, Yxy,
+    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp,
+    ClampAssign, ComponentWise, FloatComponent, IsWithinBounds, Lab, Lighten, LightenAssign, Luma,
+    Luv, Mix, MixAssign, Oklab, Oklch, Pixel, RelativeContrast, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -415,7 +415,7 @@ where
     }
 }
 
-impl<Wp, T> Shade for Xyz<Wp, T>
+impl<Wp, T> Lighten for Xyz<Wp, T>
 where
     T: FloatComponent,
     Wp: WhitePoint<T>,
@@ -423,7 +423,7 @@ where
     type Scalar = T;
 
     #[inline]
-    fn lighten(self, factor: T) -> Xyz<Wp, T> {
+    fn lighten(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_y() - self.y
         } else {
@@ -441,13 +441,39 @@ where
     }
 
     #[inline]
-    fn lighten_fixed(self, amount: T) -> Xyz<Wp, T> {
+    fn lighten_fixed(self, amount: T) -> Self {
         Xyz {
             x: self.x,
             y: (self.y + Self::max_y() * amount).max(Self::min_y()),
             z: self.z,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> LightenAssign for Xyz<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+    Wp: WhitePoint<T>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn lighten_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_y() - self.y
+        } else {
+            self.y
+        };
+
+        self.y += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.y, Self::min_y());
+    }
+
+    #[inline]
+    fn lighten_fixed_assign(&mut self, amount: T) {
+        self.y += Self::max_y() * amount;
+        clamp_min_assign(&mut self.y, Self::min_y());
     }
 }
 
