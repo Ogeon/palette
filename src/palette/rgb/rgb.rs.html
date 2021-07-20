@@ -1497,6 +1497,51 @@
 <span id="1494">1494</span>
 <span id="1495">1495</span>
 <span id="1496">1496</span>
+<span id="1497">1497</span>
+<span id="1498">1498</span>
+<span id="1499">1499</span>
+<span id="1500">1500</span>
+<span id="1501">1501</span>
+<span id="1502">1502</span>
+<span id="1503">1503</span>
+<span id="1504">1504</span>
+<span id="1505">1505</span>
+<span id="1506">1506</span>
+<span id="1507">1507</span>
+<span id="1508">1508</span>
+<span id="1509">1509</span>
+<span id="1510">1510</span>
+<span id="1511">1511</span>
+<span id="1512">1512</span>
+<span id="1513">1513</span>
+<span id="1514">1514</span>
+<span id="1515">1515</span>
+<span id="1516">1516</span>
+<span id="1517">1517</span>
+<span id="1518">1518</span>
+<span id="1519">1519</span>
+<span id="1520">1520</span>
+<span id="1521">1521</span>
+<span id="1522">1522</span>
+<span id="1523">1523</span>
+<span id="1524">1524</span>
+<span id="1525">1525</span>
+<span id="1526">1526</span>
+<span id="1527">1527</span>
+<span id="1528">1528</span>
+<span id="1529">1529</span>
+<span id="1530">1530</span>
+<span id="1531">1531</span>
+<span id="1532">1532</span>
+<span id="1533">1533</span>
+<span id="1534">1534</span>
+<span id="1535">1535</span>
+<span id="1536">1536</span>
+<span id="1537">1537</span>
+<span id="1538">1538</span>
+<span id="1539">1539</span>
+<span id="1540">1540</span>
+<span id="1541">1541</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
@@ -1524,9 +1569,9 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::matrix</span>::{<span class="ident">matrix_inverse</span>, <span class="ident">multiply_xyz_to_rgb</span>, <span class="ident">rgb_to_xyz_matrix</span>};
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Packed</span>, <span class="ident">RgbChannels</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>, <span class="ident">TransferFn</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Blend</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">Component</span>,
-    <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromComponent</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Pixel</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">Shade</span>,
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Blend</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>,
+    <span class="ident">Component</span>, <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromComponent</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>,
+    <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>,
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Hsl</span>, <span class="ident">Hsv</span>, <span class="ident">Luma</span>, <span class="ident">RgbHue</span>, <span class="ident">Xyz</span>};
 
@@ -2083,7 +2128,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Shade</span> <span class="kw">for</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>,
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
@@ -2091,44 +2136,89 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">difference_red</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="ident">T::max_intensity</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">red</span>
+            <span class="self">Self</span><span class="ident">::max_red</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">red</span>
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">red</span>
         };
         <span class="kw">let</span> <span class="ident">delta_red</span> <span class="op">=</span> <span class="ident">difference_red</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
 
         <span class="kw">let</span> <span class="ident">difference_green</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="ident">T::max_intensity</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">green</span>
+            <span class="self">Self</span><span class="ident">::max_green</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">green</span>
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">green</span>
         };
         <span class="kw">let</span> <span class="ident">delta_green</span> <span class="op">=</span> <span class="ident">difference_green</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
 
         <span class="kw">let</span> <span class="ident">difference_blue</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="ident">T::max_intensity</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">blue</span>
+            <span class="self">Self</span><span class="ident">::max_blue</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">blue</span>
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">blue</span>
         };
         <span class="kw">let</span> <span class="ident">delta_blue</span> <span class="op">=</span> <span class="ident">difference_blue</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
 
         <span class="ident">Rgb</span> {
-            <span class="ident">red</span>: (<span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span> <span class="ident">delta_red</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
-            <span class="ident">green</span>: (<span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span> <span class="ident">delta_green</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
-            <span class="ident">blue</span>: (<span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span> <span class="ident">delta_blue</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
+            <span class="ident">red</span>: (<span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span> <span class="ident">delta_red</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_red</span>()),
+            <span class="ident">green</span>: (<span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span> <span class="ident">delta_green</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_green</span>()),
+            <span class="ident">blue</span>: (<span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span> <span class="ident">delta_blue</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_blue</span>()),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Rgb</span> {
-            <span class="ident">red</span>: (<span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span> <span class="ident">T::max_intensity</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
-            <span class="ident">green</span>: (<span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span> <span class="ident">T::max_intensity</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
-            <span class="ident">blue</span>: (<span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span> <span class="ident">T::max_intensity</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="ident">T::zero</span>()),
+            <span class="ident">red</span>: (<span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_red</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_red</span>()),
+            <span class="ident">green</span>: (<span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_green</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_green</span>()),
+            <span class="ident">blue</span>: (<span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_blue</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_blue</span>()),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
+{
+    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+        <span class="kw">let</span> <span class="ident">difference_red</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+            <span class="self">Self</span><span class="ident">::max_red</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">red</span>
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">red</span>
+        };
+        <span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_red</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">red</span>, <span class="self">Self</span><span class="ident">::min_red</span>());
+
+        <span class="kw">let</span> <span class="ident">difference_green</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+            <span class="self">Self</span><span class="ident">::max_green</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">green</span>
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">green</span>
+        };
+        <span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_green</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">green</span>, <span class="self">Self</span><span class="ident">::min_green</span>());
+
+        <span class="kw">let</span> <span class="ident">difference_blue</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+            <span class="self">Self</span><span class="ident">::max_blue</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">blue</span>
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">blue</span>
+        };
+        <span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_blue</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">blue</span>, <span class="self">Self</span><span class="ident">::min_blue</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
+        <span class="self">self</span>.<span class="ident">red</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_red</span>() <span class="op">*</span> <span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">red</span>, <span class="self">Self</span><span class="ident">::min_red</span>());
+        <span class="self">self</span>.<span class="ident">green</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_green</span>() <span class="op">*</span> <span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">green</span>, <span class="self">Self</span><span class="ident">::min_green</span>());
+        <span class="self">self</span>.<span class="ident">blue</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_blue</span>() <span class="op">*</span> <span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">blue</span>, <span class="self">Self</span><span class="ident">::min_blue</span>());
     }
 }
 

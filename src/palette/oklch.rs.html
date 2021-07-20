@@ -631,6 +631,31 @@
 <span id="628">628</span>
 <span id="629">629</span>
 <span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
@@ -647,9 +672,9 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::pixel::RawPixel</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point::D65</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FloatComponent</span>,
-    <span class="ident">FromColor</span>, <span class="ident">FromF64</span>, <span class="ident">GetHue</span>, <span class="ident">Hue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Oklab</span>, <span class="ident">OklabHue</span>, <span class="ident">Pixel</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">Saturate</span>, <span class="ident">Shade</span>, <span class="ident">Xyz</span>,
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>,
+    <span class="ident">FloatComponent</span>, <span class="ident">FromColor</span>, <span class="ident">FromF64</span>, <span class="ident">GetHue</span>, <span class="ident">Hue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>,
+    <span class="ident">MixAssign</span>, <span class="ident">Oklab</span>, <span class="ident">OklabHue</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Saturate</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="doccomment">/// Oklch with an alpha component. See the [`Oklcha` implementation in</span>
@@ -975,14 +1000,14 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Shade</span> <span class="kw">for</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
             <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">l</span>
         } <span class="kw">else</span> {
@@ -999,12 +1024,37 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Oklch</span> {
             <span class="ident">l</span>: (<span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_l</span>()),
             <span class="ident">chroma</span>: <span class="self">self</span>.<span class="ident">chroma</span>,
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
+{
+    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+            <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">l</span>
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">l</span>
+        };
+
+        <span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
+        <span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">*</span> <span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>());
     }
 }
 
