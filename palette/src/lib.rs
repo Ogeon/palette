@@ -79,7 +79,7 @@
 //! converts it back to RGB:
 //!
 //! ```
-//! use palette::{FromColor, Hue, IntoColor, Lch, Srgb};
+//! use palette::{FromColor, ShiftHue, IntoColor, Lch, Srgb};
 //!
 //! let lch_color: Lch = Srgb::new(0.8, 0.2, 0.1).into_color();
 //! let new_color = Srgb::from_color(lch_color.shift_hue(180.0));
@@ -202,7 +202,7 @@
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
-#![doc(html_root_url = "https://docs.rs/palette/0.6.0/palette/")]
+#![doc(html_root_url = "https://docs.rs/palette/0.6.0/")]
 #![warn(missing_docs)]
 
 #[cfg(any(feature = "std", test))]
@@ -935,6 +935,8 @@ where
 
 /// A trait for colors where a hue may be calculated.
 ///
+/// See also [`WithHue`], [`SetHue`], [`ShiftHue`] and [`ShiftHueAssign`].
+///
 /// ```
 /// use approx::assert_relative_eq;
 /// use palette::{GetHue, LinSrgb};
@@ -966,15 +968,130 @@ pub trait GetHue {
     fn get_hue(&self) -> Option<Self::Hue>;
 }
 
-/// A trait for colors where the hue can be manipulated without conversion.
-pub trait Hue: GetHue {
-    /// Return a new copy of `self`, but with a specific hue.
+/// Change the hue of a color to a specific value.
+///
+/// See also [`SetHue`], [`GetHue`], [`ShiftHue`] and [`ShiftHueAssign`].
+///
+/// ```
+/// use palette::{Hsl, WithHue};
+///
+/// let green = Hsl::new_srgb(120.0, 1.0, 0.5);
+/// let blue = green.with_hue(240.0);
+/// assert_eq!(blue, Hsl::new_srgb(240.0, 1.0, 0.5));
+/// ```
+pub trait WithHue<H> {
+    /// Return a copy of `self` with a specific hue.
     #[must_use]
-    fn with_hue<H: Into<Self::Hue>>(self, hue: H) -> Self;
+    fn with_hue(self, hue: H) -> Self;
+}
 
-    /// Return a new copy of `self`, but with the hue shifted by `amount`.
+/// Change the hue of a color to a specific value without moving.
+///
+/// See also [`WithHue`], [`GetHue`], [`ShiftHue`] and [`ShiftHueAssign`].
+///
+/// ```
+/// use palette::{Hsl, SetHue};
+///
+/// let mut color = Hsl::new_srgb(120.0, 1.0, 0.5);
+/// color.set_hue(240.0);
+/// assert_eq!(color, Hsl::new_srgb(240.0, 1.0, 0.5));
+/// ```
+///
+/// `SetHue` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, SetHue};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.set_hue(120.0);
+/// my_array.set_hue(120.0);
+/// my_slice.set_hue(120.0);
+/// ```
+pub trait SetHue<H> {
+    /// Change the hue to a specific value.
+    fn set_hue(&mut self, hue: H);
+}
+
+impl<T, H> SetHue<H> for [T]
+where
+    T: SetHue<H>,
+    H: Clone,
+{
+    fn set_hue(&mut self, hue: H) {
+        for color in self {
+            color.set_hue(hue.clone());
+        }
+    }
+}
+
+/// Operator for increasing or decreasing the hue by an amount.
+///
+/// See also [`ShiftHueAssign`], [`WithHue`], [`SetHue`] and [`GetHue`].
+///
+/// ```
+/// use palette::{Hsl, ShiftHue};
+///
+/// let green = Hsl::new_srgb(120.0, 1.0, 0.5);
+/// let blue = green.shift_hue(120.0);
+/// assert_eq!(blue, Hsl::new_srgb(240.0, 1.0, 0.5));
+/// ```
+pub trait ShiftHue {
+    /// The type of the hue modifier.
+    type Scalar;
+
+    /// Return a copy of `self` with the hue shifted by `amount`.
     #[must_use]
-    fn shift_hue<H: Into<Self::Hue>>(self, amount: H) -> Self;
+    fn shift_hue(self, amount: Self::Scalar) -> Self;
+}
+
+/// Assigning operator for increasing or decreasing the hue by an amount.
+///
+/// See also [`ShiftHue`], [`WithHue`], [`SetHue`] and [`GetHue`].
+///
+/// ```
+/// use palette::{Hsl, ShiftHueAssign};
+///
+/// let mut color = Hsl::new_srgb(120.0, 1.0, 0.5);
+/// color.shift_hue_assign(120.0);
+/// assert_eq!(color, Hsl::new_srgb(240.0, 1.0, 0.5));
+/// ```
+///
+/// `ShiftHueAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, ShiftHueAssign};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.shift_hue_assign(120.0);
+/// my_array.shift_hue_assign(120.0);
+/// my_slice.shift_hue_assign(120.0);
+/// ```
+pub trait ShiftHueAssign {
+    /// The type of the hue modifier.
+    type Scalar;
+
+    /// Shifts the hue by `amount`.
+    fn shift_hue_assign(&mut self, amount: Self::Scalar);
+}
+
+impl<T> ShiftHueAssign for [T]
+where
+    T: ShiftHueAssign,
+    T::Scalar: Clone,
+{
+    type Scalar = T::Scalar;
+
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        for color in self {
+            color.shift_hue_assign(amount.clone());
+        }
+    }
 }
 
 /// A trait for colors where the saturation (or chroma) can be manipulated

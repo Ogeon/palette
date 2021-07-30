@@ -16,8 +16,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp,
-    ClampAssign, Float, FloatComponent, FromColor, FromF64, GetHue, Hue, IsWithinBounds, Lab,
-    LabHue, Lighten, LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Saturate, Xyz,
+    ClampAssign, Float, FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lab, LabHue,
+    Lighten, LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -350,6 +351,7 @@ where
 {
     type Hue = LabHue<T>;
 
+    #[inline]
     fn get_hue(&self) -> Option<LabHue<T>> {
         if self.chroma <= T::zero() {
             None
@@ -359,20 +361,49 @@ where
     }
 }
 
-impl<Wp, T> Hue for Lch<Wp, T>
+impl<Wp, T, H> WithHue<H> for Lch<Wp, T>
 where
-    T: Float + FromF64 + PartialOrd,
+    H: Into<LabHue<T>>,
 {
     #[inline]
-    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+    fn with_hue(mut self, hue: H) -> Self {
         self.hue = hue.into();
         self
     }
+}
+
+impl<Wp, T, H> SetHue<H> for Lch<Wp, T>
+where
+    H: Into<LabHue<T>>,
+{
+    #[inline]
+    fn set_hue(&mut self, hue: H) {
+        self.hue = hue.into();
+    }
+}
+
+impl<Wp, T> ShiftHue for Lch<Wp, T>
+where
+    T: Add<Output = T>,
+{
+    type Scalar = T;
 
     #[inline]
-    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
-        self.hue = self.hue + amount.into();
+    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
+        self.hue = self.hue + amount;
         self
+    }
+}
+
+impl<Wp, T> ShiftHueAssign for Lch<Wp, T>
+where
+    T: AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        self.hue += amount;
     }
 }
 

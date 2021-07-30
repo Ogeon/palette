@@ -15,8 +15,9 @@ use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
 use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
-    clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue, Hue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, WithAlpha,
+    clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue,
+    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, SetHue, ShiftHue,
+    ShiftHueAssign, WithAlpha, WithHue,
 };
 
 /// An alpha component wrapper for colors.
@@ -179,24 +180,55 @@ impl<C: LightenAssign> LightenAssign for Alpha<C, C::Scalar> {
 impl<C: GetHue, T> GetHue for Alpha<C, T> {
     type Hue = C::Hue;
 
+    #[inline]
     fn get_hue(&self) -> Option<C::Hue> {
         self.color.get_hue()
     }
 }
 
-impl<C: Hue, T: Clone> Hue for Alpha<C, T> {
-    fn with_hue<H: Into<C::Hue>>(self, hue: H) -> Alpha<C, T> {
-        Alpha {
-            color: self.color.with_hue(hue),
-            alpha: self.alpha,
-        }
+impl<C, T, H> WithHue<H> for Alpha<C, T>
+where
+    C: WithHue<H>,
+{
+    #[inline]
+    fn with_hue(mut self, hue: H) -> Self {
+        self.color = self.color.with_hue(hue);
+        self
     }
+}
 
-    fn shift_hue<H: Into<C::Hue>>(self, amount: H) -> Alpha<C, T> {
-        Alpha {
-            color: self.color.shift_hue(amount),
-            alpha: self.alpha,
-        }
+impl<C, T, H> SetHue<H> for Alpha<C, T>
+where
+    C: SetHue<H>,
+{
+    #[inline]
+    fn set_hue(&mut self, hue: H) {
+        self.color.set_hue(hue);
+    }
+}
+
+impl<C, T> ShiftHue for Alpha<C, T>
+where
+    C: ShiftHue,
+{
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
+        self.color = self.color.shift_hue(amount);
+        self
+    }
+}
+
+impl<C, T> ShiftHueAssign for Alpha<C, T>
+where
+    C: ShiftHueAssign,
+{
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        self.color.shift_hue_assign(amount);
     }
 }
 

@@ -16,8 +16,8 @@ use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, Hue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    Pixel, RelativeContrast, RgbHue, Xyz,
+    FloatComponent, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel,
+    RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -454,6 +454,7 @@ where
 {
     type Hue = RgbHue<T>;
 
+    #[inline]
     fn get_hue(&self) -> Option<RgbHue<T>> {
         if self.whiteness + self.blackness >= T::max_intensity() {
             None
@@ -463,20 +464,49 @@ where
     }
 }
 
-impl<S, T> Hue for Hwb<S, T>
+impl<S, T, H> WithHue<H> for Hwb<S, T>
 where
-    T: Component,
+    H: Into<RgbHue<T>>,
 {
     #[inline]
-    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+    fn with_hue(mut self, hue: H) -> Self {
         self.hue = hue.into();
         self
     }
+}
+
+impl<S, T, H> SetHue<H> for Hwb<S, T>
+where
+    H: Into<RgbHue<T>>,
+{
+    #[inline]
+    fn set_hue(&mut self, hue: H) {
+        self.hue = hue.into();
+    }
+}
+
+impl<S, T> ShiftHue for Hwb<S, T>
+where
+    T: Add<Output = T>,
+{
+    type Scalar = T;
 
     #[inline]
-    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
-        self.hue = self.hue + amount.into();
+    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
+        self.hue = self.hue + amount;
         self
+    }
+}
+
+impl<S, T> ShiftHueAssign for Hwb<S, T>
+where
+    T: AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        self.hue += amount;
     }
 }
 

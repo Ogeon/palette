@@ -17,9 +17,10 @@ use crate::{
     encoding::pixel::RawPixel,
     luv_bounds::LuvBounds,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, Hue, IsWithinBounds, Lchuv,
-    Lighten, LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, Xyz,
+    Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten,
+    LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, WithHue, Xyz,
 };
+use crate::{SetHue, ShiftHue, ShiftHueAssign};
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
@@ -362,6 +363,7 @@ where
 {
     type Hue = LuvHue<T>;
 
+    #[inline]
     fn get_hue(&self) -> Option<LuvHue<T>> {
         if self.saturation <= T::zero() {
             None
@@ -371,20 +373,49 @@ where
     }
 }
 
-impl<Wp, T> Hue for Hsluv<Wp, T>
+impl<Wp, T, H> WithHue<H> for Hsluv<Wp, T>
 where
-    T: Zero + PartialOrd + Clone,
+    H: Into<LuvHue<T>>,
 {
     #[inline]
-    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+    fn with_hue(mut self, hue: H) -> Self {
         self.hue = hue.into();
         self
     }
+}
+
+impl<Wp, T, H> SetHue<H> for Hsluv<Wp, T>
+where
+    H: Into<LuvHue<T>>,
+{
+    #[inline]
+    fn set_hue(&mut self, hue: H) {
+        self.hue = hue.into();
+    }
+}
+
+impl<Wp, T> ShiftHue for Hsluv<Wp, T>
+where
+    T: Add<Output = T>,
+{
+    type Scalar = T;
 
     #[inline]
-    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
-        self.hue = self.hue + amount.into();
+    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
+        self.hue = self.hue + amount;
         self
+    }
+}
+
+impl<Wp, T> ShiftHueAssign for Hsluv<Wp, T>
+where
+    T: AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        self.hue += amount;
     }
 }
 

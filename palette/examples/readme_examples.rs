@@ -52,12 +52,11 @@ fn pixels_and_buffers() {
 }
 
 fn color_operations_1() {
-    use palette::{Hsl, Hsv, Hue, Lighten, Mix};
+    use palette::{Hsl, Hsv, Lighten, Mix, ShiftHue};
 
     fn transform_color<C>(color: C, amount: f32) -> C
     where
-        C: Hue + Lighten<Scalar = f32> + Mix<Scalar = f32> + Copy,
-        f32: Into<C::Hue>,
+        C: ShiftHue<Scalar = f32> + Lighten<Scalar = f32> + Mix<Scalar = f32> + Copy,
     {
         let new_color = color.shift_hue(170.0).lighten(1.0);
 

@@ -1,4 +1,4 @@
-use palette::{FromColor, Hsl, Hue, Lch, Pixel, Srgb};
+use palette::{FromColor, Hsl, Lch, Pixel, ShiftHue, Srgb};
 
 fn main() {
     let mut image = image::open("example-data/input/fruits.png")
