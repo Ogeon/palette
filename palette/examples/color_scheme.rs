@@ -1,4 +1,4 @@
-use palette::{Darken, Hue, IntoColor, Lch, Lighten, LinSrgb, Pixel, Srgb};
+use palette::{Darken, IntoColor, Lch, Lighten, LinSrgb, Pixel, ShiftHue, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage, SubImage};
 

@@ -14,8 +14,9 @@ use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
-    FloatComponent, FromColor, FromF64, GetHue, Hue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, Xyz,
+    FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -405,6 +406,7 @@ where
 {
     type Hue = OklabHue<T>;
 
+    #[inline]
     fn get_hue(&self) -> Option<OklabHue<T>> {
         if self.chroma <= T::zero() {
             None
@@ -414,20 +416,49 @@ where
     }
 }
 
-impl<T> Hue for Oklch<T>
+impl<T, H> WithHue<H> for Oklch<T>
 where
-    T: Zero + PartialOrd + Clone,
+    H: Into<OklabHue<T>>,
 {
     #[inline]
-    fn with_hue<H: Into<Self::Hue>>(mut self, hue: H) -> Self {
+    fn with_hue(mut self, hue: H) -> Self {
         self.hue = hue.into();
         self
     }
+}
+
+impl<T, H> SetHue<H> for Oklch<T>
+where
+    H: Into<OklabHue<T>>,
+{
+    #[inline]
+    fn set_hue(&mut self, hue: H) {
+        self.hue = hue.into();
+    }
+}
+
+impl<T> ShiftHue for Oklch<T>
+where
+    T: Add<Output = T>,
+{
+    type Scalar = T;
 
     #[inline]
-    fn shift_hue<H: Into<Self::Hue>>(mut self, amount: H) -> Self {
-        self.hue = self.hue + amount.into();
+    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
+        self.hue = self.hue + amount;
         self
+    }
+}
+
+impl<T> ShiftHueAssign for Oklch<T>
+where
+    T: AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
+        self.hue += amount;
     }
 }
 
