@@ -18,8 +18,8 @@ use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     Component, FloatComponent, FromColor, GetHue, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign,
-    Mix, MixAssign, Pixel, RelativeContrast, RgbHue, Saturate, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    Mix, MixAssign, Pixel, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -573,9 +573,9 @@ where
     type Scalar = T;
 
     #[inline]
-    fn saturate(self, factor: T) -> Hsv<S, T> {
+    fn saturate(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
-            T::max_intensity() - self.saturation
+            Self::max_saturation() - self.saturation
         } else {
             self.saturation
         };
@@ -584,20 +584,46 @@ where
 
         Hsv {
             hue: self.hue,
-            saturation: (self.saturation + delta).max(T::zero()),
+            saturation: (self.saturation + delta).max(Self::min_saturation()),
             value: self.value,
             standard: PhantomData,
         }
     }
 
     #[inline]
-    fn saturate_fixed(self, amount: T) -> Hsv<S, T> {
+    fn saturate_fixed(self, amount: T) -> Self {
         Hsv {
             hue: self.hue,
-            saturation: (self.saturation + T::max_intensity() * amount).max(T::zero()),
+            saturation: (self.saturation + Self::max_saturation() * amount)
+                .max(Self::min_saturation()),
             value: self.value,
             standard: PhantomData,
         }
+    }
+}
+
+impl<S, T> SaturateAssign for Hsv<S, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn saturate_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_saturation() - self.saturation
+        } else {
+            self.saturation
+        };
+
+        self.saturation += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.saturation, Self::min_saturation());
+    }
+
+    #[inline]
+    fn saturate_fixed_assign(&mut self, amount: T) {
+        self.saturation += Self::max_saturation() * amount;
+        clamp_min_assign(&mut self.saturation, Self::min_saturation());
     }
 }
 

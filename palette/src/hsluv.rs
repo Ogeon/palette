@@ -18,9 +18,9 @@ use crate::{
     luv_bounds::LuvBounds,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten,
-    LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, WithHue, Xyz,
+    LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SaturateAssign,
+    SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
-use crate::{SetHue, ShiftHue, ShiftHueAssign};
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
 /// `Alpha`](crate::Alpha#Hsluva).
@@ -426,7 +426,7 @@ where
     type Scalar = T;
 
     #[inline]
-    fn saturate(self, factor: T) -> Hsluv<Wp, T> {
+    fn saturate(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_saturation() - self.saturation
         } else {
@@ -448,7 +448,7 @@ where
     }
 
     #[inline]
-    fn saturate_fixed(self, amount: T) -> Hsluv<Wp, T> {
+    fn saturate_fixed(self, amount: T) -> Self {
         Hsluv {
             hue: self.hue,
             saturation: clamp(
@@ -459,6 +459,39 @@ where
             l: self.l,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> SaturateAssign for Hsluv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn saturate_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_saturation() - self.saturation
+        } else {
+            self.saturation
+        };
+
+        self.saturation += difference.max(T::zero()) * factor;
+        clamp_assign(
+            &mut self.saturation,
+            Self::min_saturation(),
+            Self::max_saturation(),
+        );
+    }
+
+    #[inline]
+    fn saturate_fixed_assign(&mut self, amount: T) {
+        self.saturation += Self::max_saturation() * amount;
+        clamp_assign(
+            &mut self.saturation,
+            Self::min_saturation(),
+            Self::max_saturation(),
+        );
     }
 }
 

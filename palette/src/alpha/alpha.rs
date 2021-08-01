@@ -16,8 +16,8 @@ use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
     clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, SetHue, ShiftHue,
-    ShiftHueAssign, WithAlpha, WithHue,
+    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, SaturateAssign,
+    SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
 };
 
 /// An alpha component wrapper for colors.
@@ -236,7 +236,7 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     type Scalar = C::Scalar;
 
     #[inline]
-    fn saturate(self, factor: C::Scalar) -> Alpha<C, C::Scalar> {
+    fn saturate(self, factor: C::Scalar) -> Self {
         Alpha {
             color: self.color.saturate(factor),
             alpha: self.alpha,
@@ -244,11 +244,25 @@ impl<C: Saturate> Saturate for Alpha<C, C::Scalar> {
     }
 
     #[inline]
-    fn saturate_fixed(self, amount: C::Scalar) -> Alpha<C, C::Scalar> {
+    fn saturate_fixed(self, amount: C::Scalar) -> Self {
         Alpha {
             color: self.color.saturate_fixed(amount),
             alpha: self.alpha,
         }
+    }
+}
+
+impl<C: SaturateAssign> SaturateAssign for Alpha<C, C::Scalar> {
+    type Scalar = C::Scalar;
+
+    #[inline]
+    fn saturate_assign(&mut self, factor: C::Scalar) {
+        self.color.saturate_assign(factor);
+    }
+
+    #[inline]
+    fn saturate_fixed_assign(&mut self, amount: C::Scalar) {
+        self.color.saturate_fixed_assign(amount);
     }
 }
 
