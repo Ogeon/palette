@@ -748,6 +748,20 @@ pub trait Lighten {
 /// is applied to it, the color will have 50% lightness added to its lightness
 /// value resulting in a new value of 100%.
 ///
+/// `LightenAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, LightenAssign};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.lighten_assign(0.5);
+/// my_array.lighten_assign(0.5);
+/// my_slice.lighten_assign(0.5);
+/// ```
+///
 /// See also [`Lighten`], [`Darken`] and [`DarkenAssign`].
 pub trait LightenAssign {
     /// The type of the lighten modifier.
@@ -884,6 +898,20 @@ where
 /// is applied to it, the color will have 50% lightness removed from its
 /// lightness value resulting in a new value of 0%.
 ///
+/// `DarkenAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, DarkenAssign};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.darken_assign(0.5);
+/// my_array.darken_assign(0.5);
+/// my_slice.darken_assign(0.5);
+/// ```
+///
 /// See also [`Darken`], [`Lighten`] and [`LightenAssign`].
 pub trait DarkenAssign {
     /// The type of the darken modifier.
@@ -917,7 +945,7 @@ pub trait DarkenAssign {
 
 impl<T> DarkenAssign for T
 where
-    T: LightenAssign,
+    T: LightenAssign + ?Sized,
     T::Scalar: Neg<Output = T::Scalar>,
 {
     type Scalar = T::Scalar;
@@ -1094,30 +1122,25 @@ where
     }
 }
 
-/// A trait for colors where the saturation (or chroma) can be manipulated
-/// without conversion.
+/// Operator for increasing the saturation (or chroma) of a color.
 ///
 /// The trait's functions are split into two groups of functions: relative and
 /// fixed/absolute.
 ///
-/// The relative functions, [`saturate`](Saturate::saturate) and
-/// [`saturate`](Saturate::desaturate), scale the saturation towards the maximum
-/// saturation value and minimum saturation value, respectively. This means that
-/// for a color with 50% saturation, if `saturate(0.5)` is applied to it, the
-/// color will scale halfway to the maximum value of 100% resulting in a new
-/// saturation value of 75%. `desaturate(0.5)` applied to the original color
-/// will result in a new color with 25% saturation since the saturation moves
-/// halfway toward the minimum value of 0%.
+/// The relative function, [`saturate`](Saturate::saturate), scales the
+/// saturation towards the maximum saturation value. This means that for a color
+/// with 50% saturation, if `saturate(0.5)` is applied to it, the color will
+/// scale halfway to the maximum value of 100% resulting in a new saturation
+/// value of 75%.
 ///
-/// The fixed or absolute functions,
-/// [`saturate_fixed`](Saturate::saturate_fixed) and
-/// [`desaturate_fixed`](Saturate::desaturate_fixed), increase or descrease the
-/// saturation by an amount that is independent of the current saturation of the
-/// color. So for a color with 50% saturation, if `saturate_fixed(0.5)` is
-/// applied to it, the color will have 50% saturation added to its saturation
-/// value resulting in a new value of 100%. `desaturate_fixed(0.5)` will result
-/// in a new color with saturation of 0% since 50% saturation is subtracted from
-/// the original value of 50%.
+/// The fixed or absolute function,
+/// [`saturate_fixed`](Saturate::saturate_fixed), increases the saturation by an
+/// amount that is independent of the current saturation of the color. So for a
+/// color with 50% saturation, if `saturate_fixed(0.5)` is applied to it, the
+/// color will have 50% saturation added to its saturation value resulting in a
+/// new value of 100%.
+///
+/// See also [`SaturateAssign`], [`Desaturate`] and [`DesaturateAssign`].
 ///
 /// ```
 /// use approx::assert_relative_eq;
@@ -1126,12 +1149,11 @@ where
 /// let a = Hsv::new_srgb(0.0, 0.5, 1.0);
 ///
 /// assert_relative_eq!(a.saturate(0.5).saturation, 0.75);
-/// assert_relative_eq!(a.desaturate_fixed(0.5).saturation, 0.0);
-///
+/// assert_relative_eq!(a.saturate_fixed(0.5).saturation, 1.0);
 /// ```
-pub trait Saturate: Sized {
-    /// The type of the (de)saturation modifier.
-    type Scalar: Float;
+pub trait Saturate {
+    /// The type of the saturation modifier.
+    type Scalar;
 
     /// Scale the color towards the maximum saturation by `factor`, a value
     /// ranging from `0.0` to `1.0`.
@@ -1158,37 +1180,278 @@ pub trait Saturate: Sized {
     /// ```
     #[must_use]
     fn saturate_fixed(self, amount: Self::Scalar) -> Self;
+}
 
-    /// Scale the color towards the minimum saturation by `factor`, a value
+/// Assigning operator for increasing the saturation (or chroma) of a color.
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function, [`saturate_assign`](SaturateAssign::saturate_assign),
+/// scales the saturation towards the maximum saturation value. This means that
+/// for a color with 50% saturation, if `saturate_assign(0.5)` is applied to it,
+/// the color will scale halfway to the maximum value of 100% resulting in a new
+/// saturation value of 75%.
+///
+/// The fixed or absolute function,
+/// [`saturate_fixed_assign`](SaturateAssign::saturate_fixed_assign), increases
+/// the saturation by an amount that is independent of the current saturation of
+/// the color. So for a color with 50% saturation, if
+/// `saturate_fixed_assign(0.5)` is applied to it, the color will have 50%
+/// saturation added to its saturation value resulting in a new value of 100%.
+///
+/// See also [`Saturate`], [`Desaturate`] and [`DesaturateAssign`].
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::{Hsv, SaturateAssign};
+///
+/// let mut relative = Hsv::new_srgb(0.0, 0.5, 1.0);
+/// relative.saturate_assign(0.5);
+///
+/// let mut fixed = Hsv::new_srgb(0.0, 0.5, 1.0);
+/// fixed.saturate_fixed_assign(0.5);
+///
+/// assert_relative_eq!(relative.saturation, 0.75);
+/// assert_relative_eq!(fixed.saturation, 1.0);
+/// ```
+///
+/// `SaturateAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, SaturateAssign};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.saturate_assign(0.5);
+/// my_array.saturate_assign(0.5);
+/// my_slice.saturate_assign(0.5);
+/// ```
+pub trait SaturateAssign {
+    /// The type of the saturation modifier.
+    type Scalar;
+
+    /// Scale the color towards the maximum saturation by `factor`, a value
     /// ranging from `0.0` to `1.0`.
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsv, Saturate};
+    /// use palette::{Hsl, SaturateAssign};
     ///
-    /// let color = Hsv::new_srgb(0.0, 0.5, 0.5);
-    /// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);
+    /// let mut color = Hsl::new_srgb(0.0, 0.5, 0.5);
+    /// color.saturate_assign(0.5);
+    /// assert_relative_eq!(color.saturation, 0.75);
     /// ```
-    #[must_use]
-    #[inline]
-    fn desaturate(self, factor: Self::Scalar) -> Self {
-        self.saturate(-factor)
-    }
+    fn saturate_assign(&mut self, factor: Self::Scalar);
 
     /// Increase the saturation by `amount`, a value ranging from `0.0` to
     /// `1.0`.
     ///
     /// ```
     /// use approx::assert_relative_eq;
-    /// use palette::{Hsv, Saturate};
+    /// use palette::{Hsl, SaturateAssign};
+    ///
+    /// let mut color = Hsl::new_srgb(0.0, 0.4, 0.5);
+    /// color.saturate_fixed_assign(0.2);
+    /// assert_relative_eq!(color.saturation, 0.6);
+    /// ```
+    fn saturate_fixed_assign(&mut self, amount: Self::Scalar);
+}
+
+impl<T> SaturateAssign for [T]
+where
+    T: SaturateAssign,
+    T::Scalar: Clone,
+{
+    type Scalar = T::Scalar;
+
+    fn saturate_assign(&mut self, factor: Self::Scalar) {
+        for color in self {
+            color.saturate_assign(factor.clone());
+        }
+    }
+
+    fn saturate_fixed_assign(&mut self, amount: Self::Scalar) {
+        for color in self {
+            color.saturate_fixed_assign(amount.clone());
+        }
+    }
+}
+
+/// Operator for decreasing the saturation (or chroma) of a color.
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function, [`desaturate`](Desaturate::desaturate), scales the
+/// saturation towards the minimum saturation value. This means that for a color
+/// with 50% saturation, if `desaturate(0.5)` is applied to it, the color will
+/// scale halfway to the minimum value of 0% resulting in a new saturation value
+/// of 25%.
+///
+/// The fixed or absolute function,
+/// [`desaturate_fixed`](Desaturate::desaturate_fixed), decreases the saturation
+/// by an amount that is independent of the current saturation of the color. So
+/// for a color with 50% saturation, if `desaturate_fixed(0.5)` is applied to
+/// it, the color will have 50% saturation removed from its saturation value
+/// resulting in a new value of 0%.
+///
+/// See also [`DesaturateAssign`], [`Saturate`] and [`SaturateAssign`].
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::{Hsv, Desaturate};
+///
+/// let a = Hsv::new_srgb(0.0, 0.5, 1.0);
+///
+/// assert_relative_eq!(a.desaturate(0.5).saturation, 0.25);
+/// assert_relative_eq!(a.desaturate_fixed(0.5).saturation, 0.0);
+/// ```
+pub trait Desaturate {
+    /// The type of the desaturation modifier.
+    type Scalar;
+
+    /// Scale the color towards the minimum saturation by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Desaturate};
+    ///
+    /// let color = Hsv::new_srgb(0.0, 0.5, 0.5);
+    /// assert_relative_eq!(color.desaturate(0.5).saturation, 0.25);
+    /// ```
+    #[must_use]
+    fn desaturate(self, factor: Self::Scalar) -> Self;
+
+    /// Increase the saturation by `amount`, a value ranging from `0.0` to
+    /// `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, Desaturate};
     ///
     /// let color = Hsv::new_srgb(0.0, 0.4, 0.5);
     /// assert_relative_eq!(color.desaturate_fixed(0.2).saturation, 0.2);
     /// ```
     #[must_use]
+    fn desaturate_fixed(self, amount: Self::Scalar) -> Self;
+}
+
+impl<T> Desaturate for T
+where
+    T: Saturate,
+    T::Scalar: Neg<Output = T::Scalar>,
+{
+    type Scalar = T::Scalar;
+
+    #[inline]
+    fn desaturate(self, factor: Self::Scalar) -> Self {
+        self.saturate(-factor)
+    }
+
     #[inline]
     fn desaturate_fixed(self, amount: Self::Scalar) -> Self {
         self.saturate_fixed(-amount)
+    }
+}
+
+/// Assigning operator for decreasing the saturation (or chroma) of a color.
+///
+/// The trait's functions are split into two groups of functions: relative and
+/// fixed/absolute.
+///
+/// The relative function,
+/// [`desaturate_assign`](DesaturateAssign::desaturate_assign), scales the
+/// saturation towards the minimum saturation value. This means that for a color
+/// with 50% saturation, if `desaturate_assign(0.5)` is applied to it, the color
+/// will scale halfway to the minimum value of 0% resulting in a new saturation
+/// value of 25%.
+///
+/// The fixed or absolute function,
+/// [`desaturate_fixed_assign`](DesaturateAssign::desaturate_fixed_assign),
+/// decreases the saturation by an amount that is independent of the current
+/// saturation of the color. So for a color with 50% saturation, if
+/// `desaturate_fixed_assign(0.5)` is applied to it, the color will have 50%
+/// saturation removed from its saturation value resulting in a new value of 0%.
+///
+/// See also [`Desaturate`], [`Saturate`] and [`SaturateAssign`].
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::{Hsv, DesaturateAssign};
+///
+/// let mut relative = Hsv::new_srgb(0.0, 0.5, 1.0);
+/// relative.desaturate_assign(0.5);
+///
+/// let mut fixed = Hsv::new_srgb(0.0, 0.5, 1.0);
+/// fixed.desaturate_fixed_assign(0.5);
+///
+/// assert_relative_eq!(relative.saturation, 0.25);
+/// assert_relative_eq!(fixed.saturation, 0.0);
+/// ```
+///
+/// `DesaturateAssign` is also implemented for `[T]`:
+///
+/// ```
+/// use palette::{Hsl, DesaturateAssign};
+///
+/// let mut my_vec = vec![Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_array = [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(113.0, 0.5, 0.8)];
+/// let mut my_slice = &mut [Hsl::new_srgb(104.0, 0.3, 0.8), Hsl::new_srgb(112.0, 0.5, 0.8)];
+///
+/// my_vec.desaturate_assign(0.5);
+/// my_array.desaturate_assign(0.5);
+/// my_slice.desaturate_assign(0.5);
+/// ```
+pub trait DesaturateAssign {
+    /// The type of the desaturation modifier.
+    type Scalar;
+
+    /// Scale the color towards the minimum saturation by `factor`, a value
+    /// ranging from `0.0` to `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, DesaturateAssign};
+    ///
+    /// let mut color = Hsv::new_srgb(0.0, 0.5, 0.5);
+    /// color.desaturate_assign(0.5);
+    /// assert_relative_eq!(color.saturation, 0.25);
+    /// ```
+    fn desaturate_assign(&mut self, factor: Self::Scalar);
+
+    /// Increase the saturation by `amount`, a value ranging from `0.0` to
+    /// `1.0`.
+    ///
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Hsv, DesaturateAssign};
+    ///
+    /// let mut color = Hsv::new_srgb(0.0, 0.4, 0.5);
+    /// color.desaturate_fixed_assign(0.2);
+    /// assert_relative_eq!(color.saturation, 0.2);
+    /// ```
+    fn desaturate_fixed_assign(&mut self, amount: Self::Scalar);
+}
+
+impl<T> DesaturateAssign for T
+where
+    T: SaturateAssign + ?Sized,
+    T::Scalar: Neg<Output = T::Scalar>,
+{
+    type Scalar = T::Scalar;
+
+    #[inline]
+    fn desaturate_assign(&mut self, factor: Self::Scalar) {
+        self.saturate_assign(-factor);
+    }
+
+    #[inline]
+    fn desaturate_fixed_assign(&mut self, amount: Self::Scalar) {
+        self.saturate_fixed_assign(-amount);
     }
 }
 

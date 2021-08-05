@@ -16,8 +16,8 @@ use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     FloatComponent, FromColor, FromF64, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign, Luv,
-    LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -426,7 +426,7 @@ where
     type Scalar = T;
 
     #[inline]
-    fn saturate(self, factor: T) -> Lchuv<Wp, T> {
+    fn saturate(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -444,13 +444,38 @@ where
     }
 
     #[inline]
-    fn saturate_fixed(self, amount: T) -> Lchuv<Wp, T> {
+    fn saturate_fixed(self, amount: T) -> Self {
         Lchuv {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(T::zero()),
             hue: self.hue,
             white_point: PhantomData,
         }
+    }
+}
+
+impl<Wp, T> SaturateAssign for Lchuv<Wp, T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn saturate_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_chroma() - self.chroma
+        } else {
+            self.chroma
+        };
+
+        self.chroma += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.chroma, Self::min_chroma());
+    }
+
+    #[inline]
+    fn saturate_fixed_assign(&mut self, amount: T) {
+        self.chroma += Self::max_chroma() * amount;
+        clamp_min_assign(&mut self.chroma, Self::min_chroma());
     }
 }
 

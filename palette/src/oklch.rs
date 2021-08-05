@@ -15,8 +15,8 @@ use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, SaturateAssign, SetHue,
+    ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -469,7 +469,7 @@ where
     type Scalar = T;
 
     #[inline]
-    fn saturate(self, factor: T) -> Oklch<T> {
+    fn saturate(self, factor: T) -> Self {
         let difference = if factor >= T::zero() {
             Self::max_chroma() - self.chroma
         } else {
@@ -486,12 +486,37 @@ where
     }
 
     #[inline]
-    fn saturate_fixed(self, amount: T) -> Oklch<T> {
+    fn saturate_fixed(self, amount: T) -> Self {
         Oklch {
             l: self.l,
             chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
             hue: self.hue,
         }
+    }
+}
+
+impl<T> SaturateAssign for Oklch<T>
+where
+    T: FloatComponent + AddAssign,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn saturate_assign(&mut self, factor: T) {
+        let difference = if factor >= T::zero() {
+            Self::max_chroma() - self.chroma
+        } else {
+            self.chroma
+        };
+
+        self.chroma += difference.max(T::zero()) * factor;
+        clamp_min_assign(&mut self.chroma, Self::min_chroma());
+    }
+
+    #[inline]
+    fn saturate_fixed_assign(&mut self, amount: T) {
+        self.chroma += Self::max_chroma() * amount;
+        clamp_min_assign(&mut self.chroma, Self::min_chroma());
     }
 }
 
