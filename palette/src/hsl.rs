@@ -12,14 +12,13 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     Component, FloatComponent, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    Pixel, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue,
+    Xyz,
 };
 #[cfg(feature = "random")]
 use crate::{float::Float, FromF64};
@@ -39,7 +38,7 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///
 /// See [HSV](crate::Hsv) for a very similar color space, with brightness
 /// instead of lightness.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -620,23 +619,7 @@ where
 impl_color_add!(Hsl<S, T>, [hue, saturation, lightness], standard);
 impl_color_sub!(Hsl<S, T>, [hue, saturation, lightness], standard);
 
-impl<S, T, P> AsRef<P> for Hsl<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<S, T, P> AsMut<P> for Hsl<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Hsl<S, T>, [T; 3]);
 
 impl<S, T> AbsDiffEq for Hsl<S, T>
 where

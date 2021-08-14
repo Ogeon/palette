@@ -12,13 +12,12 @@ use rand::Rng;
 use crate::color_difference::get_ciede_difference;
 use crate::color_difference::ColorDifference;
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp,
     ClampAssign, Float, FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lab, LabHue,
-    Lighten, LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SaturateAssign,
-    SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    Lighten, LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue,
+    ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -31,7 +30,7 @@ pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
 /// it's a cylindrical color space, like [HSL](crate::Hsl) and
 /// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -493,23 +492,7 @@ where
 impl_color_add!(Lch<Wp, T>, [l, chroma, hue], white_point);
 impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
 
-impl<Wp, T, P> AsRef<P> for Lch<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Lch<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Lch<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Lch<Wp, T>
 where

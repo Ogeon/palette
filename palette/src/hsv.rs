@@ -12,13 +12,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     Component, FloatComponent, FromColor, GetHue, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign,
-    Mix, MixAssign, Pixel, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue,
+    Mix, MixAssign, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue,
     ShiftHueAssign, WithHue, Xyz,
 };
 #[cfg(feature = "random")]
@@ -36,7 +35,7 @@ pub type Hsva<S = Srgb, T = f32> = Alpha<Hsv<S, T>, T>;
 /// _lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)
 /// and white (100% R, 100% G, 100% B) has the same brightness (or value), but
 /// not the same lightness.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -639,23 +638,7 @@ where
 impl_color_add!(Hsv<S, T>, [hue, saturation, value], standard);
 impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
 
-impl<S, T, P> AsRef<P> for Hsv<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<S, T, P> AsMut<P> for Hsv<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Hsv<S, T>, [T; 3]);
 
 impl<S, T> AbsDiffEq for Hsv<S, T>
 where

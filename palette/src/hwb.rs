@@ -11,12 +11,11 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::encoding::Srgb;
 use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
     clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel,
+    FloatComponent, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
     RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
@@ -33,7 +32,7 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///
 /// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -526,23 +525,7 @@ where
 impl_color_add!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 
-impl<S, T, P> AsRef<P> for Hwb<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<S, T, P> AsMut<P> for Hwb<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Hwb<S, T>, [T; 3]);
 
 impl<S, T> AbsDiffEq for Hwb<S, T>
 where

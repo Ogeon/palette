@@ -10,13 +10,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::encoding::pixel::RawPixel;
 use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, Oklab, OklabHue, Pixel, RelativeContrast, Saturate, SaturateAssign, SetHue,
-    ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    MixAssign, Oklab, OklabHue, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Oklch with an alpha component. See the [`Oklcha` implementation in
@@ -33,7 +32,7 @@ pub type Oklcha<T = f32> = Alpha<Oklch<T>, T>;
 ///
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions,
 /// like Oklab.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -532,23 +531,7 @@ where
 impl_color_add!(Oklch<T>, [l, chroma, hue]);
 impl_color_sub!(Oklch<T>, [l, chroma, hue]);
 
-impl<T, P> AsRef<P> for Oklch<T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<T, P> AsMut<P> for Oklch<T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Oklch<T>, [T; 3]);
 
 impl<T> RelativeContrast for Oklch<T>
 where

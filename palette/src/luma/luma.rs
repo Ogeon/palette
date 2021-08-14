@@ -15,13 +15,12 @@ use rand::Rng;
 use crate::blend::PreAlpha;
 use crate::convert::FromColorUnclamped;
 use crate::encoding::linear::LinearFn;
-use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb, TransferFn};
 use crate::luma::LumaStandard;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign,
     Component, ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Xyz, Yxy,
+    LightenAssign, Mix, MixAssign, RelativeContrast, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -35,7 +34,7 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 /// perceived to be. It's basically the `Y` component of [CIE
 /// XYZ](crate::Xyz). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -697,46 +696,7 @@ where
     }
 }
 
-impl<S, T, P> AsRef<P> for Luma<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    /// Convert to a raw pixel format.
-    ///
-    /// ```rust
-    /// use palette::SrgbLuma;
-    ///
-    /// let luma = SrgbLuma::new(100);
-    /// let raw: &[u8] = luma.as_ref();
-    ///
-    /// assert_eq!(raw[0], 100);
-    /// ```
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<S, T, P> AsMut<P> for Luma<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    /// Convert to a raw pixel format.
-    ///
-    /// ```rust
-    /// use palette::SrgbLuma;
-    ///
-    /// let mut luma = SrgbLuma::new(100);
-    /// {
-    ///     let raw: &mut [u8] = luma.as_mut();
-    ///     raw[0] = 5;
-    /// }
-    ///
-    /// assert_eq!(luma.luma, 5);
-    /// ```
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Luma<S, T>, [T; 1]);
 
 impl<S, T> AbsDiffEq for Luma<S, T>
 where

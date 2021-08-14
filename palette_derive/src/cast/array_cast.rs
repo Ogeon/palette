@@ -16,7 +16,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         ..
     } = syn::parse(tokens).map_err(|error| vec![error])?;
 
-    let repr_c = is_repr_c(&attrs)?;
+    let allowed_repr = is_allowed_repr(&attrs)?;
     let item_meta: TypeItemAttributes = meta::parse_namespaced_attributes(attrs)?;
 
     let mut number_of_channels = 0usize;
@@ -37,13 +37,13 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         Data::Enum(_) => {
             return Err(vec![syn::Error::new(
                 Span::call_site(),
-                "`Pixel` cannot be derived for enums, because of the discriminant",
+                "`ArrayCast` cannot be derived for enums, because of the discriminant",
             )]);
         }
         Data::Union(_) => {
             return Err(vec![syn::Error::new(
                 Span::call_site(),
-                "`Pixel` cannot be derived for unions",
+                "`ArrayCast` cannot be derived for unions",
             )]);
         }
     };
@@ -87,31 +87,31 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         }
     }
 
-    if !repr_c {
+    if !allowed_repr {
         errors.push(syn::Error::new(
             Span::call_site(),
             format!(
-                "a `#[repr(C)]` attribute is required to give `{}` a fixed memory layout",
+                "a `#[repr(C)]` or `#[repr(transparent)]` attribute is required to give `{}` a fixed memory layout",
                 ident
             ),
         ));
     }
 
-    let pixel_trait_path = util::path(&["Pixel"], item_meta.internal);
+    let array_cast_trait_path = util::path(&["cast", "ArrayCast"], item_meta.internal);
 
     let mut implementation = if let Some(field_type) = field_type {
         let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
 
         quote! {
             #[automatically_derived]
-            unsafe impl #impl_generics #pixel_trait_path<#field_type> for #ident #type_generics #where_clause {
-                const CHANNELS: usize = #number_of_channels;
+            unsafe impl #impl_generics #array_cast_trait_path for #ident #type_generics #where_clause {
+                type Array = [#field_type; #number_of_channels];
             }
         }
     } else {
         errors.push(syn::Error::new(
             Span::call_site(),
-            "`Pixel` can only be derived for structs with one or more fields".to_string(),
+            "`ArrayCast` can only be derived for structs with one or more fields".to_string(),
         ));
 
         return Err(errors);
@@ -121,7 +121,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     Ok(implementation.into())
 }
 
-fn is_repr_c(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Error>> {
+fn is_allowed_repr(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Error>> {
     let mut errors = Vec::new();
 
     for attribute in attributes {
@@ -136,9 +136,11 @@ fn is_repr_c(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Err
                 }
             };
 
-            let contains_c = items.iter().any(|item: &Ident| item == "C");
+            let contains_allowed_repr = items
+                .iter()
+                .any(|item: &Ident| item == "C" || item == "transparent");
 
-            if contains_c {
+            if contains_allowed_repr {
                 return Ok(true);
             }
         }

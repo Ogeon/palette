@@ -14,12 +14,11 @@ use crate::float::Float;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio,
     convert::FromColorUnclamped,
-    encoding::pixel::RawPixel,
     luv_bounds::LuvBounds,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten,
-    LightenAssign, LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SaturateAssign,
-    SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    LightenAssign, LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue,
+    ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
@@ -35,7 +34,7 @@ pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
 /// 100.0]. This makes HSLuv much more convenient for generating
 /// colors than Lchuv, as the set of valid saturation values is
 /// independent of lightness and hue.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -507,23 +506,7 @@ where
 impl_color_add!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 
-impl<Wp, T, P> AsRef<P> for Hsluv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Hsluv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Hsluv<Wp, T>
 where

@@ -3,9 +3,10 @@ use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign,
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use num_traits::{One, Zero};
 
-use crate::encoding::pixel::RawPixel;
-use crate::float::Float;
-use crate::{clamp, Alpha, Blend, ComponentWise, Mix, MixAssign, Pixel};
+use crate::{
+    cast::ArrayCast, clamp, float::Float, Alpha, ArrayExt, Blend, ComponentWise, Mix, MixAssign,
+    NextArray,
+};
 
 /// Premultiplied alpha wrapper.
 ///
@@ -167,8 +168,12 @@ impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for PreAlpha<C, T> {
     }
 }
 
-unsafe impl<T, C: Pixel<T>> Pixel<T> for PreAlpha<C, T> {
-    const CHANNELS: usize = C::CHANNELS + 1;
+unsafe impl<C> ArrayCast for PreAlpha<C, <<C as ArrayCast>::Array as ArrayExt>::Item>
+where
+    C: ArrayCast,
+    C::Array: NextArray,
+{
+    type Array = <C::Array as NextArray>::Next;
 }
 
 impl<C: Default, T: Float> Default for PreAlpha<C, T> {
@@ -380,25 +385,7 @@ impl<T: DivAssign + Clone, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
     }
 }
 
-impl<C, T, P> AsRef<P> for PreAlpha<C, T>
-where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<C, T, P> AsMut<P> for PreAlpha<C, T>
-where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(PreAlpha<C, T>, [T; N], const N, where PreAlpha<C, T>: ArrayCast<Array = [T; N]>);
 
 impl<C, T> Deref for PreAlpha<C, T> {
     type Target = C;
@@ -423,11 +410,12 @@ where
 }
 
 // Safety:
-//  See `Alpha<C, T>`'s implementation of `Pod`.
+//
+// See `Alpha<C, T>`'s implementation of `Pod`.
 #[cfg(feature = "bytemuck")]
 unsafe impl<C, T> bytemuck::Pod for PreAlpha<C, T>
 where
-    C: bytemuck::Pod + Pixel<T>,
+    C: bytemuck::Pod + ArrayCast,
     T: bytemuck::Pod,
 {
 }

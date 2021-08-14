@@ -3,7 +3,6 @@ pub mod channels;
 use core::marker::PhantomData;
 
 use crate::rgb::{Rgb, Rgba};
-use crate::Pixel;
 
 /// RGBA color packed into a 32-bit unsigned integer. Defaults to ARGB
 /// ordering for `Rgb` types and RGBA ordering for `Rgba` types.
@@ -44,23 +43,22 @@ use crate::Pixel;
 /// corresponding `u32`. Converting from a packed color type back to an `Rgb`
 /// type will disregard the alpha value.
 ///
-/// `Packed` implements [Pixel](crate::encoding::pixel::Pixel) and can be
+/// `Packed` implements [ArrayCast](crate::cast::ArrayCast) and can be
 /// constructed from a slice of `&[u32]`.
 ///
 /// ```
-/// use palette::{Packed, Pixel};
-/// use palette::rgb::channels::Argb;
+/// use palette::{rgb::channels::Argb, cast, Packed};
 ///
 /// let raw = &[0x7F0080u32, 0x60BBCC];
-/// let colors = Packed::<Argb>::from_raw_slice(raw);
+/// let colors = cast::from_component_slice::<Packed<Argb>>(raw);
 ///
 /// assert_eq!(colors.len(), 2);
 /// assert_eq!(colors[0].color, 0x7F0080);
 /// assert_eq!(colors[1].color, 0x60BBCC);
 /// ```
-#[derive(Debug, PartialEq, Eq, Pixel)]
+#[derive(Debug, PartialEq, Eq, ArrayCast)]
 #[palette(palette_internal)]
-#[repr(C)]
+#[repr(transparent)]
 pub struct Packed<C = channels::Argb> {
     /// The sRGB color packed into a `u32`.
     pub color: u32,

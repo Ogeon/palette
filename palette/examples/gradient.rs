@@ -5,7 +5,7 @@ fn main() {
 
 #[cfg(feature = "std")]
 fn main() {
-    use palette::{FromColor, Gradient, IntoColor, Lch, LinSrgb, Pixel, Srgb};
+    use palette::{FromColor, Gradient, IntoColor, Lch, LinSrgb, Srgb};
 
     use image::{GenericImage, GenericImageView, RgbImage};
 
@@ -47,10 +47,10 @@ fn main() {
         .zip(grad3.take(256).zip(grad4.take(256)))
         .enumerate()
     {
-        let c1 = Srgb::from_linear(c1).into_format().into_raw();
-        let c2 = Srgb::from_linear(c2).into_format().into_raw();
-        let c3 = Srgb::from_linear(c3.into_color()).into_format().into_raw();
-        let c4 = Srgb::from_linear(c4.into_color()).into_format().into_raw();
+        let c1 = Srgb::from_linear(c1).into_format().into();
+        let c2 = Srgb::from_linear(c2).into_format().into();
+        let c3 = Srgb::from_linear(c3.into_color()).into_format().into();
+        let c4 = Srgb::from_linear(c4.into_color()).into_format().into();
 
         {
             let mut sub_image = image.sub_image(i as u32, 0, 1, 31);

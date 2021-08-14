@@ -1,4 +1,4 @@
-use palette::{FromColor, Hsl, IntoColor, Lch, Pixel, Saturate, Srgb};
+use palette::{FromColor, Hsl, IntoColor, Lch, Saturate, Srgb};
 
 use image::{GenericImage, GenericImageView};
 
@@ -17,7 +17,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let color: Hsl = Srgb::from_raw(&sub_image.get_pixel(x, y).0)
+                let color: Hsl = Srgb::from(sub_image.get_pixel(x, y).0)
                     .into_format()
                     .into_color();
 
@@ -25,7 +25,7 @@ fn main() {
                 sub_image.put_pixel(
                     x,
                     y,
-                    image::Rgb(Srgb::from_color(saturated).into_format().into_raw()),
+                    image::Rgb(Srgb::from_color(saturated).into_format().into()),
                 );
             }
         }
@@ -36,7 +36,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let color: Lch = Srgb::from_raw(&sub_image.get_pixel(x, y).0)
+                let color: Lch = Srgb::from(sub_image.get_pixel(x, y).0)
                     .into_format()
                     .into_color();
 
@@ -44,7 +44,7 @@ fn main() {
                 sub_image.put_pixel(
                     x,
                     y,
-                    image::Rgb(Srgb::from_color(saturated).into_format().into_raw()),
+                    image::Rgb(Srgb::from_color(saturated).into_format().into()),
                 );
             }
         }
