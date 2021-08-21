@@ -138,11 +138,12 @@
 //! #[macro_use]
 //! extern crate approx;
 //!
+//! use palette::cast::{self, ArrayCast};
 //! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
 //! use palette::encoding::Linear;
 //! use palette::white_point::D65;
 //! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
-//! use palette::{FloatComponent, Hsv, Pixel, Srgb, IntoColor};
+//! use palette::{FloatComponent, Hsv, Srgb, IntoColor};
 //!
 //! /// sRGB, but with a reversed memory layout.
 //! #[palette(
@@ -150,7 +151,7 @@
 //!     component = "T",
 //!     rgb_standard = "palette::encoding::Srgb"
 //! )]
-//! #[derive(Copy, Clone, Pixel, FromColorUnclamped)]
+//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]
 //! #[repr(C)] // Makes sure the memory layout is as we want it.
 //! struct Bgr<T> {
 //!     blue: T,
@@ -198,7 +199,8 @@
 //!         0.5,
 //!         0.25,
 //!     ];
-//!     let hsv: Hsv<_, f64> = Bgr::from_raw_slice(&buffer)[1].into_color();
+//!     let hsv: Hsv<_, f64> = cast::from_component_slice::<Bgr<_>>(&buffer)[1]
+//!         .into_color();
 //!
 //!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
 //! }

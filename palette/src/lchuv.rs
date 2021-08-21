@@ -10,13 +10,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::luv_bounds::LuvBounds;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     FloatComponent, FromColor, FromF64, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign, Luv,
-    LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
     ShiftHueAssign, WithHue, Xyz,
 };
 
@@ -30,7 +29,7 @@ pub type Lchuva<Wp = D65, T = f32> = Alpha<Lchuv<Wp, T>, T>;
 /// it's a cylindrical color space, like [HSL](crate::Hsl) and
 /// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -491,23 +490,7 @@ where
 impl_color_add!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
 impl_color_sub!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
 
-impl<Wp, T, P> AsRef<P> for Lchuv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Lchuv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Lchuv<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Lchuv<Wp, T>
 where

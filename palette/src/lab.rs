@@ -14,12 +14,11 @@ use crate::{
     color_difference::{get_ciede_difference, ColorDifference},
     contrast_ratio,
     convert::FromColorUnclamped,
-    encoding::pixel::RawPixel,
     float::Float,
     from_f64,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds,
-    LabHue, Lch, Lighten, LightenAssign, Mix, MixAssign, Pixel, RelativeContrast, Xyz,
+    LabHue, Lch, Lighten, LightenAssign, Mix, MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -37,7 +36,7 @@ pub type Laba<Wp = D65, T = f32> = Alpha<Lab<Wp, T>, T>;
 ///
 /// The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -430,23 +429,7 @@ impl_color_sub!(Lab<Wp, T>, [l, a, b], white_point);
 impl_color_mul!(Lab<Wp, T>, [l, a, b], white_point);
 impl_color_div!(Lab<Wp, T>, [l, a, b], white_point);
 
-impl<Wp, T, P> AsRef<P> for Lab<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Lab<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Lab<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Lab<Wp, T>
 where

@@ -23,7 +23,7 @@ macro_rules! raw_pixel_conversion_tests {
     };
 
     (@float_array_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
-        use crate::Pixel;
+        use crate::cast::ArrayCast;
         use crate::Alpha;
 
         let mut counter: $float = 0.0;
@@ -33,24 +33,22 @@ macro_rules! raw_pixel_conversion_tests {
         )+
         let alpha = counter + 0.1;
 
-        let raw: [$float; <$name<$($ty_param,)+ $float> as Pixel<$float>>::CHANNELS] = [$($component),+];
-        let raw_plus_1: [$float; <$name<$($ty_param,)+ $float> as Pixel<$float>>::CHANNELS + 1] = [
+        let raw: <$name<$($ty_param,)+ $float> as ArrayCast>::Array = [$($component),+];
+        let raw_plus_1: <Alpha<$name<$($ty_param,)+ $float>, $float> as ArrayCast>::Array = [
             $($component,)+
             alpha
         ];
-        let color: $name<$($ty_param,)+ $float> = *$name::from_raw(&raw);
-        let color_long: $name<$($ty_param,)+ $float> = *$name::from_raw(&raw_plus_1);
+        let color: $name<$($ty_param,)+ $float> = crate::cast::from_array(raw);
 
-        let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(&raw_plus_1);
+        let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = crate::cast::from_array(raw_plus_1);
 
         assert_eq!(color, $name::new($($component),+));
-        assert_eq!(color_long, $name::new($($component),+));
 
         assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
     };
 
     (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
-        use crate::Pixel;
+        use core::convert::{TryInto, TryFrom};
         use crate::Alpha;
 
         let mut counter: $float = 0.0;
@@ -70,17 +68,15 @@ macro_rules! raw_pixel_conversion_tests {
             alpha,
             extra
         ];
-        let color: $name<$($ty_param,)+ $float> = *$name::from_raw(raw);
-        let color_long: $name<$($ty_param,)+ $float> = *$name::from_raw(raw_plus_1);
+        let color: &$name<$($ty_param,)+ $float> = raw.try_into().unwrap();
+        assert!(<&$name<$($ty_param,)+ $float>>::try_from(raw_plus_1).is_err());
 
-        let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(raw_plus_1);
-        let color_alpha_long: Alpha<$name<$($ty_param,)+ $float>, $float> = *Alpha::<$name<$($ty_param,)+ $float>, $float>::from_raw(raw_plus_2);
+        let color_alpha: &Alpha<$name<$($ty_param,)+ $float>, $float> = raw_plus_1.try_into().unwrap();
+        assert!(<&Alpha<$name<$($ty_param,)+ $float>, $float>>::try_from(raw_plus_2).is_err());
 
-        assert_eq!(color, $name::new($($component),+));
-        assert_eq!(color_long, $name::new($($component),+));
+        assert_eq!(color, &$name::new($($component),+));
 
-        assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
-        assert_eq!(color_alpha_long, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha, &Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
     };
 }
 
@@ -88,40 +84,23 @@ macro_rules! raw_pixel_conversion_tests {
 macro_rules! raw_pixel_conversion_fail_tests {
     ($name: ident <$($ty_param: path),+> : $($component: ident),+) => {
         #[test]
-        #[should_panic(expected = "not enough color channels")]
-        fn convert_from_short_f32_array() {
-            raw_pixel_conversion_fail_tests!(@float_array_test f32, $name<$($ty_param),+>);
-        }
-
-        #[test]
-        #[should_panic(expected = "not enough color channels")]
-        fn convert_from_short_f64_array() {
-            raw_pixel_conversion_fail_tests!(@float_array_test f64, $name<$($ty_param),+>);
-        }
-
-        #[test]
-        #[should_panic(expected = "not enough color channels")]
+        #[should_panic(expected = "TryFromSliceError")]
         fn convert_from_short_f32_slice() {
             raw_pixel_conversion_fail_tests!(@float_slice_test f32, $name<$($ty_param),+>);
         }
 
         #[test]
-        #[should_panic(expected = "not enough color channels")]
+        #[should_panic(expected = "TryFromSliceError")]
         fn convert_from_short_f64_slice() {
             raw_pixel_conversion_fail_tests!(@float_slice_test f64, $name<$($ty_param),+>);
         }
     };
 
-    (@float_array_test $float: ty, $name: ident <$($ty_param: path),+>) => {
-        use crate::Pixel;
-        let raw: [$float; 1] = [0.1];
-        let _: $name<$($ty_param,)+ $float> = *$name::from_raw(&raw);
-    };
-
     (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+>) => {
-        use crate::Pixel;
+        use core::convert::TryInto;
+
         let raw: &[$float] = &[0.1];
-        let _: $name<$($ty_param,)+ $float> = *$name::from_raw(raw);
+        let _: &$name<$($ty_param,)+ $float> = raw.try_into().unwrap();
     };
 }
 
@@ -648,4 +627,162 @@ macro_rules! impl_color_div {
             }
         }
     };
+}
+
+macro_rules! impl_array_casts {
+    ($self_ty: ident < $($ty_param: ident),+ > , [$array_item: ty; $array_len: expr] $(, const $const_n: ident, where $($where: tt)+)?) => {
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn as_ref(&self) -> &[$array_item; $array_len] {
+                crate::cast::into_array_ref(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        $(where $($where)+)?
+        {
+            fn as_ref(&self) -> &$self_ty<$($ty_param),+> {
+                crate::cast::from_array_ref(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn as_mut(&mut self) -> &mut [$array_item; $array_len] {
+                crate::cast::into_array_mut(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        $(where $($where)+)?
+        {
+            fn as_mut(&mut self) -> &mut $self_ty<$($ty_param),+> {
+                crate::cast::from_array_mut(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<[$array_item]> for $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn as_ref(&self) -> &[$array_item] {
+                &*AsRef::<[$array_item; $array_len]>::as_ref(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<[$array_item]> for $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn as_mut(&mut self) -> &mut [$array_item] {
+                &mut *AsMut::<[$array_item; $array_len]>::as_mut(self)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> From<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        $(where $($where)+)?
+        {
+            fn from(color: $self_ty<$($ty_param),+>) -> Self {
+                crate::cast::into_array(color)
+            }
+        }
+
+        impl<$($ty_param,)+ $(const $const_n: usize)?> From<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn from(array: [$array_item; $array_len]) -> Self {
+                crate::cast::from_array(array)
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a $self_ty<$($ty_param),+>> for &'a [$array_item; $array_len]
+        $(where $($where)+)?
+        {
+            fn from(color: &'a $self_ty<$($ty_param),+>) -> Self {
+                color.as_ref()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a [$array_item; $array_len]> for &'a $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn from(array: &'a [$array_item; $array_len]) -> Self{
+                array.as_ref()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a $self_ty<$($ty_param),+>> for &'a [$array_item]
+        $(where $($where)+)?
+        {
+            fn from(color: &'a $self_ty<$($ty_param),+>) -> Self {
+                color.as_ref()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> core::convert::TryFrom<&'a [$array_item]> for &'a $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            type Error = <&'a [$array_item; $array_len] as core::convert::TryFrom<&'a [$array_item]>>::Error;
+
+            fn try_from(slice: &'a [$array_item]) -> Result<Self, Self::Error> {
+                use core::convert::TryInto;
+
+                slice.try_into().map(crate::cast::from_array_ref)
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut $self_ty<$($ty_param),+>> for &'a mut [$array_item; $array_len]
+        $(where $($where)+)?
+        {
+            fn from(color: &'a mut $self_ty<$($ty_param),+>) -> Self {
+                color.as_mut()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut [$array_item; $array_len]> for &'a mut $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            fn from(array: &'a mut [$array_item; $array_len]) -> Self{
+                array.as_mut()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut $self_ty<$($ty_param),+>> for &'a mut [$array_item]
+        $(where $($where)+)?
+        {
+            fn from(color: &'a mut $self_ty<$($ty_param),+>) -> Self {
+                color.as_mut()
+            }
+        }
+
+        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> core::convert::TryFrom<&'a mut [$array_item]> for &'a mut $self_ty<$($ty_param),+>
+        $(where $($where)+)?
+        {
+            type Error = <&'a mut [$array_item; $array_len] as core::convert::TryFrom<&'a mut [$array_item]>>::Error;
+
+            fn try_from(slice: &'a mut [$array_item]) -> Result<Self, Self::Error> {
+                use core::convert::TryInto;
+
+                slice.try_into().map(crate::cast::from_array_mut)
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<$($ty_param,)+ $(const $const_n: usize)?> From<Box<$self_ty<$($ty_param),+>>> for Box<[$array_item; $array_len]>
+        $(where $($where)+)?
+        {
+            fn from(color: Box<$self_ty<$($ty_param),+>>) -> Self {
+                crate::cast::into_array_box(color)
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<$($ty_param,)+ $(const $const_n: usize)?> From<Box<[$array_item; $array_len]>> for Box<$self_ty<$($ty_param),+>>
+        $(where $($where)+)?
+        {
+            fn from(array: Box<[$array_item; $array_len]>) -> Self{
+                crate::cast::from_array_box(array)
+            }
+        }
+    }
 }

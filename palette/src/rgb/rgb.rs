@@ -18,7 +18,6 @@ use crate::alpha::Alpha;
 use crate::blend::PreAlpha;
 use crate::convert::FromColorUnclamped;
 use crate::encoding::linear::LinearFn;
-use crate::encoding::pixel::RawPixel;
 use crate::encoding::{Linear, Srgb};
 use crate::luma::LumaStandard;
 use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
@@ -26,7 +25,7 @@ use crate::rgb::{Packed, RgbChannels, RgbSpace, RgbStandard, TransferFn};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign,
     Component, ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, Pixel, RelativeContrast,
+    LightenAssign, Mix, MixAssign, RelativeContrast,
 };
 use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
 
@@ -43,9 +42,9 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 ///
 /// Many conversions and operations on this color space requires that it's
 /// linear, meaning that gamma correction is required when converting to and
-/// from a displayable RGB, such as sRGB. See the [`pixel`](crate::encoding::pixel)
+/// from a displayable RGB, such as sRGB. See the [`encoding`](crate::encoding)
 /// module for encoding formats.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -1064,46 +1063,7 @@ where
     }
 }
 
-impl<S, T, P> AsRef<P> for Rgb<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    /// Convert to a raw pixel format.
-    ///
-    /// ```rust
-    /// use palette::Srgb;
-    ///
-    /// let mut rgb = Srgb::new(38, 42, 19);
-    /// let raw: &[u8] = rgb.as_ref();
-    ///
-    /// assert_eq!(raw[1], 42);
-    /// ```
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<S, T, P> AsMut<P> for Rgb<S, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    /// Convert to a raw pixel format.
-    ///
-    /// ```rust
-    /// use palette::Srgb;
-    ///
-    /// let mut rgb = Srgb::new(38, 42, 19);
-    /// {
-    ///     let raw: &mut [u8] = rgb.as_mut();
-    ///     raw[1] = 5;
-    /// }
-    ///
-    /// assert_eq!(rgb.green, 5);
-    /// ```
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Rgb<S, T>, [T; 3]);
 
 impl<S, T> fmt::LowerHex for Rgb<S, T>
 where

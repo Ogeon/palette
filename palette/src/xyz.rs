@@ -10,7 +10,6 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
 use crate::rgb::{Rgb, RgbSpace, RgbStandard};
@@ -18,7 +17,7 @@ use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp,
     ClampAssign, ComponentWise, FloatComponent, IsWithinBounds, Lab, Lighten, LightenAssign, Luma,
-    Luv, Mix, MixAssign, Oklab, Oklch, Pixel, RelativeContrast, Yxy,
+    Luv, Mix, MixAssign, Oklab, Oklch, RelativeContrast, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -34,7 +33,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 /// Conversions and operations on this color space depend on the defined white
 /// point
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -516,23 +515,7 @@ impl_color_sub!(Xyz<Wp, T>, [x, y, z], white_point);
 impl_color_mul!(Xyz<Wp, T>, [x, y, z], white_point);
 impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
 
-impl<Wp, T, P> AsRef<P> for Xyz<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Xyz<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Xyz<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Xyz<Wp, T>
 where

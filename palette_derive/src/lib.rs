@@ -32,8 +32,8 @@ macro_rules! syn_try {
 }
 
 mod alpha;
+mod cast;
 mod convert;
-mod encoding;
 mod meta;
 mod util;
 
@@ -68,7 +68,7 @@ pub fn derive_from_color_unclamped(tokens: TokenStream) -> TokenStream {
     syn_try!(convert::derive_from_color_unclamped(tokens))
 }
 
-#[proc_macro_derive(Pixel, attributes(palette))]
-pub fn derive_pixel(tokens: TokenStream) -> TokenStream {
-    syn_try!(encoding::derive_pixel(tokens))
+#[proc_macro_derive(ArrayCast, attributes(palette))]
+pub fn derive_array_cast(tokens: TokenStream) -> TokenStream {
+    syn_try!(cast::derive_array_cast(tokens))
 }

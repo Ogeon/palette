@@ -18,7 +18,7 @@
 //! For example, this does not work:
 //!
 //! ```rust,compile_fail
-//! // An alias for Rgb<Srgb>, which is what most pictures store.
+//! // An alias for Rgb<Srgb, T>, which is what most pictures store.
 //! use palette::Srgb;
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0);
@@ -29,8 +29,8 @@
 //! Instead, they have to be made linear before adding:
 //!
 //! ```rust
-//! // An alias for Rgb<Srgb>, which is what most pictures store.
-//! use palette::{Pixel, Srgb};
+//! // An alias for Rgb<Srgb, T>, which is what most pictures store.
+//! use palette::Srgb;
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
@@ -39,7 +39,7 @@
 //! // Encode the result back into sRGB and create a byte array
 //! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes)
 //!     .into_format()
-//!     .into_raw();
+//!     .into();
 //! ```
 //!
 //! See the [rgb] module for a deeper dive into RGB and (non-)linearity.
@@ -135,11 +135,11 @@
 //!
 //! ```rust
 //! # let mut image_buffer: Vec<u8> = vec![];
-//! use palette::{Srgb, Pixel};
+//! use palette::{Srgb, cast};
 //!
-//! // This works for any (even non-RGB) color type that can have the
+//! // This works for any color type (even non-RGB) that can have the
 //! // buffer element type as component.
-//! let color_buffer: &mut [Srgb<u8>] = Pixel::from_raw_slice_mut(&mut image_buffer);
+//! let color_buffer: &mut [Srgb<u8>] = cast::from_component_slice_mut(&mut image_buffer);
 //! ```
 //!
 //! * If you are getting your colors from the GPU, in a game or other graphical
@@ -178,26 +178,25 @@
 //!
 //! # Working with Raw Data
 //!
-//! Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. The
-//! [`Pixel`](crate::encoding::pixel::Pixel) trait allows for easy interoperation between
-//! Palette colors and other crates or systems. `from_raw` can be used to
-//! convert into a Palette color, `into_format` converts from  `Srgb<u8>` to
-//! `Srgb<f32>`, and finally `into_raw` to convert from a Palette color back to
-//! a `[u8;3]`.
+//! Oftentimes, pixel data is stored in a plain array or slice such as a `[u8;
+//! 3]`. The [`cast`] module allows for easy conversion between Palette colors
+//! and other crates or systems. `from` can be used to convert a `[u8;3]` into a
+//! Palette color, `into_format` converts from  `Srgb<u8>` to `Srgb<f32>`, and
+//! finally `into` converts from a Palette color back to a `[u8;3]`.
 //!
 //! ```rust
 //! use approx::assert_relative_eq;
-//! use palette::{Srgb, Pixel};
+//! use palette::Srgb;
 //!
 //! let buffer = [255, 0, 255];
-//! let raw = Srgb::from_raw(&buffer);
-//! assert_eq!(raw, &Srgb::<u8>::new(255u8, 0, 255));
+//! let srgb = Srgb::from(buffer);
+//! assert_eq!(srgb, Srgb::<u8>::new(255u8, 0, 255));
 //!
-//! let raw_float: Srgb<f32> = raw.into_format();
-//! assert_relative_eq!(raw_float, Srgb::new(1.0, 0.0, 1.0));
+//! let srgb_float: Srgb<f32> = srgb.into_format();
+//! assert_relative_eq!(srgb_float, Srgb::new(1.0, 0.0, 1.0));
 //!
-//! let raw: [u8; 3] = Srgb::into_raw(raw_float.into_format());
-//! assert_eq!(raw, buffer);
+//! let array: [u8; 3] = srgb_float.into_format().into();
+//! assert_eq!(array, buffer);
 //! ```
 
 // Keep the standard library when running tests, too
@@ -252,7 +251,6 @@ pub use yxy::{Yxy, Yxya};
 pub use color_difference::ColorDifference;
 pub use component::*;
 pub use convert::{FromColor, IntoColor};
-pub use encoding::pixel::Pixel;
 pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 pub use matrix::Mat3;
 pub use relative_contrast::{contrast_ratio, RelativeContrast};
@@ -427,6 +425,7 @@ pub mod named;
 mod random_sampling;
 
 mod alpha;
+pub mod cast;
 mod hsl;
 mod hsluv;
 mod hsv;
@@ -1498,6 +1497,56 @@ impl FromF64 for f64 {
 #[inline]
 fn from_f64<T: FromF64>(c: f64) -> T {
     T::from_f64(c)
+}
+
+/// Extension trait for fixed size arrays.
+///
+/// ## Safety
+///
+/// * `Item` must be the type of the array's items (eg: `T` in `[T; N]`).
+/// * `LENGTH` must be the length of the array (eg: `N` in `[T; N]`).
+pub unsafe trait ArrayExt: sealed::IsArray {
+    /// The type of the array's items.
+    type Item;
+
+    /// The number of items in the array.
+    const LENGTH: usize;
+}
+
+unsafe impl<T, const N: usize> ArrayExt for [T; N] {
+    type Item = T;
+
+    const LENGTH: usize = N;
+}
+
+/// Temporary helper trait for getting an array type of size `N + 1`.
+///
+/// ## Safety
+///
+/// * `Next` must have the same item type as `Self`.
+/// * `Next` must be one item longer than `Self`.
+pub unsafe trait NextArray: sealed::IsArray {
+    /// An array of size `N + 1`.
+    type Next: ArrayExt;
+}
+
+macro_rules! impl_next_array {
+    ($length: expr) => {};
+    ($length: expr, $next_length: expr $(, $rest: expr)*) => {
+        unsafe impl<T> NextArray for [T; $length] {
+            type Next = [T; $next_length];
+        }
+
+        impl_next_array!($next_length $(, $rest)*);
+    };
+}
+
+impl_next_array!(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+
+mod sealed {
+    pub trait IsArray {}
+
+    impl<T, const N: usize> IsArray for [T; N] {}
 }
 
 #[cfg(doctest)]

@@ -10,12 +10,11 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
-    LuvHue, Mix, MixAssign, Pixel, RelativeContrast, Xyz,
+    LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -32,7 +31,7 @@ pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
 /// CIELUV-space.
 ///
 /// As a result, CIELUV is used more frequently for additive settings.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -418,23 +417,7 @@ impl_color_sub!(Luv<Wp, T>, [l, u, v], white_point);
 impl_color_mul!(Luv<Wp, T>, [l, u, v], white_point);
 impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
 
-impl<Wp, T, P> AsRef<P> for Luv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Luv<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Luv<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Luv<Wp, T>
 where

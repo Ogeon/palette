@@ -16,7 +16,7 @@ A color management and conversion library that focuses on maintaining correctnes
 
 ## Minimum Supported Rust Version (MSRV)
 
-This version of Palette has been automatically tested with Rust version `1.48.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
+This version of Palette has been automatically tested with Rust version `1.51.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
 
 ## Getting Started
 
@@ -93,16 +93,16 @@ A longer and more advanced example that shows how to implement the conversion tr
 
 ### Pixels And Buffers
 
-When working with image or pixel buffers, or any color type that can be converted to a slice of components (ex. `&[u8]`), the `Pixel` trait provides methods for turning them into slices of Palette colors without cloning the whole buffer:
+When working with image or pixel buffers, or any color type that can be converted to a slice of components (ex. `&[u8]`), the `cast` module provides functions for turning them into slices of Palette colors without cloning the whole buffer:
 
 ```rust
-use palette::{Srgb, Pixel};
+use palette::{cast, Srgb};
 
 // The input to this function could be data from an image file or
 // maybe a texture in a game.
 fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
     // Convert `my_rgb_image` into `&mut [Srgb<u8>]` without copying.
-    let my_rgb_image = Srgb::from_raw_slice_mut(my_rgb_image);
+    let my_rgb_image: &mut [Srgb<u8>] = cast::from_component_slice_mut(my_rgb_image);
 
     for color in my_rgb_image {
         std::mem::swap(&mut color.red, &mut color.blue);
@@ -117,10 +117,10 @@ fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
 It's also possible to create a single color from a slice or array. Let's say we are using something that implements `AsMut<[u8; 3]>`:
 
 ```rust
-use palette::{Srgb, Pixel};
+use palette::Srgb;
 
 fn swap_red_and_blue(mut my_rgb: impl AsMut<[u8; 3]>) {
-    let my_rgb = Srgb::from_raw_mut(my_rgb.as_mut());
+    let my_rgb: &mut Srgb<u8> = my_rgb.as_mut().into();
 
     std::mem::swap(&mut my_rgb.red, &mut my_rgb.blue);
 }
@@ -156,13 +156,13 @@ This image shows the transition from the color to `new_color` in HSL and HSV:
 In addition to the operator traits, the SVG blend functions have also been implemented.
 
 ```rust
-use palette::{blend::Blend, Pixel, Srgb, WithAlpha};
+use palette::{blend::Blend, cast, Srgb, WithAlpha};
 
 // The input to this function could be data from image files.
 fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
     // Convert the images into `&mut [Srgb<u8>]` and `&[Srgb<u8>]` without copying.
-    let image1 = Srgb::from_raw_slice_mut(image1);
-    let image2 = Srgb::from_raw_slice(image2);
+    let image1: &mut [Srgb<u8>] = cast::from_component_slice_mut(image1);
+    let image2: &[Srgb<u8>] = cast::from_component_slice(image2);
 
     for (color1, color2) in image1.iter_mut().zip(image2) {
         // Convert the colors to linear floating point format and give them transparency values.

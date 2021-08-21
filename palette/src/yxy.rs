@@ -9,13 +9,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::encoding::pixel::RawPixel;
 use crate::luma::LumaStandard;
 use crate::white_point::{WhitePoint, D65};
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
     ComponentWise, FloatComponent, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
-    Pixel, RelativeContrast, Xyz,
+    RelativeContrast, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -29,7 +28,7 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 /// for the color spaces are a plot of this color space's x and y coordinates.
 ///
 /// Conversions and operations on this color space depend on the white point.
-#[derive(Debug, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -418,23 +417,7 @@ impl_color_sub!(Yxy<Wp, T>, [x, y, luma], white_point);
 impl_color_mul!(Yxy<Wp, T>, [x, y, luma], white_point);
 impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
 
-impl<Wp, T, P> AsRef<P> for Yxy<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<Wp, T, P> AsMut<P> for Yxy<Wp, T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 
 impl<Wp, T> RelativeContrast for Yxy<Wp, T>
 where

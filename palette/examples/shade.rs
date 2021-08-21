@@ -1,4 +1,4 @@
-use palette::{Darken, FromColor, Hsv, IntoColor, Lab, Lighten, LinSrgb, Pixel, Srgb};
+use palette::{Darken, FromColor, Hsv, IntoColor, Lab, Lighten, LinSrgb, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage};
 
@@ -13,10 +13,10 @@ fn main() {
     for i in 0..11 {
         let rgb1 = Srgb::from_linear(rgb.darken(0.1 * i as f32))
             .into_format()
-            .into_raw();
+            .into();
         let rgb2 = Srgb::from_linear(rgb.lighten(0.1 * i as f32))
             .into_format()
-            .into_raw();
+            .into();
 
         {
             let mut sub_image = image.sub_image(i as u32 * 20, 0, 20, 31);
@@ -40,10 +40,10 @@ fn main() {
 
         let lab1 = Srgb::from_linear(lab.darken(0.1 * i as f32).into_color())
             .into_format()
-            .into_raw();
+            .into();
         let lab2 = Srgb::from_linear(lab.lighten(0.1 * i as f32).into_color())
             .into_format()
-            .into_raw();
+            .into();
 
         {
             let mut sub_image = image.sub_image(i as u32 * 20, 65, 20, 31);
@@ -67,10 +67,10 @@ fn main() {
 
         let hsv1 = Srgb::from_linear(hsv.darken(0.1 * i as f32).into_color())
             .into_format()
-            .into_raw();
+            .into();
         let hsv2 = Srgb::from_linear(hsv.lighten(0.1 * i as f32).into_color())
             .into_format()
-            .into_raw();
+            .into();
 
         {
             let mut sub_image = image.sub_image(i as u32 * 20, 130, 20, 31);

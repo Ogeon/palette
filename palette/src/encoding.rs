@@ -6,7 +6,6 @@ pub use self::srgb::Srgb;
 
 pub mod gamma;
 pub mod linear;
-pub mod pixel;
 pub mod srgb;
 
 /// A transfer function to and from linear space.

@@ -26,13 +26,13 @@ fn converting() {
 }
 
 fn pixels_and_buffers() {
-    use palette::{Pixel, Srgb};
+    use palette::{cast, Srgb};
 
     // The input to this function could be data from an image file or
     // maybe a texture in a game.
     fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
         // Convert `my_rgb_image` into `&mut [Srgb<u8>]` without copying.
-        let my_rgb_image = Srgb::from_raw_slice_mut(my_rgb_image);
+        let my_rgb_image: &mut [Srgb<u8>] = cast::from_component_slice_mut(my_rgb_image);
 
         for color in my_rgb_image {
             std::mem::swap(&mut color.red, &mut color.blue);
@@ -91,13 +91,13 @@ fn color_operations_1() {
 }
 
 fn color_operations_2() {
-    use palette::{blend::Blend, Pixel, Srgb, WithAlpha};
+    use palette::{blend::Blend, cast, Srgb, WithAlpha};
 
     // The input to this function could be data from image files.
     fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
         // Convert the images into `&mut [Srgb<u8>]` and `&[Srgb<u8>]` without copying.
-        let image1 = Srgb::from_raw_slice_mut(image1);
-        let image2 = Srgb::from_raw_slice(image2);
+        let image1: &mut [Srgb<u8>] = cast::from_component_slice_mut(image1);
+        let image2: &[Srgb<u8>] = cast::from_component_slice(image2);
 
         for (color1, color2) in image1.iter_mut().zip(image2) {
             // Convert the colors to linear floating point format and give them transparency values.
@@ -216,8 +216,6 @@ fn display_colors(filename: &str, displays: &[DisplayType]) {
 }
 
 fn display_discrete(mut image: SubImage<&mut RgbImage>, colors: &[palette::Srgb<u8>]) {
-    use palette::Pixel;
-
     let (width, height) = image.dimensions();
     let swatch_size = width as f32 / colors.len() as f32;
     for (i, &color) in colors.iter().enumerate() {
@@ -227,7 +225,7 @@ fn display_discrete(mut image: SubImage<&mut RgbImage>, colors: &[palette::Srgb<
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                sub_image.put_pixel(x, y, image::Rgb(*color.as_raw()));
+                sub_image.put_pixel(x, y, image::Rgb(color.into()));
             }
         }
     }
@@ -237,16 +235,10 @@ fn display_continuous(
     mut image: SubImage<&mut RgbImage>,
     color_at: &dyn Fn(f32) -> palette::Srgb<u8>,
 ) {
-    use palette::Pixel;
-
     let (width, height) = image.dimensions();
     for x in 0..width {
         for y in 0..height {
-            image.put_pixel(
-                x,
-                y,
-                image::Rgb(color_at(x as f32 / width as f32).into_raw()),
-            );
+            image.put_pixel(x, y, image::Rgb(color_at(x as f32 / width as f32).into()));
         }
     }
 }

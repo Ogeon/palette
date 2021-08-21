@@ -10,13 +10,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::convert::FromColorUnclamped;
-use crate::encoding::pixel::RawPixel;
 use crate::matrix::multiply_xyz;
 use crate::white_point::D65;
 use crate::{
     clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
     Component, ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mat3, Mix, MixAssign, OklabHue, Oklch, Pixel, RelativeContrast, Xyz,
+    LightenAssign, Mat3, Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
 };
 
 #[rustfmt::skip]
@@ -64,7 +63,7 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
 /// Oklab is a perceptually-uniform color space similar in structure to
 /// [L\*a\*b\*](crate::Lab), but tries to have a better perceptual uniformity.
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions.
-#[derive(Debug, PartialEq, Pixel, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, PartialEq, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -451,23 +450,7 @@ impl_color_sub!(Oklab<T>, [l, a, b]);
 impl_color_mul!(Oklab<T>, [l, a, b]);
 impl_color_div!(Oklab<T>, [l, a, b]);
 
-impl<T, P> AsRef<P> for Oklab<T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<T, P> AsMut<P> for Oklab<T>
-where
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Oklab<T>, [T; 3]);
 
 impl<T> RelativeContrast for Oklab<T>
 where

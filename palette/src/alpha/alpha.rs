@@ -11,12 +11,12 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::blend::PreAlpha;
+use crate::cast::ArrayCast;
 use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::encoding::pixel::RawPixel;
 use crate::float::Float;
 use crate::{
-    clamp, clamp_assign, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, Pixel, Saturate, SaturateAssign,
+    clamp, clamp_assign, ArrayExt, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue,
+    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, NextArray, Saturate, SaturateAssign,
     SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
 };
 
@@ -327,8 +327,12 @@ impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for Alpha<C, T> {
     }
 }
 
-unsafe impl<T, C: Pixel<T>> Pixel<T> for Alpha<C, T> {
-    const CHANNELS: usize = C::CHANNELS + 1;
+unsafe impl<C> ArrayCast for Alpha<C, <<C as ArrayCast>::Array as ArrayExt>::Item>
+where
+    C: ArrayCast,
+    C::Array: NextArray,
+{
+    type Array = <C::Array as NextArray>::Next;
 }
 
 impl<C: Default, T: Component> Default for Alpha<C, T> {
@@ -540,25 +544,7 @@ impl<T: DivAssign + Copy, C: DivAssign<T>> DivAssign<T> for Alpha<C, T> {
     }
 }
 
-impl<C, T, P> AsRef<P> for Alpha<C, T>
-where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_ref(&self) -> &P {
-        self.as_raw()
-    }
-}
-
-impl<C, T, P> AsMut<P> for Alpha<C, T>
-where
-    C: Pixel<T>,
-    P: RawPixel<T> + ?Sized,
-{
-    fn as_mut(&mut self) -> &mut P {
-        self.as_raw_mut()
-    }
-}
+impl_array_casts!(Alpha<C, T>, [T; N], const N, where Alpha<C, T>: ArrayCast<Array = [T; N]>);
 
 impl<C, T: Component> From<C> for Alpha<C, T> {
     fn from(color: C) -> Alpha<C, T> {
@@ -689,15 +675,15 @@ where
 }
 
 // Safety:
-//  It is a requirement of `Pixel<T>` that the in-memory representation of
-//  `C` is made of `T`s.
-//  Because `T` is `Pod`, `Alpha<C, T>` is `Pod` as well because no internal
-//  padding can be introduced during monomorphization.
+//
+// It is a requirement of `ArrayCast` that the in-memory representation of `C`
+// is made of `T`s. Because `T` is `Pod`, `Alpha<C, T>` is `Pod` as well because
+// no internal padding can be introduced during monomorphization.
 #[cfg(feature = "bytemuck")]
 unsafe impl<C, T> bytemuck::Pod for Alpha<C, T>
 where
     T: bytemuck::Pod,
-    C: bytemuck::Pod + Pixel<T>,
+    C: bytemuck::Pod + ArrayCast,
 {
 }
 
