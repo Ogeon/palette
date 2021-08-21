@@ -1513,6 +1513,55 @@
 <span id="1511">1511</span>
 <span id="1512">1512</span>
 <span id="1513">1513</span>
+<span id="1514">1514</span>
+<span id="1515">1515</span>
+<span id="1516">1516</span>
+<span id="1517">1517</span>
+<span id="1518">1518</span>
+<span id="1519">1519</span>
+<span id="1520">1520</span>
+<span id="1521">1521</span>
+<span id="1522">1522</span>
+<span id="1523">1523</span>
+<span id="1524">1524</span>
+<span id="1525">1525</span>
+<span id="1526">1526</span>
+<span id="1527">1527</span>
+<span id="1528">1528</span>
+<span id="1529">1529</span>
+<span id="1530">1530</span>
+<span id="1531">1531</span>
+<span id="1532">1532</span>
+<span id="1533">1533</span>
+<span id="1534">1534</span>
+<span id="1535">1535</span>
+<span id="1536">1536</span>
+<span id="1537">1537</span>
+<span id="1538">1538</span>
+<span id="1539">1539</span>
+<span id="1540">1540</span>
+<span id="1541">1541</span>
+<span id="1542">1542</span>
+<span id="1543">1543</span>
+<span id="1544">1544</span>
+<span id="1545">1545</span>
+<span id="1546">1546</span>
+<span id="1547">1547</span>
+<span id="1548">1548</span>
+<span id="1549">1549</span>
+<span id="1550">1550</span>
+<span id="1551">1551</span>
+<span id="1552">1552</span>
+<span id="1553">1553</span>
+<span id="1554">1554</span>
+<span id="1555">1555</span>
+<span id="1556">1556</span>
+<span id="1557">1557</span>
+<span id="1558">1558</span>
+<span id="1559">1559</span>
+<span id="1560">1560</span>
+<span id="1561">1561</span>
+<span id="1562">1562</span>
 </pre><pre class="rust">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -1534,7 +1583,7 @@
 <span class="doccomment">//! For example, this does not work:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust,compile_fail</span>
-<span class="doccomment">//! // An alias for Rgb&lt;Srgb&gt;, which is what most pictures store.</span>
+<span class="doccomment">//! // An alias for Rgb&lt;Srgb, T&gt;, which is what most pictures store.</span>
 <span class="doccomment">//! use palette::Srgb;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let orangeish = Srgb::new(1.0, 0.6, 0.0);</span>
@@ -1545,8 +1594,8 @@
 <span class="doccomment">//! Instead, they have to be made linear before adding:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! // An alias for Rgb&lt;Srgb&gt;, which is what most pictures store.</span>
-<span class="doccomment">//! use palette::{Pixel, Srgb};</span>
+<span class="doccomment">//! // An alias for Rgb&lt;Srgb, T&gt;, which is what most pictures store.</span>
+<span class="doccomment">//! use palette::Srgb;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();</span>
 <span class="doccomment">//! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();</span>
@@ -1555,7 +1604,7 @@
 <span class="doccomment">//! // Encode the result back into sRGB and create a byte array</span>
 <span class="doccomment">//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes)</span>
 <span class="doccomment">//!     .into_format()</span>
-<span class="doccomment">//!     .into_raw();</span>
+<span class="doccomment">//!     .into();</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! See the [rgb] module for a deeper dive into RGB and (non-)linearity.</span>
@@ -1651,11 +1700,11 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! # let mut image_buffer: Vec&lt;u8&gt; = vec![];</span>
-<span class="doccomment">//! use palette::{Srgb, Pixel};</span>
+<span class="doccomment">//! use palette::{Srgb, cast};</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! // This works for any (even non-RGB) color type that can have the</span>
+<span class="doccomment">//! // This works for any color type (even non-RGB) that can have the</span>
 <span class="doccomment">//! // buffer element type as component.</span>
-<span class="doccomment">//! let color_buffer: &amp;mut [Srgb&lt;u8&gt;] = Pixel::from_raw_slice_mut(&amp;mut image_buffer);</span>
+<span class="doccomment">//! let color_buffer: &amp;mut [Srgb&lt;u8&gt;] = cast::from_component_slice_mut(&amp;mut image_buffer);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * If you are getting your colors from the GPU, in a game or other graphical</span>
@@ -1694,26 +1743,25 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Working with Raw Data</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Oftentimes, pixel data is stored in a raw buffer such as a `[u8; 3]`. The</span>
-<span class="doccomment">//! [`Pixel`](crate::encoding::pixel::Pixel) trait allows for easy interoperation between</span>
-<span class="doccomment">//! Palette colors and other crates or systems. `from_raw` can be used to</span>
-<span class="doccomment">//! convert into a Palette color, `into_format` converts from  `Srgb&lt;u8&gt;` to</span>
-<span class="doccomment">//! `Srgb&lt;f32&gt;`, and finally `into_raw` to convert from a Palette color back to</span>
-<span class="doccomment">//! a `[u8;3]`.</span>
+<span class="doccomment">//! Oftentimes, pixel data is stored in a plain array or slice such as a `[u8;</span>
+<span class="doccomment">//! 3]`. The [`cast`] module allows for easy conversion between Palette colors</span>
+<span class="doccomment">//! and other crates or systems. `from` can be used to convert a `[u8;3]` into a</span>
+<span class="doccomment">//! Palette color, `into_format` converts from  `Srgb&lt;u8&gt;` to `Srgb&lt;f32&gt;`, and</span>
+<span class="doccomment">//! finally `into` converts from a Palette color back to a `[u8;3]`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use approx::assert_relative_eq;</span>
-<span class="doccomment">//! use palette::{Srgb, Pixel};</span>
+<span class="doccomment">//! use palette::Srgb;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let buffer = [255, 0, 255];</span>
-<span class="doccomment">//! let raw = Srgb::from_raw(&amp;buffer);</span>
-<span class="doccomment">//! assert_eq!(raw, &amp;Srgb::&lt;u8&gt;::new(255u8, 0, 255));</span>
+<span class="doccomment">//! let srgb = Srgb::from(buffer);</span>
+<span class="doccomment">//! assert_eq!(srgb, Srgb::&lt;u8&gt;::new(255u8, 0, 255));</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let raw_float: Srgb&lt;f32&gt; = raw.into_format();</span>
-<span class="doccomment">//! assert_relative_eq!(raw_float, Srgb::new(1.0, 0.0, 1.0));</span>
+<span class="doccomment">//! let srgb_float: Srgb&lt;f32&gt; = srgb.into_format();</span>
+<span class="doccomment">//! assert_relative_eq!(srgb_float, Srgb::new(1.0, 0.0, 1.0));</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let raw: [u8; 3] = Srgb::into_raw(raw_float.into_format());</span>
-<span class="doccomment">//! assert_eq!(raw, buffer);</span>
+<span class="doccomment">//! let array: [u8; 3] = srgb_float.into_format().into();</span>
+<span class="doccomment">//! assert_eq!(array, buffer);</span>
 <span class="doccomment">//! ```</span>
 
 <span class="comment">// Keep the standard library when running tests, too</span>
@@ -1768,7 +1816,6 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">color_difference::ColorDifference</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">component</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">convert</span>::{<span class="ident">FromColor</span>, <span class="ident">IntoColor</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">encoding::pixel::Pixel</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hues</span>::{<span class="ident">LabHue</span>, <span class="ident">LuvHue</span>, <span class="ident">OklabHue</span>, <span class="ident">RgbHue</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">matrix::Mat3</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">relative_contrast</span>::{<span class="ident">contrast_ratio</span>, <span class="ident">RelativeContrast</span>};
@@ -1943,6 +1990,7 @@
 <span class="kw">mod</span> <span class="ident">random_sampling</span>;
 
 <span class="kw">mod</span> <span class="ident">alpha</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cast</span>;
 <span class="kw">mod</span> <span class="ident">hsl</span>;
 <span class="kw">mod</span> <span class="ident">hsluv</span>;
 <span class="kw">mod</span> <span class="ident">hsv</span>;
@@ -3014,6 +3062,56 @@
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">from_f64</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromF64</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
     <span class="ident">T::from_f64</span>(<span class="ident">c</span>)
+}
+
+<span class="doccomment">/// Extension trait for fixed size arrays.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Safety</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `Item` must be the type of the array&#39;s items (eg: `T` in `[T; N]`).</span>
+<span class="doccomment">/// * `LENGTH` must be the length of the array (eg: `N` in `[T; N]`).</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">ArrayExt</span>: <span class="ident">sealed::IsArray</span> {
+    <span class="doccomment">/// The type of the array&#39;s items.</span>
+    <span class="kw">type</span> <span class="ident">Item</span>;
+
+    <span class="doccomment">/// The number of items in the array.</span>
+    <span class="kw">const</span> <span class="ident">LENGTH</span>: <span class="ident">usize</span>;
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">ArrayExt</span> <span class="kw">for</span> [<span class="ident">T</span>; <span class="ident">N</span>] {
+    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">const</span> <span class="ident">LENGTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">N</span>;
+}
+
+<span class="doccomment">/// Temporary helper trait for getting an array type of size `N + 1`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Safety</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `Next` must have the same item type as `Self`.</span>
+<span class="doccomment">/// * `Next` must be one item longer than `Self`.</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">NextArray</span>: <span class="ident">sealed::IsArray</span> {
+    <span class="doccomment">/// An array of size `N + 1`.</span>
+    <span class="kw">type</span> <span class="ident">Next</span>: <span class="ident">ArrayExt</span>;
+}
+
+<span class="macro">macro_rules!</span> <span class="ident">impl_next_array</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">length</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {};
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">length</span>: <span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">next_length</span>: <span class="ident">expr</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>: <span class="ident">expr</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">NextArray</span> <span class="kw">for</span> [<span class="ident">T</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">length</span>] {
+            <span class="kw">type</span> <span class="ident">Next</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">next_length</span>];
+        }
+
+        <span class="macro">impl_next_array!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">next_length</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)<span class="kw-2">*</span>);
+    };
+}
+
+<span class="macro">impl_next_array!</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>);
+
+<span class="kw">mod</span> <span class="ident">sealed</span> {
+    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IsArray</span> {}
+
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">IsArray</span> <span class="kw">for</span> [<span class="ident">T</span>; <span class="ident">N</span>] {}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doctest</span>)]</span>

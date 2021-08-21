@@ -339,15 +339,12 @@
 <span id="337">337</span>
 <span id="338">338</span>
 <span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
 </pre><pre class="rust">
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">channels</span>;
 
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">Rgba</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::Pixel</span>;
 
 <span class="doccomment">/// RGBA color packed into a 32-bit unsigned integer. Defaults to ARGB</span>
 <span class="doccomment">/// ordering for `Rgb` types and RGBA ordering for `Rgba` types.</span>
@@ -388,23 +385,22 @@
 <span class="doccomment">/// corresponding `u32`. Converting from a packed color type back to an `Rgb`</span>
 <span class="doccomment">/// type will disregard the alpha value.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// `Packed` implements [Pixel](crate::encoding::pixel::Pixel) and can be</span>
+<span class="doccomment">/// `Packed` implements [ArrayCast](crate::cast::ArrayCast) and can be</span>
 <span class="doccomment">/// constructed from a slice of `&amp;[u32]`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{Packed, Pixel};</span>
-<span class="doccomment">/// use palette::rgb::channels::Argb;</span>
+<span class="doccomment">/// use palette::{rgb::channels::Argb, cast, Packed};</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let raw = &amp;[0x7F0080u32, 0x60BBCC];</span>
-<span class="doccomment">/// let colors = Packed::&lt;Argb&gt;::from_raw_slice(raw);</span>
+<span class="doccomment">/// let colors = cast::from_component_slice::&lt;Packed&lt;Argb&gt;&gt;(raw);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(colors.len(), 2);</span>
 <span class="doccomment">/// assert_eq!(colors[0].color, 0x7F0080);</span>
 <span class="doccomment">/// assert_eq!(colors[1].color, 0x60BBCC);</span>
 <span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Pixel</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">ArrayCast</span>)]</span>
 <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">palette_internal</span>)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">C</span> <span class="op">=</span> <span class="ident">channels::Argb</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The sRGB color packed into a `u32`.</span>
     <span class="kw">pub</span> <span class="ident">color</span>: <span class="ident">u32</span>,

@@ -959,6 +959,8 @@
 <span id="957">957</span>
 <span id="958">958</span>
 <span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Traits for converting between color spaces.</span>
 <span class="doccomment">//!</span>
@@ -1100,11 +1102,12 @@
 <span class="doccomment">//! #[macro_use]</span>
 <span class="doccomment">//! extern crate approx;</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! use palette::cast::{self, ArrayCast};</span>
 <span class="doccomment">//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};</span>
 <span class="doccomment">//! use palette::encoding::Linear;</span>
 <span class="doccomment">//! use palette::white_point::D65;</span>
 <span class="doccomment">//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};</span>
-<span class="doccomment">//! use palette::{FloatComponent, Hsv, Pixel, Srgb, IntoColor};</span>
+<span class="doccomment">//! use palette::{FloatComponent, Hsv, Srgb, IntoColor};</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! /// sRGB, but with a reversed memory layout.</span>
 <span class="doccomment">//! #[palette(</span>
@@ -1112,7 +1115,7 @@
 <span class="doccomment">//!     component = &quot;T&quot;,</span>
 <span class="doccomment">//!     rgb_standard = &quot;palette::encoding::Srgb&quot;</span>
 <span class="doccomment">//! )]</span>
-<span class="doccomment">//! #[derive(Copy, Clone, Pixel, FromColorUnclamped)]</span>
+<span class="doccomment">//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]</span>
 <span class="doccomment">//! #[repr(C)] // Makes sure the memory layout is as we want it.</span>
 <span class="doccomment">//! struct Bgr&lt;T&gt; {</span>
 <span class="doccomment">//!     blue: T,</span>
@@ -1160,7 +1163,8 @@
 <span class="doccomment">//!         0.5,</span>
 <span class="doccomment">//!         0.25,</span>
 <span class="doccomment">//!     ];</span>
-<span class="doccomment">//!     let hsv: Hsv&lt;_, f64&gt; = Bgr::from_raw_slice(&amp;buffer)[1].into_color();</span>
+<span class="doccomment">//!     let hsv: Hsv&lt;_, f64&gt; = cast::from_component_slice::&lt;Bgr&lt;_&gt;&gt;(&amp;buffer)[1]</span>
+<span class="doccomment">//!         .into_color();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));</span>
 <span class="doccomment">//! }</span>

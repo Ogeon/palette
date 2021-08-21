@@ -932,23 +932,6 @@
 <span id="930">930</span>
 <span id="931">931</span>
 <span id="932">932</span>
-<span id="933">933</span>
-<span id="934">934</span>
-<span id="935">935</span>
-<span id="936">936</span>
-<span id="937">937</span>
-<span id="938">938</span>
-<span id="939">939</span>
-<span id="940">940</span>
-<span id="941">941</span>
-<span id="942">942</span>
-<span id="943">943</span>
-<span id="944">944</span>
-<span id="945">945</span>
-<span id="946">946</span>
-<span id="947">947</span>
-<span id="948">948</span>
-<span id="949">949</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
@@ -964,13 +947,12 @@
 <span class="kw">use</span> <span class="ident">rand::Rng</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::convert::FromColorUnclamped</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::pixel::RawPixel</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::Srgb</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>,
     <span class="ident">Component</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">Hsl</span>, <span class="ident">Hwb</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>,
-    <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Pixel</span>, <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>,
+    <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>,
     <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>, <span class="ident">Xyz</span>,
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
@@ -988,7 +970,7 @@
 <span class="doccomment">/// _lightness_. The difference is that, for example, red (100% R, 0% G, 0% B)</span>
 <span class="doccomment">/// and white (100% R, 100% G, 100% B) has the same brightness (or value), but</span>
 <span class="doccomment">/// not the same lightness.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Pixel</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">ArrayCast</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
 <span class="attribute">#[<span class="ident">palette</span>(
     <span class="ident">palette_internal</span>,
@@ -1591,23 +1573,7 @@
 <span class="macro">impl_color_add!</span>(<span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">value</span>], <span class="ident">standard</span>);
 <span class="macro">impl_color_sub!</span>(<span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">value</span>], <span class="ident">standard</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">RawPixel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-{
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">P</span> {
-        <span class="self">self</span>.<span class="ident">as_raw</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">RawPixel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-{
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">P</span> {
-        <span class="self">self</span>.<span class="ident">as_raw_mut</span>()
-    }
-}
+<span class="macro">impl_array_casts!</span>(<span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
