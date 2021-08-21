@@ -1214,6 +1214,74 @@ where
     unsafe { Ok(Vec::from_raw_parts(raw.cast::<T>(), length, capacity)) }
 }
 
+/// Map values of color A to values of color B without creating a new `Vec`.
+///
+/// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
+#[cfg(feature = "std")]
+#[inline]
+pub fn map_vec_in_place<A, B, F>(values: Vec<A>, mut map: F) -> Vec<B>
+where
+    A: ArrayCast,
+    B: ArrayCast<Array = A::Array>,
+    F: FnMut(A) -> B,
+{
+    // We are checking `B` in advance, to stop the program before any work is
+    // done. `A` is checked when converting to arrays.
+    assert_eq!(core::mem::size_of::<B::Array>(), core::mem::size_of::<B>());
+    assert_eq!(
+        core::mem::align_of::<B::Array>(),
+        core::mem::align_of::<B>()
+    );
+
+    let mut values = ManuallyDrop::new(into_array_vec(values));
+
+    for item in &mut *values {
+        // Safety: We will put a new value back below, and `values` will not be dropped on panic.
+        let input = unsafe { core::ptr::read(item) };
+
+        let output = into_array::<B>(map(from_array::<A>(input)));
+
+        // Safety: `output` is derived from the original value, so this is putting it back into place.
+        unsafe { core::ptr::write(item, output) };
+    }
+
+    from_array_vec(ManuallyDrop::into_inner(values))
+}
+
+/// Map values of color A to values of color B without creating a new `Box<[B]>`.
+///
+/// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
+#[cfg(feature = "std")]
+#[inline]
+pub fn map_slice_box_in_place<A, B, F>(values: Box<[A]>, mut map: F) -> Box<[B]>
+where
+    A: ArrayCast,
+    B: ArrayCast<Array = A::Array>,
+    F: FnMut(A) -> B,
+{
+    // We are checking `B` in advance, to stop the program before any work is
+    // done. `A` is checked when converting to arrays.
+    assert_eq!(core::mem::size_of::<B::Array>(), core::mem::size_of::<B>());
+    assert_eq!(
+        core::mem::align_of::<B::Array>(),
+        core::mem::align_of::<B>()
+    );
+
+    let mut values = ManuallyDrop::new(into_array_slice_box(values));
+
+    for item in &mut **values {
+        // Safety: We will put a new value back below, and `values` will not be dropped on panic.
+        let input = unsafe { core::ptr::read(item) };
+
+        let output = into_array::<B>(map(from_array::<A>(input)));
+
+        // Safety: `output` is derived from the original value, so this is putting it back into place.
+        unsafe { core::ptr::write(item, output) };
+    }
+
+    from_array_slice_box(ManuallyDrop::into_inner(values))
+}
+
 /// The error type returned when casting a slice of components fails.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SliceCastError;
@@ -1297,7 +1365,7 @@ pub enum VecCastErrorKind {
 
 #[cfg(test)]
 mod test {
-    use crate::Srgb;
+    use crate::{LinSrgb, Srgb};
 
     #[cfg(feature = "std")]
     #[test]
@@ -1324,5 +1392,44 @@ mod test {
         let colors = super::from_component_vec::<Srgb<_>>(colors_components);
         assert_eq!(colors.len(), 3);
         assert_eq!(colors.capacity(), 8);
+    }
+
+    #[test]
+    fn map_vec_in_place() {
+        fn do_things(rgb: Srgb) -> LinSrgb {
+            let mut linear = rgb.into_linear();
+            std::mem::swap(&mut linear.red, &mut linear.blue);
+            linear
+        }
+
+        let values = vec![Srgb::new(0.8, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];
+        let result = super::map_vec_in_place(values, do_things);
+        assert_eq!(
+            result,
+            vec![
+                do_things(Srgb::new(0.8, 1.0, 0.2)),
+                do_things(Srgb::new(0.9, 0.1, 0.3))
+            ]
+        )
+    }
+
+    #[test]
+    fn map_slice_box_in_place() {
+        fn do_things(rgb: Srgb) -> LinSrgb {
+            let mut linear = rgb.into_linear();
+            std::mem::swap(&mut linear.red, &mut linear.blue);
+            linear
+        }
+
+        let values = vec![Srgb::new(0.8, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();
+        let result = super::map_slice_box_in_place(values, do_things);
+        assert_eq!(
+            result,
+            vec![
+                do_things(Srgb::new(0.8, 1.0, 0.2)),
+                do_things(Srgb::new(0.9, 0.1, 0.3))
+            ]
+            .into_boxed_slice()
+        )
     }
 }
