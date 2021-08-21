@@ -1,4 +1,5 @@
 use core::any::TypeId;
+use core::convert::TryInto;
 use core::fmt;
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
@@ -13,6 +14,7 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::blend::PreAlpha;
+use crate::cast::{ComponentOrder, Packed, UintCast};
 use crate::convert::FromColorUnclamped;
 use crate::encoding::linear::LinearFn;
 use crate::encoding::{Linear, Srgb, TransferFn};
@@ -133,6 +135,64 @@ where
     }
 }
 
+impl<S> Luma<S, u8> {
+    /// Convert to a packed `u16` with with specifiable component order.
+    ///
+    /// ```
+    /// use palette::{luma, SrgbLuma};
+    ///
+    /// let integer = SrgbLuma::new(96u8).into_u16::<luma::channels::La>();
+    /// assert_eq!(0x60FF, integer);
+    /// ```
+    ///
+    /// It's also possible to use `From` and `Into`, which defaults to the
+    /// `0xAALL` component order:
+    ///
+    /// ```
+    /// use palette::SrgbLuma;
+    ///
+    /// let integer = u16::from(SrgbLuma::new(96u8));
+    /// assert_eq!(0xFF60, integer);
+    /// ```
+    ///
+    /// See [Packed](crate::cast::Packed) for more details.
+    #[inline]
+    pub fn into_u16<O>(self) -> u16
+    where
+        O: ComponentOrder<Lumaa<S, u8>, u16>,
+    {
+        O::pack(Lumaa::from(self))
+    }
+
+    /// Convert from a packed `u16` with specifiable component order.
+    ///
+    /// ```
+    /// use palette::{luma, SrgbLuma};
+    ///
+    /// let luma = SrgbLuma::from_u16::<luma::channels::La>(0x60FF);
+    /// assert_eq!(SrgbLuma::new(96u8), luma);
+    /// ```
+    ///
+    /// It's also possible to use `From` and `Into`, which defaults to the
+    /// `0xAALL` component order:
+    ///
+    /// ```
+    /// use palette::SrgbLuma;
+    ///
+    /// let luma = SrgbLuma::from(0x60u16);
+    /// assert_eq!(SrgbLuma::new(96u8), luma);
+    /// ```
+    ///
+    /// See [Packed](crate::cast::Packed) for more details.
+    #[inline]
+    pub fn from_u16<O>(color: u16) -> Self
+    where
+        O: ComponentOrder<Lumaa<S, u8>, u16>,
+    {
+        O::unpack(color).color
+    }
+}
+
 impl<S, T> Luma<S, T>
 where
     T: FloatComponent,
@@ -180,6 +240,46 @@ where
 
 impl<S, T> Eq for Luma<S, T> where T: Eq {}
 
+// Safety:
+//
+// Luma is a transparent wrapper around its component, which fulfills the
+// requirements of UintCast.
+unsafe impl<S> UintCast for Luma<S, u8> {
+    type Uint = u8;
+}
+
+// Safety:
+//
+// Luma is a transparent wrapper around its component, which fulfills the
+// requirements of UintCast.
+unsafe impl<S> UintCast for Luma<S, u16> {
+    type Uint = u16;
+}
+
+// Safety:
+//
+// Luma is a transparent wrapper around its component, which fulfills the
+// requirements of UintCast.
+unsafe impl<S> UintCast for Luma<S, u32> {
+    type Uint = u32;
+}
+
+// Safety:
+//
+// Luma is a transparent wrapper around its component, which fulfills the
+// requirements of UintCast.
+unsafe impl<S> UintCast for Luma<S, u64> {
+    type Uint = u64;
+}
+
+// Safety:
+//
+// Luma is a transparent wrapper around its component, which fulfills the
+// requirements of UintCast.
+unsafe impl<S> UintCast for Luma<S, u128> {
+    type Uint = u128;
+}
+
 ///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A> {
     /// Create a luminance color with transparency.
@@ -223,7 +323,65 @@ impl<S, T, A> Alpha<Luma<S, T>, A> {
     }
 }
 
-///<span id="Lumaa"></span>[`Lumaa`](crate::luma::Lumaa) implementations.
+impl<S> Lumaa<S, u8> {
+    /// Convert to a packed `u16` with with a specific component order.
+    ///
+    /// ```
+    /// use palette::{luma, SrgbLumaa};
+    ///
+    /// let integer = SrgbLumaa::new(96u8, 255).into_u16::<luma::channels::Al>();
+    /// assert_eq!(0xFF60, integer);
+    /// ```
+    ///
+    /// It's also possible to use `From` and `Into`, which defaults to the
+    /// `0xLLAA` component order:
+    ///
+    /// ```
+    /// use palette::SrgbLumaa;
+    ///
+    /// let integer = u16::from(SrgbLumaa::new(96u8, 255));
+    /// assert_eq!(0x60FF, integer);
+    /// ```
+    ///
+    /// See [Packed](crate::cast::Packed) for more details.
+    #[inline]
+    pub fn into_u16<O>(self) -> u16
+    where
+        O: ComponentOrder<Lumaa<S, u8>, u16>,
+    {
+        O::pack(self)
+    }
+
+    /// Convert from a packed `u16` with a specific component order.
+    ///
+    /// ```
+    /// use palette::{luma, SrgbLumaa};
+    ///
+    /// let luma = SrgbLumaa::from_u16::<luma::channels::Al>(0xFF60);
+    /// assert_eq!(SrgbLumaa::new(96u8, 255), luma);
+    /// ```
+    ///
+    /// It's also possible to use `From` and `Into`, which defaults to the
+    /// `0xLLAA` component order:
+    ///
+    /// ```
+    /// use palette::SrgbLumaa;
+    ///
+    /// let luma = SrgbLumaa::from(0x60FF);
+    /// assert_eq!(SrgbLumaa::new(96u8, 255), luma);
+    /// ```
+    ///
+    /// See [Packed](crate::cast::Packed) for more details.
+    #[inline]
+    pub fn from_u16<O>(color: u16) -> Self
+    where
+        O: ComponentOrder<Lumaa<S, u8>, u16>,
+    {
+        O::unpack(color)
+    }
+}
+
+///[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
     T: FloatComponent,
@@ -697,6 +855,158 @@ where
 }
 
 impl_array_casts!(Luma<S, T>, [T; 1]);
+
+impl<S, T> AsRef<T> for Luma<S, T> {
+    #[inline]
+    fn as_ref(&self) -> &T {
+        &self.luma
+    }
+}
+
+impl<S, T> AsMut<T> for Luma<S, T> {
+    #[inline]
+    fn as_mut(&mut self) -> &mut T {
+        &mut self.luma
+    }
+}
+
+impl<S, T> From<T> for Luma<S, T> {
+    #[inline]
+    fn from(luma: T) -> Self {
+        Self::new(luma)
+    }
+}
+
+macro_rules! impl_luma_cast_other {
+    ($($other: ty),+) => {
+        $(
+            impl<'a, S> From<&'a $other> for &'a Luma<S, $other>
+            where
+                $other: AsRef<Luma<S, $other>>,
+            {
+                #[inline]
+                fn from(luma: &'a $other) -> Self {
+                    luma.as_ref()
+                }
+            }
+
+            impl<'a, S> From<&'a mut $other> for &'a mut Luma<S, $other>
+            where
+                $other: AsMut<Luma<S, $other>>,
+            {
+                #[inline]
+                fn from(luma: &'a mut $other) -> Self {
+                    luma.as_mut()
+                }
+            }
+
+            impl<S> AsRef<Luma<S, $other>> for $other {
+                #[inline]
+                fn as_ref(&self) -> &Luma<S, $other> {
+                    core::slice::from_ref(self).try_into().unwrap()
+                }
+            }
+
+            impl<S> AsMut<Luma<S, $other>> for $other {
+                #[inline]
+                fn as_mut(&mut self) -> &mut Luma<S, $other> {
+                    core::slice::from_mut(self).try_into().unwrap()
+                }
+            }
+
+            impl<S> From<Luma<S, $other>> for $other {
+                #[inline]
+                fn from(color: Luma<S, $other>) -> Self {
+                    color.luma
+                }
+            }
+
+            impl<'a, S> From<&'a Luma<S, $other>> for &'a $other {
+                #[inline]
+                fn from(color: &'a Luma<S, $other>) -> Self {
+                    color.as_ref()
+                }
+            }
+
+            impl<'a, S> From<&'a mut Luma<S, $other>> for &'a mut $other {
+                #[inline]
+                fn from(color: &'a mut Luma<S, $other>) -> Self {
+                    color.as_mut()
+                }
+            }
+        )+
+    };
+}
+impl_luma_cast_other!(u8, u16, u32, u64, u128, f32, f64);
+
+impl<S, T, P, O> From<Luma<S, T>> for Packed<O, P>
+where
+    O: ComponentOrder<Lumaa<S, T>, P>,
+    Lumaa<S, T>: From<Luma<S, T>>,
+{
+    #[inline]
+    fn from(color: Luma<S, T>) -> Self {
+        Self::from(Lumaa::from(color))
+    }
+}
+
+impl<S, T, O, P> From<Lumaa<S, T>> for Packed<O, P>
+where
+    O: ComponentOrder<Lumaa<S, T>, P>,
+{
+    #[inline]
+    fn from(color: Lumaa<S, T>) -> Self {
+        Packed::pack(color)
+    }
+}
+
+impl<S, O, P> From<Packed<O, P>> for Luma<S, u8>
+where
+    O: ComponentOrder<Lumaa<S, u8>, P>,
+{
+    #[inline]
+    fn from(packed: Packed<O, P>) -> Self {
+        Lumaa::from(packed).color
+    }
+}
+
+impl<S, T, O, P> From<Packed<O, P>> for Lumaa<S, T>
+where
+    O: ComponentOrder<Lumaa<S, T>, P>,
+{
+    #[inline]
+    fn from(packed: Packed<O, P>) -> Self {
+        packed.unpack()
+    }
+}
+
+impl<S> From<u16> for Luma<S, u8> {
+    #[inline]
+    fn from(color: u16) -> Self {
+        Self::from_u16::<super::channels::Al>(color)
+    }
+}
+
+impl<S> From<u16> for Lumaa<S, u8> {
+    #[inline]
+    fn from(color: u16) -> Self {
+        Self::from_u16::<super::channels::La>(color)
+    }
+}
+
+impl<S> From<Luma<S, u8>> for u16 {
+    #[inline]
+    fn from(color: Luma<S, u8>) -> Self {
+        Luma::into_u16::<super::channels::Al>(color)
+    }
+}
+
+impl<S> From<Lumaa<S, u8>> for u16 {
+    #[inline]
+    fn from(color: Lumaa<S, u8>) -> Self {
+        Lumaa::into_u16::<super::channels::La>(color)
+    }
+}
 
 impl<S, T> AbsDiffEq for Luma<S, T>
 where

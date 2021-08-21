@@ -1,5 +1,6 @@
 //! Luminance types.
 
+pub mod channels;
 mod luma;
 
 use crate::encoding::{Gamma, Linear, Srgb, TransferFn};
@@ -41,3 +42,9 @@ where
     type WhitePoint = Wp;
     type TransferFn = Tf;
 }
+
+/// A packed representation of Luma+Alpha in LA order.
+pub type PackedLumaa<P = u16> = crate::cast::Packed<channels::La, P>;
+
+/// A packed representation of Luma+Alpha in AL order.
+pub type PackedAluma<P = u16> = crate::cast::Packed<channels::Al, P>;

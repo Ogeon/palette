@@ -385,7 +385,7 @@ impl<T: DivAssign + Clone, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
     }
 }
 
-impl_array_casts!(PreAlpha<C, T>, [T; N], const N, where PreAlpha<C, T>: ArrayCast<Array = [T; N]>);
+impl_array_casts!([C, T, const N: usize] PreAlpha<C, T>, [T; N], where PreAlpha<C, T>: ArrayCast<Array = [T; N]>);
 
 impl<C, T> Deref for PreAlpha<C, T> {
     type Target = C;

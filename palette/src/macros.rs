@@ -630,100 +630,115 @@ macro_rules! impl_color_div {
 }
 
 macro_rules! impl_array_casts {
-    ($self_ty: ident < $($ty_param: ident),+ > , [$array_item: ty; $array_len: expr] $(, const $const_n: ident, where $($where: tt)+)?) => {
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+    ($self_ty: ident < $($ty_param: ident),+ > $($rest: tt)*) => {
+        impl_array_casts!([$($ty_param),+] $self_ty < $($ty_param),+ > $($rest)*);
+    };
+    ([$($ty_param: tt)+] $self_ty: ident < $($self_ty_param: ty),+ > , [$array_item: ty; $array_len: expr] $(, where $($where: tt)+)?) => {
+        impl<$($ty_param)+> AsRef<[$array_item; $array_len]> for $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn as_ref(&self) -> &[$array_item; $array_len] {
                 crate::cast::into_array_ref(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        impl<$($ty_param)+> AsRef<$self_ty<$($self_ty_param),+>> for [$array_item; $array_len]
         $(where $($where)+)?
         {
-            fn as_ref(&self) -> &$self_ty<$($ty_param),+> {
+            #[inline]
+            fn as_ref(&self) -> &$self_ty<$($self_ty_param),+> {
                 crate::cast::from_array_ref(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+        impl<$($ty_param)+> AsMut<[$array_item; $array_len]> for $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn as_mut(&mut self) -> &mut [$array_item; $array_len] {
                 crate::cast::into_array_mut(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        impl<$($ty_param)+> AsMut<$self_ty<$($self_ty_param),+>> for [$array_item; $array_len]
         $(where $($where)+)?
         {
-            fn as_mut(&mut self) -> &mut $self_ty<$($ty_param),+> {
+            #[inline]
+            fn as_mut(&mut self) -> &mut $self_ty<$($self_ty_param),+> {
                 crate::cast::from_array_mut(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsRef<[$array_item]> for $self_ty<$($ty_param),+>
+        impl<$($ty_param)+> AsRef<[$array_item]> for $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn as_ref(&self) -> &[$array_item] {
                 &*AsRef::<[$array_item; $array_len]>::as_ref(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> AsMut<[$array_item]> for $self_ty<$($ty_param),+>
+        impl<$($ty_param)+> AsMut<[$array_item]> for $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn as_mut(&mut self) -> &mut [$array_item] {
                 &mut *AsMut::<[$array_item; $array_len]>::as_mut(self)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> From<$self_ty<$($ty_param),+>> for [$array_item; $array_len]
+        impl<$($ty_param)+> From<$self_ty<$($self_ty_param),+>> for [$array_item; $array_len]
         $(where $($where)+)?
         {
-            fn from(color: $self_ty<$($ty_param),+>) -> Self {
+            #[inline]
+            fn from(color: $self_ty<$($self_ty_param),+>) -> Self {
                 crate::cast::into_array(color)
             }
         }
 
-        impl<$($ty_param,)+ $(const $const_n: usize)?> From<[$array_item; $array_len]> for $self_ty<$($ty_param),+>
+        impl<$($ty_param)+> From<[$array_item; $array_len]> for $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn from(array: [$array_item; $array_len]) -> Self {
                 crate::cast::from_array(array)
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a $self_ty<$($ty_param),+>> for &'a [$array_item; $array_len]
+        impl<'a, $($ty_param)+> From<&'a $self_ty<$($self_ty_param),+>> for &'a [$array_item; $array_len]
         $(where $($where)+)?
         {
-            fn from(color: &'a $self_ty<$($ty_param),+>) -> Self {
+            #[inline]
+            fn from(color: &'a $self_ty<$($self_ty_param),+>) -> Self {
                 color.as_ref()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a [$array_item; $array_len]> for &'a $self_ty<$($ty_param),+>
+        impl<'a, $($ty_param)+> From<&'a [$array_item; $array_len]> for &'a $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn from(array: &'a [$array_item; $array_len]) -> Self{
                 array.as_ref()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a $self_ty<$($ty_param),+>> for &'a [$array_item]
+        impl<'a, $($ty_param)+> From<&'a $self_ty<$($self_ty_param),+>> for &'a [$array_item]
         $(where $($where)+)?
         {
-            fn from(color: &'a $self_ty<$($ty_param),+>) -> Self {
+            #[inline]
+            fn from(color: &'a $self_ty<$($self_ty_param),+>) -> Self {
                 color.as_ref()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> core::convert::TryFrom<&'a [$array_item]> for &'a $self_ty<$($ty_param),+>
+        impl<'a, $($ty_param)+> core::convert::TryFrom<&'a [$array_item]> for &'a $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
             type Error = <&'a [$array_item; $array_len] as core::convert::TryFrom<&'a [$array_item]>>::Error;
 
+            #[inline]
             fn try_from(slice: &'a [$array_item]) -> Result<Self, Self::Error> {
                 use core::convert::TryInto;
 
@@ -731,35 +746,39 @@ macro_rules! impl_array_casts {
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut $self_ty<$($ty_param),+>> for &'a mut [$array_item; $array_len]
+        impl<'a, $($ty_param)+> From<&'a mut $self_ty<$($self_ty_param),+>> for &'a mut [$array_item; $array_len]
         $(where $($where)+)?
         {
-            fn from(color: &'a mut $self_ty<$($ty_param),+>) -> Self {
+            #[inline]
+            fn from(color: &'a mut $self_ty<$($self_ty_param),+>) -> Self {
                 color.as_mut()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut [$array_item; $array_len]> for &'a mut $self_ty<$($ty_param),+>
+        impl<'a, $($ty_param)+> From<&'a mut [$array_item; $array_len]> for &'a mut $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
+            #[inline]
             fn from(array: &'a mut [$array_item; $array_len]) -> Self{
                 array.as_mut()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> From<&'a mut $self_ty<$($ty_param),+>> for &'a mut [$array_item]
+        impl<'a, $($ty_param)+> From<&'a mut $self_ty<$($self_ty_param),+>> for &'a mut [$array_item]
         $(where $($where)+)?
         {
-            fn from(color: &'a mut $self_ty<$($ty_param),+>) -> Self {
+            #[inline]
+            fn from(color: &'a mut $self_ty<$($self_ty_param),+>) -> Self {
                 color.as_mut()
             }
         }
 
-        impl<'a, $($ty_param,)+ $(const $const_n: usize)?> core::convert::TryFrom<&'a mut [$array_item]> for &'a mut $self_ty<$($ty_param),+>
+        impl<'a, $($ty_param)+> core::convert::TryFrom<&'a mut [$array_item]> for &'a mut $self_ty<$($self_ty_param),+>
         $(where $($where)+)?
         {
             type Error = <&'a mut [$array_item; $array_len] as core::convert::TryFrom<&'a mut [$array_item]>>::Error;
 
+            #[inline]
             fn try_from(slice: &'a mut [$array_item]) -> Result<Self, Self::Error> {
                 use core::convert::TryInto;
 
@@ -768,20 +787,129 @@ macro_rules! impl_array_casts {
         }
 
         #[cfg(feature = "std")]
-        impl<$($ty_param,)+ $(const $const_n: usize)?> From<Box<$self_ty<$($ty_param),+>>> for Box<[$array_item; $array_len]>
+        impl<$($ty_param)+> From<Box<$self_ty<$($self_ty_param),+>>> for Box<[$array_item; $array_len]>
         $(where $($where)+)?
         {
-            fn from(color: Box<$self_ty<$($ty_param),+>>) -> Self {
+            #[inline]
+            fn from(color: Box<$self_ty<$($self_ty_param),+>>) -> Self {
                 crate::cast::into_array_box(color)
             }
         }
 
         #[cfg(feature = "std")]
-        impl<$($ty_param,)+ $(const $const_n: usize)?> From<Box<[$array_item; $array_len]>> for Box<$self_ty<$($ty_param),+>>
+        impl<$($ty_param)+> From<Box<[$array_item; $array_len]>> for Box<$self_ty<$($self_ty_param),+>>
         $(where $($where)+)?
         {
+            #[inline]
             fn from(array: Box<[$array_item; $array_len]>) -> Self{
                 crate::cast::from_array_box(array)
+            }
+        }
+    }
+}
+
+macro_rules! impl_uint_casts_self {
+    ($self_ty: ident < $($ty_param: ident),+ > $($rest: tt)*) => {
+        impl_uint_casts_self!([$($ty_param),+] $self_ty < $($ty_param),+ > $($rest)*);
+    };
+    ([$($ty_param: tt)+] $self_ty: ident < $($self_ty_param: ty),+ >, $uint: ty $(, where $($where: tt)+)?) => {
+        impl<$($ty_param)+> AsRef<$uint> for $self_ty<$($self_ty_param),+>
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn as_ref(&self) -> &$uint {
+                crate::cast::into_uint_ref(self)
+            }
+        }
+
+        impl<$($ty_param)+> AsMut<$uint> for $self_ty<$($self_ty_param),+>
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn as_mut(&mut self) -> &mut $uint {
+                crate::cast::into_uint_mut(self)
+            }
+        }
+
+        impl<$($ty_param)+> From<$uint> for $self_ty<$($self_ty_param),+>
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn from(uint: $uint) -> Self {
+                crate::cast::from_uint(uint)
+            }
+        }
+
+        impl<'a, $($ty_param)+> From<&'a $uint> for &'a $self_ty<$($self_ty_param),+>
+        where
+            $uint: AsRef<$self_ty<$($self_ty_param),+>> $(, $($where)+)?
+        {
+            #[inline]
+            fn from(uint: &'a $uint) -> Self{
+                uint.as_ref()
+            }
+        }
+
+        impl<'a, $($ty_param)+> From<&'a mut $uint> for &'a mut $self_ty<$($self_ty_param),+>
+        where
+            $uint: AsMut<$self_ty<$($self_ty_param),+>> $(, $($where)+)?
+        {
+            #[inline]
+            fn from(uint: &'a mut $uint) -> Self{
+                uint.as_mut()
+            }
+        }
+    }
+}
+
+macro_rules! impl_uint_casts_other {
+    ($self_ty: ident < $($ty_param: ident),+ > $($rest: tt)*) => {
+        impl_uint_casts_other!([$($ty_param),+] $self_ty < $($ty_param),+ > $($rest)*);
+    };
+    ([$($ty_param: ident),+] $self_ty: ident < $($self_ty_param: ty),+ >, $uint: ty $(, where $($where: tt)+)?) => {
+        impl<$($ty_param)+> AsRef<$self_ty<$($self_ty_param),+>> for $uint
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn as_ref(&self) -> &$self_ty<$($self_ty_param),+> {
+                crate::cast::from_uint_ref(self)
+            }
+        }
+
+        impl<$($ty_param)+> AsMut<$self_ty<$($self_ty_param),+>> for $uint
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn as_mut(&mut self) -> &mut $self_ty<$($self_ty_param),+> {
+                crate::cast::from_uint_mut(self)
+            }
+        }
+
+        impl<$($ty_param)+> From<$self_ty<$($self_ty_param),+>> for $uint
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn from(color: $self_ty<$($self_ty_param),+>) -> Self {
+                crate::cast::into_uint(color)
+            }
+        }
+
+        impl<'a, $($ty_param)+> From<&'a $self_ty<$($self_ty_param),+>> for &'a $uint
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn from(color: &'a $self_ty<$($self_ty_param),+>) -> Self {
+                color.as_ref()
+            }
+        }
+
+
+        impl<'a, $($ty_param)+> From<&'a mut $self_ty<$($self_ty_param),+>> for &'a mut $uint
+        $(where $($where)+)?
+        {
+            #[inline]
+            fn from(color: &'a mut $self_ty<$($self_ty_param),+>) -> Self {
+                color.as_mut()
             }
         }
     }

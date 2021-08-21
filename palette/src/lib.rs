@@ -244,7 +244,7 @@ pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use luv::{Luv, Luva};
 pub use oklab::{Oklab, Oklaba};
 pub use oklch::{Oklch, Oklcha};
-pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Packed, RgbChannels, Srgb, Srgba};
+pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
@@ -1545,8 +1545,14 @@ impl_next_array!(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 
 mod sealed {
     pub trait IsArray {}
-
     impl<T, const N: usize> IsArray for [T; N] {}
+
+    pub trait IsUint {}
+    impl IsUint for u8 {}
+    impl IsUint for u16 {}
+    impl IsUint for u32 {}
+    impl IsUint for u64 {}
+    impl IsUint for u128 {}
 }
 
 #[cfg(doctest)]

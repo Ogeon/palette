@@ -544,7 +544,7 @@ impl<T: DivAssign + Copy, C: DivAssign<T>> DivAssign<T> for Alpha<C, T> {
     }
 }
 
-impl_array_casts!(Alpha<C, T>, [T; N], const N, where Alpha<C, T>: ArrayCast<Array = [T; N]>);
+impl_array_casts!([C, T, const N: usize] Alpha<C, T>, [T; N], where Alpha<C, T>: ArrayCast<Array = [T; N]>);
 
 impl<C, T: Component> From<C> for Alpha<C, T> {
     fn from(color: C) -> Alpha<C, T> {
