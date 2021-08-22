@@ -1505,7 +1505,7 @@ fn from_f64<T: FromF64>(c: f64) -> T {
 ///
 /// * `Item` must be the type of the array's items (eg: `T` in `[T; N]`).
 /// * `LENGTH` must be the length of the array (eg: `N` in `[T; N]`).
-pub unsafe trait ArrayExt: sealed::IsArray {
+pub unsafe trait ArrayExt {
     /// The type of the array's items.
     type Item;
 
@@ -1525,7 +1525,7 @@ unsafe impl<T, const N: usize> ArrayExt for [T; N] {
 ///
 /// * `Next` must have the same item type as `Self`.
 /// * `Next` must be one item longer than `Self`.
-pub unsafe trait NextArray: sealed::IsArray {
+pub unsafe trait NextArray {
     /// An array of size `N + 1`.
     type Next: ArrayExt;
 }
@@ -1541,19 +1541,7 @@ macro_rules! impl_next_array {
     };
 }
 
-impl_next_array!(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
-
-mod sealed {
-    pub trait IsArray {}
-    impl<T, const N: usize> IsArray for [T; N] {}
-
-    pub trait IsUint {}
-    impl IsUint for u8 {}
-    impl IsUint for u16 {}
-    impl IsUint for u32 {}
-    impl IsUint for u64 {}
-    impl IsUint for u128 {}
-}
+impl_next_array!(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 
 #[cfg(doctest)]
 macro_rules! doctest {

@@ -30,7 +30,7 @@ use core::mem::{transmute_copy, ManuallyDrop};
 /// underlying field types stay the same and will be dropped.
 pub unsafe trait UintCast {
     /// An unsigned integer with the same size as `Self`.
-    type Uint: crate::sealed::IsUint;
+    type Uint;
 }
 
 /// Cast from a color type to an unsigned integer.
@@ -117,9 +117,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
+    let value: *const T = value;
+
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
-    unsafe { &*(value as *const T as *const T::Uint) }
+    unsafe { &*value.cast::<T::Uint>() }
 }
 
 /// Cast from an unsigned integer reference to a color type reference.
@@ -138,9 +140,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
+    let value: *const T::Uint = value;
+
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
-    unsafe { &*(value as *const T::Uint as *const T) }
+    unsafe { &*value.cast::<T>() }
 }
 
 /// Cast from a mutable color type reference to a mutable unsigned integer reference.
@@ -159,9 +163,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
+    let value: *mut T = value;
+
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
-    unsafe { &mut *(value as *mut T as *mut T::Uint) }
+    unsafe { &mut *value.cast::<T::Uint>() }
 }
 
 /// Cast from a mutable unsigned integer reference to a mutable color type reference.
@@ -180,9 +186,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
+    let value: *mut T::Uint = value;
+
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
-    unsafe { &mut *(value as *mut T::Uint as *mut T) }
+    unsafe { &mut *value.cast::<T>() }
 }
 
 /// Cast from a slice of colors to a slice of unsigned integers.
@@ -207,7 +215,7 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts(values.as_ptr() as *const T::Uint, values.len()) }
+    unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<T::Uint>(), values.len()) }
 }
 
 /// Cast from a slice of unsigned integers to a slice of colors.
@@ -232,7 +240,7 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts(values.as_ptr() as *const T, values.len()) }
+    unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<T>(), values.len()) }
 }
 
 /// Cast from a mutable slice of colors to a mutable slice of unsigned integers.
@@ -257,7 +265,7 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr() as *mut T::Uint, values.len()) }
+    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::<T::Uint>(), values.len()) }
 }
 
 /// Cast from a mutable slice of unsigned integers to a mutable slice of colors.
@@ -282,7 +290,7 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr() as *mut T, values.len()) }
+    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::<T>(), values.len()) }
 }
 
 /// Cast from a boxed slice of colors to a boxed slice of unsigned integers.
@@ -309,11 +317,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
-    let raw = Box::into_raw(values);
+    let raw: *mut [T::Uint] = into_uint_slice_mut(Box::leak(values));
 
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
-    unsafe { Box::from_raw(raw as *mut [T::Uint]) }
+    unsafe { Box::from_raw(raw) }
 }
 
 /// Cast from a boxed slice of unsigned integers to a boxed slice of colors.
@@ -340,11 +348,11 @@ where
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
-    let raw = Box::into_raw(values);
+    let raw: *mut [T] = from_uint_slice_mut(Box::leak(values));
 
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
-    unsafe { Box::from_raw(raw as *mut [T]) }
+    unsafe { Box::from_raw(raw) }
 }
 
 /// Cast from a `Vec` of colors to a `Vec` of unsigned integers.
@@ -377,7 +385,7 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw as *mut T::Uint, values.len(), values.capacity()) }
+    unsafe { Vec::from_raw_parts(raw.cast::<T::Uint>(), values.len(), values.capacity()) }
 }
 
 /// Cast from a `Vec` of unsigned integers to a `Vec` of colors.
@@ -410,5 +418,5 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw as *mut T, values.len(), values.capacity()) }
+    unsafe { Vec::from_raw_parts(raw.cast::<T>(), values.len(), values.capacity()) }
 }

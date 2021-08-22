@@ -245,9 +245,11 @@ where
         core::mem::align_of::<T>()
     );
 
+    let value: *const T = value;
+
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { &*(value as *const T as *const T::Array) }
+    unsafe { &*value.cast::<T::Array>() }
 }
 
 /// Cast from an array reference to a color type reference.
@@ -287,9 +289,11 @@ where
         core::mem::align_of::<T>()
     );
 
+    let value: *const T::Array = value;
+
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
-    unsafe { &*(value as *const T::Array as *const T) }
+    unsafe { &*value.cast::<T>() }
 }
 
 /// Cast from a mutable color type reference to a mutable array reference.
@@ -329,9 +333,11 @@ where
         core::mem::align_of::<T>()
     );
 
+    let value: *mut T = value;
+
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { &mut *(value as *mut T as *mut T::Array) }
+    unsafe { &mut *value.cast::<T::Array>() }
 }
 
 /// Cast from a mutable array reference to a mutable color type reference.
@@ -371,9 +377,11 @@ where
         core::mem::align_of::<T>()
     );
 
+    let value: *mut T::Array = value;
+
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
-    unsafe { &mut *(value as *mut T::Array as *mut T) }
+    unsafe { &mut *value.cast::<T>() }
 }
 
 /// Cast from a slice of colors to a slice of arrays.
@@ -398,7 +406,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts(values.as_ptr() as *const T::Array, values.len()) }
+    unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<T::Array>(), values.len()) }
 }
 
 /// Cast from a slice of colors to a slice of color components.
@@ -427,7 +435,7 @@ where
     // is safe. The length is multiplied by the array length.
     unsafe {
         core::slice::from_raw_parts(
-            values.as_ptr() as *const <T::Array as ArrayExt>::Item,
+            values.as_ptr().cast::<<T::Array as ArrayExt>::Item>(),
             length,
         )
     }
@@ -458,7 +466,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts(values.as_ptr() as *const T, values.len()) }
+    unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<T>(), values.len()) }
 }
 
 /// The same as [`try_from_component_slice`] but panics on error.
@@ -541,7 +549,7 @@ where
     }
 
     let length = values.len() / T::Array::LENGTH;
-    let raw = values.as_ptr() as *const T;
+    let raw = values.as_ptr().cast::<T>();
 
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
@@ -573,7 +581,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts_mut(values.as_ptr() as *mut T::Array, values.len()) }
+    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::<T::Array>(), values.len()) }
 }
 
 /// Cast from a slice of colors to a slice of color components.
@@ -605,7 +613,7 @@ where
     // is safe. The length is multiplied by the array length.
     unsafe {
         core::slice::from_raw_parts_mut(
-            values.as_mut_ptr() as *mut <T::Array as ArrayExt>::Item,
+            values.as_mut_ptr().cast::<<T::Array as ArrayExt>::Item>(),
             length,
         )
     }
@@ -636,7 +644,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
     // The length is the same because the size is the same.
-    unsafe { core::slice::from_raw_parts_mut(values.as_ptr() as *mut T, values.len()) }
+    unsafe { core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::<T>(), values.len()) }
 }
 
 /// The same as [`try_from_component_slice_mut`] but panics on error.
@@ -719,7 +727,7 @@ where
     }
 
     let length = values.len() / T::Array::LENGTH;
-    let raw = values.as_mut_ptr() as *mut T;
+    let raw = values.as_mut_ptr().cast::<T>();
 
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
@@ -764,7 +772,7 @@ where
 
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { Box::from_raw(raw as *mut T::Array) }
+    unsafe { Box::from_raw(raw.cast::<T::Array>()) }
 }
 
 /// Cast from a boxed array to a boxed color type.
@@ -806,7 +814,7 @@ where
 
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
-    unsafe { Box::from_raw(raw as *mut T) }
+    unsafe { Box::from_raw(raw.cast::<T>()) }
 }
 
 /// Cast from a boxed slice of colors to a boxed slice of arrays.
@@ -826,17 +834,10 @@ pub fn into_array_slice_box<T>(values: Box<[T]>) -> Box<[T::Array]>
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
+    let raw: *mut [T::Array] = into_array_slice_mut(Box::leak(values));
 
-    let raw = Box::into_raw(values);
-
-    // Safety: The requirements of implementing `ArrayCast`, as well as the size
-    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { Box::from_raw(raw as *mut [T::Array]) }
+    // Safety: We know the pointer comes from a `Box` and thus has the correct lifetime.
+    unsafe { Box::from_raw(raw) }
 }
 
 /// Cast from a boxed slice of colors to a boxed slice of color components.
@@ -856,18 +857,10 @@ pub fn into_component_slice_box<T>(values: Box<[T]>) -> Box<[<T::Array as ArrayE
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
+    let raw: *mut [<T::Array as ArrayExt>::Item] = into_component_slice_mut(Box::leak(values));
 
-    let length = values.len() * T::Array::LENGTH;
-    let raw = Box::into_raw(values) as *mut T as *mut <T::Array as ArrayExt>::Item;
-
-    // Safety: The requirements of implementing `ArrayCast`, as well as the size
-    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { Box::from_raw(core::slice::from_raw_parts_mut(raw, length)) }
+    // Safety: We know the pointer comes from a `Box` and thus has the correct lifetime.
+    unsafe { Box::from_raw(raw) }
 }
 
 /// Cast from a boxed slice of arrays to a boxed slice of colors.
@@ -887,17 +880,10 @@ pub fn from_array_slice_box<T>(values: Box<[T::Array]>) -> Box<[T]>
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
+    let raw: *mut [T] = from_array_slice_mut(Box::leak(values));
 
-    let raw = Box::into_raw(values);
-
-    // Safety: The requirements of implementing `ArrayCast`, as well as the size
-    // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
-    unsafe { Box::from_raw(raw as *mut [T]) }
+    // Safety: We know the pointer comes from a `Box` and thus has the correct lifetime.
+    unsafe { Box::from_raw(raw) }
 }
 
 /// The same as [`try_from_component_slice_box`] but panics on error.
@@ -982,22 +968,14 @@ pub fn try_from_component_slice_box<T>(
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
-
     if values.len() % T::Array::LENGTH != 0 {
         return Err(BoxedSliceCastError { values });
     }
 
-    let length = values.len() / T::Array::LENGTH;
-    let raw = Box::into_raw(values) as *mut <T::Array as ArrayExt>::Item as *mut T;
+    let raw: *mut [T] = from_component_slice_mut(Box::leak(values));
 
-    // Safety: The requirements of implementing `ArrayCast`, as well as the size
-    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
-    unsafe { Ok(Box::from_raw(core::slice::from_raw_parts_mut(raw, length))) }
+    // Safety: We know the pointer comes from a `Box` and thus has the correct lifetime.
+    unsafe { Ok(Box::from_raw(raw)) }
 }
 
 /// Cast from a `Vec` of colors to a `Vec` of arrays.
@@ -1029,7 +1007,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw as *mut T::Array, values.len(), values.capacity()) }
+    unsafe { Vec::from_raw_parts(raw.cast::<T::Array>(), values.len(), values.capacity()) }
 }
 
 /// Cast from a `Vec` of colors to a `Vec` of color components.
@@ -1063,7 +1041,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
     // The length and capacity are multiplied by the array length.
-    unsafe { Vec::from_raw_parts(raw as *mut <T::Array as ArrayExt>::Item, length, capacity) }
+    unsafe { Vec::from_raw_parts(raw.cast::<<T::Array as ArrayExt>::Item>(), length, capacity) }
 }
 
 /// Cast from a `Vec` of arrays to a `Vec` of colors.
@@ -1095,7 +1073,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw as *mut T, values.len(), values.capacity()) }
+    unsafe { Vec::from_raw_parts(raw.cast::<T>(), values.len(), values.capacity()) }
 }
 
 /// The same as [`try_from_component_vec`] but panics on error.
@@ -1233,7 +1211,7 @@ where
     // Safety: The requirements of implementing `ArrayCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
     // The length and capacity are multiplies of the array length.
-    unsafe { Ok(Vec::from_raw_parts(raw as *mut T, length, capacity)) }
+    unsafe { Ok(Vec::from_raw_parts(raw.cast::<T>(), length, capacity)) }
 }
 
 /// The error type returned when casting a slice of components fails.
