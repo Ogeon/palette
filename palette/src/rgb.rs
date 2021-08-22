@@ -64,10 +64,9 @@ use crate::encoding::{self, Gamma, Linear, TransferFn};
 use crate::white_point::{Any, WhitePoint};
 use crate::{Component, FloatComponent, FromComponent, Yxy};
 
-pub use self::packed::{channels, Packed, RgbChannels};
 pub use self::rgb::{FromHexError, Rgb, Rgba};
 
-mod packed;
+pub mod channels;
 mod rgb;
 
 /// Non-linear sRGB.
@@ -212,3 +211,15 @@ where
         srgba.into_linear().into_format()
     }
 }
+
+/// A packed representation of RGBA in RGBA order.
+pub type PackedRgba<P = u32> = crate::cast::Packed<channels::Rgba, P>;
+
+/// A packed representation of RGBA in ARGB order.
+pub type PackedArgb<P = u32> = crate::cast::Packed<channels::Argb, P>;
+
+/// A packed representation of RGBA in BGRA order.
+pub type PackedBgra<P = u32> = crate::cast::Packed<channels::Bgra, P>;
+
+/// A packed representation of RGBA in ABGR order.
+pub type PackedAbgr<P = u32> = crate::cast::Packed<channels::Abgr, P>;
