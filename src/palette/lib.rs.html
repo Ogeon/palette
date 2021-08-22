@@ -1556,12 +1556,6 @@
 <span id="1554">1554</span>
 <span id="1555">1555</span>
 <span id="1556">1556</span>
-<span id="1557">1557</span>
-<span id="1558">1558</span>
-<span id="1559">1559</span>
-<span id="1560">1560</span>
-<span id="1561">1561</span>
-<span id="1562">1562</span>
 </pre><pre class="rust">
 <span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
@@ -1809,7 +1803,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">luv</span>::{<span class="ident">Luv</span>, <span class="ident">Luva</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">oklab</span>::{<span class="ident">Oklab</span>, <span class="ident">Oklaba</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">oklch</span>::{<span class="ident">Oklch</span>, <span class="ident">Oklcha</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rgb</span>::{<span class="ident">GammaSrgb</span>, <span class="ident">GammaSrgba</span>, <span class="ident">LinSrgb</span>, <span class="ident">LinSrgba</span>, <span class="ident">Packed</span>, <span class="ident">RgbChannels</span>, <span class="ident">Srgb</span>, <span class="ident">Srgba</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rgb</span>::{<span class="ident">GammaSrgb</span>, <span class="ident">GammaSrgba</span>, <span class="ident">LinSrgb</span>, <span class="ident">LinSrgba</span>, <span class="ident">Srgb</span>, <span class="ident">Srgba</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">xyz</span>::{<span class="ident">Xyz</span>, <span class="ident">Xyza</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">yxy</span>::{<span class="ident">Yxy</span>, <span class="ident">Yxya</span>};
 
@@ -3070,7 +3064,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// * `Item` must be the type of the array&#39;s items (eg: `T` in `[T; N]`).</span>
 <span class="doccomment">/// * `LENGTH` must be the length of the array (eg: `N` in `[T; N]`).</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">ArrayExt</span>: <span class="ident">sealed::IsArray</span> {
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">ArrayExt</span> {
     <span class="doccomment">/// The type of the array&#39;s items.</span>
     <span class="kw">type</span> <span class="ident">Item</span>;
 
@@ -3090,7 +3084,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// * `Next` must have the same item type as `Self`.</span>
 <span class="doccomment">/// * `Next` must be one item longer than `Self`.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">NextArray</span>: <span class="ident">sealed::IsArray</span> {
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">NextArray</span> {
     <span class="doccomment">/// An array of size `N + 1`.</span>
     <span class="kw">type</span> <span class="ident">Next</span>: <span class="ident">ArrayExt</span>;
 }
@@ -3106,13 +3100,7 @@
     };
 }
 
-<span class="macro">impl_next_array!</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>);
-
-<span class="kw">mod</span> <span class="ident">sealed</span> {
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IsArray</span> {}
-
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">IsArray</span> <span class="kw">for</span> [<span class="ident">T</span>; <span class="ident">N</span>] {}
-}
+<span class="macro">impl_next_array!</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doctest</span>)]</span>
 <span class="macro">macro_rules!</span> <span class="ident">doctest</span> {
