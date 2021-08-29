@@ -385,7 +385,8 @@ pub trait TryIntoColor<T>: Sized {
 ///A trait for converting one color from another, in a possibly lossy way.
 ///
 /// `U: FromColor<T>` is implemented for every type `U: FromColorUnclamped<T> +
-/// Clamp`.
+/// Clamp`, as well as for `Vec<T>` and `Box<[T]>` where `T` and `U` have the
+/// same memory layout.
 ///
 /// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a
 /// lossless version of this trait. See
@@ -477,6 +478,54 @@ pub trait TryFromColor<T>: Sized {
     fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
+#[cfg(feature = "std")]
+impl<T, U> FromColorUnclamped<Vec<T>> for Vec<U>
+where
+    T: crate::cast::ArrayCast,
+    U: crate::cast::ArrayCast<Array = T::Array> + FromColorUnclamped<T>,
+{
+    /// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColorUnclamped, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];
+    /// let mut lch = Vec::<Lch>::from_color_unclamped(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Vec::<Srgb>::from_color_unclamped(lch);
+    /// ```
+    #[inline]
+    fn from_color_unclamped(color: Vec<T>) -> Self {
+        crate::cast::map_vec_in_place(color, U::from_color_unclamped)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T, U> FromColorUnclamped<Box<[T]>> for Box<[U]>
+where
+    T: crate::cast::ArrayCast,
+    U: crate::cast::ArrayCast<Array = T::Array> + FromColorUnclamped<T>,
+{
+    /// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColorUnclamped, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();
+    /// let mut lch = Box::<[Lch]>::from_color_unclamped(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Box::<[Srgb]>::from_color_unclamped(lch);
+    /// ```
+    #[inline]
+    fn from_color_unclamped(color: Box<[T]>) -> Self {
+        crate::cast::map_slice_box_in_place(color, U::from_color_unclamped)
+    }
+}
+
 impl<T, U> FromColor<T> for U
 where
     U: FromColorUnclamped<T> + Clamp,
@@ -484,6 +533,54 @@ where
     #[inline]
     fn from_color(t: T) -> Self {
         Self::from_color_unclamped(t).clamp()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T, U> FromColor<Vec<T>> for Vec<U>
+where
+    T: crate::cast::ArrayCast,
+    U: crate::cast::ArrayCast<Array = T::Array> + FromColor<T>,
+{
+    /// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];
+    /// let mut lch = Vec::<Lch>::from_color(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Vec::<Srgb>::from_color(lch);
+    /// ```
+    #[inline]
+    fn from_color(color: Vec<T>) -> Self {
+        crate::cast::map_vec_in_place(color, U::from_color)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T, U> FromColor<Box<[T]>> for Box<[U]>
+where
+    T: crate::cast::ArrayCast,
+    U: crate::cast::ArrayCast<Array = T::Array> + FromColor<T>,
+{
+    /// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();
+    /// let mut lch = Box::<[Lch]>::from_color(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Box::<[Srgb]>::from_color(lch);
+    /// ```
+    #[inline]
+    fn from_color(color: Box<[T]>) -> Self {
+        crate::cast::map_slice_box_in_place(color, U::from_color)
     }
 }
 
