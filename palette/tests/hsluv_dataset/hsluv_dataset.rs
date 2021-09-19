@@ -12,7 +12,6 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 struct HsluvExample {
-    name: String,
     lchuv: Lchuv<D65, f64>,
     hsluv: Hsluv<D65, f64>,
     luv: Luv<D65, f64>,
@@ -46,7 +45,6 @@ fn load_data() -> Examples {
             (
                 k.clone(),
                 HsluvExample {
-                    name: k.clone(),
                     luv: Luv::new(luv_data[0], luv_data[1], luv_data[2]),
                     hsluv: Hsluv::new(hsluv_data[0], hsluv_data[1], hsluv_data[2]),
                     lchuv: Lchuv::new(lchuv_data[0], lchuv_data[1], lchuv_data[2]),

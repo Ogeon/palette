@@ -16,3 +16,4 @@ jobs:
       - uses: boa-dev/criterion-compare-action@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          branchName: ${{ github.base_ref }}

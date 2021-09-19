@@ -250,7 +250,7 @@ pub use yxy::{Yxy, Yxya};
 
 pub use color_difference::ColorDifference;
 pub use component::*;
-pub use convert::{FromColor, IntoColor};
+pub use convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
 pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 pub use matrix::Mat3;
 pub use relative_contrast::{contrast_ratio, RelativeContrast};
