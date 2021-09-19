@@ -31,7 +31,7 @@ fn main() {
         Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1)),
     ]);
 
-    //The same colors and and color space as in grad3, but with the blue point
+    //The same colors and color space as in grad3, but with the blue point
     // shifted down
     let grad4 = Gradient::with_domain(vec![
         (0.0, Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1))),
