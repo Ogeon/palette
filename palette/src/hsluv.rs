@@ -1,24 +1,32 @@
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Sub, SubAssign};
-
-use num_traits::Zero;
-#[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::Distribution;
-#[cfg(feature = "random")]
-use rand::Rng;
+use core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, Sub, SubAssign},
+};
 
 #[cfg(feature = "random")]
-use crate::float::Float;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
+
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+
+#[cfg(feature = "random")]
+use crate::num::{Cbrt, Sqrt};
+
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio,
+    angle::{RealAngle, SignedAngle},
+    clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     luv_bounds::LuvBounds,
-    white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten,
-    LightenAssign, LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue,
-    ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    num::{Arithmetics, MinMax, One, Powi, Real, Zero},
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
+    LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
@@ -111,7 +119,7 @@ impl<Wp, T> Hsluv<Wp, T> {
 
 impl<Wp, T> Hsluv<Wp, T>
 where
-    T: Zero + FromF64,
+    T: Zero + Real,
 {
     /// Return the `saturation` value minimum.
     pub fn min_saturation() -> T {
@@ -175,12 +183,13 @@ impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Hsluv<Wp, T> {
 
 impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Hsluv<Wp, T>
 where
-    T: FloatComponent,
+    T: Real + RealAngle + Into<f64> + Powi + Arithmetics + Clone,
 {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
         // convert the chroma to a saturation based on the max
         // saturation at a particular hue.
-        let max_chroma = LuvBounds::from_lightness(color.l).max_chroma_at_hue(color.hue);
+        let max_chroma =
+            LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
 
         Hsluv::new(
             color.hue,
@@ -216,7 +225,7 @@ impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
 
 impl<Wp, T> IsWithinBounds for Hsluv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[rustfmt::skip]
     #[inline]
@@ -228,7 +237,7 @@ where
 
 impl<Wp, T> Clamp for Hsluv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -246,7 +255,7 @@ where
 
 impl<Wp, T> ClampAssign for Hsluv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -259,102 +268,9 @@ where
     }
 }
 
-impl<Wp, T> Mix for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        Hsluv {
-            hue: self.hue + factor * hue_diff,
-            saturation: self.saturation + factor * (other.saturation - self.saturation),
-            l: self.l + factor * (other.l - self.l),
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> MixAssign for Hsluv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        self.hue += factor * hue_diff;
-        self.saturation += factor * (other.saturation - self.saturation);
-        self.l += factor * (other.l - self.l);
-    }
-}
-
-impl<Wp, T> Lighten for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Hsluv {
-            hue: self.hue,
-            saturation: self.saturation,
-            l: (self.l + delta).max(Self::min_l()),
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Hsluv {
-            hue: self.hue,
-            saturation: self.saturation,
-            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> LightenAssign for Hsluv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        self.l += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.l += Self::max_l() * amount;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-}
+impl_mix_hue!(Hsluv<Wp> {saturation, l} phantom: white_point);
+impl_lighten!(Hsluv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, saturation} phantom: white_point);
+impl_saturate!(Hsluv<Wp> increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, l} phantom: white_point);
 
 impl<Wp, T> GetHue for Hsluv<Wp, T>
 where
@@ -418,88 +334,13 @@ where
     }
 }
 
-impl<Wp, T> Saturate for Hsluv<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_saturation() - self.saturation
-        } else {
-            self.saturation
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Hsluv {
-            hue: self.hue,
-            saturation: clamp(
-                self.saturation + delta,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            l: self.l,
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn saturate_fixed(self, amount: T) -> Self {
-        Hsluv {
-            hue: self.hue,
-            saturation: clamp(
-                self.saturation + Self::max_saturation() * amount,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            l: self.l,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SaturateAssign for Hsluv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_saturation() - self.saturation
-        } else {
-            self.saturation
-        };
-
-        self.saturation += difference.max(T::zero()) * factor;
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-    }
-
-    #[inline]
-    fn saturate_fixed_assign(&mut self, amount: T) {
-        self.saturation += Self::max_saturation() * amount;
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-    }
-}
-
 impl<Wp, T> Default for Hsluv<Wp, T>
 where
-    T: Zero,
+    T: Real + Zero,
+    LuvHue<T>: Default,
 {
     fn default() -> Hsluv<Wp, T> {
-        Hsluv::new(LuvHue::from(T::zero()), T::zero(), T::zero())
+        Hsluv::new(LuvHue::default(), Self::min_saturation(), Self::min_l())
     }
 }
 
@@ -508,17 +349,17 @@ impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 
 impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
 
+impl_eq_hue!(Hsluv<Wp>, LuvHue, [hue, saturation, l]);
+
 impl<Wp, T> RelativeContrast for Hsluv<Wp, T>
 where
-    T: FloatComponent,
-    Wp: WhitePoint<T>,
+    T: Real + Arithmetics + PartialOrd,
+    Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        use crate::FromColor;
-
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
@@ -527,9 +368,20 @@ where
 }
 
 #[cfg(feature = "random")]
+impl<Wp, T> Distribution<Hsluv<Wp, T>> for Standard
+where
+    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
+    Standard: Distribution<T> + Distribution<LuvHue<T>>,
+{
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsluv<Wp, T> {
+        crate::random_sampling::sample_hsluv(rng.gen::<LuvHue<T>>(), rng.gen(), rng.gen())
+    }
+}
+
+#[cfg(feature = "random")]
 pub struct UniformHsluv<Wp, T>
 where
-    T: Float + FromF64 + SampleUniform,
+    T: SampleUniform,
 {
     hue: crate::hues::UniformLuvHue<T>,
     u1: Uniform<T>,
@@ -540,7 +392,9 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Hsluv<Wp, T>
 where
-    T: Float + FromF64 + SampleUniform,
+    T: Real + Cbrt + Sqrt + Powi + Arithmetics + PartialOrd + Clone + SampleUniform,
+    LuvHue<T>: SampleBorrow<LuvHue<T>>,
+    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
 {
     type Sampler = UniformHsluv<Wp, T>;
 }
@@ -548,7 +402,9 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformHsluv<Wp, T>
 where
-    T: Float + FromF64 + SampleUniform,
+    T: Real + Cbrt + Sqrt + Powi + Arithmetics + PartialOrd + Clone + SampleUniform,
+    LuvHue<T>: SampleBorrow<LuvHue<T>>,
+    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
 {
     type X = Hsluv<Wp, T>;
 
@@ -559,11 +415,11 @@ where
     {
         use crate::random_sampling::invert_hsluv_sample;
 
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
-        let (r1_min, r2_min): (T, T) = invert_hsluv_sample(low);
-        let (r1_max, r2_max): (T, T) = invert_hsluv_sample(high);
+        let (r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
+        let (r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
 
         UniformHsluv {
             hue: crate::hues::UniformLuvHue::new(low.hue, high.hue),
@@ -580,11 +436,11 @@ where
     {
         use crate::random_sampling::invert_hsluv_sample;
 
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
-        let (r1_min, r2_min) = invert_hsluv_sample(low);
-        let (r1_max, r2_max) = invert_hsluv_sample(high);
+        let (r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
+        let (r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
 
         UniformHsluv {
             hue: crate::hues::UniformLuvHue::new_inclusive(low.hue, high.hue),

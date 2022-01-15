@@ -1,42 +1,57 @@
-use num_traits::Zero;
+//! Traits for working with stimulus colors and values, such as RGB and XYZ.
 
-use crate::float::Float;
-use crate::{clamp, FromF64};
+use crate::{
+    clamp,
+    num::{One, Real, Round, Zero},
+};
 
-/// Common trait for color components.
-pub trait Component: Copy + Zero + PartialOrd {
-    /// The highest displayable value this component type can reach. Higher
-    /// values are allowed, but they may be lowered to this before
-    /// converting to another format.
+/// Color components that represent a stimulus intensity.
+///
+/// The term "stimulus" comes from "tristimulus", literally a set of three
+/// stimuli, which is a term for color spaces that measure the intensity of
+/// three primary color values. Classic examples of tristimulus color space are
+/// XYZ and RGB.
+///
+/// Stimulus values are expected to have these properties:
+///  * Has a typical range from `0` to some finite maximum, the "max intensity".
+///    This represents a range from `0%` to `100%`. For example `0u8` to
+///    `255u8`, `0.0f32` to `1.0f32`.
+///  * Values below `0` are considered invalid for display purposes, but may
+///    still be used in calculations.
+///  * Values above the "max intensity" are sometimes supported, depending on
+///    the application. For example in 3D rendering, where high values represent
+///    intense light.
+///  * Unsigned integer values (`u8`, `u16`, `u32`, etc.) have a range from `0`
+///    to their largest representable value. For example `0u8` to `155u8` or
+///    `0u16` to `65535u16`.
+///  * Real values (`f32`, `f64`, fixed point types, etc.) have a range from
+///    `0.0` to `1.0`.
+pub trait Stimulus: Zero {
+    /// The highest displayable value this component type can reach. Integers
+    /// types are expected to return their maximum value, while real numbers
+    /// (like floats) return 1.0. Higher values are allowed, but they may be
+    /// lowered to this before converting to another format.
     #[must_use]
     fn max_intensity() -> Self;
 }
 
-/// Common trait for floating point color components.
-pub trait FloatComponent: Component + Float + FromF64 {}
-
-impl<T: Component + Float + FromF64> FloatComponent for T {}
-
-macro_rules! impl_float_components {
-    ($($ty: ident),+) => {
-        $(
-            impl Component for $ty {
-                fn max_intensity() -> Self {
-                    1.0
-                }
-            }
-        )*
-    };
+impl<T> Stimulus for T
+where
+    T: Real + One + Zero,
+{
+    #[inline]
+    fn max_intensity() -> Self {
+        Self::one()
+    }
 }
-
-impl_float_components!(f32, f64);
 
 macro_rules! impl_uint_components {
     ($($ty: ident),+) => {
         $(
-            impl Component for $ty {
+            impl Stimulus for $ty {
+                #[inline]
                 fn max_intensity() -> Self {
-                    core::$ty::MAX
+                    $ty::MAX
                 }
             }
         )*
@@ -45,50 +60,50 @@ macro_rules! impl_uint_components {
 
 impl_uint_components!(u8, u16, u32, u64, u128);
 
-/// Converts from a color component type, while performing the appropriate
-/// scaling, rounding and clamping.
+/// Converts from a stimulus color component type, while performing the
+/// appropriate scaling, rounding and clamping.
 ///
 /// ```
-/// use palette::FromComponent;
+/// use palette::stimulus::FromStimulus;
 ///
 /// // Scales the value up to u8::MAX while converting.
-/// let u8_component = u8::from_component(1.0f32);
+/// let u8_component = u8::from_stimulus(1.0f32);
 /// assert_eq!(u8_component, 255);
 /// ```
-pub trait FromComponent<T: Component> {
+pub trait FromStimulus<T> {
     /// Converts `other` into `Self`, while performing the appropriate scaling,
     /// rounding and clamping.
     #[must_use]
-    fn from_component(other: T) -> Self;
+    fn from_stimulus(other: T) -> Self;
 }
 
-impl<T: Component, U: IntoComponent<T> + Component> FromComponent<U> for T {
+impl<T, U: IntoStimulus<T>> FromStimulus<U> for T {
     #[inline]
-    fn from_component(other: U) -> T {
-        other.into_component()
+    fn from_stimulus(other: U) -> T {
+        other.into_stimulus()
     }
 }
 
-/// Converts into a color component type, while performing the appropriate
-/// scaling, rounding and clamping.
+/// Converts into a stimulus color component type, while performing the
+/// appropriate scaling, rounding and clamping.
 ///
 /// ```
-/// use palette::IntoComponent;
+/// use palette::stimulus::IntoStimulus;
 ///
 /// // Scales the value up to u8::MAX while converting.
-/// let u8_component: u8 = 1.0f32.into_component();
+/// let u8_component: u8 = 1.0f32.into_stimulus();
 /// assert_eq!(u8_component, 255);
 /// ```
-pub trait IntoComponent<T: Component> {
+pub trait IntoStimulus<T> {
     /// Converts `self` into `T`, while performing the appropriate scaling,
     /// rounding and clamping.
     #[must_use]
-    fn into_component(self) -> T;
+    fn into_stimulus(self) -> T;
 }
 
-impl<T: Component> IntoComponent<T> for T {
+impl<T> IntoStimulus<T> for T {
     #[inline]
-    fn into_component(self) -> T {
+    fn into_stimulus(self) -> T {
         self
     }
 }
@@ -111,9 +126,9 @@ const C52: u64 = 0x4330_0000_0000_0000;
 macro_rules! convert_float_to_uint {
     ($float: ident; direct ($($direct_target: ident),+); $(via $temporary: ident ($($target: ident),+);)*) => {
         $(
-            impl IntoComponent<$direct_target> for $float {
+            impl IntoStimulus<$direct_target> for $float {
                 #[inline]
-                fn into_component(self) -> $direct_target {
+                fn into_stimulus(self) -> $direct_target {
                     let max = $direct_target::max_intensity() as $float;
                     let scaled = (self * max).min(max);
                     let f = scaled + f32::from_bits(C23);
@@ -124,9 +139,9 @@ macro_rules! convert_float_to_uint {
 
         $(
             $(
-                impl IntoComponent<$target> for $float {
+                impl IntoStimulus<$target> for $float {
                     #[inline]
-                    fn into_component(self) -> $target {
+                    fn into_stimulus(self) -> $target {
                         let max = $target::max_intensity() as $temporary;
                         let scaled = (self as $temporary * max).min(max);
                         let f = scaled + f64::from_bits(C52);
@@ -143,9 +158,9 @@ macro_rules! convert_float_to_uint {
 macro_rules! convert_double_to_uint {
     ($double: ident; direct ($($direct_target: ident),+);) => {
         $(
-            impl IntoComponent<$direct_target> for $double {
+            impl IntoStimulus<$direct_target> for $double {
                 #[inline]
-                fn into_component(self) -> $direct_target {
+                fn into_stimulus(self) -> $direct_target {
                     let max = $direct_target::max_intensity() as $double;
                     let scaled = (self * max).min(max);
                     let f = scaled + f64::from_bits(C52);
@@ -160,9 +175,9 @@ macro_rules! convert_double_to_uint {
 // x is the component. We convert the component to f32 then multiply it by the
 // reciprocal of the float representation max value for u8.
 // Works on the range of [0, 2^23] for f32, [0, 2^52 - 1] for f64.
-impl IntoComponent<f32> for u8 {
+impl IntoStimulus<f32> for u8 {
     #[inline]
-    fn into_component(self) -> f32 {
+    fn into_stimulus(self) -> f32 {
         let comp_u = u32::from(self) + C23;
         let comp_f = f32::from_bits(comp_u) - f32::from_bits(C23);
         let max_u = u32::from(core::u8::MAX) + C23;
@@ -172,9 +187,9 @@ impl IntoComponent<f32> for u8 {
 }
 
 // Uint to f64 conversion with the formula (x_u64 + C23_u64) - C23_f64.
-impl IntoComponent<f64> for u8 {
+impl IntoStimulus<f64> for u8 {
     #[inline]
-    fn into_component(self) -> f64 {
+    fn into_stimulus(self) -> f64 {
         let comp_u = u64::from(self) + C52;
         let comp_f = f64::from_bits(comp_u) - f64::from_bits(C52);
         let max_u = u64::from(core::u8::MAX) + C52;
@@ -187,9 +202,9 @@ macro_rules! convert_uint_to_float {
     ($uint: ident; $(via $temporary: ident ($($target: ident),+);)*) => {
         $(
             $(
-                impl IntoComponent<$target> for $uint {
+                impl IntoStimulus<$target> for $uint {
                     #[inline]
-                    fn into_component(self) -> $target {
+                    fn into_stimulus(self) -> $target {
                         let max = $uint::max_intensity() as $temporary;
                         let scaled = self as $temporary / max;
                         scaled as $target
@@ -204,13 +219,13 @@ macro_rules! convert_uint_to_uint {
     ($uint: ident; $(via $temporary: ident ($($target: ident),+);)*) => {
         $(
             $(
-                impl IntoComponent<$target> for $uint {
+                impl IntoStimulus<$target> for $uint {
                     #[inline]
-                    fn into_component(self) -> $target {
+                    fn into_stimulus(self) -> $target {
                         let target_max = $target::max_intensity() as $temporary;
                         let own_max = $uint::max_intensity() as $temporary;
                         let scaled = (self as $temporary / own_max) * target_max;
-                        clamp(scaled.round(), 0.0, target_max) as $target
+                        clamp(Round::round(scaled), 0.0, target_max) as $target
                     }
                 }
             )+
@@ -218,17 +233,17 @@ macro_rules! convert_uint_to_uint {
     };
 }
 
-impl IntoComponent<f64> for f32 {
+impl IntoStimulus<f64> for f32 {
     #[inline]
-    fn into_component(self) -> f64 {
+    fn into_stimulus(self) -> f64 {
         f64::from(self)
     }
 }
 convert_float_to_uint!(f32; direct (u8, u16); via f64 (u32, u64, u128););
 
-impl IntoComponent<f32> for f64 {
+impl IntoStimulus<f32> for f64 {
     #[inline]
-    fn into_component(self) -> f32 {
+    fn into_stimulus(self) -> f32 {
         self as f32
     }
 }
@@ -250,7 +265,7 @@ convert_uint_to_uint!(u128; via f64 (u8, u16, u32, u64););
 
 #[cfg(test)]
 mod test {
-    use crate::IntoComponent;
+    use crate::stimulus::IntoStimulus;
     use approx::assert_relative_eq;
 
     #[test]
@@ -288,7 +303,7 @@ mod test {
         ];
 
         for (d, e) in data.into_iter().zip(expected) {
-            assert_eq!(IntoComponent::<u8>::into_component(d), e);
+            assert_eq!(IntoStimulus::<u8>::into_stimulus(d), e);
         }
     }
 
@@ -327,39 +342,33 @@ mod test {
         ];
 
         for (d, e) in data.into_iter().zip(expected) {
-            assert_eq!(IntoComponent::<u8>::into_component(d), e);
+            assert_eq!(IntoStimulus::<u8>::into_stimulus(d), e);
         }
     }
 
     #[test]
     fn uint_to_float() {
-        fn into_component_old(n: u8) -> f32 {
+        fn into_stimulus_old(n: u8) -> f32 {
             let max = core::u8::MAX as f32;
             let scaled = n as f32 / max;
             scaled as f32
         }
 
         for n in (0..=255).step_by(5) {
-            assert_relative_eq!(
-                IntoComponent::<f32>::into_component(n),
-                into_component_old(n)
-            )
+            assert_relative_eq!(IntoStimulus::<f32>::into_stimulus(n), into_stimulus_old(n))
         }
     }
 
     #[test]
     fn uint_to_double() {
-        fn into_component_old(n: u8) -> f64 {
+        fn into_stimulus_old(n: u8) -> f64 {
             let max = core::u8::MAX as f64;
             let scaled = n as f64 / max;
             scaled as f64
         }
 
         for n in (0..=255).step_by(5) {
-            assert_relative_eq!(
-                IntoComponent::<f64>::into_component(n),
-                into_component_old(n)
-            )
+            assert_relative_eq!(IntoStimulus::<f64>::into_stimulus(n), into_stimulus_old(n))
         }
     }
 }

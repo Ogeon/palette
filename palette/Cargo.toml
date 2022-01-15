@@ -12,7 +12,7 @@ exclude = [
     ".gitignore",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
-    "version.sh"
+    "version.sh",
 ]
 description = "Convert and manage colors with a focus on correctness, flexibility and ease of use."
 documentation = "https://docs.rs/palette/0.6.0/palette/"
@@ -32,16 +32,15 @@ named_gradients = ["std"]
 random = ["rand"]
 serializing = ["serde", "std"]
 #ignore in feature test
-std = ["approx/std", "num-traits/std"]
-libm = ["num-traits/libm"]
+std = ["approx/std"]
 
 [lib]
 bench = false
 
 [dependencies]
 palette_derive = { version = "0.6.0", path = "../palette_derive" }
-num-traits = { version = "0.2", default-features = false }
 approx = { version = "0.5", default-features = false }
+libm = { version = "0.2.1", default-features = false, optional = true }
 
 [dependencies.phf]
 version = "0.9"

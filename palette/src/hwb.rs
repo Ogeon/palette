@@ -1,22 +1,29 @@
-use core::any::TypeId;
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, DivAssign, Sub, SubAssign};
+use core::{
+    any::TypeId,
+    marker::PhantomData,
+    ops::{Add, AddAssign, DivAssign, Sub, SubAssign},
+};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::convert::FromColorUnclamped;
-use crate::encoding::Srgb;
-use crate::rgb::{RgbSpace, RgbStandard};
 use crate::{
-    clamp, clamp_min, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    FloatComponent, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    angle::{FromAngle, RealAngle, SignedAngle},
+    clamp, clamp_min, clamp_min_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    encoding::Srgb,
+    num::{Arithmetics, MinMax, One, Real, Zero},
+    rgb::{RgbSpace, RgbStandard},
+    stimulus::{FromStimulus, Stimulus},
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -29,6 +36,20 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 /// closely related to [HSV](crate::Hsv). It describes colors with a
 /// starting hue, then a degree of whiteness and blackness to mix into that
 /// base hue.
+///
+/// HWB component values are typically real numbers (such as floats), but may
+/// also be converted to and from `u8` for storage and interoperability
+/// purposes. The hue is then within the range `[0, 255]`.
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::Hwb;
+///
+/// let hwb_u8 = Hwb::new_srgb(128u8, 85, 51);
+/// let hwb_f32 = hwb_u8.into_format::<f32>();
+///
+/// assert_relative_eq!(hwb_f32, Hwb::new(180.0, 1.0 / 3.0, 0.2));
+/// ```
 ///
 /// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
@@ -114,6 +135,27 @@ impl<S, T> Hwb<S, T> {
         }
     }
 
+    /// Convert into another component type.
+    pub fn into_format<U>(self) -> Hwb<S, U>
+    where
+        U: FromStimulus<T> + FromAngle<T>,
+    {
+        Hwb {
+            hue: self.hue.into_format(),
+            whiteness: U::from_stimulus(self.whiteness),
+            blackness: U::from_stimulus(self.blackness),
+            standard: PhantomData,
+        }
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U>(color: Hwb<S, U>) -> Self
+    where
+        T: FromStimulus<U> + FromAngle<U>,
+    {
+        color.into_format()
+    }
+
     /// Convert to a `(hue, whiteness, blackness)` tuple.
     pub fn into_components(self) -> (RgbHue<T>, T, T) {
         (self.hue, self.whiteness, self.blackness)
@@ -137,7 +179,7 @@ impl<S, T> Hwb<S, T> {
 
 impl<S, T> Hwb<S, T>
 where
-    T: Component,
+    T: Stimulus,
 {
     /// Return the `whiteness` value minimum.
     pub fn min_whiteness() -> T {
@@ -211,6 +253,27 @@ impl<S, T, A> Alpha<Hwb<S, T>, A> {
         }
     }
 
+    /// Convert into another component type.
+    pub fn into_format<U, B>(self) -> Alpha<Hwb<S, U>, B>
+    where
+        U: FromStimulus<T> + FromAngle<T>,
+        B: FromStimulus<A>,
+    {
+        Alpha {
+            color: self.color.into_format(),
+            alpha: B::from_stimulus(self.alpha),
+        }
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U, B>(color: Alpha<Hwb<S, U>, B>) -> Self
+    where
+        T: FromStimulus<U> + FromAngle<U>,
+        A: FromStimulus<B>,
+    {
+        color.into_format()
+    }
+
     /// Convert to a `(hue, whiteness, blackness, alpha)` tuple.
     pub fn into_components(self) -> (RgbHue<T>, T, T, A) {
         (
@@ -234,7 +297,9 @@ where
     S1: RgbStandard<T>,
     S2: RgbStandard<T>,
     S1::Space: RgbSpace<T, WhitePoint = <S2::Space as RgbSpace<T>>::WhitePoint>,
-    T: FloatComponent,
+    Hsv<S1, T>: FromColorUnclamped<Hwb<S1, T>>,
+    Hsv<S2, T>: FromColorUnclamped<Hsv<S1, T>>,
+    Self: FromColorUnclamped<Hsv<S2, T>>,
 {
     fn from_color_unclamped(hwb: Hwb<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
@@ -249,12 +314,12 @@ where
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hwb<S, T>
 where
-    T: FloatComponent,
+    T: One + Arithmetics,
 {
     fn from_color_unclamped(color: Hsv<S, T>) -> Self {
         Hwb {
             hue: color.hue,
-            whiteness: (T::one() - color.saturation) * color.value,
+            whiteness: (T::one() - color.saturation) * &color.value,
             blackness: (T::one() - color.value),
             standard: PhantomData,
         }
@@ -287,29 +352,29 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
 
 impl<S, T> IsWithinBounds for Hwb<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd + Add<Output = T> + Clone,
 {
     #[rustfmt::skip]
     #[inline]
     fn is_within_bounds(&self) -> bool {
         self.blackness >= Self::min_blackness() && self.blackness <= Self::max_blackness() &&
         self.whiteness >= Self::min_whiteness() && self.whiteness <= Self::max_blackness() &&
-        self.whiteness + self.blackness <= T::max_intensity()
+        self.whiteness.clone() + self.blackness.clone() <= T::max_intensity()
     }
 }
 
 impl<S, T> Clamp for Hwb<S, T>
 where
-    T: Component + DivAssign,
+    T: Stimulus + PartialOrd + Add<Output = T> + DivAssign + Clone,
 {
     #[inline]
     fn clamp(self) -> Self {
-        let mut whiteness = clamp_min(self.whiteness, Self::min_whiteness());
-        let mut blackness = clamp_min(self.blackness, Self::min_blackness());
+        let mut whiteness = clamp_min(self.whiteness.clone(), Self::min_whiteness());
+        let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
 
         let sum = self.blackness + self.whiteness;
         if sum > T::max_intensity() {
-            whiteness /= sum;
+            whiteness /= sum.clone();
             blackness /= sum;
         }
 
@@ -319,77 +384,42 @@ where
 
 impl<S, T> ClampAssign for Hwb<S, T>
 where
-    T: Component + DivAssign,
+    T: Stimulus + PartialOrd + Add<Output = T> + DivAssign + Clone,
 {
     #[inline]
     fn clamp_assign(&mut self) {
         clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
         clamp_min_assign(&mut self.blackness, Self::min_blackness());
 
-        let sum = self.blackness + self.whiteness;
+        let sum = self.blackness.clone() + self.whiteness.clone();
         if sum > T::max_intensity() {
-            self.whiteness /= sum;
+            self.whiteness /= sum.clone();
             self.blackness /= sum;
         }
     }
 }
 
-impl<S, T> Mix for Hwb<S, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        Hwb {
-            hue: self.hue + factor * hue_diff,
-            whiteness: self.whiteness + factor * (other.whiteness - self.whiteness),
-            blackness: self.blackness + factor * (other.blackness - self.blackness),
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> MixAssign for Hwb<S, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        self.hue += factor * hue_diff;
-        self.whiteness += factor * (other.whiteness - self.whiteness);
-        self.blackness += factor * (other.blackness - self.blackness);
-    }
-}
+impl_mix_hue!(Hwb<S> {whiteness, blackness} phantom: standard);
 
 impl<S, T> Lighten for Hwb<S, T>
 where
-    T: FloatComponent,
+    T: Stimulus + Real + Zero + MinMax + Arithmetics + PartialOrd + Clone,
 {
     type Scalar = T;
 
     #[inline]
     fn lighten(self, factor: T) -> Self {
         let difference_whiteness = if factor >= T::zero() {
-            Self::max_whiteness() - self.whiteness
+            Self::max_whiteness() - &self.whiteness
         } else {
-            self.whiteness
+            self.whiteness.clone()
         };
-        let delta_whiteness = difference_whiteness.max(T::zero()) * factor;
+        let delta_whiteness = difference_whiteness.max(T::zero()) * &factor;
 
         let difference_blackness = if factor >= T::zero() {
-            self.blackness
+            self.blackness.clone()
         } else {
-            Self::max_blackness() - self.blackness
+            Self::max_blackness() - &self.blackness
         };
         let delta_blackness = difference_blackness.max(T::zero()) * factor;
 
@@ -405,7 +435,8 @@ where
     fn lighten_fixed(self, amount: T) -> Self {
         Hwb {
             hue: self.hue,
-            whiteness: (self.whiteness + Self::max_whiteness() * amount).max(Self::min_whiteness()),
+            whiteness: (self.whiteness + Self::max_whiteness() * &amount)
+                .max(Self::min_whiteness()),
             blackness: (self.blackness - Self::max_blackness() * amount).max(Self::min_blackness()),
             standard: PhantomData,
         }
@@ -414,24 +445,24 @@ where
 
 impl<S, T> LightenAssign for Hwb<S, T>
 where
-    T: FloatComponent + AddAssign + SubAssign,
+    T: Stimulus + Real + Zero + MinMax + AddAssign + SubAssign + Arithmetics + PartialOrd + Clone,
 {
     type Scalar = T;
 
     #[inline]
     fn lighten_assign(&mut self, factor: T) {
         let difference_whiteness = if factor >= T::zero() {
-            Self::max_whiteness() - self.whiteness
+            Self::max_whiteness() - &self.whiteness
         } else {
-            self.whiteness
+            self.whiteness.clone()
         };
-        self.whiteness += difference_whiteness.max(T::zero()) * factor;
+        self.whiteness += difference_whiteness.max(T::zero()) * &factor;
         clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
 
         let difference_blackness = if factor >= T::zero() {
-            self.blackness
+            self.blackness.clone()
         } else {
-            Self::max_blackness() - self.blackness
+            Self::max_blackness() - &self.blackness
         };
         self.blackness -= difference_blackness.max(T::zero()) * factor;
         clamp_min_assign(&mut self.blackness, Self::min_blackness());
@@ -439,7 +470,7 @@ where
 
     #[inline]
     fn lighten_fixed_assign(&mut self, amount: T) {
-        self.whiteness += Self::max_whiteness() * amount;
+        self.whiteness += Self::max_whiteness() * &amount;
         clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
 
         self.blackness -= Self::max_blackness() * amount;
@@ -449,16 +480,16 @@ where
 
 impl<S, T> GetHue for Hwb<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd + Add<Output = T> + Clone,
 {
     type Hue = RgbHue<T>;
 
     #[inline]
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        if self.whiteness + self.blackness >= T::max_intensity() {
+        if self.whiteness.clone() + self.blackness.clone() >= T::max_intensity() {
             None
         } else {
-            Some(self.hue)
+            Some(self.hue.clone())
         }
     }
 }
@@ -511,11 +542,12 @@ where
 
 impl<S, T> Default for Hwb<S, T>
 where
-    T: Component,
+    T: Stimulus,
+    RgbHue<T>: Default,
 {
     fn default() -> Hwb<S, T> {
         Hwb::new(
-            RgbHue::from(T::zero()),
+            RgbHue::default(),
             Self::min_whiteness(),
             Self::max_blackness(),
         )
@@ -529,7 +561,7 @@ impl_array_casts!(Hwb<S, T>, [T; 3]);
 
 impl<S, T> AbsDiffEq for Hwb<S, T>
 where
-    T: Component + AbsDiffEq,
+    T: Stimulus + PartialOrd + Add<Output = T> + AbsDiffEq + Clone,
     RgbHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
     T::Epsilon: Clone,
 {
@@ -546,8 +578,8 @@ where
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
-            || other.blackness + other.whiteness >= T::max_intensity();
+        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
+            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -558,7 +590,7 @@ where
 
 impl<S, T> RelativeEq for Hwb<S, T>
 where
-    T: Component + RelativeEq,
+    T: Stimulus + PartialOrd + Add<Output = T> + RelativeEq + Clone,
     RgbHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
     T::Epsilon: Clone,
 {
@@ -578,8 +610,8 @@ where
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
-            || other.blackness + other.whiteness >= T::max_intensity();
+        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
+            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -590,7 +622,7 @@ where
 
 impl<S, T> UlpsEq for Hwb<S, T>
 where
-    T: Component + UlpsEq,
+    T: Stimulus + PartialOrd + Add<Output = T> + UlpsEq + Clone,
     RgbHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
     T::Epsilon: Clone,
 {
@@ -605,8 +637,8 @@ where
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness + self.whiteness >= T::max_intensity()
-            || other.blackness + other.whiteness >= T::max_intensity();
+        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
+            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
         if is_gray {
             equal_shade
         } else {
@@ -617,15 +649,14 @@ where
 
 impl<S, T> RelativeContrast for Hwb<S, T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
     S: RgbStandard<T>,
+    Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
 {
     type Scalar = T;
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        use crate::FromColor;
-
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
@@ -636,8 +667,8 @@ where
 #[cfg(feature = "random")]
 impl<S, T> Distribution<Hwb<S, T>> for Standard
 where
-    T: FloatComponent,
-    Standard: Distribution<T>,
+    Standard: Distribution<Hsv<S, T>>,
+    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
         Hwb::from_color_unclamped(rng.gen::<Hsv<S, T>>())
@@ -647,7 +678,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformHwb<S, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
 {
     sampler: crate::hsv::UniformHsv<S, T>,
     space: PhantomData<S>,
@@ -656,7 +687,10 @@ where
 #[cfg(feature = "random")]
 impl<S, T> SampleUniform for Hwb<S, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: MinMax + Clone + SampleUniform,
+    Hsv<S, T>: FromColorUnclamped<Hwb<S, T>> + SampleBorrow<Hsv<S, T>>,
+    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
+    crate::hsv::UniformHsv<S, T>: UniformSampler<X = Hsv<S, T>>,
 {
     type Sampler = UniformHwb<S, T>;
 }
@@ -664,7 +698,10 @@ where
 #[cfg(feature = "random")]
 impl<S, T> UniformSampler for UniformHwb<S, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: MinMax + Clone + SampleUniform,
+    Hsv<S, T>: FromColorUnclamped<Hwb<S, T>> + SampleBorrow<Hsv<S, T>>,
+    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
+    crate::hsv::UniformHsv<S, T>: UniformSampler<X = Hsv<S, T>>,
 {
     type X = Hwb<S, T>;
 
@@ -673,19 +710,15 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low_input = Hsv::from_color_unclamped(*low_b.borrow());
-        let high_input = Hsv::from_color_unclamped(*high_b.borrow());
+        let low_input = Hsv::from_color_unclamped(low_b.borrow().clone());
+        let high_input = Hsv::from_color_unclamped(high_b.borrow().clone());
 
-        let low = Hsv::new(
-            low_input.hue,
-            low_input.saturation.min(high_input.saturation),
-            low_input.value.min(high_input.value),
-        );
-        let high = Hsv::new(
-            high_input.hue,
-            low_input.saturation.max(high_input.saturation),
-            low_input.value.max(high_input.value),
-        );
+        let (low_saturation, high_saturation) = low_input.saturation.min_max(high_input.saturation);
+        let (low_value, high_value) = low_input.value.min_max(high_input.value);
+
+        let low = Hsv::new(low_input.hue, low_saturation, low_value);
+        let high = Hsv::new(high_input.hue, high_saturation, high_value);
+
         let sampler = crate::hsv::UniformHsv::<S, _>::new(low, high);
 
         UniformHwb {
@@ -699,19 +732,14 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low_input = Hsv::from_color_unclamped(*low_b.borrow());
-        let high_input = Hsv::from_color_unclamped(*high_b.borrow());
+        let low_input = Hsv::from_color_unclamped(low_b.borrow().clone());
+        let high_input = Hsv::from_color_unclamped(high_b.borrow().clone());
 
-        let low = Hsv::new(
-            low_input.hue,
-            low_input.saturation.min(high_input.saturation),
-            low_input.value.min(high_input.value),
-        );
-        let high = Hsv::new(
-            high_input.hue,
-            low_input.saturation.max(high_input.saturation),
-            low_input.value.max(high_input.value),
-        );
+        let (low_saturation, high_saturation) = low_input.saturation.min_max(high_input.saturation);
+        let (low_value, high_value) = low_input.value.min_max(high_input.value);
+
+        let low = Hsv::new(low_input.hue, low_saturation, low_value);
+        let high = Hsv::new(high_input.hue, high_saturation, high_value);
 
         let sampler = crate::hsv::UniformHsv::<S, _>::new_inclusive(low, high);
 

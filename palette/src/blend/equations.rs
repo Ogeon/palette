@@ -1,5 +1,7 @@
+use core::ops::{Mul, Sub};
+
 use crate::blend::{BlendFunction, PreAlpha};
-use crate::float::Float;
+use crate::num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero};
 use crate::{Blend, ComponentWise};
 
 /// A pair of blending equations and corresponding parameters.
@@ -59,9 +61,11 @@ impl Equations {
     }
 }
 
-impl<C: Blend<Color = C> + ComponentWise + Clone> BlendFunction<C> for Equations
+impl<C> BlendFunction<C> for Equations
 where
-    C::Scalar: Float,
+    C: Blend<Color = C> + ComponentWise + Clone,
+    C::Scalar:
+        Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
 {
     fn apply_to(
         self,
@@ -87,15 +91,15 @@ where
 
         let src_color = col_src_param.mul_color(source.color.clone());
         let dst_color = col_dst_param.mul_color(destination.color.clone());
-        let src_alpha = alpha_src_param.mul_constant(source.alpha);
-        let dst_alpha = alpha_dst_param.mul_constant(destination.alpha);
+        let src_alpha = alpha_src_param.mul_constant(source.alpha.clone());
+        let dst_alpha = alpha_dst_param.mul_constant(destination.alpha.clone());
 
         let color = match self.color_equation {
             Equation::Add => src_color.component_wise(&dst_color, |a, b| a + b),
             Equation::Subtract => src_color.component_wise(&dst_color, |a, b| a - b),
             Equation::ReverseSubtract => dst_color.component_wise(&src_color, |a, b| a - b),
-            Equation::Min => source.color.component_wise(&destination.color, Float::min),
-            Equation::Max => source.color.component_wise(&destination.color, Float::max),
+            Equation::Min => source.color.component_wise(&destination.color, MinMax::min),
+            Equation::Max => source.color.component_wise(&destination.color, MinMax::max),
         };
 
         let alpha = match self.alpha_equation {
@@ -180,13 +184,10 @@ pub enum Parameter {
 }
 
 impl Parameter {
-    fn apply_to<C, T: Float>(
-        &self,
-        source: PreAlpha<C, T>,
-        destination: PreAlpha<C, T>,
-    ) -> ParamOut<C, T>
+    fn apply_to<C, T>(&self, source: PreAlpha<C, T>, destination: PreAlpha<C, T>) -> ParamOut<C, T>
     where
         PreAlpha<C, T>: ComponentWise<Scalar = T>,
+        T: Real + One + Zero + Sub<Output = T>,
     {
         match *self {
             Parameter::One => ParamOut::Constant(T::one()),
@@ -207,12 +208,16 @@ impl Parameter {
     }
 }
 
-enum ParamOut<C, T: Float> {
+enum ParamOut<C, T> {
     Color(PreAlpha<C, T>),
     Constant(T),
 }
 
-impl<C: ComponentWise<Scalar = T>, T: Float> ParamOut<C, T> {
+impl<C, T> ParamOut<C, T>
+where
+    C: ComponentWise<Scalar = T>,
+    T: Mul<Output = T> + Clone,
+{
     fn mul_constant(self, other: T) -> T {
         match self {
             ParamOut::Color(c) => c.alpha * other,
@@ -223,7 +228,7 @@ impl<C: ComponentWise<Scalar = T>, T: Float> ParamOut<C, T> {
     fn mul_color(self, other: C) -> C {
         match self {
             ParamOut::Color(c) => other.component_wise(&c.color, |a, b| a * b),
-            ParamOut::Constant(c) => other.component_wise_self(|a| a * c),
+            ParamOut::Constant(c) => other.component_wise_self(|a| a * c.clone()),
         }
     }
 }

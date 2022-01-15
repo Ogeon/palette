@@ -17,13 +17,13 @@
 //! ```
 //! # use palette::rgb::{RgbStandard, RgbSpace};
 //! # use palette::convert::FromColorUnclamped;
-//! # use palette::{Xyz, FloatComponent};
+//! # use palette::{Xyz, stimulus::Stimulus};
 //! #
+//! #[derive(FromColorUnclamped)]
 //! #[palette(
 //!     component = "T",
 //!     rgb_standard = "S",
 //! )]
-//! #[derive(FromColorUnclamped)]
 //! #[repr(C)]
 //! struct ExampleType<S, T> {
 //!     // ...
@@ -35,7 +35,7 @@
 //! # impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>> for ExampleType<S, T>
 //! # where
 //! #   S: RgbStandard<T>,
-//! #   T: FloatComponent
+//! #   T: Stimulus,
 //! # {
 //! #   fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>) -> Self {
 //! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}
@@ -45,7 +45,7 @@
 //! # impl<S, T> FromColorUnclamped<ExampleType<S, T>> for Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>
 //! # where
 //! #   S: RgbStandard<T>,
-//! #   T: FloatComponent
+//! #   Self: Default,
 //! # {
 //! #   fn from_color_unclamped(color: ExampleType<S, T>) -> Self {
 //! #       Xyz::default()
@@ -143,15 +143,15 @@
 //! use palette::encoding::Linear;
 //! use palette::white_point::D65;
 //! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
-//! use palette::{FloatComponent, Hsv, Srgb, IntoColor};
+//! use palette::{Hsv, Srgb, IntoColor};
 //!
 //! /// sRGB, but with a reversed memory layout.
+//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]
 //! #[palette(
 //!     skip_derives(Rgb),
 //!     component = "T",
 //!     rgb_standard = "palette::encoding::Srgb"
 //! )]
-//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]
 //! #[repr(C)] // Makes sure the memory layout is as we want it.
 //! struct Bgr<T> {
 //!     blue: T,
@@ -164,9 +164,9 @@
 //! // anything else with the `white_point` attribute argument.
 //! impl<S, T> FromColorUnclamped<Bgr<T>> for Rgb<S, T>
 //! where
-//!     T: FloatComponent,
 //!     S: RgbStandard<T>,
-//!     S::Space: RgbSpace<T, WhitePoint = D65>
+//!     S::Space: RgbSpace<T, WhitePoint = D65>,
+//!     Srgb<T>: IntoColorUnclamped<Rgb<S, T>>,
 //! {
 //!     fn from_color_unclamped(color: Bgr<T>) -> Rgb<S, T> {
 //!         Srgb::new(color.red, color.green, color.blue)
@@ -176,9 +176,9 @@
 //!
 //! impl<S, T> FromColorUnclamped<Rgb<S, T>> for Bgr<T>
 //! where
-//!     T: FloatComponent,
 //!     S: RgbStandard<T>,
-//!     S::Space: RgbSpace<T, WhitePoint = D65>
+//!     S::Space: RgbSpace<T, WhitePoint = D65>,
+//!     Srgb<T>: FromColorUnclamped<Rgb<S, T>>,
 //! {
 //!     fn from_color_unclamped(color: Rgb<S, T>) -> Bgr<T> {
 //!         let color = Srgb::from_color_unclamped(color);
@@ -296,10 +296,9 @@ mod tests {
     use super::{FromColor, FromColorUnclamped, IntoColor};
     use crate::encoding::linear::Linear;
     use crate::luma::{Luma, LumaStandard};
+    use crate::num::{One, Zero};
     use crate::rgb::{Rgb, RgbSpace};
-    use crate::{
-        Alpha, Clamp, FloatComponent, Hsl, Hsluv, Hsv, Hwb, IsWithinBounds, Lab, Lch, Luv, Xyz, Yxy,
-    };
+    use crate::{Alpha, Clamp, Hsl, Hsluv, Hsv, Hwb, IsWithinBounds, Lab, Lch, Luv, Xyz, Yxy};
 
     #[derive(FromColorUnclamped, WithAlpha)]
     #[palette(
@@ -378,49 +377,45 @@ mod tests {
         palette_internal,
         palette_internal_not_base_type
     )]
-    struct WithoutXyz<T: FloatComponent>(PhantomData<T>);
+    struct WithoutXyz<T>(PhantomData<T>);
 
-    impl<T: FloatComponent> IsWithinBounds for WithoutXyz<T> {
+    impl<T> IsWithinBounds for WithoutXyz<T> {
         fn is_within_bounds(&self) -> bool {
             true
         }
     }
 
-    impl<T: FloatComponent> Clamp for WithoutXyz<T> {
+    impl<T> Clamp for WithoutXyz<T> {
         fn clamp(self) -> Self {
             self
         }
     }
 
-    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for WithoutXyz<T> {
+    impl<T> FromColorUnclamped<WithoutXyz<T>> for WithoutXyz<T> {
         fn from_color_unclamped(color: WithoutXyz<T>) -> Self {
             color
         }
     }
 
-    impl<T: FloatComponent> FromColorUnclamped<Lch<crate::white_point::E, T>> for WithoutXyz<T> {
+    impl<T> FromColorUnclamped<Lch<crate::white_point::E, T>> for WithoutXyz<T> {
         fn from_color_unclamped(_color: Lch<crate::white_point::E, T>) -> Self {
             WithoutXyz(PhantomData)
         }
     }
 
-    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>> for Lch<crate::white_point::E, T> {
+    impl<T: One + Zero> FromColorUnclamped<WithoutXyz<T>> for Lch<crate::white_point::E, T> {
         fn from_color_unclamped(_color: WithoutXyz<T>) -> Lch<crate::white_point::E, T> {
             Lch::new(T::one(), T::zero(), T::zero())
         }
     }
 
-    impl<T: FloatComponent> FromColorUnclamped<Luma<Linear<crate::white_point::E>, T>>
-        for WithoutXyz<T>
-    {
+    impl<T> FromColorUnclamped<Luma<Linear<crate::white_point::E>, T>> for WithoutXyz<T> {
         fn from_color_unclamped(_color: Luma<Linear<crate::white_point::E>, T>) -> Self {
             WithoutXyz(PhantomData)
         }
     }
 
-    impl<T: FloatComponent> FromColorUnclamped<WithoutXyz<T>>
-        for Luma<Linear<crate::white_point::E>, T>
-    {
+    impl<T: One> FromColorUnclamped<WithoutXyz<T>> for Luma<Linear<crate::white_point::E>, T> {
         fn from_color_unclamped(_color: WithoutXyz<T>) -> Luma<Linear<crate::white_point::E>, T> {
             Luma::new(T::one())
         }

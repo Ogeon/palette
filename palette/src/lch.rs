@@ -1,23 +1,29 @@
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, Sub, SubAssign},
+};
 
-use num_traits::Zero;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::color_difference::get_ciede_difference;
-use crate::color_difference::ColorDifference;
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp,
-    ClampAssign, Float, FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lab, LabHue,
-    Lighten, LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue,
-    ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    angle::{RealAngle, SignedAngle},
+    clamp, clamp_assign, clamp_min, clamp_min_assign,
+    color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
+    contrast_ratio,
+    convert::FromColorUnclamped,
+    num::{Abs, Arithmetics, Exp, Hypot, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero},
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
+    LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -108,7 +114,7 @@ impl<Wp, T> Lch<Wp, T> {
 
 impl<Wp, T> Lch<Wp, T>
 where
-    T: Zero + FromF64,
+    T: Zero + Real,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -117,7 +123,7 @@ where
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        from_f64(100.0)
+        T::from_f64(100.0)
     }
 
     /// Return the `chroma` value minimum.
@@ -129,14 +135,14 @@ where
     /// color space, but covers enough to be practical for downsampling to
     /// smaller color spaces like sRGB.
     pub fn max_chroma() -> T {
-        from_f64(128.0)
+        T::from_f64(128.0)
     }
 
     /// Return the `chroma` extended maximum value. This value covers the entire
     /// color space and is included for completeness, but the additional range
     /// should be unnecessary for most use cases.
     pub fn max_extended_chroma() -> T {
-        from_f64(crate::float::Float::sqrt(128.0f64 * 128.0 + 128.0 * 128.0))
+        T::from_f64(crate::num::Sqrt::sqrt(128.0f64 * 128.0 + 128.0 * 128.0))
     }
 }
 
@@ -176,13 +182,14 @@ impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lch<Wp, T> {
 
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lch<Wp, T>
 where
-    T: FloatComponent,
+    T: Zero + Hypot,
+    Lab<Wp, T>: GetHue<Hue = LabHue<T>>,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         Lch {
-            l: color.l,
-            chroma: (color.a * color.a + color.b * color.b).sqrt(),
             hue: color.get_hue().unwrap_or_else(|| LabHue::from(T::zero())),
+            l: color.l,
+            chroma: color.a.hypot(color.b),
             white_point: PhantomData,
         }
     }
@@ -214,7 +221,7 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
 
 impl<Wp, T> IsWithinBounds for Lch<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn is_within_bounds(&self) -> bool {
@@ -224,7 +231,7 @@ where
 
 impl<Wp, T> Clamp for Lch<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -238,7 +245,7 @@ where
 
 impl<Wp, T> ClampAssign for Lch<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -247,106 +254,13 @@ where
     }
 }
 
-impl<Wp, T> Mix for Lch<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        Lch {
-            l: self.l + factor * (other.l - self.l),
-            chroma: self.chroma + factor * (other.chroma - self.chroma),
-            hue: self.hue + factor * hue_diff,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> MixAssign for Lch<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        self.l += factor * (other.l - self.l);
-        self.chroma += factor * (other.chroma - self.chroma);
-        self.hue += factor * hue_diff;
-    }
-}
-
-impl<Wp, T> Lighten for Lch<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Lch {
-            l: (self.l + delta).max(Self::min_l()),
-            chroma: self.chroma,
-            hue: self.hue,
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Lch {
-            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
-            chroma: self.chroma,
-            hue: self.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> LightenAssign for Lch<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        self.l += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.l += Self::max_l() * amount;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-}
+impl_mix_hue!(Lch<Wp> {l, chroma} phantom: white_point);
+impl_lighten!(Lch<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} phantom: white_point);
+impl_saturate!(Lch<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} phantom: white_point);
 
 impl<Wp, T> GetHue for Lch<Wp, T>
 where
-    T: Float + FromF64 + PartialOrd,
+    T: Zero + PartialOrd + Clone,
 {
     type Hue = LabHue<T>;
 
@@ -355,7 +269,7 @@ where
         if self.chroma <= T::zero() {
             None
         } else {
-            Some(self.hue)
+            Some(self.hue.clone())
         }
     }
 }
@@ -409,8 +323,19 @@ where
 /// CIEDE2000 distance metric for color difference.
 impl<Wp, T> ColorDifference for Lch<Wp, T>
 where
-    Self: IntoColorUnclamped<Lab<Wp, T>>,
-    T: Float + FromF64,
+    T: Real
+        + RealAngle
+        + One
+        + Zero
+        + Trigonometry
+        + Abs
+        + Sqrt
+        + Powi
+        + Exp
+        + Arithmetics
+        + PartialOrd
+        + Clone,
+    Self: Into<LabColorDiff<T>>,
 {
     type Scalar = T;
 
@@ -420,72 +345,13 @@ where
     }
 }
 
-impl<Wp, T> Saturate for Lch<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_chroma() - self.chroma
-        } else {
-            self.chroma
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Lch {
-            l: self.l,
-            chroma: (self.chroma + delta).max(Self::min_chroma()),
-            hue: self.hue,
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn saturate_fixed(self, amount: T) -> Self {
-        Lch {
-            l: self.l,
-            chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
-            hue: self.hue,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> SaturateAssign for Lch<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_chroma() - self.chroma
-        } else {
-            self.chroma
-        };
-
-        self.chroma += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
-
-    #[inline]
-    fn saturate_fixed_assign(&mut self, amount: T) {
-        self.chroma += Self::max_chroma() * amount;
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
-}
-
 impl<Wp, T> Default for Lch<Wp, T>
 where
-    T: Zero,
+    T: Zero + Real,
+    LabHue<T>: Default,
 {
     fn default() -> Lch<Wp, T> {
-        Lch::new(T::zero(), T::zero(), LabHue::from(T::zero()))
+        Lch::new(Self::min_l(), Self::min_chroma(), LabHue::default())
     }
 }
 
@@ -494,10 +360,12 @@ impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lch<Wp, T>, [T; 3]);
 
+impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
+
 impl<Wp, T> RelativeContrast for Lch<Wp, T>
 where
-    Wp: WhitePoint<T>,
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
+    Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;
 
@@ -513,13 +381,13 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Lch<Wp, T>> for Standard
 where
-    T: FloatComponent,
-    Standard: Distribution<T>,
+    T: Real + Zero + Sqrt + core::ops::Mul<Output = T>,
+    Standard: Distribution<T> + Distribution<LabHue<T>>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
         Lch {
-            l: rng.gen() * Lch::<Wp, T>::max_l(),
-            chroma: crate::Float::sqrt(rng.gen()) * Lch::<Wp, T>::max_chroma(),
+            l: rng.gen::<T>() * Lch::<Wp, T>::max_l(),
+            chroma: rng.gen::<T>().sqrt() * Lch::<Wp, T>::max_chroma(),
             hue: rng.gen::<LabHue<T>>(),
             white_point: PhantomData,
         }
@@ -529,7 +397,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformLch<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
 {
     l: Uniform<T>,
     chroma: Uniform<T>,
@@ -540,7 +408,9 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Lch<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
+    LabHue<T>: SampleBorrow<LabHue<T>>,
+    crate::hues::UniformLabHue<T>: UniformSampler<X = LabHue<T>>,
 {
     type Sampler = UniformLch<Wp, T>;
 }
@@ -548,7 +418,9 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformLch<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
+    LabHue<T>: SampleBorrow<LabHue<T>>,
+    crate::hues::UniformLabHue<T>: UniformSampler<X = LabHue<T>>,
 {
     type X = Lch<Wp, T>;
 
@@ -557,12 +429,15 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformLch {
             l: Uniform::new::<_, T>(low.l, high.l),
-            chroma: Uniform::new::<_, T>(low.chroma * low.chroma, high.chroma * high.chroma),
+            chroma: Uniform::new::<_, T>(
+                low.chroma.clone() * low.chroma,
+                high.chroma.clone() * high.chroma,
+            ),
             hue: crate::hues::UniformLabHue::new(low.hue, high.hue),
             white_point: PhantomData,
         }
@@ -573,14 +448,14 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformLch {
             l: Uniform::new_inclusive::<_, T>(low.l, high.l),
             chroma: Uniform::new_inclusive::<_, T>(
-                low.chroma * low.chroma,
-                high.chroma * high.chroma,
+                low.chroma.clone() * low.chroma,
+                high.chroma.clone() * high.chroma,
             ),
             hue: crate::hues::UniformLabHue::new_inclusive(low.hue, high.hue),
             white_point: PhantomData,
@@ -590,7 +465,7 @@ where
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
         Lch {
             l: self.l.sample(rng),
-            chroma: crate::Float::sqrt(self.chroma.sample(rng)),
+            chroma: self.chroma.sample(rng).sqrt(),
             hue: self.hue.sample(rng),
             white_point: PhantomData,
         }

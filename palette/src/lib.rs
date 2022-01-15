@@ -224,8 +224,6 @@ extern crate serde_json;
 
 use core::ops::Neg;
 
-use float::Float;
-
 use luma::Luma;
 
 pub use alpha::{Alpha, WithAlpha};
@@ -249,7 +247,6 @@ pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
 pub use color_difference::ColorDifference;
-pub use component::*;
 pub use convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
 pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 pub use matrix::Mat3;
@@ -425,35 +422,32 @@ pub mod named;
 mod random_sampling;
 
 mod alpha;
+pub mod angle;
 pub mod cast;
+pub mod chromatic_adaptation;
+mod color_difference;
+pub mod convert;
+pub mod encoding;
 mod hsl;
 mod hsluv;
 mod hsv;
+mod hues;
 mod hwb;
 mod lab;
 mod lch;
 mod lchuv;
 pub mod luma;
 mod luv;
+mod luv_bounds;
+pub mod num;
 mod oklab;
 mod oklch;
+mod relative_contrast;
 pub mod rgb;
+pub mod stimulus;
+pub mod white_point;
 mod xyz;
 mod yxy;
-
-mod hues;
-
-pub mod chromatic_adaptation;
-mod color_difference;
-mod component;
-pub mod convert;
-pub mod encoding;
-mod equality;
-mod luv_bounds;
-mod relative_contrast;
-pub mod white_point;
-
-pub mod float;
 
 #[doc(hidden)]
 pub mod matrix;
@@ -1470,33 +1464,6 @@ pub trait ComponentWise {
     /// Perform a unary operation on this color.
     #[must_use]
     fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
-}
-
-/// A trait for infallible conversion from `f64`. The conversion may be lossy.
-pub trait FromF64 {
-    /// Creates a value from an `f64` constant.
-    #[must_use]
-    fn from_f64(c: f64) -> Self;
-}
-
-impl FromF64 for f32 {
-    #[inline]
-    fn from_f64(c: f64) -> Self {
-        c as f32
-    }
-}
-
-impl FromF64 for f64 {
-    #[inline]
-    fn from_f64(c: f64) -> Self {
-        c
-    }
-}
-
-/// A convenience function to convert a constant number to Float Type
-#[inline]
-fn from_f64<T: FromF64>(c: f64) -> T {
-    T::from_f64(c)
 }
 
 /// Extension trait for fixed size arrays.

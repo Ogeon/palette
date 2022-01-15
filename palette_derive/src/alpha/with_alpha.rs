@@ -50,7 +50,7 @@ fn implement_for_internal_alpha(
     item_meta: &TypeItemAttributes,
 ) -> TokenStream2 {
     let with_alpha_trait_path = util::path(["WithAlpha"], item_meta.internal);
-    let component_trait_path = util::path(["Component"], item_meta.internal);
+    let stimulus_trait_path = util::path(["stimulus", "Stimulus"], item_meta.internal);
 
     let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
 
@@ -66,12 +66,12 @@ fn implement_for_internal_alpha(
             }
 
             fn without_alpha(mut self) -> Self::Color {
-                self.#alpha_property = #component_trait_path::max_intensity();
+                self.#alpha_property = #stimulus_trait_path::max_intensity();
                 self
             }
 
             fn split(mut self) -> (Self::Color, #alpha_type) {
-                let opaque_alpha = #component_trait_path::max_intensity();
+                let opaque_alpha = #stimulus_trait_path::max_intensity();
                 let alpha = core::mem::replace(&mut self.#alpha_property, opaque_alpha);
                 (self, alpha)
             }
@@ -85,7 +85,7 @@ fn implement_for_external_alpha(
     item_meta: &TypeItemAttributes,
 ) -> TokenStream2 {
     let with_alpha_trait_path = util::path(["WithAlpha"], item_meta.internal);
-    let component_trait_path = util::path(["Component"], item_meta.internal);
+    let stimulus_trait_path = util::path(["stimulus", "Stimulus"], item_meta.internal);
     let alpha_path = util::path(["Alpha"], item_meta.internal);
 
     let (_, type_generics, _) = generics.split_for_impl();
@@ -96,7 +96,7 @@ fn implement_for_external_alpha(
     impl_generics
         .make_where_clause()
         .predicates
-        .push(parse_quote!(_A: #component_trait_path));
+        .push(parse_quote!(_A: #stimulus_trait_path));
     let (impl_generics, _, where_clause) = impl_generics.split_for_impl();
 
     quote! {
@@ -117,7 +117,7 @@ fn implement_for_external_alpha(
             }
 
             fn split(self) -> (Self::Color, #alpha_type) {
-                (self, #component_trait_path::max_intensity())
+                (self, #stimulus_trait_path::max_intensity())
             }
         }
     }

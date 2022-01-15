@@ -7,9 +7,13 @@ use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
-use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
-use palette::white_point::D65;
-use palette::{FloatComponent, Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy};
+use palette::{
+    angle::AngleEq,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    rgb::RgbStandard,
+    white_point::D65,
+    Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy,
+};
 
 #[derive(Deserialize, PartialEq)]
 pub struct ColorMineRaw<F = f64> {
@@ -63,11 +67,8 @@ pub struct ColorMineRaw<F = f64> {
     pub lch_h_normalized: F,
 }
 
-#[derive(Clone, PartialEq, Debug)]
-pub struct ColorMine<F>
-where
-    F: FloatComponent,
-{
+#[derive(Clone, Debug)]
+pub struct ColorMine<F> {
     pub xyz: Xyz<D65, F>,
     pub yxy: Yxy<D65, F>,
     pub lab: Lab<D65, F>,
@@ -79,9 +80,24 @@ where
     pub hwb: Hwb<::palette::encoding::Srgb, F>,
 }
 
+impl<F: PartialEq + AngleEq> PartialEq for ColorMine<F> {
+    fn eq(&self, other: &Self) -> bool {
+        self.xyz == other.xyz
+            && self.yxy == other.yxy
+            && self.lab == other.lab
+            && self.lch == other.lch
+            && self.rgb == other.rgb
+            && self.linear_rgb == other.linear_rgb
+            && self.hsl == other.hsl
+            && self.hsv == other.hsv
+            && self.hwb == other.hwb
+    }
+}
+
 impl<F> From<ColorMineRaw<F>> for ColorMine<F>
 where
-    F: FloatComponent,
+    F: Copy,
+    palette::encoding::Srgb: RgbStandard<F, Space = palette::encoding::Srgb>,
 {
     fn from(src: ColorMineRaw<F>) -> ColorMine<F> {
         ColorMine {
@@ -102,7 +118,16 @@ macro_rules! impl_from_color {
     ($component:ident, $self_ty:ty) => {
         impl<$component> From<$self_ty> for ColorMine<$component>
         where
-            $component: FloatComponent,
+            $component: Copy,
+            $self_ty: IntoColorUnclamped<Xyz<D65, $component>>
+                + IntoColorUnclamped<Yxy<D65, $component>>
+                + IntoColorUnclamped<Lab<D65, $component>>
+                + IntoColorUnclamped<Lch<D65, $component>>
+                + IntoColorUnclamped<LinSrgb<$component>>
+                + IntoColorUnclamped<Srgb<$component>>
+                + IntoColorUnclamped<Hsl<::palette::encoding::Srgb, $component>>
+                + IntoColorUnclamped<Hsv<::palette::encoding::Srgb, $component>>
+                + IntoColorUnclamped<Hwb<::palette::encoding::Srgb, $component>>,
         {
             fn from(color: $self_ty) -> ColorMine<$component> {
                 ColorMine {
@@ -125,7 +150,16 @@ macro_rules! impl_from_rgb_derivative {
     ($component:ident, $self_ty:ty) => {
         impl<$component> From<$self_ty> for ColorMine<$component>
         where
-            $component: FloatComponent,
+            $component: Copy,
+            $self_ty: IntoColorUnclamped<Xyz<D65, $component>>
+                + IntoColorUnclamped<Yxy<D65, $component>>
+                + IntoColorUnclamped<Lab<D65, $component>>
+                + IntoColorUnclamped<Lch<D65, $component>>
+                + IntoColorUnclamped<Hsl<::palette::encoding::Srgb, $component>>
+                + IntoColorUnclamped<Hsv<::palette::encoding::Srgb, $component>>
+                + IntoColorUnclamped<Hwb<::palette::encoding::Srgb, $component>>,
+            Srgb<$component>:
+                FromColorUnclamped<$self_ty> + IntoColorUnclamped<LinSrgb<$component>>,
         {
             fn from(color: $self_ty) -> ColorMine<$component> {
                 ColorMine {
@@ -146,7 +180,17 @@ macro_rules! impl_from_rgb_derivative {
 
 impl<F> From<LinSrgb<F>> for ColorMine<F>
 where
-    F: FloatComponent,
+    F: Copy,
+    LinSrgb<F>: IntoColorUnclamped<Xyz<D65, F>>
+        + IntoColorUnclamped<Yxy<D65, F>>
+        + IntoColorUnclamped<Lab<D65, F>>
+        + IntoColorUnclamped<Lch<D65, F>>
+        + IntoColorUnclamped<LinSrgb<F>>
+        + IntoColorUnclamped<Srgb<F>>,
+    Srgb<F>: IntoColorUnclamped<Hsl<::palette::encoding::Srgb, F>>
+        + IntoColorUnclamped<Hsv<::palette::encoding::Srgb, F>>
+        + IntoColorUnclamped<Hwb<::palette::encoding::Srgb, F>>,
+    palette::encoding::Srgb: RgbStandard<F, Space = palette::encoding::Srgb>,
 {
     fn from(color: LinSrgb<F>) -> ColorMine<F> {
         ColorMine {
@@ -179,7 +223,8 @@ lazy_static! {
 
 pub fn load_data<F>() -> Vec<ColorMine<F>>
 where
-    F: FloatComponent + for<'a> serde::Deserialize<'a>,
+    F: for<'a> serde::Deserialize<'a>,
+    ColorMineRaw<F>: Into<ColorMine<F>>,
 {
     let mut rdr = csv::Reader::from_path("tests/convert/data_color_mine.csv")
         .expect("csv file could not be loaded in tests for color mine data");

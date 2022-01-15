@@ -21,19 +21,19 @@ fn matrix(c: &mut Criterion) {
     let wp: Xyz<D65, f64> = D65::get_xyz().with_white_point();
 
     group.bench_function("multiply_xyz", |b| {
-        b.iter(|| multiply_xyz::<_>(black_box(&inp1), black_box(&inp2)))
+        b.iter(|| multiply_xyz::<_>(black_box(inp1), black_box(inp2)))
     });
     group.bench_function("multiply_xyz_to_rgb", |b| {
-        b.iter(|| multiply_xyz_to_rgb::<encoding::Srgb, _>(black_box(&inp1), black_box(&wp)))
+        b.iter(|| multiply_xyz_to_rgb::<encoding::Srgb, _>(black_box(inp1), black_box(wp)))
     });
     group.bench_function("multiply_rgb_to_xyz", |b| {
-        b.iter(|| multiply_rgb_to_xyz(black_box(&mat3), black_box(&color)))
+        b.iter(|| multiply_rgb_to_xyz(black_box(mat3), black_box(color)))
     });
     group.bench_function("multiply_3x3", |b| {
-        b.iter(|| multiply_3x3(black_box(&inp3), black_box(&inp4)))
+        b.iter(|| multiply_3x3(black_box(inp3), black_box(inp4)))
     });
     group.bench_with_input("matrix_inverse", &inverse, |b, inverse| {
-        b.iter(|| matrix_inverse(inverse))
+        b.iter(|| matrix_inverse(*inverse))
     });
     group.bench_function("rgb_to_xyz_matrix", |b| {
         b.iter(|| rgb_to_xyz_matrix::<encoding::Srgb, f64>())

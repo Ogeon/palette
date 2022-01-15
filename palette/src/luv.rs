@@ -1,20 +1,26 @@
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
-use num_traits::Zero;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::convert::FromColorUnclamped;
-use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
-    ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
-    LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
+    angle::RealAngle,
+    clamp, clamp_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    num::{Arithmetics, MinMax, One, Powf, Powi, Real, Recip, Trigonometry, Zero},
+    white_point::{WhitePoint, D65},
+    Alpha, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten,
+    LightenAssign, LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -102,7 +108,7 @@ impl<Wp, T> Luv<Wp, T> {
 
 impl<Wp, T> Luv<Wp, T>
 where
-    T: Zero + FromF64,
+    T: Zero + Real,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -111,27 +117,27 @@ where
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        from_f64(100.0)
+        T::from_f64(100.0)
     }
 
     /// Return the `u` value minimum.
     pub fn min_u() -> T {
-        from_f64(-84.0)
+        T::from_f64(-84.0)
     }
 
     /// Return the `u` value maximum.
     pub fn max_u() -> T {
-        from_f64(176.0)
+        T::from_f64(176.0)
     }
 
     /// Return the `v` value minimum.
     pub fn min_v() -> T {
-        from_f64(-135.0)
+        T::from_f64(-135.0)
     }
 
     /// Return the `v` value maximum.
     pub fn max_v() -> T {
-        from_f64(108.0)
+        T::from_f64(108.0)
     }
 }
 
@@ -164,51 +170,53 @@ impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Luv<Wp, T> {
 
 impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Luv<Wp, T>
 where
-    T: FloatComponent,
+    T: RealAngle + Zero + MinMax + Trigonometry + Mul<Output = T> + Clone,
 {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
-        let (sin_hue, cos_hue) = color.hue.to_radians().sin_cos();
+        let (sin_hue, cos_hue) = color.hue.into_raw_radians().sin_cos();
         let chroma = color.chroma.max(T::zero());
-        Luv::new(color.l, chroma * cos_hue, chroma * sin_hue)
+
+        Luv::new(color.l, chroma.clone() * cos_hue, chroma * sin_hue)
     }
 }
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Luv<Wp, T>
 where
     Wp: WhitePoint<T>,
-    T: FloatComponent,
+    T: Real + Zero + Powi + Powf + Recip + Arithmetics + PartialOrd + Clone,
 {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
-        let from_f64 = T::from_f64;
         let w = Wp::get_xyz();
 
-        let kappa = from_f64(29.0 / 3.0).powi(3);
-        let epsilon = from_f64(6.0 / 29.0).powi(3);
+        let kappa = T::from_f64(29.0 / 3.0).powi(3);
+        let epsilon = T::from_f64(6.0 / 29.0).powi(3);
 
-        let prime_denom = color.x + from_f64(15.0) * color.y + from_f64(3.0) * color.z;
-        if prime_denom == from_f64(0.0) {
+        let prime_denom =
+            color.x.clone() + T::from_f64(15.0) * &color.y + T::from_f64(3.0) * color.z;
+        if prime_denom == T::from_f64(0.0) {
             return Luv::new(T::zero(), T::zero(), T::zero());
         }
         let prime_denom_recip = prime_denom.recip();
-        let prime_ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();
+        let prime_ref_denom_recip =
+            (w.x.clone() + T::from_f64(15.0) * &w.y + T::from_f64(3.0) * w.z).recip();
 
-        let u_prime: T = from_f64(4.0) * color.x * prime_denom_recip;
-        let u_ref_prime = from_f64(4.0) * w.x * prime_ref_denom_recip;
+        let u_prime: T = T::from_f64(4.0) * color.x * &prime_denom_recip;
+        let u_ref_prime = T::from_f64(4.0) * w.x * &prime_ref_denom_recip;
 
-        let v_prime: T = from_f64(9.0) * color.y * prime_denom_recip;
-        let v_ref_prime = from_f64(9.0) * w.y * prime_ref_denom_recip;
+        let v_prime: T = T::from_f64(9.0) * &color.y * prime_denom_recip;
+        let v_ref_prime = T::from_f64(9.0) * &w.y * prime_ref_denom_recip;
 
         let y_r = color.y / w.y;
         let l = if y_r > epsilon {
-            from_f64(116.0) * y_r.powf(from_f64(1.0 / 3.0)) - from_f64(16.0)
+            T::from_f64(116.0) * y_r.powf(T::from_f64(1.0 / 3.0)) - T::from_f64(16.0)
         } else {
             kappa * y_r
         };
 
         Luv {
+            u: T::from_f64(13.0) * &l * (u_prime - u_ref_prime),
+            v: T::from_f64(13.0) * &l * (v_prime - v_ref_prime),
             l,
-            u: from_f64(13.0) * l * (u_prime - u_ref_prime),
-            v: from_f64(13.0) * l * (v_prime - v_ref_prime),
             white_point: PhantomData,
         }
     }
@@ -240,7 +248,7 @@ impl<Wp, T, A> From<Alpha<Luv<Wp, T>, A>> for (T, T, T, A) {
 
 impl<Wp, T> IsWithinBounds for Luv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[rustfmt::skip]
     #[inline]
@@ -253,7 +261,7 @@ where
 
 impl<Wp, T> Clamp for Luv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -267,7 +275,7 @@ where
 
 impl<Wp, T> ClampAssign for Luv<Wp, T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + Real + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -277,95 +285,12 @@ where
     }
 }
 
-impl<Wp, T> Mix for Luv<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
-    }
-}
-
-impl<Wp, T> MixAssign for Luv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<Wp, T> Lighten for Luv<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Luv {
-            l: (self.l + delta).max(Self::min_l()),
-            u: self.u,
-            v: self.v,
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Luv {
-            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
-            u: self.u,
-            v: self.v,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> LightenAssign for Luv<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        self.l += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.l += Self::max_l() * amount;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-}
+impl_mix!(Luv<Wp>);
+impl_lighten!(Luv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {u, v} phantom: white_point);
 
 impl<Wp, T> GetHue for Luv<Wp, T>
 where
-    T: FloatComponent,
+    T: RealAngle + Zero + Trigonometry + PartialEq + Clone,
 {
     type Hue = LuvHue<T>;
 
@@ -373,31 +298,31 @@ where
         if self.u == T::zero() && self.v == T::zero() {
             None
         } else {
-            Some(LuvHue::from_radians(self.v.atan2(self.u)))
+            Some(LuvHue::from_radians(self.v.clone().atan2(self.u.clone())))
         }
     }
 }
 
 impl<Wp, T> ComponentWise for Luv<Wp, T>
 where
-    T: FloatComponent,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luv<Wp, T>, mut f: F) -> Luv<Wp, T> {
         Luv {
-            l: f(self.l, other.l),
-            u: f(self.u, other.u),
-            v: f(self.v, other.v),
+            l: f(self.l.clone(), other.l.clone()),
+            u: f(self.u.clone(), other.u.clone()),
+            v: f(self.v.clone(), other.v.clone()),
             white_point: PhantomData,
         }
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Luv<Wp, T> {
         Luv {
-            l: f(self.l),
-            u: f(self.u),
-            v: f(self.v),
+            l: f(self.l.clone()),
+            u: f(self.u.clone()),
+            v: f(self.v.clone()),
             white_point: PhantomData,
         }
     }
@@ -419,17 +344,18 @@ impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
 
 impl_array_casts!(Luv<Wp, T>, [T; 3]);
 
+impl_eq!(Luv<Wp>, [l, u, v]);
+
 impl<Wp, T> RelativeContrast for Luv<Wp, T>
 where
+    T: Real + Arithmetics + PartialOrd,
     Wp: WhitePoint<T>,
-    T: FloatComponent,
+    Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        use crate::FromColor;
-
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
@@ -440,14 +366,14 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Luv<Wp, T>> for Standard
 where
-    T: FloatComponent,
+    T: Real + Mul<Output = T> + Sub<Output = T>,
     Standard: Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
         Luv {
-            l: rng.gen() * from_f64(100.0),
-            u: rng.gen() * from_f64(260.0) - from_f64(84.0),
-            v: rng.gen() * from_f64(243.0) - from_f64(135.0),
+            l: rng.gen() * T::from_f64(100.0),
+            u: rng.gen() * T::from_f64(260.0) - T::from_f64(84.0),
+            v: rng.gen() * T::from_f64(243.0) - T::from_f64(135.0),
             white_point: PhantomData,
         }
     }
@@ -456,7 +382,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformLuv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
 {
     l: Uniform<T>,
     u: Uniform<T>,
@@ -467,7 +393,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Luv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
 {
     type Sampler = UniformLuv<Wp, T>;
 }
@@ -475,7 +401,7 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformLuv<Wp, T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
 {
     type X = Luv<Wp, T>;
 
@@ -484,8 +410,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_v.borrow();
-        let high = *high_v.borrow();
+        let low = low_v.borrow().clone();
+        let high = high_v.borrow().clone();
 
         UniformLuv {
             l: Uniform::new::<_, T>(low.l, high.l),
@@ -500,8 +426,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_v.borrow();
-        let high = *high_v.borrow();
+        let low = low_v.borrow().clone();
+        let high = high_v.borrow().clone();
 
         UniformLuv {
             l: Uniform::new_inclusive::<_, T>(low.l, high.l),

@@ -1,19 +1,25 @@
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Sub, SubAssign};
-use num_traits::Zero;
+
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use crate::num::Sqrt;
 
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::white_point::D65;
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
-    FloatComponent, FromColor, FromF64, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
+    angle::{RealAngle, SignedAngle},
+    clamp, clamp_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    num::{Arithmetics, Hypot, MinMax, One, Real, Zero},
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
     MixAssign, Oklab, OklabHue, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
     ShiftHueAssign, WithHue, Xyz,
 };
@@ -69,75 +75,6 @@ where
     }
 }
 
-impl<T> PartialEq for Oklch<T>
-where
-    T: PartialEq,
-    OklabHue<T>: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.l == other.l && self.chroma == other.chroma && self.hue == other.hue
-    }
-}
-
-impl<T> Eq for Oklch<T>
-where
-    T: Eq,
-    OklabHue<T>: Eq,
-{
-}
-
-impl<T> AbsDiffEq for Oklch<T>
-where
-    T: FloatComponent + AbsDiffEq,
-    T::Epsilon: FloatComponent,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.l.abs_diff_eq(&other.l, epsilon)
-            && self.chroma.abs_diff_eq(&other.chroma, epsilon)
-            && self.hue.abs_diff_eq(&other.hue, epsilon)
-    }
-}
-
-impl<T> RelativeEq for Oklch<T>
-where
-    T: FloatComponent + RelativeEq,
-    T::Epsilon: FloatComponent,
-{
-    fn default_max_relative() -> T::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.l.relative_eq(&other.l, epsilon, max_relative)
-            && self
-                .chroma
-                .relative_eq(&other.chroma, epsilon, max_relative)
-            && self.hue.relative_eq(&other.hue, epsilon, max_relative)
-    }
-}
-
-impl<T> UlpsEq for Oklch<T>
-where
-    T: FloatComponent + UlpsEq,
-    T::Epsilon: FloatComponent,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.l.ulps_eq(&other.l, epsilon, max_ulps)
-            && self.chroma.ulps_eq(&other.chroma, epsilon, max_ulps)
-            && self.hue.ulps_eq(&other.hue, epsilon, max_ulps)
-    }
-}
-
 impl<T> Oklch<T> {
     /// Create an Oklch color.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H) -> Self {
@@ -163,7 +100,7 @@ impl<T> Oklch<T> {
 
 impl<T> Oklch<T>
 where
-    T: Zero + FromF64,
+    T: Zero + One,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -172,7 +109,7 @@ where
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        from_f64(1.0)
+        T::one()
     }
 
     /// Return the `chroma` value minimum.
@@ -182,7 +119,7 @@ where
 
     /// Return the `chroma` value maximum.
     pub fn max_chroma() -> T {
-        from_f64(1.0)
+        T::one()
     }
 }
 
@@ -222,23 +159,25 @@ impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T> {
 
 impl<T> FromColorUnclamped<Xyz<D65, T>> for Oklch<T>
 where
-    T: FloatComponent,
+    Oklab<T>: FromColorUnclamped<Xyz<D65, T>>,
+    Self: FromColorUnclamped<Oklab<T>>,
 {
     fn from_color_unclamped(color: Xyz<D65, T>) -> Self {
-        let lab: Oklab<T> = color.into_color_unclamped();
+        let lab = Oklab::<T>::from_color_unclamped(color);
         Self::from_color_unclamped(lab)
     }
 }
 
 impl<T> FromColorUnclamped<Oklab<T>> for Oklch<T>
 where
-    T: FloatComponent,
+    T: Zero + Hypot,
+    Oklab<T>: GetHue<Hue = OklabHue<T>>,
 {
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         Oklch {
-            l: color.l,
-            chroma: (color.a * color.a + color.b * color.b).sqrt(),
             hue: color.get_hue().unwrap_or_else(|| OklabHue::from(T::zero())),
+            l: color.l,
+            chroma: color.a.hypot(color.b),
         }
     }
 }
@@ -269,7 +208,7 @@ impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
 
 impl<T> IsWithinBounds for Oklch<T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + One + PartialOrd,
 {
     #[inline]
     fn is_within_bounds(&self) -> bool {
@@ -282,7 +221,7 @@ where
 
 impl<T> Clamp for Oklch<T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + One + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -296,7 +235,7 @@ where
 
 impl<T> ClampAssign for Oklch<T>
 where
-    T: Zero + FromF64 + PartialOrd,
+    T: Zero + One + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -305,99 +244,9 @@ where
     }
 }
 
-impl<T> Mix for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        Oklch {
-            l: self.l + factor * (other.l - self.l),
-            chroma: self.chroma + factor * (other.chroma - self.chroma),
-            hue: self.hue + factor * hue_diff,
-        }
-    }
-}
-
-impl<T> MixAssign for Oklch<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        let hue_diff = (other.hue - self.hue).to_degrees();
-
-        self.l += factor * (other.l - self.l);
-        self.chroma += factor * (other.chroma - self.chroma);
-        self.hue += factor * hue_diff;
-    }
-}
-
-impl<T> Lighten for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Oklch {
-            l: (self.l + delta).max(Self::min_l()),
-            chroma: self.chroma,
-            hue: self.hue,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Oklch {
-            l: (self.l + Self::max_l() * amount).max(Self::min_l()),
-            chroma: self.chroma,
-            hue: self.hue,
-        }
-    }
-}
-
-impl<T> LightenAssign for Oklch<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        self.l += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.l += Self::max_l() * amount;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-}
+impl_mix_hue!(Oklch { l, chroma });
+impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: One);
+impl_saturate!(Oklch increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} where T: One);
 
 impl<T> GetHue for Oklch<T>
 where
@@ -461,70 +310,13 @@ where
     }
 }
 
-impl<T> Saturate for Oklch<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_chroma() - self.chroma
-        } else {
-            self.chroma
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Oklch {
-            l: self.l,
-            chroma: (self.chroma + delta).max(Self::min_chroma()),
-            hue: self.hue,
-        }
-    }
-
-    #[inline]
-    fn saturate_fixed(self, amount: T) -> Self {
-        Oklch {
-            l: self.l,
-            chroma: (self.chroma + Self::max_chroma() * amount).max(Self::min_chroma()),
-            hue: self.hue,
-        }
-    }
-}
-
-impl<T> SaturateAssign for Oklch<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn saturate_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_chroma() - self.chroma
-        } else {
-            self.chroma
-        };
-
-        self.chroma += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
-
-    #[inline]
-    fn saturate_fixed_assign(&mut self, amount: T) {
-        self.chroma += Self::max_chroma() * amount;
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
-}
-
 impl<T> Default for Oklch<T>
 where
-    T: Zero,
+    T: Zero + One,
+    OklabHue<T>: Default,
 {
     fn default() -> Oklch<T> {
-        Oklch::new(T::zero(), T::zero(), OklabHue::from(T::zero()))
+        Oklch::new(Self::min_l(), Self::min_chroma(), OklabHue::default())
     }
 }
 
@@ -533,9 +325,12 @@ impl_color_sub!(Oklch<T>, [l, chroma, hue]);
 
 impl_array_casts!(Oklch<T>, [T; 3]);
 
+impl_eq_hue!(Oklch, OklabHue, [l, chroma, hue]);
+
 impl<T> RelativeContrast for Oklch<T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
+    Xyz<D65, T>: FromColor<Self>,
 {
     type Scalar = T;
 
@@ -551,14 +346,14 @@ where
 #[cfg(feature = "random")]
 impl<T> Distribution<Oklch<T>> for Standard
 where
-    T: FloatComponent,
+    T: Sqrt,
 
-    Standard: Distribution<T>,
+    Standard: Distribution<T> + Distribution<OklabHue<T>>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Oklch<T> {
         Oklch {
             l: rng.gen(),
-            chroma: crate::Float::sqrt(rng.gen()),
+            chroma: rng.gen::<T>().sqrt(),
             hue: rng.gen::<OklabHue<T>>(),
         }
     }
@@ -567,7 +362,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformOklch<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
 {
     l: Uniform<T>,
     chroma: Uniform<T>,
@@ -577,7 +372,9 @@ where
 #[cfg(feature = "random")]
 impl<T> SampleUniform for Oklch<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
+    OklabHue<T>: SampleBorrow<OklabHue<T>>,
+    crate::hues::UniformOklabHue<T>: UniformSampler<X = OklabHue<T>>,
 {
     type Sampler = UniformOklch<T>;
 }
@@ -585,7 +382,9 @@ where
 #[cfg(feature = "random")]
 impl<T> UniformSampler for UniformOklch<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
+    OklabHue<T>: SampleBorrow<OklabHue<T>>,
+    crate::hues::UniformOklabHue<T>: UniformSampler<X = OklabHue<T>>,
 {
     type X = Oklch<T>;
 
@@ -594,12 +393,15 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformOklch {
             l: Uniform::new::<_, T>(low.l, high.l),
-            chroma: Uniform::new::<_, T>(low.chroma * low.chroma, high.chroma * high.chroma),
+            chroma: Uniform::new::<_, T>(
+                low.chroma.clone() * low.chroma,
+                high.chroma.clone() * high.chroma,
+            ),
             hue: crate::hues::UniformOklabHue::new(low.hue, high.hue),
         }
     }
@@ -609,14 +411,14 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformOklch {
             l: Uniform::new_inclusive::<_, T>(low.l, high.l),
             chroma: Uniform::new_inclusive::<_, T>(
-                low.chroma * low.chroma,
-                high.chroma * high.chroma,
+                low.chroma.clone() * low.chroma,
+                high.chroma.clone() * high.chroma,
             ),
             hue: crate::hues::UniformOklabHue::new_inclusive(low.hue, high.hue),
         }
@@ -625,17 +427,17 @@ where
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Oklch<T> {
         Oklch {
             l: self.l.sample(rng),
-            chroma: crate::Float::sqrt(self.chroma.sample(rng)),
+            chroma: self.chroma.sample(rng).sqrt(),
             hue: self.hue.sample(rng),
         }
     }
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<T> bytemuck::Zeroable for Oklch<T> where T: FloatComponent + bytemuck::Zeroable {}
+unsafe impl<T> bytemuck::Zeroable for Oklch<T> where T: bytemuck::Zeroable {}
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<T> bytemuck::Pod for Oklch<T> where T: FloatComponent + bytemuck::Pod {}
+unsafe impl<T> bytemuck::Pod for Oklch<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {

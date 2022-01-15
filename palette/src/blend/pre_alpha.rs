@@ -1,11 +1,12 @@
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::{One, Zero};
 
 use crate::{
-    cast::ArrayCast, clamp, float::Float, Alpha, ArrayExt, Blend, ComponentWise, Mix, MixAssign,
-    NextArray,
+    cast::ArrayCast,
+    clamp,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+    Alpha, ArrayExt, Blend, ComponentWise, Mix, MixAssign, NextArray,
 };
 
 /// Premultiplied alpha wrapper.
@@ -61,15 +62,15 @@ where
 
 impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T>
 where
-    C: ComponentWise<Scalar = T>,
-    T: Float,
+    C: Mul<T, Output = C>,
+    T: Real + Zero + One + PartialOrd + Clone,
 {
     #[inline]
     fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
         PreAlpha {
-            color: color.color.component_wise_self(|a| a * alpha),
+            color: color.color * alpha.clone(),
             alpha,
         }
     }
@@ -77,29 +78,28 @@ where
 
 impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T>
 where
-    C: ComponentWise<Scalar = T>,
-    T: Float,
+    C: Div<T, Output = C> + Default,
+    T: Real + Zero + One + IsValidDivisor + PartialOrd + Clone,
 {
     #[inline]
     fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
         let alpha = clamp(color.alpha, T::zero(), T::one());
 
-        let color = color.color.component_wise_self(|a| {
-            if alpha.is_normal() {
-                a / alpha
+        Alpha {
+            color: if alpha.is_valid_divisor() {
+                color.color / alpha.clone()
             } else {
-                T::zero()
-            }
-        });
-
-        Alpha { color, alpha }
+                C::default()
+            },
+            alpha,
+        }
     }
 }
 
 impl<C, T> Blend for PreAlpha<C, T>
 where
     C: Blend<Color = C> + ComponentWise<Scalar = T>,
-    T: Float,
+    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
 {
     type Color = C;
 
@@ -115,7 +115,7 @@ where
 impl<C> Mix for PreAlpha<C, C::Scalar>
 where
     C: Mix,
-    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + Clone,
+    C::Scalar: Real + Zero + One + PartialOrd + Arithmetics + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -133,7 +133,7 @@ where
 impl<C> MixAssign for PreAlpha<C, C::Scalar>
 where
     C: MixAssign,
-    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + AddAssign + Clone,
+    C::Scalar: Real + Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -176,7 +176,7 @@ where
     type Array = <C::Array as NextArray>::Next;
 }
 
-impl<C: Default, T: Float> Default for PreAlpha<C, T> {
+impl<C: Default, T: One> Default for PreAlpha<C, T> {
     fn default() -> PreAlpha<C, T> {
         PreAlpha {
             color: C::default(),

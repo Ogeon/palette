@@ -1,8 +1,10 @@
 use core::marker::PhantomData;
 
-use crate::float::Float;
-use crate::hues::{LuvHue, RgbHue};
-use crate::{from_f64, FromF64, Hsl, Hsluv, Hsv};
+use crate::{
+    hues::{LuvHue, RgbHue},
+    num::{Arithmetics, Cbrt, Powi, Real, Sqrt},
+    Hsl, Hsluv, Hsv,
+};
 
 // Based on https://stackoverflow.com/q/4778147 and https://math.stackexchange.com/q/18686,
 // picking A = (0, 0), B = (0, 1), C = (1, 1) gives us:
@@ -17,9 +19,9 @@ use crate::{from_f64, FromF64, Hsl, Hsluv, Hsv};
 
 pub fn sample_hsv<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsv<S, T>
 where
-    T: Float,
+    T: Cbrt + Sqrt,
 {
-    let (value, saturation) = (Float::cbrt(r1), Float::sqrt(r2));
+    let (value, saturation) = (r1.cbrt(), r2.sqrt());
 
     Hsv {
         hue,
@@ -31,22 +33,22 @@ where
 
 pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
 where
-    T: Float + FromF64,
+    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
 {
-    let (saturation, lightness) = if r1 <= from_f64::<T>(0.5) {
+    let (saturation, lightness) = if r1 <= T::from_f64(0.5) {
         // Scale it up to [0, 1]
-        let r1 = r1 * from_f64::<T>(2.0);
-        let h = Float::cbrt(r1);
-        let r = Float::sqrt(r2);
+        let r1 = r1 * T::from_f64(2.0);
+        let h = r1.cbrt();
+        let r = r2.sqrt();
         // Scale the lightness back to [0, 0.5]
-        (r, h * from_f64::<T>(0.5))
+        (r, h * T::from_f64(0.5))
     } else {
         // Scale and shift it to [0, 1).
-        let r1 = (from_f64::<T>(1.0) - r1) * from_f64::<T>(2.0);
-        let h = Float::cbrt(r1);
-        let r = Float::sqrt(r2);
+        let r1 = (T::from_f64(1.0) - r1) * T::from_f64(2.0);
+        let h = r1.cbrt();
+        let r = r2.sqrt();
         // Turn the cone upside-down and scale the lightness back to (0.5, 1.0]
-        (r, (from_f64::<T>(2.0) - h) * from_f64::<T>(0.5))
+        (r, (T::from_f64(2.0) - h) * T::from_f64(0.5))
     };
 
     Hsl {
@@ -59,22 +61,22 @@ where
 
 pub fn sample_hsluv<Wp, T>(hue: LuvHue<T>, r1: T, r2: T) -> Hsluv<Wp, T>
 where
-    T: Float + FromF64,
+    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
 {
-    let (saturation, l) = if r1 <= from_f64::<T>(0.5) {
+    let (saturation, l) = if r1 <= T::from_f64(0.5) {
         // Scale it up to [0, 1]
-        let r1 = r1 * from_f64::<T>(2.0);
-        let h = Float::cbrt(r1);
-        let r = Float::sqrt(r2) * from_f64::<T>(100.0);
+        let r1 = r1 * T::from_f64(2.0);
+        let h = r1.cbrt();
+        let r = r2.sqrt() * T::from_f64(100.0);
         // Scale the lightness back to [0, 0.5]
-        (r, h * from_f64::<T>(50.0))
+        (r, h * T::from_f64(50.0))
     } else {
         // Scale and shift it to [0, 1).
-        let r1 = (from_f64::<T>(1.0) - r1) * from_f64::<T>(2.0);
-        let h = Float::cbrt(r1);
-        let r = Float::sqrt(r2) * from_f64::<T>(100.0);
+        let r1 = (T::from_f64(1.0) - r1) * T::from_f64(2.0);
+        let h = r1.cbrt();
+        let r = r2.sqrt() * T::from_f64(100.0);
         // Turn the cone upside-down and scale the lightness back to (0.5, 1.0]
-        (r, (from_f64::<T>(2.0) - h) * from_f64::<T>(50.0))
+        (r, (T::from_f64(2.0) - h) * T::from_f64(50.0))
     };
 
     Hsluv {
@@ -85,45 +87,45 @@ where
     }
 }
 
-pub fn invert_hsl_sample<S, T>(color: Hsl<S, T>) -> (T, T)
+pub fn invert_hsl_sample<T>(saturation: T, lightness: T) -> (T, T)
 where
-    T: Float + FromF64,
+    T: Real + Powi + Arithmetics + PartialOrd,
 {
-    let r1 = if color.lightness <= from_f64::<T>(0.5) {
+    let r1 = if lightness <= T::from_f64(0.5) {
         // ((x * 2)^3) / 2 = x^3 * 4.
         // lightness is multiplied by 2 to scale it up to [0, 1], becoming h.
         // h is cubed to make it r1. r1 is divided by 2 to take it back to [0, 0.5].
-        color.lightness * color.lightness * color.lightness * from_f64::<T>(4.0)
+        lightness.powi(3) * T::from_f64(4.0)
     } else {
-        let x = color.lightness - from_f64::<T>(1.0);
-        x * x * x * from_f64::<T>(4.0) + from_f64::<T>(1.0)
+        let x = lightness - T::from_f64(1.0);
+        x.powi(3) * T::from_f64(4.0) + T::from_f64(1.0)
     };
 
     // saturation is first multiplied, then divided by h before squaring.
     // h can be completely eliminated, leaving only the saturation.
-    let r2 = color.saturation * color.saturation;
+    let r2 = saturation.powi(2);
 
     (r1, r2)
 }
 
-pub fn invert_hsluv_sample<Wp, T>(color: Hsluv<Wp, T>) -> (T, T)
+pub fn invert_hsluv_sample<T>(saturation: T, lightness: T) -> (T, T)
 where
-    T: Float + FromF64,
+    T: Real + Powi + Arithmetics + PartialOrd,
 {
-    let lightness: T = color.l / from_f64::<T>(100.0);
-    let r1 = if lightness <= from_f64::<T>(0.5) {
+    let lightness: T = lightness / T::from_f64(100.0);
+    let r1 = if lightness <= T::from_f64(0.5) {
         // ((x * 2)^3) / 2 = x^3 * 4.
         // l is multiplied by 2 to scale it up to [0, 1], becoming h.
         // h is cubed to make it r1. r1 is divided by 2 to take it back to [0, 0.5].
-        lightness * lightness * lightness * from_f64::<T>(4.0)
+        lightness.powi(3) * T::from_f64(4.0)
     } else {
-        let x = lightness - from_f64::<T>(1.0);
-        x * x * x * from_f64::<T>(4.0) + from_f64::<T>(1.0)
+        let x = lightness - T::from_f64(1.0);
+        x.powi(3) * T::from_f64(4.0) + T::from_f64(1.0)
     };
 
     // saturation is first multiplied, then divided by h before squaring.
     // h can be completely eliminated, leaving only the saturation.
-    let r2 = (color.saturation / from_f64::<T>(100.0)).powi(2);
+    let r2 = (saturation / T::from_f64(100.0)).powi(2);
 
     (r1, r2)
 }
@@ -131,7 +133,6 @@ where
 #[cfg(test)]
 mod test {
     use super::{invert_hsl_sample, invert_hsluv_sample, sample_hsl, sample_hsluv, sample_hsv};
-    use crate::encoding::Srgb;
     use crate::hues::{LuvHue, RgbHue};
     use crate::white_point::D65;
     use crate::{Hsl, Hsluv, Hsv};
@@ -159,7 +160,8 @@ mod test {
         // Sanity check that sampling and inverting from sample are equivalent
         macro_rules! test_hsl {
             ( $x:expr, $y:expr ) => {{
-                let a = invert_hsl_sample::<Srgb, _>(sample_hsl(RgbHue::from(0.0), $x, $y));
+                let hsl: Hsl = sample_hsl(RgbHue::from(0.0), $x, $y);
+                let a = invert_hsl_sample(hsl.saturation, hsl.lightness);
                 assert_relative_eq!(a.0, $x);
                 assert_relative_eq!(a.1, $y);
             }};
@@ -188,7 +190,8 @@ mod test {
         // Sanity check that sampling and inverting from sample are equivalent
         macro_rules! test_hsluv {
             ( $x:expr, $y:expr ) => {{
-                let a = invert_hsluv_sample::<D65, _>(sample_hsluv(LuvHue::from(0.0), $x, $y));
+                let hsluv: Hsluv = sample_hsluv(LuvHue::from(0.0), $x, $y);
+                let a = invert_hsluv_sample(hsluv.saturation, hsluv.l);
                 assert_relative_eq!(a.0, $x);
                 assert_relative_eq!(a.1, $y);
             }};

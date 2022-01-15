@@ -1,22 +1,28 @@
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
-use num_traits::Zero;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::luma::LumaStandard;
-use crate::matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix};
-use crate::rgb::{Rgb, RgbSpace, RgbStandard};
-use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, oklab, Alpha, Clamp,
-    ClampAssign, ComponentWise, FloatComponent, IsWithinBounds, Lab, Lighten, LightenAssign, Luma,
+    clamp, clamp_assign, contrast_ratio,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    luma::LumaStandard,
+    matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Powi, Real, Recip, Zero},
+    oklab,
+    rgb::{Rgb, RgbSpace, RgbStandard},
+    white_point::{Any, WhitePoint, D65},
+    Alpha, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lab, Lighten, LightenAssign, Luma,
     Luv, Mix, MixAssign, Oklab, Oklch, RelativeContrast, Yxy,
 };
 
@@ -194,50 +200,60 @@ impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
 
 impl<Wp, T, S> FromColorUnclamped<Rgb<S, T>> for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Recip + IsValidDivisor + Arithmetics + Clone,
     Wp: WhitePoint<T>,
     S: RgbStandard<T>,
     S::Space: RgbSpace<T, WhitePoint = Wp>,
+    Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
         let transform_matrix = rgb_to_xyz_matrix::<S::Space, T>();
-        multiply_rgb_to_xyz(&transform_matrix, &color.into_linear())
+        multiply_rgb_to_xyz(transform_matrix, color.into_linear())
     }
 }
 
 impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Zero + One + IsValidDivisor + Arithmetics + Clone,
 {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
-        let mut xyz = Xyz {
-            y: color.luma,
-            ..Default::default()
-        };
         // If denominator is zero, NAN or INFINITE leave x and z at the default 0
-        if color.y.is_normal() {
-            xyz.x = color.luma * color.x / color.y;
-            xyz.z = color.luma * (T::one() - color.x - color.y) / color.y;
-        }
-        xyz
+        let xyz = if color.y.is_valid_divisor() {
+            Xyz {
+                z: (T::one() - &color.x - &color.y) / &color.y,
+                x: color.x / color.y,
+                y: T::one(),
+                white_point: PhantomData,
+            }
+        } else {
+            Xyz {
+                y: T::one(),
+                ..Default::default()
+            }
+        };
+
+        xyz * color.luma
     }
 }
 
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Real + Recip + Powi + Arithmetics + PartialOrd + Clone,
     Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         // Recip call shows performance benefits in benchmarks for this function
-        let y = (color.l + from_f64(16.0)) * from_f64::<T>(116.0).recip();
-        let x = y + (color.a * from_f64::<T>(500.0).recip());
-        let z = y - (color.b * from_f64::<T>(200.0).recip());
+        let y = (color.l + T::from_f64(16.0)) * T::from_f64(116.0).recip();
+        let x = y.clone() + (color.a * T::from_f64(500.0).recip());
+        let z = y.clone() - (color.b * T::from_f64(200.0).recip());
 
-        fn convert<T: FloatComponent>(c: T) -> T {
-            let epsilon: T = from_f64(6.0 / 29.0);
-            let kappa: T = from_f64(108.0 / 841.0);
-            let delta: T = from_f64(4.0 / 29.0);
+        fn convert<T>(c: T) -> T
+        where
+            T: Real + Powi + Arithmetics + PartialOrd,
+        {
+            let epsilon: T = T::from_f64(6.0 / 29.0);
+            let kappa: T = T::from_f64(108.0 / 841.0);
+            let delta: T = T::from_f64(4.0 / 29.0);
 
             if c > epsilon {
                 c.powi(3)
@@ -252,41 +268,42 @@ where
 
 impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Real + Zero + Recip + Powi + Arithmetics + PartialOrd + Clone,
     Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
-        let from_f64 = T::from_f64;
-
-        let kappa: T = from_f64(29.0 / 3.0).powi(3);
+        let kappa = T::from_f64(29.0 / 3.0).powi(3);
 
         let w = Wp::get_xyz();
-        let ref_denom_recip = (w.x + from_f64(15.0) * w.y + from_f64(3.0) * w.z).recip();
-        let u_ref = from_f64(4.0) * w.x * ref_denom_recip;
-        let v_ref = from_f64(9.0) * w.y * ref_denom_recip;
+        let ref_denom_recip =
+            (w.x.clone() + T::from_f64(15.0) * &w.y + T::from_f64(3.0) * w.z).recip();
+        let u_ref = T::from_f64(4.0) * w.x * &ref_denom_recip;
+        let v_ref = T::from_f64(9.0) * &w.y * ref_denom_recip;
 
-        if color.l < from_f64(1e-5) {
+        if color.l < T::from_f64(1e-5) {
             return Xyz::new(T::zero(), T::zero(), T::zero());
         }
 
-        let y = if color.l > from_f64(8.0) {
-            ((color.l + from_f64(16.0)) * from_f64(116.0).recip()).powi(3)
+        let y = if color.l > T::from_f64(8.0) {
+            ((color.l.clone() + T::from_f64(16.0)) * T::from_f64(116.0).recip()).powi(3)
         } else {
-            color.l * kappa.recip()
+            color.l.clone() * kappa.recip()
         } * w.y;
 
-        let u_prime = color.u / (from_f64(13.0) * color.l) + u_ref;
-        let v_prime = color.v / (from_f64(13.0) * color.l) + v_ref;
+        let u_prime = color.u / (T::from_f64(13.0) * &color.l) + u_ref;
+        let v_prime = color.v / (T::from_f64(13.0) * color.l) + v_ref;
 
-        let x = y * from_f64(2.25) * u_prime / v_prime;
-        let z = y * (from_f64(3.0) - from_f64(0.75) * u_prime - from_f64(5.0) * v_prime) / v_prime;
+        let x = y.clone() * T::from_f64(2.25) * &u_prime / &v_prime;
+        let z = y.clone()
+            * (T::from_f64(3.0) - T::from_f64(0.75) * u_prime - T::from_f64(5.0) * &v_prime)
+            / v_prime;
         Xyz::new(x, y, z)
     }
 }
 
 impl<T> FromColorUnclamped<Oklab<T>> for Xyz<D65, T>
 where
-    T: FloatComponent,
+    T: Real + Powi + Arithmetics,
 {
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         let m1_inv = oklab::m1_inv();
@@ -294,16 +311,17 @@ where
 
         let Xyz {
             x: l, y: m, z: s, ..
-        } = multiply_xyz(&m2_inv, &Xyz::new(color.l, color.a, color.b));
+        } = multiply_xyz(m2_inv, Xyz::new(color.l, color.a, color.b));
 
         let lms = Xyz::new(l.powi(3), m.powi(3), s.powi(3));
-        multiply_xyz(&m1_inv, &lms).with_white_point()
+        multiply_xyz(m1_inv, lms).with_white_point()
     }
 }
 
 impl<T> FromColorUnclamped<Oklch<T>> for Xyz<D65, T>
 where
-    T: FloatComponent,
+    Oklch<T>: IntoColorUnclamped<Oklab<T>>,
+    Self: FromColorUnclamped<Oklab<T>>,
 {
     fn from_color_unclamped(color: Oklch<T>) -> Self {
         let oklab: Oklab<T> = color.into_color_unclamped();
@@ -318,7 +336,7 @@ where
     S: LumaStandard<T, WhitePoint = Wp>,
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
-        Wp::get_xyz().with_white_point::<Wp>() * color.luma
+        Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
     }
 }
 
@@ -388,92 +406,17 @@ where
     }
 }
 
-impl<Wp, T> Mix for Xyz<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
+impl_mix!(Xyz<Wp>);
+impl_lighten! {
+    Xyz<Wp>
+    increase {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        z => [Self::min_z(), Self::max_z()]
     }
-}
-
-impl<Wp, T> MixAssign for Xyz<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<Wp, T> Lighten for Xyz<Wp, T>
-where
-    T: FloatComponent,
-    Wp: WhitePoint<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_y() - self.y
-        } else {
-            self.y
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Xyz {
-            x: self.x,
-            y: (self.y + delta).max(Self::min_y()),
-            z: self.z,
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Xyz {
-            x: self.x,
-            y: (self.y + Self::max_y() * amount).max(Self::min_y()),
-            z: self.z,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> LightenAssign for Xyz<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-    Wp: WhitePoint<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_y() - self.y
-        } else {
-            self.y
-        };
-
-        self.y += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.y, Self::min_y());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.y += Self::max_y() * amount;
-        clamp_min_assign(&mut self.y, Self::min_y());
-    }
+    other {}
+    phantom: white_point
+    where Wp: WhitePoint<T>
 }
 
 impl<Wp, T> ComponentWise for Xyz<Wp, T>
@@ -517,9 +460,11 @@ impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
 
 impl_array_casts!(Xyz<Wp, T>, [T; 3]);
 
+impl_eq!(Xyz<Wp>, [x, y, z]);
+
 impl<Wp, T> RelativeContrast for Xyz<Wp, T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
 {
     type Scalar = T;
 

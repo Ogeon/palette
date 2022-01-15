@@ -1,34 +1,39 @@
-use core::any::TypeId;
-use core::fmt;
-use core::marker::PhantomData;
-use core::num::ParseIntError;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-use core::str::FromStr;
+use core::{
+    any::TypeId,
+    fmt,
+    marker::PhantomData,
+    num::ParseIntError,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    str::FromStr,
+};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::Zero;
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
-
-use crate::alpha::Alpha;
-use crate::blend::PreAlpha;
-use crate::cast::{ComponentOrder, Packed};
-use crate::convert::FromColorUnclamped;
-use crate::encoding::linear::LinearFn;
-use crate::encoding::{Linear, Srgb};
-use crate::luma::LumaStandard;
-use crate::matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix};
-use crate::rgb::{RgbSpace, RgbStandard, TransferFn};
-use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Blend, Clamp, ClampAssign,
-    Component, ComponentWise, FloatComponent, FromComponent, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast,
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
 };
-use crate::{Hsl, Hsv, Luma, RgbHue, Xyz};
+
+use crate::{
+    alpha::Alpha,
+    angle::{RealAngle, UnsignedAngle},
+    blend::PreAlpha,
+    cast::{ComponentOrder, Packed},
+    clamp, clamp_assign, contrast_ratio,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::{linear::LinearFn, Linear, Srgb},
+    luma::LumaStandard,
+    matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
+    num::{Abs, Arithmetics, IsValidDivisor, MinMax, One, Real, Recip, Sqrt, Trigonometry, Zero},
+    rgb::{RgbSpace, RgbStandard, TransferFn},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::Any,
+    Blend, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten,
+    LightenAssign, Luma, Mix, MixAssign, RelativeContrast, RgbHue, Xyz, Yxy,
+};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](crate::Alpha#Rgba).
@@ -100,13 +105,12 @@ impl<S, T> Rgb<S, T> {
     /// Convert into another component type.
     pub fn into_format<U>(self) -> Rgb<S, U>
     where
-        T: Component,
-        U: FromComponent<T>,
+        U: FromStimulus<T>,
     {
         Rgb {
-            red: U::from_component(self.red),
-            green: U::from_component(self.green),
-            blue: U::from_component(self.blue),
+            red: U::from_stimulus(self.red),
+            green: U::from_stimulus(self.green),
+            blue: U::from_stimulus(self.blue),
             standard: PhantomData,
         }
     }
@@ -114,8 +118,7 @@ impl<S, T> Rgb<S, T> {
     /// Convert from another component type.
     pub fn from_format<U>(color: Rgb<S, U>) -> Self
     where
-        T: FromComponent<U>,
-        U: Component,
+        T: FromStimulus<U>,
     {
         color.into_format()
     }
@@ -133,7 +136,7 @@ impl<S, T> Rgb<S, T> {
 
 impl<S, T> Rgb<S, T>
 where
-    T: Component,
+    T: Stimulus,
 {
     /// Return the `red` value minimum.
     pub fn min_red() -> T {
@@ -165,17 +168,6 @@ where
         T::max_intensity()
     }
 }
-
-impl<S, T> PartialEq for Rgb<S, T>
-where
-    T: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.red == other.red && self.green == other.green && self.blue == other.blue
-    }
-}
-
-impl<S, T> Eq for Rgb<S, T> where T: Eq {}
 
 impl<S> Rgb<S, u8> {
     /// Convert to a packed `u32` with with specifiable component order.
@@ -235,7 +227,7 @@ impl<S> Rgb<S, u8> {
     }
 }
 
-impl<S: RgbStandard<T>, T: FloatComponent> Rgb<S, T> {
+impl<S: RgbStandard<T>, T> Rgb<S, T> {
     /// Convert the color to linear RGB.
     pub fn into_linear(self) -> Rgb<Linear<S::Space>, T> {
         Rgb::new(
@@ -311,26 +303,20 @@ impl<S, T, A> Alpha<Rgb<S, T>, A> {
     /// Convert into another component type.
     pub fn into_format<U, B>(self) -> Alpha<Rgb<S, U>, B>
     where
-        T: Component,
-        A: Component,
-        U: FromComponent<T>,
-        B: FromComponent<A>,
+        U: FromStimulus<T>,
+        B: FromStimulus<A>,
     {
-        Alpha::<Rgb<S, U>, B>::new(
-            U::from_component(self.red),
-            U::from_component(self.green),
-            U::from_component(self.blue),
-            B::from_component(self.alpha),
-        )
+        Alpha {
+            color: self.color.into_format(),
+            alpha: B::from_stimulus(self.alpha),
+        }
     }
 
     /// Convert from another component type.
     pub fn from_format<U, B>(color: Alpha<Rgb<S, U>, B>) -> Self
     where
-        T: FromComponent<U>,
-        U: Component,
-        A: FromComponent<B>,
-        B: Component,
+        T: FromStimulus<U>,
+        A: FromStimulus<B>,
     {
         color.into_format()
     }
@@ -410,25 +396,21 @@ impl<S> Rgba<S, u8> {
 }
 
 /// [`Rgba`](crate::rgb::Rgba) implementations.
-impl<S: RgbStandard<T>, T: FloatComponent, A> Alpha<Rgb<S, T>, A> {
+impl<S: RgbStandard<T>, T, A> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
     pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
-        Alpha::<Rgb<Linear<S::Space>, T>, A>::new(
-            S::TransferFn::into_linear(self.red),
-            S::TransferFn::into_linear(self.green),
-            S::TransferFn::into_linear(self.blue),
-            self.alpha,
-        )
+        Alpha {
+            color: self.color.into_linear(),
+            alpha: self.alpha,
+        }
     }
 
     /// Convert linear RGB to non-linear RGB with transparency.
     pub fn from_linear(color: Alpha<Rgb<Linear<S::Space>, T>, A>) -> Self {
-        Self::new(
-            S::TransferFn::from_linear(color.red),
-            S::TransferFn::from_linear(color.green),
-            S::TransferFn::from_linear(color.blue),
-            color.alpha,
-        )
+        Alpha {
+            color: Rgb::from_linear(color.color),
+            alpha: color.alpha,
+        }
     }
 
     /// Convert the color to a different encoding with transparency.
@@ -436,12 +418,10 @@ impl<S: RgbStandard<T>, T: FloatComponent, A> Alpha<Rgb<S, T>, A> {
     where
         St: RgbStandard<T, Space = S::Space>,
     {
-        Alpha::<Rgb<St, T>, A>::new(
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.red)),
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.green)),
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.blue)),
-            self.alpha,
-        )
+        Alpha {
+            color: Rgb::from_linear(self.color.into_linear()),
+            alpha: self.alpha,
+        }
     }
 
     /// Convert RGB from a different encoding with transparency.
@@ -449,12 +429,7 @@ impl<S: RgbStandard<T>, T: FloatComponent, A> Alpha<Rgb<S, T>, A> {
     where
         St: RgbStandard<T, Space = S::Space>,
     {
-        Self::new(
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.red)),
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
-            color.alpha,
-        )
+        color.into_encoding()
     }
 }
 
@@ -463,7 +438,8 @@ where
     S1: RgbStandard<T>,
     S2: RgbStandard<T>,
     S2::Space: RgbSpace<T, WhitePoint = <S1::Space as RgbSpace<T>>::WhitePoint>,
-    T: FloatComponent,
+    Xyz<<S2::Space as RgbSpace<T>>::WhitePoint, T>: FromColorUnclamped<Rgb<S2, T>>,
+    Rgb<S1, T>: FromColorUnclamped<Xyz<<S1::Space as RgbSpace<T>>::WhitePoint, T>>,
 {
     fn from_color_unclamped(rgb: Rgb<S2, T>) -> Self {
         let rgb_space1 = TypeId::of::<<S1::Space as RgbSpace<T>>::Primaries>();
@@ -482,41 +458,43 @@ where
 impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>> for Rgb<S, T>
 where
     S: RgbStandard<T>,
-    T: FloatComponent,
+    T: Recip + IsValidDivisor + Arithmetics + Clone,
+    Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
 {
     fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>) -> Self {
-        let transform_matrix = matrix_inverse(&rgb_to_xyz_matrix::<S::Space, T>());
-        Self::from_linear(multiply_xyz_to_rgb(&transform_matrix, &color))
+        let transform_matrix = matrix_inverse(rgb_to_xyz_matrix::<S::Space, T>());
+        Self::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
     }
 }
 
 impl<S, T> FromColorUnclamped<Hsl<S, T>> for Rgb<S, T>
 where
-    T: FloatComponent,
+    T: Real + RealAngle + UnsignedAngle + Zero + One + Abs + PartialOrd + Arithmetics + Clone,
 {
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
-        let c = (T::one() - (hsl.lightness * from_f64(2.0) - T::one()).abs()) * hsl.saturation;
-        let h = hsl.hue.to_positive_degrees() / from_f64(60.0);
-        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
-        let m = hsl.lightness - c * from_f64(0.5);
+        let c = (T::one() - (hsl.lightness.clone() * T::from_f64(2.0) - T::one()).abs())
+            * hsl.saturation;
+        let h = hsl.hue.into_positive_degrees() / T::from_f64(60.0);
+        let x = c.clone() * (T::one() - (h.clone() % T::from_f64(2.0) - T::one()).abs());
+        let m = hsl.lightness - c.clone() * T::from_f64(0.5);
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < from_f64(2.0) {
+        } else if h >= T::one() && h < T::from_f64(2.0) {
             (x, c, T::zero())
-        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
+        } else if h >= T::from_f64(2.0) && h < T::from_f64(3.0) {
             (T::zero(), c, x)
-        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
+        } else if h >= T::from_f64(3.0) && h < T::from_f64(4.0) {
             (T::zero(), x, c)
-        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
+        } else if h >= T::from_f64(4.0) && h < T::from_f64(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)
         };
 
         Rgb {
-            red: red + m,
-            green: green + m,
+            red: red + m.clone(),
+            green: green + m.clone(),
             blue: blue + m,
             standard: PhantomData,
         }
@@ -525,31 +503,31 @@ where
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Rgb<S, T>
 where
-    T: FloatComponent,
+    T: Real + RealAngle + UnsignedAngle + Zero + One + Abs + PartialOrd + Arithmetics + Clone,
 {
     fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
-        let c = hsv.value * hsv.saturation;
-        let h = hsv.hue.to_positive_degrees() / from_f64(60.0);
-        let x = c * (T::one() - (h % from_f64(2.0) - T::one()).abs());
-        let m = hsv.value - c;
+        let c = hsv.value.clone() * hsv.saturation;
+        let h = hsv.hue.into_positive_degrees() / T::from_f64(60.0);
+        let x = c.clone() * (T::one() - (h.clone() % T::from_f64(2.0) - T::one()).abs());
+        let m = hsv.value - c.clone();
 
         let (red, green, blue) = if h >= T::zero() && h < T::one() {
             (c, x, T::zero())
-        } else if h >= T::one() && h < from_f64(2.0) {
+        } else if h >= T::one() && h < T::from_f64(2.0) {
             (x, c, T::zero())
-        } else if h >= from_f64(2.0) && h < from_f64(3.0) {
+        } else if h >= T::from_f64(2.0) && h < T::from_f64(3.0) {
             (T::zero(), c, x)
-        } else if h >= from_f64(3.0) && h < from_f64(4.0) {
+        } else if h >= T::from_f64(3.0) && h < T::from_f64(4.0) {
             (T::zero(), x, c)
-        } else if h >= from_f64(4.0) && h < from_f64(5.0) {
+        } else if h >= T::from_f64(4.0) && h < T::from_f64(5.0) {
             (x, T::zero(), c)
         } else {
             (c, T::zero(), x)
         };
 
         Rgb {
-            red: red + m,
-            green: green + m,
+            red: red + m.clone(),
+            green: green + m.clone(),
             blue: blue + m,
             standard: PhantomData,
         }
@@ -560,23 +538,33 @@ impl<S, St, T> FromColorUnclamped<Luma<St, T>> for Rgb<S, T>
 where
     S: RgbStandard<T>,
     St: LumaStandard<T, WhitePoint = <S::Space as RgbSpace<T>>::WhitePoint>,
-    T: FloatComponent,
+    T: Clone,
 {
+    #[inline]
     fn from_color_unclamped(color: Luma<St, T>) -> Self {
-        let luma = color.into_linear();
+        if TypeId::of::<S::TransferFn>() == TypeId::of::<St::TransferFn>() {
+            Rgb {
+                red: color.luma.clone(),
+                green: color.luma.clone(),
+                blue: color.luma,
+                standard: PhantomData,
+            }
+        } else {
+            let luma = color.into_linear();
 
-        Self::from_linear(Rgb {
-            red: luma.luma,
-            green: luma.luma,
-            blue: luma.luma,
-            standard: PhantomData,
-        })
+            Self::from_linear(Rgb {
+                red: luma.luma.clone(),
+                green: luma.luma.clone(),
+                blue: luma.luma,
+                standard: PhantomData,
+            })
+        }
     }
 }
 
 impl<S, T> IsWithinBounds for Rgb<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[rustfmt::skip]
     #[inline]
@@ -589,7 +577,7 @@ where
 
 impl<S, T> Clamp for Rgb<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -603,7 +591,7 @@ where
 
 impl<S, T> ClampAssign for Rgb<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -613,143 +601,35 @@ where
     }
 }
 
-impl<S, T> Mix for Rgb<S, T>
-where
-    S: RgbStandard<T, TransferFn = LinearFn>,
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
+impl_mix!(Rgb<S> where S: RgbStandard<T, TransferFn = LinearFn>,);
+impl_lighten! {
+    Rgb<S>
+    increase {
+        red => [Self::min_red(), Self::max_red()],
+        green => [Self::min_green(), Self::max_green()],
+        blue => [Self::min_blue(), Self::max_blue()]
     }
-}
-
-impl<S, T> MixAssign for Rgb<S, T>
-where
-    S: RgbStandard<T, TransferFn = LinearFn>,
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<S, T> Lighten for Rgb<S, T>
-where
-    S: RgbStandard<T, TransferFn = LinearFn>,
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference_red = if factor >= T::zero() {
-            Self::max_red() - self.red
-        } else {
-            self.red
-        };
-        let delta_red = difference_red.max(T::zero()) * factor;
-
-        let difference_green = if factor >= T::zero() {
-            Self::max_green() - self.green
-        } else {
-            self.green
-        };
-        let delta_green = difference_green.max(T::zero()) * factor;
-
-        let difference_blue = if factor >= T::zero() {
-            Self::max_blue() - self.blue
-        } else {
-            self.blue
-        };
-        let delta_blue = difference_blue.max(T::zero()) * factor;
-
-        Rgb {
-            red: (self.red + delta_red).max(Self::min_red()),
-            green: (self.green + delta_green).max(Self::min_green()),
-            blue: (self.blue + delta_blue).max(Self::min_blue()),
-            standard: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Rgb {
-            red: (self.red + Self::max_red() * amount).max(Self::min_red()),
-            green: (self.green + Self::max_green() * amount).max(Self::min_green()),
-            blue: (self.blue + Self::max_blue() * amount).max(Self::min_blue()),
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> LightenAssign for Rgb<S, T>
-where
-    S: RgbStandard<T, TransferFn = LinearFn>,
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference_red = if factor >= T::zero() {
-            Self::max_red() - self.red
-        } else {
-            self.red
-        };
-        self.red += difference_red.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.red, Self::min_red());
-
-        let difference_green = if factor >= T::zero() {
-            Self::max_green() - self.green
-        } else {
-            self.green
-        };
-        self.green += difference_green.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.green, Self::min_green());
-
-        let difference_blue = if factor >= T::zero() {
-            Self::max_blue() - self.blue
-        } else {
-            self.blue
-        };
-        self.blue += difference_blue.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.blue, Self::min_blue());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.red += Self::max_red() * amount;
-        clamp_min_assign(&mut self.red, Self::min_red());
-        self.green += Self::max_green() * amount;
-        clamp_min_assign(&mut self.green, Self::min_green());
-        self.blue += Self::max_blue() * amount;
-        clamp_min_assign(&mut self.blue, Self::min_blue());
-    }
+    other {}
+    phantom: standard
+    where T: Stimulus, S: RgbStandard<T, TransferFn = LinearFn>,
 }
 
 impl<S, T> GetHue for Rgb<S, T>
 where
-    T: FloatComponent,
+    T: Real + RealAngle + Trigonometry + PartialEq + Arithmetics + Clone,
 {
     type Hue = RgbHue<T>;
 
     fn get_hue(&self) -> Option<RgbHue<T>> {
-        let sqrt_3: T = from_f64(1.73205081);
+        let sqrt_3: T = T::from_f64(1.73205081);
 
         if self.red == self.green && self.red == self.blue {
             None
         } else {
             Some(RgbHue::from_radians(
-                (sqrt_3 * (self.green - self.blue))
-                    .atan2(self.red * from_f64(2.0) - self.green - self.blue),
+                (sqrt_3 * (self.green.clone() - self.blue.clone())).atan2(
+                    self.red.clone() * T::from_f64(2.0) - self.green.clone() - self.blue.clone(),
+                ),
             ))
         }
     }
@@ -758,7 +638,8 @@ where
 impl<S, T> Blend for Rgb<S, T>
 where
     S: RgbStandard<T, TransferFn = LinearFn>,
-    T: FloatComponent,
+    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
+    Rgba<S, T>: From<PreAlpha<Rgb<S, T>, T>>,
 {
     type Color = Rgb<S, T>;
 
@@ -802,10 +683,10 @@ where
 
 impl<S, T> Default for Rgb<S, T>
 where
-    T: Zero,
+    T: Stimulus,
 {
     fn default() -> Rgb<S, T> {
-        Rgb::new(T::zero(), T::zero(), T::zero())
+        Rgb::new(Self::min_red(), Self::min_green(), Self::min_blue())
     }
 }
 
@@ -1065,64 +946,9 @@ impl<S, T, A> From<Alpha<Rgb<S, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<S, T> AbsDiffEq for Rgb<S, T>
-where
-    T: AbsDiffEq,
-    T::Epsilon: Clone,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.red.abs_diff_eq(&other.red, epsilon.clone())
-            && self.green.abs_diff_eq(&other.green, epsilon.clone())
-            && self.blue.abs_diff_eq(&other.blue, epsilon)
-    }
-}
-
-impl<S, T> RelativeEq for Rgb<S, T>
-where
-    T: RelativeEq,
-    T::Epsilon: Clone,
-{
-    fn default_max_relative() -> Self::Epsilon {
-        T::default_max_relative()
-    }
-
-    #[rustfmt::skip]
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        self.red.relative_eq(&other.red, epsilon.clone(), max_relative.clone()) &&
-            self.green.relative_eq(&other.green, epsilon.clone(), max_relative.clone()) &&
-            self.blue.relative_eq(&other.blue, epsilon, max_relative)
-    }
-}
-
-impl<S, T> UlpsEq for Rgb<S, T>
-where
-    T: UlpsEq,
-    T::Epsilon: Clone,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    #[rustfmt::skip]
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.red.ulps_eq(&other.red, epsilon.clone(), max_ulps) &&
-            self.green.ulps_eq(&other.green, epsilon.clone(), max_ulps) &&
-            self.blue.ulps_eq(&other.blue, epsilon, max_ulps)
-    }
-}
-
 impl_array_casts!(Rgb<S, T>, [T; 3]);
+
+impl_eq!(Rgb<S>, [red, green, blue]);
 
 impl<S, T> fmt::LowerHex for Rgb<S, T>
 where
@@ -1299,15 +1125,14 @@ impl<S> From<Rgba<S, u8>> for u32 {
 
 impl<S, T> RelativeContrast for Rgb<S, T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
     S: RgbStandard<T>,
+    Xyz<<<S as RgbStandard<T>>::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
 {
     type Scalar = T;
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        use crate::FromColor;
-
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 

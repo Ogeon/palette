@@ -1,8 +1,9 @@
 //! Utility functions for computing in-gamut regions for CIELuv color space.
-use crate::{FloatComponent, LuvHue};
-#[allow(unused)]
-use num_traits::Float;
-use num_traits::{Pow, ToPrimitive};
+use crate::{
+    angle::RealAngle,
+    num::{Abs, Powi, Real, Sqrt, Trigonometry},
+    LuvHue,
+};
 
 /// Boundary line in the u-v plane of the Luv color space.
 struct BoundaryLine {
@@ -15,7 +16,7 @@ impl BoundaryLine {
     /// the signed length at which the ray intersects with the
     /// boundary.
     fn intersect_length_at_angle(&self, theta: f64) -> Option<f64> {
-        let (sin_theta, cos_theta) = theta.to_f64().unwrap().sin_cos();
+        let (sin_theta, cos_theta) = Trigonometry::sin_cos(theta);
         let denom = sin_theta - self.slope * cos_theta;
         if denom.abs() > 1.0e-6 {
             Some(self.intercept / denom)
@@ -27,7 +28,7 @@ impl BoundaryLine {
     /// Return the distance from this line to the origin.
     #[allow(unused)]
     fn distance_to_origin(&self) -> f64 {
-        self.intercept.abs() / (self.slope * self.slope + 1.0).sqrt()
+        Abs::abs(self.intercept) / Sqrt::sqrt(self.slope * self.slope + 1.0)
     }
 }
 
@@ -46,10 +47,13 @@ const KAPPA: f64 = 903.2962962;
 const EPSILON: f64 = 0.0088564516;
 
 impl LuvBounds {
-    pub fn from_lightness<T: FloatComponent>(l: T) -> Self {
-        let l: f64 = l.to_f64().unwrap();
+    pub fn from_lightness<T>(l: T) -> Self
+    where
+        T: Into<f64> + Powi,
+    {
+        let l: f64 = l.into();
 
-        let sub1 = (l + 16.0).pow(3.0) / 1560896.0;
+        let sub1 = (l + 16.0).powi(3) / 1560896.0;
         let sub2 = if sub1 > EPSILON { sub1 } else { l / KAPPA };
 
         let line = |c: usize, t: f64| {
@@ -79,9 +83,9 @@ impl LuvBounds {
 
     /// Given a particular hue, return the distance to the boundary at
     /// the angle determined by the hue.
-    pub fn max_chroma_at_hue<T: FloatComponent>(&self, hue: LuvHue<T>) -> T {
+    pub fn max_chroma_at_hue<T: Into<f64> + RealAngle>(&self, hue: LuvHue<T>) -> T {
         let mut min_chroma = f64::MAX;
-        let h = hue.to_positive_radians().to_f64().unwrap();
+        let h = hue.into_raw_radians().into();
 
         // minimize the distance across all individual boundaries
         for b in &self.bounds {
@@ -105,7 +109,7 @@ impl LuvBounds {
     #[allow(unused)]
     pub fn max_safe_chroma<T>(&self) -> T
     where
-        T: FloatComponent,
+        T: Real,
     {
         let mut min_dist = f64::MAX;
 

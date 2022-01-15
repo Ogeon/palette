@@ -3,16 +3,15 @@
 //! This module is only available if the `std` feature is enabled (this is the
 //! default).
 
-use core::cmp::max;
-use core::marker::PhantomData;
-use std::ops::Sub;
+use core::{cmp::max, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::{One, Zero};
 
-use crate::float::Float;
-use crate::{clamp, clamp_min, Mix};
-use crate::{from_f64, FromF64};
+use crate::{
+    clamp, clamp_min,
+    num::{Arithmetics, One, Real, Zero},
+    Mix,
+};
 
 #[cfg(feature = "named_gradients")]
 pub mod named;
@@ -49,39 +48,41 @@ where
     pub fn get(&self, i: C::Scalar) -> C
     where
         C: Clone,
-        C::Scalar: Float,
+        C::Scalar: Arithmetics + PartialOrd + Clone,
         T: AsRef<[(C::Scalar, C)]>,
     {
-        let &(mut min, ref min_color) = self
+        let (min, min_color) = self
             .0
             .as_ref()
             .get(0)
             .expect("a Gradient must contain at least one color");
+        let mut min = min;
         let mut min_color = min_color;
         let mut min_index = 0;
 
-        if i <= min {
+        if i <= *min {
             return min_color.clone();
         }
 
-        let &(mut max, ref max_color) = self
+        let (max, max_color) = self
             .0
             .as_ref()
             .last()
             .expect("a Gradient must contain at least one color");
+        let mut max = max;
         let mut max_color = max_color;
         let mut max_index = self.0.as_ref().len() - 1;
 
-        if i >= max {
+        if i >= *max {
             return max_color.clone();
         }
 
         while min_index < max_index - 1 {
             let index = min_index + (max_index - min_index) / 2;
 
-            let (p, ref color) = self.0.as_ref()[index];
+            let (p, color) = &self.0.as_ref()[index];
 
-            if i <= p {
+            if i <= *p {
                 max = p;
                 max_color = color;
                 max_index = index;
@@ -92,7 +93,7 @@ where
             }
         }
 
-        let factor = (i - min) / (max - min);
+        let factor = (i - min) / (max.clone() - min);
 
         min_color.clone().mix(max_color.clone(), factor)
     }
@@ -140,7 +141,7 @@ where
     /// ```
     pub fn take(&self, n: usize) -> Take<C, T>
     where
-        C::Scalar: Sub<Output = C::Scalar> + Clone,
+        C::Scalar: Arithmetics + Clone,
         T: AsRef<[(C::Scalar, C)]>,
     {
         let (min, max) = self.domain();
@@ -186,20 +187,17 @@ where
 impl<C> Gradient<C>
 where
     C: Mix,
-    C::Scalar: Float,
+    C::Scalar: Real + Zero + One + Arithmetics,
 {
     /// Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
     /// There must be at least one color.
-    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C>
-    where
-        C::Scalar: FromF64,
-    {
+    pub fn new<I: IntoIterator<Item = C>>(colors: I) -> Gradient<C> {
         let mut points: Vec<_> = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
         assert!(!points.is_empty());
-        let step_size = C::Scalar::one() / from_f64(max(points.len() - 1, 1) as f64);
+        let step_size = C::Scalar::one() / C::Scalar::from_f64(max(points.len() - 1, 1) as f64);
 
         for (i, &mut (ref mut p, _)) in points.iter_mut().enumerate() {
-            *p = from_f64::<C::Scalar>(i as f64) * step_size;
+            *p = C::Scalar::from_f64(i as f64) * &step_size;
         }
 
         Gradient(points, PhantomData)
@@ -222,7 +220,7 @@ where
 
 impl<'a, C, T> Iterator for Take<'a, C, T>
 where
-    C::Scalar: Float + FromF64,
+    C::Scalar: Real + Arithmetics + PartialOrd + Clone,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -232,11 +230,11 @@ where
         if self.from_head + self.from_end < self.len {
             if self.len == 1 {
                 self.from_head += 1;
-                Some(self.gradient.get(self.from))
+                Some(self.gradient.get(self.from.clone()))
             } else {
-                let i = self.from
-                    + (self.diff / from_f64((self.len - 1) as f64))
-                        * from_f64(self.from_head as f64);
+                let i = self.from.clone()
+                    + (self.diff.clone() / C::Scalar::from_f64((self.len - 1) as f64))
+                        * C::Scalar::from_f64(self.from_head as f64);
                 self.from_head += 1;
                 Some(self.gradient.get(i))
             }
@@ -255,7 +253,7 @@ where
 
 impl<'a, C, T> DoubleEndedIterator for Take<'a, C, T>
 where
-    C::Scalar: Float + FromF64,
+    C::Scalar: Real + Arithmetics + PartialOrd + Clone,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -263,11 +261,11 @@ where
         if self.from_head + self.from_end < self.len {
             if self.len == 1 {
                 self.from_end += 1;
-                Some(self.gradient.get(self.from))
+                Some(self.gradient.get(self.from.clone()))
             } else {
-                let i = self.from
-                    + (self.diff / from_f64((self.len - 1) as f64))
-                        * from_f64((self.len - self.from_end - 1) as f64);
+                let i = self.from.clone()
+                    + (self.diff.clone() / C::Scalar::from_f64((self.len - 1) as f64))
+                        * C::Scalar::from_f64((self.len - self.from_end - 1) as f64);
                 self.from_end += 1;
                 Some(self.gradient.get(i))
             }
@@ -303,13 +301,13 @@ where
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + 'a,
+    C::Scalar: Arithmetics + PartialOrd + Clone,
 {
     /// Get a color from the gradient slice. The color of the closest domain
     /// limit will be returned if `i` is outside the domain.
     pub fn get(&self, i: C::Scalar) -> C
     where
         C: Clone,
-        C::Scalar: Float,
         T: AsRef<[(C::Scalar, C)]>,
     {
         self.gradient.get(self.range.clamp(i))
@@ -353,7 +351,7 @@ impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + 'a,
     T: Clone,
-    C::Scalar: Sub<Output = C::Scalar> + Clone,
+    C::Scalar: Arithmetics + PartialOrd + Clone,
 {
     /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
     pub fn take(&self, n: usize) -> Take<C, T>
@@ -571,7 +569,7 @@ where
 impl<'a, C, T> MaybeSlice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    C::Scalar: Float,
+    C::Scalar: Arithmetics + PartialOrd + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
     fn get(&self, i: C::Scalar) -> C {

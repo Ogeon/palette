@@ -1,7 +1,4 @@
-use core::ops::{Add, Div};
-
-use crate::component::Component;
-use crate::{from_f64, FromF64};
+use crate::num::{Arithmetics, Real};
 
 /// A trait for calculating relative contrast between two colors.
 ///
@@ -53,7 +50,7 @@ use crate::{from_f64, FromF64};
 #[doc(alias = "wcag")]
 pub trait RelativeContrast: Sized {
     /// The type of the contrast ratio.
-    type Scalar: FromF64 + PartialOrd;
+    type Scalar: Real + PartialOrd;
 
     /// Calculate the contrast ratio between two colors.
     #[must_use]
@@ -64,7 +61,7 @@ pub trait RelativeContrast: Sized {
     #[must_use]
     #[inline]
     fn has_min_contrast_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= from_f64(4.5)
+        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(4.5)
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.3 for large
@@ -72,7 +69,7 @@ pub trait RelativeContrast: Sized {
     #[must_use]
     #[inline]
     fn has_min_contrast_large_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= from_f64(3.0)
+        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(3.0)
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.6. Contrast
@@ -80,7 +77,7 @@ pub trait RelativeContrast: Sized {
     #[must_use]
     #[inline]
     fn has_enhanced_contrast_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= from_f64(7.0)
+        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(7.0)
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.6 for large
@@ -104,12 +101,12 @@ pub trait RelativeContrast: Sized {
 #[inline]
 pub fn contrast_ratio<T>(luma1: T, luma2: T) -> T
 where
-    T: Component + FromF64 + Add<Output = T> + Div<Output = T>,
+    T: Real + Arithmetics + PartialOrd,
 {
     if luma1 > luma2 {
-        (luma1 + from_f64(0.05)) / (luma2 + from_f64(0.05))
+        (luma1 + T::from_f64(0.05)) / (luma2 + T::from_f64(0.05))
     } else {
-        (luma2 + from_f64(0.05)) / (luma1 + from_f64(0.05))
+        (luma2 + T::from_f64(0.05)) / (luma1 + T::from_f64(0.05))
     }
 }
 
