@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["FromStimulus","Converts from a stimulus color component type, while performing the appropriate scaling, rounding and clamping."],["IntoStimulus","Converts into a stimulus color component type, while performing the appropriate scaling, rounding and clamping."],["Stimulus","Color components that represent a stimulus intensity."]]});

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;hsl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hsl.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;hsl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hsl.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -804,169 +805,37 @@
 <span id="804">804</span>
 <span id="805">805</span>
 <span id="806">806</span>
-<span id="807">807</span>
-<span id="808">808</span>
-<span id="809">809</span>
-<span id="810">810</span>
-<span id="811">811</span>
-<span id="812">812</span>
-<span id="813">813</span>
-<span id="814">814</span>
-<span id="815">815</span>
-<span id="816">816</span>
-<span id="817">817</span>
-<span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
-<span id="825">825</span>
-<span id="826">826</span>
-<span id="827">827</span>
-<span id="828">828</span>
-<span id="829">829</span>
-<span id="830">830</span>
-<span id="831">831</span>
-<span id="832">832</span>
-<span id="833">833</span>
-<span id="834">834</span>
-<span id="835">835</span>
-<span id="836">836</span>
-<span id="837">837</span>
-<span id="838">838</span>
-<span id="839">839</span>
-<span id="840">840</span>
-<span id="841">841</span>
-<span id="842">842</span>
-<span id="843">843</span>
-<span id="844">844</span>
-<span id="845">845</span>
-<span id="846">846</span>
-<span id="847">847</span>
-<span id="848">848</span>
-<span id="849">849</span>
-<span id="850">850</span>
-<span id="851">851</span>
-<span id="852">852</span>
-<span id="853">853</span>
-<span id="854">854</span>
-<span id="855">855</span>
-<span id="856">856</span>
-<span id="857">857</span>
-<span id="858">858</span>
-<span id="859">859</span>
-<span id="860">860</span>
-<span id="861">861</span>
-<span id="862">862</span>
-<span id="863">863</span>
-<span id="864">864</span>
-<span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
-<span id="879">879</span>
-<span id="880">880</span>
-<span id="881">881</span>
-<span id="882">882</span>
-<span id="883">883</span>
-<span id="884">884</span>
-<span id="885">885</span>
-<span id="886">886</span>
-<span id="887">887</span>
-<span id="888">888</span>
-<span id="889">889</span>
-<span id="890">890</span>
-<span id="891">891</span>
-<span id="892">892</span>
-<span id="893">893</span>
-<span id="894">894</span>
-<span id="895">895</span>
-<span id="896">896</span>
-<span id="897">897</span>
-<span id="898">898</span>
-<span id="899">899</span>
-<span id="900">900</span>
-<span id="901">901</span>
-<span id="902">902</span>
-<span id="903">903</span>
-<span id="904">904</span>
-<span id="905">905</span>
-<span id="906">906</span>
-<span id="907">907</span>
-<span id="908">908</span>
-<span id="909">909</span>
-<span id="910">910</span>
-<span id="911">911</span>
-<span id="912">912</span>
-<span id="913">913</span>
-<span id="914">914</span>
-<span id="915">915</span>
-<span id="916">916</span>
-<span id="917">917</span>
-<span id="918">918</span>
-<span id="919">919</span>
-<span id="920">920</span>
-<span id="921">921</span>
-<span id="922">922</span>
-<span id="923">923</span>
-<span id="924">924</span>
-<span id="925">925</span>
-<span id="926">926</span>
-<span id="927">927</span>
-<span id="928">928</span>
-<span id="929">929</span>
-<span id="930">930</span>
-<span id="931">931</span>
-<span id="932">932</span>
-<span id="933">933</span>
-<span id="934">934</span>
-<span id="935">935</span>
-<span id="936">936</span>
-<span id="937">937</span>
-<span id="938">938</span>
-<span id="939">939</span>
-<span id="940">940</span>
-<span id="941">941</span>
-<span id="942">942</span>
-<span id="943">943</span>
-<span id="944">944</span>
-</pre><pre class="rust">
-<span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
+    <span class="ident">any::TypeId</span>,
+    <span class="ident">marker::PhantomData</span>,
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+};
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
-<span class="kw">use</span> <span class="ident">num_traits::Zero</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions::uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::Rng</span>;
-
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::convert::FromColorUnclamped</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::Srgb</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">from_f64</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>,
-    <span class="ident">Component</span>, <span class="ident">FloatComponent</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>, <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>,
-    <span class="ident">Xyz</span>,
+<span class="kw">use</span> <span class="ident">rand</span>::{
+    <span class="ident">distributions</span>::{
+        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
+        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+    },
+    <span class="ident">Rng</span>,
 };
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">float::Float</span>, <span class="ident">FromF64</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::num</span>::{<span class="ident">Cbrt</span>, <span class="ident">Powi</span>, <span class="ident">Sqrt</span>};
+
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">angle</span>::{<span class="ident">FromAngle</span>, <span class="ident">RealAngle</span>, <span class="ident">SignedAngle</span>},
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
+    <span class="ident">convert::FromColorUnclamped</span>,
+    <span class="ident">encoding::Srgb</span>,
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
+    <span class="ident">stimulus</span>::{<span class="ident">FromStimulus</span>, <span class="ident">Stimulus</span>},
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>,
+    <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>,
+    <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>, <span class="ident">Xyz</span>,
+};
 
 <span class="doccomment">/// Linear HSL with an alpha component. See the [`Hsla` implementation in</span>
 <span class="doccomment">/// `Alpha`](crate::Alpha#Hsla).</span>
@@ -980,6 +849,20 @@
 <span class="doccomment">/// `lightness` is the height from the bottom. Its composition makes it</span>
 <span class="doccomment">/// especially good for operations like changing green to red, making a color</span>
 <span class="doccomment">/// more gray, or making it darker.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// HSL component values are typically real numbers (such as floats), but may</span>
+<span class="doccomment">/// also be converted to and from `u8` for storage and interoperability</span>
+<span class="doccomment">/// purposes. The hue is then within the range `[0, 255]`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use approx::assert_relative_eq;</span>
+<span class="doccomment">/// use palette::Hsl;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let hsl_u8 = Hsl::new_srgb(128u8, 85, 51);</span>
+<span class="doccomment">/// let hsl_f32 = hsl_u8.into_format::&lt;f32&gt;();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_relative_eq!(hsl_f32, Hsl::new(180.0, 1.0 / 3.0, 0.2));</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [HSV](crate::Hsv) for a very similar color space, with brightness</span>
 <span class="doccomment">/// instead of lightness.</span>
@@ -1016,7 +899,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>: <span class="ident">Copy</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hsl</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>(),
             <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span>.<span class="ident">clone</span>(),
@@ -1029,26 +912,26 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an sRGB HSL color. This method can be used instead of `Hsl::new`</span>
     <span class="doccomment">/// to help type inference.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>)
     }
 
     <span class="doccomment">/// Create an sRGB HSL color. This is the same as `Hsl::new_srgb` without</span>
     <span class="doccomment">/// the generic hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>)
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an HSL color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>)
     }
 
     <span class="doccomment">/// Create an HSL color. This is the same as `Hsl::new` without the generic</span>
     <span class="doccomment">/// hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Hsl</span> {
             <span class="ident">hue</span>,
             <span class="ident">saturation</span>,
@@ -1057,18 +940,39 @@
         }
     }
 
+    <span class="doccomment">/// Convert into another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">Hsl</span> {
+            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">into_format</span>(),
+            <span class="ident">saturation</span>: <span class="ident">U::from_stimulus</span>(<span class="self">self</span>.<span class="ident">saturation</span>),
+            <span class="ident">lightness</span>: <span class="ident">U::from_stimulus</span>(<span class="self">self</span>.<span class="ident">lightness</span>),
+            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
+        }
+    }
+
+    <span class="doccomment">/// Convert from another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">color</span>.<span class="ident">into_format</span>()
+    }
+
     <span class="doccomment">/// Convert to a `(hue, saturation, lightness)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         (<span class="self">self</span>.<span class="ident">hue</span>, <span class="self">self</span>.<span class="ident">saturation</span>, <span class="self">self</span>.<span class="ident">lightness</span>)
     }
 
     <span class="doccomment">/// Convert from a `(hue, saturation, lightness)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_as</span><span class="op">&lt;</span><span class="ident">St</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">St</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reinterpret_as</span><span class="op">&lt;</span><span class="ident">St</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">St</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hsl</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
             <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span>,
@@ -1080,83 +984,84 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span>,
 {
     <span class="doccomment">/// Return the `saturation` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_saturation</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_saturation</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `saturation` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_saturation</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_saturation</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::max_intensity</span>()
     }
 
     <span class="doccomment">/// Return the `lightness` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_lightness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_lightness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `lightness` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_lightness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_lightness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::max_intensity</span>()
     }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">PartialEq</span>,
-    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">PartialEq</span>,
-{
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">hue</span>
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">saturation</span>
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">lightness</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Eq</span>,
-    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">PartialEq</span>,
-{
 }
 
 <span class="doccomment">///&lt;span id=&quot;Hsla&quot;&gt;&lt;/span&gt;[`Hsla`](crate::Hsla) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an sRGB HSL color with transparency. This method can be used</span>
     <span class="doccomment">/// instead of `Hsla::new` to help type inference.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Create an sRGB HSL color with transparency. This is the same as</span>
     <span class="doccomment">/// `Hsla::new_srgb` without the generic hue type. It&#39;s temporary until</span>
     <span class="doccomment">/// `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
     }
 }
 
 <span class="doccomment">///&lt;span id=&quot;Hsla&quot;&gt;&lt;/span&gt;[`Hsla`](crate::Hsla) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an HSL color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Create an HSL color with transparency. This is the same as `Hsla::new`</span>
     <span class="doccomment">/// without the generic hue type. It&#39;s temporary until `const fn` supports</span>
     <span class="doccomment">/// traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">lightness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
             <span class="ident">color</span>: <span class="ident">Hsl::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>),
             <span class="ident">alpha</span>,
         }
     }
+    <span class="doccomment">/// Convert into another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_format</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>, <span class="ident">B</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="ident">B</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">Alpha</span> {
+            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">into_format</span>(),
+            <span class="ident">alpha</span>: <span class="ident">B::from_stimulus</span>(<span class="self">self</span>.<span class="ident">alpha</span>),
+        }
+    }
+
+    <span class="doccomment">/// Convert from another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_format</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>, <span class="ident">B</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+        <span class="ident">A</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">color</span>.<span class="ident">into_format</span>()
+    }
 
     <span class="doccomment">/// Convert to a `(hue, saturation, lightness, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         (
             <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">hue</span>,
             <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturation</span>,
@@ -1168,34 +1073,36 @@
     <span class="doccomment">/// Convert from a `(hue, saturation, lightness, alpha)` tuple.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         (<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>),
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
+    ) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>, <span class="ident">alpha</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">S1</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S2</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S1::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">S2::Space</span> <span class="kw">as</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::WhitePoint</span><span class="op">&gt;</span>,
+    <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="self">Self</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>() {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>() {
             <span class="ident">hsl</span>.<span class="ident">reinterpret_as</span>()
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">rgb</span> <span class="op">=</span> <span class="ident">Rgb</span>::<span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_color_unclamped</span>(<span class="ident">hsl</span>);
             <span class="kw">let</span> <span class="ident">converted_rgb</span> <span class="op">=</span> <span class="ident">Rgb</span>::<span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_color_unclamped</span>(<span class="ident">rgb</span>);
-            <span class="self">Self</span><span class="ident">::from_color_unclamped</span>(<span class="ident">converted_rgb</span>)
+            <span class="ident"><span class="self">Self</span>::from_color_unclamped</span>(<span class="ident">converted_rgb</span>)
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="kw-2">mut</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="kw-2">mut</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="comment">// Avoid negative numbers</span>
         <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">=</span> <span class="ident">rgb</span>.<span class="ident">red</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
         <span class="ident">rgb</span>.<span class="ident">green</span> <span class="op">=</span> <span class="ident">rgb</span>.<span class="ident">green</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
@@ -1203,12 +1110,22 @@
 
         <span class="kw">let</span> (<span class="ident">max</span>, <span class="ident">min</span>, <span class="ident">sep</span>, <span class="ident">coeff</span>) <span class="op">=</span> {
             <span class="kw">let</span> (<span class="ident">max</span>, <span class="ident">min</span>, <span class="ident">sep</span>, <span class="ident">coeff</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">&gt;</span> <span class="ident">rgb</span>.<span class="ident">green</span> {
-                (<span class="ident">rgb</span>.<span class="ident">red</span>, <span class="ident">rgb</span>.<span class="ident">green</span>, <span class="ident">rgb</span>.<span class="ident">green</span> <span class="op">-</span> <span class="ident">rgb</span>.<span class="ident">blue</span>, <span class="ident">T::zero</span>())
+                (
+                    <span class="ident">rgb</span>.<span class="ident">red</span>.<span class="ident">clone</span>(),
+                    <span class="ident">rgb</span>.<span class="ident">green</span>.<span class="ident">clone</span>(),
+                    <span class="ident">rgb</span>.<span class="ident">green</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">rgb</span>.<span class="ident">blue</span>,
+                    <span class="ident">T::zero</span>(),
+                )
             } <span class="kw">else</span> {
-                (<span class="ident">rgb</span>.<span class="ident">green</span>, <span class="ident">rgb</span>.<span class="ident">red</span>, <span class="ident">rgb</span>.<span class="ident">blue</span> <span class="op">-</span> <span class="ident">rgb</span>.<span class="ident">red</span>, <span class="ident">from_f64</span>(<span class="number">2.0</span>))
+                (
+                    <span class="ident">rgb</span>.<span class="ident">green</span>.<span class="ident">clone</span>(),
+                    <span class="ident">rgb</span>.<span class="ident">red</span>.<span class="ident">clone</span>(),
+                    <span class="ident">rgb</span>.<span class="ident">blue</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">rgb</span>.<span class="ident">red</span>,
+                    <span class="ident">T::from_f64</span>(<span class="number">2.0</span>),
+                )
             };
             <span class="kw">if</span> <span class="ident">rgb</span>.<span class="ident">blue</span> <span class="op">&gt;</span> <span class="ident">max</span> {
-                (<span class="ident">rgb</span>.<span class="ident">blue</span>, <span class="ident">min</span>, <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">-</span> <span class="ident">rgb</span>.<span class="ident">green</span>, <span class="ident">from_f64</span>(<span class="number">4.0</span>))
+                (<span class="ident">rgb</span>.<span class="ident">blue</span>, <span class="ident">min</span>, <span class="ident">rgb</span>.<span class="ident">red</span> <span class="op">-</span> <span class="ident">rgb</span>.<span class="ident">green</span>, <span class="ident">T::from_f64</span>(<span class="number">4.0</span>))
             } <span class="kw">else</span> {
                 <span class="kw">let</span> <span class="ident">min_val</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">rgb</span>.<span class="ident">blue</span> <span class="op">&lt;</span> <span class="ident">min</span> { <span class="ident">rgb</span>.<span class="ident">blue</span> } <span class="kw">else</span> { <span class="ident">min</span> };
                 (<span class="ident">max</span>, <span class="ident">min_val</span>, <span class="ident">sep</span>, <span class="ident">coeff</span>)
@@ -1218,16 +1135,16 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">T::zero</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">T::zero</span>();
 
-        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">max</span> <span class="op">+</span> <span class="ident">min</span>;
-        <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">sum</span> <span class="op">/</span> <span class="ident">from_f64</span>(<span class="number">2.0</span>);
+        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">max</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">min</span>;
+        <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">sum</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>);
         <span class="kw">if</span> <span class="ident">max</span> <span class="op">!</span><span class="op">=</span> <span class="ident">min</span> {
             <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>;
             <span class="ident">s</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">sum</span> <span class="op">&gt;</span> <span class="ident">T::one</span>() {
-                <span class="ident">d</span> <span class="op">/</span> (<span class="ident">from_f64</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">sum</span>)
+                <span class="ident">d</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">sum</span>)
             } <span class="kw">else</span> {
-                <span class="ident">d</span> <span class="op">/</span> <span class="ident">sum</span>
+                <span class="ident">d</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">sum</span>
             };
-            <span class="ident">h</span> <span class="op">=</span> ((<span class="ident">sep</span> <span class="op">/</span> <span class="ident">d</span>) <span class="op">+</span> <span class="ident">coeff</span>) <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">60.0</span>);
+            <span class="ident">h</span> <span class="op">=</span> ((<span class="ident">sep</span> <span class="op">/</span> <span class="ident">d</span>) <span class="op">+</span> <span class="ident">coeff</span>) <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">60.0</span>);
         };
 
         <span class="ident">Hsl</span> {
@@ -1241,21 +1158,21 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> (<span class="ident">from_f64</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">hsv</span>.<span class="ident">saturation</span>) <span class="op">*</span> <span class="ident">hsv</span>.<span class="ident">value</span>;
-        <span class="kw">let</span> <span class="ident">saturation</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">hsv</span>.<span class="ident">value</span>.<span class="ident">is_normal</span>() {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> (<span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">hsv</span>.<span class="ident">saturation</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">hsv</span>.<span class="ident">value</span>;
+        <span class="kw">let</span> <span class="ident">saturation</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">hsv</span>.<span class="ident">value</span>.<span class="ident">is_valid_divisor</span>() {
             <span class="ident">T::zero</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span> <span class="ident">T::one</span>() {
-            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">is_normal</span>() {
-                <span class="ident">hsv</span>.<span class="ident">saturation</span> <span class="op">*</span> <span class="ident">hsv</span>.<span class="ident">value</span> <span class="op">/</span> <span class="ident">x</span>
+            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">is_valid_divisor</span>() {
+                <span class="ident">hsv</span>.<span class="ident">saturation</span> <span class="op">*</span> <span class="ident">hsv</span>.<span class="ident">value</span> <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">x</span>
             } <span class="kw">else</span> {
                 <span class="ident">T::zero</span>()
             }
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">denom</span> <span class="op">=</span> <span class="ident">from_f64</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">x</span>;
-            <span class="kw">if</span> <span class="ident">denom</span>.<span class="ident">is_normal</span>() {
+            <span class="kw">let</span> <span class="ident">denom</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">x</span>;
+            <span class="kw">if</span> <span class="ident">denom</span>.<span class="ident">is_valid_divisor</span>() {
                 <span class="ident">hsv</span>.<span class="ident">saturation</span> <span class="op">*</span> <span class="ident">hsv</span>.<span class="ident">value</span> <span class="op">/</span> <span class="ident">denom</span>
             } <span class="kw">else</span> {
                 <span class="ident">T::zero</span>()
@@ -1265,169 +1182,88 @@
         <span class="ident">Hsl</span> {
             <span class="ident">hue</span>: <span class="ident">hsv</span>.<span class="ident">hue</span>,
             <span class="ident">saturation</span>,
-            <span class="ident">lightness</span>: <span class="ident">x</span> <span class="op">/</span> <span class="ident">from_f64</span>(<span class="number">2.0</span>),
+            <span class="ident">lightness</span>: <span class="ident">x</span> <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_saturation</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_saturation</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_lightness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_lightness</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(
+    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(
             <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">saturation</span>, <span class="ident">T::zero</span>(), <span class="ident">T::max_intensity</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">lightness</span>, <span class="ident">T::zero</span>(), <span class="ident">T::max_intensity</span>()),
+            <span class="ident">clamp</span>(
+                <span class="self">self</span>.<span class="ident">saturation</span>,
+                <span class="ident"><span class="self">Self</span>::min_saturation</span>(),
+                <span class="ident"><span class="self">Self</span>::max_saturation</span>(),
+            ),
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">lightness</span>, <span class="ident"><span class="self">Self</span>::min_lightness</span>(), <span class="ident"><span class="self">Self</span>::max_lightness</span>()),
         )
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">saturation</span>, <span class="ident">T::zero</span>(), <span class="ident">T::max_intensity</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">lightness</span>, <span class="ident">T::zero</span>(), <span class="ident">T::max_intensity</span>());
+    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="ident">clamp_assign</span>(
+            <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">saturation</span>,
+            <span class="ident"><span class="self">Self</span>::min_saturation</span>(),
+            <span class="ident"><span class="self">Self</span>::max_saturation</span>(),
+        );
+        <span class="ident">clamp_assign</span>(
+            <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">lightness</span>,
+            <span class="ident"><span class="self">Self</span>::min_lightness</span>(),
+            <span class="ident"><span class="self">Self</span>::max_lightness</span>(),
+        );
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
-
-        <span class="ident">Hsl</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>,
-            <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">saturation</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">saturation</span>),
-            <span class="ident">lightness</span>: <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">lightness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>),
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
-
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>;
-        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">saturation</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">saturation</span>);
-        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">lightness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>);
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_lightness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">lightness</span>
-        };
-
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-
-        <span class="ident">Hsl</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span>,
-            <span class="ident">lightness</span>: (<span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span> <span class="ident">delta</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_lightness</span>()),
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Hsl</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span>,
-            <span class="ident">lightness</span>: (<span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_lightness</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_lightness</span>()),
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_lightness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">lightness</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">lightness</span>
-        };
-
-        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">lightness</span>, <span class="self">Self</span><span class="ident">::min_lightness</span>());
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">lightness</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_lightness</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">lightness</span>, <span class="self">Self</span><span class="ident">::min_lightness</span>());
-    }
-}
+<span class="macro">impl_mix_hue!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {<span class="ident">saturation</span>, <span class="ident">lightness</span>} <span class="ident">phantom</span>: <span class="ident">standard</span>);
+<span class="macro">impl_lighten!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">lightness</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_lightness</span>(), <span class="ident"><span class="self">Self</span>::max_lightness</span>()]} <span class="ident">other</span> {<span class="ident">hue</span>, <span class="ident">saturation</span>} <span class="ident">phantom</span>: <span class="ident">standard</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span>);
+<span class="macro">impl_saturate!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">saturation</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_saturation</span>(), <span class="ident"><span class="self">Self</span>::max_saturation</span>()]} <span class="ident">other</span> {<span class="ident">hue</span>, <span class="ident">lightness</span>} <span class="ident">phantom</span>: <span class="ident">standard</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -1436,7 +1272,7 @@
     <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
@@ -1450,7 +1286,7 @@
     <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
         <span class="self">self</span>
     }
@@ -1461,7 +1297,7 @@
     <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
+    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
     }
 }
@@ -1473,7 +1309,7 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">amount</span>;
         <span class="self">self</span>
     }
@@ -1486,78 +1322,22 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) {
+    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">amount</span>;
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Saturate</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_saturation</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">saturation</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">saturation</span>
-        };
-
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-
-        <span class="ident">Hsl</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">saturation</span>: (<span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span> <span class="ident">delta</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_saturation</span>()),
-            <span class="ident">lightness</span>: <span class="self">self</span>.<span class="ident">lightness</span>,
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Hsl</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">saturation</span>: (<span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_saturation</span>() <span class="op">*</span> <span class="ident">amount</span>)
-                .<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_saturation</span>()),
-            <span class="ident">lightness</span>: <span class="self">self</span>.<span class="ident">lightness</span>,
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SaturateAssign</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_saturation</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">saturation</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">saturation</span>
-        };
-
-        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">saturation</span>, <span class="self">Self</span><span class="ident">::min_saturation</span>());
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">saturation</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_saturation</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">saturation</span>, <span class="self">Self</span><span class="ident">::min_saturation</span>());
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span>,
+    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Default</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Hsl::new</span>(<span class="ident">RgbHue::from</span>(<span class="ident">T::zero</span>()), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">Hsl::new</span>(
+            <span class="ident">RgbHue::default</span>(),
+            <span class="ident"><span class="self">Self</span>::min_saturation</span>(),
+            <span class="ident"><span class="self">Self</span>::min_lightness</span>(),
+        )
     }
 }
 
@@ -1566,78 +1346,18 @@
 
 <span class="macro">impl_array_casts!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">AbsDiffEq</span>,
-    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
-
-    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Epsilon</span> {
-        <span class="ident">T::default_epsilon</span>()
-    }
-
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">hue</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">saturation</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">lightness</span>, <span class="ident">epsilon</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">RelativeEq</span>,
-    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">RelativeEq</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Epsilon</span> {
-        <span class="ident">T::default_max_relative</span>()
-    }
-
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="kw">fn</span> <span class="ident">relative_eq</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-        <span class="ident">epsilon</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>,
-        <span class="ident">max_relative</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">hue</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">saturation</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">lightness</span>, <span class="ident">epsilon</span>, <span class="ident">max_relative</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UlpsEq</span>,
-    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UlpsEq</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="ident">T::default_max_ulps</span>()
-    }
-
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">hue</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>)
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">saturation</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">saturation</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>)
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">lightness</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">lightness</span>, <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>)
-    }
-}
+<span class="macro">impl_eq_hue!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">RgbHue</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>]);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Arithmetics</span>,
     <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S::Space</span> <span class="kw">as</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::FromColor</span>;
-
+    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">xyz1</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="self">self</span>);
         <span class="kw">let</span> <span class="ident">xyz2</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="ident">other</span>);
 
@@ -1648,20 +1368,20 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span>,
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">crate</span><span class="ident">::random_sampling::sample_hsl</span>(<span class="ident">rng</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>())
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="kw">crate</span>::random_sampling::sample_hsl</span>(<span class="ident">rng</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>())
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformHsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
 {
-    <span class="ident">hue</span>: <span class="kw">crate</span><span class="ident">::hues::UniformRgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformRgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">u1</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">u2</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">space</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
@@ -1670,7 +1390,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident"><span class="kw">crate</span>::hues::UniformRgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformHsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
@@ -1678,54 +1400,56 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformHsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident"><span class="kw">crate</span>::hues::UniformRgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::random_sampling::invert_hsl_sample</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::random_sampling::invert_hsl_sample</span>;
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
 
-        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">low</span>);
-        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">high</span>);
+        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">low</span>.<span class="ident">saturation</span>, <span class="ident">low</span>.<span class="ident">lightness</span>);
+        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">high</span>.<span class="ident">saturation</span>, <span class="ident">high</span>.<span class="ident">lightness</span>);
 
         <span class="ident">UniformHsl</span> {
-            <span class="ident">hue</span>: <span class="kw">crate</span><span class="ident">::hues::UniformRgbHue::new</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
+            <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformRgbHue::new</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
             <span class="ident">u1</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r1_min</span>, <span class="ident">r1_max</span>),
             <span class="ident">u2</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r2_min</span>, <span class="ident">r2_max</span>),
             <span class="ident">space</span>: <span class="ident">PhantomData</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::random_sampling::invert_hsl_sample</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::random_sampling::invert_hsl_sample</span>;
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
 
-        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">low</span>);
-        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">high</span>);
+        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">low</span>.<span class="ident">saturation</span>, <span class="ident">low</span>.<span class="ident">lightness</span>);
+        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>) <span class="op">=</span> <span class="ident">invert_hsl_sample</span>(<span class="ident">high</span>.<span class="ident">saturation</span>, <span class="ident">high</span>.<span class="ident">lightness</span>);
 
         <span class="ident">UniformHsl</span> {
-            <span class="ident">hue</span>: <span class="kw">crate</span><span class="ident">::hues::UniformRgbHue::new_inclusive</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
+            <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformRgbHue::new_inclusive</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
             <span class="ident">u1</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r1_min</span>, <span class="ident">r1_max</span>),
             <span class="ident">u2</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r2_min</span>, <span class="ident">r2_max</span>),
             <span class="ident">space</span>: <span class="ident">PhantomData</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">crate</span><span class="ident">::random_sampling::sample_hsl</span>(
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="kw">crate</span>::random_sampling::sample_hsl</span>(
             <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
             <span class="self">self</span>.<span class="ident">u1</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
             <span class="self">self</span>.<span class="ident">u2</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
@@ -1741,7 +1465,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::Hsl</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Hsl</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromColor</span>, <span class="ident">Hsv</span>, <span class="ident">Srgb</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1797,24 +1521,24 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">ranges</span>() {
         <span class="macro">assert_ranges!</span> {
-            <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
+            <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
             <span class="ident">clamped</span> {
-                <span class="ident">saturation</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1.0</span>,
-                <span class="ident">lightness</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1.0</span>
+                <span class="ident">saturation</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
+                <span class="ident">lightness</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>
             }
             <span class="ident">clamped_min</span> {}
             <span class="ident">unclamped</span> {
-                <span class="ident">hue</span>: <span class="op">-</span><span class="number">360.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">360.0</span>
+                <span class="ident">hue</span>: <span class="op">-</span><span class="number">360.0</span> =&gt; <span class="number">360.0</span>
             }
         }
     }
 
-    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
-    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
+    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
+    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::Srgb</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>;
 
         <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsl</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::min_saturation</span>(), <span class="number">0.0</span>);
         <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsl</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::min_lightness</span>(), <span class="number">0.0</span>);
@@ -1844,7 +1568,7 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
     <span class="macro">test_uniform_distribution!</span> {
-        <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="kw">crate</span><span class="ident">::rgb::Rgb</span> {
+        <span class="ident">Hsl</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident"><span class="kw">crate</span>::rgb::Rgb</span> {
             <span class="ident">red</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
             <span class="ident">green</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
             <span class="ident">blue</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>)
@@ -1861,8 +1585,8 @@
     <span class="kw">fn</span> <span class="ident">uniform_distribution_fail</span>() {
         <span class="kw">use</span> <span class="ident">rand::Rng</span>;
 
-        <span class="kw">const</span> <span class="ident">BINS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::random_sampling::test_utils::BINS</span>;
-        <span class="kw">const</span> <span class="ident">SAMPLES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::random_sampling::test_utils::SAMPLES</span>;
+        <span class="kw">const</span> <span class="ident">BINS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::random_sampling::test_utils::BINS</span>;
+        <span class="kw">const</span> <span class="ident">SAMPLES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::random_sampling::test_utils::SAMPLES</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">red</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">BINS</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">green</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">BINS</span>];
@@ -1871,12 +1595,12 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand_mt::Mt::new</span>(<span class="number">1234</span>); <span class="comment">// We want the same seed on every run to avoid random fails</span>
 
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">SAMPLES</span> {
-            <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">Hsl</span>::<span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(
+            <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">Hsl</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(
                 <span class="ident">rng</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="number">360.0</span>,
                 <span class="ident">rng</span>.<span class="ident">gen</span>(),
                 <span class="ident">rng</span>.<span class="ident">gen</span>(),
             );
-            <span class="kw">let</span> <span class="ident">color</span>: <span class="kw">crate</span><span class="ident">::rgb::Rgb</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::IntoColor::into_color</span>(<span class="ident">color</span>);
+            <span class="kw">let</span> <span class="ident">color</span>: <span class="ident"><span class="kw">crate</span>::rgb::Rgb</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::IntoColor::into_color</span>(<span class="ident">color</span>);
             <span class="ident">red</span>[((<span class="ident">color</span>.<span class="ident">red</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="number">9</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="ident">green</span>[((<span class="ident">color</span>.<span class="ident">green</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="number">9</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="ident">blue</span>[((<span class="ident">color</span>.<span class="ident">blue</span> <span class="op">*</span> <span class="ident">BINS</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">min</span>(<span class="number">9</span>)] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1887,7 +1611,6 @@
         <span class="macro">assert_uniform_distribution!</span>(<span class="ident">blue</span>);
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;yxy.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>yxy.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;yxy.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>yxy.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -534,98 +535,29 @@
 <span id="534">534</span>
 <span id="535">535</span>
 <span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
-<span id="576">576</span>
-<span id="577">577</span>
-<span id="578">578</span>
-<span id="579">579</span>
-<span id="580">580</span>
-<span id="581">581</span>
-<span id="582">582</span>
-<span id="583">583</span>
-<span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
-<span id="588">588</span>
-<span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-</pre><pre class="rust">
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
+    <span class="ident">marker::PhantomData</span>,
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+};
 
+<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions::uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::Rng</span>;
+<span class="kw">use</span> <span class="ident">rand</span>::{
+    <span class="ident">distributions</span>::{
+        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
+        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+    },
+    <span class="ident">Rng</span>,
+};
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::luma::LumaStandard</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">Component</span>,
-    <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Luma</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
+    <span class="ident">convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>},
+    <span class="ident">luma::LumaStandard</span>,
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Luma</span>, <span class="ident">Mix</span>,
+    <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="doccomment">/// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation</span>
@@ -676,7 +608,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>(),
             <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>(),
@@ -688,7 +620,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a CIE Yxy color.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>,
             <span class="ident">y</span>,
@@ -698,13 +630,13 @@
     }
 
     <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         (<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">luma</span>)
     }
 
     <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>)
     }
 
     <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
@@ -717,50 +649,50 @@
     <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
     <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy::new</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">luma</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span>,
 {
     <span class="doccomment">/// Return the `x` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_x</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_x</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `x` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_x</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">T::max_intensity</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_x</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::one</span>()
     }
 
     <span class="doccomment">/// Return the `y` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_y</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_y</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `y` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_y</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">T::max_intensity</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_y</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::one</span>()
     }
 
     <span class="doccomment">/// Return the `luma` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_luma</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_luma</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `luma` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_luma</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">T::max_intensity</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_luma</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::one</span>()
     }
 }
 
 <span class="doccomment">///&lt;span id=&quot;Yxya&quot;&gt;&lt;/span&gt;[`Yxya`](crate::Yxya) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a CIE Yxy color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
             <span class="ident">color</span>: <span class="ident">Yxy::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>),
             <span class="ident">alpha</span>,
@@ -768,13 +700,13 @@
     }
 
     <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         (<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">luma</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
@@ -787,56 +719,56 @@
     <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
     <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
         <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">luma</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">color</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">yxy</span> <span class="op">=</span> <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="ident">T::zero</span>(),
             <span class="ident">y</span>: <span class="ident">T::zero</span>(),
-            <span class="ident">luma</span>: <span class="ident">xyz</span>.<span class="ident">y</span>,
+            <span class="ident">luma</span>: <span class="ident">xyz</span>.<span class="ident">y</span>.<span class="ident">clone</span>(),
             <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
         };
-        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">x</span> <span class="op">+</span> <span class="ident">xyz</span>.<span class="ident">y</span> <span class="op">+</span> <span class="ident">xyz</span>.<span class="ident">z</span>;
+        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">x</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xyz</span>.<span class="ident">y</span> <span class="op">+</span> <span class="ident">xyz</span>.<span class="ident">z</span>;
         <span class="comment">// If denominator is zero, NAN or INFINITE leave x and y at the default 0</span>
-        <span class="kw">if</span> <span class="ident">sum</span>.<span class="ident">is_normal</span>() {
-            <span class="ident">yxy</span>.<span class="ident">x</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">x</span> <span class="op">/</span> <span class="ident">sum</span>;
+        <span class="kw">if</span> <span class="ident">sum</span>.<span class="ident">is_valid_divisor</span>() {
+            <span class="ident">yxy</span>.<span class="ident">x</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">x</span> <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">sum</span>;
             <span class="ident">yxy</span>.<span class="ident">y</span> <span class="op">=</span> <span class="ident">xyz</span>.<span class="ident">y</span> <span class="op">/</span> <span class="ident">sum</span>;
         }
         <span class="ident">yxy</span>
@@ -845,10 +777,10 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
     <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="self">Self</span>: <span class="ident">Default</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">luma</span>: <span class="ident">luma</span>.<span class="ident">into_linear</span>().<span class="ident">luma</span>,
             ..<span class="ident">Default::default</span>()
@@ -858,128 +790,45 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">x</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_x</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_x</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">y</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_y</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_y</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_luma</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_luma</span>()
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">x</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_x</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_x</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">y</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_y</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_y</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_luma</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_luma</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="self">Self</span><span class="ident">::min_x</span>(), <span class="self">Self</span><span class="ident">::max_x</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">y</span>, <span class="self">Self</span><span class="ident">::min_y</span>(), <span class="self">Self</span><span class="ident">::max_y</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">luma</span>, <span class="self">Self</span><span class="ident">::min_luma</span>(), <span class="self">Self</span><span class="ident">::max_luma</span>()),
+    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="ident"><span class="self">Self</span>::min_x</span>(), <span class="ident"><span class="self">Self</span>::max_x</span>()),
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">y</span>, <span class="ident"><span class="self">Self</span>::min_y</span>(), <span class="ident"><span class="self">Self</span>::max_y</span>()),
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">luma</span>, <span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()),
         )
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">x</span>, <span class="self">Self</span><span class="ident">::min_x</span>(), <span class="self">Self</span><span class="ident">::max_x</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">y</span>, <span class="self">Self</span><span class="ident">::min_y</span>(), <span class="self">Self</span><span class="ident">::max_y</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">luma</span>, <span class="self">Self</span><span class="ident">::min_luma</span>(), <span class="self">Self</span><span class="ident">::max_luma</span>());
+    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">x</span>, <span class="ident"><span class="self">Self</span>::min_x</span>(), <span class="ident"><span class="self">Self</span>::max_x</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">y</span>, <span class="ident"><span class="self">Self</span>::min_y</span>(), <span class="ident"><span class="self">Self</span>::max_y</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">luma</span>, <span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>());
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="self">self</span> <span class="op">+</span> (<span class="ident">other</span> <span class="op">-</span> <span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">other</span> <span class="op">-</span> <span class="kw-2">*</span><span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>;
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_luma</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">luma</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">luma</span>
-        };
-
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>,
-            <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>,
-            <span class="ident">luma</span>: (<span class="self">self</span>.<span class="ident">luma</span> <span class="op">+</span> <span class="ident">delta</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_luma</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>,
-            <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>,
-            <span class="ident">luma</span>: (<span class="self">self</span>.<span class="ident">luma</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_luma</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_luma</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_luma</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">luma</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">luma</span>
-        };
-
-        <span class="self">self</span>.<span class="ident">luma</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">luma</span>, <span class="self">Self</span><span class="ident">::min_luma</span>());
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">luma</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_luma</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">luma</span>, <span class="self">Self</span><span class="ident">::min_luma</span>());
-    }
-}
+<span class="macro">impl_mix!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
+<span class="macro">impl_lighten!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">luma</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()]} <span class="ident">other</span> {<span class="ident">x</span>, <span class="ident">y</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">One</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentWise</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -987,7 +836,7 @@
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
             <span class="ident">y</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
@@ -996,7 +845,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
             <span class="ident">y</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
@@ -1008,10 +857,11 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span>,
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="comment">// The default for x and y are the white point x and y ( from the default D65).</span>
         <span class="comment">// Since Y (luma) is 0.0, this makes the default color black just like for</span>
         <span class="comment">// other colors. The reason for not using 0 for x and y is that this</span>
@@ -1030,14 +880,16 @@
 
 <span class="macro">impl_array_casts!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
 
+<span class="macro">impl_eq!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">y</span>, <span class="ident">x</span>, <span class="ident">luma</span>]);
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
         <span class="ident">contrast_ratio</span>(<span class="self">self</span>.<span class="ident">luma</span>, <span class="ident">other</span>.<span class="ident">luma</span>)
     }
 }
@@ -1047,7 +899,7 @@
 <span class="kw">where</span>
     <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
             <span class="ident">y</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
@@ -1083,10 +935,10 @@
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>();
         <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>();
@@ -1099,10 +951,10 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>();
         <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>();
@@ -1115,7 +967,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Yxy</span> {
             <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
             <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
@@ -1133,8 +985,8 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::Yxy</span>;
-    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point::D65</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Yxy</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::white_point::D65</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromColor</span>, <span class="ident">LinLuma</span>, <span class="ident">LinSrgb</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1170,9 +1022,9 @@
         <span class="macro">assert_ranges!</span> {
             <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
             <span class="ident">clamped</span> {
-                <span class="ident">x</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1.0</span>,
-                <span class="ident">y</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1.0</span>,
-                <span class="ident">luma</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1.0</span>
+                <span class="ident">x</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
+                <span class="ident">y</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
+                <span class="ident">luma</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>
             }
             <span class="ident">clamped_min</span> {}
             <span class="ident">unclamped</span> {}
@@ -1219,7 +1071,6 @@
         <span class="ident">max</span>: <span class="ident">Yxy::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>),
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

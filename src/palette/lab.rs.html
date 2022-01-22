@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;lab.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lab.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;lab.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lab.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -560,89 +561,31 @@
 <span id="560">560</span>
 <span id="561">561</span>
 <span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
-<span id="576">576</span>
-<span id="577">577</span>
-<span id="578">578</span>
-<span id="579">579</span>
-<span id="580">580</span>
-<span id="581">581</span>
-<span id="582">582</span>
-<span id="583">583</span>
-<span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
-<span id="588">588</span>
-<span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-</pre><pre class="rust">
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
+    <span class="ident">marker::PhantomData</span>,
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+};
 
-<span class="kw">use</span> <span class="ident">num_traits::Zero</span>;
+<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions::uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::Rng</span>;
+<span class="kw">use</span> <span class="ident">rand</span>::{
+    <span class="ident">distributions</span>::{
+        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
+        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+    },
+    <span class="ident">Rng</span>,
+};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">clamp_min_assign</span>,
-    <span class="ident">color_difference</span>::{<span class="ident">get_ciede_difference</span>, <span class="ident">ColorDifference</span>},
+    <span class="ident">angle::RealAngle</span>,
+    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>,
+    <span class="ident">color_difference</span>::{<span class="ident">get_ciede_difference</span>, <span class="ident">ColorDifference</span>, <span class="ident">LabColorDiff</span>},
     <span class="ident">contrast_ratio</span>,
     <span class="ident">convert::FromColorUnclamped</span>,
-    <span class="ident">float::Float</span>,
-    <span class="ident">from_f64</span>,
+    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">Cbrt</span>, <span class="ident">Exp</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>},
     <span class="ident">white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>, <span class="ident">FloatComponent</span>, <span class="ident">FromF64</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>,
-    <span class="ident">LabHue</span>, <span class="ident">Lch</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">LabHue</span>, <span class="ident">Lch</span>,
+    <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="doccomment">/// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`</span>
@@ -693,7 +636,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
             <span class="ident">l</span>: <span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>(),
             <span class="ident">a</span>: <span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>(),
@@ -705,7 +648,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a CIE L\*a\*b\* color.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
             <span class="ident">l</span>,
             <span class="ident">a</span>,
@@ -715,55 +658,55 @@
     }
 
     <span class="doccomment">/// Convert to a `(L\*, a\*, b\*)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         (<span class="self">self</span>.<span class="ident">l</span>, <span class="self">self</span>.<span class="ident">a</span>, <span class="self">self</span>.<span class="ident">b</span>)
     }
 
     <span class="doccomment">/// Convert from a `(L\*, a\*, b\*)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span>,
 {
     <span class="doccomment">/// Return the `l` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_l</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_l</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `l` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_l</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">from_f64</span>(<span class="number">100.0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_l</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::from_f64</span>(<span class="number">100.0</span>)
     }
 
     <span class="doccomment">/// Return the `a` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_a</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">from_f64</span>(<span class="op">-</span><span class="number">128.0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_a</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">128.0</span>)
     }
 
     <span class="doccomment">/// Return the `a` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_a</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">from_f64</span>(<span class="number">127.0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_a</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::from_f64</span>(<span class="number">127.0</span>)
     }
 
     <span class="doccomment">/// Return the `b` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_b</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">from_f64</span>(<span class="op">-</span><span class="number">128.0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_b</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">128.0</span>)
     }
 
     <span class="doccomment">/// Return the `b` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_b</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="ident">from_f64</span>(<span class="number">127.0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_b</span>() -&gt; <span class="ident">T</span> {
+        <span class="ident">T::from_f64</span>(<span class="number">127.0</span>)
     }
 }
 
 <span class="doccomment">///&lt;span id=&quot;Laba&quot;&gt;&lt;/span&gt;[`Laba`](crate::Laba) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a CIE L\*a\*b\* with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
             <span class="ident">color</span>: <span class="ident">Lab::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>),
             <span class="ident">alpha</span>,
@@ -771,18 +714,18 @@
     }
 
     <span class="doccomment">/// Convert to a `(L\*, a\*, b\*, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         (<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">l</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">a</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">b</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Convert from a `(L\*, a\*, b\*, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">color</span>
     }
 }
@@ -790,9 +733,9 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">Xyz</span> {
             <span class="kw-2">mut</span> <span class="ident">x</span>,
             <span class="kw-2">mut</span> <span class="ident">y</span>,
@@ -800,10 +743,13 @@
             ..
         } <span class="op">=</span> <span class="ident">color</span> <span class="op">/</span> <span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>();
 
-        <span class="kw">fn</span> <span class="ident">convert</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FloatComponent</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-            <span class="kw">let</span> <span class="ident">epsilon</span> <span class="op">=</span> <span class="ident">from_f64</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="number">6.0</span> <span class="op">/</span> <span class="number">29.0</span>).<span class="ident">powi</span>(<span class="number">3</span>);
-            <span class="kw">let</span> <span class="ident">kappa</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">841.0</span> <span class="op">/</span> <span class="number">108.0</span>);
-            <span class="kw">let</span> <span class="ident">delta</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">from_f64</span>(<span class="number">4.0</span> <span class="op">/</span> <span class="number">29.0</span>);
+        <span class="kw">fn</span> <span class="ident">convert</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+        <span class="kw">where</span>
+            <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+        {
+            <span class="kw">let</span> <span class="ident">epsilon</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">6.0</span> <span class="op">/</span> <span class="number">29.0</span>).<span class="ident">powi</span>(<span class="number">3</span>);
+            <span class="kw">let</span> <span class="ident">kappa</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">841.0</span> <span class="op">/</span> <span class="number">108.0</span>);
+            <span class="kw">let</span> <span class="ident">delta</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">4.0</span> <span class="op">/</span> <span class="number">29.0</span>);
             <span class="kw">if</span> <span class="ident">c</span> <span class="op">&gt;</span> <span class="ident">epsilon</span> {
                 <span class="ident">c</span>.<span class="ident">cbrt</span>()
             } <span class="kw">else</span> {
@@ -816,9 +762,9 @@
         <span class="ident">z</span> <span class="op">=</span> <span class="ident">convert</span>(<span class="ident">z</span>);
 
         <span class="ident">Lab</span> {
-            <span class="ident">l</span>: ((<span class="ident">y</span> <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">116.0</span>)) <span class="op">-</span> <span class="ident">from_f64</span>(<span class="number">16.0</span>)),
-            <span class="ident">a</span>: ((<span class="ident">x</span> <span class="op">-</span> <span class="ident">y</span>) <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">500.0</span>)),
-            <span class="ident">b</span>: ((<span class="ident">y</span> <span class="op">-</span> <span class="ident">z</span>) <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">200.0</span>)),
+            <span class="ident">l</span>: ((<span class="ident">y</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">116.0</span>)) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">16.0</span>)),
+            <span class="ident">a</span>: ((<span class="ident">x</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">y</span>) <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">500.0</span>)),
+            <span class="ident">b</span>: ((<span class="ident">y</span> <span class="op">-</span> <span class="ident">z</span>) <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">200.0</span>)),
             <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
         }
     }
@@ -826,190 +772,122 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> (<span class="ident">hue_sin</span>, <span class="ident">hue_cos</span>) <span class="op">=</span> <span class="ident">color</span>.<span class="ident">hue</span>.<span class="ident">into_raw_radians</span>().<span class="ident">sin_cos</span>();
+        <span class="kw">let</span> <span class="ident">chroma</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">chroma</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
+
         <span class="ident">Lab</span> {
             <span class="ident">l</span>: <span class="ident">color</span>.<span class="ident">l</span>,
-            <span class="ident">a</span>: <span class="ident">color</span>.<span class="ident">chroma</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">color</span>.<span class="ident">hue</span>.<span class="ident">to_radians</span>().<span class="ident">cos</span>(),
-            <span class="ident">b</span>: <span class="ident">color</span>.<span class="ident">chroma</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">color</span>.<span class="ident">hue</span>.<span class="ident">to_radians</span>().<span class="ident">sin</span>(),
+            <span class="ident">a</span>: <span class="ident">hue_cos</span> <span class="op">*</span> <span class="ident">chroma</span>.<span class="ident">clone</span>(),
+            <span class="ident">b</span>: <span class="ident">hue_sin</span> <span class="op">*</span> <span class="ident">chroma</span>,
             <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">l</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_l</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_a</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">a</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_a</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">b</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_b</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_b</span>()
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">l</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_l</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_l</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_a</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">a</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_a</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">b</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_b</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_b</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>(), <span class="self">Self</span><span class="ident">::max_l</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">a</span>, <span class="self">Self</span><span class="ident">::min_a</span>(), <span class="self">Self</span><span class="ident">::max_a</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">b</span>, <span class="self">Self</span><span class="ident">::min_b</span>(), <span class="self">Self</span><span class="ident">::max_b</span>()),
+    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()),
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">a</span>, <span class="ident"><span class="self">Self</span>::min_a</span>(), <span class="ident"><span class="self">Self</span>::max_a</span>()),
+            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">b</span>, <span class="ident"><span class="self">Self</span>::min_b</span>(), <span class="ident"><span class="self">Self</span>::max_b</span>()),
         )
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">FromF64</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>(), <span class="self">Self</span><span class="ident">::max_l</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">a</span>, <span class="self">Self</span><span class="ident">::min_a</span>(), <span class="self">Self</span><span class="ident">::max_a</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">b</span>, <span class="self">Self</span><span class="ident">::min_b</span>(), <span class="self">Self</span><span class="ident">::max_b</span>());
+    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">a</span>, <span class="ident"><span class="self">Self</span>::min_a</span>(), <span class="ident"><span class="self">Self</span>::max_a</span>());
+        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">b</span>, <span class="ident"><span class="self">Self</span>::min_b</span>(), <span class="ident"><span class="self">Self</span>::max_b</span>());
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="self">self</span> <span class="op">+</span> (<span class="ident">other</span> <span class="op">-</span> <span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">other</span> <span class="op">-</span> <span class="kw-2">*</span><span class="self">self</span>) <span class="op">*</span> <span class="ident">factor</span>;
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">l</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">l</span>
-        };
-
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-
-        <span class="ident">Lab</span> {
-            <span class="ident">l</span>: (<span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span> <span class="ident">delta</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_l</span>()),
-            <span class="ident">a</span>: <span class="self">self</span>.<span class="ident">a</span>,
-            <span class="ident">b</span>: <span class="self">self</span>.<span class="ident">b</span>,
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Lab</span> {
-            <span class="ident">l</span>: (<span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_l</span>()),
-            <span class="ident">a</span>: <span class="self">self</span>.<span class="ident">a</span>,
-            <span class="ident">b</span>: <span class="self">self</span>.<span class="ident">b</span>,
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">l</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">l</span>
-        };
-
-        <span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>());
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">l</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_l</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="self">Self</span><span class="ident">::min_l</span>());
-    }
-}
+<span class="macro">impl_mix!</span>(<span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
+<span class="macro">impl_lighten!</span>(<span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]} <span class="ident">other</span> {<span class="ident">a</span>, <span class="ident">b</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">LabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">a</span> <span class="op">=</span><span class="op">=</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">a</span> <span class="op">==</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">b</span> <span class="op">==</span> <span class="ident">T::zero</span>() {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">LabHue::from_radians</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">a</span>)))
+            <span class="prelude-val">Some</span>(<span class="ident">LabHue::from_radians</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>().<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>())))
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ColorDifference</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Float</span> <span class="op">+</span> <span class="ident">FromF64</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span>
+        <span class="op">+</span> <span class="ident">RealAngle</span>
+        <span class="op">+</span> <span class="ident">One</span>
+        <span class="op">+</span> <span class="ident">Zero</span>
+        <span class="op">+</span> <span class="ident">Powi</span>
+        <span class="op">+</span> <span class="ident">Exp</span>
+        <span class="op">+</span> <span class="ident">Trigonometry</span>
+        <span class="op">+</span> <span class="ident">Abs</span>
+        <span class="op">+</span> <span class="ident">Sqrt</span>
+        <span class="op">+</span> <span class="ident">Arithmetics</span>
+        <span class="op">+</span> <span class="ident">PartialOrd</span>
+        <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="self">Self</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_color_difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Scalar</span> {
+    <span class="kw">fn</span> <span class="ident">get_color_difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Scalar</span> {
         <span class="ident">get_ciede_difference</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>())
     }
 }
@@ -1020,7 +898,7 @@
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
             <span class="ident">l</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">l</span>.<span class="ident">clone</span>()),
             <span class="ident">a</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">a</span>.<span class="ident">clone</span>()),
@@ -1029,7 +907,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
             <span class="ident">l</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>()),
             <span class="ident">a</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>()),
@@ -1043,7 +921,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Zero</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab::new</span>(<span class="ident">T::zero</span>(), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
     }
 }
@@ -1055,17 +933,17 @@
 
 <span class="macro">impl_array_casts!</span>(<span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
 
+<span class="macro">impl_eq!</span>(<span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::FromColor</span>;
-
+    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">xyz1</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="self">self</span>);
         <span class="kw">let</span> <span class="ident">xyz2</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="ident">other</span>);
 
@@ -1076,15 +954,15 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="comment">// `a` and `b` both range from (-128.0, 127.0)</span>
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
-            <span class="ident">l</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">100.0</span>),
-            <span class="ident">a</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">255.0</span>) <span class="op">-</span> <span class="ident">from_f64</span>(<span class="number">128.0</span>),
-            <span class="ident">b</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">from_f64</span>(<span class="number">255.0</span>) <span class="op">-</span> <span class="ident">from_f64</span>(<span class="number">128.0</span>),
+            <span class="ident">l</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">100.0</span>),
+            <span class="ident">a</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">255.0</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">128.0</span>),
+            <span class="ident">b</span>: <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">255.0</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">128.0</span>),
             <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
         }
     }
@@ -1093,7 +971,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformLab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
 {
     <span class="ident">l</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">a</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
@@ -1104,7 +982,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
 {
     <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformLab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
@@ -1112,17 +990,17 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformLab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
 
         <span class="ident">UniformLab</span> {
             <span class="ident">l</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">l</span>, <span class="ident">high</span>.<span class="ident">l</span>),
@@ -1132,13 +1010,13 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
 
         <span class="ident">UniformLab</span> {
             <span class="ident">l</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">l</span>, <span class="ident">high</span>.<span class="ident">l</span>),
@@ -1148,7 +1026,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Lab</span> {
             <span class="ident">l</span>: <span class="self">self</span>.<span class="ident">l</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
             <span class="ident">a</span>: <span class="self">self</span>.<span class="ident">a</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
@@ -1166,8 +1044,8 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::Lab</span>;
-    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::white_point::D65</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Lab</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::white_point::D65</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromColor</span>, <span class="ident">LinSrgb</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1196,9 +1074,9 @@
         <span class="macro">assert_ranges!</span> {
             <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
             <span class="ident">clamped</span> {
-                <span class="ident">l</span>: <span class="number">0.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">100.0</span>,
-                <span class="ident">a</span>: <span class="op">-</span><span class="number">128.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">127.0</span>,
-                <span class="ident">b</span>: <span class="op">-</span><span class="number">128.0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">127.0</span>
+                <span class="ident">l</span>: <span class="number">0.0</span> =&gt; <span class="number">100.0</span>,
+                <span class="ident">a</span>: <span class="op">-</span><span class="number">128.0</span> =&gt; <span class="number">127.0</span>,
+                <span class="ident">b</span>: <span class="op">-</span><span class="number">128.0</span> =&gt; <span class="number">127.0</span>
             }
             <span class="ident">clamped_min</span> {}
             <span class="ident">unclamped</span> {}
@@ -1245,7 +1123,6 @@
         <span class="ident">max</span>: <span class="ident">Lab::new</span>(<span class="number">100.0</span>, <span class="number">127.0</span>, <span class="number">127.0</span>)
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

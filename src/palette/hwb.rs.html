@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;hwb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hwb.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette&#x2F;src&#x2F;hwb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hwb.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../palette/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -839,26 +840,60 @@
 <span id="839">839</span>
 <span id="840">840</span>
 <span id="841">841</span>
-</pre><pre class="rust">
-<span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">DivAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
+    <span class="ident">any::TypeId</span>,
+    <span class="ident">marker::PhantomData</span>,
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">DivAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+};
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions::uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">UniformSampler</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand::Rng</span>;
+<span class="kw">use</span> <span class="ident">rand</span>::{
+    <span class="ident">distributions</span>::{
+        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">UniformSampler</span>},
+        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+    },
+    <span class="ident">Rng</span>,
+};
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::convert::FromColorUnclamped</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::Srgb</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::rgb</span>::{<span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_min</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>, <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">Component</span>,
-    <span class="ident">FloatComponent</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>, <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>, <span class="ident">Xyz</span>,
+    <span class="ident">angle</span>::{<span class="ident">FromAngle</span>, <span class="ident">RealAngle</span>, <span class="ident">SignedAngle</span>},
+    <span class="ident">clamp</span>, <span class="ident">clamp_min</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>,
+    <span class="ident">convert::FromColorUnclamped</span>,
+    <span class="ident">encoding::Srgb</span>,
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">rgb</span>::{<span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
+    <span class="ident">stimulus</span>::{<span class="ident">FromStimulus</span>, <span class="ident">Stimulus</span>},
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>,
+    <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">RgbHue</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>, <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="doccomment">/// Linear HWB with an alpha component. See the [`Hwba` implementation in</span>
@@ -871,6 +906,20 @@
 <span class="doccomment">/// closely related to [HSV](crate::Hsv). It describes colors with a</span>
 <span class="doccomment">/// starting hue, then a degree of whiteness and blackness to mix into that</span>
 <span class="doccomment">/// base hue.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// HWB component values are typically real numbers (such as floats), but may</span>
+<span class="doccomment">/// also be converted to and from `u8` for storage and interoperability</span>
+<span class="doccomment">/// purposes. The hue is then within the range `[0, 255]`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use approx::assert_relative_eq;</span>
+<span class="doccomment">/// use palette::Hwb;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let hwb_u8 = Hwb::new_srgb(128u8, 85, 51);</span>
+<span class="doccomment">/// let hwb_f32 = hwb_u8.into_format::&lt;f32&gt;();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_relative_eq!(hwb_f32, Hwb::new(180.0, 1.0 / 3.0, 0.2));</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// It is very intuitive for humans to use and many color-pickers are based on</span>
 <span class="doccomment">/// the HWB color system</span>
@@ -915,7 +964,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>(),
             <span class="ident">whiteness</span>: <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>(),
@@ -928,26 +977,26 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an sRGB HWB color. This method can be used instead of `Hwb::new`</span>
     <span class="doccomment">/// to help type inference.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
 
     <span class="doccomment">/// Create an sRGB HWB color. This is the same as `Hwb::new_srgb` without the</span>
     <span class="doccomment">/// generic hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an HWB color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
 
     <span class="doccomment">/// Create an HWB color. This is the same as `Hwb::new` without the generic</span>
     <span class="doccomment">/// hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>,
             <span class="ident">whiteness</span>,
@@ -956,18 +1005,39 @@
         }
     }
 
+    <span class="doccomment">/// Convert into another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">Hwb</span> {
+            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">into_format</span>(),
+            <span class="ident">whiteness</span>: <span class="ident">U::from_stimulus</span>(<span class="self">self</span>.<span class="ident">whiteness</span>),
+            <span class="ident">blackness</span>: <span class="ident">U::from_stimulus</span>(<span class="self">self</span>.<span class="ident">blackness</span>),
+            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
+        }
+    }
+
+    <span class="doccomment">/// Convert from another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">color</span>.<span class="ident">into_format</span>()
+    }
+
     <span class="doccomment">/// Convert to a `(hue, whiteness, blackness)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         (<span class="self">self</span>.<span class="ident">hue</span>, <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="self">self</span>.<span class="ident">blackness</span>)
     }
 
     <span class="doccomment">/// Convert from a `(hue, whiteness, blackness)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_as</span><span class="op">&lt;</span><span class="ident">St</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">St</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reinterpret_as</span><span class="op">&lt;</span><span class="ident">St</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">St</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
             <span class="ident">whiteness</span>: <span class="self">self</span>.<span class="ident">whiteness</span>,
@@ -979,25 +1049,25 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span>,
 {
     <span class="doccomment">/// Return the `whiteness` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_whiteness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_whiteness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `whiteness` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_whiteness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_whiteness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::max_intensity</span>()
     }
 
     <span class="doccomment">/// Return the `blackness` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_blackness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_blackness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::zero</span>()
     }
 
     <span class="doccomment">/// Return the `blackness` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_blackness</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_blackness</span>() -&gt; <span class="ident">T</span> {
         <span class="ident">T::max_intensity</span>()
     }
 }
@@ -1007,10 +1077,10 @@
     <span class="ident">T</span>: <span class="ident">PartialEq</span>,
     <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">PartialEq</span>,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">hue</span>
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">whiteness</span>
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">blackness</span>
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">hue</span>
+            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">whiteness</span>
+            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">blackness</span>
     }
 }
 
@@ -1025,36 +1095,57 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an sRGB HWB color with transparency. This method can be used</span>
     <span class="doccomment">/// instead of `Hwba::new` to help type inference.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_srgb</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Create an sRGB HWB color with transparency. This is the same as</span>
     <span class="doccomment">/// `Hwba::new_srgb` without the generic hue type. It&#39;s temporary until `const</span>
     <span class="doccomment">/// fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_srgb_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
     }
 }
 
 <span class="doccomment">///&lt;span id=&quot;Hwba&quot;&gt;&lt;/span&gt;[`Hwba`](crate::Hwba) implementations.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create an HWB color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
     }
 
     <span class="doccomment">/// Create an HWB color with transparency. This is the same as `Hwba::new` without the</span>
     <span class="doccomment">/// generic hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">whiteness</span>: <span class="ident">T</span>, <span class="ident">blackness</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Alpha</span> {
             <span class="ident">color</span>: <span class="ident">Hwb::new_const</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>),
             <span class="ident">alpha</span>,
         }
     }
 
+    <span class="doccomment">/// Convert into another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_format</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>, <span class="ident">B</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="ident">B</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">Alpha</span> {
+            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">into_format</span>(),
+            <span class="ident">alpha</span>: <span class="ident">B::from_stimulus</span>(<span class="self">self</span>.<span class="ident">alpha</span>),
+        }
+    }
+
+    <span class="doccomment">/// Convert from another component type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_format</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">U</span><span class="op">&gt;</span>, <span class="ident">B</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+        <span class="ident">A</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">color</span>.<span class="ident">into_format</span>()
+    }
+
     <span class="doccomment">/// Convert to a `(hue, whiteness, blackness, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         (
             <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">hue</span>,
             <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">whiteness</span>,
@@ -1066,8 +1157,8 @@
     <span class="doccomment">/// Convert from a `(hue, whiteness, blackness, alpha)` tuple.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         (<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>),
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
+    ) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>, <span class="ident">alpha</span>)
     }
 }
 
@@ -1076,27 +1167,29 @@
     <span class="ident">S1</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S2</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S1::Space</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">S2::Space</span> <span class="kw">as</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::WhitePoint</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="self">Self</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>() {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>() {
             <span class="ident">hwb</span>.<span class="ident">reinterpret_as</span>()
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">hsv</span> <span class="op">=</span> <span class="ident">Hsv</span>::<span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_color_unclamped</span>(<span class="ident">hwb</span>);
             <span class="kw">let</span> <span class="ident">converted_hsv</span> <span class="op">=</span> <span class="ident">Hsv</span>::<span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="ident">::from_color_unclamped</span>(<span class="ident">hsv</span>);
-            <span class="self">Self</span><span class="ident">::from_color_unclamped</span>(<span class="ident">converted_hsv</span>)
+            <span class="ident"><span class="self">Self</span>::from_color_unclamped</span>(<span class="ident">converted_hsv</span>)
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span>,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="ident">color</span>.<span class="ident">hue</span>,
-            <span class="ident">whiteness</span>: (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">color</span>.<span class="ident">saturation</span>) <span class="op">*</span> <span class="ident">color</span>.<span class="ident">value</span>,
+            <span class="ident">whiteness</span>: (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">color</span>.<span class="ident">saturation</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">color</span>.<span class="ident">value</span>,
             <span class="ident">blackness</span>: (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">color</span>.<span class="ident">value</span>),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
@@ -1104,151 +1197,117 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_components</span>(<span class="ident">components</span>)
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
         <span class="ident">color</span>.<span class="ident">into_components</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_blackness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::min_whiteness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_blackness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_whiteness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">&amp;&amp;</span>
+        <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">DivAssign</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">whiteness</span> <span class="op">=</span> <span class="ident">clamp_min</span>(<span class="self">self</span>.<span class="ident">whiteness</span>, <span class="self">Self</span><span class="ident">::min_whiteness</span>());
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">blackness</span> <span class="op">=</span> <span class="ident">clamp_min</span>(<span class="self">self</span>.<span class="ident">blackness</span>, <span class="self">Self</span><span class="ident">::min_blackness</span>());
+    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">whiteness</span> <span class="op">=</span> <span class="ident">clamp_min</span>(<span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>(), <span class="ident"><span class="self">Self</span>::min_whiteness</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">blackness</span> <span class="op">=</span> <span class="ident">clamp_min</span>(<span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>(), <span class="ident"><span class="self">Self</span>::min_blackness</span>());
 
         <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>;
         <span class="kw">if</span> <span class="ident">sum</span> <span class="op">&gt;</span> <span class="ident">T::max_intensity</span>() {
-            <span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
+            <span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>.<span class="ident">clone</span>();
             <span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
         }
 
-        <span class="self">Self</span><span class="ident">::new</span>(<span class="self">self</span>.<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="self">self</span>.<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">DivAssign</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="self">Self</span><span class="ident">::min_whiteness</span>());
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="self">Self</span><span class="ident">::min_blackness</span>());
+    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="ident"><span class="self">Self</span>::min_whiteness</span>());
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="ident"><span class="self">Self</span>::min_blackness</span>());
 
-        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>;
+        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>();
         <span class="kw">if</span> <span class="ident">sum</span> <span class="op">&gt;</span> <span class="ident">T::max_intensity</span>() {
-            <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
+            <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>.<span class="ident">clone</span>();
             <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
-
-        <span class="ident">Hwb</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>,
-            <span class="ident">whiteness</span>: <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">whiteness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">whiteness</span>),
-            <span class="ident">blackness</span>: <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">blackness</span>),
-            <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-        <span class="kw">let</span> <span class="ident">hue_diff</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">hue</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">hue</span>).<span class="ident">to_degrees</span>();
-
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> <span class="ident">hue_diff</span>;
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">whiteness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">whiteness</span>);
-        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">blackness</span>);
-    }
-}
+<span class="macro">impl_mix_hue!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {<span class="ident">whiteness</span>, <span class="ident">blackness</span>} <span class="ident">phantom</span>: <span class="ident">standard</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_whiteness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">whiteness</span>
+            <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">whiteness</span>
+            <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>()
         };
-        <span class="kw">let</span> <span class="ident">delta_whiteness</span> <span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
+        <span class="kw">let</span> <span class="ident">delta_whiteness</span> <span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">factor</span>;
 
         <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">self</span>.<span class="ident">blackness</span>
+            <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>()
         } <span class="kw">else</span> {
-            <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">blackness</span>
+            <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>
         };
         <span class="kw">let</span> <span class="ident">delta_blackness</span> <span class="op">=</span> <span class="ident">difference_blackness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
 
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">whiteness</span>: (<span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="ident">delta_whiteness</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_whiteness</span>()),
-            <span class="ident">blackness</span>: (<span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="ident">delta_blackness</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_blackness</span>()),
+            <span class="ident">whiteness</span>: (<span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="ident">delta_whiteness</span>).<span class="ident">max</span>(<span class="ident"><span class="self">Self</span>::min_whiteness</span>()),
+            <span class="ident">blackness</span>: (<span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="ident">delta_blackness</span>).<span class="ident">max</span>(<span class="ident"><span class="self">Self</span>::min_blackness</span>()),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">whiteness</span>: (<span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="self">Self</span><span class="ident">::max_whiteness</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_whiteness</span>()),
-            <span class="ident">blackness</span>: (<span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="self">Self</span><span class="ident">::min_blackness</span>()),
+            <span class="ident">whiteness</span>: (<span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">amount</span>)
+                .<span class="ident">max</span>(<span class="ident"><span class="self">Self</span>::min_whiteness</span>()),
+            <span class="ident">blackness</span>: (<span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">*</span> <span class="ident">amount</span>).<span class="ident">max</span>(<span class="ident"><span class="self">Self</span>::min_blackness</span>()),
             <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
         }
     }
@@ -1256,51 +1315,51 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">SubAssign</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">SubAssign</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
         <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">Self</span><span class="ident">::max_whiteness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">whiteness</span>
+            <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">whiteness</span>
+            <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>()
         };
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="self">Self</span><span class="ident">::min_whiteness</span>());
+        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">factor</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="ident"><span class="self">Self</span>::min_whiteness</span>());
 
         <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">self</span>.<span class="ident">blackness</span>
+            <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>()
         } <span class="kw">else</span> {
-            <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">blackness</span>
+            <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>
         };
         <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span><span class="op">=</span> <span class="ident">difference_blackness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="self">Self</span><span class="ident">::min_blackness</span>());
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="ident"><span class="self">Self</span>::min_blackness</span>());
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_whiteness</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="self">Self</span><span class="ident">::min_whiteness</span>());
+    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">T</span>) {
+        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="ident"><span class="self">Self</span>::min_whiteness</span>());
 
-        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span><span class="op">=</span> <span class="self">Self</span><span class="ident">::max_blackness</span>() <span class="op">*</span> <span class="ident">amount</span>;
-        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="self">Self</span><span class="ident">::min_blackness</span>());
+        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">*</span> <span class="ident">amount</span>;
+        <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="ident"><span class="self">Self</span>::min_blackness</span>());
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>() {
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>() {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">hue</span>)
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>())
         }
     }
 }
@@ -1310,7 +1369,7 @@
     <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
         <span class="self">self</span>
     }
@@ -1321,7 +1380,7 @@
     <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
+    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
     }
 }
@@ -1333,7 +1392,7 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">amount</span>;
         <span class="self">self</span>
     }
@@ -1346,20 +1405,21 @@
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="self">Self</span><span class="ident">::Scalar</span>) {
+    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) {
         <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">amount</span>;
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span>,
+    <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Default</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hwb::new</span>(
-            <span class="ident">RgbHue::from</span>(<span class="ident">T::zero</span>()),
-            <span class="self">Self</span><span class="ident">::min_whiteness</span>(),
-            <span class="self">Self</span><span class="ident">::max_blackness</span>(),
+            <span class="ident">RgbHue::default</span>(),
+            <span class="ident"><span class="self">Self</span>::min_whiteness</span>(),
+            <span class="ident"><span class="self">Self</span>::max_blackness</span>(),
         )
     }
 }
@@ -1371,25 +1431,25 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
     <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
 
-    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Epsilon</span> {
+    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
         <span class="ident">T::default_epsilon</span>()
     }
 
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">equal_shade</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">whiteness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>())
             <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">blackness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>());
 
         <span class="comment">// The hue doesn&#39;t matter that much when the color is gray, and may fluctuate</span>
         <span class="comment">// due to precision errors. This is a blunt tool, but works for now.</span>
-        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
+        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
         <span class="kw">if</span> <span class="ident">is_gray</span> {
             <span class="ident">equal_shade</span>
         } <span class="kw">else</span> {
@@ -1400,11 +1460,11 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">RelativeEq</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">RelativeEq</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">RelativeEq</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
     <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Epsilon</span> {
+    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
         <span class="ident">T::default_max_relative</span>()
     }
 
@@ -1412,16 +1472,16 @@
     <span class="kw">fn</span> <span class="ident">relative_eq</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-        <span class="ident">epsilon</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>,
-        <span class="ident">max_relative</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
+        <span class="ident">max_relative</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
+    ) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">equal_shade</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">whiteness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>())
             <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">blackness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>());
 
         <span class="comment">// The hue doesn&#39;t matter that much when the color is gray, and may fluctuate</span>
         <span class="comment">// due to precision errors. This is a blunt tool, but works for now.</span>
-        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
+        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
         <span class="kw">if</span> <span class="ident">is_gray</span> {
             <span class="ident">equal_shade</span>
         } <span class="kw">else</span> {
@@ -1432,23 +1492,23 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Component</span> <span class="op">+</span> <span class="ident">UlpsEq</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UlpsEq</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UlpsEq</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
     <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() -&gt; <span class="ident">u32</span> {
         <span class="ident">T::default_max_ulps</span>()
     }
 
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="self">Self</span><span class="ident">::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">equal_shade</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">whiteness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>.<span class="ident">clone</span>())
             <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">blackness</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>.<span class="ident">clone</span>());
 
         <span class="comment">// The hue doesn&#39;t matter that much when the color is gray, and may fluctuate</span>
         <span class="comment">// due to precision errors. This is a blunt tool, but works for now.</span>
-        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
+        <span class="kw">let</span> <span class="ident">is_gray</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+            <span class="op">|</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">other</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>();
         <span class="kw">if</span> <span class="ident">is_gray</span> {
             <span class="ident">equal_shade</span>
         } <span class="kw">else</span> {
@@ -1459,15 +1519,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
     <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S::Space</span> <span class="kw">as</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::FromColor</span>;
-
+    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">xyz1</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="self">self</span>);
         <span class="kw">let</span> <span class="ident">xyz2</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="ident">other</span>);
 
@@ -1478,10 +1537,10 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span>,
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hwb::from_color_unclamped</span>(<span class="ident">rng</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>())
     }
 }
@@ -1489,16 +1548,19 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformHwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
 {
-    <span class="ident">sampler</span>: <span class="kw">crate</span><span class="ident">::hsv::UniformHsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">sampler</span>: <span class="ident"><span class="kw">crate</span>::hsv::UniformHsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">space</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident"><span class="kw">crate</span>::hsv::UniformHsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformHwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
@@ -1506,29 +1568,28 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformHwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FloatComponent</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">T</span>: <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+    <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident"><span class="kw">crate</span>::hsv::UniformHsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">low_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>());
-        <span class="kw">let</span> <span class="ident">high_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>());
+        <span class="kw">let</span> <span class="ident">low_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">high_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>());
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(
-            <span class="ident">low_input</span>.<span class="ident">hue</span>,
-            <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">min</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>),
-            <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">min</span>(<span class="ident">high_input</span>.<span class="ident">value</span>),
-        );
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(
-            <span class="ident">high_input</span>.<span class="ident">hue</span>,
-            <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">max</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>),
-            <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">max</span>(<span class="ident">high_input</span>.<span class="ident">value</span>),
-        );
-        <span class="kw">let</span> <span class="ident">sampler</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::hsv::UniformHsv</span>::<span class="op">&lt;</span><span class="ident">S</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">low</span>, <span class="ident">high</span>);
+        <span class="kw">let</span> (<span class="ident">low_saturation</span>, <span class="ident">high_saturation</span>) <span class="op">=</span> <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">min_max</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>);
+        <span class="kw">let</span> (<span class="ident">low_value</span>, <span class="ident">high_value</span>) <span class="op">=</span> <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">min_max</span>(<span class="ident">high_input</span>.<span class="ident">value</span>);
+
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(<span class="ident">low_input</span>.<span class="ident">hue</span>, <span class="ident">low_saturation</span>, <span class="ident">low_value</span>);
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(<span class="ident">high_input</span>.<span class="ident">hue</span>, <span class="ident">high_saturation</span>, <span class="ident">high_value</span>);
+
+        <span class="kw">let</span> <span class="ident">sampler</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::hsv::UniformHsv</span>::<span class="op">&lt;</span><span class="ident">S</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">low</span>, <span class="ident">high</span>);
 
         <span class="ident">UniformHwb</span> {
             <span class="ident">sampler</span>,
@@ -1536,26 +1597,21 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">low_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="kw-2">*</span><span class="ident">low_b</span>.<span class="ident">borrow</span>());
-        <span class="kw">let</span> <span class="ident">high_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="kw-2">*</span><span class="ident">high_b</span>.<span class="ident">borrow</span>());
+        <span class="kw">let</span> <span class="ident">low_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">high_input</span> <span class="op">=</span> <span class="ident">Hsv::from_color_unclamped</span>(<span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>());
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(
-            <span class="ident">low_input</span>.<span class="ident">hue</span>,
-            <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">min</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>),
-            <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">min</span>(<span class="ident">high_input</span>.<span class="ident">value</span>),
-        );
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(
-            <span class="ident">high_input</span>.<span class="ident">hue</span>,
-            <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">max</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>),
-            <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">max</span>(<span class="ident">high_input</span>.<span class="ident">value</span>),
-        );
+        <span class="kw">let</span> (<span class="ident">low_saturation</span>, <span class="ident">high_saturation</span>) <span class="op">=</span> <span class="ident">low_input</span>.<span class="ident">saturation</span>.<span class="ident">min_max</span>(<span class="ident">high_input</span>.<span class="ident">saturation</span>);
+        <span class="kw">let</span> (<span class="ident">low_value</span>, <span class="ident">high_value</span>) <span class="op">=</span> <span class="ident">low_input</span>.<span class="ident">value</span>.<span class="ident">min_max</span>(<span class="ident">high_input</span>.<span class="ident">value</span>);
 
-        <span class="kw">let</span> <span class="ident">sampler</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::hsv::UniformHsv</span>::<span class="op">&lt;</span><span class="ident">S</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new_inclusive</span>(<span class="ident">low</span>, <span class="ident">high</span>);
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(<span class="ident">low_input</span>.<span class="ident">hue</span>, <span class="ident">low_saturation</span>, <span class="ident">low_value</span>);
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">Hsv::new</span>(<span class="ident">high_input</span>.<span class="ident">hue</span>, <span class="ident">high_saturation</span>, <span class="ident">high_value</span>);
+
+        <span class="kw">let</span> <span class="ident">sampler</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::hsv::UniformHsv</span>::<span class="op">&lt;</span><span class="ident">S</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new_inclusive</span>(<span class="ident">low</span>, <span class="ident">high</span>);
 
         <span class="ident">UniformHwb</span> {
             <span class="ident">sampler</span>,
@@ -1563,7 +1619,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Hwb::from_color_unclamped</span>(<span class="self">self</span>.<span class="ident">sampler</span>.<span class="ident">sample</span>(<span class="ident">rng</span>))
     }
 }
@@ -1576,7 +1632,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::Hwb</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Hwb</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Clamp</span>, <span class="ident">FromColor</span>, <span class="ident">Srgb</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1640,12 +1696,12 @@
         <span class="macro">assert_relative_eq!</span>(<span class="ident">expected</span>, <span class="ident">clamped</span>);
     }
 
-    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>);
-    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>);
+    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>);
+    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>);
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::encoding::Srgb</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>;
 
         <span class="macro">assert_relative_eq!</span>(<span class="ident">Hwb</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::min_whiteness</span>(), <span class="number">0.0</span>,);
         <span class="macro">assert_relative_eq!</span>(<span class="ident">Hwb</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::min_blackness</span>(), <span class="number">0.0</span>,);
@@ -1672,7 +1728,7 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
     <span class="macro">test_uniform_distribution!</span> {
-        <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="kw">crate</span><span class="ident">::rgb::Rgb</span> {
+        <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident"><span class="kw">crate</span>::rgb::Rgb</span> {
             <span class="ident">red</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
             <span class="ident">green</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
             <span class="ident">blue</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>)
@@ -1681,7 +1737,6 @@
         <span class="ident">max</span>: <span class="ident">Hwb::new</span>(<span class="number">360.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>
