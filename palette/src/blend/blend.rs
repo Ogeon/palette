@@ -1,8 +1,9 @@
-use num_traits::{One, Zero};
-
-use crate::blend::{BlendFunction, PreAlpha};
-use crate::float::Float;
-use crate::{clamp, ComponentWise};
+use crate::{
+    blend::{BlendFunction, PreAlpha},
+    clamp,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+    ComponentWise,
+};
 
 /// A trait for colors that can be blended together.
 ///
@@ -14,7 +15,8 @@ use crate::{clamp, ComponentWise};
 /// results._
 pub trait Blend: Sized
 where
-    <Self::Color as ComponentWise>::Scalar: Float,
+    <Self::Color as ComponentWise>::Scalar:
+        Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
 {
     /// The core color type. Typically `Self` for color types without alpha.
     type Color: Blend<Color = Self::Color> + ComponentWise;
@@ -66,8 +68,8 @@ where
     #[must_use]
     #[inline]
     fn over(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -75,8 +77,12 @@ where
         let result = PreAlpha {
             color: src
                 .color
-                .component_wise(&dst.color, |a, b| a + b * (one - src.alpha)),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+                .component_wise(&dst.color, |a, b| a + b * (one() - &src.alpha)),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -94,7 +100,7 @@ where
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise_self(|a| a * dst.alpha),
+            color: src.color.component_wise_self(|a| a * &dst.alpha),
             alpha: clamp(src.alpha * dst.alpha, zero, one),
         };
 
@@ -106,15 +112,15 @@ where
     #[must_use]
     #[inline]
     fn outside(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise_self(|a| a * (one - dst.alpha)),
-            alpha: clamp(src.alpha * (one - dst.alpha), zero, one),
+            color: src.color.component_wise_self(|a| a * (one() - &dst.alpha)),
+            alpha: clamp(src.alpha * (one() - dst.alpha), zero(), one()),
         };
 
         Self::from_premultiplied(result)
@@ -124,8 +130,8 @@ where
     #[must_use]
     #[inline]
     fn atop(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -133,8 +139,8 @@ where
         let result = PreAlpha {
             color: src
                 .color
-                .component_wise(&dst.color, |a, b| a * dst.alpha + b * (one - src.alpha)),
-            alpha: clamp(dst.alpha, zero, one),
+                .component_wise(&dst.color, |a, b| a * &dst.alpha + b * (one() - &src.alpha)),
+            alpha: clamp(dst.alpha, zero(), one()),
         };
 
         Self::from_premultiplied(result)
@@ -144,21 +150,21 @@ where
     #[must_use]
     #[inline]
     fn xor(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                a * (one - dst.alpha) + b * (one - src.alpha)
+                a * (one() - &dst.alpha) + b * (one() - &src.alpha)
             }),
             alpha: clamp(
-                src.alpha + dst.alpha - two * src.alpha * dst.alpha,
-                zero,
-                one,
+                src.alpha.clone() + &dst.alpha - two() * src.alpha * dst.alpha,
+                zero(),
+                one(),
             ),
         };
 
@@ -189,17 +195,21 @@ where
     #[must_use]
     #[inline]
     fn multiply(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                a * b + a * (one - dst.alpha) + b * (one - src.alpha)
+                a.clone() * &b + a * (one() - &dst.alpha) + b * (one() - &src.alpha)
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -216,8 +226,14 @@ where
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
-            color: src.color.component_wise(&dst.color, |a, b| a + b - a * b),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            color: src
+                .color
+                .component_wise(&dst.color, |a, b| a.clone() + &b - a * b),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero,
+                one,
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -228,24 +244,28 @@ where
     #[must_use]
     #[inline]
     fn overlay(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                if b * two <= dst.alpha {
-                    two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
+                if two() * &b <= dst.alpha {
+                    two() * &a * &b + a * (one() - &dst.alpha) + b * (one() - &src.alpha)
                 } else {
-                    a * (one + dst.alpha) + b * (one + src.alpha)
-                        - two * a * b
-                        - src.alpha * dst.alpha
+                    a.clone() * (one() + &dst.alpha) + b.clone() * (one() + &src.alpha)
+                        - two() * a * b
+                        - src.alpha.clone() * &dst.alpha
                 }
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -255,17 +275,23 @@ where
     #[must_use]
     #[inline]
     fn darken(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                (a * dst.alpha).min(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)
+                (a.clone() * &dst.alpha).min(b.clone() * &src.alpha)
+                    + a * (one() - &dst.alpha)
+                    + b * (one() - &src.alpha)
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -275,17 +301,23 @@ where
     #[must_use]
     #[inline]
     fn lighten(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                (a * dst.alpha).max(b * src.alpha) + a * (one - dst.alpha) + b * (one - src.alpha)
+                (a.clone() * &dst.alpha).max(b.clone() * &src.alpha)
+                    + a * (one() - &dst.alpha)
+                    + b * (one() - &src.alpha)
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -296,25 +328,34 @@ where
     #[must_use]
     #[inline]
     fn dodge(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                if a == src.alpha && !b.is_normal() {
-                    a * (one - dst.alpha)
+                if a == src.alpha && !b.is_valid_divisor() {
+                    a * (one() - &dst.alpha)
                 } else if a == src.alpha {
-                    src.alpha * dst.alpha + a * (one - dst.alpha) + b * (one - src.alpha)
+                    src.alpha.clone() * &dst.alpha
+                        + a * (one() - &dst.alpha)
+                        + b * (one() - &src.alpha)
                 } else {
-                    src.alpha * dst.alpha * one.min((b / dst.alpha) * src.alpha / (src.alpha - a))
-                        + a * (one - dst.alpha)
-                        + b * (one - src.alpha)
+                    src.alpha.clone()
+                        * &dst.alpha
+                        * one()
+                            .min((b.clone() / &dst.alpha) * &src.alpha / (src.alpha.clone() - &a))
+                        + a * (one() - &dst.alpha)
+                        + b * (one() - &src.alpha)
                 }
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -325,25 +366,31 @@ where
     #[must_use]
     #[inline]
     fn burn(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                if !a.is_normal() && b == dst.alpha {
-                    src.alpha * dst.alpha + b * (one - src.alpha)
-                } else if !a.is_normal() {
-                    b * (one - src.alpha)
+                if !a.is_valid_divisor() && b == dst.alpha {
+                    src.alpha.clone() * &dst.alpha + b * (one() - &src.alpha)
+                } else if !a.is_valid_divisor() {
+                    b * (one() - &src.alpha)
                 } else {
-                    src.alpha * dst.alpha * (one - one.min((one - b / dst.alpha) * src.alpha / a))
-                        + a * (one - dst.alpha)
-                        + b * (one - src.alpha)
+                    src.alpha.clone()
+                        * &dst.alpha
+                        * (one() - one().min((one() - b.clone() / &dst.alpha) * &src.alpha / &a))
+                        + a * (one() - &dst.alpha)
+                        + b * (one() - &src.alpha)
                 }
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -355,24 +402,28 @@ where
     #[must_use]
     #[inline]
     fn hard_light(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                if a * two <= src.alpha {
-                    two * a * b + a * (one - dst.alpha) + b * (one - src.alpha)
+                if two() * &a <= src.alpha {
+                    two() * &a * &b + a * (one() - &dst.alpha) + b * (one() - &src.alpha)
                 } else {
-                    a * (one + dst.alpha) + b * (one + src.alpha)
-                        - two * a * b
-                        - src.alpha * dst.alpha
+                    a.clone() * (one() + &dst.alpha) + b.clone() * (one() + &src.alpha)
+                        - two() * a * b
+                        - src.alpha.clone() * &dst.alpha
                 }
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -384,41 +435,50 @@ where
     #[must_use]
     #[inline]
     fn soft_light(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
-        let three = two + one;
-        let four = two + two;
-        let twelve = four + four + four;
-        let sixteen = twelve + four;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
+        let three = || two() + one();
+        let four = || two() + two();
+        let twelve = || four() + four() + four();
+        let sixteen = || twelve() + four();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                let m = if dst.alpha.is_normal() {
-                    b / dst.alpha
+                let m = if dst.alpha.is_valid_divisor() {
+                    b.clone() / &dst.alpha
                 } else {
-                    zero
+                    zero()
                 };
 
-                if a * two <= src.alpha {
-                    b * (src.alpha + (two * a - src.alpha) * (one - m))
-                        + a * (one - dst.alpha)
-                        + b * (one - src.alpha)
-                } else if b * four <= dst.alpha {
-                    let m2 = m * m;
-                    let m3 = m2 * m;
+                if two() * &a <= src.alpha {
+                    b.clone() * (src.alpha.clone() + (two() * &a - &src.alpha) * (one() - m))
+                        + a * (one() - &dst.alpha)
+                        + b * (one() - &src.alpha)
+                } else if four() * &b <= dst.alpha {
+                    let m2 = m.clone() * &m;
+                    let m3 = m2.clone() * &m;
 
-                    dst.alpha * (two * a - src.alpha) * (m3 * sixteen - m2 * twelve - m * three) + a
-                        - a * dst.alpha
+                    dst.alpha.clone()
+                        * (two() * &a - &src.alpha)
+                        * (m3 * sixteen() - m2 * twelve() - m * three())
+                        + &a
+                        - a * &dst.alpha
                         + b
                 } else {
-                    dst.alpha * (two * a - src.alpha) * (m.sqrt() - m) + a - a * dst.alpha + b
+                    dst.alpha.clone() * (two() * &a - &src.alpha) * (m.clone().sqrt() - m) + &a
+                        - a * &dst.alpha
+                        + b
                 }
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -429,18 +489,22 @@ where
     #[must_use]
     #[inline]
     fn difference(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
 
         let result = PreAlpha {
             color: src.color.component_wise(&dst.color, |a, b| {
-                a + b - two * (a * dst.alpha).min(b * src.alpha)
+                a.clone() + &b - two() * (a * &dst.alpha).min(b * &src.alpha)
             }),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)
@@ -452,9 +516,9 @@ where
     #[must_use]
     #[inline]
     fn exclusion(self, other: Self) -> Self {
-        let one = <Self::Color as ComponentWise>::Scalar::one();
-        let zero = <Self::Color as ComponentWise>::Scalar::zero();
-        let two = one + one;
+        let one = <Self::Color as ComponentWise>::Scalar::one;
+        let zero = <Self::Color as ComponentWise>::Scalar::zero;
+        let two = || one() + one();
 
         let src = self.into_premultiplied();
         let dst = other.into_premultiplied();
@@ -462,8 +526,12 @@ where
         let result = PreAlpha {
             color: src
                 .color
-                .component_wise(&dst.color, |a, b| a + b - two * a * b),
-            alpha: clamp(src.alpha + dst.alpha - src.alpha * dst.alpha, zero, one),
+                .component_wise(&dst.color, |a, b| a.clone() + &b - two() * a * b),
+            alpha: clamp(
+                src.alpha.clone() + &dst.alpha - src.alpha * dst.alpha,
+                zero(),
+                one(),
+            ),
         };
 
         Self::from_premultiplied(result)

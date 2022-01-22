@@ -1,28 +1,32 @@
-use core::any::TypeId;
-use core::convert::TryInto;
-use core::fmt;
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::{
+    any::TypeId,
+    convert::TryInto,
+    fmt,
+    marker::PhantomData,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::Zero;
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::blend::PreAlpha;
-use crate::cast::{ComponentOrder, Packed, UintCast};
-use crate::convert::FromColorUnclamped;
-use crate::encoding::linear::LinearFn;
-use crate::encoding::{Linear, Srgb, TransferFn};
-use crate::luma::LumaStandard;
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, Alpha, Blend, Clamp, ClampAssign,
-    Component, ComponentWise, FloatComponent, FromComponent, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast, Xyz, Yxy,
+    blend::PreAlpha,
+    cast::{ComponentOrder, Packed, UintCast},
+    clamp, clamp_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    encoding::{linear::LinearFn, Linear, Srgb, TransferFn},
+    luma::LumaStandard,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+    stimulus::{FromStimulus, Stimulus},
+    Alpha, Blend, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, RelativeContrast, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -80,11 +84,10 @@ impl<S, T> Luma<S, T> {
     /// Convert into another component type.
     pub fn into_format<U>(self) -> Luma<S, U>
     where
-        T: Component,
-        U: FromComponent<T>,
+        U: FromStimulus<T>,
     {
         Luma {
-            luma: U::from_component(self.luma),
+            luma: U::from_stimulus(self.luma),
             standard: PhantomData,
         }
     }
@@ -92,8 +95,7 @@ impl<S, T> Luma<S, T> {
     /// Convert from another component type.
     pub fn from_format<U>(color: Luma<S, U>) -> Self
     where
-        U: Component,
-        T: FromComponent<U>,
+        T: FromStimulus<U>,
     {
         color.into_format()
     }
@@ -122,7 +124,7 @@ impl<S, T> Luma<S, T> {
 
 impl<S, T> Luma<S, T>
 where
-    T: Component,
+    T: Stimulus,
 {
     /// Return the `luma` value minimum.
     pub fn min_luma() -> T {
@@ -195,7 +197,6 @@ impl<S> Luma<S, u8> {
 
 impl<S, T> Luma<S, T>
 where
-    T: FloatComponent,
     S: LumaStandard<T>,
 {
     /// Convert the color to linear luminance.
@@ -293,21 +294,20 @@ impl<S, T, A> Alpha<Luma<S, T>, A> {
     /// Convert into another component type.
     pub fn into_format<U, B>(self) -> Alpha<Luma<S, U>, B>
     where
-        T: Component,
-        A: Component,
-        U: FromComponent<T>,
-        B: FromComponent<A>,
+        U: FromStimulus<T>,
+        B: FromStimulus<A>,
     {
-        Alpha::<Luma<S, U>, B>::new(U::from_component(self.luma), B::from_component(self.alpha))
+        Alpha {
+            color: self.color.into_format(),
+            alpha: B::from_stimulus(self.alpha),
+        }
     }
 
     /// Convert from another component type.
     pub fn from_format<U, B>(color: Alpha<Luma<S, U>, B>) -> Self
     where
-        T: FromComponent<U>,
-        U: Component,
-        A: FromComponent<B>,
-        B: Component,
+        T: FromStimulus<U>,
+        A: FromStimulus<B>,
     {
         color.into_format()
     }
@@ -384,20 +384,22 @@ impl<S> Lumaa<S, u8> {
 ///[`Lumaa`](crate::luma::Lumaa) implementations.
 impl<S, T, A> Alpha<Luma<S, T>, A>
 where
-    T: FloatComponent,
     S: LumaStandard<T>,
 {
     /// Convert the color to linear luminance with transparency.
     pub fn into_linear(self) -> Alpha<Luma<Linear<S::WhitePoint>, T>, A> {
-        Alpha::<Luma<Linear<S::WhitePoint>, T>, A>::new(
-            S::TransferFn::into_linear(self.luma),
-            self.alpha,
-        )
+        Alpha {
+            color: self.color.into_linear(),
+            alpha: self.alpha,
+        }
     }
 
     /// Convert linear luminance to non-linear luminance with transparency.
     pub fn from_linear(color: Alpha<Luma<Linear<S::WhitePoint>, T>, A>) -> Alpha<Luma<S, T>, A> {
-        Alpha::<Luma<S, T>, A>::new(S::TransferFn::from_linear(color.luma), color.alpha)
+        Alpha {
+            color: Luma::from_linear(color.color),
+            alpha: color.alpha,
+        }
     }
 
     /// Convert the color to a different encoding with transparency.
@@ -405,10 +407,10 @@ where
     where
         St: LumaStandard<T, WhitePoint = S::WhitePoint>,
     {
-        Alpha::<Luma<St, T>, A>::new(
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.luma)),
-            self.alpha,
-        )
+        Alpha {
+            color: Luma::from_linear(self.color.into_linear()),
+            alpha: self.alpha,
+        }
     }
 
     /// Convert luminance from a different encoding with transparency.
@@ -416,10 +418,7 @@ where
     where
         St: LumaStandard<T, WhitePoint = S::WhitePoint>,
     {
-        Alpha::<Luma<S, T>, A>::new(
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.luma)),
-            color.alpha,
-        )
+        color.into_encoding()
     }
 }
 
@@ -427,7 +426,6 @@ impl<S1, S2, T> FromColorUnclamped<Luma<S2, T>> for Luma<S1, T>
 where
     S1: LumaStandard<T>,
     S2: LumaStandard<T, WhitePoint = S1::WhitePoint>,
-    T: FloatComponent,
 {
     fn from_color_unclamped(color: Luma<S2, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
@@ -441,7 +439,6 @@ where
 impl<S, T> FromColorUnclamped<Xyz<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard<T>,
-    T: FloatComponent,
 {
     fn from_color_unclamped(color: Xyz<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
@@ -454,7 +451,6 @@ where
 impl<S, T> FromColorUnclamped<Yxy<S::WhitePoint, T>> for Luma<S, T>
 where
     S: LumaStandard<T>,
-    T: FloatComponent,
 {
     fn from_color_unclamped(color: Yxy<S::WhitePoint, T>) -> Self {
         Self::from_linear(Luma {
@@ -490,7 +486,7 @@ impl<S, T, A> From<Alpha<Luma<S, T>, A>> for (T, A) {
 
 impl<S, T> IsWithinBounds for Luma<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[inline]
     fn is_within_bounds(&self) -> bool {
@@ -500,7 +496,7 @@ where
 
 impl<S, T> Clamp for Luma<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -510,7 +506,7 @@ where
 
 impl<S, T> ClampAssign for Luma<S, T>
 where
-    T: Component,
+    T: Stimulus + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -518,96 +514,14 @@ where
     }
 }
 
-impl<S, T> Mix for Luma<S, T>
-where
-    T: FloatComponent,
-    S: LumaStandard<T, TransferFn = LinearFn>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
-    }
-}
-
-impl<S, T> MixAssign for Luma<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: LumaStandard<T, TransferFn = LinearFn>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<S, T> Lighten for Luma<S, T>
-where
-    T: FloatComponent,
-    S: LumaStandard<T, TransferFn = LinearFn>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_luma() - self.luma
-        } else {
-            self.luma
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Luma {
-            luma: (self.luma + delta).max(Self::min_luma()),
-            standard: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Luma {
-            luma: (self.luma + Self::max_luma() * amount).max(Self::min_luma()),
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> LightenAssign for Luma<S, T>
-where
-    T: FloatComponent + AddAssign,
-    S: LumaStandard<T, TransferFn = LinearFn>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_luma() - self.luma
-        } else {
-            self.luma
-        };
-
-        self.luma += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.luma, Self::min_luma());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.luma += Self::max_luma() * amount;
-        clamp_min_assign(&mut self.luma, Self::min_luma());
-    }
-}
+impl_mix!(Luma<S> where S: LumaStandard<T, TransferFn = LinearFn>,);
+impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus, S: LumaStandard<T, TransferFn = LinearFn>);
 
 impl<S, T> Blend for Luma<S, T>
 where
-    T: FloatComponent,
     S: LumaStandard<T, TransferFn = LinearFn>,
+    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
+    Lumaa<S, T>: From<PreAlpha<Luma<S, T>, T>>,
 {
     type Color = Luma<S, T>;
 
@@ -647,10 +561,10 @@ where
 
 impl<S, T> Default for Luma<S, T>
 where
-    T: Zero,
+    T: Stimulus,
 {
     fn default() -> Luma<S, T> {
-        Luma::new(T::zero())
+        Luma::new(Self::min_luma())
     }
 }
 
@@ -1076,7 +990,7 @@ where
 
 impl<S, T> RelativeContrast for Luma<S, T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
     S: LumaStandard<T>,
 {
     type Scalar = T;

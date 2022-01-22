@@ -1,56 +1,60 @@
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-use num_traits::Zero;
+
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::convert::FromColorUnclamped;
-use crate::matrix::multiply_xyz;
-use crate::white_point::D65;
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, from_f64, Alpha, Clamp, ClampAssign,
-    Component, ComponentWise, FloatComponent, FromF64, GetHue, IsWithinBounds, Lighten,
+    angle::RealAngle,
+    clamp, clamp_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    matrix::multiply_xyz,
+    num::{Arithmetics, Cbrt, MinMax, One, Real, Trigonometry, Zero},
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, IsWithinBounds, Lighten,
     LightenAssign, Mat3, Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
 };
 
 #[rustfmt::skip]
-fn m1<T: FromF64>() -> Mat3<T> {
+fn m1<T: Real>() -> Mat3<T> {
     [
-        from_f64(0.8189330101), from_f64(0.3618667424), from_f64(-0.1288597137),
-        from_f64(0.0329845436), from_f64(0.9293118715), from_f64(0.0361456387),
-        from_f64(0.0482003018), from_f64(0.2643662691), from_f64(0.6338517070),
+        T::from_f64(0.8189330101), T::from_f64(0.3618667424), T::from_f64(-0.1288597137),
+        T::from_f64(0.0329845436), T::from_f64(0.9293118715), T::from_f64(0.0361456387),
+        T::from_f64(0.0482003018), T::from_f64(0.2643662691), T::from_f64(0.6338517070),
     ]
 }
 
 #[rustfmt::skip]
-pub(crate) fn m1_inv<T: FromF64>() -> Mat3<T> {
+pub(crate) fn m1_inv<T: Real>() -> Mat3<T> {
     [
-        from_f64(1.2270138511), from_f64(-0.5577999807), from_f64(0.2812561490),
-        from_f64(-0.0405801784), from_f64(1.1122568696), from_f64(-0.0716766787),
-        from_f64(-0.0763812845), from_f64(-0.4214819784), from_f64(1.5861632204),
+        T::from_f64(1.2270138511), T::from_f64(-0.5577999807), T::from_f64(0.2812561490),
+        T::from_f64(-0.0405801784), T::from_f64(1.1122568696), T::from_f64(-0.0716766787),
+        T::from_f64(-0.0763812845), T::from_f64(-0.4214819784), T::from_f64(1.5861632204),
     ]
 }
 
 #[rustfmt::skip]
-fn m2<T: FromF64>() -> Mat3<T> {
+fn m2<T: Real>() -> Mat3<T> {
     [
-        from_f64(0.2104542553), from_f64(0.7936177850), from_f64(-0.0040720468),
-        from_f64(1.9779984951), from_f64(-2.4285922050), from_f64(0.4505937099),
-        from_f64(0.0259040371), from_f64(0.7827717662), from_f64(-0.8086757660),
+        T::from_f64(0.2104542553), T::from_f64(0.7936177850), T::from_f64(-0.0040720468),
+        T::from_f64(1.9779984951), T::from_f64(-2.4285922050), T::from_f64(0.4505937099),
+        T::from_f64(0.0259040371), T::from_f64(0.7827717662), T::from_f64(-0.8086757660),
     ]
 }
 
 #[rustfmt::skip]
-pub(crate) fn m2_inv<T: FromF64>() -> Mat3<T> {
+pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
     [
-        from_f64(0.9999999985), from_f64(0.3963377922), from_f64(0.2158037581),
-        from_f64(1.0000000089), from_f64(-0.1055613423), from_f64(-0.0638541748),
-        from_f64(1.0000000547), from_f64(-0.0894841821), from_f64(-1.2914855379),
+        T::from_f64(0.9999999985), T::from_f64(0.3963377922), T::from_f64(0.2158037581),
+        T::from_f64(1.0000000089), T::from_f64(-0.1055613423), T::from_f64(-0.0638541748),
+        T::from_f64(1.0000000547), T::from_f64(-0.0894841821), T::from_f64(-1.2914855379),
     ]
 }
 
@@ -63,7 +67,7 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
 /// Oklab is a perceptually-uniform color space similar in structure to
 /// [L\*a\*b\*](crate::Lab), but tries to have a better perceptual uniformity.
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions.
-#[derive(Debug, PartialEq, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -98,57 +102,6 @@ where
     }
 }
 
-impl<T> AbsDiffEq for Oklab<T>
-where
-    T: AbsDiffEq,
-    T::Epsilon: Clone,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.l.abs_diff_eq(&other.l, epsilon.clone())
-            && self.a.abs_diff_eq(&other.a, epsilon.clone())
-            && self.b.abs_diff_eq(&other.b, epsilon)
-    }
-}
-
-impl<T> RelativeEq for Oklab<T>
-where
-    T: RelativeEq,
-    T::Epsilon: Clone,
-{
-    fn default_max_relative() -> T::Epsilon {
-        T::default_max_relative()
-    }
-
-    #[rustfmt::skip]
-    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.l.relative_eq(&other.l, epsilon.clone(), max_relative.clone())
-            && self.a.relative_eq(&other.a, epsilon.clone(), max_relative.clone())
-            && self.b.relative_eq(&other.b, epsilon, max_relative)
-    }
-}
-
-impl<T> UlpsEq for Oklab<T>
-where
-    T: UlpsEq,
-    T::Epsilon: Clone,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.l.ulps_eq(&other.l, epsilon.clone(), max_ulps.clone())
-            && self.a.ulps_eq(&other.a, epsilon.clone(), max_ulps.clone())
-            && self.b.ulps_eq(&other.b, epsilon, max_ulps)
-    }
-}
-
 impl<T> Oklab<T> {
     /// Create an Oklab color.
     pub const fn new(l: T, a: T, b: T) -> Self {
@@ -168,36 +121,36 @@ impl<T> Oklab<T> {
 
 impl<T> Oklab<T>
 where
-    T: FromF64,
+    T: Real,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
-        from_f64(0.0)
+        T::from_f64(0.0)
     }
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        from_f64(1.0)
+        T::from_f64(1.0)
     }
 
     /// Return the `a` value minimum.
     pub fn min_a() -> T {
-        from_f64(-1.0)
+        T::from_f64(-1.0)
     }
 
     /// Return the `a` value maximum.
     pub fn max_a() -> T {
-        from_f64(1.0)
+        T::from_f64(1.0)
     }
 
     /// Return the `b` value minimum.
     pub fn min_b() -> T {
-        from_f64(-1.0)
+        T::from_f64(-1.0)
     }
 
     /// Return the `b` value maximum.
     pub fn max_b() -> T {
-        from_f64(1.0)
+        T::from_f64(1.0)
     }
 }
 
@@ -230,7 +183,7 @@ impl<T> FromColorUnclamped<Oklab<T>> for Oklab<T> {
 
 impl<T> FromColorUnclamped<Xyz<D65, T>> for Oklab<T>
 where
-    T: FloatComponent,
+    T: Real + Cbrt + Arithmetics,
 {
     fn from_color_unclamped(color: Xyz<D65, T>) -> Self {
         let m1 = m1();
@@ -238,13 +191,13 @@ where
 
         let Xyz {
             x: l, y: m, z: s, ..
-        } = multiply_xyz(&m1, &color.with_white_point());
+        } = multiply_xyz(m1, color.with_white_point());
 
         let l_m_s_ = Xyz::new(l.cbrt(), m.cbrt(), s.cbrt());
 
         let Xyz {
             x: l, y: a, z: b, ..
-        } = multiply_xyz(&m2, &l_m_s_);
+        } = multiply_xyz(m2, l_m_s_);
 
         Self::new(l, a, b)
     }
@@ -252,13 +205,16 @@ where
 
 impl<T> FromColorUnclamped<Oklch<T>> for Oklab<T>
 where
-    T: FloatComponent,
+    T: RealAngle + Zero + MinMax + Trigonometry + Mul<Output = T> + Clone,
 {
     fn from_color_unclamped(color: Oklch<T>) -> Self {
+        let (sin_hue, cos_hue) = color.hue.into_raw_radians().sin_cos();
+        let chroma = color.chroma.max(T::zero());
+
         Oklab {
             l: color.l,
-            a: color.chroma.max(T::zero()) * color.hue.to_radians().cos(),
-            b: color.chroma.max(T::zero()) * color.hue.to_radians().sin(),
+            a: cos_hue * chroma.clone(),
+            b: sin_hue * chroma,
         }
     }
 }
@@ -275,13 +231,13 @@ impl<T> From<Oklab<T>> for (T, T, T) {
     }
 }
 
-impl<T, A: Component> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
+impl<T, A> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
     fn from(components: (T, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T, A: Component> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
+impl<T, A> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
     fn from(color: Alpha<Oklab<T>, A>) -> (T, T, T, A) {
         color.into_components()
     }
@@ -289,7 +245,7 @@ impl<T, A: Component> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
 
 impl<T> IsWithinBounds for Oklab<T>
 where
-    T: FromF64 + PartialOrd,
+    T: Real + PartialOrd,
 {
     #[rustfmt::skip]
     #[inline]
@@ -302,7 +258,7 @@ where
 
 impl<T> Clamp for Oklab<T>
 where
-    T: FromF64 + PartialOrd,
+    T: Real + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -316,7 +272,7 @@ where
 
 impl<T> ClampAssign for Oklab<T>
 where
-    T: FromF64 + PartialOrd,
+    T: Real + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -326,89 +282,12 @@ where
     }
 }
 
-impl<T> Mix for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
-    }
-}
-
-impl<T> MixAssign for Oklab<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<T> Lighten for Oklab<T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Self::new((self.l + delta).max(Self::min_l()), self.a, self.b)
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Self::new(
-            (self.l + Self::max_l() * amount).max(Self::min_l()),
-            self.a,
-            self.b,
-        )
-    }
-}
-
-impl<T> LightenAssign for Oklab<T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_l() - self.l
-        } else {
-            self.l
-        };
-
-        self.l += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.l += Self::max_l() * amount;
-        clamp_min_assign(&mut self.l, Self::min_l());
-    }
-}
+impl_mix!(Oklab);
+impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b});
 
 impl<T> GetHue for Oklab<T>
 where
-    T: FloatComponent,
+    T: RealAngle + Zero + Trigonometry + PartialEq + Clone,
 {
     type Hue = OklabHue<T>;
 
@@ -416,23 +295,27 @@ where
         if self.a == T::zero() && self.b == T::zero() {
             None
         } else {
-            Some(OklabHue::from_radians(self.b.atan2(self.a)))
+            Some(OklabHue::from_radians(self.b.clone().atan2(self.a.clone())))
         }
     }
 }
 
 impl<T> ComponentWise for Oklab<T>
 where
-    T: FloatComponent,
+    T: Clone,
 {
     type Scalar = T;
 
     fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Self, mut f: F) -> Self {
-        Self::new(f(self.l, other.l), f(self.a, other.a), f(self.b, other.b))
+        Self::new(
+            f(self.l.clone(), other.l.clone()),
+            f(self.a.clone(), other.a.clone()),
+            f(self.b.clone(), other.b.clone()),
+        )
     }
 
     fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Self {
-        Self::new(f(self.l), f(self.a), f(self.b))
+        Self::new(f(self.l.clone()), f(self.a.clone()), f(self.b.clone()))
     }
 }
 
@@ -452,16 +335,17 @@ impl_color_div!(Oklab<T>, [l, a, b]);
 
 impl_array_casts!(Oklab<T>, [T; 3]);
 
+impl_eq!(Oklab, [l, a, b]);
+
 impl<T> RelativeContrast for Oklab<T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
+    Xyz<D65, T>: FromColor<Self>,
 {
     type Scalar = T;
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        use crate::FromColor;
-
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
@@ -472,7 +356,7 @@ where
 #[cfg(feature = "random")]
 impl<T> Distribution<Oklab<T>> for Standard
 where
-    T: FloatComponent,
+    T: Real + Mul<Output = T> + Sub<Output = T>,
     Standard: Distribution<T>,
 {
     // `a` and `b` both range from (-1.0, 1.0)
@@ -480,8 +364,8 @@ where
 where {
         Oklab::new(
             rng.gen(),
-            rng.gen() * from_f64(2.0) - from_f64(1.0),
-            rng.gen() * from_f64(2.0) - from_f64(1.0),
+            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
+            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
         )
     }
 }
@@ -489,7 +373,7 @@ where {
 #[cfg(feature = "random")]
 pub struct UniformOklab<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: SampleUniform,
 {
     l: Uniform<T>,
     a: Uniform<T>,
@@ -499,7 +383,7 @@ where
 #[cfg(feature = "random")]
 impl<T> SampleUniform for Oklab<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
 {
     type Sampler = UniformOklab<T>;
 }
@@ -507,7 +391,7 @@ where
 #[cfg(feature = "random")]
 impl<T> UniformSampler for UniformOklab<T>
 where
-    T: FloatComponent + SampleUniform,
+    T: Clone + SampleUniform,
 {
     type X = Oklab<T>;
 
@@ -516,8 +400,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         Self {
             l: Uniform::new::<_, T>(low.l, high.l),
@@ -531,8 +415,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         Self {
             l: Uniform::new_inclusive::<_, T>(low.l, high.l),

@@ -60,9 +60,12 @@
 //! colors correctly and still allow advanced users a high degree of
 //! flexibility.
 
-use crate::encoding::{self, Gamma, Linear, TransferFn};
-use crate::white_point::{Any, WhitePoint};
-use crate::{Component, FloatComponent, FromComponent, Yxy};
+use crate::{
+    encoding::{self, Gamma, Linear, TransferFn},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::{Any, WhitePoint},
+    Yxy,
+};
 
 pub use self::rgb::{FromHexError, Rgb, Rgba};
 
@@ -144,8 +147,8 @@ pub trait Primaries<T>: 'static {
 
 impl<T, U> From<LinSrgb<T>> for Srgb<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
@@ -156,8 +159,8 @@ where
 
 impl<T, U> From<Srgb<T>> for LinSrgb<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(srgb: Srgb<T>) -> Self {
@@ -167,8 +170,8 @@ where
 
 impl<T, U> From<LinSrgb<T>> for Srgba<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: Stimulus + FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
@@ -180,8 +183,8 @@ where
 
 impl<T, U> From<LinSrgba<T>> for Srgba<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(lin_srgba: LinSrgba<T>) -> Self {
@@ -192,8 +195,8 @@ where
 
 impl<T, U> From<Srgb<T>> for LinSrgba<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: Stimulus + FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(srgb: Srgb<T>) -> Self {
@@ -203,8 +206,8 @@ where
 
 impl<T, U> From<Srgba<T>> for LinSrgba<U>
 where
-    T: FloatComponent,
-    U: Component + FromComponent<T>,
+    U: FromStimulus<T>,
+    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
 {
     #[inline]
     fn from(srgba: Srgba<T>) -> Self {

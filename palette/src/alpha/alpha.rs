@@ -1,23 +1,28 @@
-use core::fmt;
-use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::{
+    fmt,
+    ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use num_traits::{One, Zero};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::blend::PreAlpha;
-use crate::cast::ArrayCast;
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::float::Float;
 use crate::{
-    clamp, clamp_assign, ArrayExt, Blend, Clamp, ClampAssign, Component, ComponentWise, GetHue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, NextArray, Saturate, SaturateAssign,
-    SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
+    blend::PreAlpha,
+    cast::ArrayCast,
+    clamp, clamp_assign,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+    stimulus::Stimulus,
+    ArrayExt, Blend, Clamp, ClampAssign, ComponentWise, GetHue, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, NextArray, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithAlpha, WithHue,
 };
 
 /// An alpha component wrapper for colors.
@@ -34,7 +39,7 @@ pub struct Alpha<C, T> {
     pub alpha: T,
 }
 
-impl<C, T: Component> Alpha<C, T> {
+impl<C, T: Stimulus> Alpha<C, T> {
     /// Return the `alpha` value minimum.
     pub fn min_alpha() -> T {
         T::zero()
@@ -63,7 +68,7 @@ where
 {
 }
 
-impl<C1: WithAlpha<T>, C2, T: Component> FromColorUnclamped<C1> for Alpha<C2, T>
+impl<C1: WithAlpha<T>, C2, T> FromColorUnclamped<C1> for Alpha<C2, T>
 where
     C1::Color: IntoColorUnclamped<C2>,
 {
@@ -77,7 +82,7 @@ where
     }
 }
 
-impl<C, A: Component> WithAlpha<A> for Alpha<C, A> {
+impl<C, A> WithAlpha<A> for Alpha<C, A> {
     type Color = C;
     type WithAlpha = Self;
 
@@ -112,7 +117,7 @@ impl<C, T> DerefMut for Alpha<C, T> {
 impl<C> Mix for Alpha<C, C::Scalar>
 where
     C: Mix,
-    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + Clone,
+    C::Scalar: Zero + One + PartialOrd + Arithmetics + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -130,7 +135,7 @@ where
 impl<C> MixAssign for Alpha<C, C::Scalar>
 where
     C: MixAssign,
-    C::Scalar: Zero + One + PartialOrd + Sub<Output = C::Scalar> + AddAssign + Clone,
+    C::Scalar: Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -266,7 +271,11 @@ impl<C: SaturateAssign> SaturateAssign for Alpha<C, C::Scalar> {
     }
 }
 
-impl<C: IsWithinBounds, T: Component> IsWithinBounds for Alpha<C, T> {
+impl<C, T> IsWithinBounds for Alpha<C, T>
+where
+    C: IsWithinBounds,
+    T: Stimulus + PartialOrd,
+{
     #[inline]
     fn is_within_bounds(&self) -> bool {
         self.color.is_within_bounds()
@@ -275,7 +284,11 @@ impl<C: IsWithinBounds, T: Component> IsWithinBounds for Alpha<C, T> {
     }
 }
 
-impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
+impl<C, T> Clamp for Alpha<C, T>
+where
+    C: Clamp,
+    T: Stimulus + PartialOrd,
+{
     #[inline]
     fn clamp(self) -> Self {
         Alpha {
@@ -285,7 +298,11 @@ impl<C: Clamp, T: Component> Clamp for Alpha<C, T> {
     }
 }
 
-impl<C: ClampAssign, T: Component> ClampAssign for Alpha<C, T> {
+impl<C, T> ClampAssign for Alpha<C, T>
+where
+    C: ClampAssign,
+    T: Stimulus + PartialOrd,
+{
     #[inline]
     fn clamp_assign(&mut self) {
         self.color.clamp_assign();
@@ -293,10 +310,14 @@ impl<C: ClampAssign, T: Component> ClampAssign for Alpha<C, T> {
     }
 }
 
-impl<C: Blend, T: Float> Blend for Alpha<C, T>
+impl<C, T> Blend for Alpha<C, T>
 where
+    C: Blend,
+    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
     C::Color: ComponentWise<Scalar = T>,
     Alpha<C, T>: Into<Alpha<C::Color, T>> + From<Alpha<C::Color, T>>,
+    Alpha<C::Color, T>: From<PreAlpha<C::Color, T>>,
+    PreAlpha<C::Color, T>: From<Alpha<C::Color, T>>,
 {
     type Color = C::Color;
 
@@ -335,11 +356,11 @@ where
     type Array = <C::Array as NextArray>::Next;
 }
 
-impl<C: Default, T: Component> Default for Alpha<C, T> {
+impl<C: Default, T: Stimulus> Default for Alpha<C, T> {
     fn default() -> Alpha<C, T> {
         Alpha {
             color: C::default(),
-            alpha: T::max_intensity(),
+            alpha: Self::max_alpha(),
         }
     }
 }
@@ -400,7 +421,11 @@ where
     }
 }
 
-impl<C: Add, T: Float> Add for Alpha<C, T> {
+impl<C, T> Add for Alpha<C, T>
+where
+    C: Add,
+    T: Add,
+{
     type Output = Alpha<C::Output, <T as Add>::Output>;
 
     fn add(self, other: Alpha<C, T>) -> Self::Output {
@@ -411,7 +436,11 @@ impl<C: Add, T: Float> Add for Alpha<C, T> {
     }
 }
 
-impl<T: Add + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
+impl<T, C> Add<T> for Alpha<C, T>
+where
+    T: Add + Clone,
+    C: Add<T>,
+{
     type Output = Alpha<C::Output, <T as Add>::Output>;
 
     fn add(self, c: T) -> Self::Output {
@@ -422,21 +451,33 @@ impl<T: Add + Clone, C: Add<T>> Add<T> for Alpha<C, T> {
     }
 }
 
-impl<C: AddAssign, T: Float + AddAssign> AddAssign for Alpha<C, T> {
+impl<C, T> AddAssign for Alpha<C, T>
+where
+    C: AddAssign,
+    T: AddAssign,
+{
     fn add_assign(&mut self, other: Alpha<C, T>) {
         self.color += other.color;
         self.alpha += other.alpha;
     }
 }
 
-impl<T: AddAssign + Copy, C: AddAssign<T>> AddAssign<T> for Alpha<C, T> {
+impl<T, C> AddAssign<T> for Alpha<C, T>
+where
+    T: AddAssign + Clone,
+    C: AddAssign<T>,
+{
     fn add_assign(&mut self, c: T) {
-        self.color += c;
+        self.color += c.clone();
         self.alpha += c;
     }
 }
 
-impl<C: Sub, T: Float> Sub for Alpha<C, T> {
+impl<C, T> Sub for Alpha<C, T>
+where
+    C: Sub,
+    T: Sub,
+{
     type Output = Alpha<C::Output, <T as Sub>::Output>;
 
     fn sub(self, other: Alpha<C, T>) -> Self::Output {
@@ -447,7 +488,11 @@ impl<C: Sub, T: Float> Sub for Alpha<C, T> {
     }
 }
 
-impl<T: Sub + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
+impl<T, C> Sub<T> for Alpha<C, T>
+where
+    T: Sub + Clone,
+    C: Sub<T>,
+{
     type Output = Alpha<C::Output, <T as Sub>::Output>;
 
     fn sub(self, c: T) -> Self::Output {
@@ -458,21 +503,33 @@ impl<T: Sub + Clone, C: Sub<T>> Sub<T> for Alpha<C, T> {
     }
 }
 
-impl<C: SubAssign, T: Float + SubAssign> SubAssign for Alpha<C, T> {
+impl<C, T> SubAssign for Alpha<C, T>
+where
+    C: SubAssign,
+    T: SubAssign,
+{
     fn sub_assign(&mut self, other: Alpha<C, T>) {
         self.color -= other.color;
         self.alpha -= other.alpha;
     }
 }
 
-impl<T: SubAssign + Copy, C: SubAssign<T>> SubAssign<T> for Alpha<C, T> {
+impl<T, C> SubAssign<T> for Alpha<C, T>
+where
+    T: SubAssign + Clone,
+    C: SubAssign<T>,
+{
     fn sub_assign(&mut self, c: T) {
-        self.color -= c;
+        self.color -= c.clone();
         self.alpha -= c;
     }
 }
 
-impl<C: Mul, T: Float> Mul for Alpha<C, T> {
+impl<C, T> Mul for Alpha<C, T>
+where
+    C: Mul,
+    T: Mul,
+{
     type Output = Alpha<C::Output, <T as Mul>::Output>;
 
     fn mul(self, other: Alpha<C, T>) -> Self::Output {
@@ -483,7 +540,11 @@ impl<C: Mul, T: Float> Mul for Alpha<C, T> {
     }
 }
 
-impl<T: Mul + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
+impl<T, C> Mul<T> for Alpha<C, T>
+where
+    T: Mul + Clone,
+    C: Mul<T>,
+{
     type Output = Alpha<C::Output, <T as Mul>::Output>;
 
     fn mul(self, c: T) -> Self::Output {
@@ -494,21 +555,33 @@ impl<T: Mul + Clone, C: Mul<T>> Mul<T> for Alpha<C, T> {
     }
 }
 
-impl<C: MulAssign, T: Float + MulAssign> MulAssign for Alpha<C, T> {
+impl<C, T> MulAssign for Alpha<C, T>
+where
+    C: MulAssign,
+    T: MulAssign,
+{
     fn mul_assign(&mut self, other: Alpha<C, T>) {
         self.color *= other.color;
         self.alpha *= other.alpha;
     }
 }
 
-impl<T: MulAssign + Copy, C: MulAssign<T>> MulAssign<T> for Alpha<C, T> {
+impl<T, C> MulAssign<T> for Alpha<C, T>
+where
+    T: MulAssign + Clone,
+    C: MulAssign<T>,
+{
     fn mul_assign(&mut self, c: T) {
-        self.color *= c;
+        self.color *= c.clone();
         self.alpha *= c;
     }
 }
 
-impl<C: Div, T: Float> Div for Alpha<C, T> {
+impl<C, T> Div for Alpha<C, T>
+where
+    C: Div,
+    T: Div,
+{
     type Output = Alpha<C::Output, <T as Div>::Output>;
 
     fn div(self, other: Alpha<C, T>) -> Self::Output {
@@ -519,7 +592,11 @@ impl<C: Div, T: Float> Div for Alpha<C, T> {
     }
 }
 
-impl<T: Div + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
+impl<T, C> Div<T> for Alpha<C, T>
+where
+    T: Div + Clone,
+    C: Div<T>,
+{
     type Output = Alpha<C::Output, <T as Div>::Output>;
 
     fn div(self, c: T) -> Self::Output {
@@ -530,27 +607,35 @@ impl<T: Div + Clone, C: Div<T>> Div<T> for Alpha<C, T> {
     }
 }
 
-impl<C: DivAssign, T: Float + DivAssign> DivAssign for Alpha<C, T> {
+impl<C, T> DivAssign for Alpha<C, T>
+where
+    C: DivAssign,
+    T: DivAssign,
+{
     fn div_assign(&mut self, other: Alpha<C, T>) {
         self.color /= other.color;
         self.alpha /= other.alpha;
     }
 }
 
-impl<T: DivAssign + Copy, C: DivAssign<T>> DivAssign<T> for Alpha<C, T> {
+impl<T, C> DivAssign<T> for Alpha<C, T>
+where
+    T: DivAssign + Clone,
+    C: DivAssign<T>,
+{
     fn div_assign(&mut self, c: T) {
-        self.color /= c;
+        self.color /= c.clone();
         self.alpha /= c;
     }
 }
 
 impl_array_casts!([C, T, const N: usize] Alpha<C, T>, [T; N], where Alpha<C, T>: ArrayCast<Array = [T; N]>);
 
-impl<C, T: Component> From<C> for Alpha<C, T> {
+impl<C, T: Stimulus> From<C> for Alpha<C, T> {
     fn from(color: C) -> Alpha<C, T> {
         Alpha {
             color,
-            alpha: T::max_intensity(),
+            alpha: Self::max_alpha(),
         }
     }
 }
@@ -592,7 +677,6 @@ where
 #[cfg(feature = "random")]
 impl<C, T> Distribution<Alpha<C, T>> for Standard
 where
-    T: Component,
     Standard: Distribution<C> + Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alpha<C, T> {
@@ -606,7 +690,7 @@ where
 #[cfg(feature = "random")]
 pub struct UniformAlpha<C, T>
 where
-    T: Component + SampleUniform,
+    T: SampleUniform,
     C: SampleUniform,
 {
     color: Uniform<C>,
@@ -616,8 +700,8 @@ where
 #[cfg(feature = "random")]
 impl<C, T> SampleUniform for Alpha<C, T>
 where
-    T: Component + SampleUniform,
-    C: Copy + SampleUniform,
+    T: Clone + SampleUniform,
+    C: Clone + SampleUniform,
 {
     type Sampler = UniformAlpha<C, T>;
 }
@@ -625,8 +709,8 @@ where
 #[cfg(feature = "random")]
 impl<C, T> UniformSampler for UniformAlpha<C, T>
 where
-    T: Component + SampleUniform,
-    C: Copy + SampleUniform,
+    T: Clone + SampleUniform,
+    C: Clone + SampleUniform,
 {
     type X = Alpha<C, T>;
 
@@ -635,8 +719,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformAlpha {
             color: Uniform::new::<C, _>(low.color, high.color),
@@ -649,8 +733,8 @@ where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
     {
-        let low = *low_b.borrow();
-        let high = *high_b.borrow();
+        let low = low_b.borrow().clone();
+        let high = high_b.borrow().clone();
 
         UniformAlpha {
             color: Uniform::new_inclusive::<C, _>(low.color, high.color),

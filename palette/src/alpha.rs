@@ -1,8 +1,7 @@
-use crate::Component;
-
-use num_traits::Zero;
 #[doc(hidden)]
 pub use palette_derive::WithAlpha;
+
+use crate::{num::Zero, stimulus::Stimulus};
 
 pub use self::alpha::*;
 
@@ -150,7 +149,7 @@ pub trait WithAlpha<A>: Sized {
     #[inline]
     fn opaque(self) -> Self::WithAlpha
     where
-        A: Component,
+        A: Stimulus,
     {
         self.with_alpha(A::max_intensity())
     }

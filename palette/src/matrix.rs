@@ -3,30 +3,35 @@
 
 use core::marker::PhantomData;
 
-use crate::convert::IntoColorUnclamped;
-use crate::encoding::Linear;
-use crate::float::Float;
-use crate::rgb::{Primaries, Rgb, RgbSpace};
-use crate::white_point::{Any, WhitePoint};
-use crate::{FloatComponent, Xyz};
+use crate::{
+    convert::IntoColorUnclamped,
+    encoding::Linear,
+    num::{Arithmetics, IsValidDivisor, Recip},
+    rgb::{Primaries, Rgb, RgbSpace},
+    white_point::{Any, WhitePoint},
+    Xyz, Yxy,
+};
 
 /// A 9 element array representing a 3x3 matrix.
 pub type Mat3<T> = [T; 9];
 
 /// Multiply the 3x3 matrix with an XYZ color.
 #[inline]
-pub fn multiply_xyz<T: FloatComponent>(c: &Mat3<T>, f: &Xyz<Any, T>) -> Xyz<Any, T> {
+pub fn multiply_xyz<T>(c: Mat3<T>, f: Xyz<Any, T>) -> Xyz<Any, T>
+where
+    T: Arithmetics,
+{
     // Input Mat3 is destructured to avoid panic paths
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
-    let x1 = c0 * f.x;
-    let y1 = c3 * f.x;
+    let x1 = c0 * &f.x;
+    let y1 = c3 * &f.x;
     let z1 = c6 * f.x;
-    let x2 = c1 * f.y;
-    let y2 = c4 * f.y;
+    let x2 = c1 * &f.y;
+    let y2 = c4 * &f.y;
     let z2 = c7 * f.y;
-    let x3 = c2 * f.z;
-    let y3 = c5 * f.z;
+    let x3 = c2 * &f.z;
+    let y3 = c5 * &f.z;
     let z3 = c8 * f.z;
 
     Xyz {
@@ -38,34 +43,36 @@ pub fn multiply_xyz<T: FloatComponent>(c: &Mat3<T>, f: &Xyz<Any, T>) -> Xyz<Any,
 }
 /// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
 #[inline]
-pub fn multiply_xyz_to_rgb<S: RgbSpace<T>, T: FloatComponent>(
-    c: &Mat3<T>,
-    f: &Xyz<S::WhitePoint, T>,
-) -> Rgb<Linear<S>, T> {
+pub fn multiply_xyz_to_rgb<S, T>(c: Mat3<T>, f: Xyz<S::WhitePoint, T>) -> Rgb<Linear<S>, T>
+where
+    S: RgbSpace<T>,
+    T: Arithmetics,
+{
     // Input Mat3 is destructured to avoid panic paths. red, green, and blue
     // can't be extracted like in `multiply_xyz` to get a performance increase
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
     Rgb {
-        red: (c0 * f.x) + (c1 * f.y) + (c2 * f.z),
-        green: (c3 * f.x) + (c4 * f.y) + (c5 * f.z),
+        red: (c0 * &f.x) + (c1 * &f.y) + (c2 * &f.z),
+        green: (c3 * &f.x) + (c4 * &f.y) + (c5 * &f.z),
         blue: (c6 * f.x) + (c7 * f.y) + (c8 * f.z),
         standard: PhantomData,
     }
 }
 /// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
 #[inline]
-pub fn multiply_rgb_to_xyz<S: RgbSpace<T>, T: FloatComponent>(
-    c: &Mat3<T>,
-    f: &Rgb<Linear<S>, T>,
-) -> Xyz<S::WhitePoint, T> {
+pub fn multiply_rgb_to_xyz<S, T>(c: Mat3<T>, f: Rgb<Linear<S>, T>) -> Xyz<S::WhitePoint, T>
+where
+    S: RgbSpace<T>,
+    T: Arithmetics,
+{
     // Input Mat3 is destructured to avoid panic paths. Same problem as
     // `multiply_xyz_to_rgb` for extracting x, y, z
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
     Xyz {
-        x: (c0 * f.red) + (c1 * f.green) + (c2 * f.blue),
-        y: (c3 * f.red) + (c4 * f.green) + (c5 * f.blue),
+        x: (c0 * &f.red) + (c1 * &f.green) + (c2 * &f.blue),
+        y: (c3 * &f.red) + (c4 * &f.green) + (c5 * &f.blue),
         z: (c6 * f.red) + (c7 * f.green) + (c8 * f.blue),
         white_point: PhantomData,
     }
@@ -73,21 +80,24 @@ pub fn multiply_rgb_to_xyz<S: RgbSpace<T>, T: FloatComponent>(
 
 /// Multiply two 3x3 matrices.
 #[inline]
-pub fn multiply_3x3<T: Float>(c: &Mat3<T>, f: &Mat3<T>) -> Mat3<T> {
+pub fn multiply_3x3<T>(c: Mat3<T>, f: Mat3<T>) -> Mat3<T>
+where
+    T: Arithmetics + Clone,
+{
     // Input Mat3 are destructured to avoid panic paths
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = *c;
-    let [f0, f1, f2, f3, f4, f5, f6, f7, f8] = *f;
+    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
+    let [f0, f1, f2, f3, f4, f5, f6, f7, f8] = f;
 
-    let o0 = c0 * f0 + c1 * f3 + c2 * f6;
-    let o1 = c0 * f1 + c1 * f4 + c2 * f7;
-    let o2 = c0 * f2 + c1 * f5 + c2 * f8;
+    let o0 = c0.clone() * &f0 + c1.clone() * &f3 + c2.clone() * &f6;
+    let o1 = c0.clone() * &f1 + c1.clone() * &f4 + c2.clone() * &f7;
+    let o2 = c0 * &f2 + c1 * &f5 + c2 * &f8;
 
-    let o3 = c3 * f0 + c4 * f3 + c5 * f6;
-    let o4 = c3 * f1 + c4 * f4 + c5 * f7;
-    let o5 = c3 * f2 + c4 * f5 + c5 * f8;
+    let o3 = c3.clone() * &f0 + c4.clone() * &f3 + c5.clone() * &f6;
+    let o4 = c3.clone() * &f1 + c4.clone() * &f4 + c5.clone() * &f7;
+    let o5 = c3 * &f2 + c4 * &f5 + c5 * &f8;
 
-    let o6 = c6 * f0 + c7 * f3 + c8 * f6;
-    let o7 = c6 * f1 + c7 * f4 + c8 * f7;
+    let o6 = c6.clone() * f0 + c7.clone() * f3 + c8.clone() * f6;
+    let o7 = c6.clone() * f1 + c7.clone() * f4 + c8.clone() * f7;
     let o8 = c6 * f2 + c7 * f5 + c8 * f8;
 
     [o0, o1, o2, o3, o4, o5, o6, o7, o8]
@@ -95,62 +105,72 @@ pub fn multiply_3x3<T: Float>(c: &Mat3<T>, f: &Mat3<T>) -> Mat3<T> {
 
 /// Invert a 3x3 matrix and panic if matrix is not invertible.
 #[inline]
-pub fn matrix_inverse<T: Float>(a: &Mat3<T>) -> Mat3<T> {
+pub fn matrix_inverse<T>(a: Mat3<T>) -> Mat3<T>
+where
+    T: Recip + IsValidDivisor + Arithmetics + Clone,
+{
     // This function runs fastest with assert and no destructuring. The `det`'s
     // location should not be changed until benched that it's faster elsewhere
     assert!(a.len() > 8);
 
-    let d0 = a[4] * a[8] - a[5] * a[7];
-    let d1 = a[3] * a[8] - a[5] * a[6];
-    let d2 = a[3] * a[7] - a[4] * a[6];
-    let mut det = a[0] * d0 - a[1] * d1 + a[2] * d2;
-    let d3 = a[1] * a[8] - a[2] * a[7];
-    let d4 = a[0] * a[8] - a[2] * a[6];
-    let d5 = a[0] * a[7] - a[1] * a[6];
-    let d6 = a[1] * a[5] - a[2] * a[4];
-    let d7 = a[0] * a[5] - a[2] * a[3];
-    let d8 = a[0] * a[4] - a[1] * a[3];
+    let d0 = a[4].clone() * &a[8] - a[5].clone() * &a[7];
+    let d1 = a[3].clone() * &a[8] - a[5].clone() * &a[6];
+    let d2 = a[3].clone() * &a[7] - a[4].clone() * &a[6];
+    let mut det = a[0].clone() * &d0 - a[1].clone() * &d1 + a[2].clone() * &d2;
+    let d3 = a[1].clone() * &a[8] - a[2].clone() * &a[7];
+    let d4 = a[0].clone() * &a[8] - a[2].clone() * &a[6];
+    let d5 = a[0].clone() * &a[7] - a[1].clone() * &a[6];
+    let d6 = a[1].clone() * &a[5] - a[2].clone() * &a[4];
+    let d7 = a[0].clone() * &a[5] - a[2].clone() * &a[3];
+    let d8 = a[0].clone() * &a[4] - a[1].clone() * &a[3];
 
-    if !det.is_normal() {
+    if !det.is_valid_divisor() {
         panic!("The given matrix is not invertible")
     }
     det = det.recip();
 
     [
-        d0 * det,
-        -d3 * det,
-        d6 * det,
-        -d1 * det,
-        d4 * det,
-        -d7 * det,
-        d2 * det,
-        -d5 * det,
+        d0 * &det,
+        -d3 * &det,
+        d6 * &det,
+        -d1 * &det,
+        d4 * &det,
+        -d7 * &det,
+        d2 * &det,
+        -d5 * &det,
         d8 * det,
     ]
 }
 
 /// Generates the Srgb to Xyz transformation matrix for a given white point.
 #[inline]
-pub fn rgb_to_xyz_matrix<S: RgbSpace<T>, T: FloatComponent>() -> Mat3<T> {
+pub fn rgb_to_xyz_matrix<S, T>() -> Mat3<T>
+where
+    S: RgbSpace<T>,
+    T: Recip + IsValidDivisor + Arithmetics + Clone,
+    Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
+{
     let r = S::Primaries::red().into_color_unclamped();
     let g = S::Primaries::green().into_color_unclamped();
     let b = S::Primaries::blue().into_color_unclamped();
 
-    // Destructuring has some performance benefits, don't change unless measured
-    let [t0, t1, t2, t3, t4, t5, t6, t7, t8] = mat3_from_primaries(r, g, b);
+    let matrix = mat3_from_primaries(r, g, b);
 
     let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(
-        &matrix_inverse(&[t0, t1, t2, t3, t4, t5, t6, t7, t8]),
-        &S::WhitePoint::get_xyz().with_white_point(),
+        matrix_inverse(matrix.clone()),
+        S::WhitePoint::get_xyz().with_white_point(),
     );
 
+    // Destructuring has some performance benefits, don't change unless measured
+    let [t0, t1, t2, t3, t4, t5, t6, t7, t8] = matrix;
+
     [
-        t0 * s_matrix.red,
-        t1 * s_matrix.green,
-        t2 * s_matrix.blue,
-        t3 * s_matrix.red,
-        t4 * s_matrix.green,
-        t5 * s_matrix.blue,
+        t0 * &s_matrix.red,
+        t1 * &s_matrix.green,
+        t2 * &s_matrix.blue,
+        t3 * &s_matrix.red,
+        t4 * &s_matrix.green,
+        t5 * &s_matrix.blue,
         t6 * s_matrix.red,
         t7 * s_matrix.green,
         t8 * s_matrix.blue,
@@ -159,7 +179,7 @@ pub fn rgb_to_xyz_matrix<S: RgbSpace<T>, T: FloatComponent>() -> Mat3<T> {
 
 #[rustfmt::skip]
 #[inline]
-fn mat3_from_primaries<T: FloatComponent>(r: Xyz<Any, T>, g: Xyz<Any, T>, b: Xyz<Any, T>) -> Mat3<T> {
+fn mat3_from_primaries<T>(r: Xyz<Any, T>, g: Xyz<Any, T>, b: Xyz<Any, T>) -> Mat3<T> {
     [
         r.x, g.x, b.x,
         r.y, g.y, b.y,
@@ -182,7 +202,7 @@ mod test {
         let inp2 = [4.0, 5.0, 6.0, 6.0, 5.0, 4.0, 4.0, 6.0, 5.0];
         let expected = [28.0, 33.0, 29.0, 28.0, 31.0, 31.0, 26.0, 33.0, 31.0];
 
-        let computed = multiply_3x3(&inp1, &inp2);
+        let computed = multiply_3x3(inp1, inp2);
         for (t1, t2) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(t1, t2);
         }
@@ -195,7 +215,7 @@ mod test {
 
         let expected = Xyz::new(0.4, 0.32, 0.38);
 
-        let computed = multiply_xyz(&inp1, &inp2);
+        let computed = multiply_xyz(inp1, inp2);
         assert_relative_eq!(expected, computed)
     }
 
@@ -204,7 +224,7 @@ mod test {
         let input: [f64; 9] = [3.0, 0.0, 2.0, 2.0, 0.0, -2.0, 0.0, 1.0, 1.0];
 
         let expected: [f64; 9] = [0.2, 0.2, 0.0, -0.2, 0.3, 1.0, 0.2, -0.3, 0.0];
-        let computed = matrix_inverse(&input);
+        let computed = matrix_inverse(input);
         for (t1, t2) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(t1, t2);
         }
@@ -214,7 +234,7 @@ mod test {
         let input: [f64; 9] = [1.0, 0.0, 1.0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0];
 
         let expected: [f64; 9] = [-1.0, -1.0, 2.0, -1.0, 0.0, 1.0, 2.0, 1.0, -2.0];
-        let computed = matrix_inverse(&input);
+        let computed = matrix_inverse(input);
         for (t1, t2) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(t1, t2);
         }
@@ -223,7 +243,7 @@ mod test {
     #[should_panic]
     fn matrix_inverse_panic() {
         let input: [f64; 9] = [1.0, 0.0, 0.0, 2.0, 0.0, 0.0, -4.0, 6.0, 1.0];
-        matrix_inverse(&input);
+        matrix_inverse(input);
     }
 
     #[rustfmt::skip]

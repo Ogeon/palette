@@ -1,20 +1,26 @@
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::convert::{FromColorUnclamped, IntoColorUnclamped};
-use crate::luma::LumaStandard;
-use crate::white_point::{WhitePoint, D65};
 use crate::{
-    clamp, clamp_assign, clamp_min_assign, contrast_ratio, Alpha, Clamp, ClampAssign, Component,
-    ComponentWise, FloatComponent, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
-    RelativeContrast, Xyz,
+    clamp, clamp_assign, contrast_ratio,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    luma::LumaStandard,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    white_point::{WhitePoint, D65},
+    Alpha, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lighten, LightenAssign, Luma, Mix,
+    MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -113,7 +119,7 @@ impl<Wp, T> Yxy<Wp, T> {
 
 impl<Wp, T> Yxy<Wp, T>
 where
-    T: Component,
+    T: Zero + One,
 {
     /// Return the `x` value minimum.
     pub fn min_x() -> T {
@@ -122,7 +128,7 @@ where
 
     /// Return the `x` value maximum.
     pub fn max_x() -> T {
-        T::max_intensity()
+        T::one()
     }
 
     /// Return the `y` value minimum.
@@ -132,7 +138,7 @@ where
 
     /// Return the `y` value maximum.
     pub fn max_y() -> T {
-        T::max_intensity()
+        T::one()
     }
 
     /// Return the `luma` value minimum.
@@ -142,7 +148,7 @@ where
 
     /// Return the `luma` value maximum.
     pub fn max_luma() -> T {
-        T::max_intensity()
+        T::one()
     }
 }
 
@@ -213,19 +219,19 @@ impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T> {
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Yxy<Wp, T>
 where
-    T: FloatComponent,
+    T: Zero + IsValidDivisor + Arithmetics + Clone,
 {
     fn from_color_unclamped(xyz: Xyz<Wp, T>) -> Self {
         let mut yxy = Yxy {
             x: T::zero(),
             y: T::zero(),
-            luma: xyz.y,
+            luma: xyz.y.clone(),
             white_point: PhantomData,
         };
-        let sum = xyz.x + xyz.y + xyz.z;
+        let sum = xyz.x.clone() + &xyz.y + xyz.z;
         // If denominator is zero, NAN or INFINITE leave x and y at the default 0
-        if sum.is_normal() {
-            yxy.x = xyz.x / sum;
+        if sum.is_valid_divisor() {
+            yxy.x = xyz.x / &sum;
             yxy.y = xyz.y / sum;
         }
         yxy
@@ -234,8 +240,8 @@ where
 
 impl<T, S> FromColorUnclamped<Luma<S, T>> for Yxy<S::WhitePoint, T>
 where
-    T: FloatComponent,
     S: LumaStandard<T>,
+    Self: Default,
 {
     fn from_color_unclamped(luma: Luma<S, T>) -> Self {
         Yxy {
@@ -247,7 +253,7 @@ where
 
 impl<Wp, T> IsWithinBounds for Yxy<Wp, T>
 where
-    T: Component,
+    T: Zero + One + PartialOrd,
 {
     #[rustfmt::skip]
     #[inline]
@@ -260,7 +266,7 @@ where
 
 impl<Wp, T> Clamp for Yxy<Wp, T>
 where
-    T: Component,
+    T: Zero + One + PartialOrd,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -274,7 +280,7 @@ where
 
 impl<Wp, T> ClampAssign for Yxy<Wp, T>
 where
-    T: Component,
+    T: Zero + One + PartialOrd,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -284,91 +290,8 @@ where
     }
 }
 
-impl<Wp, T> Mix for Yxy<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix(self, other: Self, factor: T) -> Self {
-        let factor = clamp(factor, T::zero(), T::one());
-        self + (other - self) * factor
-    }
-}
-
-impl<Wp, T> MixAssign for Yxy<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn mix_assign(&mut self, other: Self, factor: T) {
-        let factor = clamp(factor, T::zero(), T::one());
-        *self += (other - *self) * factor;
-    }
-}
-
-impl<Wp, T> Lighten for Yxy<Wp, T>
-where
-    T: FloatComponent,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference = if factor >= T::zero() {
-            Self::max_luma() - self.luma
-        } else {
-            self.luma
-        };
-
-        let delta = difference.max(T::zero()) * factor;
-
-        Yxy {
-            x: self.x,
-            y: self.y,
-            luma: (self.luma + delta).max(Self::min_luma()),
-            white_point: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Yxy {
-            x: self.x,
-            y: self.y,
-            luma: (self.luma + Self::max_luma() * amount).max(Self::min_luma()),
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> LightenAssign for Yxy<Wp, T>
-where
-    T: FloatComponent + AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference = if factor >= T::zero() {
-            Self::max_luma() - self.luma
-        } else {
-            self.luma
-        };
-
-        self.luma += difference.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.luma, Self::min_luma());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.luma += Self::max_luma() * amount;
-        clamp_min_assign(&mut self.luma, Self::min_luma());
-    }
-}
+impl_mix!(Yxy<Wp>);
+impl_lighten!(Yxy<Wp> increase {luma => [Self::min_luma(), Self::max_luma()]} other {x, y} phantom: white_point where T: One);
 
 impl<Wp, T> ComponentWise for Yxy<Wp, T>
 where
@@ -397,8 +320,9 @@ where
 
 impl<Wp, T> Default for Yxy<Wp, T>
 where
-    T: FloatComponent,
+    T: Zero,
     Wp: WhitePoint<T>,
+    Xyz<Wp, T>: IntoColorUnclamped<Self>,
 {
     fn default() -> Yxy<Wp, T> {
         // The default for x and y are the white point x and y ( from the default D65).
@@ -419,9 +343,11 @@ impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
 
 impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 
+impl_eq!(Yxy<Wp>, [y, x, luma]);
+
 impl<Wp, T> RelativeContrast for Yxy<Wp, T>
 where
-    T: FloatComponent,
+    T: Real + Arithmetics + PartialOrd,
 {
     type Scalar = T;
 

@@ -1,15 +1,26 @@
-use core::cmp::PartialEq;
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::{
+    cmp::PartialEq,
+    ops::{Add, AddAssign, Mul, Sub, SubAssign},
+};
+
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 #[cfg(feature = "random")]
-use rand::distributions::uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler};
-#[cfg(feature = "random")]
-use rand::distributions::{Distribution, Standard};
-#[cfg(feature = "random")]
-use rand::Rng;
+use rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
+    },
+    Rng,
+};
 
-use crate::float::Float;
-use crate::{from_f64, FromF64};
+#[cfg(feature = "random")]
+use crate::angle::FullRotation;
+
+use crate::{
+    angle::{AngleEq, FromAngle, HalfRotation, RealAngle, SignedAngle, UnsignedAngle},
+    num::Zero,
+};
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -26,54 +37,92 @@ macro_rules! make_hues {
         pub struct $name<T = f32>(T);
 
         impl<T> $name<T> {
-            /// Create a new hue from degrees.
+            /// Create a new hue, specified in the default unit for the angle
+            /// type `T`.
+            ///
+            /// `f32`, `f64` and other real number types represent degrees,
+            /// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.
             #[inline]
-            pub const fn from_degrees(degrees: T) -> Self {
-                Self(degrees)
+            pub const fn new(angle: T) -> Self {
+                Self(angle)
             }
 
-            /// Get the internal representation, without normalizing it.
-            #[inline]
-            pub fn to_raw_degrees(self) -> T {
+            /// Get the internal representation without normalizing or converting it.
+            ///
+            /// `f32`, `f64` and other real number types represent degrees,
+            /// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.
+            pub fn into_inner(self) -> T {
                 self.0
+            }
+
+            /// Convert into another angle type.
+            pub fn into_format<U>(self) -> $name<U>
+            where
+                U: FromAngle<T>,
+            {
+                $name(U::from_angle(self.0))
+            }
+
+            /// Convert from another angle type.
+            pub fn from_format<U>(hue: $name<U>) -> Self
+            where
+                T: FromAngle<U>,
+            {
+                hue.into_format()
             }
         }
 
-        impl<T: Float + FromF64> $name<T> {
+        impl<T: RealAngle> $name<T> {
+            /// Create a new hue from degrees. This is an alias for `new`.
+            #[inline]
+            pub fn from_degrees(degrees: T) -> Self {
+                Self::new(degrees)
+            }
+
             /// Create a new hue from radians, instead of degrees.
             #[inline]
             pub fn from_radians(radians: T) -> Self {
-                Self(radians.to_degrees())
+                Self(T::radians_to_degrees(radians))
             }
 
-            /// Get the hue as degrees, in the range `(-180, 180]`.
+            /// Get the internal representation as degrees, without normalizing it.
             #[inline]
-            pub fn to_degrees(self) -> T {
-                normalize_angle(self.0)
-            }
-
-            /// Convert the hue to radians, in the range `(-π, π]`.
-            #[inline]
-            pub fn to_radians(self) -> T {
-                normalize_angle(self.0).to_radians()
-            }
-
-            /// Convert the hue to positive degrees, in the range `[0, 360)`.
-            #[inline]
-            pub fn to_positive_degrees(self) -> T {
-                normalize_angle_positive(self.0)
-            }
-
-            /// Convert the hue to positive radians, in the range `[0, 2π)`.
-            #[inline]
-            pub fn to_positive_radians(self) -> T {
-                normalize_angle_positive(self.0).to_radians()
+            pub fn into_raw_degrees(self) -> T {
+                self.0
             }
 
             /// Get the internal representation as radians, without normalizing it.
             #[inline]
-            pub fn to_raw_radians(self) -> T {
-                self.0.to_radians()
+            pub fn into_raw_radians(self) -> T {
+                T::degrees_to_radians(self.0)
+            }
+        }
+
+        impl<T: RealAngle + SignedAngle> $name<T> {
+            /// Get the hue as degrees, in the range `(-180, 180]`.
+            #[inline]
+            pub fn into_degrees(self) -> T {
+                self.0.normalize_signed_angle()
+            }
+
+            /// Convert the hue to radians, in the range `(-π, π]`.
+            #[inline]
+            pub fn into_radians(self) -> T {
+                T::degrees_to_radians(self.0.normalize_signed_angle())
+            }
+        }
+
+        impl<T: RealAngle + UnsignedAngle> $name<T> {
+            /// Convert the hue to positive degrees, in the range `[0, 360)`.
+            #[inline]
+            pub fn into_positive_degrees(self) -> T {
+                self.0.normalize_unsigned_angle()
+            }
+
+            /// Convert the hue to positive radians, in the range `[0, 2π)`.
+            #[inline]
+            pub fn into_positive_radians(self) -> T {
+                T::degrees_to_radians(self.0.normalize_unsigned_angle())
             }
         }
 
@@ -87,41 +136,123 @@ macro_rules! make_hues {
         impl Into<f64> for $name<f64> {
             #[inline]
             fn into(self) -> f64 {
-                normalize_angle(self.0)
+                self.0.normalize_signed_angle()
             }
         }
 
         impl Into<f32> for $name<f32> {
             #[inline]
             fn into(self) -> f32 {
-                normalize_angle(self.0)
+                self.0.normalize_signed_angle()
             }
         }
+
         impl Into<f32> for $name<f64> {
             #[inline]
             fn into(self) -> f32 {
-                normalize_angle(self.0) as f32
+                self.0.normalize_signed_angle() as f32
             }
         }
 
-        impl<T: Float + FromF64> PartialEq for $name<T> {
+        impl Into<u8> for $name<u8> {
+            #[inline]
+            fn into(self) -> u8 {
+                self.0
+            }
+        }
+
+        impl<T: AngleEq> PartialEq for $name<T> {
             #[inline]
             fn eq(&self, other: &$name<T>) -> bool {
-                let hue_s: T = (*self).to_degrees();
-                let hue_o: T = (*other).to_degrees();
-                hue_s.eq(&hue_o)
+                self.0.angle_eq(&other.0)
             }
         }
 
-        impl<T: Float + FromF64> PartialEq<T> for $name<T> {
+        impl<T: AngleEq> PartialEq<T> for $name<T> {
             #[inline]
             fn eq(&self, other: &T) -> bool {
-                let hue: T = (*self).to_degrees();
-                hue.eq(&normalize_angle(*other))
+                self.0.angle_eq(other)
             }
         }
 
-        impl<T: Float + FromF64 + Eq> Eq for $name<T> {}
+        impl<T: AngleEq + Eq> Eq for $name<T> {}
+
+        // For hues, the difference is calculated and compared to zero. However due to
+        // the way floating point's work this is not so simple.
+        //
+        // Reference:
+        // https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+        //
+        // The recommendation is use 180 * epsilon as the epsilon and do not compare by
+        // ulps. Because of this we loose some precision for values close to 0.0.
+        impl<T> AbsDiffEq for $name<T>
+        where
+            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + AbsDiffEq + Clone,
+            T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
+        {
+            type Epsilon = T::Epsilon;
+
+            fn default_epsilon() -> Self::Epsilon {
+                T::default_epsilon() * T::Epsilon::half_rotation()
+            }
+
+            fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::abs_diff_eq(&diff, &T::zero(), epsilon)
+            }
+            fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::abs_diff_ne(&diff, &T::zero(), epsilon)
+            }
+        }
+
+        impl<T> RelativeEq for $name<T>
+        where
+            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + Clone + RelativeEq,
+            T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
+        {
+            fn default_max_relative() -> Self::Epsilon {
+                T::default_max_relative() * T::Epsilon::half_rotation()
+            }
+
+            fn relative_eq(
+                &self,
+                other: &Self,
+                epsilon: T::Epsilon,
+                max_relative: T::Epsilon,
+            ) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::relative_eq(&diff, &T::zero(), epsilon, max_relative)
+            }
+            fn relative_ne(
+                &self,
+                other: &Self,
+                epsilon: Self::Epsilon,
+                max_relative: Self::Epsilon,
+            ) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::relative_ne(&diff, &T::zero(), epsilon, max_relative)
+            }
+        }
+
+        impl<T> UlpsEq for $name<T>
+        where
+            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + Clone + UlpsEq,
+            T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
+        {
+            fn default_max_ulps() -> u32 {
+                T::default_max_ulps() * 180 // This should probably depend on T
+            }
+
+            fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::ulps_eq(&diff, &T::zero(), epsilon, max_ulps)
+            }
+            fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+                let diff: T = (self.clone() - other.clone()).into_degrees();
+                T::ulps_ne(&diff, &T::zero(), epsilon, max_ulps)
+            }
+        }
 
         impl<T: Add<Output=T>> Add<$name<T>> for $name<T> {
             type Output = $name<T>;
@@ -254,11 +385,11 @@ macro_rules! make_hues {
         #[cfg(feature = "random")]
         impl<T> Distribution<$name<T>> for Standard
         where
-            T: Float + FromF64,
+            T: RealAngle + FullRotation + Mul<Output = T>,
             Standard: Distribution<T>,
         {
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $name<T> {
-                $name(rng.gen() * from_f64(360.0))
+                $name::from_degrees(rng.gen() * T::full_rotation())
             }
         }
 
@@ -292,25 +423,12 @@ make_hues! {
     struct OklabHue;
 }
 
-#[inline]
-fn normalize_angle<T: Float + FromF64>(deg: T) -> T {
-    let c360 = from_f64(360.0);
-    let c180 = from_f64(180.0);
-    deg - (((deg + c180) / c360) - T::one()).ceil() * c360
-}
-
-#[inline]
-fn normalize_angle_positive<T: Float + FromF64>(deg: T) -> T {
-    let c360 = from_f64(360.0);
-    deg - ((deg / c360).floor() * c360)
-}
-
 macro_rules! impl_uniform {
     (  $uni_ty: ident , $base_ty: ident) => {
         #[cfg(feature = "random")]
         pub struct $uni_ty<T>
         where
-            T: Float + FromF64 + SampleUniform,
+            T: SampleUniform,
         {
             hue: Uniform<T>,
         }
@@ -318,7 +436,14 @@ macro_rules! impl_uniform {
         #[cfg(feature = "random")]
         impl<T> SampleUniform for $base_ty<T>
         where
-            T: Float + FromF64 + SampleUniform,
+            T: RealAngle
+                + UnsignedAngle
+                + FullRotation
+                + Add<Output = T>
+                + Mul<Output = T>
+                + PartialOrd
+                + Clone
+                + SampleUniform,
         {
             type Sampler = $uni_ty<T>;
         }
@@ -326,7 +451,14 @@ macro_rules! impl_uniform {
         #[cfg(feature = "random")]
         impl<T> UniformSampler for $uni_ty<T>
         where
-            T: Float + FromF64 + SampleUniform,
+            T: RealAngle
+                + UnsignedAngle
+                + FullRotation
+                + Add<Output = T>
+                + Mul<Output = T>
+                + PartialOrd
+                + Clone
+                + SampleUniform,
         {
             type X = $base_ty<T>;
 
@@ -335,13 +467,13 @@ macro_rules! impl_uniform {
                 B1: SampleBorrow<Self::X> + Sized,
                 B2: SampleBorrow<Self::X> + Sized,
             {
-                let low = *low_b.borrow();
-                let normalized_low = $base_ty::to_positive_degrees(low);
-                let high = *high_b.borrow();
-                let normalized_high = $base_ty::to_positive_degrees(high);
+                let low = low_b.borrow().clone();
+                let normalized_low = $base_ty::into_positive_degrees(low.clone());
+                let high = high_b.borrow().clone();
+                let normalized_high = $base_ty::into_positive_degrees(high.clone());
 
                 let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-                    normalized_high + from_f64(360.0)
+                    normalized_high + T::full_rotation()
                 } else {
                     normalized_high
                 };
@@ -356,13 +488,13 @@ macro_rules! impl_uniform {
                 B1: SampleBorrow<Self::X> + Sized,
                 B2: SampleBorrow<Self::X> + Sized,
             {
-                let low = *low_b.borrow();
-                let normalized_low = $base_ty::to_positive_degrees(low);
-                let high = *high_b.borrow();
-                let normalized_high = $base_ty::to_positive_degrees(high);
+                let low = low_b.borrow().clone();
+                let normalized_low = $base_ty::into_positive_degrees(low.clone());
+                let high = high_b.borrow().clone();
+                let normalized_high = $base_ty::into_positive_degrees(high.clone());
 
                 let normalized_high = if normalized_low >= normalized_high && low.0 < high.0 {
-                    normalized_high + from_f64(360.0)
+                    normalized_high + T::full_rotation()
                 } else {
                     normalized_high
                 };
@@ -373,7 +505,7 @@ macro_rules! impl_uniform {
             }
 
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $base_ty<T> {
-                $base_ty::from(self.hue.sample(rng) * from_f64(360.0))
+                $base_ty::from(self.hue.sample(rng) * T::full_rotation())
             }
         }
     };
@@ -386,8 +518,10 @@ impl_uniform!(UniformOklabHue, OklabHue);
 
 #[cfg(test)]
 mod test {
-    use super::{normalize_angle, normalize_angle_positive};
-    use crate::RgbHue;
+    use crate::{
+        angle::{SignedAngle, UnsignedAngle},
+        RgbHue,
+    };
 
     #[test]
     fn normalize_angle_0_360() {
@@ -422,7 +556,10 @@ mod test {
             90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 0.0, 0.5, 180.0, 280.0,
         ];
 
-        let result: Vec<f32> = inp.iter().map(|x| normalize_angle_positive(*x)).collect();
+        let result: Vec<f32> = inp
+            .iter()
+            .map(|x| (*x).normalize_unsigned_angle())
+            .collect();
         for (res, exp) in result.iter().zip(expected.iter()) {
             assert_relative_eq!(res, exp);
         }
@@ -461,7 +598,7 @@ mod test {
             179.5, 180.0, -179.5, -120.0, -0.5, 0.0, 0.5, 180.0, -80.0,
         ];
 
-        let result: Vec<f32> = inp.iter().map(|x| normalize_angle(*x)).collect();
+        let result: Vec<f32> = inp.iter().map(|x| (*x).normalize_signed_angle()).collect();
         for (res, exp) in result.iter().zip(expected.iter()) {
             assert_relative_eq!(res, exp);
         }
@@ -472,10 +609,10 @@ mod test {
         for i in -180..180 {
             let hue = RgbHue::from(4.0 * i as f32);
 
-            let degs = hue.to_degrees();
+            let degs = hue.into_degrees();
             assert!(degs > -180.0 && degs <= 180.0);
 
-            let pos_degs = hue.to_positive_degrees();
+            let pos_degs = hue.into_positive_degrees();
             assert!(pos_degs >= 0.0 && pos_degs < 360.0);
 
             assert_relative_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));

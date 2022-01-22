@@ -36,7 +36,7 @@
 //! which may result in loss of some color information in some cases. One such
 //! case is that a completely transparent resultant color will become black.
 
-use crate::float::Float;
+use crate::num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero};
 use crate::ComponentWise;
 
 pub use self::blend::Blend;
@@ -51,9 +51,11 @@ mod pre_alpha;
 mod test;
 
 /// A trait for custom blend functions.
-pub trait BlendFunction<C: Blend<Color = C> + ComponentWise>
+pub trait BlendFunction<C>
 where
-    C::Scalar: Float,
+    C: Blend<Color = C> + ComponentWise,
+    C::Scalar:
+        Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
 {
     /// Apply this blend function to a pair of colors.
     #[must_use]
@@ -67,7 +69,8 @@ where
 impl<C, F> BlendFunction<C> for F
 where
     C: Blend<Color = C> + ComponentWise,
-    C::Scalar: Float,
+    C::Scalar:
+        Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
     F: FnOnce(PreAlpha<C, C::Scalar>, PreAlpha<C, C::Scalar>) -> PreAlpha<C, C::Scalar>,
 {
     #[inline]
