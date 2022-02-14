@@ -32,7 +32,7 @@ use crate::{
 /// `Alpha`](crate::Alpha#Lchuva).
 pub type Lchuva<Wp = D65, T = f32> = Alpha<Lchuv<Wp, T>, T>;
 
-/// CIE L\*C\*uv h°uv, a polar version of [CIE L\*u\*v\*](crate::Lab).
+/// CIE L\*C\*uv h°uv, a polar version of [CIE L\*u\*v\*](crate::Luv).
 ///
 /// L\*C\*uv h°uv shares its range and perceptual uniformity with L\*u\*v\*, but
 /// it's a cylindrical color space, like [HSL](crate::Hsl) and
