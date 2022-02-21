@@ -2,7 +2,7 @@
 //! `"named_from_str"` Cargo features.
 //!
 //! They are taken from the [SVG keyword
-//! colors](https://www.w3.org/TR/SVG/types.html#ColorKeywords) (same as in
+//! colors](https://www.w3.org/TR/SVG11/types.html#ColorKeywords) (same as in
 //! CSS3) and they can be used as if they were pixel values:
 //!
 //! ```
