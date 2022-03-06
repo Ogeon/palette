@@ -13,6 +13,8 @@ mod mix;
 mod lighten_saturate;
 #[macro_use]
 mod equality;
+#[macro_use]
+mod blend;
 
 #[cfg(feature = "random")]
 #[macro_use]

@@ -20,19 +20,19 @@ use rand::{
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
-    blend::PreAlpha,
+    blend::{PreAlpha, Premultiply},
     cast::{ComponentOrder, Packed},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{linear::LinearFn, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
-    num::{Abs, Arithmetics, IsValidDivisor, MinMax, One, Real, Recip, Sqrt, Trigonometry, Zero},
+    num::{Abs, Arithmetics, IsValidDivisor, MinMax, One, Real, Recip, Trigonometry, Zero},
     rgb::{RgbSpace, RgbStandard, TransferFn},
-    stimulus::{FromStimulus, Stimulus},
+    stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::Any,
-    Blend, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten,
-    LightenAssign, Luma, Mix, MixAssign, RelativeContrast, RgbHue, Xyz, Yxy,
+    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
+    Mix, MixAssign, RelativeContrast, RgbHue, Xyz, Yxy,
 };
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
@@ -635,51 +635,9 @@ where
     }
 }
 
-impl<S, T> Blend for Rgb<S, T>
-where
-    S: RgbStandard<T, TransferFn = LinearFn>,
-    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
-    Rgba<S, T>: From<PreAlpha<Rgb<S, T>, T>>,
-{
-    type Color = Rgb<S, T>;
+impl_premultiply!(Rgb<S> where S: RgbStandard<T, TransferFn = LinearFn>);
 
-    fn into_premultiplied(self) -> PreAlpha<Rgb<S, T>, T> {
-        Rgba {
-            color: self,
-            alpha: T::one(),
-        }
-        .into_premultiplied()
-    }
-
-    fn from_premultiplied(color: PreAlpha<Rgb<S, T>, T>) -> Self {
-        Rgba::from_premultiplied(color).color
-    }
-}
-
-impl<S, T> ComponentWise for Rgb<S, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Rgb<S, T>, mut f: F) -> Rgb<S, T> {
-        Rgb {
-            red: f(self.red.clone(), other.red.clone()),
-            green: f(self.green.clone(), other.green.clone()),
-            blue: f(self.blue.clone(), other.blue.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Rgb<S, T> {
-        Rgb {
-            red: f(self.red.clone()),
-            green: f(self.green.clone()),
-            blue: f(self.blue.clone()),
-            standard: PhantomData,
-        }
-    }
-}
+impl<S, T> StimulusColor for Rgb<S, T> where T: Stimulus {}
 
 impl<S, T> Default for Rgb<S, T>
 where

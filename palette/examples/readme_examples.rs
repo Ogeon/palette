@@ -91,7 +91,7 @@ fn color_operations_1() {
 }
 
 fn color_operations_2() {
-    use palette::{blend::Blend, cast, Srgb, WithAlpha};
+    use palette::{blend::Compose, cast, Srgb, WithAlpha};
 
     // The input to this function could be data from image files.
     fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {

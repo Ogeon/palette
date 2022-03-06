@@ -60,6 +60,11 @@ macro_rules! impl_uint_components {
 
 impl_uint_components!(u8, u16, u32, u64, u128);
 
+/// A marker trait for colors where all components are stimuli.
+///
+/// Typical stimulus colors are RGB and XYZ.
+pub trait StimulusColor {}
+
 /// Converts from a stimulus color component type, while performing the
 /// appropriate scaling, rounding and clamping.
 ///

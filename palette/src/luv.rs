@@ -15,12 +15,14 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
+    blend::{PreAlpha, Premultiply},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
-    num::{Arithmetics, MinMax, One, Powf, Powi, Real, Recip, Trigonometry, Zero},
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Powf, Powi, Real, Recip, Trigonometry, Zero},
+    stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten,
-    LightenAssign, LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
+    LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -287,6 +289,7 @@ where
 
 impl_mix!(Luv<Wp>);
 impl_lighten!(Luv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {u, v} phantom: white_point);
+impl_premultiply!(Luv<Wp>);
 
 impl<Wp, T> GetHue for Luv<Wp, T>
 where
@@ -299,31 +302,6 @@ where
             None
         } else {
             Some(LuvHue::from_radians(self.v.clone().atan2(self.u.clone())))
-        }
-    }
-}
-
-impl<Wp, T> ComponentWise for Luv<Wp, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luv<Wp, T>, mut f: F) -> Luv<Wp, T> {
-        Luv {
-            l: f(self.l.clone(), other.l.clone()),
-            u: f(self.u.clone(), other.u.clone()),
-            v: f(self.v.clone(), other.v.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Luv<Wp, T> {
-        Luv {
-            l: f(self.l.clone()),
-            u: f(self.u.clone()),
-            v: f(self.v.clone()),
-            white_point: PhantomData,
         }
     }
 }

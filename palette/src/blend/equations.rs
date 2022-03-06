@@ -1,8 +1,12 @@
 use core::ops::{Mul, Sub};
 
-use crate::blend::{BlendFunction, PreAlpha};
-use crate::num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero};
-use crate::{Blend, ComponentWise};
+use crate::{
+    blend::{BlendFunction, PreAlpha},
+    cast::ArrayCast,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+};
+
+use super::{zip_colors, Premultiply};
 
 /// A pair of blending equations and corresponding parameters.
 ///
@@ -61,56 +65,79 @@ impl Equations {
     }
 }
 
-impl<C> BlendFunction<C> for Equations
+impl<C, S, const N: usize, const M: usize> BlendFunction<C> for Equations
 where
-    C: Blend<Color = C> + ComponentWise + Clone,
-    C::Scalar:
-        Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
+    C: Clone
+        + Premultiply<Scalar = S>
+        + Mul<Output = C>
+        + Mul<S, Output = C>
+        + ArrayCast<Array = [S; N]>,
+    PreAlpha<C>: ArrayCast<Array = [S; M]>,
+    S: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
 {
-    fn apply_to(
-        self,
-        source: PreAlpha<C, C::Scalar>,
-        destination: PreAlpha<C, C::Scalar>,
-    ) -> PreAlpha<C, C::Scalar> {
-        let col_src_param = self
-            .color_parameters
-            .source
-            .apply_to(source.clone(), destination.clone());
-        let col_dst_param = self
-            .color_parameters
-            .destination
-            .apply_to(source.clone(), destination.clone());
-        let alpha_src_param = self
-            .alpha_parameters
-            .source
-            .apply_to(source.clone(), destination.clone());
-        let alpha_dst_param = self
-            .alpha_parameters
-            .destination
-            .apply_to(source.clone(), destination.clone());
+    fn apply_to(self, source: PreAlpha<C>, destination: PreAlpha<C>) -> PreAlpha<C> {
+        let (src_color, mut dst_color) =
+            if matches!(self.color_equation, Equation::Min | Equation::Max) {
+                (source.color.clone(), destination.color.clone())
+            } else {
+                let col_src_param = self
+                    .color_parameters
+                    .source
+                    .apply_to(source.clone(), destination.clone());
+                let col_dst_param = self
+                    .color_parameters
+                    .destination
+                    .apply_to(source.clone(), destination.clone());
 
-        let src_color = col_src_param.mul_color(source.color.clone());
-        let dst_color = col_dst_param.mul_color(destination.color.clone());
-        let src_alpha = alpha_src_param.mul_constant(source.alpha.clone());
-        let dst_alpha = alpha_dst_param.mul_constant(destination.alpha.clone());
+                (
+                    col_src_param.mul_color(source.color.clone()),
+                    col_dst_param.mul_color(destination.color.clone()),
+                )
+            };
 
-        let color = match self.color_equation {
-            Equation::Add => src_color.component_wise(&dst_color, |a, b| a + b),
-            Equation::Subtract => src_color.component_wise(&dst_color, |a, b| a - b),
-            Equation::ReverseSubtract => dst_color.component_wise(&src_color, |a, b| a - b),
-            Equation::Min => source.color.component_wise(&destination.color, MinMax::min),
-            Equation::Max => source.color.component_wise(&destination.color, MinMax::max),
+        let (src_alpha, dst_alpha) = if matches!(self.alpha_equation, Equation::Min | Equation::Max)
+        {
+            (source.alpha, destination.alpha)
+        } else {
+            let alpha_src_param = self
+                .alpha_parameters
+                .source
+                .apply_to(source.clone(), destination.clone());
+            let alpha_dst_param = self
+                .alpha_parameters
+                .destination
+                .apply_to(source.clone(), destination.clone());
+
+            (
+                alpha_src_param.mul_constant(source.alpha.clone()),
+                alpha_dst_param.mul_constant(destination.alpha.clone()),
+            )
         };
 
-        let alpha = match self.alpha_equation {
-            Equation::Add => src_alpha + dst_alpha,
-            Equation::Subtract => src_alpha - dst_alpha,
-            Equation::ReverseSubtract => dst_alpha - src_alpha,
-            Equation::Min => source.alpha.min(destination.alpha),
-            Equation::Max => source.alpha.max(destination.alpha),
+        let color_op = match self.color_equation {
+            Equation::Add => |src, dst| src + dst,
+            Equation::Subtract => |src, dst| src - dst,
+            Equation::ReverseSubtract => |src, dst| dst - src,
+            Equation::Min => MinMax::min,
+            Equation::Max => MinMax::max,
         };
 
-        PreAlpha { color, alpha }
+        let alpha_op = match self.alpha_equation {
+            Equation::Add => |src, dst| src + dst,
+            Equation::Subtract => |src, dst| src - dst,
+            Equation::ReverseSubtract => |src, dst| dst - src,
+            Equation::Min => MinMax::min,
+            Equation::Max => MinMax::max,
+        };
+
+        for (src, dst) in zip_colors(src_color, &mut dst_color) {
+            *dst = color_op(src, dst.clone());
+        }
+
+        PreAlpha {
+            color: dst_color,
+            alpha: alpha_op(src_alpha, dst_alpha),
+        }
     }
 }
 
@@ -184,9 +211,14 @@ pub enum Parameter {
 }
 
 impl Parameter {
-    fn apply_to<C, T>(&self, source: PreAlpha<C, T>, destination: PreAlpha<C, T>) -> ParamOut<C, T>
+    fn apply_to<C, T, const N: usize>(
+        &self,
+        source: PreAlpha<C>,
+        destination: PreAlpha<C>,
+    ) -> ParamOut<C>
     where
-        PreAlpha<C, T>: ComponentWise<Scalar = T>,
+        C: Premultiply<Scalar = T>,
+        PreAlpha<C>: ArrayCast<Array = [T; N]>,
         T: Real + One + Zero + Sub<Output = T>,
     {
         match *self {
@@ -194,11 +226,11 @@ impl Parameter {
             Parameter::Zero => ParamOut::Constant(T::zero()),
             Parameter::SourceColor => ParamOut::Color(source),
             Parameter::OneMinusSourceColor => {
-                ParamOut::Color(source.component_wise_self(|a| T::one() - a))
+                ParamOut::Color(<[T; N]>::from(source).map(|a| T::one() - a).into())
             }
             Parameter::DestinationColor => ParamOut::Color(destination),
             Parameter::OneMinusDestinationColor => {
-                ParamOut::Color(destination.component_wise_self(|a| T::one() - a))
+                ParamOut::Color(<[T; N]>::from(destination).map(|a| T::one() - a).into())
             }
             Parameter::SourceAlpha => ParamOut::Constant(source.alpha),
             Parameter::OneMinusSourceAlpha => ParamOut::Constant(T::one() - source.alpha),
@@ -208,14 +240,14 @@ impl Parameter {
     }
 }
 
-enum ParamOut<C, T> {
-    Color(PreAlpha<C, T>),
-    Constant(T),
+enum ParamOut<C: Premultiply> {
+    Color(PreAlpha<C>),
+    Constant(C::Scalar),
 }
 
-impl<C, T> ParamOut<C, T>
+impl<C, T> ParamOut<C>
 where
-    C: ComponentWise<Scalar = T>,
+    C: Mul<Output = C> + Mul<T, Output = C> + Premultiply<Scalar = T>,
     T: Mul<Output = T> + Clone,
 {
     fn mul_constant(self, other: T) -> T {
@@ -227,8 +259,8 @@ where
 
     fn mul_color(self, other: C) -> C {
         match self {
-            ParamOut::Color(c) => other.component_wise(&c.color, |a, b| a * b),
-            ParamOut::Constant(c) => other.component_wise_self(|a| a * c.clone()),
+            ParamOut::Color(c) => other * c.color,
+            ParamOut::Constant(c) => other * c,
         }
     }
 }

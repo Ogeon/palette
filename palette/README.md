@@ -16,7 +16,7 @@ A color management and conversion library that focuses on maintaining correctnes
 
 ## Minimum Supported Rust Version (MSRV)
 
-This version of Palette has been automatically tested with Rust version `1.51.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
+This version of Palette has been automatically tested with Rust version `1.55.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
 
 ## Getting Started
 
@@ -153,10 +153,10 @@ This image shows the transition from the color to `new_color` in HSL and HSV:
 
 ![Gradients showing the transition from the starting color to the modified color in HSL and HSV.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_color_operations_1.png)
 
-In addition to the operator traits, the SVG blend functions have also been implemented.
+In addition to the operator traits, the SVG blend and composition functions have also been implemented.
 
 ```rust
-use palette::{blend::Blend, cast, Srgb, WithAlpha};
+use palette::{blend::Compose, cast, Srgb, WithAlpha};
 
 // The input to this function could be data from image files.
 fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
@@ -182,7 +182,7 @@ fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
 |---------|---------|--------|
 | ![A photo of various fruit.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/example-data/input/fruits-128.png) | ![A photo of kitten in a strawhat.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/example-data/input/cat-128.png) |![Image 2 blended over Image 1 with 50% transparency.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_color_operations_2.png)
 
-There's also the option to explicitly convert to and from premultiplied alpha, to avoid converting back and forth more than necessary, using `Blend::into_premultiplied` and `Blend::from_premultiplied`.
+There's also the option to explicitly convert to and from premultiplied alpha, to avoid converting back and forth more than necessary, using the `PreAlpha` type.
 
 ### Gradients
 

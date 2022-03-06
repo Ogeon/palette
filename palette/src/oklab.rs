@@ -13,13 +13,15 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
+    blend::{PreAlpha, Premultiply},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     matrix::multiply_xyz,
-    num::{Arithmetics, Cbrt, MinMax, One, Real, Trigonometry, Zero},
+    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mat3, Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mat3,
+    Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
 };
 
 #[rustfmt::skip]
@@ -284,6 +286,7 @@ where
 
 impl_mix!(Oklab);
 impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b});
+impl_premultiply!(Oklab);
 
 impl<T> GetHue for Oklab<T>
 where
@@ -297,25 +300,6 @@ where
         } else {
             Some(OklabHue::from_radians(self.b.clone().atan2(self.a.clone())))
         }
-    }
-}
-
-impl<T> ComponentWise for Oklab<T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Self, mut f: F) -> Self {
-        Self::new(
-            f(self.l.clone(), other.l.clone()),
-            f(self.a.clone(), other.a.clone()),
-            f(self.b.clone(), other.b.clone()),
-        )
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Self {
-        Self::new(f(self.l.clone()), f(self.a.clone()), f(self.b.clone()))
     }
 }
 

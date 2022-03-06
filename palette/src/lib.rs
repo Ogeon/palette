@@ -227,7 +227,6 @@ use core::ops::Neg;
 use luma::Luma;
 
 pub use alpha::{Alpha, WithAlpha};
-pub use blend::Blend;
 #[cfg(feature = "std")]
 pub use gradient::Gradient;
 
@@ -411,7 +410,6 @@ macro_rules! assert_ranges {
 #[macro_use]
 mod macros;
 
-pub mod blend;
 #[cfg(feature = "std")]
 pub mod gradient;
 
@@ -423,6 +421,7 @@ mod random_sampling;
 
 mod alpha;
 pub mod angle;
+pub mod blend;
 pub mod cast;
 pub mod chromatic_adaptation;
 mod color_difference;
@@ -1446,24 +1445,6 @@ where
     fn desaturate_fixed_assign(&mut self, amount: Self::Scalar) {
         self.saturate_fixed_assign(-amount);
     }
-}
-
-/// Perform a unary or binary operation on each component of a color.
-pub trait ComponentWise {
-    /// The scalar type for color components.
-    type Scalar;
-
-    /// Perform a binary operation on this and an other color.
-    #[must_use]
-    fn component_wise<F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar>(
-        &self,
-        other: &Self,
-        f: F,
-    ) -> Self;
-
-    /// Perform a unary operation on this color.
-    #[must_use]
-    fn component_wise_self<F: FnMut(Self::Scalar) -> Self::Scalar>(&self, f: F) -> Self;
 }
 
 /// Extension trait for fixed size arrays.
