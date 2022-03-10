@@ -500,22 +500,6 @@
 <span id="498">498</span>
 <span id="499">499</span>
 <span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
@@ -531,13 +515,15 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">angle::RealAngle</span>,
+    <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
     <span class="ident">convert::FromColorUnclamped</span>,
     <span class="ident">matrix::multiply_xyz</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Cbrt</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Cbrt</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>},
+    <span class="ident">stimulus::Stimulus</span>,
     <span class="ident">white_point::D65</span>,
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>,
-    <span class="ident">LightenAssign</span>, <span class="ident">Mat3</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">OklabHue</span>, <span class="ident">Oklch</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mat3</span>,
+    <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">OklabHue</span>, <span class="ident">Oklch</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
 };
 
 <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
@@ -802,6 +788,7 @@
 
 <span class="macro">impl_mix!</span>(<span class="ident">Oklab</span>);
 <span class="macro">impl_lighten!</span>(<span class="ident">Oklab</span> <span class="ident">increase</span> {<span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]} <span class="ident">other</span> {<span class="ident">a</span>, <span class="ident">b</span>});
+<span class="macro">impl_premultiply!</span>(<span class="ident">Oklab</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -815,25 +802,6 @@
         } <span class="kw">else</span> {
             <span class="prelude-val">Some</span>(<span class="ident">OklabHue::from_radians</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>().<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>())))
         }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentWise</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">l</span>.<span class="ident">clone</span>()),
-            <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">a</span>.<span class="ident">clone</span>()),
-            <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">b</span>.<span class="ident">clone</span>()),
-        )
-    }
-
-    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">f</span>(<span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>()), <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>()), <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>()))
     }
 }
 

@@ -374,6 +374,11 @@
 <span id="372">372</span>
 <span id="373">373</span>
 <span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Traits for working with stimulus colors and values, such as RGB and XYZ.</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -435,6 +440,11 @@
 }
 
 <span class="macro">impl_uint_components!</span>(<span class="ident">u8</span>, <span class="ident">u16</span>, <span class="ident">u32</span>, <span class="ident">u64</span>, <span class="ident">u128</span>);
+
+<span class="doccomment">/// A marker trait for colors where all components are stimuli.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Typical stimulus colors are RGB and XYZ.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">StimulusColor</span> {}
 
 <span class="doccomment">/// Converts from a stimulus color component type, while performing the</span>
 <span class="doccomment">/// appropriate scaling, rounding and clamping.</span>

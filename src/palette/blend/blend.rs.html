@@ -513,570 +513,518 @@
 <span id="511">511</span>
 <span id="512">512</span>
 <span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">blend</span>::{<span class="ident">BlendFunction</span>, <span class="ident">PreAlpha</span>},
-    <span class="ident">clamp</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
-    <span class="ident">ComponentWise</span>,
+    <span class="ident">cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>},
+    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
+    <span class="ident">stimulus</span>::{<span class="ident">Stimulus</span>, <span class="ident">StimulusColor</span>},
+    <span class="ident">Alpha</span>,
 };
 
-<span class="doccomment">/// A trait for colors that can be blended together.</span>
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">blend_alpha</span>, <span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>};
+
+<span class="doccomment">/// A trait for different ways of mixing colors together.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Blending can either be performed through the predefined blend modes, or a</span>
-<span class="doccomment">/// custom blend functions.</span>
+<span class="doccomment">/// This implements the classic separable blend modes, [as described by</span>
+<span class="doccomment">/// W3C](https://www.w3.org/TR/compositing-1/#blending).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// _Note: The default implementations of the blend modes are meant for color</span>
 <span class="doccomment">/// components in the range [0.0, 1.0] and may otherwise produce strange</span>
 <span class="doccomment">/// results._</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Blend</span>: <span class="ident">Sized</span>
-<span class="kw">where</span>
-    <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar</span>:
-        <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-{
-    <span class="doccomment">/// The core color type. Typically `Self` for color types without alpha.</span>
-    <span class="kw">type</span> <span class="ident">Color</span>: <span class="ident">Blend</span><span class="op">&lt;</span><span class="ident">Color</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ComponentWise</span>;
-
-    <span class="doccomment">/// Convert the color to premultiplied alpha.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_premultiplied</span>(<span class="self">self</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span>, <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar</span><span class="op">&gt;</span>;
-
-    <span class="doccomment">/// Convert the color from premultiplied alpha.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_premultiplied</span>(
-        <span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span>, <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="self">Self</span>;
-
-    <span class="doccomment">/// Blend self, as the source color, with `destination`, using</span>
-    <span class="doccomment">/// `blend_function`. Anything that implements `BlendFunction` is</span>
-    <span class="doccomment">/// acceptable, including functions and closures.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{LinSrgb, LinSrgba, Blend};</span>
-    <span class="doccomment">/// use palette::blend::PreAlpha;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// type PreRgba = PreAlpha&lt;LinSrgb&lt;f32&gt;, f32&gt;;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// fn blend_mode(a: PreRgba, b: PreRgba) -&gt; PreRgba {</span>
-    <span class="doccomment">///    PreAlpha {</span>
-    <span class="doccomment">///        color: LinSrgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),</span>
-    <span class="doccomment">///        alpha: a.alpha * b.alpha,</span>
-    <span class="doccomment">///    }</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);</span>
-    <span class="doccomment">/// let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);</span>
-    <span class="doccomment">/// let c = a.blend(b, blend_mode);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">blend</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">destination</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span>,
-    {
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(
-            <span class="ident">blend_function</span>.<span class="ident">apply_to</span>(<span class="self">self</span>.<span class="ident">into_premultiplied</span>(), <span class="ident">destination</span>.<span class="ident">into_premultiplied</span>()),
-        )
-    }
-
-    <span class="doccomment">/// Place `self` over `other`. This is the good old common alpha</span>
-    <span class="doccomment">/// composition equation.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>
-                .<span class="ident">color</span>
-                .<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// Results in the parts of `self` that overlaps the visible parts of</span>
-    <span class="doccomment">/// `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise_self</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(<span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>, <span class="ident">zero</span>, <span class="ident">one</span>),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// Results in the parts of `self` that lies outside the visible parts of</span>
-    <span class="doccomment">/// `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise_self</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(<span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="ident">dst</span>.<span class="ident">alpha</span>), <span class="ident">zero</span>(), <span class="ident">one</span>()),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// Place `self` over only the visible parts of `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>
-                .<span class="ident">color</span>
-                .<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(<span class="ident">dst</span>.<span class="ident">alpha</span>, <span class="ident">zero</span>(), <span class="ident">one</span>()),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// Results in either `self` or `other`, where they do not overlap.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// Add `self` and `other`. This uses the alpha component to regulate the</span>
-    <span class="doccomment">/// effect, so it&#39;s not just plain component wise addition.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(<span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">dst</span>.<span class="ident">alpha</span>, <span class="ident">zero</span>, <span class="ident">one</span>),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
-
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Blend</span> {
     <span class="doccomment">/// Multiply `self` with `other`. This uses the alpha component to regulate</span>
     <span class="doccomment">/// the effect, so it&#39;s not just plain component wise multiplication.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Make a color which is at least as light as `self` or `other`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>();
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>
-                .<span class="ident">color</span>
-                .<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">-</span> <span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>,
-                <span class="ident">one</span>,
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `other`</span>
     <span class="doccomment">/// is light. This results in an S curve.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">dst</span>.<span class="ident">alpha</span> {
-                    <span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> {
-                    <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">one</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">one</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                        <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> <span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>
-                        <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                }
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Return the darkest parts of `self` and `other`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                (<span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>).<span class="ident">min</span>(<span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                    <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                    <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Return the lightest parts of `self` and `other`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                (<span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>).<span class="ident">max</span>(<span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                    <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                    <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Lighten `other` to reflect `self`. Results in `other` if `self` is</span>
     <span class="doccomment">/// black.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">b</span>.<span class="ident">is_valid_divisor</span>() {
-                    <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">src</span>.<span class="ident">alpha</span> {
-                    <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                        <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                        <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> {
-                    <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>()
-                        <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                        <span class="op">*</span> <span class="ident">one</span>()
-                            .<span class="ident">min</span>((<span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">/</span> (<span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">a</span>))
-                        <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                        <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                }
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Darken `other` to reflect `self`. Results in `other` if `self` is</span>
     <span class="doccomment">/// white.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">a</span>.<span class="ident">is_valid_divisor</span>() <span class="op">&amp;&amp;</span> <span class="ident">b</span> <span class="op">==</span> <span class="ident">dst</span>.<span class="ident">alpha</span> {
-                    <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">a</span>.<span class="ident">is_valid_divisor</span>() {
-                    <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> {
-                    <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>()
-                        <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                        <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="ident">one</span>().<span class="ident">min</span>((<span class="ident">one</span>() <span class="op">-</span> <span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">a</span>))
-                        <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                        <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                }
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `self`</span>
     <span class="doccomment">/// is light. This is similar to `overlay`, but depends on `self` instead</span>
     <span class="doccomment">/// of `other`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span> {
-                    <span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> {
-                    <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">one</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>) <span class="op">+</span> <span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">one</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                        <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> <span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>
-                        <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                }
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Lighten `other` if `self` is light, or darken `other` as if it&#39;s burned</span>
     <span class="doccomment">/// if `self` is dark. The effect is increased if the components of `self`</span>
     <span class="doccomment">/// is further from 0.5.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-        <span class="kw">let</span> <span class="ident">three</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">two</span>() <span class="op">+</span> <span class="ident">one</span>();
-        <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">two</span>() <span class="op">+</span> <span class="ident">two</span>();
-        <span class="kw">let</span> <span class="ident">twelve</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">four</span>() <span class="op">+</span> <span class="ident">four</span>() <span class="op">+</span> <span class="ident">four</span>();
-        <span class="kw">let</span> <span class="ident">sixteen</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">twelve</span>() <span class="op">+</span> <span class="ident">four</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">alpha</span>.<span class="ident">is_valid_divisor</span>() {
-                    <span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                } <span class="kw">else</span> {
-                    <span class="ident">zero</span>()
-                };
-
-                <span class="kw">if</span> <span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span> {
-                    <span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> (<span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>) <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="ident">m</span>))
-                        <span class="op">+</span> <span class="ident">a</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>)
-                        <span class="op">+</span> <span class="ident">b</span> <span class="op">*</span> (<span class="ident">one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">four</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">dst</span>.<span class="ident">alpha</span> {
-                    <span class="kw">let</span> <span class="ident">m2</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">m</span>;
-                    <span class="kw">let</span> <span class="ident">m3</span> <span class="op">=</span> <span class="ident">m2</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">m</span>;
-
-                    <span class="ident">dst</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>()
-                        <span class="op">*</span> (<span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-                        <span class="op">*</span> (<span class="ident">m3</span> <span class="op">*</span> <span class="ident">sixteen</span>() <span class="op">-</span> <span class="ident">m2</span> <span class="op">*</span> <span class="ident">twelve</span>() <span class="op">-</span> <span class="ident">m</span> <span class="op">*</span> <span class="ident">three</span>())
-                        <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">a</span>
-                        <span class="op">-</span> <span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                        <span class="op">+</span> <span class="ident">b</span>
-                } <span class="kw">else</span> {
-                    <span class="ident">dst</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">*</span> (<span class="ident">two</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>) <span class="op">*</span> (<span class="ident">m</span>.<span class="ident">clone</span>().<span class="ident">sqrt</span>() <span class="op">-</span> <span class="ident">m</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">a</span>
-                        <span class="op">-</span> <span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>
-                        <span class="op">+</span> <span class="ident">b</span>
-                }
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Return the absolute difference between `self` and `other`. It&#39;s</span>
     <span class="doccomment">/// basically `abs(self - other)`, but regulated by the alpha component.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>.<span class="ident">color</span>.<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> (<span class="ident">a</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span>).<span class="ident">min</span>(<span class="ident">b</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src</span>.<span class="ident">alpha</span>)
-            }),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
-    }
+    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Similar to `difference`, but appears to result in a lower contrast.</span>
     <span class="doccomment">/// `other` is inverted if `self` is white, and preserved if `self` is</span>
     <span class="doccomment">/// black.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">multiply_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">screen_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">overlay_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">darken_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">lighten_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">dodge_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">burn_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">hard_light_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">soft_light_blend</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">difference_blend</span>)
+    }
+
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::one</span>;
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span> <span class="kw">as</span> <span class="ident">ComponentWise</span><span class="op">&gt;</span><span class="ident">::Scalar::zero</span>;
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">one</span>() <span class="op">+</span> <span class="ident">one</span>();
-
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into_premultiplied</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_premultiplied</span>();
-
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">src</span>
-                .<span class="ident">color</span>
-                .<span class="ident">component_wise</span>(<span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">color</span>, <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">b</span> <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> <span class="ident">a</span> <span class="op">*</span> <span class="ident">b</span>),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(
-                <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">src</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">dst</span>.<span class="ident">alpha</span>,
-                <span class="ident">zero</span>(),
-                <span class="ident">one</span>(),
-            ),
-        };
-
-        <span class="ident"><span class="self">Self</span>::from_premultiplied</span>(<span class="ident">result</span>)
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">exclusion_blend</span>)
     }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">C</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">multiply_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">screen_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">overlay_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">darken_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">lighten_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">dodge_blend</span>).<span class="ident">unpremultiply</span>().<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">burn_blend</span>).<span class="ident">unpremultiply</span>().<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">hard_light_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">soft_light_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">difference_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
+        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">exclusion_blend</span>)
+            .<span class="ident">unpremultiply</span>()
+            .<span class="ident">color</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">multiply_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">screen_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">overlay_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">darken_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">lighten_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">dodge_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">burn_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">hard_light_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">soft_light_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">difference_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">exclusion_blend</span>).<span class="ident">unpremultiply</span>()
+    }
+}
+
+<span class="kw">struct</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> {
+    <span class="ident">color</span>: <span class="ident">C</span>,
+    <span class="ident">color_pre</span>: <span class="ident">C</span>,
+    <span class="ident">alpha</span>: <span class="ident">C::Scalar</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="ident">new_opaque</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">BlendInput</span> {
+            <span class="ident">color_pre</span>: <span class="ident">color</span>.<span class="ident">clone</span>(),
+            <span class="ident">color</span>,
+            <span class="ident">alpha</span>: <span class="ident">C::Scalar::max_intensity</span>(),
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">color_pre</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">color</span>.<span class="ident">clone</span>().<span class="ident">premultiply</span>(<span class="ident">color</span>.<span class="ident">alpha</span>);
+        <span class="ident">BlendInput</span> {
+            <span class="ident">color</span>: <span class="ident">color</span>.<span class="ident">color</span>,
+            <span class="ident">color_pre</span>: <span class="ident">color_pre</span>.<span class="ident">color</span>,
+            <span class="ident">alpha</span>: <span class="ident">color_pre</span>.<span class="ident">alpha</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">color_pre</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">color</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> (<span class="ident">color</span>, <span class="ident">alpha</span>) <span class="op">=</span> <span class="ident">C::unpremultiply</span>(<span class="ident">color</span>);
+        <span class="ident">BlendInput</span> {
+            <span class="ident">color</span>,
+            <span class="ident">color_pre</span>,
+            <span class="ident">alpha</span>,
+        }
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">multiply_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Arithmetics</span>,
+{
+    <span class="ident">src</span> <span class="op">*</span> <span class="ident">dst</span>
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">screen_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span> <span class="op">*</span> <span class="ident">dst</span>
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">overlay_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="ident">hard_light_blend</span>(<span class="ident">dst</span>, <span class="ident">src</span>)
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">darken_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">MinMax</span>,
+{
+    <span class="ident">src</span>.<span class="ident">min</span>(<span class="ident">dst</span>)
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">lighten_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">MinMax</span>,
+{
+    <span class="ident">src</span>.<span class="ident">max</span>(<span class="ident">dst</span>)
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">dodge_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+{
+    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
+    <span class="comment">// values outside it and clamp.</span>
+    <span class="kw">if</span> <span class="ident">dst</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+        <span class="ident">T::zero</span>()
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">src</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
+        <span class="ident">T::one</span>()
+    } <span class="kw">else</span> {
+        <span class="ident">T::one</span>().<span class="ident">min</span>(<span class="ident">dst</span> <span class="op">/</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src</span>))
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">burn_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+{
+    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
+    <span class="comment">// values outside it and clamp.</span>
+    <span class="kw">if</span> <span class="ident">dst</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
+        <span class="ident">T::one</span>()
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
+        <span class="ident">T::zero</span>()
+    } <span class="kw">else</span> {
+        <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">T::one</span>().<span class="ident">min</span>((<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>) <span class="op">/</span> <span class="ident">src</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">hard_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">src</span>;
+
+    <span class="kw">if</span> <span class="ident">two_src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
+        <span class="ident">multiply_blend</span>(<span class="ident">two_src</span>, <span class="ident">dst</span>)
+    } <span class="kw">else</span> {
+        <span class="ident">screen_blend</span>(<span class="ident">two_src</span> <span class="op">-</span> <span class="ident">T::one</span>(), <span class="ident">dst</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">soft_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">4.0</span>);
+    <span class="kw">let</span> <span class="ident">twelve</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">12.0</span>);
+
+    <span class="kw">let</span> <span class="ident">four_dst</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
+    <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span>;
+
+    <span class="kw">let</span> <span class="ident">d_dst</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">four_dst</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
+        <span class="kw">let</span> <span class="ident">sixteen_dst</span> <span class="op">=</span> <span class="ident">four_dst</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
+        ((<span class="ident">sixteen_dst</span> <span class="op">-</span> <span class="ident">twelve</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">+</span> <span class="ident">four</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>
+    } <span class="kw">else</span> {
+        <span class="ident">dst</span>.<span class="ident">clone</span>().<span class="ident">sqrt</span>()
+    };
+
+    <span class="kw">if</span> <span class="ident">two_src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
+        <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">-</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">two_src</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>)
+    } <span class="kw">else</span> {
+        <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> (<span class="ident">two_src</span> <span class="op">-</span> <span class="ident">T::one</span>()) <span class="op">*</span> (<span class="ident">d_dst</span> <span class="op">-</span> <span class="ident">dst</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">difference_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Abs</span>,
+{
+    (<span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span>).<span class="ident">abs</span>()
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">exclusion_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span> <span class="op">-</span> (<span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">dst</span>) <span class="op">*</span> <span class="ident">src</span>
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">blend_separable</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="ident">F</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
+    <span class="ident">src</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="kw-2">mut</span> <span class="ident">dst</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="kw-2">mut</span> <span class="ident">blend</span>: <span class="ident">F</span>,
+) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span>,
+{
+    <span class="kw">let</span> <span class="ident">src_alpha</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>();
+    <span class="kw">let</span> <span class="ident">zipped_input</span> <span class="op">=</span> <span class="ident">zip_input</span>(<span class="ident">src</span>, <span class="ident">dst</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">dst</span>.<span class="ident">color_pre</span>, <span class="ident">dst</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>());
+
+    <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">src_pre</span>, <span class="ident">src_alpha</span>, <span class="ident">dst</span>, <span class="ident">dst_pre</span>, <span class="ident">dst_alpha</span>) <span class="kw">in</span> <span class="ident">zipped_input</span> {
+        <span class="kw-2">*</span><span class="ident">dst_pre</span> <span class="op">=</span> <span class="ident">src_pre</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst_alpha</span>)
+            <span class="op">+</span> <span class="ident">blend</span>(<span class="ident">src</span>, <span class="ident">dst</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src_alpha</span> <span class="op">*</span> <span class="ident">dst_alpha</span>
+            <span class="op">+</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src_alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst_pre</span>;
+    }
+
+    <span class="ident">PreAlpha</span> {
+        <span class="ident">color</span>: <span class="ident">dst</span>.<span class="ident">color_pre</span>,
+        <span class="ident">alpha</span>: <span class="ident">blend_alpha</span>(<span class="ident">src_alpha</span>, <span class="ident">dst</span>.<span class="ident">alpha</span>),
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">zip_input</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
+    <span class="ident">src</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="ident">dst</span>: <span class="ident">C</span>,
+    <span class="ident">dst_pre</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">C</span>,
+    <span class="ident">dst_alpha</span>: <span class="ident">T</span>,
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Clone</span>,
+{
+    <span class="kw">let</span> <span class="ident">src_alpha</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span>;
+    <span class="ident">IntoIterator::into_iter</span>(<span class="ident">cast::into_array</span>(<span class="ident">src</span>.<span class="ident">color</span>))
+        .<span class="ident">zip</span>(<span class="ident">cast::into_array</span>(<span class="ident">src</span>.<span class="ident">color_pre</span>))
+        .<span class="ident">zip</span>(<span class="ident">cast::into_array</span>(<span class="ident">dst</span>))
+        .<span class="ident">zip</span>(<span class="ident">cast::into_array_mut</span>(<span class="ident">dst_pre</span>))
+        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(((<span class="ident">src_color</span>, <span class="ident">src_pre</span>), <span class="ident">dst_color</span>), <span class="ident">dst_pre</span>)<span class="op">|</span> {
+            (
+                <span class="ident">src_color</span>,
+                <span class="ident">src_pre</span>,
+                <span class="ident">src_alpha</span>.<span class="ident">clone</span>(),
+                <span class="ident">dst_color</span>,
+                <span class="ident">dst_pre</span>,
+                <span class="ident">dst_alpha</span>.<span class="ident">clone</span>(),
+            )
+        })
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>

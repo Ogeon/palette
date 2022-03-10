@@ -1504,25 +1504,6 @@
 <span id="1502">1502</span>
 <span id="1503">1503</span>
 <span id="1504">1504</span>
-<span id="1505">1505</span>
-<span id="1506">1506</span>
-<span id="1507">1507</span>
-<span id="1508">1508</span>
-<span id="1509">1509</span>
-<span id="1510">1510</span>
-<span id="1511">1511</span>
-<span id="1512">1512</span>
-<span id="1513">1513</span>
-<span id="1514">1514</span>
-<span id="1515">1515</span>
-<span id="1516">1516</span>
-<span id="1517">1517</span>
-<span id="1518">1518</span>
-<span id="1519">1519</span>
-<span id="1520">1520</span>
-<span id="1521">1521</span>
-<span id="1522">1522</span>
-<span id="1523">1523</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
 <span class="doccomment">//! to avoid mistakes, such as mixing incompatible color types.</span>
@@ -1752,7 +1733,6 @@
 <span class="kw">use</span> <span class="ident">luma::Luma</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alpha</span>::{<span class="ident">Alpha</span>, <span class="ident">WithAlpha</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">blend::Blend</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gradient::Gradient</span>;
 
@@ -1936,7 +1916,6 @@
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">macros</span>;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">blend</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">gradient</span>;
 
@@ -1948,6 +1927,7 @@
 
 <span class="kw">mod</span> <span class="ident">alpha</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">angle</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">blend</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cast</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">chromatic_adaptation</span>;
 <span class="kw">mod</span> <span class="ident">color_difference</span>;
@@ -2971,24 +2951,6 @@
     <span class="kw">fn</span> <span class="ident">desaturate_fixed_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) {
         <span class="self">self</span>.<span class="ident">saturate_fixed_assign</span>(<span class="op">-</span><span class="ident">amount</span>);
     }
-}
-
-<span class="doccomment">/// Perform a unary or binary operation on each component of a color.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ComponentWise</span> {
-    <span class="doccomment">/// The scalar type for color components.</span>
-    <span class="kw">type</span> <span class="ident">Scalar</span>;
-
-    <span class="doccomment">/// Perform a binary operation on this and an other color.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident"><span class="self">Self</span>::Scalar</span>, <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="ident"><span class="self">Self</span>::Scalar</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-        <span class="ident">f</span>: <span class="ident">F</span>,
-    ) -&gt; <span class="self">Self</span>;
-
-    <span class="doccomment">/// Perform a unary operation on this color.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="ident"><span class="self">Self</span>::Scalar</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// Extension trait for fixed size arrays.</span>

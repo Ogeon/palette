@@ -643,26 +643,6 @@
 <span id="641">641</span>
 <span id="642">642</span>
 <span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
-<span id="655">655</span>
-<span id="656">656</span>
-<span id="657">657</span>
-<span id="658">658</span>
-<span id="659">659</span>
-<span id="660">660</span>
-<span id="661">661</span>
-<span id="662">662</span>
-<span id="663">663</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">marker::PhantomData</span>,
     <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
@@ -679,6 +659,7 @@
 };
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
     <span class="ident">convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>},
     <span class="ident">luma::LumaStandard</span>,
@@ -686,9 +667,10 @@
     <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>, <span class="ident">Recip</span>, <span class="ident">Zero</span>},
     <span class="ident">oklab</span>,
     <span class="ident">rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
+    <span class="ident">stimulus</span>::{<span class="ident">Stimulus</span>, <span class="ident">StimulusColor</span>},
     <span class="ident">white_point</span>::{<span class="ident">Any</span>, <span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">ComponentWise</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lab</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Luma</span>,
-    <span class="ident">Luv</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Yxy</span>,
+    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lab</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Luma</span>, <span class="ident">Luv</span>, <span class="ident">Mix</span>,
+    <span class="ident">MixAssign</span>, <span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Yxy</span>,
 };
 
 <span class="doccomment">/// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in</span>
@@ -1083,31 +1065,9 @@
     <span class="ident">phantom</span>: <span class="ident">white_point</span>
     <span class="kw">where</span> <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 }
+<span class="macro">impl_premultiply!</span>(<span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentWise</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="kw">fn</span> <span class="ident">component_wise</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Xyz</span> {
-            <span class="ident">x</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
-            <span class="ident">y</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
-            <span class="ident">z</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">z</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">z</span>.<span class="ident">clone</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-
-    <span class="kw">fn</span> <span class="ident">component_wise_self</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>) -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Xyz</span> {
-            <span class="ident">x</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
-            <span class="ident">y</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
-            <span class="ident">z</span>: <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">z</span>.<span class="ident">clone</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
-        }
-    }
-}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">StimulusColor</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span> {}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
