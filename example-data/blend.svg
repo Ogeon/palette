@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866668"
+   version="1.1"
+   id="svg833"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs830">
+    <linearGradient
+       id="linearGradient3820">
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1"
+         offset="0"
+         id="stop3816" />
+      <stop
+         style="stop-color:#ffff00;stop-opacity:1"
+         offset="0.17"
+         id="stop5023" />
+      <stop
+         style="stop-color:#00ff00;stop-opacity:1"
+         offset="0.33000001"
+         id="stop4957" />
+      <stop
+         style="stop-color:#00ffff;stop-opacity:1"
+         offset="0.5"
+         id="stop4115" />
+      <stop
+         style="stop-color:#0000ff;stop-opacity:1"
+         offset="0.67000002"
+         id="stop4891" />
+      <stop
+         style="stop-color:#ff00ff;stop-opacity:1"
+         offset="0.82999998"
+         id="stop4825" />
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1"
+         offset="1"
+         id="stop3818" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient3820"
+       id="linearGradient3822"
+       x1="0"
+       y1="25.4"
+       x2="33.866665"
+       y2="25.4"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad" />
+  </defs>
+  <g
+     id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264154"
+       id="rect916-4-5"
+       width="8.4392223"
+       height="16.933332"
+       x="25.427446"
+       y="1.110223e-15" />
+    <rect
+       style="fill:#bfbfbf;fill-opacity:1;stroke:none;stroke-width:0.264154"
+       id="rect916-4"
+       width="8.4392223"
+       height="16.933332"
+       x="18.654112"
+       y="9.3998878e-16" />
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.270928"
+       id="rect916-7"
+       width="8.877614"
+       height="16.933332"
+       x="11.442387"
+       y="9.3998878e-16" />
+    <rect
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:0.254367"
+       id="rect916-8"
+       width="7.8254738"
+       height="16.933332"
+       x="5.7211933"
+       y="9.3998878e-16" />
+    <rect
+       style="fill:url(#linearGradient3822);fill-opacity:1;stroke:none;stroke-width:0.268259"
+       id="rect1574"
+       width="33.866665"
+       height="16.933332"
+       x="0"
+       y="16.933332" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.23665"
+       id="rect916"
+       width="6.7733335"
+       height="16.933332"
+       x="4.6999439e-16"
+       y="9.3998878e-16" />
+  </g>
+</svg>

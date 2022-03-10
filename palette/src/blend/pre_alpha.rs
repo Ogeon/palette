@@ -5,123 +5,133 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use crate::{
     cast::ArrayCast,
     clamp,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
-    Alpha, ArrayExt, Blend, ComponentWise, Mix, MixAssign, NextArray,
+    num::{Arithmetics, One, Real, Zero},
+    stimulus::Stimulus,
+    Alpha, ArrayExt, Mix, MixAssign, NextArray,
 };
+
+use super::Premultiply;
 
 /// Premultiplied alpha wrapper.
 ///
-/// Premultiplied colors are commonly used in composition algorithms to
-/// simplify the calculations. It may also be preferred when interpolating
-/// between colors, which is one of the reasons why it's offered as a separate
-/// type. The other reason is to make it easier to avoid unnecessary
-/// computations in composition chains.
+/// Premultiplied, or alpha masked, or associated alpha colors have had their
+/// component values multiplied with their alpha value. They are commonly used
+/// in composition algorithms and as output from computer generated graphics. It
+/// may also be preferred when interpolating between colors and in other image
+/// manipulation operations, such as blurring or resizing images.
 ///
 /// ```
-/// use palette::{Blend, LinSrgb, LinSrgba};
-/// use palette::blend::PreAlpha;
+/// use palette::{LinSrgb, LinSrgba};
+/// use palette::blend::{Blend, PreAlpha};
 ///
 /// let a = PreAlpha::from(LinSrgba::new(0.4, 0.5, 0.5, 0.3));
 /// let b = PreAlpha::from(LinSrgba::new(0.3, 0.8, 0.4, 0.4));
 /// let c = PreAlpha::from(LinSrgba::new(0.7, 0.1, 0.8, 0.8));
 ///
-/// let res = LinSrgb::from_premultiplied(a.screen(b).overlay(c));
+/// let res: LinSrgba = a.screen(b).overlay(c).into();
 /// ```
 ///
 /// Note that converting to and from premultiplied alpha will cause the alpha
-/// component to be clamped to [0.0, 1.0].
+/// component to be clamped to [0.0, 1.0], and fully transparent colors will
+/// become black.
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
-pub struct PreAlpha<C, T> {
+pub struct PreAlpha<C: Premultiply> {
     /// The premultiplied color components (`original.color * original.alpha`).
     #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
     /// opaque.
-    pub alpha: T,
+    pub alpha: C::Scalar,
 }
 
-impl<C, T> PartialEq for PreAlpha<C, T>
+impl<C> PreAlpha<C>
 where
-    T: PartialEq,
-    C: PartialEq,
+    C: Premultiply,
+{
+    /// Alpha mask `color` with `alpha`.
+    pub fn new(color: C, alpha: C::Scalar) -> Self {
+        color.premultiply(alpha)
+    }
+
+    /// Create an opaque alpha masked color.
+    pub fn new_opaque(color: C) -> Self
+    where
+        C::Scalar: Stimulus,
+    {
+        Self {
+            color,
+            alpha: C::Scalar::max_intensity(),
+        }
+    }
+
+    /// Alpha unmask the color.
+    pub fn unpremultiply(self) -> Alpha<C, C::Scalar> {
+        let (color, alpha) = C::unpremultiply(self);
+        Alpha { color, alpha }
+    }
+}
+
+impl<C> PartialEq for PreAlpha<C>
+where
+    C: PartialEq + Premultiply,
+    C::Scalar: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.color == other.color && self.alpha == other.alpha
     }
 }
 
-impl<C, T> Eq for PreAlpha<C, T>
+impl<C> Eq for PreAlpha<C>
 where
-    T: Eq,
-    C: Eq,
+    C: Eq + Premultiply,
+    C::Scalar: Eq,
 {
 }
 
-impl<C, T> From<Alpha<C, T>> for PreAlpha<C, T>
+impl<C> From<Alpha<C, C::Scalar>> for PreAlpha<C>
 where
-    C: Mul<T, Output = C>,
-    T: Real + Zero + One + PartialOrd + Clone,
+    C: Premultiply,
 {
     #[inline]
-    fn from(color: Alpha<C, T>) -> PreAlpha<C, T> {
-        let alpha = clamp(color.alpha, T::zero(), T::one());
-
-        PreAlpha {
-            color: color.color * alpha.clone(),
-            alpha,
-        }
+    fn from(color: Alpha<C, C::Scalar>) -> Self {
+        color.color.premultiply(color.alpha)
     }
 }
 
-impl<C, T> From<PreAlpha<C, T>> for Alpha<C, T>
+impl<C> From<PreAlpha<C>> for Alpha<C, C::Scalar>
 where
-    C: Div<T, Output = C> + Default,
-    T: Real + Zero + One + IsValidDivisor + PartialOrd + Clone,
+    C: Premultiply,
 {
     #[inline]
-    fn from(color: PreAlpha<C, T>) -> Alpha<C, T> {
-        let alpha = clamp(color.alpha, T::zero(), T::one());
-
-        Alpha {
-            color: if alpha.is_valid_divisor() {
-                color.color / alpha.clone()
-            } else {
-                C::default()
-            },
-            alpha,
-        }
+    fn from(color: PreAlpha<C>) -> Self {
+        let (color, alpha) = C::unpremultiply(color);
+        Alpha { color, alpha }
     }
 }
 
-impl<C, T> Blend for PreAlpha<C, T>
+impl<C> From<C> for PreAlpha<C>
 where
-    C: Blend<Color = C> + ComponentWise<Scalar = T>,
-    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
+    C: Premultiply,
+    C::Scalar: Stimulus,
 {
-    type Color = C;
-
-    fn into_premultiplied(self) -> PreAlpha<C, T> {
-        self
-    }
-
-    fn from_premultiplied(color: PreAlpha<C, T>) -> PreAlpha<C, T> {
-        color
+    fn from(color: C) -> Self {
+        color.premultiply(C::Scalar::max_intensity())
     }
 }
 
-impl<C> Mix for PreAlpha<C, C::Scalar>
+impl<C, T> Mix for PreAlpha<C>
 where
-    C: Mix,
-    C::Scalar: Real + Zero + One + PartialOrd + Arithmetics + Clone,
+    C: Mix<Scalar = T> + Premultiply<Scalar = T>,
+    T: Real + Zero + One + PartialOrd + Arithmetics + Clone,
 {
-    type Scalar = C::Scalar;
+    type Scalar = T;
 
     #[inline]
-    fn mix(mut self, other: Self, factor: C::Scalar) -> Self {
-        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+    fn mix(mut self, other: Self, factor: T) -> Self {
+        let factor = clamp(factor, T::zero(), T::one());
 
         self.color = self.color.mix(other.color, factor.clone());
         self.alpha = self.alpha.clone() + factor * (other.alpha - self.alpha);
@@ -130,64 +140,46 @@ where
     }
 }
 
-impl<C> MixAssign for PreAlpha<C, C::Scalar>
+impl<C, T> MixAssign for PreAlpha<C>
 where
-    C: MixAssign,
-    C::Scalar: Real + Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
+    C: MixAssign<Scalar = T> + Premultiply<Scalar = T>,
+    T: Real + Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
 {
-    type Scalar = C::Scalar;
+    type Scalar = T;
 
     #[inline]
-    fn mix_assign(&mut self, other: Self, factor: C::Scalar) {
-        let factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
+    fn mix_assign(&mut self, other: Self, factor: T) {
+        let factor = clamp(factor, T::zero(), T::one());
 
         self.color.mix_assign(other.color, factor.clone());
         self.alpha += factor * (other.alpha - self.alpha.clone());
     }
 }
 
-impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for PreAlpha<C, T> {
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(
-        &self,
-        other: &PreAlpha<C, T>,
-        mut f: F,
-    ) -> PreAlpha<C, T> {
-        PreAlpha {
-            alpha: f(self.alpha.clone(), other.alpha.clone()),
-            color: self.color.component_wise(&other.color, f),
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> PreAlpha<C, T> {
-        PreAlpha {
-            alpha: f(self.alpha.clone()),
-            color: self.color.component_wise_self(f),
-        }
-    }
-}
-
-unsafe impl<C> ArrayCast for PreAlpha<C, <<C as ArrayCast>::Array as ArrayExt>::Item>
+unsafe impl<C, T> ArrayCast for PreAlpha<C>
 where
-    C: ArrayCast,
-    C::Array: NextArray,
+    C: ArrayCast + Premultiply<Scalar = T>,
+    C::Array: NextArray + ArrayExt<Item = T>,
 {
     type Array = <C::Array as NextArray>::Next;
 }
 
-impl<C: Default, T: One> Default for PreAlpha<C, T> {
-    fn default() -> PreAlpha<C, T> {
+impl<C> Default for PreAlpha<C>
+where
+    C: Default + Premultiply,
+    C::Scalar: Stimulus,
+{
+    fn default() -> PreAlpha<C> {
         PreAlpha {
             color: C::default(),
-            alpha: T::one(),
+            alpha: C::Scalar::max_intensity(),
         }
     }
 }
 
-impl<C, T> AbsDiffEq for PreAlpha<C, T>
+impl<C, T> AbsDiffEq for PreAlpha<C>
 where
-    C: AbsDiffEq<Epsilon = T::Epsilon>,
+    C: AbsDiffEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,
     T: AbsDiffEq,
     T::Epsilon: Clone,
 {
@@ -197,15 +189,15 @@ where
         T::default_epsilon()
     }
 
-    fn abs_diff_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon) -> bool {
+    fn abs_diff_eq(&self, other: &PreAlpha<C>, epsilon: Self::Epsilon) -> bool {
         self.color.abs_diff_eq(&other.color, epsilon.clone())
             && self.alpha.abs_diff_eq(&other.alpha, epsilon)
     }
 }
 
-impl<C, T> RelativeEq for PreAlpha<C, T>
+impl<C, T> RelativeEq for PreAlpha<C>
 where
-    C: RelativeEq<Epsilon = T::Epsilon>,
+    C: RelativeEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,
     T: RelativeEq,
     T::Epsilon: Clone,
 {
@@ -215,7 +207,7 @@ where
 
     fn relative_eq(
         &self,
-        other: &PreAlpha<C, T>,
+        other: &PreAlpha<C>,
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
@@ -225,9 +217,9 @@ where
     }
 }
 
-impl<C, T> UlpsEq for PreAlpha<C, T>
+impl<C, T> UlpsEq for PreAlpha<C>
 where
-    C: UlpsEq<Epsilon = T::Epsilon>,
+    C: UlpsEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,
     T: UlpsEq,
     T::Epsilon: Clone,
 {
@@ -235,159 +227,107 @@ where
         T::default_max_ulps()
     }
 
-    fn ulps_eq(&self, other: &PreAlpha<C, T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+    fn ulps_eq(&self, other: &PreAlpha<C>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
         self.color.ulps_eq(&other.color, epsilon.clone(), max_ulps)
             && self.alpha.ulps_eq(&other.alpha, epsilon, max_ulps)
     }
 }
 
-impl<C: Add, T: Add> Add for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
+macro_rules! impl_binop {
+    (
+        $op_trait:ident::$op_trait_fn:ident,
+        $op_assign_trait:ident::$op_assign_trait_fn:ident
+    ) => {
+        impl<C> $op_trait for PreAlpha<C>
+        where
+            C: $op_trait<Output = C> + Premultiply,
+            C::Scalar: $op_trait<Output = C::Scalar>,
+        {
+            type Output = PreAlpha<C>;
 
-    fn add(self, other: PreAlpha<C, T>) -> Self::Output {
-        PreAlpha {
-            color: self.color + other.color,
-            alpha: self.alpha + other.alpha,
+            fn $op_trait_fn(self, other: PreAlpha<C>) -> Self::Output {
+                PreAlpha {
+                    color: self.color.$op_trait_fn(other.color),
+                    alpha: self.alpha.$op_trait_fn(other.alpha),
+                }
+            }
         }
-    }
-}
 
-impl<T: Add + Clone, C: Add<T>> Add<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn add(self, c: T) -> Self::Output {
-        PreAlpha {
-            color: self.color + c.clone(),
-            alpha: self.alpha + c,
+        impl<C> $op_assign_trait for PreAlpha<C>
+        where
+            C: $op_assign_trait + Premultiply,
+            C::Scalar: $op_assign_trait + Real,
+        {
+            fn $op_assign_trait_fn(&mut self, other: PreAlpha<C>) {
+                self.color.$op_assign_trait_fn(other.color);
+                self.alpha.$op_assign_trait_fn(other.alpha);
+            }
         }
-    }
+    };
 }
 
-impl<C: AddAssign, T: AddAssign> AddAssign for PreAlpha<C, T> {
-    fn add_assign(&mut self, other: PreAlpha<C, T>) {
-        self.color += other.color;
-        self.alpha += other.alpha;
-    }
+impl_binop!(Add::add, AddAssign::add_assign);
+impl_binop!(Sub::sub, SubAssign::sub_assign);
+impl_binop!(Mul::mul, MulAssign::mul_assign);
+impl_binop!(Div::div, DivAssign::div_assign);
+
+macro_rules! impl_scalar_binop {
+    (
+        $op_trait:ident::$op_trait_fn:ident,
+        $op_assign_trait:ident::$op_assign_trait_fn:ident,
+        [$($ty:ident),+]
+    ) => {
+        $(
+            impl<C> $op_trait<$ty> for PreAlpha<C>
+            where
+                C: $op_trait<$ty, Output = C> + Premultiply<Scalar = $ty>,
+            {
+                type Output = PreAlpha<C>;
+
+                fn $op_trait_fn(self, c: $ty) -> Self::Output {
+                    PreAlpha {
+                        color: self.color.$op_trait_fn(c),
+                        alpha: self.alpha.$op_trait_fn(c),
+                    }
+                }
+            }
+
+            impl<C> $op_trait<PreAlpha<C>> for $ty
+            where
+                C: Premultiply<Scalar = $ty>,
+                $ty: $op_trait<$ty, Output = $ty> + $op_trait<C, Output = C>,
+            {
+                type Output = PreAlpha<C>;
+
+                fn $op_trait_fn(self, color: PreAlpha<C>) -> Self::Output {
+                    PreAlpha {
+                        color: $op_trait::<C>::$op_trait_fn(self, color.color),
+                        alpha: $op_trait::<$ty>::$op_trait_fn(self, color.alpha),
+                    }
+                }
+            }
+
+            impl<C> $op_assign_trait<$ty> for PreAlpha<C>
+            where
+                C: $op_assign_trait<$ty> + Premultiply<Scalar = $ty>,
+            {
+                fn $op_assign_trait_fn(&mut self, c: $ty) {
+                    self.color.$op_assign_trait_fn(c);
+                    self.alpha.$op_assign_trait_fn(c);
+                }
+            }
+        )+
+    };
 }
 
-impl<T: AddAssign + Clone, C: AddAssign<T>> AddAssign<T> for PreAlpha<C, T> {
-    fn add_assign(&mut self, c: T) {
-        self.color += c.clone();
-        self.alpha += c;
-    }
-}
+impl_scalar_binop!(Add::add, AddAssign::add_assign, [f32, f64]);
+impl_scalar_binop!(Sub::sub, SubAssign::sub_assign, [f32, f64]);
+impl_scalar_binop!(Mul::mul, MulAssign::mul_assign, [f32, f64]);
+impl_scalar_binop!(Div::div, DivAssign::div_assign, [f32, f64]);
 
-impl<C: Sub, T: Sub> Sub for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
+impl_array_casts!([C: Premultiply, const N: usize] PreAlpha<C>, [C::Scalar; N], where PreAlpha<C>: ArrayCast<Array = [C::Scalar; N]>);
 
-    fn sub(self, other: PreAlpha<C, T>) -> Self::Output {
-        PreAlpha {
-            color: self.color - other.color,
-            alpha: self.alpha - other.alpha,
-        }
-    }
-}
-
-impl<T: Sub + Clone, C: Sub<T>> Sub<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn sub(self, c: T) -> Self::Output {
-        PreAlpha {
-            color: self.color - c.clone(),
-            alpha: self.alpha - c,
-        }
-    }
-}
-
-impl<C: SubAssign, T: SubAssign> SubAssign for PreAlpha<C, T> {
-    fn sub_assign(&mut self, other: PreAlpha<C, T>) {
-        self.color -= other.color;
-        self.alpha -= other.alpha;
-    }
-}
-
-impl<T: SubAssign + Clone, C: SubAssign<T>> SubAssign<T> for PreAlpha<C, T> {
-    fn sub_assign(&mut self, c: T) {
-        self.color -= c.clone();
-        self.alpha -= c;
-    }
-}
-
-impl<C: Mul, T: Mul> Mul for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn mul(self, other: PreAlpha<C, T>) -> Self::Output {
-        PreAlpha {
-            color: self.color * other.color,
-            alpha: self.alpha * other.alpha,
-        }
-    }
-}
-
-impl<T: Mul + Clone, C: Mul<T>> Mul<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn mul(self, c: T) -> Self::Output {
-        PreAlpha {
-            color: self.color * c.clone(),
-            alpha: self.alpha * c,
-        }
-    }
-}
-
-impl<C: MulAssign, T: MulAssign> MulAssign for PreAlpha<C, T> {
-    fn mul_assign(&mut self, other: PreAlpha<C, T>) {
-        self.color *= other.color;
-        self.alpha *= other.alpha;
-    }
-}
-
-impl<T: MulAssign + Clone, C: MulAssign<T>> MulAssign<T> for PreAlpha<C, T> {
-    fn mul_assign(&mut self, c: T) {
-        self.color *= c.clone();
-        self.alpha *= c;
-    }
-}
-
-impl<C: Div, T: Div> Div for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn div(self, other: PreAlpha<C, T>) -> Self::Output {
-        PreAlpha {
-            color: self.color / other.color,
-            alpha: self.alpha / other.alpha,
-        }
-    }
-}
-
-impl<T: Div + Clone, C: Div<T>> Div<T> for PreAlpha<C, T> {
-    type Output = PreAlpha<C::Output, T::Output>;
-
-    fn div(self, c: T) -> Self::Output {
-        PreAlpha {
-            color: self.color / c.clone(),
-            alpha: self.alpha / c,
-        }
-    }
-}
-
-impl<C: DivAssign, T: DivAssign> DivAssign for PreAlpha<C, T> {
-    fn div_assign(&mut self, other: PreAlpha<C, T>) {
-        self.color /= other.color;
-        self.alpha /= other.alpha;
-    }
-}
-
-impl<T: DivAssign + Clone, C: DivAssign<T>> DivAssign<T> for PreAlpha<C, T> {
-    fn div_assign(&mut self, c: T) {
-        self.color /= c.clone();
-        self.alpha /= c;
-    }
-}
-
-impl_array_casts!([C, T, const N: usize] PreAlpha<C, T>, [T; N], where PreAlpha<C, T>: ArrayCast<Array = [T; N]>);
-
-impl<C, T> Deref for PreAlpha<C, T> {
+impl<C: Premultiply> Deref for PreAlpha<C> {
     type Target = C;
 
     fn deref(&self) -> &C {
@@ -395,17 +335,17 @@ impl<C, T> Deref for PreAlpha<C, T> {
     }
 }
 
-impl<C, T> DerefMut for PreAlpha<C, T> {
+impl<C: Premultiply> DerefMut for PreAlpha<C> {
     fn deref_mut(&mut self) -> &mut C {
         &mut self.color
     }
 }
 
 #[cfg(feature = "bytemuck")]
-unsafe impl<C, T> bytemuck::Zeroable for PreAlpha<C, T>
+unsafe impl<C> bytemuck::Zeroable for PreAlpha<C>
 where
-    C: bytemuck::Zeroable,
-    T: bytemuck::Zeroable,
+    C: bytemuck::Zeroable + Premultiply,
+    C::Scalar: bytemuck::Zeroable,
 {
 }
 
@@ -413,10 +353,10 @@ where
 //
 // See `Alpha<C, T>`'s implementation of `Pod`.
 #[cfg(feature = "bytemuck")]
-unsafe impl<C, T> bytemuck::Pod for PreAlpha<C, T>
+unsafe impl<C> bytemuck::Pod for PreAlpha<C>
 where
-    C: bytemuck::Pod + ArrayCast,
-    T: bytemuck::Pod,
+    C: bytemuck::Pod + ArrayCast + Premultiply,
+    C::Scalar: bytemuck::Pod,
 {
 }
 
@@ -424,14 +364,13 @@ where
 #[cfg(feature = "serializing")]
 mod test {
     use super::PreAlpha;
-    use crate::encoding::Srgb;
-    use crate::rgb::Rgb;
+    use crate::LinSrgb;
 
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
         let color = PreAlpha {
-            color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
+            color: LinSrgb::new(0.3, 0.8, 0.1),
             alpha: 0.5,
         };
 
@@ -447,11 +386,11 @@ mod test {
     #[test]
     fn deserialize() {
         let expected = PreAlpha {
-            color: Rgb::<Srgb>::new(0.3, 0.8, 0.1),
+            color: LinSrgb::new(0.3, 0.8, 0.1),
             alpha: 0.5,
         };
 
-        let deserialized: PreAlpha<_, _> =
+        let deserialized: PreAlpha<_> =
             ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
 
         assert_eq!(deserialized, expected);

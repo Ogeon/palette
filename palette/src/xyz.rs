@@ -14,6 +14,7 @@ use rand::{
 };
 
 use crate::{
+    blend::{PreAlpha, Premultiply},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     luma::LumaStandard,
@@ -21,9 +22,10 @@ use crate::{
     num::{Arithmetics, IsValidDivisor, MinMax, One, Powi, Real, Recip, Zero},
     oklab,
     rgb::{Rgb, RgbSpace, RgbStandard},
+    stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lab, Lighten, LightenAssign, Luma,
-    Luv, Mix, MixAssign, Oklab, Oklch, RelativeContrast, Yxy,
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
+    MixAssign, Oklab, Oklch, RelativeContrast, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -418,31 +420,9 @@ impl_lighten! {
     phantom: white_point
     where Wp: WhitePoint<T>
 }
+impl_premultiply!(Xyz<Wp>);
 
-impl<Wp, T> ComponentWise for Xyz<Wp, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Xyz<Wp, T>, mut f: F) -> Xyz<Wp, T> {
-        Xyz {
-            x: f(self.x.clone(), other.x.clone()),
-            y: f(self.y.clone(), other.y.clone()),
-            z: f(self.z.clone(), other.z.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Xyz<Wp, T> {
-        Xyz {
-            x: f(self.x.clone()),
-            y: f(self.y.clone()),
-            z: f(self.z.clone()),
-            white_point: PhantomData,
-        }
-    }
-}
+impl<Wp, T> StimulusColor for Xyz<Wp, T> where T: Stimulus {}
 
 impl<Wp, T> Default for Xyz<Wp, T>
 where

@@ -14,15 +14,14 @@ use rand::{
 };
 
 use crate::{
-    blend::PreAlpha,
+    blend::{PreAlpha, Premultiply},
     cast::ArrayCast,
     clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
+    num::{Arithmetics, One, Zero},
     stimulus::Stimulus,
-    ArrayExt, Blend, Clamp, ClampAssign, ComponentWise, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, NextArray, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithAlpha, WithHue,
+    ArrayExt, Clamp, ClampAssign, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    NextArray, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
 };
 
 /// An alpha component wrapper for colors.
@@ -37,6 +36,13 @@ pub struct Alpha<C, T> {
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
     /// opaque.
     pub alpha: T,
+}
+
+impl<C: Premultiply> Alpha<C, C::Scalar> {
+    /// Alpha mask the color by its transparency.
+    pub fn premultiply(self) -> PreAlpha<C> {
+        PreAlpha::new(self.color, self.alpha)
+    }
 }
 
 impl<C, T: Stimulus> Alpha<C, T> {
@@ -307,44 +313,6 @@ where
     fn clamp_assign(&mut self) {
         self.color.clamp_assign();
         clamp_assign(&mut self.alpha, Self::min_alpha(), Self::max_alpha());
-    }
-}
-
-impl<C, T> Blend for Alpha<C, T>
-where
-    C: Blend,
-    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
-    C::Color: ComponentWise<Scalar = T>,
-    Alpha<C, T>: Into<Alpha<C::Color, T>> + From<Alpha<C::Color, T>>,
-    Alpha<C::Color, T>: From<PreAlpha<C::Color, T>>,
-    PreAlpha<C::Color, T>: From<Alpha<C::Color, T>>,
-{
-    type Color = C::Color;
-
-    fn into_premultiplied(self) -> PreAlpha<C::Color, T> {
-        PreAlpha::<C::Color, T>::from(self.into())
-    }
-
-    fn from_premultiplied(color: PreAlpha<C::Color, T>) -> Alpha<C, T> {
-        Alpha::<C::Color, T>::from(color).into()
-    }
-}
-
-impl<C: ComponentWise<Scalar = T>, T: Clone> ComponentWise for Alpha<C, T> {
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Alpha<C, T>, mut f: F) -> Alpha<C, T> {
-        Alpha {
-            color: self.color.component_wise(&other.color, &mut f),
-            alpha: f(self.alpha.clone(), other.alpha.clone()),
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Alpha<C, T> {
-        Alpha {
-            color: self.color.component_wise_self(&mut f),
-            alpha: f(self.alpha.clone()),
-        }
     }
 }
 

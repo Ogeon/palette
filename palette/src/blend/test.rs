@@ -1,22 +1,15 @@
-use crate::blend::PreAlpha;
-use crate::encoding::Linear;
-use crate::rgb::Rgb;
-use crate::{Blend, ComponentWise, LinSrgb, LinSrgba};
+use crate::{
+    blend::{Blend, BlendWith, Compose},
+    LinSrgb, LinSrgba,
+};
 
 #[test]
 fn blend_color() {
     let a = LinSrgb::new(1.0, 0.0, 0.0);
     let b = LinSrgb::new(0.0, 0.0, 1.0);
 
-    let c: LinSrgb = a
-        .blend(
-            b,
-            |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
-                a.component_wise(&b, |a, b| a + b)
-            },
-        )
-        .into();
-    assert_relative_eq!(LinSrgb::new(1.0, 0.0, 1.0), c);
+    let c: LinSrgb = a.blend_with(b, |a, b| a + b);
+    assert_relative_eq!(LinSrgb::new(0.5, 0.0, 0.5), c);
 }
 
 #[test]
@@ -24,14 +17,7 @@ fn blend_alpha_color() {
     let a = LinSrgba::new(1.0, 0.0, 0.0, 0.2);
     let b = LinSrgba::new(0.0, 0.0, 1.0, 0.2);
 
-    let c: LinSrgba = a
-        .blend(
-            b,
-            |a: PreAlpha<Rgb<Linear<_>>, _>, b: PreAlpha<Rgb<Linear<_>>, _>| {
-                a.component_wise(&b, |a, b| a + b)
-            },
-        )
-        .into();
+    let c: LinSrgba = a.blend_with(b, |a, b| a + b);
     assert_relative_eq!(LinSrgba::new(0.2 / 0.4, 0.0, 0.2 / 0.4, 0.4), c);
 }
 

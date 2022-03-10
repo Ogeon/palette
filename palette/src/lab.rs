@@ -15,14 +15,19 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
+    blend::{PreAlpha, Premultiply},
     clamp, clamp_assign,
     color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
     contrast_ratio,
     convert::FromColorUnclamped,
-    num::{Abs, Arithmetics, Cbrt, Exp, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero},
+    num::{
+        Abs, Arithmetics, Cbrt, Exp, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Trigonometry,
+        Zero,
+    },
+    stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, ComponentWise, FromColor, GetHue, IsWithinBounds, LabHue, Lch,
-    Lighten, LightenAssign, Mix, MixAssign, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, LabHue, Lch, Lighten,
+    LightenAssign, Mix, MixAssign, RelativeContrast, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -289,6 +294,7 @@ where
 
 impl_mix!(Lab<Wp>);
 impl_lighten!(Lab<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {a, b} phantom: white_point);
+impl_premultiply!(Lab<Wp>);
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where
@@ -326,31 +332,6 @@ where
     #[inline]
     fn get_color_difference(self, other: Lab<Wp, T>) -> Self::Scalar {
         get_ciede_difference(self.into(), other.into())
-    }
-}
-
-impl<Wp, T> ComponentWise for Lab<Wp, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Lab<Wp, T>, mut f: F) -> Lab<Wp, T> {
-        Lab {
-            l: f(self.l.clone(), other.l.clone()),
-            a: f(self.a.clone(), other.a.clone()),
-            b: f(self.b.clone(), other.b.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Lab<Wp, T> {
-        Lab {
-            l: f(self.l.clone()),
-            a: f(self.a.clone()),
-            b: f(self.b.clone()),
-            white_point: PhantomData,
-        }
     }
 }
 

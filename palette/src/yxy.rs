@@ -14,13 +14,15 @@ use rand::{
 };
 
 use crate::{
+    blend::{PreAlpha, Premultiply},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     luma::LumaStandard,
     num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lighten, LightenAssign, Luma, Mix,
-    MixAssign, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
+    RelativeContrast, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -292,31 +294,7 @@ where
 
 impl_mix!(Yxy<Wp>);
 impl_lighten!(Yxy<Wp> increase {luma => [Self::min_luma(), Self::max_luma()]} other {x, y} phantom: white_point where T: One);
-
-impl<Wp, T> ComponentWise for Yxy<Wp, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Yxy<Wp, T>, mut f: F) -> Yxy<Wp, T> {
-        Yxy {
-            x: f(self.x.clone(), other.x.clone()),
-            y: f(self.y.clone(), other.y.clone()),
-            luma: f(self.luma.clone(), other.luma.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Yxy<Wp, T> {
-        Yxy {
-            x: f(self.x.clone()),
-            y: f(self.y.clone()),
-            luma: f(self.luma.clone()),
-            white_point: PhantomData,
-        }
-    }
-}
+impl_premultiply!(Yxy<Wp>);
 
 impl<Wp, T> Default for Yxy<Wp, T>
 where

@@ -4,7 +4,7 @@ Contains derive macros for the [`palette`](https://crates.io/crates/palette/) cr
 
 ## Minimum Supported Rust Version (MSRV)
 
-This version of Palette has been automatically tested with Rust version `1.51.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
+This version of Palette has been automatically tested with Rust version `1.55.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
 
 ## License
 

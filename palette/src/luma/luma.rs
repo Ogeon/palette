@@ -17,16 +17,16 @@ use rand::{
 };
 
 use crate::{
-    blend::PreAlpha,
+    blend::{PreAlpha, Premultiply},
     cast::{ComponentOrder, Packed, UintCast},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::{linear::LinearFn, Linear, Srgb, TransferFn},
     luma::LumaStandard,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
-    stimulus::{FromStimulus, Stimulus},
-    Alpha, Blend, Clamp, ClampAssign, ComponentWise, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RelativeContrast, Xyz, Yxy,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    stimulus::{FromStimulus, Stimulus, StimulusColor},
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    RelativeContrast, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -516,48 +516,9 @@ where
 
 impl_mix!(Luma<S> where S: LumaStandard<T, TransferFn = LinearFn>,);
 impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus, S: LumaStandard<T, TransferFn = LinearFn>);
+impl_premultiply!(Luma<S> where S: LumaStandard<T, TransferFn = LinearFn>);
 
-impl<S, T> Blend for Luma<S, T>
-where
-    S: LumaStandard<T, TransferFn = LinearFn>,
-    T: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
-    Lumaa<S, T>: From<PreAlpha<Luma<S, T>, T>>,
-{
-    type Color = Luma<S, T>;
-
-    fn into_premultiplied(self) -> PreAlpha<Luma<S, T>, T> {
-        Lumaa {
-            color: self,
-            alpha: T::one(),
-        }
-        .into_premultiplied()
-    }
-
-    fn from_premultiplied(color: PreAlpha<Luma<S, T>, T>) -> Self {
-        Lumaa::from_premultiplied(color).color
-    }
-}
-
-impl<S, T> ComponentWise for Luma<S, T>
-where
-    T: Clone,
-{
-    type Scalar = T;
-
-    fn component_wise<F: FnMut(T, T) -> T>(&self, other: &Luma<S, T>, mut f: F) -> Luma<S, T> {
-        Luma {
-            luma: f(self.luma.clone(), other.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn component_wise_self<F: FnMut(T) -> T>(&self, mut f: F) -> Luma<S, T> {
-        Luma {
-            luma: f(self.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-}
+impl<S, T> StimulusColor for Luma<S, T> where T: Stimulus {}
 
 impl<S, T> Default for Luma<S, T>
 where
