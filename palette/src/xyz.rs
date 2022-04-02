@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -15,11 +15,15 @@ use rand::{
 
 use crate::{
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     luma::LumaStandard,
     matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Powi, Real, Recip, Zero},
+    num::{
+        self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax,
+        One, PartialCmp, Powi, Real, Recip, Zero,
+    },
     oklab,
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
@@ -202,14 +206,16 @@ impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
 
 impl<Wp, T, S> FromColorUnclamped<Rgb<S, T>> for Xyz<Wp, T>
 where
-    T: Recip + IsValidDivisor + Arithmetics + Clone,
+    T: Arithmetics + FromScalar,
+    T::Scalar:
+        Recip + IsValidDivisor<Mask = bool> + Arithmetics + FromScalar<Scalar = T::Scalar> + Clone,
     Wp: WhitePoint<T>,
     S: RgbStandard<T>,
-    S::Space: RgbSpace<T, WhitePoint = Wp>,
-    Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
+    S::Space: RgbSpace<T::Scalar, WhitePoint = Wp>,
+    Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<S::Space, T>();
+        let transform_matrix = rgb_to_xyz_matrix::<S::Space, T::Scalar>();
         multiply_rgb_to_xyz(transform_matrix, color.into_linear())
     }
 }
@@ -217,30 +223,34 @@ where
 impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Xyz<Wp, T>
 where
     T: Zero + One + IsValidDivisor + Arithmetics + Clone,
+    T::Mask: LazySelect<T> + Clone,
 {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
+        let Yxy { x, y, luma, .. } = color;
+
         // If denominator is zero, NAN or INFINITE leave x and z at the default 0
-        let xyz = if color.y.is_valid_divisor() {
-            Xyz {
-                z: (T::one() - &color.x - &color.y) / &color.y,
-                x: color.x / color.y,
-                y: T::one(),
-                white_point: PhantomData,
-            }
-        } else {
-            Xyz {
-                y: T::one(),
-                ..Default::default()
-            }
+        let mask = y.is_valid_divisor();
+        let xyz = Xyz {
+            z: lazy_select! {
+                if mask.clone() => (T::one() - &x - &y) / &y,
+                else => T::zero(),
+            },
+            x: lazy_select! {
+                if mask => x / y,
+                else => T::zero(),
+            },
+            y: T::one(),
+            white_point: PhantomData,
         };
 
-        xyz * color.luma
+        xyz * luma
     }
 }
 
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Xyz<Wp, T>
 where
-    T: Real + Recip + Powi + Arithmetics + PartialOrd + Clone,
+    T: Real + Recip + Powi + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
     Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
@@ -249,20 +259,16 @@ where
         let x = y.clone() + (color.a * T::from_f64(500.0).recip());
         let z = y.clone() - (color.b * T::from_f64(200.0).recip());
 
-        fn convert<T>(c: T) -> T
-        where
-            T: Real + Powi + Arithmetics + PartialOrd,
-        {
-            let epsilon: T = T::from_f64(6.0 / 29.0);
-            let kappa: T = T::from_f64(108.0 / 841.0);
-            let delta: T = T::from_f64(4.0 / 29.0);
+        let epsilon: T = T::from_f64(6.0 / 29.0);
+        let kappa: T = T::from_f64(108.0 / 841.0);
+        let delta: T = T::from_f64(4.0 / 29.0);
 
-            if c > epsilon {
-                c.powi(3)
-            } else {
-                (c - delta) * kappa
+        let convert = |c: T| {
+            lazy_select! {
+                if c.gt(&epsilon) => c.clone().powi(3),
+                else => (c.clone() - &delta) * &kappa
             }
-        }
+        };
 
         Xyz::new(convert(x), convert(y), convert(z)) * Wp::get_xyz().with_white_point()
     }
@@ -270,7 +276,7 @@ where
 
 impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Xyz<Wp, T>
 where
-    T: Real + Zero + Recip + Powi + Arithmetics + PartialOrd + Clone,
+    T: Real + Zero + Recip + Powi + Arithmetics + PartialOrd + Clone + HasBoolMask<Mask = bool>,
     Wp: WhitePoint<T>,
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
@@ -366,23 +372,20 @@ impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Xyz<Wp, T>
-where
-    T: Zero + PartialOrd,
-    Wp: WhitePoint<T>,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.x >= Self::min_x() && self.x <= Self::max_x() &&
-        self.y >= Self::min_y() && self.y <= Self::max_y() &&
-        self.z >= Self::min_z() && self.z <= Self::max_z()
+impl_is_within_bounds! {
+    Xyz<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        z => [Self::min_z(), Self::max_z()]
     }
+    where
+        T: Zero,
+        Wp: WhitePoint<T>
 }
 
 impl<Wp, T> Clamp for Xyz<Wp, T>
 where
-    T: Zero + PartialOrd,
+    T: Zero + num::Clamp,
     Wp: WhitePoint<T>,
 {
     #[inline]
@@ -397,7 +400,7 @@ where
 
 impl<Wp, T> ClampAssign for Xyz<Wp, T>
 where
-    T: Zero + PartialOrd,
+    T: Zero + num::ClampAssign,
     Wp: WhitePoint<T>,
 {
     #[inline]
@@ -420,9 +423,16 @@ impl_lighten! {
     phantom: white_point
     where Wp: WhitePoint<T>
 }
-impl_premultiply!(Xyz<Wp>);
+impl_premultiply!(Xyz<Wp> {x, y, z} phantom: white_point);
 
 impl<Wp, T> StimulusColor for Xyz<Wp, T> where T: Stimulus {}
+
+impl<Wp, T> HasBoolMask for Xyz<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
 
 impl<Wp, T> Default for Xyz<Wp, T>
 where
@@ -439,12 +449,14 @@ impl_color_mul!(Xyz<Wp, T>, [x, y, z], white_point);
 impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
 
 impl_array_casts!(Xyz<Wp, T>, [T; 3]);
+impl_simd_array_conversion!(Xyz<Wp>, [x, y, z], white_point);
 
 impl_eq!(Xyz<Wp>, [x, y, z]);
 
 impl<Wp, T> RelativeContrast for Xyz<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
 {
     type Scalar = T;
 

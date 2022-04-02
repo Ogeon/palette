@@ -62,6 +62,11 @@ optional = true
 version = "1"
 optional = true
 
+[dependencies.wide]
+version = "0.7.3"
+optional = true
+default-features = false
+
 [dev-dependencies]
 csv = "1"
 lazy_static = "1"

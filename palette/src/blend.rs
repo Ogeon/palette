@@ -38,7 +38,7 @@
 use crate::{
     cast::{self, ArrayCast},
     clamp,
-    num::{Arithmetics, One, Real, Zero},
+    num::{Arithmetics, Clamp, One, Real, Zero},
     stimulus::Stimulus,
 };
 
@@ -101,7 +101,7 @@ pub trait Premultiply: Sized {
 
 fn blend_alpha<T>(src: T, dst: T) -> T
 where
-    T: Zero + One + Arithmetics + PartialOrd + Clone,
+    T: Zero + One + Arithmetics + Clamp + Clone,
 {
     clamp(src.clone() + &dst - src * dst, T::zero(), T::one())
 }

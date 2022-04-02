@@ -1,12 +1,12 @@
 macro_rules! impl_premultiply {
-    ($ty: ident $(where $($where: tt)+)?) => {
-        impl_premultiply!($ty<> $(where $($where)+)?);
+    ($ty: ident {$($component: ident),+} $(phantom: $phantom: ident)? $(where $($where: tt)+)?) => {
+        impl_premultiply!($ty<> {$($component),+} $(phantom: $phantom)? $(where $($where)+)?);
     };
-    ($ty: ident <$($ty_param: ident),*> $(where $($where: tt)+)?) => {
+    ($ty: ident <$($ty_param: ident),*> {$($component: ident),+} $(phantom: $phantom: ident)? $(where $($where: tt)+)?) => {
         impl<$($ty_param,)* T> Premultiply for $ty<$($ty_param,)* T>
         where
-            Self: Mul<T, Output = Self> + Div<T, Output = Self> + Default,
-            T: Real + Stimulus + IsValidDivisor + Clone,
+            T: Real + Stimulus + Zero + IsValidDivisor + Mul<T, Output = T> + Div<T, Output = T> + Clone,
+            T::Mask: LazySelect<T> + Clone,
             $($($where)+)?
         {
             type Scalar = T;
@@ -21,13 +21,24 @@ macro_rules! impl_premultiply {
 
             #[inline]
             fn unpremultiply(premultiplied: PreAlpha<Self>) -> (Self, T) {
-                let color = if premultiplied.alpha.is_valid_divisor() {
-                    premultiplied.color / premultiplied.alpha.clone()
-                } else {
-                    Self::default()
+                let PreAlpha {
+                    color: $ty { $($component,)+ .. },
+                    alpha,
+                } = premultiplied;
+
+                let is_valid_divisor = alpha.is_valid_divisor();
+
+                let color = Self {
+                    $(
+                        $component: lazy_select! {
+                            if is_valid_divisor.clone() => $component / alpha.clone(),
+                            else => T::zero()
+                        },
+                    )+
+                    $($phantom: PhantomData,)?
                 };
 
-                (color, premultiplied.alpha)
+                (color, alpha)
             }
         }
 

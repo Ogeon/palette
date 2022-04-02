@@ -294,11 +294,14 @@ mod tests {
     use core::marker::PhantomData;
 
     use super::{FromColor, FromColorUnclamped, IntoColor};
-    use crate::encoding::linear::Linear;
-    use crate::luma::{Luma, LumaStandard};
-    use crate::num::{One, Zero};
-    use crate::rgb::{Rgb, RgbSpace};
-    use crate::{Alpha, Clamp, Hsl, Hsluv, Hsv, Hwb, IsWithinBounds, Lab, Lch, Luv, Xyz, Yxy};
+    use crate::{
+        bool_mask::{BoolMask, HasBoolMask},
+        encoding::linear::Linear,
+        luma::{Luma, LumaStandard},
+        num::{One, Zero},
+        rgb::{Rgb, RgbSpace},
+        Alpha, Clamp, Hsl, Hsluv, Hsv, Hwb, IsWithinBounds, Lab, Lch, Luv, Xyz, Yxy,
+    };
 
     #[derive(FromColorUnclamped, WithAlpha)]
     #[palette(
@@ -317,6 +320,10 @@ mod tests {
     }
 
     impl<S> Copy for WithXyz<S> {}
+
+    impl<S> HasBoolMask for WithXyz<S> {
+        type Mask = bool;
+    }
 
     impl<S> IsWithinBounds for WithXyz<S> {
         fn is_within_bounds(&self) -> bool {
@@ -379,9 +386,19 @@ mod tests {
     )]
     struct WithoutXyz<T>(PhantomData<T>);
 
-    impl<T> IsWithinBounds for WithoutXyz<T> {
-        fn is_within_bounds(&self) -> bool {
-            true
+    impl<T> HasBoolMask for WithoutXyz<T>
+    where
+        T: HasBoolMask,
+    {
+        type Mask = T::Mask;
+    }
+
+    impl<T> IsWithinBounds for WithoutXyz<T>
+    where
+        T: HasBoolMask,
+    {
+        fn is_within_bounds(&self) -> T::Mask {
+            T::Mask::from_bool(true)
         }
     }
 

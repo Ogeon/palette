@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -15,10 +15,14 @@ use rand::{
 
 use crate::{
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     luma::LumaStandard,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Real, Zero,
+    },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
@@ -222,21 +226,27 @@ impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T> {
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Yxy<Wp, T>
 where
     T: Zero + IsValidDivisor + Arithmetics + Clone,
+    T::Mask: LazySelect<T> + Clone,
 {
     fn from_color_unclamped(xyz: Xyz<Wp, T>) -> Self {
-        let mut yxy = Yxy {
-            x: T::zero(),
-            y: T::zero(),
-            luma: xyz.y.clone(),
-            white_point: PhantomData,
-        };
-        let sum = xyz.x.clone() + &xyz.y + xyz.z;
+        let Xyz { x, y, z, .. } = xyz;
+
+        let sum = x.clone() + &y + z;
+
         // If denominator is zero, NAN or INFINITE leave x and y at the default 0
-        if sum.is_valid_divisor() {
-            yxy.x = xyz.x / &sum;
-            yxy.y = xyz.y / sum;
+        let mask = sum.is_valid_divisor();
+        Yxy {
+            x: lazy_select! {
+                if mask.clone() => x / &sum,
+                else => T::zero(),
+            },
+            y: lazy_select! {
+                if mask => y.clone() / sum,
+                else => T::zero()
+            },
+            luma: y,
+            white_point: PhantomData,
         }
-        yxy
     }
 }
 
@@ -253,22 +263,18 @@ where
     }
 }
 
-impl<Wp, T> IsWithinBounds for Yxy<Wp, T>
-where
-    T: Zero + One + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.x >= Self::min_x() && self.x <= Self::max_x() &&
-        self.y >= Self::min_y() && self.y <= Self::max_y() &&
-        self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
+impl_is_within_bounds! {
+    Yxy<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        luma => [Self::min_luma(), Self::max_luma()]
     }
+    where T: Zero + One
 }
 
 impl<Wp, T> Clamp for Yxy<Wp, T>
 where
-    T: Zero + One + PartialOrd,
+    T: Zero + One + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -282,7 +288,7 @@ where
 
 impl<Wp, T> ClampAssign for Yxy<Wp, T>
 where
-    T: Zero + One + PartialOrd,
+    T: Zero + One + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -294,7 +300,14 @@ where
 
 impl_mix!(Yxy<Wp>);
 impl_lighten!(Yxy<Wp> increase {luma => [Self::min_luma(), Self::max_luma()]} other {x, y} phantom: white_point where T: One);
-impl_premultiply!(Yxy<Wp>);
+impl_premultiply!(Yxy<Wp> {x, y, luma} phantom: white_point);
+
+impl<Wp, T> HasBoolMask for Yxy<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
 
 impl<Wp, T> Default for Yxy<Wp, T>
 where
@@ -320,12 +333,14 @@ impl_color_mul!(Yxy<Wp, T>, [x, y, luma], white_point);
 impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
 
 impl_array_casts!(Yxy<Wp, T>, [T; 3]);
+impl_simd_array_conversion!(Yxy<Wp>, [x, y, luma], white_point);
 
 impl_eq!(Yxy<Wp>, [y, x, luma]);
 
 impl<Wp, T> RelativeContrast for Yxy<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
 {
     type Scalar = T;
 

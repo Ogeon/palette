@@ -70,7 +70,7 @@ pub trait TryFromColor<T>: Sized {
 
 impl<T, U> TryFromColor<T> for U
 where
-    U: FromColorUnclamped<T> + IsWithinBounds,
+    U: FromColorUnclamped<T> + IsWithinBounds<Mask = bool>,
 {
     #[inline]
     fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>> {

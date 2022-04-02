@@ -9,7 +9,7 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::{
     clamp, clamp_min,
-    num::{Arithmetics, One, Real, Zero},
+    num::{Arithmetics, Clamp, One, Real, Zero},
     Mix,
 };
 
@@ -220,7 +220,7 @@ where
 
 impl<'a, C, T> Iterator for Take<'a, C, T>
 where
-    C::Scalar: Real + Arithmetics + PartialOrd + Clone,
+    C::Scalar: Real + Clamp + Arithmetics + PartialOrd + Clone,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -253,7 +253,7 @@ where
 
 impl<'a, C, T> DoubleEndedIterator for Take<'a, C, T>
 where
-    C::Scalar: Real + Arithmetics + PartialOrd + Clone,
+    C::Scalar: Real + Clamp + Arithmetics + PartialOrd + Clone,
     C: Mix + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
@@ -301,7 +301,7 @@ where
 impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + 'a,
-    C::Scalar: Arithmetics + PartialOrd + Clone,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
 {
     /// Get a color from the gradient slice. The color of the closest domain
     /// limit will be returned if `i` is outside the domain.
@@ -351,7 +351,7 @@ impl<'a, C, T> Slice<'a, C, T>
 where
     C: Mix + 'a,
     T: Clone,
-    C::Scalar: Arithmetics + PartialOrd + Clone,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
 {
     /// Take `n` evenly spaced colors from the gradient slice, as an iterator.
     pub fn take(&self, n: usize) -> Take<C, T>
@@ -380,7 +380,7 @@ pub struct Range<T> {
 
 impl<T> Range<T>
 where
-    T: PartialOrd + Clone,
+    T: Clamp + PartialOrd + Clone,
 {
     fn clamp(&self, x: T) -> T {
         let min = self.from.clone().unwrap_or(x.clone());
@@ -569,7 +569,7 @@ where
 impl<'a, C, T> MaybeSlice<'a, C, T>
 where
     C: Mix + Clone + 'a,
-    C::Scalar: Arithmetics + PartialOrd + Clone,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
     T: AsRef<[(C::Scalar, C)]>,
 {
     fn get(&self, i: C::Scalar) -> C {

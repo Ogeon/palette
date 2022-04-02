@@ -5,7 +5,7 @@ macro_rules! impl_mix {
     ($ty: ident <$($ty_param: ident),*> $(where $($where: tt)+)?) => {
         impl<$($ty_param,)* T> Mix for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + One + Arithmetics + PartialOrd + Clone,
+            T: Real + Zero + One + Arithmetics + num::Clamp + Clone,
             $($($where)+)?
         {
             type Scalar = T;
@@ -19,7 +19,7 @@ macro_rules! impl_mix {
 
         impl<$($ty_param,)* T> MixAssign for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + One + AddAssign + Arithmetics + PartialOrd + Clone,
+            T: Real + Zero + One + AddAssign + Arithmetics + num::Clamp + Clone,
             $($($where)+)?
         {
             type Scalar = T;
@@ -40,7 +40,7 @@ macro_rules! impl_mix_hue {
     ($ty: ident <$($ty_param: ident),*> {$($other_field: ident),*} $(phantom: $phantom: ident)?) => {
         impl<$($ty_param,)* T> Mix for $ty<$($ty_param,)* T>
         where
-            T: RealAngle + SignedAngle + Zero + One + PartialOrd + Arithmetics + Clone,
+            T: RealAngle + SignedAngle + Zero + One + num::Clamp + Arithmetics + Clone,
         {
             type Scalar = T;
 
@@ -64,7 +64,7 @@ macro_rules! impl_mix_hue {
 
         impl<$($ty_param,)* T> MixAssign for $ty<$($ty_param,)* T>
         where
-            T: RealAngle + SignedAngle + Zero + One + PartialOrd + AddAssign + Arithmetics + Clone,
+            T: RealAngle + SignedAngle + Zero + One + num::Clamp + AddAssign + Arithmetics + Clone,
         {
             type Scalar = T;
 

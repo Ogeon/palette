@@ -9,18 +9,16 @@ The Rgb colors in this data appear to be adapted to the D50 white_point from the
 use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 
-use palette::convert::IntoColorUnclamped;
-use palette::white_point::D50;
-use palette::{Lab, Xyz, Yxy};
+use palette::{convert::IntoColorUnclamped, num::IntoScalarArray, white_point::D50, Lab, Xyz, Yxy};
 
 use super::load_data::{load_babel, ColorCheckerRaw};
 use super::MAX_ERROR;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct BabelData {
-    yxy: Yxy<D50, f64>,
-    xyz: Xyz<D50, f64>,
-    lab: Lab<D50, f64>,
+pub struct BabelData<T = f64> {
+    yxy: Yxy<D50, T>,
+    xyz: Xyz<D50, T>,
+    lab: Lab<D50, T>,
 }
 
 impl From<ColorCheckerRaw> for BabelData {
@@ -35,8 +33,14 @@ impl From<ColorCheckerRaw> for BabelData {
 
 macro_rules! impl_from_color {
     ($self_ty:ident) => {
-        impl From<$self_ty<D50, f64>> for BabelData {
-            fn from(color: $self_ty<D50, f64>) -> BabelData {
+        impl<T> From<$self_ty<D50, T>> for BabelData<T>
+        where
+            T: Copy,
+            $self_ty<D50, T>: IntoColorUnclamped<Yxy<D50, T>>
+                + IntoColorUnclamped<Xyz<D50, T>>
+                + IntoColorUnclamped<Lab<D50, T>>,
+        {
+            fn from(color: $self_ty<D50, T>) -> BabelData<T> {
                 BabelData {
                     yxy: color.into_color_unclamped(),
                     xyz: color.into_color_unclamped(),
@@ -50,6 +54,33 @@ macro_rules! impl_from_color {
 impl_from_color!(Yxy);
 impl_from_color!(Xyz);
 impl_from_color!(Lab);
+
+impl<V> Into<[BabelData<V::Scalar>; 2]> for BabelData<V>
+where
+    V: IntoScalarArray<2>,
+    Xyz<D50, V>: Into<[Xyz<D50, V::Scalar>; 2]>,
+    Yxy<D50, V>: Into<[Yxy<D50, V::Scalar>; 2]>,
+    Lab<D50, V>: Into<[Lab<D50, V::Scalar>; 2]>,
+{
+    fn into(self) -> [BabelData<V::Scalar>; 2] {
+        let [xyz0, xyz1]: [_; 2] = self.xyz.into();
+        let [yxy0, yxy1]: [_; 2] = self.yxy.into();
+        let [lab0, lab1]: [_; 2] = self.lab.into();
+
+        [
+            BabelData {
+                xyz: xyz0,
+                yxy: yxy0,
+                lab: lab0,
+            },
+            BabelData {
+                xyz: xyz1,
+                yxy: yxy1,
+                lab: lab1,
+            },
+        ]
+    }
+}
 
 lazy_static! {
     static ref TEST_DATA: Vec<BabelData> = load_babel();
@@ -77,5 +108,47 @@ pub fn run_from_lab_tests() {
     for expected in TEST_DATA.iter() {
         let result = BabelData::from(expected.lab);
         check_equal(&result, expected);
+    }
+}
+
+#[cfg(feature = "wide")]
+pub mod wide_f64x2 {
+    use super::*;
+
+    pub fn run_from_yxy_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let [result0, result1]: [BabelData; 2] =
+                BabelData::from(Yxy::<_, wide::f64x2>::from([
+                    expected[0].yxy,
+                    expected[1].yxy,
+                ]))
+                .into();
+            check_equal(&result0, &expected[0]);
+            check_equal(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_xyz_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let [result0, result1]: [BabelData; 2] =
+                BabelData::from(Xyz::<_, wide::f64x2>::from([
+                    expected[0].xyz,
+                    expected[1].xyz,
+                ]))
+                .into();
+            check_equal(&result0, &expected[0]);
+            check_equal(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_lab_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let [result0, result1]: [BabelData; 2] =
+                BabelData::from(Lab::<_, wide::f64x2>::from([
+                    expected[0].lab,
+                    expected[1].lab,
+                ]))
+                .into();
+            check_equal(&result0, &expected[0]);
+            check_equal(&result1, &expected[1]);
+        }
     }
 }

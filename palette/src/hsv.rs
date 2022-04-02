@@ -1,7 +1,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -19,10 +19,14 @@ use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
     angle::{FromAngle, RealAngle, SignedAngle},
+    bool_mask::{BitOps, HasBoolMask, LazySelect, Select},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Real, Zero,
+    },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign,
@@ -296,53 +300,74 @@ where
 
 impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsv<S, T>
 where
-    T: Real + Zero + MinMax + Arithmetics + PartialOrd + Clone,
+    T: RealAngle + One + Zero + MinMax + Arithmetics + PartialCmp + Clone,
+    T::Mask: BitOps + LazySelect<T> + Clone,
 {
-    fn from_color_unclamped(mut rgb: Rgb<S, T>) -> Self {
+    fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
+        // Based on OPTIMIZED RGB TO HSV COLOR CONVERSION USING SSE TECHNOLOGY
+        // by KOBALICEK, Petr & BLIZNAK, Michal
+        //
+        // This implementation assumes less about the underlying mask and number
+        // representation. The hue is also multiplied by 6 to avoid rounding
+        // errors when using degrees.
+
+        let six = T::from_f64(6.0);
+
         // Avoid negative numbers
-        rgb.red = rgb.red.max(T::zero());
-        rgb.green = rgb.green.max(T::zero());
-        rgb.blue = rgb.blue.max(T::zero());
+        let red = rgb.red.max(T::zero());
+        let green = rgb.green.max(T::zero());
+        let blue = rgb.blue.max(T::zero());
 
-        let (max, min, sep, coeff) = {
-            let (max, min, sep, coeff) = if rgb.red > rgb.green {
-                (
-                    rgb.red.clone(),
-                    rgb.green.clone(),
-                    rgb.green.clone() - &rgb.blue,
-                    T::zero(),
-                )
-            } else {
-                (
-                    rgb.green.clone(),
-                    rgb.red.clone(),
-                    rgb.blue.clone() - &rgb.red,
-                    T::from_f64(2.0),
-                )
-            };
-            if rgb.blue > max {
-                (rgb.blue, min, rgb.red - rgb.green, T::from_f64(4.0))
-            } else {
-                let min_val = if rgb.blue < min { rgb.blue } else { min };
-                (max, min_val, sep, coeff)
-            }
-        };
+        let value = red.clone().max(green.clone()).max(blue.clone());
+        let min = red.clone().min(green.clone()).min(blue.clone());
 
-        let (h, s) = if max != min {
-            let d = max.clone() - min;
-            let h = ((sep / &d) + coeff) * T::from_f64(60.0);
-            let s = d / &max;
+        let chroma = value.clone() - min;
+        let saturation = chroma
+            .eq(&T::zero())
+            .lazy_select(|| T::zero(), || chroma.clone() / &value);
 
-            (h, s)
-        } else {
-            (T::zero(), T::zero())
-        };
-        let v = max;
+        // Each of these represents an RGB component. The maximum will be false
+        // while the two other will be true. They are later used for determining
+        // which branch in the hue equation we end up in.
+        let x = value.neq(&red);
+        let y = value.eq(&red) | value.neq(&green);
+        let z = value.eq(&red) | value.eq(&green);
+
+        // The hue base is the `1`, `2/6`, `4/6` or 0 part of the hue equation,
+        // except it's multiplied by 6 here.
+        let hue_base = x.clone().select(T::from_f64(-4.0), T::zero())
+            * z.clone().select(T::one(), -T::one())
+            + &six;
+
+        // Each of these is a part of `G - B`, `B - R`, `R - G` or 0 from the
+        // hue equation. They become positive, negative or 0, depending on which
+        // branch we should be in. This makes the sum of all three combine as
+        // expected.
+        let red_m = x.clone().select(red, T::zero()) * y.clone().select(T::one(), -T::one());
+        let green_m = y.clone().select(green, T::zero()) * z.clone().select(T::one(), -T::one());
+        let blue_m = z.select(blue, T::zero()) * y.select(-T::one(), T::one());
+
+        // This is the hue equation parts combined. The hue base is the constant
+        // and the RGB components are masked so up to two of them are non-zero.
+        // Once again, this is multiplied by 6, so the chroma isn't multiplied
+        // before dividing.
+        //
+        // We also avoid dividing by 0 for non-SIMD values.
+        let hue = chroma.eq(&T::zero()).lazy_select(
+            || T::zero(),
+            || hue_base + (red_m + green_m + blue_m) / &chroma,
+        );
+
+        // hue will always be within [0, 12) (it's multiplied by 6, compared to
+        // the paper), so we can subtract by 6 instead of using % to get it
+        // within [0, 6).
+        let hue_sub = hue.gt_eq(&six).select(six, T::zero());
+        let hue = hue - hue_sub;
 
         Hsv {
-            hue: h.into(),
-            saturation: s,
-            value: v,
+            hue: RgbHue::from_degrees(hue * T::from_f64(60.0)),
+            saturation,
+            value,
             standard: PhantomData,
         }
     }
@@ -350,22 +375,21 @@ where
 
 impl<S, T> FromColorUnclamped<Hsl<S, T>> for Hsv<S, T>
 where
-    T: Real + Zero + One + IsValidDivisor + Arithmetics + PartialOrd,
+    T: Real + Zero + One + IsValidDivisor + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
-        let x = if hsl.lightness < T::from_f64(0.5) {
-            hsl.saturation * &hsl.lightness
-        } else {
-            hsl.saturation * (T::one() - &hsl.lightness)
-        };
+        let x = lazy_select! {
+            if hsl.lightness.lt(&T::from_f64(0.5)) => hsl.lightness.clone(),
+            else => T::one() - &hsl.lightness,
+        } * hsl.saturation;
 
         let value = hsl.lightness + &x;
 
         // avoid divide by zero
-        let saturation = if value.is_valid_divisor() {
-            x * T::from_f64(2.0) / &value
-        } else {
-            T::zero()
+        let saturation = lazy_select! {
+            if value.is_valid_divisor() => x * T::from_f64(2.0) / &value,
+            else => T::zero(),
         };
 
         Hsv {
@@ -380,19 +404,28 @@ where
 impl<S, T> FromColorUnclamped<Hwb<S, T>> for Hsv<S, T>
 where
     T: One + Zero + IsValidDivisor + Arithmetics,
+    T::Mask: LazySelect<T>,
 {
     fn from_color_unclamped(hwb: Hwb<S, T>) -> Self {
-        let inv = T::one() - hwb.blackness;
+        let Hwb {
+            hue,
+            whiteness,
+            blackness,
+            ..
+        } = hwb;
+
+        let value = T::one() - blackness;
+
         // avoid divide by zero
-        let s = if inv.is_valid_divisor() {
-            T::one() - (hwb.whiteness / &inv)
-        } else {
-            T::zero()
+        let saturation = lazy_select! {
+            if value.is_valid_divisor() => T::one() - (whiteness / &value),
+            else => T::zero(),
         };
+
         Hsv {
-            hue: hwb.hue,
-            saturation: s,
-            value: inv,
+            hue,
+            saturation,
+            value,
             standard: PhantomData,
         }
     }
@@ -422,21 +455,17 @@ impl<S, T, A> From<Alpha<Hsv<S, T>, A>> for (RgbHue<T>, T, T, A) {
     }
 }
 
-impl<S, T> IsWithinBounds for Hsv<S, T>
-where
-    T: Stimulus + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
-        self.value >= Self::min_value() && self.value <= Self::max_value()
+impl_is_within_bounds! {
+    Hsv<S> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        value => [Self::min_value(), Self::max_value()]
     }
+    where T: Stimulus
 }
 
 impl<S, T> Clamp for Hsv<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -454,7 +483,7 @@ where
 
 impl<S, T> ClampAssign for Hsv<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -473,17 +502,13 @@ impl_saturate!(Hsv<S> increase {saturation => [Self::min_saturation(), Self::max
 
 impl<S, T> GetHue for Hsv<S, T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Clone,
 {
     type Hue = RgbHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<RgbHue<T>> {
-        if self.saturation <= T::zero() || self.value <= T::zero() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> RgbHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -533,6 +558,13 @@ where
     }
 }
 
+impl<S, T> HasBoolMask for Hsv<S, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
 impl<S, T> Default for Hsv<S, T>
 where
     T: Stimulus,
@@ -547,12 +579,14 @@ impl_color_add!(Hsv<S, T>, [hue, saturation, value], standard);
 impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
 
 impl_array_casts!(Hsv<S, T>, [T; 3]);
+impl_simd_array_conversion_hue!(Hsv<S>, [saturation, value], standard);
 
 impl_eq_hue!(Hsv<S>, RgbHue, [hue, saturation, value]);
 
 impl<S, T> RelativeContrast for Hsv<S, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     S: RgbStandard<T>,
     Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
 {

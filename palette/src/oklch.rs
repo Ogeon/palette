@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
@@ -15,9 +15,13 @@ use crate::num::Sqrt;
 
 use crate::{
     angle::{RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
-    num::{Arithmetics, Hypot, MinMax, One, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Real,
+        Zero,
+    },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
     MixAssign, Oklab, OklabHue, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
@@ -175,7 +179,7 @@ where
 {
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         Oklch {
-            hue: color.get_hue().unwrap_or_else(|| OklabHue::from(T::zero())),
+            hue: color.get_hue(),
             l: color.l,
             chroma: color.a.hypot(color.b),
         }
@@ -206,22 +210,17 @@ impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
     }
 }
 
-impl<T> IsWithinBounds for Oklch<T>
-where
-    T: Zero + One + PartialOrd,
-{
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l()
-            && self.l <= Self::max_l()
-            && self.chroma >= Self::min_chroma()
-            && self.chroma <= Self::max_chroma()
+impl_is_within_bounds! {
+    Oklch {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), Self::max_chroma()]
     }
+    where T: Zero + One
 }
 
 impl<T> Clamp for Oklch<T>
 where
-    T: Zero + One + PartialOrd,
+    T: Zero + One + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -235,7 +234,7 @@ where
 
 impl<T> ClampAssign for Oklch<T>
 where
-    T: Zero + One + PartialOrd,
+    T: Zero + One + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -250,17 +249,13 @@ impl_saturate!(Oklch increase {chroma => [Self::min_chroma(), Self::max_chroma()
 
 impl<T> GetHue for Oklch<T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Clone,
 {
     type Hue = OklabHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<OklabHue<T>> {
-        if self.chroma <= T::zero() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> OklabHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -310,6 +305,13 @@ where
     }
 }
 
+impl<T> HasBoolMask for Oklch<T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
 impl<T> Default for Oklch<T>
 where
     T: Zero + One,
@@ -324,12 +326,14 @@ impl_color_add!(Oklch<T>, [l, chroma, hue]);
 impl_color_sub!(Oklch<T>, [l, chroma, hue]);
 
 impl_array_casts!(Oklch<T>, [T; 3]);
+impl_simd_array_conversion_hue!(Oklch, [l, chroma]);
 
 impl_eq_hue!(Oklch, OklabHue, [l, chroma, hue]);
 
 impl<T> RelativeContrast for Oklch<T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<D65, T>: FromColor<Self>,
 {
     type Scalar = T;

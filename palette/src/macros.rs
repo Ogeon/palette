@@ -15,6 +15,12 @@ mod lighten_saturate;
 mod equality;
 #[macro_use]
 mod blend;
+#[macro_use]
+mod lazy_select;
+#[macro_use]
+mod simd;
+#[macro_use]
+mod clamp;
 
 #[cfg(feature = "random")]
 #[macro_use]

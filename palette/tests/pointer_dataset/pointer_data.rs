@@ -16,9 +16,12 @@ use csv;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
-use palette::convert::IntoColorUnclamped;
-use palette::white_point::{Any, WhitePoint};
-use palette::{Lab, Lch, Xyz};
+use palette::{
+    convert::IntoColorUnclamped,
+    num::IntoScalarArray,
+    white_point::{Any, WhitePoint},
+    Lab, LabHue, Lch, Xyz,
+};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PointerWP;
@@ -41,10 +44,20 @@ struct PointerDataRaw {
     luv_v: f64,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
-struct PointerData {
-    lch: Lch<PointerWP, f64>,
-    lab: Lab<PointerWP, f64>,
+#[derive(Copy, Clone, Debug)]
+struct PointerData<T = f64> {
+    lch: Lch<PointerWP, T>,
+    lab: Lab<PointerWP, T>,
+}
+
+impl<T> PartialEq for PointerData<T>
+where
+    T: PartialEq,
+    LabHue<T>: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.lch == other.lch && self.lab == other.lab
+    }
 }
 
 impl From<PointerDataRaw> for PointerData {
@@ -58,8 +71,13 @@ impl From<PointerDataRaw> for PointerData {
 
 macro_rules! impl_from_color_pointer {
     ($self_ty:ident) => {
-        impl From<$self_ty<PointerWP, f64>> for PointerData {
-            fn from(color: $self_ty<PointerWP, f64>) -> PointerData {
+        impl<T> From<$self_ty<PointerWP, T>> for PointerData<T>
+        where
+            T: Copy,
+            $self_ty<PointerWP, T>:
+                IntoColorUnclamped<Lch<PointerWP, T>> + IntoColorUnclamped<Lab<PointerWP, T>>,
+        {
+            fn from(color: $self_ty<PointerWP, T>) -> PointerData<T> {
                 PointerData {
                     lch: color.into_color_unclamped(),
                     lab: color.into_color_unclamped(),
@@ -71,6 +89,29 @@ macro_rules! impl_from_color_pointer {
 
 impl_from_color_pointer!(Lch);
 impl_from_color_pointer!(Lab);
+
+impl<V> Into<[PointerData<V::Scalar>; 2]> for PointerData<V>
+where
+    V: IntoScalarArray<2>,
+    Lch<PointerWP, V>: Into<[Lch<PointerWP, V::Scalar>; 2]>,
+    Lab<PointerWP, V>: Into<[Lab<PointerWP, V::Scalar>; 2]>,
+{
+    fn into(self) -> [PointerData<V::Scalar>; 2] {
+        let [lch0, lch1]: [_; 2] = self.lch.into();
+        let [lab0, lab1]: [_; 2] = self.lab.into();
+
+        [
+            PointerData {
+                lch: lch0,
+                lab: lab0,
+            },
+            PointerData {
+                lch: lch1,
+                lab: lab1,
+            },
+        ]
+    }
+}
 
 lazy_static! {
     static ref TEST_DATA: Vec<PointerData> = load_data();
@@ -105,5 +146,35 @@ pub fn run_from_lab_tests() {
     for expected in TEST_DATA.iter() {
         let result = PointerData::from(expected.lab);
         check_equal(&result, expected);
+    }
+}
+
+#[cfg(feature = "wide")]
+pub mod wide_f64x2 {
+    use super::*;
+
+    pub fn run_from_lch_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let [result0, result1]: [PointerData; 2] =
+                PointerData::from(Lch::<_, wide::f64x2>::from([
+                    expected[0].lch,
+                    expected[1].lch,
+                ]))
+                .into();
+            check_equal(&result0, &expected[0]);
+            check_equal(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_lab_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let [result0, result1]: [PointerData; 2] =
+                PointerData::from(Lab::<_, wide::f64x2>::from([
+                    expected[0].lab,
+                    expected[1].lab,
+                ]))
+                .into();
+            check_equal(&result0, &expected[0]);
+            check_equal(&result1, &expected[1]);
+        }
     }
 }

@@ -73,7 +73,7 @@ where
         + Mul<S, Output = C>
         + ArrayCast<Array = [S; N]>,
     PreAlpha<C>: ArrayCast<Array = [S; M]>,
-    S: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + PartialOrd + Clone,
+    S: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + Clone,
 {
     fn apply_to(self, source: PreAlpha<C>, destination: PreAlpha<C>) -> PreAlpha<C> {
         let (src_color, mut dst_color) =

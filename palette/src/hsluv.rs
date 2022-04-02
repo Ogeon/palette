@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -19,10 +19,14 @@ use crate::num::{Cbrt, Sqrt};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     luv_bounds::LuvBounds,
-    num::{Arithmetics, MinMax, One, Powi, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Powi, Real,
+        Zero,
+    },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
     LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
@@ -223,21 +227,17 @@ impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Hsluv<Wp, T>
-where
-    T: Zero + Real + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.saturation >= Self::min_saturation() && self.saturation <= Self::max_saturation() &&
-        self.l >= Self::min_l() && self.l <= Self::max_l()
+impl_is_within_bounds! {
+    Hsluv<Wp> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        l => [Self::min_l(), Self::max_l()]
     }
+    where T: Real + Zero
 }
 
 impl<Wp, T> Clamp for Hsluv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -255,7 +255,7 @@ where
 
 impl<Wp, T> ClampAssign for Hsluv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -274,17 +274,13 @@ impl_saturate!(Hsluv<Wp> increase {saturation => [Self::min_saturation(), Self::
 
 impl<Wp, T> GetHue for Hsluv<Wp, T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Clone,
 {
     type Hue = LuvHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<LuvHue<T>> {
-        if self.saturation <= T::zero() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> LuvHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -334,6 +330,13 @@ where
     }
 }
 
+impl<Wp, T> HasBoolMask for Hsluv<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
 impl<Wp, T> Default for Hsluv<Wp, T>
 where
     T: Real + Zero,
@@ -348,12 +351,14 @@ impl_color_add!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 
 impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
+impl_simd_array_conversion_hue!(Hsluv<Wp>, [saturation, l], white_point);
 
 impl_eq_hue!(Hsluv<Wp>, LuvHue, [hue, saturation, l]);
 
 impl<Wp, T> RelativeContrast for Hsluv<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;
@@ -370,7 +375,8 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> Distribution<Hsluv<Wp, T>> for Standard
 where
-    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
+    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T> + Clone,
     Standard: Distribution<T> + Distribution<LuvHue<T>>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsluv<Wp, T> {
@@ -392,7 +398,8 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> SampleUniform for Hsluv<Wp, T>
 where
-    T: Real + Cbrt + Sqrt + Powi + Arithmetics + PartialOrd + Clone + SampleUniform,
+    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
+    T::Mask: LazySelect<T> + Clone,
     LuvHue<T>: SampleBorrow<LuvHue<T>>,
     crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
 {
@@ -402,7 +409,8 @@ where
 #[cfg(feature = "random")]
 impl<Wp, T> UniformSampler for UniformHsluv<Wp, T>
 where
-    T: Real + Cbrt + Sqrt + Powi + Arithmetics + PartialOrd + Clone + SampleUniform,
+    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
+    T::Mask: LazySelect<T> + Clone,
     LuvHue<T>: SampleBorrow<LuvHue<T>>,
     crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
 {

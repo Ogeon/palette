@@ -2,7 +2,8 @@
     "rust-analyzer.cargo.features": [
         "random",
         "serializing",
-        "bytemuck"
+        "bytemuck",
+        "wide"
     ],
     "rust-analyzer.assist.importEnforceGranularity": true,
     "rust-analyzer.assist.importGranularity": "crate",

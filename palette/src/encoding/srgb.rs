@@ -1,9 +1,10 @@
 //! The sRGB standard.
 
 use crate::{
+    bool_mask::LazySelect,
     encoding::TransferFn,
     luma::LumaStandard,
-    num::{Arithmetics, One, Powf, Real, Recip},
+    num::{Arithmetics, One, PartialCmp, Powf, Real, Recip},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, WhitePoint, D65},
     Yxy,
@@ -65,22 +66,21 @@ where
 
 impl<T> TransferFn<T> for Srgb
 where
-    T: Real + One + Powf + Recip + Arithmetics + PartialOrd,
+    T: Real + One + Powf + Recip + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     fn into_linear(x: T) -> T {
         // Recip call shows performance benefits in benchmarks for this function
-        if x <= T::from_f64(0.04045) {
-            x * T::from_f64(12.92).recip()
-        } else {
-            ((x + T::from_f64(0.055)) * T::from_f64(1.055).recip()).powf(T::from_f64(2.4))
+        lazy_select! {
+            if x.lt_eq(&T::from_f64(0.04045)) => T::from_f64(12.92).recip() * &x,
+            else => ((T::from_f64(0.055) + &x) * T::from_f64(1.055).recip()).powf(T::from_f64(2.4)),
         }
     }
 
     fn from_linear(x: T) -> T {
-        if x <= T::from_f64(0.0031308) {
-            x * T::from_f64(12.92)
-        } else {
-            x.powf(T::one() / T::from_f64(2.4)) * T::from_f64(1.055) - T::from_f64(0.055)
+        lazy_select! {
+            if x.lt_eq(&T::from_f64(0.0031308)) => T::from_f64(12.92) * &x,
+            else => x.clone().powf(T::one() / T::from_f64(2.4)) * T::from_f64(1.055) - T::from_f64(0.055),
         }
     }
 }

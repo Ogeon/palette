@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, BitOr, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -15,11 +15,15 @@ use rand::{
 
 use crate::{
     angle::{RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, clamp_min, clamp_min_assign,
     color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
     contrast_ratio,
     convert::FromColorUnclamped,
-    num::{Abs, Arithmetics, Exp, Hypot, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero},
+    num::{
+        self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, MinMax, One,
+        PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
+    },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
     LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
@@ -187,7 +191,7 @@ where
 {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         Lch {
-            hue: color.get_hue().unwrap_or_else(|| LabHue::from(T::zero())),
+            hue: color.get_hue(),
             l: color.l,
             chroma: color.a.hypot(color.b),
             white_point: PhantomData,
@@ -221,17 +225,20 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
 
 impl<Wp, T> IsWithinBounds for Lch<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + PartialCmp + HasBoolMask,
+    T::Mask: BitAnd<Output = T::Mask>,
 {
     #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l() && self.l <= Self::max_l() && self.chroma >= Self::min_chroma()
+    fn is_within_bounds(&self) -> T::Mask {
+        self.l.gt_eq(&Self::min_l())
+            & self.l.lt_eq(&Self::max_l())
+            & self.chroma.gt_eq(&Self::min_chroma())
     }
 }
 
 impl<Wp, T> Clamp for Lch<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -245,7 +252,7 @@ where
 
 impl<Wp, T> ClampAssign for Lch<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -260,17 +267,13 @@ impl_saturate!(Lch<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma
 
 impl<Wp, T> GetHue for Lch<Wp, T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Clone,
 {
     type Hue = LabHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<LabHue<T>> {
-        if self.chroma <= T::zero() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> LabHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -333,8 +336,9 @@ where
         + Powi
         + Exp
         + Arithmetics
-        + PartialOrd
+        + PartialCmp
         + Clone,
+    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>,
     Self: Into<LabColorDiff<T>>,
 {
     type Scalar = T;
@@ -343,6 +347,13 @@ where
     fn get_color_difference(self, other: Lch<Wp, T>) -> Self::Scalar {
         get_ciede_difference(self.into(), other.into())
     }
+}
+
+impl<Wp, T> HasBoolMask for Lch<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
 }
 
 impl<Wp, T> Default for Lch<Wp, T>
@@ -359,12 +370,14 @@ impl_color_add!(Lch<Wp, T>, [l, chroma, hue], white_point);
 impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lch<Wp, T>, [T; 3]);
+impl_simd_array_conversion_hue!(Lch<Wp>, [l, chroma], white_point);
 
 impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
 
 impl<Wp, T> RelativeContrast for Lch<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;

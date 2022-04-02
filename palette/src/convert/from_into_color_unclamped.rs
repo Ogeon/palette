@@ -18,7 +18,7 @@ pub trait FromColorUnclamped<T>: Sized {
     /// use palette::convert::FromColorUnclamped;
     /// use palette::{IsWithinBounds, Lch, Srgb};
     ///
-    /// let rgb = Srgb::from_color_unclamped(Lch::new(50.0, 100.0, -175.0));
+    /// let rgb = Srgb::from_color_unclamped(Lch::new(50.0f32, 100.0, -175.0));
     /// assert!(!rgb.is_within_bounds());
     /// ```
     #[must_use]

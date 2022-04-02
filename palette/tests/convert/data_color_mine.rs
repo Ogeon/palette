@@ -10,8 +10,9 @@ use serde_derive::Deserialize;
 use palette::{
     angle::AngleEq,
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{IntoScalarArray, One, Real, Zero},
     rgb::RgbStandard,
-    white_point::D65,
+    white_point::{WhitePoint, D65},
     Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy,
 };
 
@@ -80,7 +81,10 @@ pub struct ColorMine<F> {
     pub hwb: Hwb<::palette::encoding::Srgb, F>,
 }
 
-impl<F: PartialEq + AngleEq> PartialEq for ColorMine<F> {
+impl<F> PartialEq for ColorMine<F>
+where
+    F: PartialEq + AngleEq<Mask = bool>,
+{
     fn eq(&self, other: &Self) -> bool {
         self.xyz == other.xyz
             && self.yxy == other.yxy
@@ -217,6 +221,51 @@ impl_from_rgb_derivative!(F, Hsl<::palette::encoding::Srgb, F>);
 impl_from_rgb_derivative!(F, Hsv<::palette::encoding::Srgb, F>);
 impl_from_rgb_derivative!(F, Hwb<::palette::encoding::Srgb, F>);
 
+impl<F, S> Into<[ColorMine<F>; 2]> for ColorMine<S>
+where
+    S: IntoScalarArray<2, Scalar = F>,
+    F: Real + Zero + One + Default,
+    D65: WhitePoint<F>,
+    Yxy<D65, F>: FromColorUnclamped<Xyz<D65, F>>,
+{
+    fn into(self) -> [ColorMine<F>; 2] {
+        let [xyz0, xyz1]: [Xyz<_, F>; 2] = self.xyz.into();
+        let [yxy0, yxy1]: [Yxy<_, F>; 2] = self.yxy.into();
+        let [lab0, lab1]: [Lab<_, F>; 2] = self.lab.into();
+        let [lch0, lch1]: [Lch<_, F>; 2] = self.lch.into();
+        let [linear_rgb0, linear_rgb1]: [LinSrgb<F>; 2] = self.linear_rgb.into();
+        let [rgb0, rgb1]: [Srgb<F>; 2] = self.rgb.into();
+        let [hsl0, hsl1]: [Hsl<_, F>; 2] = self.hsl.into();
+        let [hsv0, hsv1]: [Hsv<_, F>; 2] = self.hsv.into();
+        let [hwb0, hwb1]: [Hwb<_, F>; 2] = self.hwb.into();
+
+        [
+            ColorMine {
+                xyz: xyz0,
+                yxy: yxy0,
+                lab: lab0,
+                lch: lch0,
+                linear_rgb: linear_rgb0,
+                rgb: rgb0,
+                hsl: hsl0,
+                hsv: hsv0,
+                hwb: hwb0,
+            },
+            ColorMine {
+                xyz: xyz1,
+                yxy: yxy1,
+                lab: lab1,
+                lch: lch1,
+                linear_rgb: linear_rgb1,
+                rgb: rgb1,
+                hsl: hsl1,
+                hsv: hsv1,
+                hwb: hwb1,
+            },
+        ]
+    }
+}
+
 lazy_static! {
     static ref TEST_DATA: Vec<ColorMine<f64>> = load_data();
 }
@@ -313,5 +362,84 @@ pub fn run_from_lch_tests() {
     for expected in TEST_DATA.iter() {
         let mut result = ColorMine::from(expected.lch);
         check_equal_cie(&mut result, expected);
+    }
+}
+
+#[cfg(feature = "wide")]
+pub mod wide_f64x2 {
+    use super::*;
+
+    pub fn run_from_xyz_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Xyz::<_, wide::f64x2>::from([expected[0].xyz, expected[1].xyz]);
+            let [mut result0, mut result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_cie(&mut result0, &expected[0]);
+            check_equal_cie(&mut result1, &expected[1]);
+        }
+    }
+    pub fn run_from_yxy_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Yxy::<_, wide::f64x2>::from([expected[0].yxy, expected[1].yxy]);
+            let [mut result0, mut result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_cie(&mut result0, &expected[0]);
+            check_equal_cie(&mut result1, &expected[1]);
+        }
+    }
+    pub fn run_from_rgb_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Srgb::<wide::f64x2>::from([expected[0].rgb, expected[1].rgb]);
+            let [result0, result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_rgb(&result0, &expected[0]);
+            check_equal_rgb(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_linear_rgb_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors =
+                LinSrgb::<wide::f64x2>::from([expected[0].linear_rgb, expected[1].linear_rgb]);
+            let [mut result0, mut result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_cie(&mut result0, &expected[0]);
+            check_equal_cie(&mut result1, &expected[1]);
+        }
+    }
+    pub fn run_from_hsl_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Hsl::<_, wide::f64x2>::from([expected[0].hsl, expected[1].hsl]);
+            let [result0, result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_rgb(&result0, &expected[0]);
+            check_equal_rgb(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_hsv_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Hsv::<_, wide::f64x2>::from([expected[0].hsv, expected[1].hsv]);
+            let [result0, result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_rgb(&result0, &expected[0]);
+            check_equal_rgb(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_hwb_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Hwb::<_, wide::f64x2>::from([expected[0].hwb, expected[1].hwb]);
+            let [result0, result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_rgb(&result0, &expected[0]);
+            check_equal_rgb(&result1, &expected[1]);
+        }
+    }
+    pub fn run_from_lab_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Lab::<_, wide::f64x2>::from([expected[0].lab, expected[1].lab]);
+            let [mut result0, mut result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_cie(&mut result0, &expected[0]);
+            check_equal_cie(&mut result1, &expected[1]);
+        }
+    }
+    pub fn run_from_lch_tests() {
+        for expected in TEST_DATA.chunks_exact(2) {
+            let colors = Lch::<_, wide::f64x2>::from([expected[0].lch, expected[1].lch]);
+            let [mut result0, mut result1]: [ColorMine<f64>; 2] = ColorMine::from(colors).into();
+            check_equal_cie(&mut result0, &expected[0]);
+            check_equal_cie(&mut result1, &expected[1]);
+        }
     }
 }

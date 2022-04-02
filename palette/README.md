@@ -51,6 +51,7 @@ These features are disabled by default:
 * `"random"` - Enables generating random colors using [`rand`].
 * `"libm"` - Uses the [`libm`] floating point math library (for when the `std` feature is disabled).
 * `"bytemuck"` - Enables casting between plain data types using [`bytemuck`].
+* `"wide"` - Enables support for using SIMD types from [`wide`].
 
 ### Using palette in an embedded environment
 
@@ -351,3 +352,4 @@ at your option.
 [`rand`]: https://crates.io/crates/rand
 [`libm`]: https://crates.io/crates/libm
 [`bytemuck`]: https://crates.io/crates/bytemuck
+[`wide`]: https://crates.io/crates/wide

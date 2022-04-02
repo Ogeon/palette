@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Mul, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Mul, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -18,10 +18,14 @@ use crate::num::Sqrt;
 
 use crate::{
     angle::{RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     luv_bounds::LuvBounds,
-    num::{Arithmetics, Hypot, MinMax, One, Powi, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Powi,
+        Real, Zero,
+    },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
     Luv, LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
@@ -182,7 +186,7 @@ where
 {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         Lchuv {
-            hue: color.get_hue().unwrap_or_else(|| LuvHue::from(T::zero())),
+            hue: color.get_hue(),
             l: color.l,
             chroma: color.u.hypot(color.v),
             white_point: PhantomData,
@@ -232,22 +236,17 @@ impl<Wp, T, A> From<Alpha<Lchuv<Wp, T>, A>> for (T, T, LuvHue<T>, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Lchuv<Wp, T>
-where
-    T: Zero + Real + PartialOrd,
-{
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l()
-            && self.l <= Self::max_l()
-            && self.chroma >= Self::min_chroma()
-            && self.chroma <= Self::max_chroma()
+impl_is_within_bounds! {
+    Lchuv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), Self::max_chroma()]
     }
+    where T: Real + Zero
 }
 
 impl<Wp, T> Clamp for Lchuv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -261,7 +260,7 @@ where
 
 impl<Wp, T> ClampAssign for Lchuv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -276,17 +275,13 @@ impl_saturate!(Lchuv<Wp> increase {chroma => [Self::min_chroma(), Self::max_chro
 
 impl<Wp, T> GetHue for Lchuv<Wp, T>
 where
-    T: Zero + PartialOrd + Clone,
+    T: Clone,
 {
     type Hue = LuvHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<LuvHue<T>> {
-        if self.chroma <= T::zero() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> LuvHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -336,6 +331,13 @@ where
     }
 }
 
+impl<Wp, T> HasBoolMask for Lchuv<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
 impl<Wp, T> Default for Lchuv<Wp, T>
 where
     T: Zero + Real,
@@ -350,12 +352,14 @@ impl_color_add!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
 impl_color_sub!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lchuv<Wp, T>, [T; 3]);
+impl_simd_array_conversion_hue!(Lchuv<Wp>, [l, chroma], white_point);
 
 impl_eq_hue!(Lchuv<Wp>, LuvHue, [l, chroma, hue]);
 
 impl<Wp, T> RelativeContrast for Lchuv<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;

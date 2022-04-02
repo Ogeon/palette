@@ -3,7 +3,7 @@ use core::{
     fmt,
     marker::PhantomData,
     num::ParseIntError,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
     str::FromStr,
 };
 
@@ -21,13 +21,17 @@ use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
     blend::{PreAlpha, Premultiply},
+    bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{linear::LinearFn, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
-    num::{Abs, Arithmetics, IsValidDivisor, MinMax, One, Real, Recip, Trigonometry, Zero},
+    num::{
+        self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
+        MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
+    },
     rgb::{RgbSpace, RgbStandard, TransferFn},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::Any,
@@ -458,38 +462,63 @@ where
 impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>> for Rgb<S, T>
 where
     S: RgbStandard<T>,
-    T: Recip + IsValidDivisor + Arithmetics + Clone,
-    Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
+    S::Space: RgbSpace<T::Scalar, WhitePoint = <S::Space as RgbSpace<T>>::WhitePoint>,
+    T: Arithmetics + FromScalar,
+    T::Scalar:
+        Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone + FromScalar<Scalar = T::Scalar>,
+    Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>) -> Self {
-        let transform_matrix = matrix_inverse(rgb_to_xyz_matrix::<S::Space, T>());
+        let transform_matrix = matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>());
         Self::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
     }
 }
 
 impl<S, T> FromColorUnclamped<Hsl<S, T>> for Rgb<S, T>
 where
-    T: Real + RealAngle + UnsignedAngle + Zero + One + Abs + PartialOrd + Arithmetics + Clone,
+    T: Real
+        + RealAngle
+        + UnsignedAngle
+        + Zero
+        + One
+        + Abs
+        + Round
+        + PartialCmp
+        + Arithmetics
+        + Clone,
+    T::Mask: LazySelect<T> + BitOps + Clone,
 {
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
         let c = (T::one() - (hsl.lightness.clone() * T::from_f64(2.0) - T::one()).abs())
             * hsl.saturation;
         let h = hsl.hue.into_positive_degrees() / T::from_f64(60.0);
-        let x = c.clone() * (T::one() - (h.clone() % T::from_f64(2.0) - T::one()).abs());
+        // We avoid using %, since it's not always (or never?) supported in SIMD
+        let h_mod_two = h.clone() - Round::floor(h.clone() * T::from_f64(0.5)) * T::from_f64(2.0);
+        let x = c.clone() * (T::one() - (h_mod_two - T::one()).abs());
         let m = hsl.lightness - c.clone() * T::from_f64(0.5);
 
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < T::from_f64(2.0) {
-            (x, c, T::zero())
-        } else if h >= T::from_f64(2.0) && h < T::from_f64(3.0) {
-            (T::zero(), c, x)
-        } else if h >= T::from_f64(3.0) && h < T::from_f64(4.0) {
-            (T::zero(), x, c)
-        } else if h >= T::from_f64(4.0) && h < T::from_f64(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
+        let is_zone0 = h.gt_eq(&T::zero()) & h.lt(&T::one());
+        let is_zone1 = h.gt_eq(&T::one()) & h.lt(&T::from_f64(2.0));
+        let is_zone2 = h.gt_eq(&T::from_f64(2.0)) & h.lt(&T::from_f64(3.0));
+        let is_zone3 = h.gt_eq(&T::from_f64(3.0)) & h.lt(&T::from_f64(4.0));
+        let is_zone4 = h.gt_eq(&T::from_f64(4.0)) & h.lt(&T::from_f64(5.0));
+
+        let red = lazy_select! {
+            if is_zone1.clone() | &is_zone4 => x.clone(),
+            if is_zone2.clone() | &is_zone3 => T::zero(),
+            else => c.clone(),
+        };
+
+        let green = lazy_select! {
+            if is_zone0.clone() | &is_zone3 => x.clone(),
+            if is_zone1.clone() | &is_zone2 => c.clone(),
+            else => T::zero(),
+        };
+
+        let blue = lazy_select! {
+            if is_zone0 | is_zone1 => T::zero(),
+            if is_zone3 | is_zone4 => c,
+            else => x,
         };
 
         Rgb {
@@ -503,26 +532,48 @@ where
 
 impl<S, T> FromColorUnclamped<Hsv<S, T>> for Rgb<S, T>
 where
-    T: Real + RealAngle + UnsignedAngle + Zero + One + Abs + PartialOrd + Arithmetics + Clone,
+    T: Real
+        + RealAngle
+        + UnsignedAngle
+        + Round
+        + Zero
+        + One
+        + Abs
+        + PartialCmp
+        + Arithmetics
+        + Clone,
+    T::Mask: LazySelect<T> + BitOps + Clone,
 {
     fn from_color_unclamped(hsv: Hsv<S, T>) -> Self {
         let c = hsv.value.clone() * hsv.saturation;
         let h = hsv.hue.into_positive_degrees() / T::from_f64(60.0);
-        let x = c.clone() * (T::one() - (h.clone() % T::from_f64(2.0) - T::one()).abs());
+        // We avoid using %, since it's not always (or never?) supported in SIMD
+        let h_mod_two = h.clone() - Round::floor(h.clone() * T::from_f64(0.5)) * T::from_f64(2.0);
+        let x = c.clone() * (T::one() - (h_mod_two - T::one()).abs());
         let m = hsv.value - c.clone();
 
-        let (red, green, blue) = if h >= T::zero() && h < T::one() {
-            (c, x, T::zero())
-        } else if h >= T::one() && h < T::from_f64(2.0) {
-            (x, c, T::zero())
-        } else if h >= T::from_f64(2.0) && h < T::from_f64(3.0) {
-            (T::zero(), c, x)
-        } else if h >= T::from_f64(3.0) && h < T::from_f64(4.0) {
-            (T::zero(), x, c)
-        } else if h >= T::from_f64(4.0) && h < T::from_f64(5.0) {
-            (x, T::zero(), c)
-        } else {
-            (c, T::zero(), x)
+        let is_zone0 = h.gt_eq(&T::zero()) & h.lt(&T::one());
+        let is_zone1 = h.gt_eq(&T::one()) & h.lt(&T::from_f64(2.0));
+        let is_zone2 = h.gt_eq(&T::from_f64(2.0)) & h.lt(&T::from_f64(3.0));
+        let is_zone3 = h.gt_eq(&T::from_f64(3.0)) & h.lt(&T::from_f64(4.0));
+        let is_zone4 = h.gt_eq(&T::from_f64(4.0)) & h.lt(&T::from_f64(5.0));
+
+        let red = lazy_select! {
+            if is_zone1.clone() | &is_zone4 => x.clone(),
+            if is_zone2.clone() | &is_zone3 => T::zero(),
+            else => c.clone(),
+        };
+
+        let green = lazy_select! {
+            if is_zone0.clone() | &is_zone3 => x.clone(),
+            if is_zone1.clone() | &is_zone2 => c.clone(),
+            else => T::zero(),
+        };
+
+        let blue = lazy_select! {
+            if is_zone0 | is_zone1 => T::zero(),
+            if is_zone3 | is_zone4 => c,
+            else => x,
         };
 
         Rgb {
@@ -562,22 +613,18 @@ where
     }
 }
 
-impl<S, T> IsWithinBounds for Rgb<S, T>
-where
-    T: Stimulus + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.red >= Self::min_red() && self.red <= Self::max_red() &&
-        self.green >= Self::min_green() && self.green <= Self::max_green() &&
-        self.blue >= Self::min_blue() && self.blue <= Self::max_blue()
+impl_is_within_bounds! {
+    Rgb<S> {
+        red => [Self::min_red(), Self::max_red()],
+        green => [Self::min_green(), Self::max_green()],
+        blue => [Self::min_blue(), Self::max_blue()]
     }
+    where T: Stimulus
 }
 
 impl<S, T> Clamp for Rgb<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -591,7 +638,7 @@ where
 
 impl<S, T> ClampAssign for Rgb<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -616,28 +663,31 @@ impl_lighten! {
 
 impl<S, T> GetHue for Rgb<S, T>
 where
-    T: Real + RealAngle + Trigonometry + PartialEq + Arithmetics + Clone,
+    T: Real + RealAngle + Trigonometry + Arithmetics + Clone,
 {
     type Hue = RgbHue<T>;
 
-    fn get_hue(&self) -> Option<RgbHue<T>> {
+    fn get_hue(&self) -> RgbHue<T> {
         let sqrt_3: T = T::from_f64(1.73205081);
 
-        if self.red == self.green && self.red == self.blue {
-            None
-        } else {
-            Some(RgbHue::from_radians(
-                (sqrt_3 * (self.green.clone() - self.blue.clone())).atan2(
-                    self.red.clone() * T::from_f64(2.0) - self.green.clone() - self.blue.clone(),
-                ),
-            ))
-        }
+        RgbHue::from_radians(
+            (sqrt_3 * (self.green.clone() - self.blue.clone())).atan2(
+                self.red.clone() * T::from_f64(2.0) - self.green.clone() - self.blue.clone(),
+            ),
+        )
     }
 }
 
-impl_premultiply!(Rgb<S> where S: RgbStandard<T, TransferFn = LinearFn>);
+impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard where S: RgbStandard<T, TransferFn = LinearFn>);
 
 impl<S, T> StimulusColor for Rgb<S, T> where T: Stimulus {}
+
+impl<S, T> HasBoolMask for Rgb<S, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
 
 impl<S, T> Default for Rgb<S, T>
 where
@@ -905,6 +955,7 @@ impl<S, T, A> From<Alpha<Rgb<S, T>, A>> for (T, T, T, A) {
 }
 
 impl_array_casts!(Rgb<S, T>, [T; 3]);
+impl_simd_array_conversion!(Rgb<S>, [red, green, blue], standard);
 
 impl_eq!(Rgb<S>, [red, green, blue]);
 
@@ -1083,7 +1134,8 @@ impl<S> From<Rgba<S, u8>> for u32 {
 
 impl<S, T> RelativeContrast for Rgb<S, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     S: RgbStandard<T>,
     Xyz<<<S as RgbStandard<T>>::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
 {

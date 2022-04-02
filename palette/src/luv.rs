@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -16,9 +16,13 @@ use rand::{
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Powf, Powi, Real, Recip, Trigonometry, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Powf, Powi, Real, Recip, Trigonometry, Zero,
+    },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
@@ -185,7 +189,15 @@ where
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Luv<Wp, T>
 where
     Wp: WhitePoint<T>,
-    T: Real + Zero + Powi + Powf + Recip + Arithmetics + PartialOrd + Clone,
+    T: Real
+        + Zero
+        + Powi
+        + Powf
+        + Recip
+        + Arithmetics
+        + PartialOrd
+        + Clone
+        + HasBoolMask<Mask = bool>,
 {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         let w = Wp::get_xyz();
@@ -248,22 +260,18 @@ impl<Wp, T, A> From<Alpha<Luv<Wp, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Luv<Wp, T>
-where
-    T: Zero + Real + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l() && self.l <= Self::max_l() &&
-        self.u >= Self::min_u() && self.u <= Self::max_u() &&
-        self.v >= Self::min_v() && self.v <= Self::max_v()
+impl_is_within_bounds! {
+    Luv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        u => [Self::min_u(), Self::max_u()],
+        v => [Self::min_v(), Self::max_v()]
     }
+    where T: Real + Zero
 }
 
 impl<Wp, T> Clamp for Luv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -277,7 +285,7 @@ where
 
 impl<Wp, T> ClampAssign for Luv<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -289,21 +297,24 @@ where
 
 impl_mix!(Luv<Wp>);
 impl_lighten!(Luv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {u, v} phantom: white_point);
-impl_premultiply!(Luv<Wp>);
+impl_premultiply!(Luv<Wp> {l, u, v} phantom: white_point);
 
 impl<Wp, T> GetHue for Luv<Wp, T>
 where
-    T: RealAngle + Zero + Trigonometry + PartialEq + Clone,
+    T: RealAngle + Trigonometry + Clone,
 {
     type Hue = LuvHue<T>;
 
-    fn get_hue(&self) -> Option<LuvHue<T>> {
-        if self.u == T::zero() && self.v == T::zero() {
-            None
-        } else {
-            Some(LuvHue::from_radians(self.v.clone().atan2(self.u.clone())))
-        }
+    fn get_hue(&self) -> LuvHue<T> {
+        LuvHue::from_radians(self.v.clone().atan2(self.u.clone()))
     }
+}
+
+impl<Wp, T> HasBoolMask for Luv<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
 }
 
 impl<Wp, T> Default for Luv<Wp, T>
@@ -321,12 +332,14 @@ impl_color_mul!(Luv<Wp, T>, [l, u, v], white_point);
 impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
 
 impl_array_casts!(Luv<Wp, T>, [T; 3]);
+impl_simd_array_conversion!(Luv<Wp>, [l, u, v], white_point);
 
 impl_eq!(Luv<Wp>, [l, u, v]);
 
 impl<Wp, T> RelativeContrast for Luv<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Wp: WhitePoint<T>,
     Xyz<Wp, T>: FromColor<Self>,
 {
