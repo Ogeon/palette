@@ -19,7 +19,7 @@ use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
     angle::{FromAngle, RealAngle, SignedAngle},
-    bool_mask::{BitOps, HasBoolMask, LazySelect, Select},
+    bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
@@ -301,74 +301,124 @@ where
 impl<S, T> FromColorUnclamped<Rgb<S, T>> for Hsv<S, T>
 where
     T: RealAngle + One + Zero + MinMax + Arithmetics + PartialCmp + Clone,
-    T::Mask: BitOps + LazySelect<T> + Clone,
+    T::Mask: BoolMask + BitOps + LazySelect<T> + Clone + 'static,
 {
     fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
-        // Based on OPTIMIZED RGB TO HSV COLOR CONVERSION USING SSE TECHNOLOGY
-        // by KOBALICEK, Petr & BLIZNAK, Michal
-        //
-        // This implementation assumes less about the underlying mask and number
-        // representation. The hue is also multiplied by 6 to avoid rounding
-        // errors when using degrees.
-
-        let six = T::from_f64(6.0);
-
         // Avoid negative numbers
         let red = rgb.red.max(T::zero());
         let green = rgb.green.max(T::zero());
         let blue = rgb.blue.max(T::zero());
 
-        let value = red.clone().max(green.clone()).max(blue.clone());
-        let min = red.clone().min(green.clone()).min(blue.clone());
+        // The SIMD optimized version showed significant slowdown for regular floats.
+        if TypeId::of::<T::Mask>() == TypeId::of::<bool>() {
+            let (max, min, sep, coeff) = {
+                let (max, min, sep, coeff) = if red.gt(&green).is_true() {
+                    (red.clone(), green.clone(), green.clone() - &blue, T::zero())
+                } else {
+                    (
+                        green.clone(),
+                        red.clone(),
+                        blue.clone() - &red,
+                        T::from_f64(2.0),
+                    )
+                };
+                if blue.gt(&max).is_true() {
+                    (blue, min, red - green, T::from_f64(4.0))
+                } else {
+                    let min_val = if blue.lt(&min).is_true() { blue } else { min };
+                    (max, min_val, sep, coeff)
+                }
+            };
 
-        let chroma = value.clone() - min;
-        let saturation = chroma
-            .eq(&T::zero())
-            .lazy_select(|| T::zero(), || chroma.clone() / &value);
+            let (h, s) = if max.neq(&min).is_true() {
+                let d = max.clone() - min;
+                let h = ((sep / &d) + coeff) * T::from_f64(60.0);
+                let s = d / &max;
 
-        // Each of these represents an RGB component. The maximum will be false
-        // while the two other will be true. They are later used for determining
-        // which branch in the hue equation we end up in.
-        let x = value.neq(&red);
-        let y = value.eq(&red) | value.neq(&green);
-        let z = value.eq(&red) | value.eq(&green);
+                (h, s)
+            } else {
+                (T::zero(), T::zero())
+            };
+            let v = max;
 
-        // The hue base is the `1`, `2/6`, `4/6` or 0 part of the hue equation,
-        // except it's multiplied by 6 here.
-        let hue_base = x.clone().select(T::from_f64(-4.0), T::zero())
-            * z.clone().select(T::one(), -T::one())
-            + &six;
+            Hsv {
+                hue: h.into(),
+                saturation: s,
+                value: v,
+                standard: PhantomData,
+            }
+        } else {
+            // Based on OPTIMIZED RGB TO HSV COLOR CONVERSION USING SSE TECHNOLOGY
+            // by KOBALICEK, Petr & BLIZNAK, Michal
+            //
+            // This implementation assumes less about the underlying mask and number
+            // representation. The hue is also multiplied by 6 to avoid rounding
+            // errors when using degrees.
 
-        // Each of these is a part of `G - B`, `B - R`, `R - G` or 0 from the
-        // hue equation. They become positive, negative or 0, depending on which
-        // branch we should be in. This makes the sum of all three combine as
-        // expected.
-        let red_m = x.clone().select(red, T::zero()) * y.clone().select(T::one(), -T::one());
-        let green_m = y.clone().select(green, T::zero()) * z.clone().select(T::one(), -T::one());
-        let blue_m = z.select(blue, T::zero()) * y.select(-T::one(), T::one());
+            let six = T::from_f64(6.0);
 
-        // This is the hue equation parts combined. The hue base is the constant
-        // and the RGB components are masked so up to two of them are non-zero.
-        // Once again, this is multiplied by 6, so the chroma isn't multiplied
-        // before dividing.
-        //
-        // We also avoid dividing by 0 for non-SIMD values.
-        let hue = chroma.eq(&T::zero()).lazy_select(
-            || T::zero(),
-            || hue_base + (red_m + green_m + blue_m) / &chroma,
-        );
+            let value = red.clone().max(green.clone()).max(blue.clone());
+            let min = red.clone().min(green.clone()).min(blue.clone());
 
-        // hue will always be within [0, 12) (it's multiplied by 6, compared to
-        // the paper), so we can subtract by 6 instead of using % to get it
-        // within [0, 6).
-        let hue_sub = hue.gt_eq(&six).select(six, T::zero());
-        let hue = hue - hue_sub;
+            let chroma = value.clone() - min;
+            let saturation = chroma
+                .eq(&T::zero())
+                .lazy_select(|| T::zero(), || chroma.clone() / &value);
 
-        Hsv {
-            hue: RgbHue::from_degrees(hue * T::from_f64(60.0)),
-            saturation,
-            value,
-            standard: PhantomData,
+            // Each of these represents an RGB component. The maximum will be false
+            // while the two other will be true. They are later used for determining
+            // which branch in the hue equation we end up in.
+            let x = value.neq(&red);
+            let y = !x.clone() | value.neq(&green);
+            let z = !x.clone() | value.eq(&green);
+
+            // The hue base is the `1`, `2/6`, `4/6` or 0 part of the hue equation,
+            // except it's multiplied by 6 here.
+            let hue_base = x.clone().select(
+                z.clone().select(T::from_f64(-4.0), T::from_f64(4.0)),
+                T::zero(),
+            ) + &six;
+
+            // Each of these is a part of `G - B`, `B - R`, `R - G` or 0 from the
+            // hue equation. They become positive, negative or 0, depending on which
+            // branch we should be in. This makes the sum of all three combine as
+            // expected.
+            let red_m = lazy_select! {
+               if x.clone() => y.clone().select(red.clone(), -red),
+               else => T::zero(),
+            };
+            let green_m = lazy_select! {
+               if y.clone() => z.clone().select(green.clone(), -green),
+               else => T::zero(),
+            };
+            let blue_m = lazy_select! {
+               if z => y.select(-blue.clone(), blue),
+               else => T::zero(),
+            };
+
+            // This is the hue equation parts combined. The hue base is the constant
+            // and the RGB components are masked so up to two of them are non-zero.
+            // Once again, this is multiplied by 6, so the chroma isn't multiplied
+            // before dividing.
+            //
+            // We also avoid dividing by 0 for non-SIMD values.
+            let hue = lazy_select! {
+                if chroma.eq(&T::zero()) => T::zero(),
+                else => hue_base + (red_m + green_m + blue_m) / &chroma,
+            };
+
+            // hue will always be within [0, 12) (it's multiplied by 6, compared to
+            // the paper), so we can subtract by 6 instead of using % to get it
+            // within [0, 6).
+            let hue_sub = hue.gt_eq(&six).select(six, T::zero());
+            let hue = hue - hue_sub;
+
+            Hsv {
+                hue: RgbHue::from_degrees(hue * T::from_f64(60.0)),
+                saturation,
+                value,
+                standard: PhantomData,
+            }
         }
     }
 }
