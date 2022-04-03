@@ -43,7 +43,7 @@ pub trait FromColor<T>: Sized {
     /// ```
     /// use palette::{IsWithinBounds, FromColor, Lch, Srgb};
     ///
-    /// let rgb = Srgb::from_color(Lch::new(50.0, 100.0, -175.0));
+    /// let rgb = Srgb::from_color(Lch::new(50.0f32, 100.0, -175.0));
     /// assert!(rgb.is_within_bounds());
     /// ```
     #[must_use]

@@ -39,13 +39,37 @@ use data_color_mine::{load_data, ColorMine};
 
 fn rgb_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Rgb family");
-    let colormine: Vec<ColorMine<f32>> = load_data();
+    let mut colormine: Vec<ColorMine<f32>> = load_data();
+    colormine.truncate(colormine.len() - colormine.len() % 8);
+    assert_eq!(
+        colormine.len() % 8,
+        0,
+        "number of colors must be a multiple of 8 for a fair comparison with SIMD"
+    );
+    #[cfg(feature = "wide")]
+    let wide_colormine: Vec<_> = colormine
+        .chunks_exact(8)
+        .map(|chunk| {
+            ColorMine::<wide::f32x8>::from([
+                chunk[0].clone(),
+                chunk[1].clone(),
+                chunk[2].clone(),
+                chunk[3].clone(),
+                chunk[4].clone(),
+                chunk[5].clone(),
+                chunk[6].clone(),
+                chunk[7].clone(),
+            ])
+        })
+        .collect();
+
     let rgb_u8: Vec<Srgb<u8>> = colormine.iter().map(|x| x.rgb.into_format()).collect();
 
     let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
     let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
     let linear_hwb: Vec<LinHwb> = colormine.iter().map(|x| x.hwb.into_color()).collect();
 
+    group.throughput(criterion::Throughput::Elements(colormine.len() as u64));
     group.bench_with_input("rgb to linsrgb", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -53,6 +77,18 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
+    #[cfg(feature = "wide")]
+    group.bench_with_input(
+        "rgb to linsrgb - wide::f32x8",
+        &wide_colormine,
+        |b, wide_colormine| {
+            b.iter(|| {
+                for c in wide_colormine {
+                    black_box(c.rgb.into_linear());
+                }
+            })
+        },
+    );
     group.bench_with_input("rgb to hsl", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -60,6 +96,18 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
+    #[cfg(feature = "wide")]
+    group.bench_with_input(
+        "rgb to hsl - wide::f32x8",
+        &wide_colormine,
+        |b, wide_colormine| {
+            b.iter(|| {
+                for c in wide_colormine {
+                    black_box(Hsl::from_color_unclamped(c.rgb));
+                }
+            })
+        },
+    );
     group.bench_with_input("hsv to hsl", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -74,6 +122,18 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
+    #[cfg(feature = "wide")]
+    group.bench_with_input(
+        "rgb to hsv - wide::f32x8",
+        &wide_colormine,
+        |b, wide_colormine| {
+            b.iter(|| {
+                for c in wide_colormine {
+                    black_box(Hsv::from_color_unclamped(c.rgb));
+                }
+            })
+        },
+    );
     group.bench_with_input("hsl to hsv", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -102,6 +162,18 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
+    #[cfg(feature = "wide")]
+    group.bench_with_input(
+        "xyz to linsrgb - wide::f32x8",
+        &wide_colormine,
+        |b, wide_colormine| {
+            b.iter(|| {
+                for c in wide_colormine {
+                    black_box(LinSrgb::from_color_unclamped(c.xyz));
+                }
+            })
+        },
+    );
     group.bench_with_input("hsl to rgb", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -165,6 +237,18 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
+    #[cfg(feature = "wide")]
+    group.bench_with_input(
+        "linsrgb to rgb - wide::f32x8",
+        &wide_colormine,
+        |b, wide_colormine| {
+            b.iter(|| {
+                for c in wide_colormine {
+                    black_box(Srgb::from_linear(c.linear_rgb));
+                }
+            })
+        },
+    );
     group.bench_with_input("rgb_u8 to linsrgb_f32", &rgb_u8, |b, rgb_u8| {
         b.iter(|| {
             for c in rgb_u8 {

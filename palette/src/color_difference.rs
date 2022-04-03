@@ -1,7 +1,10 @@
+use core::ops::{BitAnd, BitOr};
+
 use crate::{
     angle::RealAngle,
+    bool_mask::LazySelect,
     convert::IntoColorUnclamped,
-    num::{Abs, Arithmetics, Exp, Hypot, One, Powi, Real, Sqrt, Trigonometry, Zero},
+    num::{Abs, Arithmetics, Exp, Hypot, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero},
     Lab, Lch,
 };
 
@@ -76,7 +79,9 @@ where
         + Powi
         + Exp
         + Arithmetics
-        + PartialOrd + Clone,
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>
 {
     let c_bar = (this.chroma + other.chroma) / T::from_f64(2.0);
     let c_bar_pow_seven = c_bar.powi(7);
@@ -91,41 +96,40 @@ where
     let c_two_prime = (a_two_prime.clone() * &a_two_prime + other.b.clone() * &other.b).sqrt();
 
     let calc_h_prime = |b: T, a_prime: T| -> T {
-        if b == T::zero() && a_prime == T::zero() {
-            T::zero()
-        } else {
-            let result = T::radians_to_degrees(b.atan2(a_prime));
-            if result < T::zero() {
-                result + T::from_f64(360.0)
-            } else {
-                result
-            }
+        lazy_select! {
+            if b.eq(&T::zero()) & a_prime.eq(&T::zero()) => T::zero(),
+            else => {
+                let result = T::radians_to_degrees(b.atan2(a_prime));
+                lazy_select! {
+                    if result.lt(&T::zero()) => result.clone() + T::from_f64(360.0),
+                    else => result.clone(),
+                }
+            },
         }
     };
     let h_one_prime = calc_h_prime(this.b, a_one_prime);
     let h_two_prime = calc_h_prime(other.b, a_two_prime);
 
-    let h_prime_difference = (h_one_prime.clone() - &h_two_prime).abs();
+    let h_prime_diff = h_two_prime.clone() - &h_one_prime;
+    let h_prime_abs_diff = h_prime_diff.clone().abs();
 
-    let delta_h_prime: T = if c_one_prime == T::zero() || c_two_prime == T::zero() {
-        T::zero()
-    } else if h_prime_difference <= T::from_f64(180.0) {
-        h_two_prime.clone() - &h_one_prime
-    } else if h_two_prime <= h_one_prime {
-        h_two_prime.clone() - &h_one_prime + T::from_f64(360.0)
-    } else {
-        h_two_prime.clone() - &h_one_prime - T::from_f64(360.0)
+    let delta_h_prime: T = lazy_select! {
+        if c_one_prime.eq(&T::zero()) | c_two_prime.eq(&T::zero()) => T::zero(),
+        if h_prime_abs_diff.lt_eq(&T::from_f64(180.0)) => h_prime_diff.clone(),
+        if h_two_prime.lt_eq(&h_one_prime) => h_prime_diff.clone() + T::from_f64(360.0),
+        else => h_prime_diff.clone() - T::from_f64(360.0),
     };
 
     let delta_big_h_prime = T::from_f64(2.0)
         * (c_one_prime.clone() * &c_two_prime).sqrt()
         * (delta_h_prime / T::from_f64(2.0) * &pi_over_180).sin();
-    let h_bar_prime = if c_one_prime == T::zero() || c_two_prime == T::zero() {
-        h_one_prime + h_two_prime
-    } else if h_prime_difference > T::from_f64(180.0) {
-        (h_one_prime + h_two_prime + T::from_f64(360.0)) / T::from_f64(2.0)
-    } else {
-        (h_one_prime + h_two_prime) / T::from_f64(2.0)
+    let h_prime_sum = h_one_prime + h_two_prime;
+    let h_bar_prime = lazy_select! {
+        if c_one_prime.eq(&T::zero()) | c_two_prime.eq(&T::zero()) => h_prime_sum.clone(),
+        if h_prime_abs_diff.gt(&T::from_f64(180.0)) => {
+            (h_prime_sum.clone() + T::from_f64(360.0)) / T::from_f64(2.0)
+        },
+        else => h_prime_sum.clone() / T::from_f64(2.0),
     };
 
     let l_bar = (this.l.clone() + &other.l) / T::from_f64(2.0);

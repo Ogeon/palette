@@ -1,6 +1,8 @@
 use core::{
     fmt,
-    ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{
+        Add, AddAssign, BitAnd, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign,
+    },
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -15,10 +17,11 @@ use rand::{
 
 use crate::{
     blend::{PreAlpha, Premultiply},
+    bool_mask::HasBoolMask,
     cast::ArrayCast,
     clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    num::{Arithmetics, One, Zero},
+    num::{self, Arithmetics, One, PartialCmp, Zero},
     stimulus::Stimulus,
     ArrayExt, Clamp, ClampAssign, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
     NextArray, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
@@ -123,7 +126,7 @@ impl<C, T> DerefMut for Alpha<C, T> {
 impl<C> Mix for Alpha<C, C::Scalar>
 where
     C: Mix,
-    C::Scalar: Zero + One + PartialOrd + Arithmetics + Clone,
+    C::Scalar: Zero + One + num::Clamp + Arithmetics + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -141,7 +144,7 @@ where
 impl<C> MixAssign for Alpha<C, C::Scalar>
 where
     C: MixAssign,
-    C::Scalar: Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
+    C::Scalar: Zero + One + num::Clamp + Arithmetics + AddAssign + Clone,
 {
     type Scalar = C::Scalar;
 
@@ -192,7 +195,7 @@ impl<C: GetHue, T> GetHue for Alpha<C, T> {
     type Hue = C::Hue;
 
     #[inline]
-    fn get_hue(&self) -> Option<C::Hue> {
+    fn get_hue(&self) -> C::Hue {
         self.color.get_hue()
     }
 }
@@ -280,20 +283,21 @@ impl<C: SaturateAssign> SaturateAssign for Alpha<C, C::Scalar> {
 impl<C, T> IsWithinBounds for Alpha<C, T>
 where
     C: IsWithinBounds,
-    T: Stimulus + PartialOrd,
+    T: Stimulus + PartialCmp + IsWithinBounds<Mask = C::Mask>,
+    C::Mask: BitAnd<Output = C::Mask>,
 {
     #[inline]
-    fn is_within_bounds(&self) -> bool {
+    fn is_within_bounds(&self) -> C::Mask {
         self.color.is_within_bounds()
-            && self.alpha >= Self::min_alpha()
-            && self.alpha <= Self::max_alpha()
+            & self.alpha.gt_eq(&Self::min_alpha())
+            & self.alpha.lt_eq(&Self::max_alpha())
     }
 }
 
 impl<C, T> Clamp for Alpha<C, T>
 where
     C: Clamp,
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -307,7 +311,7 @@ where
 impl<C, T> ClampAssign for Alpha<C, T>
 where
     C: ClampAssign,
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -322,6 +326,14 @@ where
     C::Array: NextArray,
 {
     type Array = <C::Array as NextArray>::Next;
+}
+
+impl<C, T> HasBoolMask for Alpha<C, T>
+where
+    C: HasBoolMask,
+    T: HasBoolMask<Mask = C::Mask>,
+{
+    type Mask = C::Mask;
 }
 
 impl<C: Default, T: Stimulus> Default for Alpha<C, T> {

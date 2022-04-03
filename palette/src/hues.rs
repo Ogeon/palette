@@ -161,21 +161,21 @@ macro_rules! make_hues {
             }
         }
 
-        impl<T: AngleEq> PartialEq for $name<T> {
+        impl<T> PartialEq for $name<T> where T: AngleEq<Mask = bool> + PartialEq {
             #[inline]
             fn eq(&self, other: &$name<T>) -> bool {
                 self.0.angle_eq(&other.0)
             }
         }
 
-        impl<T: AngleEq> PartialEq<T> for $name<T> {
+        impl<T> PartialEq<T> for $name<T> where T: AngleEq<Mask = bool> + PartialEq {
             #[inline]
             fn eq(&self, other: &T) -> bool {
                 self.0.angle_eq(other)
             }
         }
 
-        impl<T: AngleEq + Eq> Eq for $name<T> {}
+        impl<T> Eq for $name<T> where T: AngleEq<Mask = bool> + Eq {}
 
         // For hues, the difference is calculated and compared to zero. However due to
         // the way floating point's work this is not so simple.
@@ -187,7 +187,7 @@ macro_rules! make_hues {
         // ulps. Because of this we loose some precision for values close to 0.0.
         impl<T> AbsDiffEq for $name<T>
         where
-            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + AbsDiffEq + Clone,
+            T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + AbsDiffEq + Clone,
             T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
         {
             type Epsilon = T::Epsilon;
@@ -208,7 +208,7 @@ macro_rules! make_hues {
 
         impl<T> RelativeEq for $name<T>
         where
-            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + Clone + RelativeEq,
+            T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + Clone + RelativeEq,
             T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
         {
             fn default_max_relative() -> Self::Epsilon {
@@ -237,7 +237,7 @@ macro_rules! make_hues {
 
         impl<T> UlpsEq for $name<T>
         where
-            T: RealAngle + SignedAngle + Zero + AngleEq + Sub<Output = T> + Clone + UlpsEq,
+            T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + Clone + UlpsEq,
             T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
         {
             fn default_max_ulps() -> u32 {

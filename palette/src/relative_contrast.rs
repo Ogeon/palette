@@ -1,4 +1,7 @@
-use crate::num::{Arithmetics, Real};
+use crate::{
+    bool_mask::{HasBoolMask, LazySelect},
+    num::{Arithmetics, PartialCmp, Real},
+};
 
 /// A trait for calculating relative contrast between two colors.
 ///
@@ -50,7 +53,7 @@ use crate::num::{Arithmetics, Real};
 #[doc(alias = "wcag")]
 pub trait RelativeContrast: Sized {
     /// The type of the contrast ratio.
-    type Scalar: Real + PartialOrd;
+    type Scalar: Real + PartialCmp;
 
     /// Calculate the contrast ratio between two colors.
     #[must_use]
@@ -60,31 +63,34 @@ pub trait RelativeContrast: Sized {
     /// is at least 4.5:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(4.5)
+    fn has_min_contrast_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.get_contrast_ratio(other)
+            .gt_eq(&Self::Scalar::from_f64(4.5))
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.3 for large
     /// text. Contrast is at least 3:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_large_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(3.0)
+    fn has_min_contrast_large_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.get_contrast_ratio(other)
+            .gt_eq(&Self::Scalar::from_f64(3.0))
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.6. Contrast
     /// is at least 7:1 (Level AAA).
     #[must_use]
     #[inline]
-    fn has_enhanced_contrast_text(self, other: Self) -> bool {
-        self.get_contrast_ratio(other) >= Self::Scalar::from_f64(7.0)
+    fn has_enhanced_contrast_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.get_contrast_ratio(other)
+            .gt_eq(&Self::Scalar::from_f64(7.0))
     }
 
     /// Verify the contrast between two colors satisfies SC 1.4.6 for large
     /// text. Contrast is at least 4.5:1 (Level AAA).
     #[must_use]
     #[inline]
-    fn has_enhanced_contrast_large_text(self, other: Self) -> bool {
+    fn has_enhanced_contrast_large_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
         self.has_min_contrast_text(other)
     }
 
@@ -92,7 +98,7 @@ pub trait RelativeContrast: Sized {
     /// objects. Contrast is at least 3:1 (Level AA).
     #[must_use]
     #[inline]
-    fn has_min_contrast_graphics(self, other: Self) -> bool {
+    fn has_min_contrast_graphics(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
         self.has_min_contrast_large_text(other)
     }
 }
@@ -101,12 +107,12 @@ pub trait RelativeContrast: Sized {
 #[inline]
 pub fn contrast_ratio<T>(luma1: T, luma2: T) -> T
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
 {
-    if luma1 > luma2 {
-        (luma1 + T::from_f64(0.05)) / (luma2 + T::from_f64(0.05))
-    } else {
-        (luma2 + T::from_f64(0.05)) / (luma1 + T::from_f64(0.05))
+    lazy_select! {
+        if luma1.gt(&luma2) => (T::from_f64(0.05) + &luma1) / (T::from_f64(0.05) + &luma2),
+        else => (T::from_f64(0.05) + &luma2) / (T::from_f64(0.05) + &luma1)
     }
 }
 
@@ -119,7 +125,7 @@ mod test {
 
     #[test]
     fn relative_contrast() {
-        let white = Srgb::new(1.0, 1.0, 1.0);
+        let white = Srgb::new(1.0f32, 1.0, 1.0);
         let black = Srgb::new(0.0, 0.0, 0.0);
 
         assert_relative_eq!(white.get_contrast_ratio(white), 1.0);

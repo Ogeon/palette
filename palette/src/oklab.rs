@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -14,10 +14,14 @@ use rand::{
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     matrix::multiply_xyz,
-    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    num::{
+        self, Arithmetics, Cbrt, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Real, Trigonometry, Zero,
+    },
     stimulus::Stimulus,
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mat3,
@@ -245,22 +249,18 @@ impl<T, A> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<T> IsWithinBounds for Oklab<T>
-where
-    T: Real + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l() && self.l <= Self::max_l() &&
-        self.a >= Self::min_a() && self.a <= Self::max_a() &&
-        self.b >= Self::min_b() && self.b <= Self::max_b()
+impl_is_within_bounds! {
+    Oklab {
+        l => [Self::min_l(), Self::max_l()],
+        a => [Self::min_a(), Self::max_a()],
+        b => [Self::min_b(), Self::max_b()]
     }
+    where T: Real
 }
 
 impl<T> Clamp for Oklab<T>
 where
-    T: Real + PartialOrd,
+    T: Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -274,7 +274,7 @@ where
 
 impl<T> ClampAssign for Oklab<T>
 where
-    T: Real + PartialOrd,
+    T: Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -286,21 +286,24 @@ where
 
 impl_mix!(Oklab);
 impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b});
-impl_premultiply!(Oklab);
+impl_premultiply!(Oklab { l, a, b });
 
 impl<T> GetHue for Oklab<T>
 where
-    T: RealAngle + Zero + Trigonometry + PartialEq + Clone,
+    T: RealAngle + Trigonometry + Clone,
 {
     type Hue = OklabHue<T>;
 
-    fn get_hue(&self) -> Option<OklabHue<T>> {
-        if self.a == T::zero() && self.b == T::zero() {
-            None
-        } else {
-            Some(OklabHue::from_radians(self.b.clone().atan2(self.a.clone())))
-        }
+    fn get_hue(&self) -> OklabHue<T> {
+        OklabHue::from_radians(self.b.clone().atan2(self.a.clone()))
     }
+}
+
+impl<T> HasBoolMask for Oklab<T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
 }
 
 impl<T> Default for Oklab<T>
@@ -318,12 +321,14 @@ impl_color_mul!(Oklab<T>, [l, a, b]);
 impl_color_div!(Oklab<T>, [l, a, b]);
 
 impl_array_casts!(Oklab<T>, [T; 3]);
+impl_simd_array_conversion!(Oklab, [l, a, b]);
 
 impl_eq!(Oklab, [l, a, b]);
 
 impl<T> RelativeContrast for Oklab<T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<D65, T>: FromColor<Self>,
 {
     type Scalar = T;

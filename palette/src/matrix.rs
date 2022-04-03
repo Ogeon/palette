@@ -6,7 +6,7 @@ use core::marker::PhantomData;
 use crate::{
     convert::IntoColorUnclamped,
     encoding::Linear,
-    num::{Arithmetics, IsValidDivisor, Recip},
+    num::{Arithmetics, FromScalar, IsValidDivisor, Recip},
     rgb::{Primaries, Rgb, RgbSpace},
     white_point::{Any, WhitePoint},
     Xyz, Yxy,
@@ -43,37 +43,47 @@ where
 }
 /// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
 #[inline]
-pub fn multiply_xyz_to_rgb<S, T>(c: Mat3<T>, f: Xyz<S::WhitePoint, T>) -> Rgb<Linear<S>, T>
+pub fn multiply_xyz_to_rgb<S, V, T>(c: Mat3<T>, f: Xyz<S::WhitePoint, V>) -> Rgb<Linear<S>, V>
 where
     S: RgbSpace<T>,
-    T: Arithmetics,
+    V: Arithmetics + FromScalar<Scalar = T>,
 {
     // Input Mat3 is destructured to avoid panic paths. red, green, and blue
     // can't be extracted like in `multiply_xyz` to get a performance increase
     let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
     Rgb {
-        red: (c0 * &f.x) + (c1 * &f.y) + (c2 * &f.z),
-        green: (c3 * &f.x) + (c4 * &f.y) + (c5 * &f.z),
-        blue: (c6 * f.x) + (c7 * f.y) + (c8 * f.z),
+        red: (V::from_scalar(c0) * &f.x)
+            + (V::from_scalar(c1) * &f.y)
+            + (V::from_scalar(c2) * &f.z),
+        green: (V::from_scalar(c3) * &f.x)
+            + (V::from_scalar(c4) * &f.y)
+            + (V::from_scalar(c5) * &f.z),
+        blue: (V::from_scalar(c6) * f.x) + (V::from_scalar(c7) * f.y) + (V::from_scalar(c8) * f.z),
         standard: PhantomData,
     }
 }
 /// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
 #[inline]
-pub fn multiply_rgb_to_xyz<S, T>(c: Mat3<T>, f: Rgb<Linear<S>, T>) -> Xyz<S::WhitePoint, T>
+pub fn multiply_rgb_to_xyz<S, V, T>(c: Mat3<T>, f: Rgb<Linear<S>, V>) -> Xyz<S::WhitePoint, V>
 where
     S: RgbSpace<T>,
-    T: Arithmetics,
+    V: Arithmetics + FromScalar<Scalar = T>,
 {
     // Input Mat3 is destructured to avoid panic paths. Same problem as
     // `multiply_xyz_to_rgb` for extracting x, y, z
     let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
     Xyz {
-        x: (c0 * &f.red) + (c1 * &f.green) + (c2 * &f.blue),
-        y: (c3 * &f.red) + (c4 * &f.green) + (c5 * &f.blue),
-        z: (c6 * f.red) + (c7 * f.green) + (c8 * f.blue),
+        x: (V::from_scalar(c0) * &f.red)
+            + (V::from_scalar(c1) * &f.green)
+            + (V::from_scalar(c2) * &f.blue),
+        y: (V::from_scalar(c3) * &f.red)
+            + (V::from_scalar(c4) * &f.green)
+            + (V::from_scalar(c5) * &f.blue),
+        z: (V::from_scalar(c6) * f.red)
+            + (V::from_scalar(c7) * f.green)
+            + (V::from_scalar(c8) * f.blue),
         white_point: PhantomData,
     }
 }
@@ -107,7 +117,7 @@ where
 #[inline]
 pub fn matrix_inverse<T>(a: Mat3<T>) -> Mat3<T>
 where
-    T: Recip + IsValidDivisor + Arithmetics + Clone,
+    T: Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone,
 {
     // This function runs fastest with assert and no destructuring. The `det`'s
     // location should not be changed until benched that it's faster elsewhere
@@ -147,7 +157,7 @@ where
 pub fn rgb_to_xyz_matrix<S, T>() -> Mat3<T>
 where
     S: RgbSpace<T>,
-    T: Recip + IsValidDivisor + Arithmetics + Clone,
+    T: Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone + FromScalar<Scalar = T>,
     Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
 {
     let r = S::Primaries::red().into_color_unclamped();

@@ -3,7 +3,7 @@ use core::{
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -18,12 +18,16 @@ use rand::{
 
 use crate::{
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::{linear::LinearFn, Linear, Srgb, TransferFn},
     luma::LumaStandard,
-    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Real, Zero,
+    },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
     RelativeContrast, Xyz, Yxy,
@@ -484,19 +488,16 @@ impl<S, T, A> From<Alpha<Luma<S, T>, A>> for (T, A) {
     }
 }
 
-impl<S, T> IsWithinBounds for Luma<S, T>
-where
-    T: Stimulus + PartialOrd,
-{
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.luma >= Self::min_luma() && self.luma <= Self::max_luma()
+impl_is_within_bounds! {
+    Luma<S> {
+        luma => [Self::min_luma(), Self::max_luma()]
     }
+    where T: Stimulus
 }
 
 impl<S, T> Clamp for Luma<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -506,7 +507,7 @@ where
 
 impl<S, T> ClampAssign for Luma<S, T>
 where
-    T: Stimulus + PartialOrd,
+    T: Stimulus + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -516,9 +517,16 @@ where
 
 impl_mix!(Luma<S> where S: LumaStandard<T, TransferFn = LinearFn>,);
 impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus, S: LumaStandard<T, TransferFn = LinearFn>);
-impl_premultiply!(Luma<S> where S: LumaStandard<T, TransferFn = LinearFn>);
+impl_premultiply!(Luma<S> {luma} phantom: standard where S: LumaStandard<T, TransferFn = LinearFn>);
 
 impl<S, T> StimulusColor for Luma<S, T> where T: Stimulus {}
+
+impl<S, T> HasBoolMask for Luma<S, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
 
 impl<S, T> Default for Luma<S, T>
 where
@@ -883,6 +891,8 @@ impl<S> From<Lumaa<S, u8>> for u16 {
     }
 }
 
+impl_simd_array_conversion!(Luma<S>, [luma], standard);
+
 impl<S, T> AbsDiffEq for Luma<S, T>
 where
     T: AbsDiffEq,
@@ -951,7 +961,8 @@ where
 
 impl<S, T> RelativeContrast for Luma<S, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     S: LumaStandard<T>,
 {
     type Scalar = T;

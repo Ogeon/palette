@@ -10,7 +10,8 @@ macro_rules! _impl_increase_value_trait {
     ) => {
         impl<$($ty_param,)* T> $trait for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + MinMax + Arithmetics + PartialOrd + Clone,
+            T: Real + Zero + MinMax + num::Clamp + Arithmetics + PartialCmp + Clone,
+            T::Mask: LazySelect<T>,
             $($($where)+)?
         {
             type Scalar = T;
@@ -18,10 +19,9 @@ macro_rules! _impl_increase_value_trait {
             #[inline]
             fn $method(self, factor: T) -> Self {
                 $(
-                    let difference = if factor >= T::zero() {
-                       $get_max - &self.$component
-                    } else {
-                        self.$component.clone()
+                    let difference = lazy_select!{
+                        if factor.gt_eq(&T::zero()) => $get_max - &self.$component,
+                        else => self.$component.clone(),
                     };
 
                     let $component = difference.max(T::zero()) * &factor;
@@ -46,7 +46,8 @@ macro_rules! _impl_increase_value_trait {
 
         impl<$($ty_param,)* T> $assign_trait for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + MinMax + AddAssign + Arithmetics + PartialOrd + Clone,
+            T: Real + Zero + MinMax + num::ClampAssign + AddAssign + Arithmetics + PartialCmp + Clone,
+            T::Mask: LazySelect<T>,
             $($($where)+)?
         {
             type Scalar = T;
@@ -54,10 +55,9 @@ macro_rules! _impl_increase_value_trait {
             #[inline]
             fn $assign_method(&mut self, factor: T) {
                 $(
-                    let difference = if factor >= T::zero() {
-                        $get_max - &self.$component
-                    } else {
-                        self.$component.clone()
+                    let difference = lazy_select!{
+                        if factor.gt_eq(&T::zero()) => $get_max - &self.$component,
+                        else => self.$component.clone(),
                     };
 
                     self.$component += difference.max(T::zero()) * &factor;

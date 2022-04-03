@@ -222,8 +222,9 @@ extern crate serde;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
-use core::ops::Neg;
+use core::ops::{BitAndAssign, Neg};
 
+use bool_mask::{BoolMask, HasBoolMask};
 use luma::Luma;
 
 pub use alpha::{Alpha, WithAlpha};
@@ -422,6 +423,7 @@ mod random_sampling;
 mod alpha;
 pub mod angle;
 pub mod blend;
+pub mod bool_mask;
 pub mod cast;
 pub mod chromatic_adaptation;
 mod color_difference;
@@ -452,39 +454,23 @@ mod yxy;
 pub mod matrix;
 
 #[inline]
-fn clamp<T: PartialOrd>(value: T, min: T, max: T) -> T {
-    if value < min {
-        min
-    } else if value > max {
-        max
-    } else {
-        value
-    }
+fn clamp<T: num::Clamp>(value: T, min: T, max: T) -> T {
+    value.clamp(min, max)
 }
 
 #[inline]
-fn clamp_assign<T: PartialOrd>(value: &mut T, min: T, max: T) {
-    if *value < min {
-        *value = min;
-    } else if *value > max {
-        *value = max;
-    }
+fn clamp_assign<T: num::ClampAssign>(value: &mut T, min: T, max: T) {
+    value.clamp_assign(min, max);
 }
 
 #[inline]
-fn clamp_min<T: PartialOrd>(value: T, min: T) -> T {
-    if value < min {
-        min
-    } else {
-        value
-    }
+fn clamp_min<T: num::Clamp>(value: T, min: T) -> T {
+    value.clamp_min(min)
 }
 
 #[inline]
-fn clamp_min_assign<T: PartialOrd>(value: &mut T, min: T) {
-    if *value < min {
-        *value = min;
-    }
+fn clamp_min_assign<T: num::ClampAssign>(value: &mut T, min: T) {
+    value.clamp_min_assign(min);
 }
 
 /// Checks if color components are within their expected range bounds.
@@ -494,9 +480,9 @@ fn clamp_min_assign<T: PartialOrd>(value: &mut T, min: T) {
 ///
 /// ```
 /// use palette::{Srgb, IsWithinBounds};
-/// let a = Srgb::new(0.4, 0.3, 0.8);
-/// let b = Srgb::new(1.2, 0.3, 0.8);
-/// let c = Srgb::new(-0.6, 0.3, 0.8);
+/// let a = Srgb::new(0.4f32, 0.3, 0.8);
+/// let b = Srgb::new(1.2f32, 0.3, 0.8);
+/// let c = Srgb::new(-0.6f32, 0.3, 0.8);
 ///
 /// assert!(a.is_within_bounds());
 /// assert!(!b.is_within_bounds());
@@ -508,32 +494,43 @@ fn clamp_min_assign<T: PartialOrd>(value: &mut T, min: T) {
 /// ```
 /// use palette::{Srgb, IsWithinBounds};
 ///
-/// let my_vec = vec![Srgb::new(0.4, 0.3, 0.8), Srgb::new(0.8, 0.5, 0.1)];
-/// let my_array = [Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];
-/// let my_slice = &[Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];
+/// let my_vec = vec![Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(0.8, 0.5, 0.1)];
+/// let my_array = [Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];
+/// let my_slice = &[Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];
 ///
 /// assert!(my_vec.is_within_bounds());
 /// assert!(!my_array.is_within_bounds());
 /// assert!(!my_slice.is_within_bounds());
 /// ```
-pub trait IsWithinBounds {
+pub trait IsWithinBounds: HasBoolMask {
     /// Check if the color's components are within the expected range bounds.
     ///
     /// ```
     /// use palette::{Srgb, IsWithinBounds};
-    /// assert!(Srgb::new(0.8, 0.5, 0.2).is_within_bounds());
-    /// assert!(!Srgb::new(1.3, 0.5, -3.0).is_within_bounds());
+    /// assert!(Srgb::new(0.8f32, 0.5, 0.2).is_within_bounds());
+    /// assert!(!Srgb::new(1.3f32, 0.5, -3.0).is_within_bounds());
     /// ```
-    fn is_within_bounds(&self) -> bool;
+    fn is_within_bounds(&self) -> Self::Mask;
 }
 
 impl<T> IsWithinBounds for [T]
 where
     T: IsWithinBounds,
+    T::Mask: BoolMask + BitAndAssign,
 {
     #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.iter().all(T::is_within_bounds)
+    fn is_within_bounds(&self) -> Self::Mask {
+        let mut result = Self::Mask::from_bool(true);
+
+        for item in self {
+            result &= item.is_within_bounds();
+
+            if result.is_false() {
+                break;
+            }
+        }
+
+        result
     }
 }
 
@@ -547,7 +544,7 @@ where
 /// ```
 /// use palette::{Srgb, IsWithinBounds, Clamp};
 ///
-/// let unclamped = Srgb::new(1.3, 0.5, -3.0);
+/// let unclamped = Srgb::new(1.3f32, 0.5, -3.0);
 /// assert!(!unclamped.is_within_bounds());
 ///
 /// let clamped = unclamped.clamp();
@@ -577,7 +574,7 @@ pub trait Clamp {
 /// ```
 /// use palette::{Srgb, IsWithinBounds, ClampAssign};
 ///
-/// let mut color = Srgb::new(1.3, 0.5, -3.0);
+/// let mut color = Srgb::new(1.3f32, 0.5, -3.0);
 /// assert!(!color.is_within_bounds());
 ///
 /// color.clamp_assign();
@@ -966,10 +963,10 @@ where
 /// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
 /// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
-/// assert_relative_eq!(red.get_hue().unwrap(), 0.0.into());
-/// assert_relative_eq!(green.get_hue().unwrap(), 120.0.into());
-/// assert_relative_eq!(blue.get_hue().unwrap(), 240.0.into());
-/// assert_eq!(gray.get_hue(), None);
+/// assert_relative_eq!(red.get_hue(), 0.0.into());
+/// assert_relative_eq!(green.get_hue(), 120.0.into());
+/// assert_relative_eq!(blue.get_hue(), 240.0.into());
+/// assert_relative_eq!(gray.get_hue(), 0.0.into());
 /// ```
 pub trait GetHue {
     /// The kind of hue unit this color space uses.
@@ -983,9 +980,9 @@ pub trait GetHue {
     /// Calculate a hue if possible.
     ///
     /// Colors in the gray scale has no well defined hue and should preferably
-    /// return `None`.
+    /// return `0`.
     #[must_use]
-    fn get_hue(&self) -> Option<Self::Hue>;
+    fn get_hue(&self) -> Self::Hue;
 }
 
 /// Change the hue of a color to a specific value.

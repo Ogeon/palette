@@ -1,7 +1,7 @@
 use crate::{
     cast::ArrayCast,
     clamp,
-    num::{Arithmetics, One, Real, Zero},
+    num::{Arithmetics, Clamp, One, Real, Zero},
     stimulus::Stimulus,
     Alpha,
 };
@@ -47,7 +47,7 @@ pub trait Compose {
 impl<C, T, const N: usize> Compose for PreAlpha<C>
 where
     C: ArrayCast<Array = [T; N]> + Premultiply<Scalar = T>,
-    T: Real + Zero + One + Arithmetics + PartialOrd + Clone,
+    T: Real + Zero + One + Arithmetics + Clamp + Clone,
 {
     #[inline]
     fn over(self, mut other: Self) -> Self {

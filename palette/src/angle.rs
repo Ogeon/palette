@@ -1,6 +1,12 @@
 //! Traits for working with angular values, such as for in hues.
 
-use crate::num::{Real, Round};
+use crate::{
+    bool_mask::HasBoolMask,
+    num::{Real, Round},
+};
+
+#[cfg(feature = "wide")]
+mod wide;
 
 /// Represents types that can express half of a rotation (i.e. 180 degrees).
 pub trait HalfRotation {
@@ -29,10 +35,10 @@ pub trait RealAngle: Real {
 }
 
 /// Angular equality, where 0 degrees and 360 degrees are equal.
-pub trait AngleEq: PartialEq {
+pub trait AngleEq: HasBoolMask {
     /// Check if `self` and `other` represent the same angle on a circle.
     #[must_use]
-    fn angle_eq(&self, other: &Self) -> bool;
+    fn angle_eq(&self, other: &Self) -> Self::Mask;
 }
 
 /// Angle types that can represent the full circle using positive and negative

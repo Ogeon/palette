@@ -1,7 +1,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, DivAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -16,10 +16,13 @@ use rand::{
 
 use crate::{
     angle::{FromAngle, RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect, Select},
     clamp, clamp_min, clamp_min_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
-    num::{Arithmetics, MinMax, One, Real, Zero},
+    num::{
+        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
+    },
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
@@ -301,6 +304,7 @@ where
     Hsv<S2, T>: FromColorUnclamped<Hsv<S1, T>>,
     Self: FromColorUnclamped<Hsv<S2, T>>,
 {
+    #[inline]
     fn from_color_unclamped(hwb: Hwb<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
             hwb.reinterpret_as()
@@ -316,6 +320,7 @@ impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hwb<S, T>
 where
     T: One + Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(color: Hsv<S, T>) -> Self {
         Hwb {
             hue: color.hue,
@@ -352,20 +357,22 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
 
 impl<S, T> IsWithinBounds for Hwb<S, T>
 where
-    T: Stimulus + PartialOrd + Add<Output = T> + Clone,
+    T: Stimulus + PartialCmp + Add<Output = T> + HasBoolMask + Clone,
+    T::Mask: BitAnd<Output = T::Mask>,
 {
     #[rustfmt::skip]
     #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.blackness >= Self::min_blackness() && self.blackness <= Self::max_blackness() &&
-        self.whiteness >= Self::min_whiteness() && self.whiteness <= Self::max_blackness() &&
-        self.whiteness.clone() + self.blackness.clone() <= T::max_intensity()
+    fn is_within_bounds(&self) -> T::Mask {
+        self.blackness.gt_eq(&Self::min_blackness()) & self.blackness.lt_eq(&Self::max_blackness()) &
+        self.whiteness.gt_eq(&Self::min_whiteness()) & self.whiteness.lt_eq(&Self::max_blackness()) &
+        (self.whiteness.clone() + self.blackness.clone()).lt_eq(&T::max_intensity())
     }
 }
 
 impl<S, T> Clamp for Hwb<S, T>
 where
-    T: Stimulus + PartialOrd + Add<Output = T> + DivAssign + Clone,
+    T: Stimulus + One + num::Clamp + PartialCmp + Add<Output = T> + DivAssign + Clone,
+    T::Mask: Select<T>,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -373,10 +380,9 @@ where
         let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
 
         let sum = self.blackness + self.whiteness;
-        if sum > T::max_intensity() {
-            whiteness /= sum.clone();
-            blackness /= sum;
-        }
+        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
+        whiteness /= divisor.clone();
+        blackness /= divisor;
 
         Self::new(self.hue, whiteness, blackness)
     }
@@ -384,7 +390,8 @@ where
 
 impl<S, T> ClampAssign for Hwb<S, T>
 where
-    T: Stimulus + PartialOrd + Add<Output = T> + DivAssign + Clone,
+    T: Stimulus + One + num::ClampAssign + PartialCmp + Add<Output = T> + DivAssign + Clone,
+    T::Mask: Select<T>,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -392,10 +399,9 @@ where
         clamp_min_assign(&mut self.blackness, Self::min_blackness());
 
         let sum = self.blackness.clone() + self.whiteness.clone();
-        if sum > T::max_intensity() {
-            self.whiteness /= sum.clone();
-            self.blackness /= sum;
-        }
+        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
+        self.whiteness /= divisor.clone();
+        self.blackness /= divisor;
     }
 }
 
@@ -403,23 +409,22 @@ impl_mix_hue!(Hwb<S> {whiteness, blackness} phantom: standard);
 
 impl<S, T> Lighten for Hwb<S, T>
 where
-    T: Stimulus + Real + Zero + MinMax + Arithmetics + PartialOrd + Clone,
+    T: Stimulus + Real + Zero + MinMax + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     type Scalar = T;
 
     #[inline]
     fn lighten(self, factor: T) -> Self {
-        let difference_whiteness = if factor >= T::zero() {
-            Self::max_whiteness() - &self.whiteness
-        } else {
-            self.whiteness.clone()
+        let difference_whiteness = lazy_select! {
+            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
+            else => self.whiteness.clone(),
         };
         let delta_whiteness = difference_whiteness.max(T::zero()) * &factor;
 
-        let difference_blackness = if factor >= T::zero() {
-            self.blackness.clone()
-        } else {
-            Self::max_blackness() - &self.blackness
+        let difference_blackness = lazy_select! {
+            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
+            else => Self::max_blackness() - &self.blackness,
         };
         let delta_blackness = difference_blackness.max(T::zero()) * factor;
 
@@ -445,24 +450,32 @@ where
 
 impl<S, T> LightenAssign for Hwb<S, T>
 where
-    T: Stimulus + Real + Zero + MinMax + AddAssign + SubAssign + Arithmetics + PartialOrd + Clone,
+    T: Stimulus
+        + Real
+        + Zero
+        + MinMax
+        + num::ClampAssign
+        + AddAssign
+        + SubAssign
+        + Arithmetics
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T>,
 {
     type Scalar = T;
 
     #[inline]
     fn lighten_assign(&mut self, factor: T) {
-        let difference_whiteness = if factor >= T::zero() {
-            Self::max_whiteness() - &self.whiteness
-        } else {
-            self.whiteness.clone()
+        let difference_whiteness = lazy_select! {
+            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
+            else => self.whiteness.clone(),
         };
         self.whiteness += difference_whiteness.max(T::zero()) * &factor;
         clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
 
-        let difference_blackness = if factor >= T::zero() {
-            self.blackness.clone()
-        } else {
-            Self::max_blackness() - &self.blackness
+        let difference_blackness = lazy_select! {
+            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
+            else => Self::max_blackness() - &self.blackness,
         };
         self.blackness -= difference_blackness.max(T::zero()) * factor;
         clamp_min_assign(&mut self.blackness, Self::min_blackness());
@@ -480,17 +493,13 @@ where
 
 impl<S, T> GetHue for Hwb<S, T>
 where
-    T: Stimulus + PartialOrd + Add<Output = T> + Clone,
+    T: Clone,
 {
     type Hue = RgbHue<T>;
 
     #[inline]
-    fn get_hue(&self) -> Option<RgbHue<T>> {
-        if self.whiteness.clone() + self.blackness.clone() >= T::max_intensity() {
-            None
-        } else {
-            Some(self.hue.clone())
-        }
+    fn get_hue(&self) -> RgbHue<T> {
+        self.hue.clone()
     }
 }
 
@@ -540,6 +549,13 @@ where
     }
 }
 
+impl<S, T> HasBoolMask for Hwb<S, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
 impl<S, T> Default for Hwb<S, T>
 where
     T: Stimulus,
@@ -558,6 +574,7 @@ impl_color_add!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 
 impl_array_casts!(Hwb<S, T>, [T; 3]);
+impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
 
 impl<S, T> AbsDiffEq for Hwb<S, T>
 where
@@ -649,7 +666,8 @@ where
 
 impl<S, T> RelativeContrast for Hwb<S, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     S: RgbStandard<T>,
     Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
 {
@@ -769,21 +787,21 @@ mod test {
     fn red() {
         let a = Hwb::from_color(Srgb::new(1.0, 0.0, 0.0));
         let b = Hwb::new_srgb(0.0, 0.0, 0.0);
-        assert_relative_eq!(a, b, epsilon = 0.000001);
+        assert_relative_eq!(a, b);
     }
 
     #[test]
     fn orange() {
         let a = Hwb::from_color(Srgb::new(1.0, 0.5, 0.0));
         let b = Hwb::new_srgb(30.0, 0.0, 0.0);
-        assert_relative_eq!(a, b, epsilon = 0.000001);
+        assert_relative_eq!(a, b);
     }
 
     #[test]
     fn green() {
         let a = Hwb::from_color(Srgb::new(0.0, 1.0, 0.0));
         let b = Hwb::new_srgb(120.0, 0.0, 0.0);
-        assert_relative_eq!(a, b, epsilon = 0.000001);
+        assert_relative_eq!(a, b);
     }
 
     #[test]
@@ -797,7 +815,7 @@ mod test {
     fn purple() {
         let a = Hwb::from_color(Srgb::new(0.5, 0.0, 1.0));
         let b = Hwb::new_srgb(270.0, 0.0, 0.0);
-        assert_relative_eq!(a, b, epsilon = 0.000001);
+        assert_relative_eq!(a, b);
     }
 
     #[test]

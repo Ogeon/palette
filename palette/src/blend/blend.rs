@@ -1,6 +1,7 @@
 use crate::{
+    bool_mask::LazySelect,
     cast::{self, ArrayCast},
-    num::{Abs, Arithmetics, MinMax, One, Real, Sqrt, Zero},
+    num::{Abs, Arithmetics, Clamp, MinMax, One, PartialCmp, Real, Sqrt, Zero},
     stimulus::{Stimulus, StimulusColor},
     Alpha,
 };
@@ -75,7 +76,8 @@ pub trait Blend {
 impl<C, T, const N: usize> Blend for PreAlpha<C>
 where
     C: Premultiply<Scalar = T> + StimulusColor + ArrayCast<Array = [T; N]> + Clone,
-    T: Real + Zero + One + MinMax + Sqrt + Abs + Arithmetics + PartialOrd + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     #[inline]
     fn multiply(self, other: Self) -> Self {
@@ -136,7 +138,8 @@ where
 impl<C, T, const N: usize> Blend for C
 where
     C: Premultiply<Scalar = T> + StimulusColor + ArrayCast<Array = [T; N]> + Clone,
-    T: Real + Zero + One + MinMax + Sqrt + Abs + Arithmetics + PartialOrd + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     fn multiply(self, other: Self) -> Self {
         let src = BlendInput::new_opaque(self);
@@ -226,7 +229,8 @@ where
 impl<C, T, const N: usize> Blend for Alpha<C, T>
 where
     C: Premultiply<Scalar = T> + StimulusColor + ArrayCast<Array = [T; N]> + Clone,
-    T: Real + Zero + One + MinMax + Sqrt + Abs + Arithmetics + PartialOrd + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     #[inline]
     fn multiply(self, other: Self) -> Self {
@@ -351,7 +355,8 @@ where
 #[inline]
 fn overlay_blend<T>(src: T, dst: T) -> T
 where
-    T: One + Arithmetics + PartialOrd + Clone,
+    T: One + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     hard_light_blend(dst, src)
 }
@@ -375,53 +380,52 @@ where
 #[inline]
 fn dodge_blend<T>(src: T, dst: T) -> T
 where
-    T: One + Zero + MinMax + Arithmetics + PartialOrd,
+    T: One + Zero + MinMax + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
 {
     // The original algorithm assumes values within [0, 1], but we check for
     // values outside it and clamp.
-    if dst <= T::zero() {
-        T::zero()
-    } else if src >= T::one() {
-        T::one()
-    } else {
-        T::one().min(dst / (T::one() - src))
+    lazy_select! {
+        if dst.lt_eq(&T::zero()) => T::zero(),
+        if src.gt_eq(&T::one()) => T::one(),
+        else => T::one().min(dst / (T::one() - src)),
     }
 }
 
 #[inline]
 fn burn_blend<T>(src: T, dst: T) -> T
 where
-    T: One + Zero + MinMax + Arithmetics + PartialOrd,
+    T: One + Zero + MinMax + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
 {
     // The original algorithm assumes values within [0, 1], but we check for
     // values outside it and clamp.
-    if dst >= T::one() {
-        T::one()
-    } else if src <= T::zero() {
-        T::zero()
-    } else {
-        T::one() - T::one().min((T::one() - dst) / src)
+    lazy_select! {
+        if dst.gt_eq(&T::one()) => T::one(),
+        if src.lt_eq(&T::zero()) => T::zero(),
+        else => T::one() - T::one().min((T::one() - dst) / src),
     }
 }
 
 #[inline]
 fn hard_light_blend<T>(src: T, dst: T) -> T
 where
-    T: One + Arithmetics + PartialOrd + Clone,
+    T: One + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     let two_src = src.clone() + src;
 
-    if two_src <= T::one() {
-        multiply_blend(two_src, dst)
-    } else {
-        screen_blend(two_src - T::one(), dst)
+    lazy_select! {
+        if two_src.lt_eq(&T::one()) => multiply_blend(two_src.clone(), dst.clone()),
+        else => screen_blend(two_src.clone() - T::one(), dst.clone()),
     }
 }
 
 #[inline]
 fn soft_light_blend<T>(src: T, dst: T) -> T
 where
-    T: Real + One + Arithmetics + Sqrt + PartialOrd + Clone,
+    T: Real + One + Arithmetics + Sqrt + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     let four = T::from_f64(4.0);
     let twelve = T::from_f64(12.0);
@@ -429,17 +433,19 @@ where
     let four_dst = dst.clone() * &four;
     let two_src = src.clone() + &src;
 
-    let d_dst = if four_dst <= T::one() {
-        let sixteen_dst = four_dst * &four;
-        ((sixteen_dst - twelve) * &dst + four) * &dst
-    } else {
-        dst.clone().sqrt()
+    let d_dst = lazy_select! {
+        if four_dst.lt_eq(&T::one()) => {
+            let sixteen_dst = four_dst * &four;
+            ((sixteen_dst - twelve) * &dst + four) * &dst
+        },
+        else => dst.clone().sqrt(),
     };
 
-    if two_src <= T::one() {
-        dst.clone() - (T::one() - two_src) * &dst * (T::one() - dst)
-    } else {
-        dst.clone() + (two_src - T::one()) * (d_dst - dst)
+    lazy_select! {
+        if two_src.lt_eq(&T::one()) => {
+            dst.clone() - (T::one() - &two_src) * &dst * (T::one() - &dst)
+        },
+        else => dst.clone() + (two_src.clone() - T::one()) * (d_dst - &dst),
     }
 }
 
@@ -467,7 +473,7 @@ fn blend_separable<C, T, F, const N: usize>(
 ) -> PreAlpha<C>
 where
     C: ArrayCast<Array = [T; N]> + Premultiply<Scalar = T>,
-    T: One + Zero + Arithmetics + PartialOrd + Clone,
+    T: One + Zero + Arithmetics + Clamp + Clone,
     F: FnMut(T, T) -> T,
 {
     let src_alpha = src.alpha.clone();

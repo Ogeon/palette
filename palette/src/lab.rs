@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -16,13 +16,14 @@ use rand::{
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign,
     color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
     contrast_ratio,
     convert::FromColorUnclamped,
     num::{
-        Abs, Arithmetics, Cbrt, Exp, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Trigonometry,
-        Zero,
+        self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, IntoScalarArray, IsValidDivisor,
+        MinMax, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
@@ -175,33 +176,26 @@ impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lab<Wp, T> {
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Lab<Wp, T>
 where
     Wp: WhitePoint<T>,
-    T: Real + Powi + Cbrt + Arithmetics + PartialOrd + Clone,
+    T: Real + Powi + Cbrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
-        let Xyz {
-            mut x,
-            mut y,
-            mut z,
-            ..
-        } = color / Wp::get_xyz().with_white_point();
+        let Xyz { x, y, z, .. } = color / Wp::get_xyz().with_white_point();
 
-        fn convert<T>(c: T) -> T
-        where
-            T: Real + Powi + Cbrt + Arithmetics + PartialOrd,
-        {
-            let epsilon = T::from_f64(6.0 / 29.0).powi(3);
-            let kappa: T = T::from_f64(841.0 / 108.0);
-            let delta: T = T::from_f64(4.0 / 29.0);
-            if c > epsilon {
-                c.cbrt()
-            } else {
-                (kappa * c) + delta
+        let epsilon = T::from_f64(6.0 / 29.0).powi(3);
+        let kappa: T = T::from_f64(841.0 / 108.0);
+        let delta: T = T::from_f64(4.0 / 29.0);
+
+        let convert = |c: T| {
+            lazy_select! {
+                if c.gt(&epsilon) => c.clone().cbrt(),
+                else => (kappa.clone() * &c) + &delta,
             }
-        }
+        };
 
-        x = convert(x);
-        y = convert(y);
-        z = convert(z);
+        let x = convert(x);
+        let y = convert(y);
+        let z = convert(z);
 
         Lab {
             l: ((y.clone() * T::from_f64(116.0)) - T::from_f64(16.0)),
@@ -253,22 +247,18 @@ impl<Wp, T, A> From<Alpha<Lab<Wp, T>, A>> for (T, T, T, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Lab<Wp, T>
-where
-    T: Zero + Real + PartialOrd,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> bool {
-        self.l >= Self::min_l() && self.l <= Self::max_l() &&
-        self.a >= Self::min_a() && self.a <= Self::max_a() &&
-        self.b >= Self::min_b() && self.b <= Self::max_b()
+impl_is_within_bounds! {
+    Lab<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        a => [Self::min_a(), Self::max_a()],
+        b => [Self::min_b(), Self::max_b()]
     }
+    where T: Real + Zero
 }
 
 impl<Wp, T> Clamp for Lab<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::Clamp,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -282,7 +272,7 @@ where
 
 impl<Wp, T> ClampAssign for Lab<Wp, T>
 where
-    T: Zero + Real + PartialOrd,
+    T: Zero + Real + num::ClampAssign,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -294,20 +284,16 @@ where
 
 impl_mix!(Lab<Wp>);
 impl_lighten!(Lab<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {a, b} phantom: white_point);
-impl_premultiply!(Lab<Wp>);
+impl_premultiply!(Lab<Wp> {l, a, b} phantom: white_point);
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where
-    T: RealAngle + Zero + One + Trigonometry + PartialOrd + Clone,
+    T: RealAngle + Trigonometry + Clone,
 {
     type Hue = LabHue<T>;
 
-    fn get_hue(&self) -> Option<LabHue<T>> {
-        if self.a == T::zero() && self.b == T::zero() {
-            None
-        } else {
-            Some(LabHue::from_radians(self.b.clone().atan2(self.a.clone())))
-        }
+    fn get_hue(&self) -> LabHue<T> {
+        LabHue::from_radians(self.b.clone().atan2(self.a.clone()))
     }
 }
 
@@ -323,8 +309,9 @@ where
         + Abs
         + Sqrt
         + Arithmetics
-        + PartialOrd
+        + PartialCmp
         + Clone,
+    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>,
     Self: Into<LabColorDiff<T>>,
 {
     type Scalar = T;
@@ -333,6 +320,13 @@ where
     fn get_color_difference(self, other: Lab<Wp, T>) -> Self::Scalar {
         get_ciede_difference(self.into(), other.into())
     }
+}
+
+impl<Wp, T> HasBoolMask for Lab<Wp, T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
 }
 
 impl<Wp, T> Default for Lab<Wp, T>
@@ -350,12 +344,14 @@ impl_color_mul!(Lab<Wp, T>, [l, a, b], white_point);
 impl_color_div!(Lab<Wp, T>, [l, a, b], white_point);
 
 impl_array_casts!(Lab<Wp, T>, [T; 3]);
+impl_simd_array_conversion!(Lab<Wp>, [l, a, b], white_point);
 
 impl_eq!(Lab<Wp>, [l, a, b]);
 
 impl<Wp, T> RelativeContrast for Lab<Wp, T>
 where
-    T: Real + Arithmetics + PartialOrd,
+    T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect<T>,
     Xyz<Wp, T>: FromColor<Self>,
 {
     type Scalar = T;

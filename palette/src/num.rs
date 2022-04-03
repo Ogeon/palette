@@ -12,10 +12,14 @@
 //! some of the traits, and new methods can be added as new traits without
 //! affecting old functionality.
 
-use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use core::ops::{Add, Div, Mul, Neg, Sub};
+
+use crate::bool_mask::HasBoolMask;
 
 #[cfg(all(not(feature = "std"), feature = "libm"))]
 mod libm;
+#[cfg(feature = "wide")]
+mod wide;
 
 /// Numbers that belong to the real number set. It's both a semantic marker and
 /// provides a constructor for number constants.
@@ -23,6 +27,32 @@ pub trait Real {
     /// Create a number from an `f64` value, mainly for converting constants.
     #[must_use]
     fn from_f64(n: f64) -> Self;
+}
+
+/// Trait for creating a vectorized value from a scalar value.
+pub trait FromScalar {
+    /// The scalar type that is stored in each lane of `Self`. Scalar types
+    /// should set this to equal `Self`.
+    type Scalar;
+
+    /// Create a new vectorized value where each lane is `scalar`. This
+    /// corresponds to `splat` for SIMD types.
+    #[must_use]
+    fn from_scalar(scalar: Self::Scalar) -> Self;
+}
+
+/// Conversion from an array of scalars to a vectorized value.
+pub trait FromScalarArray<const N: usize>: FromScalar {
+    /// Creates a vectorized value from an array of scalars.
+    #[must_use]
+    fn from_array(scalars: [Self::Scalar; N]) -> Self;
+}
+
+/// Conversion from a vectorized value to an array of scalars.
+pub trait IntoScalarArray<const N: usize>: FromScalar {
+    /// Creates an array of scalars from a vectorized value.
+    #[must_use]
+    fn into_array(self) -> [Self::Scalar; N];
 }
 
 /// Methods for the value `0`.
@@ -47,7 +77,6 @@ where
         + Mul<Output = Self>
         + Div<Output = Self>
         + Neg<Output = Self>
-        + Rem<Output = Self>
         + Sized,
     for<'a> Self: Add<&'a Self, Output = Self>
         + Sub<&'a Self, Output = Self>
@@ -63,7 +92,6 @@ where
         + Mul<Output = Self>
         + Div<Output = Self>
         + Neg<Output = Self>
-        + Rem<Output = Self>
         + Sized,
     for<'a> Self: Add<&'a Self, Output = Self>
         + Sub<&'a Self, Output = Self>
@@ -184,14 +212,14 @@ pub trait Exp {
 }
 
 /// Methods for checking if a number can be used as a divisor.
-pub trait IsValidDivisor {
+pub trait IsValidDivisor: HasBoolMask {
     /// Return `true` if `self` can be used as a divisor in `x / self`.
     ///
     /// This checks that division by `self` will result in a finite and defined
     /// value. Integers check for `self != 0`, while floating point types call
     /// [`is_normal`][std::primitive::f32::is_normal].
     #[must_use]
-    fn is_valid_divisor(&self) -> bool;
+    fn is_valid_divisor(&self) -> Self::Mask;
 }
 
 /// Methods for calculating the lengths of a hypotenuse.
@@ -217,9 +245,74 @@ pub trait Round {
     fn ceil(self) -> Self;
 }
 
+/// Trait for clamping a value.
+pub trait Clamp {
+    /// Clamp self to be within the range `[min, max]`.
+    #[must_use]
+    fn clamp(self, min: Self, max: Self) -> Self;
+
+    /// Clamp self to be within the range `[min, ∞)`.
+    #[must_use]
+    fn clamp_min(self, min: Self) -> Self;
+
+    /// Clamp self to be within the range `(-∞, max]`.
+    #[must_use]
+    fn clamp_max(self, max: Self) -> Self;
+}
+
+/// Assigning trait for clamping a value.
+pub trait ClampAssign {
+    /// Clamp self to be within the range `[min, max]`.
+    fn clamp_assign(&mut self, min: Self, max: Self);
+
+    /// Clamp self to be within the range `[min, ∞)`.
+    fn clamp_min_assign(&mut self, min: Self);
+
+    /// Clamp self to be within the range `(-∞, max]`.
+    fn clamp_max_assign(&mut self, max: Self);
+}
+
+/// Combined multiplication and addition operation.
+pub trait MulAdd {
+    /// Multiplies self with `m` and add `a`, as in `(self * m) + a`.
+    #[must_use]
+    fn mul_add(self, m: Self, a: Self) -> Self;
+}
+
+/// Combined multiplication and subtraction operation.
+pub trait MulSub {
+    /// Multiplies self with `m` and subtract `s`, as in `(self * m) - s`.
+    #[must_use]
+    fn mul_sub(self, m: Self, s: Self) -> Self;
+}
+
 macro_rules! impl_uint {
     ($($ty: ident),+) => {
         $(
+            impl FromScalar for $ty {
+                type Scalar = Self;
+
+                #[inline]
+                fn from_scalar(scalar: Self) -> Self {
+                    scalar
+                }
+            }
+
+            impl FromScalarArray<1> for $ty {
+                #[inline]
+                fn from_array(scalars: [Self; 1]) -> Self {
+                    let [scalar] = scalars;
+                    scalar
+                }
+            }
+
+            impl IntoScalarArray<1> for $ty {
+                #[inline]
+                fn into_array(self) -> [Self; 1] {
+                    [self]
+                }
+            }
+
             impl Zero for $ty {
                 #[inline]
                 fn zero() -> Self {
@@ -268,6 +361,54 @@ macro_rules! impl_uint {
                     *self != 0
                 }
             }
+
+            impl Clamp for $ty {
+                #[inline]
+                fn clamp(self, min: Self, max: Self) -> Self {
+                    core::cmp::Ord::clamp(self, min, max)
+                }
+
+                #[inline]
+                fn clamp_min(self, min: Self) -> Self {
+                    core::cmp::Ord::max(self, min)
+                }
+
+                #[inline]
+                fn clamp_max(self, max: Self) -> Self {
+                    core::cmp::Ord::min(self, max)
+                }
+            }
+
+            impl ClampAssign for $ty {
+                #[inline]
+                fn clamp_assign(&mut self, min: Self, max: Self) {
+                    *self = core::cmp::Ord::clamp(*self, min, max);
+                }
+
+                #[inline]
+                fn clamp_min_assign(&mut self, min: Self) {
+                    *self = core::cmp::Ord::max(*self, min);
+                }
+
+                #[inline]
+                fn clamp_max_assign(&mut self, max: Self) {
+                    *self = core::cmp::Ord::min(*self, max);
+                }
+            }
+
+            impl MulAdd for $ty {
+                #[inline]
+                fn mul_add(self, m: Self, a: Self) -> Self {
+                    (self * m) + a
+                }
+            }
+
+            impl MulSub for $ty {
+                #[inline]
+                fn mul_sub(self, m: Self, s: Self) -> Self {
+                    (self * m) - s
+                }
+            }
         )+
     };
 }
@@ -279,6 +420,30 @@ macro_rules! impl_float {
                 #[inline]
                 fn from_f64(n: f64) -> $ty {
                     n as $ty
+                }
+            }
+
+            impl FromScalar for $ty {
+                type Scalar = Self;
+
+                #[inline]
+                fn from_scalar(scalar: Self) -> Self {
+                    scalar
+                }
+            }
+
+            impl FromScalarArray<1> for $ty {
+                #[inline]
+                fn from_array(scalars: [Self; 1]) -> Self {
+                    let [scalar] = scalars;
+                    scalar
+                }
+            }
+
+            impl IntoScalarArray<1> for $ty {
+                #[inline]
+                fn into_array(self) -> [Self; 1] {
+                    [self]
                 }
             }
 
@@ -455,6 +620,55 @@ macro_rules! impl_float {
                     $ty::ceil(self)
                 }
             }
+
+            impl Clamp for $ty {
+                #[inline]
+                fn clamp(self, min: Self, max: Self) -> Self {
+                    $ty::clamp(self, min, max)
+                }
+
+                #[inline]
+                fn clamp_min(self, min: Self) -> Self {
+                    $ty::max(self, min)
+                }
+
+                #[inline]
+                fn clamp_max(self, max: Self) -> Self {
+                    $ty::min(self, max)
+                }
+            }
+
+            impl ClampAssign for $ty {
+                #[inline]
+                fn clamp_assign(&mut self, min: Self, max: Self) {
+                    *self = $ty::clamp(*self, min, max);
+                }
+
+                #[inline]
+                fn clamp_min_assign(&mut self, min: Self) {
+                    *self = $ty::max(*self, min);
+                }
+
+                #[inline]
+                fn clamp_max_assign(&mut self, max: Self) {
+                    *self = $ty::min(*self, max);
+                }
+            }
+
+            #[cfg(feature = "std")]
+            impl MulAdd for $ty {
+                #[inline]
+                fn mul_add(self, m: Self, a: Self) -> Self {
+                    $ty::mul_add(self, m, a)
+                }
+            }
+
+            impl MulSub for $ty {
+                #[inline]
+                fn mul_sub(self, m: Self, s: Self) -> Self {
+                    (self * m) - s
+                }
+            }
         )+
     };
 }
@@ -501,3 +715,73 @@ fn pow<T: Clone + One + Mul<T, Output = T>>(mut base: T, mut exp: u32) -> T {
     }
     acc
 }
+
+/// Trait for lanewise comparison of two values.
+///
+/// This is similar to `PartialEq` and `PartialOrd`, except that it returns a
+/// Boolean mask instead of `bool` or [`Ordering`][core::cmp::Ordering].
+pub trait PartialCmp: HasBoolMask {
+    /// Compares `self < other`.
+    #[must_use]
+    fn lt(&self, other: &Self) -> Self::Mask;
+
+    /// Compares `self <= other`.
+    #[must_use]
+    fn lt_eq(&self, other: &Self) -> Self::Mask;
+
+    /// Compares `self == other`.
+    #[must_use]
+    fn eq(&self, other: &Self) -> Self::Mask;
+
+    /// Compares `self != other`.
+    #[must_use]
+    fn neq(&self, other: &Self) -> Self::Mask;
+
+    /// Compares `self >= other`.
+    #[must_use]
+    fn gt_eq(&self, other: &Self) -> Self::Mask;
+
+    /// Compares `self > other`.
+    #[must_use]
+    fn gt(&self, other: &Self) -> Self::Mask;
+}
+
+macro_rules! impl_partial_cmp {
+    ($($ty:ident),+) => {
+        $(
+            impl PartialCmp for $ty {
+                #[inline]
+                fn lt(&self, other: &Self) -> Self::Mask {
+                    self < other
+                }
+
+                #[inline]
+                fn lt_eq(&self, other: &Self) -> Self::Mask {
+                    self <= other
+                }
+
+                #[inline]
+                fn eq(&self, other: &Self) -> Self::Mask {
+                    self == other
+                }
+
+                #[inline]
+                fn neq(&self, other: &Self) -> Self::Mask {
+                    self != other
+                }
+
+                #[inline]
+                fn gt_eq(&self, other: &Self) -> Self::Mask {
+                    self >= other
+                }
+
+                #[inline]
+                fn gt(&self, other: &Self) -> Self::Mask {
+                    self > other
+                }
+            }
+        )+
+    };
+}
+
+impl_partial_cmp!(u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64);

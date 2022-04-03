@@ -5,7 +5,7 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use crate::{
     cast::ArrayCast,
     clamp,
-    num::{Arithmetics, One, Real, Zero},
+    num::{self, Arithmetics, One, Real, Zero},
     stimulus::Stimulus,
     Alpha, ArrayExt, Mix, MixAssign, NextArray,
 };
@@ -125,7 +125,7 @@ where
 impl<C, T> Mix for PreAlpha<C>
 where
     C: Mix<Scalar = T> + Premultiply<Scalar = T>,
-    T: Real + Zero + One + PartialOrd + Arithmetics + Clone,
+    T: Real + Zero + One + num::Clamp + Arithmetics + Clone,
 {
     type Scalar = T;
 
@@ -143,7 +143,7 @@ where
 impl<C, T> MixAssign for PreAlpha<C>
 where
     C: MixAssign<Scalar = T> + Premultiply<Scalar = T>,
-    T: Real + Zero + One + PartialOrd + Arithmetics + AddAssign + Clone,
+    T: Real + Zero + One + num::Clamp + Arithmetics + AddAssign + Clone,
 {
     type Scalar = T;
 

@@ -1,8 +1,9 @@
 use core::marker::PhantomData;
 
 use crate::{
+    bool_mask::LazySelect,
     hues::{LuvHue, RgbHue},
-    num::{Arithmetics, Cbrt, Powi, Real, Sqrt},
+    num::{Arithmetics, Cbrt, One, PartialCmp, Powi, Real, Sqrt},
     Hsl, Hsluv, Hsv,
 };
 
@@ -17,6 +18,7 @@ use crate::{
 // Substituting, we get `x = scale * radius, y = scale` and thus for cone
 // sampling: `scale = powf(r1, 1.0/3.0)` and `radius = sqrt(r2)`.
 
+#[inline]
 pub fn sample_hsv<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsv<S, T>
 where
     T: Cbrt + Sqrt,
@@ -31,75 +33,65 @@ where
     }
 }
 
+#[inline]
 pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
 where
-    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
+    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T> + Clone,
 {
-    let (saturation, lightness) = if r1 <= T::from_f64(0.5) {
-        // Scale it up to [0, 1]
-        let r1 = r1 * T::from_f64(2.0);
-        let h = r1.cbrt();
-        let r = r2.sqrt();
-        // Scale the lightness back to [0, 0.5]
-        (r, h * T::from_f64(0.5))
-    } else {
-        // Scale and shift it to [0, 1).
-        let r1 = (T::from_f64(1.0) - r1) * T::from_f64(2.0);
-        let h = r1.cbrt();
-        let r = r2.sqrt();
-        // Turn the cone upside-down and scale the lightness back to (0.5, 1.0]
-        (r, (T::from_f64(2.0) - h) * T::from_f64(0.5))
-    };
-
     Hsl {
         hue,
-        saturation,
-        lightness,
+        saturation: r2.sqrt(),
+        lightness: sample_bicone_height(r1),
         standard: PhantomData,
     }
 }
 
+#[inline]
 pub fn sample_hsluv<Wp, T>(hue: LuvHue<T>, r1: T, r2: T) -> Hsluv<Wp, T>
 where
-    T: Real + Cbrt + Sqrt + Arithmetics + PartialOrd,
+    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T> + Clone,
 {
-    let (saturation, l) = if r1 <= T::from_f64(0.5) {
-        // Scale it up to [0, 1]
-        let r1 = r1 * T::from_f64(2.0);
-        let h = r1.cbrt();
-        let r = r2.sqrt() * T::from_f64(100.0);
-        // Scale the lightness back to [0, 0.5]
-        (r, h * T::from_f64(50.0))
-    } else {
-        // Scale and shift it to [0, 1).
-        let r1 = (T::from_f64(1.0) - r1) * T::from_f64(2.0);
-        let h = r1.cbrt();
-        let r = r2.sqrt() * T::from_f64(100.0);
-        // Turn the cone upside-down and scale the lightness back to (0.5, 1.0]
-        (r, (T::from_f64(2.0) - h) * T::from_f64(50.0))
-    };
-
     Hsluv {
         hue,
-        saturation,
-        l,
+        saturation: r2.sqrt() * T::from_f64(100.0),
+        l: sample_bicone_height(r1) * T::from_f64(100.0),
         white_point: PhantomData,
     }
 }
 
+#[inline]
+fn sample_bicone_height<T>(r1: T) -> T
+where
+    T: Real + One + Cbrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T> + Clone,
+{
+    let mask = r1.lt_eq(&T::from_f64(0.5));
+
+    // Scale it up to [0, 1] or [0, 1)
+    let r1 = lazy_select! {
+        if mask.clone() => r1.clone(),
+        else => T::one() - &r1,
+    } * T::from_f64(2.0);
+
+    let height = r1.cbrt();
+
+    // Turn the height back to [0, 0.5] or (0.5, 1.0]
+    let height = height * T::from_f64(0.5);
+    lazy_select! {
+        if mask => height.clone(),
+        else => T::one() - &height,
+    }
+}
+
+#[inline]
 pub fn invert_hsl_sample<T>(saturation: T, lightness: T) -> (T, T)
 where
-    T: Real + Powi + Arithmetics + PartialOrd,
+    T: Real + Powi + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
-    let r1 = if lightness <= T::from_f64(0.5) {
-        // ((x * 2)^3) / 2 = x^3 * 4.
-        // lightness is multiplied by 2 to scale it up to [0, 1], becoming h.
-        // h is cubed to make it r1. r1 is divided by 2 to take it back to [0, 0.5].
-        lightness.powi(3) * T::from_f64(4.0)
-    } else {
-        let x = lightness - T::from_f64(1.0);
-        x.powi(3) * T::from_f64(4.0) + T::from_f64(1.0)
-    };
+    let r1 = invert_bicone_height_sample(lightness);
 
     // saturation is first multiplied, then divided by h before squaring.
     // h can be completely eliminated, leaving only the saturation.
@@ -108,26 +100,38 @@ where
     (r1, r2)
 }
 
+#[inline]
 pub fn invert_hsluv_sample<T>(saturation: T, lightness: T) -> (T, T)
 where
-    T: Real + Powi + Arithmetics + PartialOrd,
+    T: Real + Powi + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
 {
-    let lightness: T = lightness / T::from_f64(100.0);
-    let r1 = if lightness <= T::from_f64(0.5) {
-        // ((x * 2)^3) / 2 = x^3 * 4.
-        // l is multiplied by 2 to scale it up to [0, 1], becoming h.
-        // h is cubed to make it r1. r1 is divided by 2 to take it back to [0, 0.5].
-        lightness.powi(3) * T::from_f64(4.0)
-    } else {
-        let x = lightness - T::from_f64(1.0);
-        x.powi(3) * T::from_f64(4.0) + T::from_f64(1.0)
-    };
+    let r1 = invert_bicone_height_sample(lightness / T::from_f64(100.0));
 
     // saturation is first multiplied, then divided by h before squaring.
     // h can be completely eliminated, leaving only the saturation.
     let r2 = (saturation / T::from_f64(100.0)).powi(2);
 
     (r1, r2)
+}
+
+fn invert_bicone_height_sample<T>(height: T) -> T
+where
+    T: Real + Powi + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T>,
+{
+    lazy_select! {
+        if height.lt_eq(&T::from_f64(0.5)) => {
+            // ((x * 2)^3) / 2 = x^3 * 4.
+            // height is multiplied by 2 to scale it up to [0, 1], becoming h.
+            // h is cubed to make it r1. r1 is divided by 2 to take it back to [0, 0.5].
+            height.clone().powi(3) * T::from_f64(4.0)
+        },
+        else => {
+            let x = height.clone() - T::from_f64(1.0);
+            x.powi(3) * T::from_f64(4.0) + T::from_f64(1.0)
+        },
+    }
 }
 
 #[cfg(test)]
