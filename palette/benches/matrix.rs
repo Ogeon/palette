@@ -13,13 +13,14 @@ fn matrix(c: &mut Criterion) {
 
     let inp1 = [0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.2, 0.1, 0.3];
     let inp2 = Xyz::new(0.4, 0.6, 0.8);
-    let inp3 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 1.0, 3.0];
+    let inp3 = [1.0f32, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 1.0, 3.0];
     let inp4 = [4.0, 5.0, 6.0, 6.0, 5.0, 4.0, 4.0, 6.0, 5.0];
-    let inverse: [f64; 9] = [3.0, 0.0, 2.0, 2.0, 0.0, -2.0, 0.0, 1.0, 1.0];
-    let color = LinSrgb::new(0.2f64, 0.8, 0.4);
-    let mat3 = rgb_to_xyz_matrix::<encoding::Srgb, f64>();
-    let wp: Xyz<D65, f64> = D65::get_xyz().with_white_point();
+    let inverse: [f32; 9] = [3.0, 0.0, 2.0, 2.0, 0.0, -2.0, 0.0, 1.0, 1.0];
+    let color = LinSrgb::new(0.2f32, 0.8, 0.4);
+    let mat3 = rgb_to_xyz_matrix::<encoding::Srgb, f32>();
+    let wp: Xyz<D65, f32> = D65::get_xyz().with_white_point();
 
+    group.throughput(criterion::Throughput::Elements(1));
     group.bench_function("multiply_xyz", |b| {
         b.iter(|| multiply_xyz::<_>(black_box(inp1), black_box(inp2)))
     });
@@ -36,7 +37,7 @@ fn matrix(c: &mut Criterion) {
         b.iter(|| matrix_inverse(*inverse))
     });
     group.bench_function("rgb_to_xyz_matrix", |b| {
-        b.iter(|| rgb_to_xyz_matrix::<encoding::Srgb, f64>())
+        b.iter(|| rgb_to_xyz_matrix::<encoding::Srgb, f32>())
     });
 }
 

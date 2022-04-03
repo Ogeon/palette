@@ -284,6 +284,7 @@ where
     Rgb<S2, T>: FromColorUnclamped<Rgb<S1, T>>,
     Self: FromColorUnclamped<Rgb<S2, T>>,
 {
+    #[inline]
     fn from_color_unclamped(hsl: Hsl<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
             hsl.reinterpret_as()
@@ -367,16 +368,16 @@ where
             let chroma = max.clone() - &min;
             let saturation = lazy_select! {
                 if min.eq(&max) => T::zero(),
-                if sum.gt(&T::one()) => chroma.clone() / (T::from_f64(2.0) - &sum),
-                else => chroma.clone() / &sum,
+                else => chroma.clone() /
+                    sum.gt(&T::one()).select(T::from_f64(2.0) - &sum, sum.clone()),
             };
 
             // Each of these represents an RGB component. The maximum will be false
             // while the two other will be true. They are later used for determining
             // which branch in the hue equation we end up in.
             let x = max.neq(&red);
-            let y = !x.clone() | max.neq(&green);
-            let z = !x.clone() | max.eq(&green);
+            let y = max.eq(&red) | max.neq(&green);
+            let z = max.eq(&red) | max.eq(&green);
 
             // The hue base is the `1`, `2/6`, `4/6` or 0 part of the hue equation,
             // except it's multiplied by 6 here.

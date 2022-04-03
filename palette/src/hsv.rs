@@ -287,6 +287,7 @@ where
     Rgb<S2, T>: FromColorUnclamped<Rgb<S1, T>>,
     Self: FromColorUnclamped<Rgb<S2, T>>,
 {
+    #[inline]
     fn from_color_unclamped(hsv: Hsv<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
             hsv.reinterpret_as()
@@ -369,8 +370,8 @@ where
             // while the two other will be true. They are later used for determining
             // which branch in the hue equation we end up in.
             let x = value.neq(&red);
-            let y = !x.clone() | value.neq(&green);
-            let z = !x.clone() | value.eq(&green);
+            let y = value.eq(&red) | value.neq(&green);
+            let z = value.eq(&red) | value.eq(&green);
 
             // The hue base is the `1`, `2/6`, `4/6` or 0 part of the hue equation,
             // except it's multiplied by 6 here.
@@ -428,6 +429,7 @@ where
     T: Real + Zero + One + IsValidDivisor + Arithmetics + PartialCmp + Clone,
     T::Mask: LazySelect<T>,
 {
+    #[inline]
     fn from_color_unclamped(hsl: Hsl<S, T>) -> Self {
         let x = lazy_select! {
             if hsl.lightness.lt(&T::from_f64(0.5)) => hsl.lightness.clone(),
@@ -456,6 +458,7 @@ where
     T: One + Zero + IsValidDivisor + Arithmetics,
     T::Mask: LazySelect<T>,
 {
+    #[inline]
     fn from_color_unclamped(hwb: Hwb<S, T>) -> Self {
         let Hwb {
             hue,

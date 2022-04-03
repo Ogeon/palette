@@ -272,6 +272,20 @@ pub trait ClampAssign {
     fn clamp_max_assign(&mut self, max: Self);
 }
 
+/// Combined multiplication and addition operation.
+pub trait MulAdd {
+    /// Multiplies self with `m` and add `a`, as in `(self * m) + a`.
+    #[must_use]
+    fn mul_add(self, m: Self, a: Self) -> Self;
+}
+
+/// Combined multiplication and subtraction operation.
+pub trait MulSub {
+    /// Multiplies self with `m` and subtract `s`, as in `(self * m) - s`.
+    #[must_use]
+    fn mul_sub(self, m: Self, s: Self) -> Self;
+}
+
 macro_rules! impl_uint {
     ($($ty: ident),+) => {
         $(
@@ -379,6 +393,20 @@ macro_rules! impl_uint {
                 #[inline]
                 fn clamp_max_assign(&mut self, max: Self) {
                     *self = core::cmp::Ord::min(*self, max);
+                }
+            }
+
+            impl MulAdd for $ty {
+                #[inline]
+                fn mul_add(self, m: Self, a: Self) -> Self {
+                    (self * m) + a
+                }
+            }
+
+            impl MulSub for $ty {
+                #[inline]
+                fn mul_sub(self, m: Self, s: Self) -> Self {
+                    (self * m) - s
                 }
             }
         )+
@@ -624,6 +652,21 @@ macro_rules! impl_float {
                 #[inline]
                 fn clamp_max_assign(&mut self, max: Self) {
                     *self = $ty::min(*self, max);
+                }
+            }
+
+            #[cfg(feature = "std")]
+            impl MulAdd for $ty {
+                #[inline]
+                fn mul_add(self, m: Self, a: Self) -> Self {
+                    $ty::mul_add(self, m, a)
+                }
+            }
+
+            impl MulSub for $ty {
+                #[inline]
+                fn mul_sub(self, m: Self, s: Self) -> Self {
+                    (self * m) - s
                 }
             }
         )+

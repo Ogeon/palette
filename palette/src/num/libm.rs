@@ -239,3 +239,17 @@ impl Round for f64 {
         ::libm::ceil(self)
     }
 }
+
+impl MulAdd for f32 {
+    #[inline]
+    fn mul_add(self, m: Self, a: Self) -> Self {
+        ::libm::fmaf(self, m, a)
+    }
+}
+
+impl MulAdd for f64 {
+    #[inline]
+    fn mul_add(self, m: Self, a: Self) -> Self {
+        ::libm::fma(self, m, a)
+    }
+}

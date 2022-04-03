@@ -304,6 +304,7 @@ where
     Hsv<S2, T>: FromColorUnclamped<Hsv<S1, T>>,
     Self: FromColorUnclamped<Hsv<S2, T>>,
 {
+    #[inline]
     fn from_color_unclamped(hwb: Hwb<S1, T>) -> Self {
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
             hwb.reinterpret_as()
@@ -319,6 +320,7 @@ impl<S, T> FromColorUnclamped<Hsv<S, T>> for Hwb<S, T>
 where
     T: One + Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(color: Hsv<S, T>) -> Self {
         Hwb {
             hue: color.hue,

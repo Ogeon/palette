@@ -283,6 +283,20 @@ macro_rules! impl_wide_float {
                     self.cmp_gt(*other)
                 }
             }
+
+            impl MulAdd for $ty {
+                #[inline]
+                fn mul_add(self, m: Self, a: Self) -> Self {
+                    $ty::mul_add(self, m, a)
+                }
+            }
+
+            impl MulSub for $ty {
+                #[inline]
+                fn mul_sub(self, m: Self, s: Self) -> Self {
+                    $ty::mul_sub(self, m, s)
+                }
+            }
         )+
     };
 }

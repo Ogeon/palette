@@ -10,7 +10,7 @@ use serde_derive::Deserialize;
 use palette::{
     angle::AngleEq,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    num::{IntoScalarArray, One, Real, Zero},
+    num::{FromScalarArray, IntoScalarArray, One, Real, Zero},
     rgb::RgbStandard,
     white_point::{WhitePoint, D65},
     Hsl, Hsv, Hwb, Lab, Lch, LinSrgb, Srgb, Xyz, Yxy,
@@ -220,6 +220,57 @@ impl_from_color!(F, Lch<D65, F>);
 impl_from_rgb_derivative!(F, Hsl<::palette::encoding::Srgb, F>);
 impl_from_rgb_derivative!(F, Hsv<::palette::encoding::Srgb, F>);
 impl_from_rgb_derivative!(F, Hwb<::palette::encoding::Srgb, F>);
+
+impl<F, S, const N: usize> From<[ColorMine<F>; N]> for ColorMine<S>
+where
+    [Xyz<D65, F>; N]: Default,
+    [Yxy<D65, F>; N]: Default,
+    [Lab<D65, F>; N]: Default,
+    [Lch<D65, F>; N]: Default,
+    [LinSrgb<F>; N]: Default,
+    [Srgb<F>; N]: Default,
+    [Hsl<::palette::encoding::Srgb, F>; N]: Default,
+    [Hsv<::palette::encoding::Srgb, F>; N]: Default,
+    [Hwb<::palette::encoding::Srgb, F>; N]: Default,
+    [F; N]: Default,
+    S: FromScalarArray<N, Scalar = F>,
+{
+    fn from(colors: [ColorMine<F>; N]) -> Self {
+        let mut xyz: [Xyz<D65, F>; N] = Default::default();
+        let mut yxy: [Yxy<D65, F>; N] = Default::default();
+        let mut lab: [Lab<D65, F>; N] = Default::default();
+        let mut lch: [Lch<D65, F>; N] = Default::default();
+        let mut linear_rgb: [LinSrgb<F>; N] = Default::default();
+        let mut rgb: [Srgb<F>; N] = Default::default();
+        let mut hsl: [Hsl<::palette::encoding::Srgb, F>; N] = Default::default();
+        let mut hsv: [Hsv<::palette::encoding::Srgb, F>; N] = Default::default();
+        let mut hwb: [Hwb<::palette::encoding::Srgb, F>; N] = Default::default();
+
+        for (index, color) in IntoIterator::into_iter(colors).enumerate() {
+            xyz[index] = color.xyz;
+            yxy[index] = color.yxy;
+            lab[index] = color.lab;
+            lch[index] = color.lch;
+            linear_rgb[index] = color.linear_rgb;
+            rgb[index] = color.rgb;
+            hsl[index] = color.hsl;
+            hsv[index] = color.hsv;
+            hwb[index] = color.hwb;
+        }
+
+        ColorMine {
+            xyz: xyz.into(),
+            yxy: yxy.into(),
+            lab: lab.into(),
+            lch: lch.into(),
+            linear_rgb: linear_rgb.into(),
+            rgb: rgb.into(),
+            hsl: hsl.into(),
+            hsv: hsv.into(),
+            hwb: hwb.into(),
+        }
+    }
+}
 
 impl<F, S> Into<[ColorMine<F>; 2]> for ColorMine<S>
 where
