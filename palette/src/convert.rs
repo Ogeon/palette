@@ -32,19 +32,19 @@
 //!     standard: std::marker::PhantomData<S>,
 //! }
 //!
-//! # impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>> for ExampleType<S, T>
+//! # impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace>::WhitePoint, T>> for ExampleType<S, T>
 //! # where
-//! #   S: RgbStandard<T>,
+//! #   S: RgbStandard,
 //! #   T: Stimulus,
 //! # {
-//! #   fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>) -> Self {
+//! #   fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
 //! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}
 //! #   }
 //! # }
 //! #
-//! # impl<S, T> FromColorUnclamped<ExampleType<S, T>> for Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>
+//! # impl<S, T> FromColorUnclamped<ExampleType<S, T>> for Xyz<<S::Space as RgbSpace>::WhitePoint, T>
 //! # where
-//! #   S: RgbStandard<T>,
+//! #   S: RgbStandard,
 //! #   Self: Default,
 //! # {
 //! #   fn from_color_unclamped(color: ExampleType<S, T>) -> Self {
@@ -164,8 +164,8 @@
 //! // anything else with the `white_point` attribute argument.
 //! impl<S, T> FromColorUnclamped<Bgr<T>> for Rgb<S, T>
 //! where
-//!     S: RgbStandard<T>,
-//!     S::Space: RgbSpace<T, WhitePoint = D65>,
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>,
 //!     Srgb<T>: IntoColorUnclamped<Rgb<S, T>>,
 //! {
 //!     fn from_color_unclamped(color: Bgr<T>) -> Rgb<S, T> {
@@ -176,8 +176,8 @@
 //!
 //! impl<S, T> FromColorUnclamped<Rgb<S, T>> for Bgr<T>
 //! where
-//!     S: RgbStandard<T>,
-//!     S::Space: RgbSpace<T, WhitePoint = D65>,
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace<WhitePoint = D65>,
 //!     Srgb<T>: FromColorUnclamped<Rgb<S, T>>,
 //! {
 //!     fn from_color_unclamped(color: Rgb<S, T>) -> Bgr<T> {
@@ -213,9 +213,7 @@
 //! extern crate approx;
 //!
 //! use palette::{LinSrgba, Srgb, IntoColor, WithAlpha};
-//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
-//! use palette::encoding::Linear;
-//! use palette::white_point::D65;
+//! use palette::rgb::Rgb;
 //! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 //!
 //! /// CSS style sRGB.
@@ -237,8 +235,7 @@
 //! // the transparency for us.
 //! impl<S> FromColorUnclamped<Rgb<S, f32>> for CssRgb
 //! where
-//!     S: RgbStandard<f32>,
-//!     S::Space: RgbSpace<f32, WhitePoint = D65>,
+//!     Srgb<f32>: FromColorUnclamped<Rgb<S, f32>>
 //! {
 //!     fn from_color_unclamped(color: Rgb<S, f32>) -> CssRgb{
 //!         let srgb = Srgb::from_color_unclamped(color)
@@ -255,8 +252,7 @@
 //!
 //! impl<S> FromColorUnclamped<CssRgb> for Rgb<S, f32>
 //! where
-//!     S: RgbStandard<f32>,
-//!     S::Space: RgbSpace<f32, WhitePoint = D65>,
+//!     Srgb<f32>: IntoColorUnclamped<Rgb<S, f32>>
 //! {
 //!     fn from_color_unclamped(color: CssRgb) -> Rgb<S, f32>{
 //!         Srgb::new(color.red, color.green, color.blue)
@@ -339,27 +335,27 @@ mod tests {
 
     impl<S1, S2> FromColorUnclamped<WithXyz<S2>> for WithXyz<S1>
     where
-        S1: RgbSpace<f64>,
-        S2: RgbSpace<f64, WhitePoint = S1::WhitePoint>,
+        S1: RgbSpace,
+        S2: RgbSpace<WhitePoint = S1::WhitePoint>,
     {
         fn from_color_unclamped(_color: WithXyz<S2>) -> Self {
             WithXyz(PhantomData)
         }
     }
 
-    impl<S: RgbSpace<f64>> FromColorUnclamped<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
+    impl<S: RgbSpace> FromColorUnclamped<Xyz<S::WhitePoint, f64>> for WithXyz<S> {
         fn from_color_unclamped(_color: Xyz<S::WhitePoint, f64>) -> Self {
             WithXyz(PhantomData)
         }
     }
 
-    impl<S: RgbSpace<f64>> FromColorUnclamped<WithXyz<S>> for Xyz<S::WhitePoint, f64> {
+    impl<S: RgbSpace> FromColorUnclamped<WithXyz<S>> for Xyz<S::WhitePoint, f64> {
         fn from_color_unclamped(_color: WithXyz<S>) -> Xyz<S::WhitePoint, f64> {
             Xyz::new(0.0, 1.0, 0.0)
         }
     }
 
-    impl<Rs: RgbSpace<f64>, Ls: LumaStandard<f64, WhitePoint = Rs::WhitePoint>>
+    impl<Rs: RgbSpace, Ls: LumaStandard<WhitePoint = Rs::WhitePoint>>
         FromColorUnclamped<Luma<Ls, f64>> for WithXyz<Rs>
     {
         fn from_color_unclamped(_color: Luma<Ls, f64>) -> Self {
@@ -367,7 +363,7 @@ mod tests {
         }
     }
 
-    impl<Rs: RgbSpace<f64>, Ls: LumaStandard<f64, WhitePoint = Rs::WhitePoint>>
+    impl<Rs: RgbSpace, Ls: LumaStandard<WhitePoint = Rs::WhitePoint>>
         FromColorUnclamped<WithXyz<Rs>> for Luma<Ls, f64>
     {
         fn from_color_unclamped(_color: WithXyz<Rs>) -> Self {

@@ -10,6 +10,7 @@ use serde_derive::Deserialize;
 use palette::{
     angle::AngleEq,
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::{FromLinear, IntoLinear},
     num::{FromScalarArray, IntoScalarArray, One, Real, Zero},
     rgb::RgbStandard,
     white_point::{WhitePoint, D65},
@@ -101,7 +102,7 @@ where
 impl<F> From<ColorMineRaw<F>> for ColorMine<F>
 where
     F: Copy,
-    palette::encoding::Srgb: RgbStandard<F, Space = palette::encoding::Srgb>,
+    palette::encoding::Srgb: RgbStandard<Space = palette::encoding::Srgb> + IntoLinear<F, F>,
 {
     fn from(src: ColorMineRaw<F>) -> ColorMine<F> {
         ColorMine {
@@ -194,7 +195,7 @@ where
     Srgb<F>: IntoColorUnclamped<Hsl<::palette::encoding::Srgb, F>>
         + IntoColorUnclamped<Hsv<::palette::encoding::Srgb, F>>
         + IntoColorUnclamped<Hwb<::palette::encoding::Srgb, F>>,
-    palette::encoding::Srgb: RgbStandard<F, Space = palette::encoding::Srgb>,
+    palette::encoding::Srgb: RgbStandard<Space = palette::encoding::Srgb> + FromLinear<F, F>,
 {
     fn from(color: LinSrgb<F>) -> ColorMine<F> {
         ColorMine {

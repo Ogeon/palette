@@ -39,6 +39,7 @@ bench = false
 
 [dependencies]
 palette_derive = { version = "0.6.0", path = "../palette_derive" }
+fast-srgb8 = "1.0.0"
 approx = { version = "0.5", default-features = false }
 libm = { version = "0.2.1", default-features = false, optional = true }
 

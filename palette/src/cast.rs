@@ -20,16 +20,14 @@
 //! ```
 //! use palette::{cast, Srgb, IntoColor};
 //!
-//! let color = cast::from_array::<Srgb<u8>>([23u8, 198, 76])
-//!     .into_format::<f32>()
-//!     .into_linear();
+//! let color = cast::from_array::<Srgb<u8>>([23u8, 198, 76]).into_linear();
 //!
 //! let buffer = &mut [[64u8, 139, 10], [93, 18, 214]];
 //! let color_buffer = cast::from_array_slice_mut::<Srgb<u8>>(buffer);
 //!
 //! for destination in color_buffer {
-//!     let linear_dst = destination.into_format().into_linear();
-//!     *destination = (linear_dst + color).into_encoding().into_format();
+//!     let linear_dst = destination.into_linear::<f32>();
+//!     *destination = (linear_dst + color).into_encoding();
 //! }
 //! ```
 //!

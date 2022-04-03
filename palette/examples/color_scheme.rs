@@ -89,10 +89,7 @@ fn main() {
         .and_then(|r| r.parse().ok())
         .expect("the blue channel must be a number in the range [0-255]");
 
-    let primary: Lch = Srgb::new(red, green, blue)
-        .into_format::<f32>()
-        .into_linear()
-        .into_color();
+    let primary: Lch = Srgb::new(red, green, blue).into_linear().into_color();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {
@@ -170,18 +167,12 @@ fn blit_shades(color: LinSrgb<f32>, mut canvas: SubImage<&mut RgbImage>) {
     let width = canvas.width();
     let height = canvas.height();
 
-    let primary = Srgb::from_linear(color).into_format().into();
+    let primary = Srgb::from_linear(color).into();
 
     //Generate one lighter and two darker versions of the color
-    let light = Srgb::from_linear(color.lighten(0.1).into())
-        .into_format()
-        .into();
-    let dark1 = Srgb::from_linear(color.darken(0.1).into())
-        .into_format()
-        .into();
-    let dark2 = Srgb::from_linear(color.darken(0.2).into())
-        .into_format()
-        .into();
+    let light = Srgb::from_linear(color.lighten(0.1).into()).into();
+    let dark1 = Srgb::from_linear(color.darken(0.1).into()).into();
+    let dark2 = Srgb::from_linear(color.darken(0.2).into()).into();
 
     for x in 0..width {
         for y in 0..height {

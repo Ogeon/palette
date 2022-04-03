@@ -3,8 +3,8 @@
 pub mod channels;
 mod luma;
 
-use crate::encoding::{Gamma, Linear, Srgb, TransferFn};
-use crate::white_point::{WhitePoint, D65};
+use crate::encoding::{Gamma, Linear, Srgb};
+use crate::white_point::D65;
 
 pub use self::luma::{Luma, Lumaa};
 
@@ -26,19 +26,15 @@ pub type GammaLuma<T = f32> = Luma<Gamma<D65>, T>;
 pub type GammaLumaa<T = f32> = Lumaa<Gamma<D65>, T>;
 
 /// A white point and a transfer function.
-pub trait LumaStandard<T>: 'static {
+pub trait LumaStandard {
     /// The white point of the color space.
-    type WhitePoint: WhitePoint<T>;
+    type WhitePoint;
 
     /// The transfer function for the luminance component.
-    type TransferFn: TransferFn<T>;
+    type TransferFn;
 }
 
-impl<T, Wp, Tf> LumaStandard<T> for (Wp, Tf)
-where
-    Wp: WhitePoint<T>,
-    Tf: TransferFn<T>,
-{
+impl<Wp, Tf> LumaStandard for (Wp, Tf) {
     type WhitePoint = Wp;
     type TransferFn = Tf;
 }

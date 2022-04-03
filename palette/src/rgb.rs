@@ -61,9 +61,9 @@
 //! flexibility.
 
 use crate::{
-    encoding::{self, Gamma, Linear, TransferFn},
+    encoding::{self, FromLinear, Gamma, IntoLinear, Linear},
     stimulus::{FromStimulus, Stimulus},
-    white_point::{Any, WhitePoint},
+    white_point::Any,
     Yxy,
 };
 
@@ -90,53 +90,46 @@ pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
 /// An RGB space and a transfer function.
-pub trait RgbStandard<T>: 'static {
+pub trait RgbStandard {
     /// The RGB color space.
-    type Space: RgbSpace<T>;
+    type Space: RgbSpace;
 
     /// The transfer function for the color components.
-    type TransferFn: TransferFn<T>;
+    type TransferFn;
 }
 
-impl<T, Sp, Tf> RgbStandard<T> for (Sp, Tf)
+impl<Sp, Tf> RgbStandard for (Sp, Tf)
 where
-    Sp: RgbSpace<T>,
-    Tf: TransferFn<T>,
+    Sp: RgbSpace,
 {
     type Space = Sp;
     type TransferFn = Tf;
 }
 
-impl<T, Pr, Wp, Tf> RgbStandard<T> for (Pr, Wp, Tf)
+impl<Pr, Wp, Tf> RgbStandard for (Pr, Wp, Tf)
 where
-    Pr: Primaries<T>,
-    Wp: WhitePoint<T>,
-    Tf: TransferFn<T>,
+    (Pr, Wp): RgbSpace,
 {
     type Space = (Pr, Wp);
     type TransferFn = Tf;
 }
 
 /// A set of primaries and a white point.
-pub trait RgbSpace<T>: 'static {
+pub trait RgbSpace {
     /// The primaries of the RGB color space.
-    type Primaries: Primaries<T>;
+    type Primaries;
 
     /// The white point of the RGB color space.
-    type WhitePoint: WhitePoint<T>;
+    type WhitePoint;
 }
 
-impl<T, P, W> RgbSpace<T> for (P, W)
-where
-    P: Primaries<T>,
-    W: WhitePoint<T>,
-{
+impl<P, W> RgbSpace for (P, W) {
     type Primaries = P;
     type WhitePoint = W;
 }
 
 /// Represents the red, green and blue primaries of an RGB space.
-pub trait Primaries<T>: 'static {
+pub trait Primaries<T> {
     /// Primary red.
     fn red() -> Yxy<Any, T>;
     /// Primary green.
@@ -147,71 +140,66 @@ pub trait Primaries<T>: 'static {
 
 impl<T, U> From<LinSrgb<T>> for Srgb<U>
 where
-    U: FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + FromLinear<T, U>,
 {
     #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
-        let non_lin = Srgb::<T>::from_linear(lin_srgb);
-        non_lin.into_format()
+        lin_srgb.into_encoding()
     }
 }
 
 impl<T, U> From<Srgb<T>> for LinSrgb<U>
 where
-    U: FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + IntoLinear<U, T>,
 {
     #[inline]
     fn from(srgb: Srgb<T>) -> Self {
-        srgb.into_linear().into_format()
+        srgb.into_linear()
     }
 }
 
 impl<T, U> From<LinSrgb<T>> for Srgba<U>
 where
-    U: Stimulus + FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    U: Stimulus,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + FromLinear<T, U>,
 {
     #[inline]
     fn from(lin_srgb: LinSrgb<T>) -> Self {
-        let non_lin = Srgb::<T>::from_linear(lin_srgb);
-        let new_fmt = Srgb::<U>::from_format(non_lin);
-        new_fmt.into()
+        let non_lin = Srgb::from_linear(lin_srgb);
+        non_lin.into()
     }
 }
 
 impl<T, U> From<LinSrgba<T>> for Srgba<U>
 where
     U: FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + FromLinear<T, U>,
 {
     #[inline]
     fn from(lin_srgba: LinSrgba<T>) -> Self {
-        let non_lin = Srgba::<T>::from_linear(lin_srgba);
-        non_lin.into_format()
+        Srgba::from_linear(lin_srgba)
     }
 }
 
 impl<T, U> From<Srgb<T>> for LinSrgba<U>
 where
-    U: Stimulus + FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    U: Stimulus,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + IntoLinear<U, T>,
 {
     #[inline]
     fn from(srgb: Srgb<T>) -> Self {
-        srgb.into_linear().into_format().into()
+        srgb.into_linear().into()
     }
 }
 
 impl<T, U> From<Srgba<T>> for LinSrgba<U>
 where
     U: FromStimulus<T>,
-    crate::encoding::Srgb: RgbStandard<T, Space = crate::encoding::Srgb>,
+    crate::encoding::Srgb: RgbStandard<Space = crate::encoding::Srgb> + IntoLinear<U, T>,
 {
     #[inline]
     fn from(srgba: Srgba<T>) -> Self {
-        srgba.into_linear().into_format()
+        srgba.into_linear()
     }
 }
 

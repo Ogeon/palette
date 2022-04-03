@@ -25,19 +25,21 @@ use crate::{
     cast::{ComponentOrder, Packed},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    encoding::{linear::LinearFn, Linear, Srgb},
+    encoding::{linear::LinearFn, FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
         self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
     },
-    rgb::{RgbSpace, RgbStandard, TransferFn},
+    rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
-    white_point::Any,
+    white_point::{Any, WhitePoint},
     Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
     Mix, MixAssign, RelativeContrast, RgbHue, Xyz, Yxy,
 };
+
+use super::Primaries;
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](crate::Alpha#Rgba).
@@ -231,9 +233,12 @@ impl<S> Rgb<S, u8> {
     }
 }
 
-impl<S: RgbStandard<T>, T> Rgb<S, T> {
+impl<S: RgbStandard, T> Rgb<S, T> {
     /// Convert the color to linear RGB.
-    pub fn into_linear(self) -> Rgb<Linear<S::Space>, T> {
+    pub fn into_linear<U>(self) -> Rgb<Linear<S::Space>, U>
+    where
+        S::TransferFn: IntoLinear<U, T>,
+    {
         Rgb::new(
             S::TransferFn::into_linear(self.red),
             S::TransferFn::into_linear(self.green),
@@ -242,48 +247,47 @@ impl<S: RgbStandard<T>, T> Rgb<S, T> {
     }
 
     /// Convert linear RGB to non-linear RGB.
-    pub fn from_linear(color: Rgb<Linear<S::Space>, T>) -> Rgb<S, T> {
+    pub fn from_linear<U>(color: Rgb<Linear<S::Space>, U>) -> Self
+    where
+        S::TransferFn: FromLinear<U, T>,
+    {
         Rgb::new(
             S::TransferFn::from_linear(color.red),
             S::TransferFn::from_linear(color.green),
             S::TransferFn::from_linear(color.blue),
         )
     }
+}
 
-    /// Convert the color to a different encoding.
-    pub fn into_encoding<St>(self) -> Rgb<St, T>
+impl<S: RgbSpace, T> Rgb<Linear<S>, T> {
+    /// Convert a linear color to a different encoding.
+    pub fn into_encoding<U, St>(self) -> Rgb<St, U>
     where
-        St: RgbStandard<T, Space = S::Space>,
+        St: RgbStandard<Space = S>,
+        St::TransferFn: FromLinear<T, U>,
     {
-        Rgb::new(
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.red)),
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.green)),
-            St::TransferFn::from_linear(S::TransferFn::into_linear(self.blue)),
-        )
+        Rgb::<St, U>::from_linear(self)
     }
 
-    /// Convert RGB from a different encoding.
-    pub fn from_encoding<St>(color: Rgb<St, T>) -> Rgb<S, T>
+    /// Convert linear RGB from a different encoding.
+    pub fn from_encoding<U, St>(color: Rgb<St, U>) -> Self
     where
-        St: RgbStandard<T, Space = S::Space>,
+        St: RgbStandard<Space = S>,
+        St::TransferFn: IntoLinear<T, U>,
     {
-        Rgb::new(
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.red)),
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.green)),
-            S::TransferFn::from_linear(St::TransferFn::into_linear(color.blue)),
-        )
+        color.into_linear()
     }
 }
 
 impl<S, T> Rgb<S, T>
 where
-    S: RgbStandard<T>,
+    S: RgbStandard,
 {
     #[inline]
     fn reinterpret_as<St>(self) -> Rgb<St, T>
     where
-        S::Space: RgbSpace<T, WhitePoint = <St::Space as RgbSpace<T>>::WhitePoint>,
-        St: RgbStandard<T>,
+        S::Space: RgbSpace<WhitePoint = <St::Space as RgbSpace>::WhitePoint>,
+        St: RgbStandard,
     {
         Rgb {
             red: self.red,
@@ -399,55 +403,67 @@ impl<S> Rgba<S, u8> {
     }
 }
 
-/// [`Rgba`](crate::rgb::Rgba) implementations.
-impl<S: RgbStandard<T>, T, A> Alpha<Rgb<S, T>, A> {
+impl<S: RgbStandard, T, A> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
-    pub fn into_linear(self) -> Alpha<Rgb<Linear<S::Space>, T>, A> {
+    pub fn into_linear<U, B>(self) -> Alpha<Rgb<Linear<S::Space>, U>, B>
+    where
+        S::TransferFn: IntoLinear<U, T>,
+        B: FromStimulus<A>,
+    {
         Alpha {
             color: self.color.into_linear(),
-            alpha: self.alpha,
+            alpha: B::from_stimulus(self.alpha),
         }
     }
 
     /// Convert linear RGB to non-linear RGB with transparency.
-    pub fn from_linear(color: Alpha<Rgb<Linear<S::Space>, T>, A>) -> Self {
+    pub fn from_linear<U, B>(color: Alpha<Rgb<Linear<S::Space>, U>, B>) -> Self
+    where
+        S::TransferFn: FromLinear<U, T>,
+        A: FromStimulus<B>,
+    {
         Alpha {
             color: Rgb::from_linear(color.color),
-            alpha: color.alpha,
+            alpha: A::from_stimulus(color.alpha),
         }
     }
+}
 
-    /// Convert the color to a different encoding with transparency.
-    pub fn into_encoding<St>(self) -> Alpha<Rgb<St, T>, A>
+impl<S: RgbSpace, T, A> Alpha<Rgb<Linear<S>, T>, A> {
+    /// Convert a linear color to a different encoding with transparency.
+    pub fn into_encoding<U, B, St>(self) -> Alpha<Rgb<St, U>, B>
     where
-        St: RgbStandard<T, Space = S::Space>,
+        St: RgbStandard<Space = S>,
+        St::TransferFn: FromLinear<T, U>,
+        B: FromStimulus<A>,
     {
-        Alpha {
-            color: Rgb::from_linear(self.color.into_linear()),
-            alpha: self.alpha,
-        }
+        Alpha::<Rgb<St, U>, B>::from_linear(self)
     }
 
-    /// Convert RGB from a different encoding with transparency.
-    pub fn from_encoding<St>(color: Alpha<Rgb<St, T>, A>) -> Self
+    /// Convert RGB from a different encoding to linear with transparency.
+    pub fn from_encoding<U, B, St>(color: Alpha<Rgb<St, U>, B>) -> Self
     where
-        St: RgbStandard<T, Space = S::Space>,
+        St: RgbStandard<Space = S>,
+        St::TransferFn: IntoLinear<T, U>,
+        A: FromStimulus<B>,
     {
-        color.into_encoding()
+        color.into_linear()
     }
 }
 
 impl<S1, S2, T> FromColorUnclamped<Rgb<S2, T>> for Rgb<S1, T>
 where
-    S1: RgbStandard<T>,
-    S2: RgbStandard<T>,
-    S2::Space: RgbSpace<T, WhitePoint = <S1::Space as RgbSpace<T>>::WhitePoint>,
-    Xyz<<S2::Space as RgbSpace<T>>::WhitePoint, T>: FromColorUnclamped<Rgb<S2, T>>,
-    Rgb<S1, T>: FromColorUnclamped<Xyz<<S1::Space as RgbSpace<T>>::WhitePoint, T>>,
+    S1: RgbStandard + 'static,
+    S2: RgbStandard + 'static,
+    S1::TransferFn: FromLinear<T, T>,
+    S2::TransferFn: IntoLinear<T, T>,
+    S2::Space: RgbSpace<WhitePoint = <S1::Space as RgbSpace>::WhitePoint>,
+    Xyz<<S2::Space as RgbSpace>::WhitePoint, T>: FromColorUnclamped<Rgb<S2, T>>,
+    Rgb<S1, T>: FromColorUnclamped<Xyz<<S1::Space as RgbSpace>::WhitePoint, T>>,
 {
     fn from_color_unclamped(rgb: Rgb<S2, T>) -> Self {
-        let rgb_space1 = TypeId::of::<<S1::Space as RgbSpace<T>>::Primaries>();
-        let rgb_space2 = TypeId::of::<<S2::Space as RgbSpace<T>>::Primaries>();
+        let rgb_space1 = TypeId::of::<<S1::Space as RgbSpace>::Primaries>();
+        let rgb_space2 = TypeId::of::<<S2::Space as RgbSpace>::Primaries>();
 
         if TypeId::of::<S1>() == TypeId::of::<S2>() {
             rgb.reinterpret_as()
@@ -459,16 +475,18 @@ where
     }
 }
 
-impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>> for Rgb<S, T>
+impl<S, T> FromColorUnclamped<Xyz<<S::Space as RgbSpace>::WhitePoint, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T>,
-    S::Space: RgbSpace<T::Scalar, WhitePoint = <S::Space as RgbSpace<T>>::WhitePoint>,
+    S: RgbStandard,
+    S::TransferFn: FromLinear<T, T>,
+    <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
+    <S::Space as RgbSpace>::WhitePoint: WhitePoint<T::Scalar>,
     T: Arithmetics + FromScalar,
     T::Scalar:
         Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone + FromScalar<Scalar = T::Scalar>,
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
-    fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace<T>>::WhitePoint, T>) -> Self {
+    fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
         let transform_matrix = matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>());
         Self::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
     }
@@ -587,8 +605,10 @@ where
 
 impl<S, St, T> FromColorUnclamped<Luma<St, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T>,
-    St: LumaStandard<T, WhitePoint = <S::Space as RgbSpace<T>>::WhitePoint>,
+    S: RgbStandard + 'static,
+    St: LumaStandard<WhitePoint = <S::Space as RgbSpace>::WhitePoint> + 'static,
+    S::TransferFn: FromLinear<T, T>,
+    St::TransferFn: IntoLinear<T, T>,
     T: Clone,
 {
     #[inline]
@@ -648,7 +668,7 @@ where
     }
 }
 
-impl_mix!(Rgb<S> where S: RgbStandard<T, TransferFn = LinearFn>,);
+impl_mix!(Rgb<S> where S: RgbStandard<TransferFn = LinearFn>,);
 impl_lighten! {
     Rgb<S>
     increase {
@@ -658,7 +678,7 @@ impl_lighten! {
     }
     other {}
     phantom: standard
-    where T: Stimulus, S: RgbStandard<T, TransferFn = LinearFn>,
+    where T: Stimulus, S: RgbStandard<TransferFn = LinearFn>,
 }
 
 impl<S, T> GetHue for Rgb<S, T>
@@ -678,7 +698,7 @@ where
     }
 }
 
-impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard where S: RgbStandard<T, TransferFn = LinearFn>);
+impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard where S: RgbStandard<TransferFn = LinearFn>);
 
 impl<S, T> StimulusColor for Rgb<S, T> where T: Stimulus {}
 
@@ -700,7 +720,7 @@ where
 
 impl<S, T> Add<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Add,
 {
     type Output = Rgb<S, <T as Add>::Output>;
@@ -717,7 +737,7 @@ where
 
 impl<S, T> Add<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Add + Clone,
 {
     type Output = Rgb<S, <T as Add>::Output>;
@@ -734,7 +754,7 @@ where
 
 impl<S, T> AddAssign<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: AddAssign,
 {
     fn add_assign(&mut self, other: Rgb<S, T>) {
@@ -746,7 +766,7 @@ where
 
 impl<S, T> AddAssign<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: AddAssign + Clone,
 {
     fn add_assign(&mut self, c: T) {
@@ -758,7 +778,7 @@ where
 
 impl<S, T> Sub<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Sub,
 {
     type Output = Rgb<S, <T as Sub>::Output>;
@@ -775,7 +795,7 @@ where
 
 impl<S, T> Sub<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Sub + Clone,
 {
     type Output = Rgb<S, <T as Sub>::Output>;
@@ -792,7 +812,7 @@ where
 
 impl<S, T> SubAssign<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: SubAssign,
 {
     fn sub_assign(&mut self, other: Rgb<S, T>) {
@@ -804,7 +824,7 @@ where
 
 impl<S, T> SubAssign<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: SubAssign + Clone,
 {
     fn sub_assign(&mut self, c: T) {
@@ -816,7 +836,7 @@ where
 
 impl<S, T> Mul<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Mul,
 {
     type Output = Rgb<S, <T as Mul>::Output>;
@@ -833,7 +853,7 @@ where
 
 impl<S, T> Mul<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Mul + Clone,
 {
     type Output = Rgb<S, <T as Mul>::Output>;
@@ -850,7 +870,7 @@ where
 
 impl<S, T> MulAssign<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: MulAssign,
 {
     fn mul_assign(&mut self, other: Rgb<S, T>) {
@@ -862,7 +882,7 @@ where
 
 impl<S, T> MulAssign<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: MulAssign + Clone,
 {
     fn mul_assign(&mut self, c: T) {
@@ -874,7 +894,7 @@ where
 
 impl<S, T> Div<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Div,
 {
     type Output = Rgb<S, <T as Div>::Output>;
@@ -891,7 +911,7 @@ where
 
 impl<S, T> Div<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: Div + Clone,
 {
     type Output = Rgb<S, <T as Div>::Output>;
@@ -908,7 +928,7 @@ where
 
 impl<S, T> DivAssign<Rgb<S, T>> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: DivAssign,
 {
     fn div_assign(&mut self, other: Rgb<S, T>) {
@@ -920,7 +940,7 @@ where
 
 impl<S, T> DivAssign<T> for Rgb<S, T>
 where
-    S: RgbStandard<T, TransferFn = LinearFn>,
+    S: RgbStandard<TransferFn = LinearFn>,
     T: DivAssign + Clone,
 {
     fn div_assign(&mut self, c: T) {
@@ -1136,8 +1156,8 @@ impl<S, T> RelativeContrast for Rgb<S, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
-    S: RgbStandard<T>,
-    Xyz<<<S as RgbStandard<T>>::Space as RgbSpace<T>>::WhitePoint, T>: FromColor<Self>,
+    S: RgbStandard,
+    Xyz<<<S as RgbStandard>::Space as RgbSpace>::WhitePoint, T>: FromColor<Self>,
 {
     type Scalar = T;
 

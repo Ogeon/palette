@@ -3,12 +3,12 @@
 use core::{marker::PhantomData, ops::Div};
 
 use crate::{
-    encoding::TransferFn,
     luma::LumaStandard,
     num::{One, Powf, Real},
     rgb::{RgbSpace, RgbStandard},
-    white_point::WhitePoint,
 };
+
+use super::{FromLinear, IntoLinear};
 
 /// Gamma encoding.
 ///
@@ -24,20 +24,17 @@ use crate::{
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Gamma<S, N: Number = F2p2>(PhantomData<(S, N)>);
 
-impl<T, Sp, N> RgbStandard<T> for Gamma<Sp, N>
+impl<Sp, N> RgbStandard for Gamma<Sp, N>
 where
-    Sp: RgbSpace<T>,
-    GammaFn<N>: TransferFn<T>,
+    Sp: RgbSpace,
     N: Number,
 {
     type Space = Sp;
     type TransferFn = GammaFn<N>;
 }
 
-impl<T, Wp, N> LumaStandard<T> for Gamma<Wp, N>
+impl<Wp, N> LumaStandard for Gamma<Wp, N>
 where
-    Wp: WhitePoint<T>,
-    GammaFn<N>: TransferFn<T>,
     N: Number,
 {
     type WhitePoint = Wp;
@@ -51,7 +48,7 @@ where
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct GammaFn<N: Number = F2p2>(PhantomData<N>);
 
-impl<T, N> TransferFn<T> for GammaFn<N>
+impl<T, N> IntoLinear<T, T> for GammaFn<N>
 where
     T: Real + One + Powf + Div<Output = T>,
     N: Number,
@@ -60,7 +57,13 @@ where
     fn into_linear(x: T) -> T {
         x.powf(T::one() / T::from_f64(N::VALUE))
     }
+}
 
+impl<T, N> FromLinear<T, T> for GammaFn<N>
+where
+    T: Real + Powf,
+    N: Number,
+{
     #[inline]
     fn from_linear(x: T) -> T {
         x.powf(T::from_f64(N::VALUE))

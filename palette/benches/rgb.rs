@@ -64,6 +64,10 @@ fn rgb_conversion(c: &mut Criterion) {
         .collect();
 
     let rgb_u8: Vec<Srgb<u8>> = colormine.iter().map(|x| x.rgb.into_format()).collect();
+    let linsrgb_f64: Vec<LinSrgb<f64>> = colormine
+        .iter()
+        .map(|x| x.linear_rgb.into_format())
+        .collect();
 
     let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
     let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
@@ -233,7 +237,7 @@ fn rgb_conversion(c: &mut Criterion) {
     group.bench_with_input("linsrgb to rgb", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
-                black_box(Srgb::from_linear(c.linear_rgb));
+                black_box(Srgb::<f32>::from_linear(c.linear_rgb));
             }
         })
     });
@@ -252,14 +256,28 @@ fn rgb_conversion(c: &mut Criterion) {
     group.bench_with_input("rgb_u8 to linsrgb_f32", &rgb_u8, |b, rgb_u8| {
         b.iter(|| {
             for c in rgb_u8 {
-                black_box(c.into_format::<f32>().into_linear());
+                black_box(c.into_linear::<f32>());
             }
         })
     });
     group.bench_with_input("linsrgb_f32 to rgb_u8", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
-                black_box(Srgb::from_linear(c.linear_rgb).into_format::<u8>());
+                black_box(Srgb::<u8>::from_linear(c.linear_rgb));
+            }
+        })
+    });
+    group.bench_with_input("rgb_u8 to linsrgb_f64", &rgb_u8, |b, rgb_u8| {
+        b.iter(|| {
+            for c in rgb_u8 {
+                black_box(c.into_linear::<f64>());
+            }
+        })
+    });
+    group.bench_with_input("linsrgb_f64 to rgb_u8", &linsrgb_f64, |b, linsrgb_f64| {
+        b.iter(|| {
+            for &c in linsrgb_f64 {
+                black_box(Srgb::<u8>::from_linear(c));
             }
         })
     });

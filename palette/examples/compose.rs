@@ -37,12 +37,8 @@ fn main() {
     let mut image = image::RgbaImage::new(tile_width * COLUMNS, tile_height * BLEND_FNS);
 
     for ((x, y, background), foreground) in background.enumerate_pixels().zip(foreground.pixels()) {
-        let background = Srgba::from(background.0)
-            .into_format::<f32, f32>()
-            .into_linear();
-        let foreground = Srgba::from(foreground.0)
-            .into_format::<f32, f32>()
-            .into_linear();
+        let background = Srgba::from(background.0).into_linear();
+        let foreground = Srgba::from(foreground.0).into_linear();
 
         let bg_rgb = background.into();
         let bg_xyz = Xyza::from_color(background).into();
@@ -188,5 +184,5 @@ where
 
     let result = composed.over(image_background);
 
-    image::Rgba(Srgba::from_linear(result).into_format().into())
+    image::Rgba(Srgba::from_linear(result).into())
 }

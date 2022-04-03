@@ -42,7 +42,6 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         item_meta.white_point.as_ref(),
         item_meta.rgb_standard.as_ref(),
         item_meta.luma_standard.as_ref(),
-        &component,
         item_meta.internal,
     );
 
@@ -170,7 +169,7 @@ fn prepare_from_impl(
                     generics
                         .make_where_clause()
                         .predicates
-                        .push(parse_quote!(#rgb_standard: #rgb_standard_path<#component>));
+                        .push(parse_quote!(#rgb_standard: #rgb_standard_path));
                 }
                 Some(WhitePointSource::LumaStandard) => {
                     let luma_standard_path = util::path(&["luma", "LumaStandard"], meta.internal);
@@ -178,7 +177,7 @@ fn prepare_from_impl(
                     generics
                         .make_where_clause()
                         .predicates
-                        .push(parse_quote!(#luma_standard: #luma_standard_path<#component>));
+                        .push(parse_quote!(#luma_standard: #luma_standard_path));
                 }
                 None => {}
             }
