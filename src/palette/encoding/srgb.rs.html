@@ -89,9 +89,10 @@
 </pre><pre class="rust"><code><span class="doccomment">//! The sRGB standard.</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">bool_mask::LazySelect</span>,
     <span class="ident">encoding::TransferFn</span>,
     <span class="ident">luma::LumaStandard</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">Powf</span>, <span class="ident">Real</span>, <span class="ident">Recip</span>},
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">MulAdd</span>, <span class="ident">MulSub</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Powf</span>, <span class="ident">Real</span>},
     <span class="ident">rgb</span>::{<span class="ident">Primaries</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
     <span class="ident">white_point</span>::{<span class="ident">Any</span>, <span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
     <span class="ident">Yxy</span>,
@@ -153,22 +154,21 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">TransferFn</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">Recip</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">MulAdd</span> <span class="op">+</span> <span class="ident">MulSub</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="comment">// Recip call shows performance benefits in benchmarks for this function</span>
-        <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">0.04045</span>) {
-            <span class="ident">x</span> <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">12.92</span>).<span class="ident">recip</span>()
-        } <span class="kw">else</span> {
-            ((<span class="ident">x</span> <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">0.055</span>)) <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">1.055</span>).<span class="ident">recip</span>()).<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="number">2.4</span>))
+        <span class="comment">// Dividing the constants directly shows performance benefits in benchmarks for this function</span>
+        <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">0.04045</span>)) =&gt; <span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">12.92</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span>,
+            <span class="kw">else</span> =&gt; <span class="ident">x</span>.<span class="ident">clone</span>().<span class="ident">mul_add</span>(<span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">1.055</span>), <span class="ident">T::from_f64</span>(<span class="number">0.055</span> <span class="op">/</span> <span class="number">1.055</span>)).<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="number">2.4</span>)),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">0.0031308</span>) {
-            <span class="ident">x</span> <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">12.92</span>)
-        } <span class="kw">else</span> {
-            <span class="ident">x</span>.<span class="ident">powf</span>(<span class="ident">T::one</span>() <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.4</span>)) <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">1.055</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">0.055</span>)
+        <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">0.0031308</span>)) =&gt; <span class="ident">T::from_f64</span>(<span class="number">12.92</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span>,
+            <span class="kw">else</span> =&gt; <span class="ident">x</span>.<span class="ident">clone</span>().<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">2.4</span>)).<span class="ident">mul_sub</span>(<span class="ident">T::from_f64</span>(<span class="number">1.055</span>), <span class="ident">T::from_f64</span>(<span class="number">0.055</span>)),
         }
     }
 }

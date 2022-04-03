@@ -1501,9 +1501,6 @@
 <span id="1499">1499</span>
 <span id="1500">1500</span>
 <span id="1501">1501</span>
-<span id="1502">1502</span>
-<span id="1503">1503</span>
-<span id="1504">1504</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and</span>
 <span class="doccomment">//! accessible for anyone. It uses the type system to enforce correctness and</span>
 <span class="doccomment">//! to avoid mistakes, such as mixing incompatible color types.</span>
@@ -1728,8 +1725,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">test</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>))]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde_json</span>;
 
-<span class="kw">use</span> <span class="ident">core::ops::Neg</span>;
+<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">BitAndAssign</span>, <span class="ident">Neg</span>};
 
+<span class="kw">use</span> <span class="ident">bool_mask</span>::{<span class="ident">BoolMask</span>, <span class="ident">HasBoolMask</span>};
 <span class="kw">use</span> <span class="ident">luma::Luma</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alpha</span>::{<span class="ident">Alpha</span>, <span class="ident">WithAlpha</span>};
@@ -1928,6 +1926,7 @@
 <span class="kw">mod</span> <span class="ident">alpha</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">angle</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">blend</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">bool_mask</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cast</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">chromatic_adaptation</span>;
 <span class="kw">mod</span> <span class="ident">color_difference</span>;
@@ -1958,39 +1957,23 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">matrix</span>;
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">clamp</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-    <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
-        <span class="ident">min</span>
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">max</span> {
-        <span class="ident">max</span>
-    } <span class="kw">else</span> {
-        <span class="ident">value</span>
-    }
+<span class="kw">fn</span> <span class="ident">clamp</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">num::Clamp</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
+    <span class="ident">value</span>.<span class="ident">clamp</span>(<span class="ident">min</span>, <span class="ident">max</span>)
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">clamp_assign</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) {
-    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
-        <span class="kw-2">*</span><span class="ident">value</span> <span class="op">=</span> <span class="ident">min</span>;
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">max</span> {
-        <span class="kw-2">*</span><span class="ident">value</span> <span class="op">=</span> <span class="ident">max</span>;
-    }
+<span class="kw">fn</span> <span class="ident">clamp_assign</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">num::ClampAssign</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) {
+    <span class="ident">value</span>.<span class="ident">clamp_assign</span>(<span class="ident">min</span>, <span class="ident">max</span>);
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">clamp_min</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-    <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
-        <span class="ident">min</span>
-    } <span class="kw">else</span> {
-        <span class="ident">value</span>
-    }
+<span class="kw">fn</span> <span class="ident">clamp_min</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">num::Clamp</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
+    <span class="ident">value</span>.<span class="ident">clamp_min</span>(<span class="ident">min</span>)
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">clamp_min_assign</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>) {
-    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">value</span> <span class="op">&lt;</span> <span class="ident">min</span> {
-        <span class="kw-2">*</span><span class="ident">value</span> <span class="op">=</span> <span class="ident">min</span>;
-    }
+<span class="kw">fn</span> <span class="ident">clamp_min_assign</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">num::ClampAssign</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>, <span class="ident">min</span>: <span class="ident">T</span>) {
+    <span class="ident">value</span>.<span class="ident">clamp_min_assign</span>(<span class="ident">min</span>);
 }
 
 <span class="doccomment">/// Checks if color components are within their expected range bounds.</span>
@@ -2000,9 +1983,9 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds};</span>
-<span class="doccomment">/// let a = Srgb::new(0.4, 0.3, 0.8);</span>
-<span class="doccomment">/// let b = Srgb::new(1.2, 0.3, 0.8);</span>
-<span class="doccomment">/// let c = Srgb::new(-0.6, 0.3, 0.8);</span>
+<span class="doccomment">/// let a = Srgb::new(0.4f32, 0.3, 0.8);</span>
+<span class="doccomment">/// let b = Srgb::new(1.2f32, 0.3, 0.8);</span>
+<span class="doccomment">/// let c = Srgb::new(-0.6f32, 0.3, 0.8);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert!(a.is_within_bounds());</span>
 <span class="doccomment">/// assert!(!b.is_within_bounds());</span>
@@ -2014,32 +1997,43 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let my_vec = vec![Srgb::new(0.4, 0.3, 0.8), Srgb::new(0.8, 0.5, 0.1)];</span>
-<span class="doccomment">/// let my_array = [Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];</span>
-<span class="doccomment">/// let my_slice = &amp;[Srgb::new(0.4, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];</span>
+<span class="doccomment">/// let my_vec = vec![Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(0.8, 0.5, 0.1)];</span>
+<span class="doccomment">/// let my_array = [Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(1.3, 0.5, -3.0)];</span>
+<span class="doccomment">/// let my_slice = &amp;[Srgb::new(0.4f32, 0.3, 0.8), Srgb::new(1.2, 0.3, 0.8)];</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert!(my_vec.is_within_bounds());</span>
 <span class="doccomment">/// assert!(!my_array.is_within_bounds());</span>
 <span class="doccomment">/// assert!(!my_slice.is_within_bounds());</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IsWithinBounds</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IsWithinBounds</span>: <span class="ident">HasBoolMask</span> {
     <span class="doccomment">/// Check if the color&#39;s components are within the expected range bounds.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use palette::{Srgb, IsWithinBounds};</span>
-    <span class="doccomment">/// assert!(Srgb::new(0.8, 0.5, 0.2).is_within_bounds());</span>
-    <span class="doccomment">/// assert!(!Srgb::new(1.3, 0.5, -3.0).is_within_bounds());</span>
+    <span class="doccomment">/// assert!(Srgb::new(0.8f32, 0.5, 0.2).is_within_bounds());</span>
+    <span class="doccomment">/// assert!(!Srgb::new(1.3f32, 0.5, -3.0).is_within_bounds());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mask</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> [<span class="ident">T</span>]
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">IsWithinBounds</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">BoolMask</span> <span class="op">+</span> <span class="ident">BitAndAssign</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="ident">T::is_within_bounds</span>)
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mask</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Mask::from_bool</span>(<span class="bool-val">true</span>);
+
+        <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="self">self</span> {
+            <span class="ident">result</span> <span class="op">&amp;=</span> <span class="ident">item</span>.<span class="ident">is_within_bounds</span>();
+
+            <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_false</span>() {
+                <span class="kw">break</span>;
+            }
+        }
+
+        <span class="ident">result</span>
     }
 }
 
@@ -2053,7 +2047,7 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds, Clamp};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let unclamped = Srgb::new(1.3, 0.5, -3.0);</span>
+<span class="doccomment">/// let unclamped = Srgb::new(1.3f32, 0.5, -3.0);</span>
 <span class="doccomment">/// assert!(!unclamped.is_within_bounds());</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let clamped = unclamped.clamp();</span>
@@ -2083,7 +2077,7 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use palette::{Srgb, IsWithinBounds, ClampAssign};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let mut color = Srgb::new(1.3, 0.5, -3.0);</span>
+<span class="doccomment">/// let mut color = Srgb::new(1.3f32, 0.5, -3.0);</span>
 <span class="doccomment">/// assert!(!color.is_within_bounds());</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// color.clamp_assign();</span>
@@ -2472,10 +2466,10 @@
 <span class="doccomment">/// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);</span>
 <span class="doccomment">/// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_relative_eq!(red.get_hue().unwrap(), 0.0.into());</span>
-<span class="doccomment">/// assert_relative_eq!(green.get_hue().unwrap(), 120.0.into());</span>
-<span class="doccomment">/// assert_relative_eq!(blue.get_hue().unwrap(), 240.0.into());</span>
-<span class="doccomment">/// assert_eq!(gray.get_hue(), None);</span>
+<span class="doccomment">/// assert_relative_eq!(red.get_hue(), 0.0.into());</span>
+<span class="doccomment">/// assert_relative_eq!(green.get_hue(), 120.0.into());</span>
+<span class="doccomment">/// assert_relative_eq!(blue.get_hue(), 240.0.into());</span>
+<span class="doccomment">/// assert_relative_eq!(gray.get_hue(), 0.0.into());</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">GetHue</span> {
     <span class="doccomment">/// The kind of hue unit this color space uses.</span>
@@ -2489,9 +2483,9 @@
     <span class="doccomment">/// Calculate a hue if possible.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Colors in the gray scale has no well defined hue and should preferably</span>
-    <span class="doccomment">/// return `None`.</span>
+    <span class="doccomment">/// return `0`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Hue</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Hue</span>;
 }
 
 <span class="doccomment">/// Change the hue of a color to a specific value.</span>

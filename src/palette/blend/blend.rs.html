@@ -513,9 +513,16 @@
 <span id="511">511</span>
 <span id="512">512</span>
 <span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">bool_mask::LazySelect</span>,
     <span class="ident">cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>},
-    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
     <span class="ident">stimulus</span>::{<span class="ident">Stimulus</span>, <span class="ident">StimulusColor</span>},
     <span class="ident">Alpha</span>,
 };
@@ -590,7 +597,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
@@ -651,7 +659,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">C</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
@@ -741,7 +750,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
@@ -866,7 +876,8 @@
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">overlay_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="ident">hard_light_blend</span>(<span class="ident">dst</span>, <span class="ident">src</span>)
 }
@@ -890,53 +901,52 @@
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">dodge_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
     <span class="comment">// values outside it and clamp.</span>
-    <span class="kw">if</span> <span class="ident">dst</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-        <span class="ident">T::zero</span>()
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">src</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
-        <span class="ident">T::one</span>()
-    } <span class="kw">else</span> {
-        <span class="ident">T::one</span>().<span class="ident">min</span>(<span class="ident">dst</span> <span class="op">/</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src</span>))
+    <span class="macro">lazy_select!</span> {
+        <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
+        <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">T::one</span>(),
+        <span class="kw">else</span> =&gt; <span class="ident">T::one</span>().<span class="ident">min</span>(<span class="ident">dst</span> <span class="op">/</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src</span>)),
     }
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">burn_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
     <span class="comment">// values outside it and clamp.</span>
-    <span class="kw">if</span> <span class="ident">dst</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
-        <span class="ident">T::one</span>()
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-        <span class="ident">T::zero</span>()
-    } <span class="kw">else</span> {
-        <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">T::one</span>().<span class="ident">min</span>((<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>) <span class="op">/</span> <span class="ident">src</span>)
+    <span class="macro">lazy_select!</span> {
+        <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">T::one</span>(),
+        <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
+        <span class="kw">else</span> =&gt; <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">T::one</span>().<span class="ident">min</span>((<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>) <span class="op">/</span> <span class="ident">src</span>),
     }
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">hard_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">src</span>;
 
-    <span class="kw">if</span> <span class="ident">two_src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
-        <span class="ident">multiply_blend</span>(<span class="ident">two_src</span>, <span class="ident">dst</span>)
-    } <span class="kw">else</span> {
-        <span class="ident">screen_blend</span>(<span class="ident">two_src</span> <span class="op">-</span> <span class="ident">T::one</span>(), <span class="ident">dst</span>)
+    <span class="macro">lazy_select!</span> {
+        <span class="kw">if</span> <span class="ident">two_src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">multiply_blend</span>(<span class="ident">two_src</span>.<span class="ident">clone</span>(), <span class="ident">dst</span>.<span class="ident">clone</span>()),
+        <span class="kw">else</span> =&gt; <span class="ident">screen_blend</span>(<span class="ident">two_src</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::one</span>(), <span class="ident">dst</span>.<span class="ident">clone</span>()),
     }
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">soft_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">4.0</span>);
     <span class="kw">let</span> <span class="ident">twelve</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">12.0</span>);
@@ -944,17 +954,19 @@
     <span class="kw">let</span> <span class="ident">four_dst</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
     <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span>;
 
-    <span class="kw">let</span> <span class="ident">d_dst</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">four_dst</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
-        <span class="kw">let</span> <span class="ident">sixteen_dst</span> <span class="op">=</span> <span class="ident">four_dst</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
-        ((<span class="ident">sixteen_dst</span> <span class="op">-</span> <span class="ident">twelve</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">+</span> <span class="ident">four</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>
-    } <span class="kw">else</span> {
-        <span class="ident">dst</span>.<span class="ident">clone</span>().<span class="ident">sqrt</span>()
+    <span class="kw">let</span> <span class="ident">d_dst</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
+        <span class="kw">if</span> <span class="ident">four_dst</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; {
+            <span class="kw">let</span> <span class="ident">sixteen_dst</span> <span class="op">=</span> <span class="ident">four_dst</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
+            ((<span class="ident">sixteen_dst</span> <span class="op">-</span> <span class="ident">twelve</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">+</span> <span class="ident">four</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>
+        },
+        <span class="kw">else</span> =&gt; <span class="ident">dst</span>.<span class="ident">clone</span>().<span class="ident">sqrt</span>(),
     };
 
-    <span class="kw">if</span> <span class="ident">two_src</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::one</span>() {
-        <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">-</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">two_src</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>)
-    } <span class="kw">else</span> {
-        <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> (<span class="ident">two_src</span> <span class="op">-</span> <span class="ident">T::one</span>()) <span class="op">*</span> (<span class="ident">d_dst</span> <span class="op">-</span> <span class="ident">dst</span>)
+    <span class="macro">lazy_select!</span> {
+        <span class="kw">if</span> <span class="ident">two_src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; {
+            <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">-</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">two_src</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>)
+        },
+        <span class="kw">else</span> =&gt; <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> (<span class="ident">two_src</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::one</span>()) <span class="op">*</span> (<span class="ident">d_dst</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>),
     }
 }
 
@@ -982,7 +994,7 @@
 ) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span>,
 {
     <span class="kw">let</span> <span class="ident">src_alpha</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>();

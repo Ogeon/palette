@@ -405,7 +405,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">cast::ArrayCast</span>,
     <span class="ident">clamp</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{<span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
     <span class="ident">stimulus::Stimulus</span>,
     <span class="ident">Alpha</span>, <span class="ident">ArrayExt</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">NextArray</span>,
 };
@@ -525,7 +525,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Mix</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
@@ -543,7 +543,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">MixAssign</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 

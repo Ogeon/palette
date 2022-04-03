@@ -1144,12 +1144,23 @@
 <span id="1142">1142</span>
 <span id="1143">1143</span>
 <span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">any::TypeId</span>,
     <span class="ident">convert::TryInto</span>,
     <span class="ident">fmt</span>,
     <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
 };
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
@@ -1164,12 +1175,16 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
+    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
     <span class="ident">cast</span>::{<span class="ident">ComponentOrder</span>, <span class="ident">Packed</span>, <span class="ident">UintCast</span>},
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
     <span class="ident">convert::FromColorUnclamped</span>,
     <span class="ident">encoding</span>::{<span class="ident">linear::LinearFn</span>, <span class="ident">Linear</span>, <span class="ident">Srgb</span>, <span class="ident">TransferFn</span>},
     <span class="ident">luma::LumaStandard</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{
+        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>,
+        <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>,
+    },
     <span class="ident">stimulus</span>::{<span class="ident">FromStimulus</span>, <span class="ident">Stimulus</span>, <span class="ident">StimulusColor</span>},
     <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
     <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
@@ -1630,19 +1645,16 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_luma</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">luma</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_luma</span>()
+<span class="macro">impl_is_within_bounds!</span> {
+    <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+        <span class="ident">luma</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()]
     }
+    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span>
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
@@ -1652,7 +1664,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
@@ -1662,9 +1674,16 @@
 
 <span class="macro">impl_mix!</span>(<span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>,);
 <span class="macro">impl_lighten!</span>(<span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">luma</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()]} <span class="ident">other</span> {} <span class="ident">phantom</span>: <span class="ident">standard</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span>, <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>);
-<span class="macro">impl_premultiply!</span>(<span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>);
+<span class="macro">impl_premultiply!</span>(<span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {<span class="ident">luma</span>} <span class="ident">phantom</span>: <span class="ident">standard</span> <span class="kw">where</span> <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">LinearFn</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">StimulusColor</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Stimulus</span> {}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+{
+    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -2029,6 +2048,8 @@
     }
 }
 
+<span class="macro">impl_simd_array_conversion!</span>(<span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, [<span class="ident">luma</span>], <span class="ident">standard</span>);
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">AbsDiffEq</span>,
@@ -2097,7 +2118,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;

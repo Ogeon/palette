@@ -530,9 +530,22 @@
 <span id="528">528</span>
 <span id="529">529</span>
 <span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
 };
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
@@ -548,9 +561,13 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">angle::RealAngle</span>,
     <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
+    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
     <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
     <span class="ident">convert::FromColorUnclamped</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Powf</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>, <span class="ident">Recip</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{
+        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>,
+        <span class="ident">PartialCmp</span>, <span class="ident">Powf</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>, <span class="ident">Recip</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>,
+    },
     <span class="ident">stimulus::Stimulus</span>,
     <span class="ident">white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
     <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lchuv</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>,
@@ -717,7 +734,15 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">Recip</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span>
+        <span class="op">+</span> <span class="ident">Zero</span>
+        <span class="op">+</span> <span class="ident">Powi</span>
+        <span class="op">+</span> <span class="ident">Powf</span>
+        <span class="op">+</span> <span class="ident">Recip</span>
+        <span class="op">+</span> <span class="ident">Arithmetics</span>
+        <span class="op">+</span> <span class="ident">PartialOrd</span>
+        <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="op">+</span> <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">Wp::get_xyz</span>();
@@ -780,22 +805,18 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
-{
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">l</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_l</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_l</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">u</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_u</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">u</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_u</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">v</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_v</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">v</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_v</span>()
+<span class="macro">impl_is_within_bounds!</span> {
+    <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {
+        <span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()],
+        <span class="ident">u</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_u</span>(), <span class="ident"><span class="self">Self</span>::max_u</span>()],
+        <span class="ident">v</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_v</span>(), <span class="ident"><span class="self">Self</span>::max_v</span>()]
     }
+    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span>
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
@@ -809,7 +830,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
@@ -821,21 +842,24 @@
 
 <span class="macro">impl_mix!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
 <span class="macro">impl_lighten!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]} <span class="ident">other</span> {<span class="ident">u</span>, <span class="ident">v</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
-<span class="macro">impl_premultiply!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
+<span class="macro">impl_premultiply!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {<span class="ident">l</span>, <span class="ident">u</span>, <span class="ident">v</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">u</span> <span class="op">==</span> <span class="ident">T::zero</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">v</span> <span class="op">==</span> <span class="ident">T::zero</span>() {
-            <span class="prelude-val">None</span>
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">LuvHue::from_radians</span>(<span class="self">self</span>.<span class="ident">v</span>.<span class="ident">clone</span>().<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">u</span>.<span class="ident">clone</span>())))
-        }
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="ident">LuvHue::from_radians</span>(<span class="self">self</span>.<span class="ident">v</span>.<span class="ident">clone</span>().<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">u</span>.<span class="ident">clone</span>()))
     }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+{
+    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -853,12 +877,14 @@
 <span class="macro">impl_color_div!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">u</span>, <span class="ident">v</span>], <span class="ident">white_point</span>);
 
 <span class="macro">impl_array_casts!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
+<span class="macro">impl_simd_array_conversion!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">u</span>, <span class="ident">v</span>], <span class="ident">white_point</span>);
 
 <span class="macro">impl_eq!</span>(<span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">u</span>, <span class="ident">v</span>]);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {

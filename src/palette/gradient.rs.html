@@ -693,7 +693,7 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">clamp</span>, <span class="ident">clamp_min</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
     <span class="ident">Mix</span>,
 };
 
@@ -904,7 +904,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Take</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
 {
@@ -937,7 +937,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DoubleEndedIterator</span> <span class="kw">for</span> <span class="ident">Take</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
 {
@@ -985,7 +985,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="doccomment">/// Get a color from the gradient slice. The color of the closest domain</span>
     <span class="doccomment">/// limit will be returned if `i` is outside the domain.</span>
@@ -1035,7 +1035,7 @@
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
     <span class="ident">T</span>: <span class="ident">Clone</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="doccomment">/// Take `n` evenly spaced colors from the gradient slice, as an iterator.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Take</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -1064,7 +1064,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>().<span class="ident">unwrap_or</span>(<span class="ident">x</span>.<span class="ident">clone</span>());
@@ -1253,7 +1253,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MaybeSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="ident">C</span> {

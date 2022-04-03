@@ -197,9 +197,21 @@
 <span id="195">195</span>
 <span id="196">196</span>
 <span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Traits for working with angular values, such as for in hues.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::num</span>::{<span class="ident">Real</span>, <span class="ident">Round</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">bool_mask::HasBoolMask</span>,
+    <span class="ident">num</span>::{<span class="ident">Real</span>, <span class="ident">Round</span>},
+};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;wide&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">wide</span>;
 
 <span class="doccomment">/// Represents types that can express half of a rotation (i.e. 180 degrees).</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HalfRotation</span> {
@@ -228,10 +240,10 @@
 }
 
 <span class="doccomment">/// Angular equality, where 0 degrees and 360 degrees are equal.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AngleEq</span>: <span class="ident">PartialEq</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AngleEq</span>: <span class="ident">HasBoolMask</span> {
     <span class="doccomment">/// Check if `self` and `other` represent the same angle on a circle.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mask</span>;
 }
 
 <span class="doccomment">/// Angle types that can represent the full circle using positive and negative</span>

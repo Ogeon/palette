@@ -869,10 +869,28 @@
 <span id="867">867</span>
 <span id="868">868</span>
 <span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">any::TypeId</span>,
     <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">DivAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">DivAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
 };
 
 <span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
@@ -887,10 +905,13 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">angle</span>::{<span class="ident">FromAngle</span>, <span class="ident">RealAngle</span>, <span class="ident">SignedAngle</span>},
+    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>, <span class="ident">Select</span>},
     <span class="ident">clamp</span>, <span class="ident">clamp_min</span>, <span class="ident">clamp_min_assign</span>, <span class="ident">contrast_ratio</span>,
     <span class="ident">convert::FromColorUnclamped</span>,
     <span class="ident">encoding::Srgb</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
+    <span class="ident">num</span>::{
+        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>,
+    },
     <span class="ident">rgb</span>::{<span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
     <span class="ident">stimulus</span>::{<span class="ident">FromStimulus</span>, <span class="ident">Stimulus</span>},
     <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">Hsv</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>,
@@ -1172,6 +1193,7 @@
     <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="self">Self</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S2</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>() {
             <span class="ident">hwb</span>.<span class="ident">reinterpret_as</span>()
@@ -1187,6 +1209,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span>,
 {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Hwb</span> {
             <span class="ident">hue</span>: <span class="ident">color</span>.<span class="ident">hue</span>,
@@ -1223,20 +1246,22 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">HasBoolMask</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Mask</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_blackness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::min_whiteness</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>()
+    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T::Mask</span> {
+        <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::min_blackness</span>()) <span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::max_blackness</span>()) <span class="op">&amp;</span>
+        <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::min_whiteness</span>()) <span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::max_blackness</span>()) <span class="op">&amp;</span>
+        (<span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>()).<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::max_intensity</span>())
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
@@ -1244,10 +1269,9 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">blackness</span> <span class="op">=</span> <span class="ident">clamp_min</span>(<span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>(), <span class="ident"><span class="self">Self</span>::min_blackness</span>());
 
         <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>;
-        <span class="kw">if</span> <span class="ident">sum</span> <span class="op">&gt;</span> <span class="ident">T::max_intensity</span>() {
-            <span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>.<span class="ident">clone</span>();
-            <span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
-        }
+        <span class="kw">let</span> <span class="ident">divisor</span> <span class="op">=</span> <span class="ident">sum</span>.<span class="ident">gt</span>(<span class="kw-2">&amp;</span><span class="ident">T::max_intensity</span>()).<span class="ident">select</span>(<span class="ident">sum</span>, <span class="ident">T::one</span>());
+        <span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">divisor</span>.<span class="ident">clone</span>();
+        <span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">divisor</span>;
 
         <span class="ident"><span class="self">Self</span>::new</span>(<span class="self">self</span>.<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>)
     }
@@ -1255,7 +1279,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
@@ -1263,10 +1288,9 @@
         <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="ident"><span class="self">Self</span>::min_blackness</span>());
 
         <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>();
-        <span class="kw">if</span> <span class="ident">sum</span> <span class="op">&gt;</span> <span class="ident">T::max_intensity</span>() {
-            <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>.<span class="ident">clone</span>();
-            <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">sum</span>;
-        }
+        <span class="kw">let</span> <span class="ident">divisor</span> <span class="op">=</span> <span class="ident">sum</span>.<span class="ident">gt</span>(<span class="kw-2">&amp;</span><span class="ident">T::max_intensity</span>()).<span class="ident">select</span>(<span class="ident">sum</span>, <span class="ident">T::one</span>());
+        <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">divisor</span>.<span class="ident">clone</span>();
+        <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">/</span><span class="op">=</span> <span class="ident">divisor</span>;
     }
 }
 
@@ -1274,23 +1298,22 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>()
+        <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">factor</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>,
+            <span class="kw">else</span> =&gt; <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>(),
         };
         <span class="kw">let</span> <span class="ident">delta_whiteness</span> <span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">factor</span>;
 
-        <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>()
-        } <span class="kw">else</span> {
-            <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>
+        <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">factor</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>(),
+            <span class="kw">else</span> =&gt; <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>,
         };
         <span class="kw">let</span> <span class="ident">delta_blackness</span> <span class="op">=</span> <span class="ident">difference_blackness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
 
@@ -1316,24 +1339,32 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">SubAssign</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Stimulus</span>
+        <span class="op">+</span> <span class="ident">Real</span>
+        <span class="op">+</span> <span class="ident">Zero</span>
+        <span class="op">+</span> <span class="ident">MinMax</span>
+        <span class="op">+</span> <span class="ident">num::ClampAssign</span>
+        <span class="op">+</span> <span class="ident">AddAssign</span>
+        <span class="op">+</span> <span class="ident">SubAssign</span>
+        <span class="op">+</span> <span class="ident">Arithmetics</span>
+        <span class="op">+</span> <span class="ident">PartialCmp</span>
+        <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>()
+        <span class="kw">let</span> <span class="ident">difference_whiteness</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">factor</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident"><span class="self">Self</span>::max_whiteness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">whiteness</span>,
+            <span class="kw">else</span> =&gt; <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>(),
         };
         <span class="self">self</span>.<span class="ident">whiteness</span> <span class="op">+</span><span class="op">=</span> <span class="ident">difference_whiteness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">factor</span>;
         <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">whiteness</span>, <span class="ident"><span class="self">Self</span>::min_whiteness</span>());
 
-        <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">factor</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::zero</span>() {
-            <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>()
-        } <span class="kw">else</span> {
-            <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>
+        <span class="kw">let</span> <span class="ident">difference_blackness</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
+            <span class="kw">if</span> <span class="ident">factor</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>(),
+            <span class="kw">else</span> =&gt; <span class="ident"><span class="self">Self</span>::max_blackness</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">blackness</span>,
         };
         <span class="self">self</span>.<span class="ident">blackness</span> <span class="op">-</span><span class="op">=</span> <span class="ident">difference_blackness</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>()) <span class="op">*</span> <span class="ident">factor</span>;
         <span class="ident">clamp_min_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">blackness</span>, <span class="ident"><span class="self">Self</span>::min_blackness</span>());
@@ -1351,17 +1382,13 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">whiteness</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="self">self</span>.<span class="ident">blackness</span>.<span class="ident">clone</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::max_intensity</span>() {
-            <span class="prelude-val">None</span>
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>())
-        }
+    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RgbHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>()
     }
 }
 
@@ -1411,6 +1438,13 @@
     }
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+{
+    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Stimulus</span>,
@@ -1429,6 +1463,7 @@
 <span class="macro">impl_color_sub!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">hue</span>, <span class="ident">whiteness</span>, <span class="ident">blackness</span>], <span class="ident">standard</span>);
 
 <span class="macro">impl_array_casts!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
+<span class="macro">impl_simd_array_conversion_hue!</span>(<span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, [<span class="ident">whiteness</span>, <span class="ident">blackness</span>], <span class="ident">standard</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -1520,7 +1555,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Hwb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span>,
+    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
+    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">S</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">Xyz</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S::Space</span> <span class="kw">as</span> <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
 {
@@ -1640,21 +1676,21 @@
     <span class="kw">fn</span> <span class="ident">red</span>() {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Hwb::from_color</span>(<span class="ident">Srgb::new</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Hwb::new_srgb</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">orange</span>() {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Hwb::from_color</span>(<span class="ident">Srgb::new</span>(<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>));
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Hwb::new_srgb</span>(<span class="number">30.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">green</span>() {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Hwb::from_color</span>(<span class="ident">Srgb::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Hwb::new_srgb</span>(<span class="number">120.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1668,7 +1704,7 @@
     <span class="kw">fn</span> <span class="ident">purple</span>() {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Hwb::from_color</span>(<span class="ident">Srgb::new</span>(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Hwb::new_srgb</span>(<span class="number">270.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
