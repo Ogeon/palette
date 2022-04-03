@@ -52,7 +52,6 @@ fn cie_conversion(c: &mut Criterion) {
         .map(|x| Lch::from_color_unclamped(x.xyz))
         .collect();
 
-    group.throughput(criterion::Throughput::Elements(colormine.len() as u64));
     group.bench_with_input("xyz to lab", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {

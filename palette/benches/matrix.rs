@@ -20,7 +20,6 @@ fn matrix(c: &mut Criterion) {
     let mat3 = rgb_to_xyz_matrix::<encoding::Srgb, f32>();
     let wp: Xyz<D65, f32> = D65::get_xyz().with_white_point();
 
-    group.throughput(criterion::Throughput::Elements(1));
     group.bench_function("multiply_xyz", |b| {
         b.iter(|| multiply_xyz::<_>(black_box(inp1), black_box(inp2)))
     });
