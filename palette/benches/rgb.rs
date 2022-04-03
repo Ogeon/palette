@@ -69,7 +69,6 @@ fn rgb_conversion(c: &mut Criterion) {
     let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
     let linear_hwb: Vec<LinHwb> = colormine.iter().map(|x| x.hwb.into_color()).collect();
 
-    group.throughput(criterion::Throughput::Elements(colormine.len() as u64));
     group.bench_with_input("rgb to linsrgb", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
