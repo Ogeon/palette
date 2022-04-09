@@ -18,6 +18,7 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::IntoLinear,
     luma::LumaStandard,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
@@ -252,7 +253,8 @@ where
 
 impl<T, S> FromColorUnclamped<Luma<S, T>> for Yxy<S::WhitePoint, T>
 where
-    S: LumaStandard<T>,
+    S: LumaStandard,
+    S::TransferFn: IntoLinear<T, T>,
     Self: Default,
 {
     fn from_color_unclamped(luma: Luma<S, T>) -> Self {

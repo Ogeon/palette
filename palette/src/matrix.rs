@@ -45,7 +45,7 @@ where
 #[inline]
 pub fn multiply_xyz_to_rgb<S, V, T>(c: Mat3<T>, f: Xyz<S::WhitePoint, V>) -> Rgb<Linear<S>, V>
 where
-    S: RgbSpace<T>,
+    S: RgbSpace,
     V: Arithmetics + FromScalar<Scalar = T>,
 {
     // Input Mat3 is destructured to avoid panic paths. red, green, and blue
@@ -67,7 +67,7 @@ where
 #[inline]
 pub fn multiply_rgb_to_xyz<S, V, T>(c: Mat3<T>, f: Rgb<Linear<S>, V>) -> Xyz<S::WhitePoint, V>
 where
-    S: RgbSpace<T>,
+    S: RgbSpace,
     V: Arithmetics + FromScalar<Scalar = T>,
 {
     // Input Mat3 is destructured to avoid panic paths. Same problem as
@@ -156,7 +156,9 @@ where
 #[inline]
 pub fn rgb_to_xyz_matrix<S, T>() -> Mat3<T>
 where
-    S: RgbSpace<T>,
+    S: RgbSpace,
+    S::Primaries: Primaries<T>,
+    S::WhitePoint: WhitePoint<T>,
     T: Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone + FromScalar<Scalar = T>,
     Yxy<Any, T>: IntoColorUnclamped<Xyz<Any, T>>,
 {

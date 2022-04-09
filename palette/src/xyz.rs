@@ -18,6 +18,7 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::IntoLinear,
     luma::LumaStandard,
     matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
     num::{
@@ -25,7 +26,7 @@ use crate::{
         One, PartialCmp, Powi, Real, Recip, Zero,
     },
     oklab,
-    rgb::{Rgb, RgbSpace, RgbStandard},
+    rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
@@ -209,9 +210,11 @@ where
     T: Arithmetics + FromScalar,
     T::Scalar:
         Recip + IsValidDivisor<Mask = bool> + Arithmetics + FromScalar<Scalar = T::Scalar> + Clone,
-    Wp: WhitePoint<T>,
-    S: RgbStandard<T>,
-    S::Space: RgbSpace<T::Scalar, WhitePoint = Wp>,
+    Wp: WhitePoint<T::Scalar>,
+    S: RgbStandard,
+    S::TransferFn: IntoLinear<T, T>,
+    S::Space: RgbSpace<WhitePoint = Wp>,
+    <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
@@ -341,7 +344,8 @@ impl<Wp, T, S> FromColorUnclamped<Luma<S, T>> for Xyz<Wp, T>
 where
     Self: Mul<T, Output = Self>,
     Wp: WhitePoint<T>,
-    S: LumaStandard<T, WhitePoint = Wp>,
+    S: LumaStandard<WhitePoint = Wp>,
+    S::TransferFn: IntoLinear<T, T>,
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma

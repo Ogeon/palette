@@ -47,10 +47,10 @@ fn main() {
         .zip(grad3.take(256).zip(grad4.take(256)))
         .enumerate()
     {
-        let c1 = Srgb::from_linear(c1).into_format().into();
-        let c2 = Srgb::from_linear(c2).into_format().into();
-        let c3 = Srgb::from_linear(c3.into_color()).into_format().into();
-        let c4 = Srgb::from_linear(c4.into_color()).into_format().into();
+        let c1 = Srgb::from_linear(c1).into();
+        let c2 = Srgb::from_linear(c2).into();
+        let c3 = Srgb::from_linear(c3.into_color()).into();
+        let c4 = Srgb::from_linear(c4.into_color()).into();
 
         {
             let mut sub_image = image.sub_image(i as u32, 0, 1, 31);

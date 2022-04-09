@@ -19,7 +19,7 @@ fn converting() {
         "example-data/output/readme_converting.png",
         &[DisplayType::Discrete(&[
             my_rgb.into_format(),
-            Srgb::from_linear(my_lch.into_color()).into_format(),
+            Srgb::from_linear(my_lch.into_color()),
             Srgb::from_color(my_hsl).into_format(), // my_new_rgb is the same as my_hsl
         ])],
     );
@@ -101,14 +101,14 @@ fn color_operations_2() {
 
         for (color1, color2) in image1.iter_mut().zip(image2) {
             // Convert the colors to linear floating point format and give them transparency values.
-            let color1_alpha = color1.into_format().into_linear().opaque();
-            let color2_alpha = color2.into_format().into_linear().with_alpha(0.5);
+            let color1_alpha = color1.into_linear().opaque();
+            let color2_alpha = color2.into_linear().with_alpha(0.5);
 
             // Alpha blend `color2_alpha` over `color1_alpha`.
             let blended = color2_alpha.over(color1_alpha);
 
             // Convert the color part back to `Srgb<u8>` and overwrite the value in image1.
-            *color1 = blended.color.into_encoding().into_format();
+            *color1 = blended.color.into_encoding();
         }
     }
 
@@ -142,12 +142,12 @@ fn gradients_1() {
     // Write example image
     let taken_srgb8_colors: Vec<_> = taken_colors
         .into_iter()
-        .map(|color| color.into_encoding().into_format())
+        .map(|color| color.into_encoding())
         .collect();
     display_colors(
         "example-data/output/readme_gradients_1.png",
         &[
-            DisplayType::Continuous(&|i| gradient.get(i).into_encoding().into_format()),
+            DisplayType::Continuous(&|i| gradient.get(i).into_encoding()),
             DisplayType::Discrete(&taken_srgb8_colors),
         ],
     );
@@ -168,12 +168,12 @@ fn gradients_2() {
     // Write example image
     let taken_srgb8_colors: Vec<_> = taken_colors
         .into_iter()
-        .map(|color| color.into_encoding().into_format())
+        .map(|color| color.into_encoding())
         .collect();
     display_colors(
         "example-data/output/readme_gradients_2.png",
         &[
-            DisplayType::Continuous(&|i| gradient.get(i).into_encoding().into_format()),
+            DisplayType::Continuous(&|i| gradient.get(i).into_encoding()),
             DisplayType::Discrete(&taken_srgb8_colors),
         ],
     );

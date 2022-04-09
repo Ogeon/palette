@@ -11,7 +11,6 @@ pub fn white_point_type(
     white_point: Option<&Type>,
     rgb_standard: Option<&Type>,
     luma_standard: Option<&Type>,
-    component: &Type,
     internal: bool,
 ) -> (Type, Option<WhitePointSource>) {
     white_point
@@ -21,7 +20,7 @@ pub fn white_point_type(
                 let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
                 let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
                 (
-                    parse_quote!(<<#rgb_standard as #rgb_standard_path<#component>>::Space as #rgb_space_path<#component>>::WhitePoint),
+                    parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
                     Some(WhitePointSource::RgbStandard),
                 )
             })
@@ -30,7 +29,7 @@ pub fn white_point_type(
             luma_standard.map(|luma_standard| {
                 let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
                 (
-                    parse_quote!(<#luma_standard as #luma_standard_path<#component>>::WhitePoint),
+                    parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
                     Some(WhitePointSource::LumaStandard),
                 )
             })
@@ -72,9 +71,10 @@ pub fn get_convert_color_type(
                     Ident::new("_S", Span::call_site()).into(),
                 ));
 
-                generics.make_where_clause().predicates.push(
-                    parse_quote!(_S: #luma_standard_path<#component, WhitePoint = #white_point>),
-                );
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
                 (
                     parse_quote!(#color_path<_S, #component>),
                     UsedInput { white_point: true },
@@ -98,10 +98,10 @@ pub fn get_convert_color_type(
 
                 where_clause
                     .predicates
-                    .push(parse_quote!(_S: #rgb_standard_path<#component>));
-                where_clause.predicates.push(
-                    parse_quote!(_S::Space: #rgb_space_path<#component, WhitePoint = #white_point>),
-                );
+                    .push(parse_quote!(_S: #rgb_standard_path));
+                where_clause
+                    .predicates
+                    .push(parse_quote!(_S::Space: #rgb_space_path<WhitePoint = #white_point>));
 
                 (
                     parse_quote!(#color_path<_S, #component>),

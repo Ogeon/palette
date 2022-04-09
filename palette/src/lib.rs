@@ -32,14 +32,12 @@
 //! // An alias for Rgb<Srgb, T>, which is what most pictures store.
 //! use palette::Srgb;
 //!
-//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
+//! let orangeish = Srgb::new(1.0f32, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
 //! let whatever_it_becomes = orangeish + blueish;
 //!
 //! // Encode the result back into sRGB and create a byte array
-//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes)
-//!     .into_format()
-//!     .into();
+//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes).into();
 //! ```
 //!
 //! See the [rgb] module for a deeper dive into RGB and (non-)linearity.

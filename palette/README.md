@@ -167,14 +167,14 @@ fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
 
     for (color1, color2) in image1.iter_mut().zip(image2) {
         // Convert the colors to linear floating point format and give them transparency values.
-        let color1_alpha = color1.into_format().into_linear().opaque();
-        let color2_alpha = color2.into_format().into_linear().with_alpha(0.5);
+        let color1_alpha = color1.into_linear().opaque();
+        let color2_alpha = color2.into_linear().with_alpha(0.5);
 
         // Alpha blend `color2_alpha` over `color1_alpha`.
         let blended = color2_alpha.over(color1_alpha);
 
         // Convert the color part back to `Srgb<u8>` and overwrite the value in image1.
-        *color1 = blended.color.into_encoding().into_format();
+        *color1 = blended.color.into_encoding();
     }
 }
 ```
@@ -259,7 +259,7 @@ The following example shows how it's possible for Palette users to convert from 
 use palette::{
     convert::FromColorUnclamped,
     encoding,
-    rgb::{Rgb, RgbStandard},
+    rgb::Rgb,
     IntoColor, WithAlpha, Clamp, Srgb, Lcha
 };
 
@@ -287,7 +287,7 @@ impl FromColorUnclamped<Color> for Color {
 // Convert from any kind of f32 sRGB.
 impl<S> FromColorUnclamped<Rgb<S, f32>> for Color
 where
-    S: RgbStandard<f32, Space = encoding::Srgb>,
+    Srgb: FromColorUnclamped<Rgb<S, f32>>,
 {
     fn from_color_unclamped(color: Rgb<S, f32>) -> Color {
         let srgb = Srgb::from_color_unclamped(color);
@@ -298,7 +298,7 @@ where
 // Convert into any kind of f32 sRGB.
 impl<S> FromColorUnclamped<Color> for Rgb<S, f32>
 where
-    S: RgbStandard<f32, Space = encoding::Srgb>,
+    Rgb<S, f32>: FromColorUnclamped<Srgb>,
 {
     fn from_color_unclamped(color: Color) -> Self {
         let srgb = Srgb::new(color.r, color.g, color.b);
