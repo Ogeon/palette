@@ -27,6 +27,10 @@ impl<Wp> LumaStandard for Linear<Wp> {
 }
 
 /// Linear color component encoding.
+///
+/// Converting anything from linear to linear space is a no-op and constant
+/// time. This is a useful property in generic code, where the transfer
+/// functions may be unknown.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct LinearFn;
 

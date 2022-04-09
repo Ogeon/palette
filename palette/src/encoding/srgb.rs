@@ -14,7 +14,21 @@ use lookup_tables::*;
 
 mod lookup_tables;
 
-/// The sRGB color space.
+/// The sRGB standard, color space, and transfer function.
+///
+/// # As transfer function
+///
+/// `Srgb` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values. `f32` will use the
+///   table provided by [fast_srgb8::srgb8_to_f32].
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses [fast_srgb8::f32_to_srgb8].
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Srgb;
 

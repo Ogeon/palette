@@ -204,6 +204,19 @@ where
     S: LumaStandard,
 {
     /// Convert the color to linear luminance.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLuma, LinLuma};
+    ///
+    /// let linear: LinLuma<_, f32> = SrgbLuma::new(96u8).into_linear();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_linear<U>(self) -> Luma<Linear<S::WhitePoint>, U>
     where
         S::TransferFn: IntoLinear<U, T>,
@@ -212,6 +225,19 @@ where
     }
 
     /// Convert linear luminance to non-linear luminance.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLuma, LinLuma};
+    ///
+    /// let encoded = SrgbLuma::<u8>::from_linear(LinLuma::new(0.95f32));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_linear<U>(color: Luma<Linear<S::WhitePoint>, U>) -> Luma<S, T>
     where
         S::TransferFn: FromLinear<U, T>,
@@ -222,6 +248,19 @@ where
 
 impl<Wp, T> Luma<Linear<Wp>, T> {
     /// Convert a linear color to a different encoding.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLuma, LinLuma};
+    ///
+    /// let encoded: SrgbLuma<u8> = LinLuma::new(0.95f32).into_encoding();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_encoding<U, St>(self) -> Luma<St, U>
     where
         St: LumaStandard<WhitePoint = Wp>,
@@ -231,6 +270,19 @@ impl<Wp, T> Luma<Linear<Wp>, T> {
     }
 
     /// Convert from linear luminance from a different encoding.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLuma, LinLuma};
+    ///
+    /// let linear = LinLuma::<_, f32>::from_encoding(SrgbLuma::new(96u8));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_encoding<U, St>(color: Luma<St, U>) -> Self
     where
         St: LumaStandard<WhitePoint = Wp>,
@@ -396,6 +448,19 @@ where
     S: LumaStandard,
 {
     /// Convert the color to linear luminance with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLumaa, LinLumaa};
+    ///
+    /// let linear: LinLumaa<_, f32> = SrgbLumaa::new(96u8, 38).into_linear();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_linear<U, B>(self) -> Alpha<Luma<Linear<S::WhitePoint>, U>, B>
     where
         S::TransferFn: IntoLinear<U, T>,
@@ -408,6 +473,19 @@ where
     }
 
     /// Convert linear luminance to non-linear luminance with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLumaa, LinLumaa};
+    ///
+    /// let encoded = SrgbLumaa::<u8>::from_linear(LinLumaa::new(0.95f32, 0.75));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_linear<U, B>(color: Alpha<Luma<Linear<S::WhitePoint>, U>, B>) -> Self
     where
         S::TransferFn: FromLinear<U, T>,
@@ -422,6 +500,19 @@ where
 
 impl<Wp, T, A> Alpha<Luma<Linear<Wp>, T>, A> {
     /// Convert a linear color to a different encoding with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLumaa, LinLumaa};
+    ///
+    /// let encoded: SrgbLumaa<u8> = LinLumaa::new(0.95f32, 0.75).into_encoding();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_encoding<U, B, St>(self) -> Alpha<Luma<St, U>, B>
     where
         St: LumaStandard<WhitePoint = Wp>,
@@ -432,6 +523,19 @@ impl<Wp, T, A> Alpha<Luma<Linear<Wp>, T>, A> {
     }
 
     /// Convert to linear luminance from a different encoding with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Luma::into_format].
+    ///
+    /// ```
+    /// use palette::{SrgbLumaa, LinLumaa};
+    ///
+    /// let linear = LinLumaa::<_, f32>::from_encoding(SrgbLumaa::new(96u8, 38));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_encoding<U, B, St>(color: Alpha<Luma<St, U>, B>) -> Self
     where
         St: LumaStandard<WhitePoint = Wp>,

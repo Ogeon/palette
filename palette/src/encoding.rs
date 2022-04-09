@@ -1,4 +1,9 @@
-//! Various encoding traits, types and standards.
+//! Number and color encoding traits, types and standards.
+//!
+//! Some color spaces, particularly RGB, may be encoded in more than one way and
+//! may have more than one standard. These encodings and standards are
+//! represented as type parameters in Palette, as a form of type branding, to
+//! prevent accidental mixups.
 
 pub use self::gamma::{F2p2, Gamma};
 pub use self::linear::Linear;

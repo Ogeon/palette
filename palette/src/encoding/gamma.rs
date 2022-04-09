@@ -43,6 +43,11 @@ where
 
 /// The transfer function for gamma encoded colors.
 ///
+/// Conversion is performed using a single `powf(x, gamma)` and `powf(x, 1.0 /
+/// gamma)` call, for from and into linear respectively. This makes
+/// `GammaFn<F2p2>` usable as a slightly less expensive approximation of the
+/// [`Srgb`][super::Srgb] transfer function.
+///
 /// The gamma value is stored as a simple type that represents an `f32`
 /// constant.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

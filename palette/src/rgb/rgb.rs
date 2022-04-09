@@ -235,6 +235,19 @@ impl<S> Rgb<S, u8> {
 
 impl<S: RgbStandard, T> Rgb<S, T> {
     /// Convert the color to linear RGB.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgb, LinSrgb};
+    ///
+    /// let linear: LinSrgb<f32> = Srgb::new(96u8, 127, 0).into_linear();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_linear<U>(self) -> Rgb<Linear<S::Space>, U>
     where
         S::TransferFn: IntoLinear<U, T>,
@@ -247,6 +260,19 @@ impl<S: RgbStandard, T> Rgb<S, T> {
     }
 
     /// Convert linear RGB to non-linear RGB.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgb, LinSrgb};
+    ///
+    /// let encoded = Srgb::<u8>::from_linear(LinSrgb::new(0.95f32, 0.90, 0.30));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_linear<U>(color: Rgb<Linear<S::Space>, U>) -> Self
     where
         S::TransferFn: FromLinear<U, T>,
@@ -261,6 +287,19 @@ impl<S: RgbStandard, T> Rgb<S, T> {
 
 impl<S: RgbSpace, T> Rgb<Linear<S>, T> {
     /// Convert a linear color to a different encoding.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgb, LinSrgb};
+    ///
+    /// let encoded: Srgb<u8> = LinSrgb::new(0.95f32, 0.90, 0.30).into_encoding();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_encoding<U, St>(self) -> Rgb<St, U>
     where
         St: RgbStandard<Space = S>,
@@ -270,6 +309,19 @@ impl<S: RgbSpace, T> Rgb<Linear<S>, T> {
     }
 
     /// Convert linear RGB from a different encoding.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgb, LinSrgb};
+    ///
+    /// let linear = LinSrgb::<f32>::from_encoding(Srgb::new(96u8, 127, 0));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_encoding<U, St>(color: Rgb<St, U>) -> Self
     where
         St: RgbStandard<Space = S>,
@@ -405,6 +457,19 @@ impl<S> Rgba<S, u8> {
 
 impl<S: RgbStandard, T, A> Alpha<Rgb<S, T>, A> {
     /// Convert the color to linear RGB with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgba, LinSrgba};
+    ///
+    /// let linear: LinSrgba<f32> = Srgba::new(96u8, 127, 0, 38).into_linear();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_linear<U, B>(self) -> Alpha<Rgb<Linear<S::Space>, U>, B>
     where
         S::TransferFn: IntoLinear<U, T>,
@@ -417,6 +482,19 @@ impl<S: RgbStandard, T, A> Alpha<Rgb<S, T>, A> {
     }
 
     /// Convert linear RGB to non-linear RGB with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgba, LinSrgba};
+    ///
+    /// let encoded = Srgba::<u8>::from_linear(LinSrgba::new(0.95f32, 0.90, 0.30, 0.75));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_linear<U, B>(color: Alpha<Rgb<Linear<S::Space>, U>, B>) -> Self
     where
         S::TransferFn: FromLinear<U, T>,
@@ -431,6 +509,19 @@ impl<S: RgbStandard, T, A> Alpha<Rgb<S, T>, A> {
 
 impl<S: RgbSpace, T, A> Alpha<Rgb<Linear<S>, T>, A> {
     /// Convert a linear color to a different encoding with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgba, LinSrgba};
+    ///
+    /// let encoded: Srgba<u8> = LinSrgba::new(0.95f32, 0.90, 0.30, 0.75).into_encoding();
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn into_encoding<U, B, St>(self) -> Alpha<Rgb<St, U>, B>
     where
         St: RgbStandard<Space = S>,
@@ -441,6 +532,19 @@ impl<S: RgbSpace, T, A> Alpha<Rgb<Linear<S>, T>, A> {
     }
 
     /// Convert RGB from a different encoding to linear with transparency.
+    ///
+    /// Some transfer functions allow the component type to be converted at the
+    /// same time. This is usually offered with increased performance, compared
+    /// to using [`into_format`][Rgb::into_format].
+    ///
+    /// ```
+    /// use palette::{Srgba, LinSrgba};
+    ///
+    /// let linear = LinSrgba::<f32>::from_encoding(Srgba::new(96u8, 127, 0, 38));
+    /// ```
+    ///
+    /// See the transfer function types in the [`encoding`](crate::encoding)
+    /// module for details and performance characteristics.
     pub fn from_encoding<U, B, St>(color: Alpha<Rgb<St, U>, B>) -> Self
     where
         St: RgbStandard<Space = S>,
