@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Srgb","The sRGB color space."]]});
+initSidebarItems({"struct":[["Srgb","The sRGB standard, color space, and transfer function."]]});
