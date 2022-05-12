@@ -28,24 +28,33 @@ use crate::{
     Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
 };
 
+// Using recalculated matrix values from
+// https://github.com/LeaVerou/color.js/blob/master/src/spaces/oklab.js
+//
+// see https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
+// and the following https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-945714988
+
+/// XYZ to LSM transformation matrix
 #[rustfmt::skip]
 fn m1<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(0.8189330101), T::from_f64(0.3618667424), T::from_f64(-0.1288597137),
-        T::from_f64(0.0329845436), T::from_f64(0.9293118715), T::from_f64(0.0361456387),
-        T::from_f64(0.0482003018), T::from_f64(0.2643662691), T::from_f64(0.6338517070),
+        T::from_f64(0.8190224432164319), T::from_f64(0.3619062562801221), T::from_f64(-0.12887378261216414),
+        T::from_f64(0.0329836671980271), T::from_f64(0.9292868468965546), T::from_f64(0.03614466816999844),
+        T::from_f64(0.048177199566046255), T::from_f64(0.26423952494422764), T::from_f64(0.6335478258136937),
     ]
 }
 
+/// LMS to XYZ transformation matrix
 #[rustfmt::skip]
 pub(crate) fn m1_inv<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(1.2270138511), T::from_f64(-0.5577999807), T::from_f64(0.2812561490),
-        T::from_f64(-0.0405801784), T::from_f64(1.1122568696), T::from_f64(-0.0716766787),
-        T::from_f64(-0.0763812845), T::from_f64(-0.4214819784), T::from_f64(1.5861632204),
+        T::from_f64(1.2268798733741557), T::from_f64(-0.5578149965554813), T::from_f64(0.28139105017721583),
+        T::from_f64(-0.04057576262431372), T::from_f64(1.1122868293970594), T::from_f64(-0.07171106666151701),
+        T::from_f64(-0.07637294974672142), T::from_f64(-0.4214933239627914), T::from_f64(1.5869240244272418),
     ]
 }
 
+/// LMS to Oklab transformation matrix
 #[rustfmt::skip]
 fn m2<T: Real>() -> Mat3<T> {
     [
@@ -55,12 +64,13 @@ fn m2<T: Real>() -> Mat3<T> {
     ]
 }
 
+/// Oklab to LMS transformation matrix
 #[rustfmt::skip]
 pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(0.9999999985), T::from_f64(0.3963377922), T::from_f64(0.2158037581),
-        T::from_f64(1.0000000089), T::from_f64(-0.1055613423), T::from_f64(-0.0638541748),
-        T::from_f64(1.0000000547), T::from_f64(-0.0894841821), T::from_f64(-1.2914855379),
+        T::from_f64(0.99999999845051981432), T::from_f64(0.39633779217376785678), T::from_f64(0.21580375806075880339),
+        T::from_f64(1.0000000088817607767), T::from_f64(-0.1055613423236563494), T::from_f64(-0.063854174771705903402),
+        T::from_f64(1.0000000546724109177), T::from_f64(-0.089484182094965759684), T::from_f64(-1.2914855378640917399),
     ]
 }
 
@@ -125,6 +135,7 @@ impl<T> Oklab<T> {
     }
 }
 
+// FIXME:https://colorjs.io/docs/spaces.html#oklab uses different values to the documentation above and these min- and max- values
 impl<T> Oklab<T>
 where
     T: Real,
@@ -429,27 +440,57 @@ unsafe impl<T> bytemuck::Pod for Oklab<T> where T: bytemuck::Pod {}
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{FromColor, LinSrgb};
+    use crate::rgb::Rgb;
+    use crate::{FromColor, LinSrgb, Srgb};
+    use std::str::FromStr;
+
+    #[test]
+    fn blue_srgb() {
+        // use f64 to be comparable to javascript
+        let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap().into_format();
+        let lin_rgb = LinSrgb::from_color_unclamped(rgb);
+        let oklab = Oklab::from_color_unclamped(lin_rgb);
+
+        println!(
+            "RGB: {rgb:?}\n\
+        LinRgb: {lin_rgb:?}\n\
+        Oklab: {oklab:?}"
+        );
+        // values from Ok Color Picker, which seems to use  Björn Ottosson's original
+        // algorithm, but from the direct srgb2oklab conversion
+        // (not via the XYZ color space)
+        assert!(abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-3));
+        assert!(abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-3));
+        assert!(abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-3));
+    }
 
     #[test]
     fn red() {
         let a = Oklab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-        let b = Oklab::new(0.627986, 0.224840, 0.125798);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        let b = Oklab::new(0.6279886758522074, 0.22487499084122475, 0.12585297511892374);
+        assert_relative_eq!(a, b, epsilon = 1e-12);
     }
 
     #[test]
     fn green() {
         let a = Oklab::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-        let b = Oklab::new(0.866432, -0.233916, 0.179417);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        let b = Oklab::new(
+            0.8664329386540478,
+            -0.23388577290357765,
+            0.17949709748981812,
+        );
+        assert_relative_eq!(a, b, epsilon = 1e-12);
     }
 
     #[test]
     fn blue() {
         let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-        let b = Oklab::new(0.451977, -0.032429, -0.311611);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        let b = Oklab::new(
+            0.45197756295615854,
+            -0.0324543880170432,
+            -0.3115032293331476,
+        );
+        assert_relative_eq!(a, b, epsilon = 1e-12);
     }
 
     #[test]

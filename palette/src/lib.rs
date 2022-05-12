@@ -201,6 +201,7 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 #![doc(html_root_url = "https://docs.rs/palette/0.6.0/")]
 #![warn(missing_docs)]
+#![allow(non_snake_case)] //FIXME: remove
 
 #[cfg(any(feature = "std", test))]
 extern crate core;
@@ -238,6 +239,8 @@ pub use lch::{Lch, Lcha};
 pub use lchuv::{Lchuv, Lchuva};
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use luv::{Luv, Luva};
+pub use okhsl::{Okhsl, Okhsla};
+pub use okhsv::{Okhsv, Okhsva};
 pub use oklab::{Oklab, Oklaba};
 pub use oklch::{Oklch, Oklcha};
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
@@ -439,6 +442,8 @@ pub mod luma;
 mod luv;
 mod luv_bounds;
 pub mod num;
+mod okhsl;
+mod okhsv;
 mod oklab;
 mod oklch;
 mod relative_contrast;
