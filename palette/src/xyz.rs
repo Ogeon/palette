@@ -30,7 +30,7 @@ use crate::{
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
-    MixAssign, Oklab, Oklch, RelativeContrast, Yxy,
+    MixAssign, Okhsl, Okhsv, Okhwb, Oklab, Oklch, RelativeContrast, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -52,7 +52,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Oklch, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Oklch, Okhsl, Okhsv, Okhwb, Luma)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32> {
@@ -340,6 +340,38 @@ where
     }
 }
 
+impl<T> FromColorUnclamped<Okhsv<T>> for Xyz<D65, T>
+where
+    Okhsv<T>: IntoColorUnclamped<Oklab<T>>,
+    Self: FromColorUnclamped<Oklab<T>>,
+{
+    fn from_color_unclamped(color: Okhsv<T>) -> Self {
+        let oklab: Oklab<T> = color.into_color_unclamped();
+        Self::from_color_unclamped(oklab)
+    }
+}
+
+impl<T> FromColorUnclamped<Okhsl<T>> for Xyz<D65, T>
+where
+    Okhsl<T>: IntoColorUnclamped<Oklab<T>>,
+    Self: FromColorUnclamped<Oklab<T>>,
+{
+    fn from_color_unclamped(color: Okhsl<T>) -> Self {
+        let oklab: Oklab<T> = color.into_color_unclamped();
+        Self::from_color_unclamped(oklab)
+    }
+}
+
+impl<T> FromColorUnclamped<Okhwb<T>> for Xyz<D65, T>
+where
+    Okhwb<T>: IntoColorUnclamped<Okhsv<T>>,
+    Self: FromColorUnclamped<Okhsv<T>>,
+{
+    fn from_color_unclamped(color: Okhwb<T>) -> Self {
+        let okhsv: Okhsv<T> = color.into_color_unclamped();
+        Self::from_color_unclamped(okhsv)
+    }
+}
 impl<Wp, T, S> FromColorUnclamped<Luma<S, T>> for Xyz<Wp, T>
 where
     Self: Mul<T, Output = Self>,

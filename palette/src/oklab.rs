@@ -2,6 +2,7 @@ use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, Sub
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
+use core::fmt::Debug;
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -11,6 +12,9 @@ use rand::{
     Rng,
 };
 
+use crate::convert::IntoColorUnclamped;
+use crate::num::{FromScalar, Powi, Recip, Sqrt};
+use crate::ok_utils::{toe_inv, ChromaValues, LC, ST};
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
@@ -24,8 +28,8 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mat3,
-    Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, LinSrgb,
+    Mat3, Mix, MixAssign, Okhsl, Okhsv, OklabHue, Oklch, RelativeContrast, Xyz,
 };
 
 // Using recalculated matrix values from
@@ -89,7 +93,7 @@ pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
     palette_internal,
     white_point = "D65",
     component = "T",
-    skip_derives(Oklab, Oklch, Xyz)
+    skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz)
 )]
 #[repr(C)]
 pub struct Oklab<T = f32> {
@@ -135,7 +139,10 @@ impl<T> Oklab<T> {
     }
 }
 
-// FIXME:https://colorjs.io/docs/spaces.html#oklab uses different values to the documentation above and these min- and max- values
+//FIXME:https://colorjs.io/docs/spaces.html#oklab uses different values to the documentation above and these min- and max- values
+// From my understanding Chroma in Oklab is unlimited, as it is only limited, when used in reference to the gamut of a specific  display technology.
+// So here, a and b should be unlimited. Only in Okhsl and Okhsv should chroma be limited, as they reference the sRGB gamut.
+// For a different Okhsl and Okhsv, which references HDR (https://bottosson.github.io/posts/colorpicker/#ideas-for-future-work) they'd need to be different again.
 impl<T> Oklab<T>
 where
     T: Real,
@@ -233,6 +240,169 @@ where
             a: cos_hue * chroma.clone(),
             b: sin_hue * chroma,
         }
+    }
+}
+
+/// # See
+/// See [`okhsl_to_srgb`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
+impl<T> FromColorUnclamped<Okhsl<T>> for Oklab<T>
+where
+    T: Real
+        + Debug
+        + AbsDiffEq
+        + One
+        + Zero
+        + Arithmetics
+        + Sqrt
+        + MinMax
+        + Copy
+        + PartialOrd
+        + HasBoolMask<Mask = bool>
+        + Powi
+        + Cbrt
+        + Trigonometry
+        + FromScalar
+        + RealAngle,
+    T::Scalar: Real
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
+{
+    fn from_color_unclamped(hsl: Okhsl<T>) -> Self {
+        let h = hsl.hue;
+        let s = hsl.saturation;
+        let l = hsl.lightness;
+
+        if l == T::one() {
+            return Oklab::new(T::one(), T::zero(), T::zero());
+        } else if l == T::zero() {
+            return Oklab::new(T::zero(), T::zero(), T::zero());
+        }
+
+        let h_radians = h.into_raw_radians();
+        let a_ = T::cos(h_radians);
+        let b_ = T::sin(h_radians);
+        let L = toe_inv(l);
+
+        let cs = ChromaValues::from_normalized(L, a_, b_);
+
+        // Interpolate the three values for C so that:
+        // At s=0: dC/ds = cs.zero, C = 0
+        // At s=0.8: C = cs.mid
+        // At s=1.0: C = cs.max
+
+        let mid = T::from_f64(0.8);
+        let mid_inv = T::from_f64(1.25);
+
+        let C = if s < mid {
+            let t = mid_inv * s;
+
+            let k_1 = mid * cs.zero;
+            let k_2 = T::one() - k_1 / cs.mid;
+
+            t * k_1 / (T::one() - k_2 * t)
+        } else {
+            let t = (s - mid) / (T::one() - mid);
+
+            let k_0 = cs.mid;
+            let k_1 = (T::one() - mid) * cs.mid * cs.mid * mid_inv * mid_inv / cs.zero;
+            let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+
+            k_0 + t * k_1 / (T::one() - k_2 * t)
+        };
+
+        Oklab::new(L, C * a_, C * b_)
+    }
+}
+
+impl<T> FromColorUnclamped<Okhsv<T>> for Oklab<T>
+where
+    T: Real
+        + AbsDiffEq
+        + PartialOrd
+        + HasBoolMask<Mask = bool>
+        + MinMax
+        + Powi
+        + Arithmetics
+        + Copy
+        + One
+        + Zero
+        + Sqrt
+        + Cbrt
+        + Trigonometry
+        + RealAngle
+        + FromScalar
+        + Debug,
+    T::Scalar: Real
+        + PartialOrd
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
+{
+    fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
+        if hsv.saturation == T::zero() {
+            // totally desaturated color -- the triangle is just the 0-chroma-line
+            if hsv.value == T::zero() {
+                // pure black
+                return Self {
+                    l: T::zero(),
+                    a: T::zero(),
+                    b: T::zero(),
+                };
+            }
+            let l = toe_inv(hsv.value);
+            return Self {
+                l,
+                a: T::zero(),
+                b: T::zero(),
+            };
+        }
+
+        let h_radians = hsv.hue.into_raw_radians();
+        let a_ = T::cos(h_radians);
+        let b_ = T::sin(h_radians);
+
+        let cusp = LC::find_cusp(a_, b_);
+        let cusp: ST<T> = cusp.into();
+        let S_0 = T::from_f64(0.5);
+        let k = T::one() - S_0 / cusp.s;
+
+        // first we compute L and V as if the gamut is a perfect triangle
+
+        // L, C, when v == 1:
+        let L_v = T::one() - hsv.saturation * S_0 / (S_0 + cusp.t - cusp.t * k * hsv.saturation);
+        let C_v = hsv.saturation * cusp.t * S_0 / (S_0 + cusp.t - cusp.t * k * hsv.saturation);
+
+        // then we compensate for both toe and the curved top part of the triangle:
+        let L_vt = toe_inv(L_v);
+        let C_vt = C_v * L_vt / L_v;
+
+        let mut L = hsv.value * L_v;
+        let mut C = hsv.value * C_v;
+        let L_new = toe_inv(L);
+        C = C * L_new / L;
+        // the values may be outside the normal range
+        let rgb_scale: LinSrgb<T> = Oklab::new(L_vt, a_ * C_vt, b_ * C_vt).into_color_unclamped();
+        let scale_L = T::cbrt(
+            T::one()
+                / T::max(
+                    T::max(rgb_scale.red, rgb_scale.green),
+                    T::max(rgb_scale.blue, T::zero()),
+                ),
+        );
+
+        L = L_new * scale_L;
+        C = C * scale_L;
+
+        Oklab::new(L, C * a_, C * b_)
     }
 }
 
@@ -451,11 +621,6 @@ mod test {
         let lin_rgb = LinSrgb::from_color_unclamped(rgb);
         let oklab = Oklab::from_color_unclamped(lin_rgb);
 
-        println!(
-            "RGB: {rgb:?}\n\
-        LinRgb: {lin_rgb:?}\n\
-        Oklab: {oklab:?}"
-        );
         // values from Ok Color Picker, which seems to use  Björn Ottosson's original
         // algorithm, but from the direct srgb2oklab conversion
         // (not via the XYZ color space)
