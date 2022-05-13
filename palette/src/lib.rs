@@ -201,7 +201,6 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 #![doc(html_root_url = "https://docs.rs/palette/0.6.0/")]
 #![warn(missing_docs)]
-#![allow(non_snake_case)] //FIXME: remove
 
 #[cfg(any(feature = "std", test))]
 extern crate core;

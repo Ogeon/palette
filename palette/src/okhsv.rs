@@ -141,14 +141,13 @@ where
         }
 
         // compute hue and chroma as for OkLCh
-        // we will use h as is.
-        let mut C = T::hypot(lab.a, lab.b);
-        let a_ = lab.a / C;
-        let b_ = lab.b / C;
+        // we will use hue as is.
+        let chroma = T::hypot(lab.a, lab.b);
+        let a_ = lab.a / chroma;
+        let b_ = lab.b / chroma;
 
-        let mut L = lab.l;
         // use negative a and be and rotate, to ensure hue is normalized
-        let h = T::from_f64(180.0) + T::atan2(-lab.b, -lab.a).radians_to_degrees();
+        let hue = T::from_f64(180.0) + T::atan2(-lab.b, -lab.a).radians_to_degrees();
 
         // For each hue the sRGB gamut can be drawn on a 2-dimensional space.
         // Let L_r, the lightness in relation to the possible luminance of sRGB, be spread
@@ -159,21 +158,21 @@ where
         // The lower point of the triangle is expanded to the lower side of the square.
         // The left side remains unchanged and the cusp of the triangle moves to the upper right.
         let cusp = LC::find_cusp(a_, b_);
-        let ST_max: ST<T> = cusp.into();
-        let S_0 = T::from_f64(0.5);
-        let k = T::one() - S_0 / ST_max.s;
+        let st_max: ST<T> = cusp.into();
+        let s_0 = T::from_f64(0.5);
+        let k = T::one() - s_0 / st_max.s;
 
         // first we find L_v, C_v, L_vt and C_vt
-        let t = ST_max.t / (C + L * ST_max.t);
-        let L_v = t * L;
-        let C_v = t * C;
+        let t = st_max.t / (chroma + lab.l * st_max.t);
+        let l_v = t * lab.l;
+        let c_v = t * chroma;
 
-        let L_vt = ok_utils::toe_inv(L_v);
-        let C_vt = C_v * L_vt / L_v;
+        let l_vt = ok_utils::toe_inv(l_v);
+        let c_vt = c_v * l_vt / l_v;
 
         // we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
-        let rgb_scale: LinSrgb<T> = Oklab::new(L_vt, a_ * C_vt, b_ * C_vt).into_color_unclamped();
-        let scale_L = T::cbrt(
+        let rgb_scale: LinSrgb<T> = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+        let lightness_scale_factor = T::cbrt(
             T::one()
                 / T::max(
                     T::max(rgb_scale.red, rgb_scale.green),
@@ -181,19 +180,17 @@ where
                 ),
         );
 
-        L = L / scale_L;
-        C = C / scale_L;
+        //chroma = chroma / lightness_scale_factor;
 
         // use L_r instead of L and also scale C by L_r/L
-        let L_r = ok_utils::toe(L);
-        C = C * L_r / L;
-        L = L_r;
+        let l_r = ok_utils::toe(lab.l / lightness_scale_factor);
+        //chroma = chroma * l_r / (lab.l / lightness_scale_factor);
 
         // we can now compute v and s:
-        let v = L / L_v;
-        let s = (S_0 + ST_max.t) * C_v / ((ST_max.t * S_0) + ST_max.t * k * C_v);
+        let v = l_r / l_v;
+        let s = (s_0 + st_max.t) * c_v / ((st_max.t * s_0) + st_max.t * k * c_v);
 
-        Self::new(h, s, v)
+        Self::new(hue, s, v)
     }
 }
 impl<T> FromColorUnclamped<Okhwb<T>> for Okhsv<T>

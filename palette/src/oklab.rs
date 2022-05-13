@@ -70,6 +70,7 @@ fn m2<T: Real>() -> Mat3<T> {
 
 /// Oklab to LMS transformation matrix
 #[rustfmt::skip]
+#[allow(clippy::excessive_precision)]
 pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
     [
         T::from_f64(0.99999999845051981432), T::from_f64(0.39633779217376785678), T::from_f64(0.21580375806075880339),
@@ -286,9 +287,9 @@ where
         let h_radians = h.into_raw_radians();
         let a_ = T::cos(h_radians);
         let b_ = T::sin(h_radians);
-        let L = toe_inv(l);
+        let lightness = toe_inv(l);
 
-        let cs = ChromaValues::from_normalized(L, a_, b_);
+        let cs = ChromaValues::from_normalized(lightness, a_, b_);
 
         // Interpolate the three values for C so that:
         // At s=0: dC/ds = cs.zero, C = 0
@@ -298,7 +299,7 @@ where
         let mid = T::from_f64(0.8);
         let mid_inv = T::from_f64(1.25);
 
-        let C = if s < mid {
+        let chroma = if s < mid {
             let t = mid_inv * s;
 
             let k_1 = mid * cs.zero;
@@ -315,7 +316,7 @@ where
             k_0 + t * k_1 / (T::one() - k_2 * t)
         };
 
-        Oklab::new(L, C * a_, C * b_)
+        Oklab::new(lightness, chroma * a_, chroma * b_)
     }
 }
 
@@ -372,26 +373,26 @@ where
 
         let cusp = LC::find_cusp(a_, b_);
         let cusp: ST<T> = cusp.into();
-        let S_0 = T::from_f64(0.5);
-        let k = T::one() - S_0 / cusp.s;
+        let s_0 = T::from_f64(0.5);
+        let k = T::one() - s_0 / cusp.s;
 
         // first we compute L and V as if the gamut is a perfect triangle
 
         // L, C, when v == 1:
-        let L_v = T::one() - hsv.saturation * S_0 / (S_0 + cusp.t - cusp.t * k * hsv.saturation);
-        let C_v = hsv.saturation * cusp.t * S_0 / (S_0 + cusp.t - cusp.t * k * hsv.saturation);
+        let l_v = T::one() - hsv.saturation * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+        let c_v = hsv.saturation * cusp.t * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
 
         // then we compensate for both toe and the curved top part of the triangle:
-        let L_vt = toe_inv(L_v);
-        let C_vt = C_v * L_vt / L_v;
+        let l_vt = toe_inv(l_v);
+        let c_vt = c_v * l_vt / l_v;
 
-        let mut L = hsv.value * L_v;
-        let mut C = hsv.value * C_v;
-        let L_new = toe_inv(L);
-        C = C * L_new / L;
+        let mut lightness = hsv.value * l_v;
+        let mut chroma = hsv.value * c_v;
+        let lightness_new = toe_inv(lightness);
+        chroma = chroma * lightness_new / lightness;
         // the values may be outside the normal range
-        let rgb_scale: LinSrgb<T> = Oklab::new(L_vt, a_ * C_vt, b_ * C_vt).into_color_unclamped();
-        let scale_L = T::cbrt(
+        let rgb_scale: LinSrgb<T> = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+        let lightness_scale_factor = T::cbrt(
             T::one()
                 / T::max(
                     T::max(rgb_scale.red, rgb_scale.green),
@@ -399,10 +400,10 @@ where
                 ),
         );
 
-        L = L_new * scale_L;
-        C = C * scale_L;
+        lightness = lightness_new * lightness_scale_factor;
+        chroma = chroma * lightness_scale_factor;
 
-        Oklab::new(L, C * a_, C * b_)
+        Oklab::new(lightness, chroma * a_, chroma * b_)
     }
 }
 

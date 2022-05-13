@@ -14,7 +14,8 @@ use crate::{
 pub type Okhwba<T = f32> = Alpha<Okhwb<T>, T>;
 
 /// A Hue/Whiteness/Blackness representation of [`Oklab`].
-///
+/// # See
+/// https://bottosson.github.io/posts/colorpicker/#okhwb
 #[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -37,7 +38,12 @@ pub struct Okhwb<T = f32> {
     #[palette(unsafe_same_layout_as = "T")]
     pub hue: OklabHue<T>,
 
+    /// The amount of white, mixed in the pure hue, ranging from `0.0` to `1.0`.
+    /// `0.0` produces pure, possibly black color. `1.0` a white or grey.
     pub whiteness: T,
+
+    /// The amount of black, mixed in the pure hue, ranging from `0.0` to `1.0`.
+    /// `0.0` produces a pure bright or whitened color. `1.0` a black or grey.
     pub blackness: T,
 }
 

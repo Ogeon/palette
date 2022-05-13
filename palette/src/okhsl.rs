@@ -111,8 +111,7 @@ where
         + FromScalar<Scalar = T::Scalar>,
 {
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
-        let L = lab.l;
-        let l = toe(L);
+        let l = toe(lab.l);
 
         if lab.a == T::zero() && lab.b == T::zero() {
             // `a` describes how green/red the color is, `b` how blue/yellow the color is
@@ -120,32 +119,32 @@ where
             return Self::new(T::zero(), T::zero(), l);
         }
 
-        let C = T::hypot(lab.a, lab.b);
-        let a_ = lab.a / C;
-        let b_ = lab.b / C;
+        let chroma = T::hypot(lab.a, lab.b);
+        let a_ = lab.a / chroma;
+        let b_ = lab.b / chroma;
 
         // use negative a and be and rotate, to ensure hue is normalized
         let h = T::from_f64(180.0) + T::atan2(-lab.b, -lab.a).radians_to_degrees();
 
-        let cs = ChromaValues::from_normalized(L, a_, b_);
+        let cs = ChromaValues::from_normalized(lab.l, a_, b_);
 
         // Inverse of the interpolation in okhsl_to_srgb:
 
         let mid = T::from_f64(0.8);
         let mid_inv = T::from_f64(1.25);
 
-        let s = if C < cs.mid {
+        let s = if chroma < cs.mid {
             let k_1 = mid * cs.zero;
             let k_2 = T::one() - k_1 / cs.mid;
 
-            let t = C / (k_1 + k_2 * C);
+            let t = chroma / (k_1 + k_2 * chroma);
             t * mid
         } else {
             let k_0 = cs.mid;
             let k_1 = (T::one() - mid) * (cs.mid * mid_inv).powi(2) / cs.zero;
             let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
 
-            let t = (C - k_0) / (k_1 + k_2 * (C - k_0));
+            let t = (chroma - k_0) / (k_1 + k_2 * (chroma - k_0));
             mid + (T::one() - mid) * t
         };
 
