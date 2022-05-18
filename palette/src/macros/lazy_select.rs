@@ -1,6 +1,6 @@
 /// Chains calls to `LazySelect::lazy_select` to mimic an if-else chain.
 ///
-/// ```
+/// ```ignore
 /// let result = lazy_select! {
 ///     if predicate1 => result1,
 ///     if predicate2 => result2,

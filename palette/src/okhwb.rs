@@ -1,7 +1,11 @@
-use crate::white_point::D65;
 use core::fmt::Debug;
 
+use approx::AbsDiffEq;
+use approx::RelativeEq;
+use approx::UlpsEq;
+
 use crate::num::{FromScalar, Hypot, Recip, Sqrt};
+use crate::white_point::D65;
 use crate::{
     angle::RealAngle,
     convert::FromColorUnclamped,
@@ -13,7 +17,7 @@ use crate::{
 /// `Alpha`](crate::Alpha#Okhwba).
 pub type Okhwba<T = f32> = Alpha<Okhwb<T>, T>;
 
-/// A Hue/Whiteness/Blackness representation of [`Oklab`].
+/// A Hue/Whiteness/Blackness representation of [`Oklab`] in the `sRGB` color space.
 /// # See
 /// https://bottosson.github.io/posts/colorpicker/#okhwb
 #[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
@@ -83,12 +87,6 @@ impl<T> Okhwb<T> {
     }
 }
 
-/// Converts `lab` to `Okhwb` in the bounds of sRGB.
-///
-/// # See
-/// See [`srgb_to_okhwb`](https://bottosson.github.io/posts/colorpicker/#hwb-2).
-/// This implementation differs from srgb_to_okhwb in that it starts with the `lab`
-/// value and produces hues in degrees, whereas `srgb_to_okhwb` produces degree/360.
 impl<T> FromColorUnclamped<Okhsv<T>> for Okhwb<T>
 where
     T: Real
@@ -114,6 +112,13 @@ where
         + FromScalar<Scalar = T::Scalar>
         + Debug,
 {
+    /// Converts `lab` to `Okhwb` in the bounds of sRGB.
+    ///
+    /// # See
+    /// https://bottosson.github.io/posts/colorpicker/#okhwb
+    /// See [`srgb_to_okhwb`](https://bottosson.github.io/posts/colorpicker/#hwb-2).
+    /// This implementation differs from srgb_to_okhwb in that it starts with the `lab`
+    /// value and produces hues in degrees, whereas `srgb_to_okhwb` produces degree/360.
     fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
         Self::new(
             hsv.hue,
@@ -122,12 +127,14 @@ where
         )
     }
 }
+// wenn weiß ?== 100% || weiß 0% && schwraz 100%-> hue egal
+impl_eq_hue!(Okhwb, OklabHue, [hue, whiteness, blackness]);
 
 #[cfg(test)]
 mod tests {
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
-    use crate::{encoding, LinSrgb, Okhwb, Oklab};
+    use crate::{encoding, LinSrgb, Okhsv, Okhwb, Oklab};
 
     #[test]
     fn test_roundtrip_okhwb_oklab_is_original() {
@@ -179,9 +186,18 @@ mod tests {
                 rgb, color
             );
 
+            let okhsv = Okhsv::from_color_unclamped(color);
+            println!("Okhsv: {:?}", okhsv);
+            let okhwb_from_okhsv = Okhwb::from_color_unclamped(okhsv);
             let okhwb = Okhwb::from_color_unclamped(color);
             println!("Okhwb: {:?}", okhwb);
+            assert_abs_diff_eq!(okhwb, okhwb_from_okhsv);
+            let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
+            assert_abs_diff_eq!(okhsv, okhsv_from_okhwb);
+
             let roundtrip_color = Oklab::from_color_unclamped(okhwb);
+            let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
+            assert_abs_diff_eq!(roundtrip_color, oklab_from_okhsv);
             assert!(
                 relative_eq!(roundtrip_color, color, epsilon = 1e-3),
                 "'{name}' failed. {:?} != {:?}",

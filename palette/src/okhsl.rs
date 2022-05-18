@@ -1,9 +1,12 @@
-use crate::white_point::D65;
-use approx::AbsDiffEq;
 use core::fmt::Debug;
+use std::ops::Neg;
 
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+
+use crate::angle::AngleEq;
 use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
 use crate::ok_utils::{toe, ChromaValues};
+use crate::white_point::D65;
 use crate::{
     angle::RealAngle,
     convert::FromColorUnclamped,
@@ -14,7 +17,7 @@ use crate::{
 /// Okhsl with an alpha component.
 pub type Okhsla<T = f32> = Alpha<Okhsl<T>, T>;
 
-/// A Hue/Saturation/Lightness representation of [`Oklab`].
+/// A Hue/Saturation/Lightness representation of [`Oklab`] in the `sRGB` color space.
 ///
 /// Allows
 /// * changing hue/chroma/saturation, while keeping perceived lightness constant (like HSLuv)
@@ -55,7 +58,12 @@ pub struct Okhsl<T = f32> {
     /// The amount of black and white "paint in the mixture".
     /// While changes do not affect the saturation, they do affect
     /// * `0.0` corresponds to pure black
-    /// * `1.0` corresponds to a maximally bright colour
+    /// * `1.0` corresponds to white
+    ///
+    /// `Okhsv`'s `value` component goes from black to non-black
+    /// -- a maximally bright color.
+    ///
+    /// `Okhsl`'s `lightness` component goes from black to white.
     pub lightness: T,
 }
 
@@ -80,6 +88,154 @@ impl<T> Okhsl<T> {
     }
 }
 
+impl<T> Okhsl<T>
+where
+    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
+    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
+    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+{
+    /// Returns true, if `saturation == 0`
+    pub fn is_grey(&self, epsilon: T::Epsilon) -> bool {
+        debug_assert!(self.saturation >= -epsilon.clone());
+        self.saturation.abs_diff_eq(&T::zero(), epsilon)
+    }
+
+    /// Returns true, if `self.lightness >= 1`,
+    /// i.e. colors outside the sRGB gamut are also considered white
+    pub fn is_white(&self, epsilon: T::Epsilon) -> bool {
+        self.lightness > T::one() || self.lightness.abs_diff_eq(&T::one(), epsilon)
+    }
+
+    /// Returns true, if `self.lightness == 0`.
+    pub fn is_black(&self, epsilon: T::Epsilon) -> bool {
+        debug_assert!(self.lightness >= -epsilon.clone());
+        self.lightness <= epsilon
+    }
+
+    /// Returns true, if `self` and `other` are either both white or both black
+    fn both_black_or_both_white(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        self.is_white(epsilon.clone()) && other.is_white(epsilon.clone())
+            || self.is_black(epsilon.clone()) && other.is_black(epsilon)
+    }
+}
+
+impl<T> PartialEq for Okhsl<T>
+where
+    T: PartialEq,
+    OklabHue<T>: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.hue == other.hue
+            && self.saturation == other.saturation
+            && self.lightness == other.lightness
+    }
+}
+impl<T> Eq for Okhsl<T>
+where
+    T: Eq + AngleEq,
+    OklabHue<T>: Eq,
+{
+}
+impl<T> AbsDiffEq for Okhsl<T>
+where
+    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
+    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
+    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+{
+    type Epsilon = T::Epsilon;
+
+    fn default_epsilon() -> Self::Epsilon {
+        T::default_epsilon()
+    }
+
+    /// Returns true, if `self ` and `other` are visually indiscernible, even
+    /// if they hold are both black or both white and their `hue` and
+    /// `saturation` values differ.
+    ///
+    /// `epsilon` must be large enough to detect white (see [Oklab::is_white])
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        self.both_black_or_both_white(other, epsilon.clone())
+            || self.hue.abs_diff_eq(&other.hue, epsilon.clone())
+                && self
+                    .saturation
+                    .abs_diff_eq(&other.saturation, epsilon.clone())
+                && self.lightness.abs_diff_eq(&other.lightness, epsilon)
+    }
+    fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        !self.both_black_or_both_white(other, epsilon.clone())
+            && (self.hue.abs_diff_ne(&other.hue, epsilon.clone())
+                || self
+                    .saturation
+                    .abs_diff_ne(&other.saturation, epsilon.clone())
+                || self.lightness.abs_diff_ne(&other.lightness, epsilon))
+    }
+}
+impl<T> RelativeEq for Okhsl<T>
+where
+    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + RelativeEq + AbsDiffEq<Epsilon = T>,
+    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
+    OklabHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
+{
+    fn default_max_relative() -> T::Epsilon {
+        T::default_max_relative()
+    }
+
+    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
+        self.both_black_or_both_white(other, epsilon.clone())
+            || self
+                .hue
+                .relative_eq(&other.hue, epsilon.clone(), max_relative.clone())
+                && self.saturation.relative_eq(
+                    &other.saturation,
+                    epsilon.clone(),
+                    max_relative.clone(),
+                )
+                && self
+                    .lightness
+                    .relative_eq(&other.lightness, epsilon, max_relative)
+    }
+    fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
+        !self.both_black_or_both_white(other, epsilon.clone())
+            && (self
+                .hue
+                .relative_ne(&other.hue, epsilon.clone(), max_relative.clone())
+                || self.saturation.relative_ne(
+                    &other.saturation,
+                    epsilon.clone(),
+                    max_relative.clone(),
+                )
+                || self
+                    .lightness
+                    .relative_ne(&other.lightness, epsilon, max_relative))
+    }
+}
+impl<T> UlpsEq for Okhsl<T>
+where
+    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + UlpsEq + AbsDiffEq<Epsilon = T>,
+    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
+    OklabHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
+        self.both_black_or_both_white(other, epsilon.clone())
+            || self.hue.ulps_eq(&other.hue, epsilon.clone(), max_ulps)
+                && self
+                    .saturation
+                    .ulps_eq(&other.saturation, epsilon.clone(), max_ulps)
+                && self.lightness.ulps_eq(&other.lightness, epsilon, max_ulps)
+    }
+    fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
+        !self.both_black_or_both_white(other, epsilon.clone())
+            && (self.hue.ulps_ne(&other.hue, epsilon.clone(), max_ulps)
+                || self
+                    .saturation
+                    .ulps_ne(&other.saturation, epsilon.clone(), max_ulps)
+                || self.lightness.ulps_ne(&other.lightness, epsilon, max_ulps))
+    }
+}
 /// # See
 /// See [`srgb_to_okhsl`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
 impl<T> FromColorUnclamped<Oklab<T>> for Okhsl<T>
@@ -154,10 +310,11 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
     use crate::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
-    use std::str::FromStr;
 
     #[test]
     fn test_roundtrip_okhsl_oklab_is_original() {
@@ -179,10 +336,6 @@ mod tests {
                 Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
             ),
             (
-                "white",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
-            ),
-            (
                 "black",
                 Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
             ),
@@ -198,10 +351,15 @@ mod tests {
                 "blue",
                 Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
             ),
+            (
+                "white",
+                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
+            ),
         ];
+        const EPSILON: f64 = 1e-8;
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
-                crate::Srgb::<f32>::from_color_unclamped(color).into_format();
+                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
             println!(
                 "\n\
             roundtrip of {name} (#{:x} / {:?})\n\
@@ -209,12 +367,14 @@ mod tests {
                 rgb, color
             );
 
+            println!("Color is white: {}", color.is_white(EPSILON));
+
             let okhsl = Okhsl::from_color_unclamped(color);
             println!("Okhsl: {:?}", okhsl);
             let roundtrip_color = Oklab::from_color_unclamped(okhsl);
             assert!(
-                relative_eq!(roundtrip_color, color, epsilon = 1e-4),
-                "'{name}' failed. {:?} != {:?}",
+                relative_eq!(roundtrip_color, color, epsilon = EPSILON),
+                "'{name}' failed.\n{:?}\n!=\n{:?}",
                 roundtrip_color,
                 color
             );
@@ -235,19 +395,19 @@ mod tests {
                 360.0 * 0.7334778365225699,
                 epsilon = 1e-10
             ),
-            "{} != {}",
+            "{}\n!=\n{}",
             okhsl.hue.into_raw_degrees(),
             360.0 * 0.7334778365225699
         );
         assert!(
-            abs_diff_eq!(okhsl.saturation, 0.9999999897262261, epsilon = 1e-10),
-            "{} != {}",
+            abs_diff_eq!(okhsl.saturation, 0.9999999897262261, epsilon = 1e-8),
+            "{}\n!=\n{}",
             okhsl.saturation,
             0.9999999897262261
         );
         assert!(
             abs_diff_eq!(okhsl.lightness, 0.366565335813274, epsilon = 1e-10),
-            "{} != {}",
+            "{}\n!=\n{}",
             okhsl.lightness,
             0.366565335813274
         );
@@ -258,12 +418,6 @@ mod tests {
         let red_hex = "#834941";
         let rgb: Srgb<f64> = Srgb::from_str(red_hex).unwrap().into_format();
         let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
-        // FIXME: test data from Ok Color picker, that's hex to lin-rgb slightly differs.
-        let lin_rgb = LinSrgb::new(
-            0.22696587351009836,
-            0.06662593864377289,
-            0.052860647023180246,
-        );
         let oklab = Oklab::from_color_unclamped(lin_rgb);
         println!(
             "RGB: {rgb:?}\n\
@@ -273,15 +427,14 @@ mod tests {
         let okhsl = Okhsl::from_color_unclamped(oklab);
 
         // test data from Ok Color picker
-        // FIXME: results strangely are not very similar. Is there a way to reduce the epsilons?
         assert_relative_eq!(
             okhsl.hue.into_raw_degrees(),
             360.0 * 0.07992730371382328,
-            epsilon = 1e-3,
-            max_relative = 1e-3
+            epsilon = 1e-10,
+            max_relative = 1e-13
         );
-        assert_relative_eq!(okhsl.saturation, 0.4629217183454986, epsilon = 1e-4);
-        assert_relative_eq!(okhsl.lightness, 0.3900998146147427, epsilon = 1e-4);
+        assert_relative_eq!(okhsl.saturation, 0.4629217183454986, epsilon = 1e-10);
+        assert_relative_eq!(okhsl.lightness, 0.3900998146147427, epsilon = 1e-10);
     }
 
     #[test]
