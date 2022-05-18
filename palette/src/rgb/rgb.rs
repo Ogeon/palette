@@ -6,6 +6,7 @@ use core::{
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
     str::FromStr,
 };
+use std::fmt::Debug;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
@@ -17,6 +18,9 @@ use rand::{
     Rng,
 };
 
+use crate::num::Powi;
+use crate::oklab::oklab_to_linear_srgb;
+use crate::white_point::D65;
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
@@ -36,7 +40,7 @@ use crate::{
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint},
     Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
-    Mix, MixAssign, RelativeContrast, RgbHue, Xyz, Yxy,
+    Mix, MixAssign, Oklab, RelativeContrast, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;
@@ -62,7 +66,7 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
     palette_internal,
     rgb_standard = "S",
     component = "T",
-    skip_derives(Xyz, Hsv, Hsl, Luma, Rgb)
+    skip_derives(Xyz, Hsv, Hsl, Luma, Rgb, Oklab)
 )]
 #[repr(C)]
 pub struct Rgb<S = Srgb, T = f32> {
@@ -336,7 +340,7 @@ where
     S: RgbStandard,
 {
     #[inline]
-    fn reinterpret_as<St>(self) -> Rgb<St, T>
+    pub(crate) fn reinterpret_as<St>(self) -> Rgb<St, T>
     where
         S::Space: RgbSpace<WhitePoint = <St::Space as RgbSpace>::WhitePoint>,
         St: RgbStandard,
@@ -733,6 +737,36 @@ where
                 blue: luma.luma,
                 standard: PhantomData,
             })
+        }
+    }
+}
+
+impl<S, T> FromColorUnclamped<Oklab<T>> for Rgb<S, T>
+where
+    T: Real + Powi + Arithmetics + FromScalar + Copy + Debug,
+    T::Scalar: Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + FromScalar<Scalar = T::Scalar>
+        + Real
+        + Zero
+        + One
+        + Clone,
+    S: RgbStandard + 'static,
+    S::TransferFn: FromLinear<T, T>,
+    S::Space: RgbSpace<WhitePoint = D65>,
+    <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
+    Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
+{
+    fn from_color_unclamped(oklab: Oklab<T>) -> Self {
+        if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
+            // Use direct sRGB to Oklab conversion
+            // fixme: why does the direct conversion produce relevant differences
+            // to the conversion via XYZ?
+            oklab_to_linear_srgb(oklab).into_color_unclamped()
+        } else {
+            // Convert via XYZ
+            Xyz::from_color_unclamped(oklab).into_color_unclamped()
         }
     }
 }

@@ -1,3 +1,4 @@
+use crate::angle::RealAngle;
 use crate::convert::IntoColorUnclamped;
 use crate::num::{
     Arithmetics, Cbrt, FromScalar, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
@@ -19,6 +20,7 @@ fn find_gamut_intersection<T>(a: T, b: T, l1: T, c1: T, l0: T, cusp: Option<LC<T
 where
     T: Real
         + Debug
+        + RealAngle
         + AbsDiffEq
         + One
         + Zero
@@ -149,6 +151,7 @@ impl<T> ChromaValues<T>
 where
     T: Real
         + Debug
+        + RealAngle
         + AbsDiffEq
         + One
         + Zero
@@ -246,6 +249,7 @@ impl<T> LC<T>
 where
     T: Real
         + Debug
+        + RealAngle
         + AbsDiffEq
         + PartialOrd
         + HasBoolMask<Mask = bool>
@@ -273,10 +277,15 @@ where
     ///
     /// Normalized means, that `a² + b² == 1`
     pub fn find_cusp(a: T, b: T) -> Self {
+        //println!("find cusp {a:?}, {b:?}");
         assert_normalized_hue(a, b);
         // First, find the maximum saturation (saturation S = C/L)
         let max_saturation = Self::max_saturation(a, b);
-
+        //println!(
+        //    "max saturation of hue {:?}: {:?}",
+        //    T::from_f64(180.0) + T::atan2(-b, -a).radians_to_degrees(),
+        //    max_saturation
+        //);
         // Convert to linear sRGB to find the first point where at least one of r,g or b >= 1:
         let rgb_at_max: LinSrgb<T> =
             Oklab::new(T::one(), max_saturation * a, max_saturation * b).into_color_unclamped();
@@ -304,6 +313,7 @@ where
         // -- the color space modelling human perception.
         let (k0, k1, k2, k3, k4, wl, wm, ws) =
             if T::from_f64(-1.88170328) * a - T::from_f64(0.80936493) * b > T::one() {
+                //println!("red component at zero first");
                 // red component
                 (
                     T::from_f64(1.19086277),
@@ -316,6 +326,7 @@ where
                     T::from_f64(0.2309699292),
                 )
             } else if T::from_f64(1.81444104) * a - T::from_f64(1.19445276) * b > T::one() {
+                //println!("green component at zero first");
                 // green component
                 (
                     T::from_f64(0.73956515),
@@ -328,6 +339,7 @@ where
                     T::from_f64(-0.3413193965),
                 )
             } else {
+                //println!("blue component at zero first");
                 // blue component
                 (
                     T::from_f64(1.35733652),
@@ -341,9 +353,10 @@ where
                 )
             };
 
+        //println!("k0: {k0:?}, k1: {k1:?}, k2: {k2:?}, k3: {k3:?}, k4: {k4:?}");
         // Approximate max saturation using a polynomial
         let mut approx_max_saturation = k0 + k1 * a + k2 * b + k3 * a.powi(2) + k4 * a * b;
-
+        //println!("Initial approx_max_saturation {approx_max_saturation:?}");
         // Get closer with Halley's method
         let k_l = T::from_f64(0.3963377774) * a + T::from_f64(0.2158037573) * b;
         let k_m = T::from_f64(-0.1055613458) * a - T::from_f64(0.0638541728) * b;
@@ -383,6 +396,7 @@ where
 
             approx_max_saturation =
                 approx_max_saturation - f * f1 / (f1.powi(2) - T::from_f64(0.5) * f * f2);
+            //println!("Iteration {_i}, approx_max_saturation {approx_max_saturation:?}");
         }
         approx_max_saturation
     }
@@ -499,7 +513,7 @@ mod tests {
     use super::*;
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
-    use crate::{encoding, Oklab, Srgb};
+    use crate::{encoding, Oklab, OklabHue, Srgb};
     use std::str::FromStr;
 
     #[test]
@@ -524,5 +538,50 @@ mod tests {
         let grey50oklab = Oklab::from_color_unclamped(grey50srgb);
         println!("grey 50% oklab lightness: {}", grey50oklab.l);
         assert!(relative_eq!(toe(grey50oklab.l), 0.5, epsilon = 1e-3));
+    }
+
+    #[test]
+    fn print_max_srgb_chroma_of_all_hues() {
+        let mut max_chroma: (OklabHue<f64>, LC<f64>) = (
+            OklabHue::new(f64::NAN),
+            LC {
+                lightness: 0.0,
+                chroma: 0.0,
+            },
+        );
+        let mut min_a = f64::INFINITY;
+        let mut min_b = f64::INFINITY;
+        let mut max_a = -f64::INFINITY;
+        let mut max_b = -f64::INFINITY;
+
+        const SAMPLE_RESOLUTION: usize = 3;
+
+        for i in 0..SAMPLE_RESOLUTION * 360 {
+            let hue = i as f64 / (SAMPLE_RESOLUTION as f64);
+            let hue_radians = hue.to_radians();
+            let normalized_hue_vector = (f64::cos(hue_radians), f64::sin(hue_radians));
+            let lc = LC::find_cusp(normalized_hue_vector.0, normalized_hue_vector.1);
+            let a = lc.chroma * normalized_hue_vector.0;
+            let b = lc.chroma * normalized_hue_vector.1;
+            if lc.chroma > max_chroma.1.chroma {
+                max_chroma = (OklabHue::new(hue), lc);
+            }
+            max_a = f64::max(max_a, a);
+            min_a = f64::min(min_a, a);
+            max_b = f64::max(max_b, b);
+            min_b = f64::min(min_b, b);
+        }
+        let max_chroma_hue = max_chroma.0;
+        let max_chroma_hue_radians = max_chroma_hue.into_raw_radians();
+        let max_chroma = max_chroma.1.chroma;
+        println!(
+            "Max chroma {} at hue {:?}° (Oklab a and b {}, {}).",
+            max_chroma,
+            max_chroma_hue,
+            max_chroma * f64::cos(max_chroma_hue_radians),
+            max_chroma * f64::sin(max_chroma_hue_radians)
+        );
+        println!("{} <= a <= {}", min_a, max_a);
+        println!("{} <= b <= {}", min_b, max_b);
     }
 }
