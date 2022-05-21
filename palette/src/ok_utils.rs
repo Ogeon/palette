@@ -304,7 +304,8 @@ where
     /// and `a` and `b` are normalized to a chroma of `1`.
     ///
     /// # Panics
-    /// Panics, if /// `a²+b² != 1`
+    /// Panics, if
+    /// `a²+b² != 1`
     fn max_saturation(a: T, b: T) -> T {
         assert_normalized_hue(a, b);
         // Max saturation will be when one of r, g or b goes below zero.
@@ -367,7 +368,7 @@ where
         // For pure SRGB blue the optimization process oscillates after more than 4 iterations
         // due to rounding errors even with f64.
         // TODO: find out which blue hues are problematic and use a 3 or 4 iterations for them
-        const MAX_ITER: usize = 2;
+        const MAX_ITER: usize = 1;
         for _i in 0..MAX_ITER {
             let l_ = T::one() + approx_max_saturation * k_l;
             let m_ = T::one() + approx_max_saturation * k_m;
