@@ -489,9 +489,9 @@ mod tests {
                 crate::Srgb::<f64>::from_color_unclamped(color).into_format();
             println!(
                 "\n\
-            roundtrip of {name} (#{:x} / {:?})\n\
+            roundtrip of {} (#{:x} / {:?})\n\
             =================================================",
-                rgb, color
+                name, rgb, color
             );
 
             let okhsv = Okhsv::from_color_unclamped(color);
@@ -499,7 +499,8 @@ mod tests {
             let roundtrip_color = Oklab::from_color_unclamped(okhsv);
             assert!(
                 relative_eq!(roundtrip_color, color, epsilon = 1e-10),
-                "'{name}' failed.\n{:?}\n!=\n{:?}",
+                "'{}' failed.\n{:?}\n!=\n{:?}",
+                name,
                 roundtrip_color,
                 color
             );

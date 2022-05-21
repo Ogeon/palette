@@ -362,9 +362,9 @@ mod tests {
                 crate::Srgb::<f64>::from_color_unclamped(color).into_format();
             println!(
                 "\n\
-            roundtrip of {name} (#{:x} / {:?})\n\
+            roundtrip of {} (#{:x} / {:?})\n\
             =================================================",
-                rgb, color
+                name, rgb, color
             );
 
             println!("Color is white: {}", color.is_white(EPSILON));
@@ -374,7 +374,8 @@ mod tests {
             let roundtrip_color = Oklab::from_color_unclamped(okhsl);
             assert!(
                 relative_eq!(roundtrip_color, color, epsilon = EPSILON),
-                "'{name}' failed.\n{:?}\n!=\n{:?}",
+                "'{}' failed.\n{:?}\n!=\n{:?}",
+                name,
                 roundtrip_color,
                 color
             );
@@ -420,9 +421,10 @@ mod tests {
         let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
         let oklab = Oklab::from_color_unclamped(lin_rgb);
         println!(
-            "RGB: {rgb:?}\n\
-        LinRgb: {lin_rgb:?}\n\
-        Oklab: {oklab:?}"
+            "RGB: {:?}\n\
+            LinRgb: {:?}\n\
+            Oklab: {:?}",
+            rgb, lin_rgb, oklab
         );
         let okhsl = Okhsl::from_color_unclamped(oklab);
 
