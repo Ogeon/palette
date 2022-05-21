@@ -1,5 +1,5 @@
 use core::fmt::Debug;
-use std::ops::Neg;
+use core::ops::Neg;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -310,7 +310,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
@@ -356,7 +356,13 @@ mod tests {
                 Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
             ),
         ];
+
+        // unlike in okhwb we are using f64 here, which actually works.
+        // So we can afford a small tolerance.
+        // For some reason the roundtrip of Okhsl seems to produce a greater
+        // divergence than the round trip of Okhsv (1e-8 vs 1e-10)
         const EPSILON: f64 = 1e-8;
+
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
                 crate::Srgb::<f64>::from_color_unclamped(color).into_format();

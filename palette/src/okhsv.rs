@@ -1,5 +1,5 @@
 use core::fmt::Debug;
-use std::ops::{Mul, Neg, Sub};
+use core::ops::{Mul, Neg, Sub};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
@@ -438,7 +438,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
@@ -484,6 +484,11 @@ mod tests {
                 Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
             ),
         ];
+
+        // unlike in okhwb we are using f64 here, which actually works.
+        // So we can afford a small tolerance
+        const EPSILON: f64 = 1e-10;
+
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
                 crate::Srgb::<f64>::from_color_unclamped(color).into_format();
@@ -498,7 +503,7 @@ mod tests {
             println!("Okhsv: {:?}", okhsv);
             let roundtrip_color = Oklab::from_color_unclamped(okhsv);
             assert!(
-                relative_eq!(roundtrip_color, color, epsilon = 1e-10),
+                relative_eq!(roundtrip_color, color, epsilon = EPSILON),
                 "'{}' failed.\n{:?}\n!=\n{:?}",
                 name,
                 roundtrip_color,
@@ -507,21 +512,43 @@ mod tests {
         }
     }
 
+    /// Compares results to results for a run of
+    /// https://github.com/bottosson/bottosson.github.io/blob/3d3f17644d7f346e1ce1ca08eb8b01782eea97af/misc/ok_color.h
+    /// Not to the ideal values, which should be
+    /// hue: as is
+    /// saturation: 1.0
+    /// value: 1.0
     #[test]
     fn blue() {
         let color = Oklab::<f64>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
         let okhsv = Okhsv::from_color_unclamped(color);
         println!("Okhsv f64: {:?}\n", okhsv);
-        assert_abs_diff_eq!(okhsv.value, 1.0, epsilon = 1e-5);
-        assert_abs_diff_eq!(okhsv.saturation, 1.0, epsilon = 1e-5);
-        assert_abs_diff_eq!(okhsv.hue, OklabHue::new(264.05), epsilon = 1.0);
+        // HSV values of the reference implementation
+        // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
+        // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
+        // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+        assert_abs_diff_eq!(
+            okhsv.hue,
+            OklabHue::new(264.0520206380550121),
+            epsilon = 1e-12
+        );
+        assert_abs_diff_eq!(okhsv.saturation, 0.9999910912349018, epsilon = 1e-12);
+        assert_abs_diff_eq!(okhsv.value, 0.9999999646150918, epsilon = 1e-12);
 
         let color = Oklab::<f32>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
         let okhsv = Okhsv::from_color_unclamped(color);
         println!("Okhsv f32: {:?}", okhsv);
-        assert_abs_diff_eq!(okhsv.value, 1.0, epsilon = 1e-1);
-        assert_abs_diff_eq!(okhsv.saturation, 1.0, epsilon = 1e-1);
-        assert_abs_diff_eq!(okhsv.hue, OklabHue::new(264.05), epsilon = 1.0);
+        // HSV values of the reference implementation (printed with more double digits despite using float)
+        // 1 iteration : 264.0520324707031250, 0.9239708185195923, 1.0000002384185791
+        // 2 iterations: 264.0520324707031250, -1.0219360589981079, 0.9999997615814209
+        // 3 iterations: 264.0520324707031250, 0.1297522187232971, 0.9999999403953552
+        assert_abs_diff_eq!(
+            okhsv.hue,
+            OklabHue::new(264.0520324707031250),
+            epsilon = 1e-6
+        );
+        assert_abs_diff_eq!(okhsv.saturation, 0.9239708185195923, epsilon = 1e-6);
+        assert_abs_diff_eq!(okhsv.value, 1.0000002384185791, epsilon = 1e-6);
     }
 
     #[test]

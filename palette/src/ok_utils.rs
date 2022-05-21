@@ -515,7 +515,7 @@ mod tests {
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
     use crate::{encoding, Oklab, OklabHue, Srgb};
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     #[test]
     fn test_roundtrip_toe_is_original() {

@@ -1,12 +1,12 @@
 use core::{
     any::TypeId,
     fmt,
+    fmt::Debug,
     marker::PhantomData,
     num::ParseIntError,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
     str::FromStr,
 };
-use std::fmt::Debug;
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
@@ -1401,9 +1401,10 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Rgb<S, T> where T: bytemuck::Pod {}
 mod test {
     use core::str::FromStr;
 
-    use super::{Rgb, Rgba};
     use crate::encoding::Srgb;
     use crate::rgb::channels;
+
+    use super::{Rgb, Rgba};
 
     #[test]
     fn ranges() {

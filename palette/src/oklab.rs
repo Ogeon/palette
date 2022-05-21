@@ -2,6 +2,7 @@ use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, Sub
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
+use core::any::TypeId;
 use core::fmt::Debug;
 #[cfg(feature = "random")]
 use rand::{
@@ -11,7 +12,6 @@ use rand::{
     },
     Rng,
 };
-use std::any::TypeId;
 
 use crate::convert::IntoColorUnclamped;
 use crate::encoding::{IntoLinear, Srgb};
@@ -837,7 +837,7 @@ mod test {
     use super::*;
     use crate::rgb::Rgb;
     use crate::{FromColor, LinSrgb, Srgb};
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     #[test]
     fn blue_srgb() {

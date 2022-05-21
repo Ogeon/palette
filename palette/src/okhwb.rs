@@ -176,6 +176,15 @@ mod tests {
                 Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
             ),
         ];
+
+        // unlike in okhsv and okhsl we are using f32 here, which is
+        // broken already in the reference implementation.
+        // We need a huge tolerance. Even this tolerace works only because
+        // `crate::ok_utils::max_saturation::MAX_ITER == 1` accidentally hides the
+        // real error. If raised the error becomes much larger.
+        //FIXME: Fix the error and use a small tolerance
+        const EPSILON: f32 = 1e-1;
+
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
                 crate::Srgb::<f32>::from_color_unclamped(color).into_format();
@@ -199,12 +208,7 @@ mod tests {
             let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
             assert_abs_diff_eq!(roundtrip_color, oklab_from_okhsv);
             assert!(
-                //FIXME: use epsilon = 1e-3 or less.
-                // using epsilon = 1e-1 because of an error in the reference implementation
-                // for f32 with blue hues. An error tolerance of 1e-1 works only because
-                // `crate::ok_utils::max_saturation::MAX_ITER == 1` accidentally hides the
-                // real error. If raised the error becomes much larger.
-                relative_eq!(roundtrip_color, color, epsilon = 1e-1),
+                relative_eq!(roundtrip_color, color, epsilon = EPSILON),
                 "'{}' failed. {:?} != {:?}",
                 name,
                 roundtrip_color,
