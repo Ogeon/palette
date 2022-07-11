@@ -21,18 +21,20 @@ readme = "README.md"
 keywords = ["color", "conversion", "linear", "pixel", "rgb"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
+resolver = "2"
 categories = ["graphics", "multimedia::images", "no-std"]
 build = "build/main.rs"
 
 [features]
-default = ["named_from_str", "named_gradients", "std"]
+default = ["named_from_str", "named_gradients", "std", "approx"]
 named_from_str = ["named", "phf"]
 named = []
 named_gradients = ["std"]
 random = ["rand"]
 serializing = ["serde", "std"]
 #ignore in feature test
-std = ["approx/std"]
+find-crate = ["palette_derive/find-crate"]
+std = ["approx?/std"]
 
 [lib]
 bench = false
@@ -40,7 +42,7 @@ bench = false
 [dependencies]
 palette_derive = { version = "0.6.0", path = "../palette_derive" }
 fast-srgb8 = "1.0.0"
-approx = { version = "0.5", default-features = false }
+approx = { version = "0.5", default-features = false, optional = true }
 libm = { version = "0.2.1", default-features = false, optional = true }
 
 [dependencies.phf]

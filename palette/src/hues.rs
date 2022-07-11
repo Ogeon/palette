@@ -1,8 +1,12 @@
+#[cfg(any(feature = "approx", feature = "random"))]
+use core::ops::Mul;
+
 use core::{
     cmp::PartialEq,
-    ops::{Add, AddAssign, Mul, Sub, SubAssign},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 #[cfg(feature = "random")]
@@ -14,13 +18,13 @@ use rand::{
     Rng,
 };
 
+#[cfg(feature = "approx")]
+use crate::{angle::HalfRotation, num::Zero};
+
 #[cfg(feature = "random")]
 use crate::angle::FullRotation;
 
-use crate::{
-    angle::{AngleEq, FromAngle, HalfRotation, RealAngle, SignedAngle, UnsignedAngle},
-    num::Zero,
-};
+use crate::angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle};
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -185,6 +189,7 @@ macro_rules! make_hues {
         //
         // The recommendation is use 180 * epsilon as the epsilon and do not compare by
         // ulps. Because of this we loose some precision for values close to 0.0.
+        #[cfg(feature = "approx")]
         impl<T> AbsDiffEq for $name<T>
         where
             T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + AbsDiffEq + Clone,
@@ -206,6 +211,7 @@ macro_rules! make_hues {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<T> RelativeEq for $name<T>
         where
             T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + Clone + RelativeEq,
@@ -235,6 +241,7 @@ macro_rules! make_hues {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<T> UlpsEq for $name<T>
         where
             T: RealAngle + SignedAngle + Zero + AngleEq<Mask = bool> + Sub<Output = T> + Clone + UlpsEq,

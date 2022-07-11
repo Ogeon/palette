@@ -27,7 +27,18 @@ jobs:
           override: true
           target: thumbv6m-none-eabi
           profile: minimal
-      - uses: actions-rs/cargo@v1
+      - name: Minimal check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -v -p palette --no-default-features --features std
+      - name: find-crate check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -v -p palette --no-default-features --features "std find-crate"
+      - name: Default check
+        uses: actions-rs/cargo@v1
         with:
           command: check
           args: -v --workspace --exclude no_std_test

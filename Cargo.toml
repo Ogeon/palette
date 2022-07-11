@@ -4,5 +4,6 @@ members = [
     "palette_derive",
 
     # Test crates
-    "no_std_test"
+    "no_std_test",
 ]
+resolver = "2"

@@ -5,6 +5,7 @@
 
 use core::{cmp::max, marker::PhantomData};
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::{
@@ -460,6 +461,7 @@ impl<T> From<::std::ops::RangeFull> for Range<T> {
     }
 }
 
+#[cfg(feature = "approx")]
 impl<T> AbsDiffEq for Range<T>
 where
     T: AbsDiffEq,
@@ -488,6 +490,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<T> RelativeEq for Range<T>
 where
     T: RelativeEq,
@@ -519,6 +522,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<T> UlpsEq for Range<T>
 where
     T: UlpsEq,

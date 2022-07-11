@@ -5,6 +5,7 @@ use core::{
     },
 };
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
@@ -345,6 +346,7 @@ impl<C: Default, T: Stimulus> Default for Alpha<C, T> {
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> AbsDiffEq for Alpha<C, T>
 where
     C: AbsDiffEq<Epsilon = T::Epsilon>,
@@ -363,6 +365,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> RelativeEq for Alpha<C, T>
 where
     C: RelativeEq<Epsilon = T::Epsilon>,
@@ -385,6 +388,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> UlpsEq for Alpha<C, T>
 where
     C: UlpsEq<Epsilon = T::Epsilon>,

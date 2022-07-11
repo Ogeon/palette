@@ -7,6 +7,7 @@ use core::{
     str::FromStr,
 };
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{

@@ -44,6 +44,7 @@ These features are enabled by default:
 * `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors.
 * `"named_gradients"`- Enables gradient constants, located in `gradient::named`. This requires the standard library.
 * `"std"` - Enables use of the standard library.
+* `"approx"` - Enables approximate comparison using [`approx`].
 
 These features are disabled by default:
 
@@ -52,6 +53,7 @@ These features are disabled by default:
 * `"libm"` - Uses the [`libm`] floating point math library (for when the `std` feature is disabled).
 * `"bytemuck"` - Enables casting between plain data types using [`bytemuck`].
 * `"wide"` - Enables support for using SIMD types from [`wide`].
+* `"find-crate"` - Enables derives to find the `palette` crate when it's renamed in `Cargo.toml`.
 
 ### Using palette in an embedded environment
 
@@ -353,3 +355,4 @@ at your option.
 [`libm`]: https://crates.io/crates/libm
 [`bytemuck`]: https://crates.io/crates/bytemuck
 [`wide`]: https://crates.io/crates/wide
+[`approx`]: https://crates.io/crates/approx

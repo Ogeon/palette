@@ -1,5 +1,6 @@
 use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{

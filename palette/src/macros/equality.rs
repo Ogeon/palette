@@ -15,6 +15,7 @@ macro_rules! impl_eq {
 
         impl<$($ty_param,)* T> Eq for $self_ty<$($ty_param,)* T> where T: Eq {}
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> AbsDiffEq for $self_ty<$($ty_param,)* T>
         where T: AbsDiffEq,
             T::Epsilon: Clone,
@@ -33,6 +34,7 @@ macro_rules! impl_eq {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> RelativeEq for $self_ty<$($ty_param,)* T>
         where T: RelativeEq,
             T::Epsilon: Clone,
@@ -49,6 +51,7 @@ macro_rules! impl_eq {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> UlpsEq for $self_ty<$($ty_param,)* T>
         where T: UlpsEq,
             T::Epsilon: Clone,
@@ -89,6 +92,7 @@ macro_rules! impl_eq_hue {
             $hue_ty<T>: Eq,
         {}
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> AbsDiffEq for $self_ty<$($ty_param,)* T>
         where
             T: AbsDiffEq,
@@ -109,6 +113,7 @@ macro_rules! impl_eq_hue {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> RelativeEq for $self_ty<$($ty_param,)* T>
         where
             T: RelativeEq,
@@ -127,6 +132,7 @@ macro_rules! impl_eq_hue {
             }
         }
 
+        #[cfg(feature = "approx")]
         impl<$($ty_param,)* T> UlpsEq for $self_ty<$($ty_param,)* T>
         where
             T: UlpsEq,

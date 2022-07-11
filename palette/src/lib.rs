@@ -205,6 +205,7 @@
 #[cfg(any(feature = "std", test))]
 extern crate core;
 
+#[cfg(feature = "approx")]
 #[cfg_attr(test, macro_use)]
 extern crate approx;
 
