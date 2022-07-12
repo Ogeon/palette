@@ -6,6 +6,7 @@ use core::{
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
@@ -1017,6 +1018,7 @@ impl<S> From<Lumaa<S, u8>> for u16 {
 
 impl_simd_array_conversion!(Luma<S>, [luma], standard);
 
+#[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Luma<S, T>
 where
     T: AbsDiffEq,
@@ -1032,6 +1034,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<S, T> RelativeEq for Luma<S, T>
 where
     T: RelativeEq,
@@ -1050,6 +1053,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<S, T> UlpsEq for Luma<S, T>
 where
     T: UlpsEq,

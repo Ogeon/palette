@@ -4,7 +4,7 @@ set -e
 features=""
 
 #Features that will always be activated
-required_features="std"
+required_features="std approx"
 
 
 #Find features

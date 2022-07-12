@@ -37,6 +37,7 @@ pub fn color_path(color: &str, internal: bool) -> TokenStream {
     }
 }
 
+#[cfg(feature = "find-crate")]
 fn find_crate_name() -> Ident {
     use find_crate::Error;
 
@@ -48,4 +49,9 @@ fn find_crate_name() -> Ident {
             error
         ),
     }
+}
+
+#[cfg(not(feature = "find-crate"))]
+fn find_crate_name() -> Ident {
+    Ident::new("palette", Span::call_site())
 }
