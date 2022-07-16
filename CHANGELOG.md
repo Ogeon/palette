@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.6.1 - 2022-07-16
+
+* [#290][290]: Update phf to 0.11.0. Closes [#289][289].
+
 ## Version 0.6.0 - 2021-07-12
 
 * [#235][235]: Upgrade phf to 0.9 and enable named_from_str for no_std.
@@ -182,6 +186,7 @@ The first published version.
 [229]: https://github.com/Ogeon/palette/pull/229
 [231]: https://github.com/Ogeon/palette/pull/231
 [235]: https://github.com/Ogeon/palette/pull/235
+[290]: https://github.com/Ogeon/palette/pull/290
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -232,3 +237,4 @@ The first published version.
 [209]: https://github.com/Ogeon/palette/issues/209
 [215]: https://github.com/Ogeon/palette/issues/215
 [222]: https://github.com/Ogeon/palette/issues/222
+[289]: https://github.com/Ogeon/palette/issues/289
