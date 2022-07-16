@@ -16,7 +16,7 @@ A color management and conversion library that focuses on maintaining correctnes
 
 ## Minimum Supported Rust Version (MSRV)
 
-This version of Palette has been automatically tested with Rust version `1.48.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will be considered a breaking change.
+This version of Palette has been automatically tested with Rust version `1.60.0` and the `stable`, `beta`, and `nightly` channels. Future versions of the library may advance the minimum supported version to make use of new language features, but this will normally be considered a breaking change. Exceptions may be made for security patches and similar changes.
 
 ## Getting Started
 
