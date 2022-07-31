@@ -1,10 +1,13 @@
+use core::any::TypeId;
+#[cfg(feature = "approx")]
+use core::borrow::Borrow;
+use core::fmt::Debug;
+#[cfg(feature = "approx")]
+use core::ops::Neg;
 use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
-use core::any::TypeId;
-use core::fmt::Debug;
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -14,11 +17,15 @@ use rand::{
     Rng,
 };
 
+#[cfg(feature = "approx")]
+use crate::angle::{AngleEq, HalfRotation, SignedAngle};
 use crate::convert::IntoColorUnclamped;
 use crate::encoding::{IntoLinear, Srgb};
 use crate::num::{FromScalar, Powi, Recip, Sqrt};
 use crate::ok_utils::{toe_inv, ChromaValues, LC, ST};
 use crate::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
+#[cfg(feature = "approx")]
+use crate::visual::{VisualColor, VisuallyEqual};
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
@@ -604,131 +611,63 @@ impl_color_div!(Oklab<T>, [l, a, b]);
 impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);
 
+impl_eq_hue!(Oklab, OklabHue, [l, a, b]);
+
 #[cfg(feature = "approx")]
-impl<T> Oklab<T>
+impl<T> VisualColor<T> for Oklab<T>
 where
-    T: AbsDiffEq + One + Zero,
-    T::Epsilon: Clone + Real + PartialOrd,
+    T: PartialOrd
+        + HasBoolMask<Mask = bool>
+        + AbsDiffEq<Epsilon = T>
+        + One
+        + Zero
+        + Neg<Output = T>,
+    T::Epsilon: Clone,
+    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
 {
-    /// Returns true, if `lightness == 1`
+    /// Returns true, if `chroma == 0`
+    #[allow(dead_code)]
+    fn is_grey(&self, epsilon: T::Epsilon) -> bool {
+        self.a.abs_diff_eq(&T::zero(), epsilon.clone()) && self.b.abs_diff_eq(&T::zero(), epsilon)
+    }
+
+    /// Returns true, if `lightness >= 1`
     ///
     /// **Note:** `sRGB` to `Oklab` conversion uses `f32` constants.
     /// A tolerance `epsilon >= 1e-8` is required to reliably detect white.
     /// Conversion of `sRGB` via XYZ requires `epsilon >= 1e-5`
-    pub(crate) fn is_white(&self, epsilon: T::Epsilon) -> bool {
-        self.l.abs_diff_eq(&T::one(), epsilon)
+    fn is_white(&self, epsilon: T::Epsilon) -> bool {
+        self.l >= T::one() || self.l.abs_diff_eq(&T::one(), epsilon)
     }
 
     /// Returns true, if `lightness == 0`
-    pub(crate) fn is_black(&self, epsilon: T::Epsilon) -> bool {
+    fn is_black(&self, epsilon: T::Epsilon) -> bool {
         self.l.abs_diff_eq(&T::zero(), epsilon)
     }
-
-    /// Returns true, if `chroma == 0`
-    #[allow(dead_code)]
-    pub(crate) fn is_grey(&self, epsilon: T::Epsilon) -> bool {
-        self.a.abs_diff_eq(&T::zero(), epsilon.clone()) && self.b.abs_diff_eq(&T::zero(), epsilon)
-    }
-
-    fn both_black_or_both_white(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.is_white(epsilon.clone()) && other.is_white(epsilon.clone())
-            || self.is_black(epsilon.clone()) && other.is_black(epsilon)
-    }
-}
-
-impl<T> PartialEq for Oklab<T>
-where
-    T: PartialEq,
-{
-    /// Returns true, f `l`, `a` and `b` of `self` and `other` are identical.
-    /// This is equality in name only, as with computed floating point numbers there
-    /// always is an error, that must be accounted for, using a tolerance.   
-    fn eq(&self, other: &Self) -> bool {
-        self.l == other.l && self.a == other.a && self.b == other.b
-    }
-}
-impl<T> Eq for Oklab<T> where T: Eq {}
-#[cfg(feature = "approx")]
-impl<T> AbsDiffEq for Oklab<T>
-where
-    T: AbsDiffEq + One + Zero,
-    T::Epsilon: Clone + Real + PartialOrd,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    /// Returns true, if `self ` and `other` are visually indiscernible, specially
-    /// if they are both black or both white and their `a` and `b` values differ.
-    ///
-    /// `epsilon` must be large enough to detect white (see [Oklab::is_white])
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.l.abs_diff_eq(&other.l, epsilon.clone())
-                && self.a.abs_diff_eq(&other.a, epsilon.clone())
-                && self.b.abs_diff_eq(&other.b, epsilon)
-    }
-    fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self.l.abs_diff_ne(&other.l, epsilon.clone())
-                || self.a.abs_diff_ne(&other.a, epsilon.clone())
-                || self.b.abs_diff_ne(&other.b, epsilon))
-    }
 }
 #[cfg(feature = "approx")]
-impl<T> RelativeEq for Oklab<T>
+impl<S, O, T> VisuallyEqual<O, S, T> for Oklab<T>
 where
-    T: RelativeEq + One + Zero,
-    T::Epsilon: Clone + Real + PartialOrd,
+    T: PartialOrd
+        + HasBoolMask<Mask = bool>
+        + RealAngle
+        + SignedAngle
+        + Zero
+        + One
+        + AngleEq<Mask = bool>
+        + Sub<Output = T>
+        + AbsDiffEq<Epsilon = T>
+        + Neg<Output = T>
+        + Clone,
+    T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
+    S: Borrow<Self> + Copy,
+    O: Borrow<Self> + Copy,
 {
-    fn default_max_relative() -> T::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self
-                .l
-                .relative_eq(&other.l, epsilon.clone(), max_relative.clone())
-                && self
-                    .a
-                    .relative_eq(&other.a, epsilon.clone(), max_relative.clone())
-                && self.b.relative_eq(&other.b, epsilon, max_relative)
-    }
-    fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self
-                .l
-                .relative_ne(&other.l, epsilon.clone(), max_relative.clone())
-                || self
-                    .a
-                    .relative_ne(&other.a, epsilon.clone(), max_relative.clone())
-                || self.b.relative_ne(&other.b, epsilon, max_relative))
-    }
-}
-#[cfg(feature = "approx")]
-impl<T> UlpsEq for Oklab<T>
-where
-    T: UlpsEq + One + Zero,
-    T::Epsilon: Clone + Real + PartialOrd,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.l.ulps_eq(&other.l, epsilon.clone(), max_ulps)
-                && self.a.ulps_eq(&other.a, epsilon.clone(), max_ulps)
-                && self.b.ulps_eq(&other.b, epsilon, max_ulps)
-    }
-    fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self.l.ulps_ne(&other.l, epsilon.clone(), max_ulps)
-                || self.a.ulps_ne(&other.a, epsilon.clone(), max_ulps)
-                || self.b.ulps_ne(&other.b, epsilon, max_ulps))
+    fn visually_eq(s: S, o: O, epsilon: T::Epsilon) -> bool {
+        VisuallyEqual::both_black_or_both_white(s, o, epsilon.clone())
+            || s.borrow().l.abs_diff_eq(&o.borrow().l, epsilon.clone())
+                && s.borrow().a.abs_diff_eq(&o.borrow().a, epsilon.clone())
+                && s.borrow().b.abs_diff_eq(&o.borrow().b, epsilon)
     }
 }
 
@@ -835,10 +774,12 @@ unsafe impl<T> bytemuck::Pod for Oklab<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use core::str::FromStr;
+
     use crate::rgb::Rgb;
     use crate::{FromColor, LinSrgb, Srgb};
-    use core::str::FromStr;
+
+    use super::*;
 
     #[test]
     fn blue_srgb() {
@@ -859,7 +800,7 @@ mod test {
         let a = Oklab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
         // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
         let b = Oklab::new(0.6279553606145516, 0.22486306106597395, 0.1258462985307351);
-        assert_relative_eq!(a, b, epsilon = 1e-8);
+        assert!(Oklab::visually_eq(a, b, 1e-8));
     }
 
     #[test]
@@ -871,7 +812,7 @@ mod test {
             -0.23388757418790812,
             0.17949847989672985,
         );
-        assert_relative_eq!(a, b, epsilon = 1e-8);
+        assert!(Oklab::visually_eq(a, b, 1e-8));
     }
 
     #[test]
@@ -879,48 +820,48 @@ mod test {
         let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
         // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
         let b = Oklab::new(0.4520137183853429, -0.0324569841687640, -0.3115281476783751);
-        assert_relative_eq!(a, b, epsilon = 1e-8);
+        assert!(Oklab::visually_eq(a, b, 1e-8));
     }
 
     #[test]
     fn black_eq_different_black() {
-        assert_abs_diff_eq!(
+        assert!(Oklab::visually_eq(
             Oklab::new(0.0, 1.0, 0.0),
             Oklab::new(0.0, 0.0, 1.0),
-            epsilon = 1e-8
-        );
+            1e-8
+        ));
     }
 
     #[test]
     fn white_eq_different_white() {
-        assert_abs_diff_eq!(
+        assert!(Oklab::visually_eq(
             Oklab::new(1.0, 1.0, 0.0),
             Oklab::new(1.0, 0.0, 1.0),
-            epsilon = 1e-8
-        );
+            1e-8
+        ));
     }
 
     #[test]
     fn white_ne_black() {
-        assert_abs_diff_ne!(
+        assert!(!Oklab::visually_eq(
             Oklab::new(1.0, 1.0, 0.0),
             Oklab::new(0.0, 0.0, 1.0),
-            epsilon = 1e-8
-        );
-        assert_abs_diff_ne!(
+            1e-8
+        ));
+        assert!(!Oklab::visually_eq(
             Oklab::new(1.0, 1.0, 0.0),
             Oklab::new(0.0, 1.0, 0.0),
-            epsilon = 1e-8
-        );
+            1e-8
+        ));
     }
 
     #[test]
     fn non_bw_neq_different_non_bw() {
-        assert_abs_diff_ne!(
+        assert!(!Oklab::visually_eq(
             Oklab::new(0.3, 1.0, 0.0),
             Oklab::new(0.3, 0.0, 1.0),
-            epsilon = 1e-8
-        );
+            1e-8
+        ));
     }
 
     #[test]

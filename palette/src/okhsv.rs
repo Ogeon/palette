@@ -3,6 +3,8 @@ use crate::angle::{AngleEq, HalfRotation, SignedAngle};
 use crate::convert::IntoColorUnclamped;
 use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
 use crate::ok_utils::{LC, ST};
+#[cfg(feature = "approx")]
+use crate::visual::{VisualColor, VisuallyEqual};
 use crate::white_point::D65;
 use crate::{
     angle::RealAngle,
@@ -12,6 +14,8 @@ use crate::{
 };
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "approx")]
+use core::borrow::Borrow;
 use core::fmt::Debug;
 #[cfg(feature = "approx")]
 use core::ops::{Mul, Neg, Sub};
@@ -26,7 +30,7 @@ pub type Okhsva<T = f32> = Alpha<Okhsv<T>, T>;
 /// * changing lightness/chroma/saturation while keeping perceived Hue constant
 /// (like HSV promises but delivers only partially)  
 /// * finding the strongest color (maximum chroma) at s == 1 (like HSV)  
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -66,9 +70,10 @@ pub struct Okhsv<T = f32> {
     pub value: T,
 }
 
-//impl_eq!(Okhsv, [hue, saturation, value]);
+impl_eq_hue!(Okhsv, OklabHue, [hue, saturation, value]);
+
 #[cfg(feature = "approx")]
-impl<T> Okhsv<T>
+impl<T> VisualColor<T> for Okhsv<T>
 where
     T: PartialOrd
         + HasBoolMask<Mask = bool>
@@ -80,7 +85,7 @@ where
     OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
 {
     /// Returns true, if `saturation == 0`
-    pub fn is_grey(&self, epsilon: T::Epsilon) -> bool {
+    fn is_grey(&self, epsilon: T::Epsilon) -> bool {
         self.saturation.abs_diff_eq(&T::zero(), epsilon)
     }
 
@@ -88,46 +93,20 @@ where
     /// i.e. the color's hue is irrelevant **and** it is at or beyond the
     /// `sRGB` maximum brightness. A color at or beyond maximum brightness isn't
     /// necessarily white. It can also be a bright shining hue.
-    pub fn is_white(&self, epsilon: T::Epsilon) -> bool {
-        self.is_grey(epsilon.clone()) && self.value > T::one()
+    fn is_white(&self, epsilon: T::Epsilon) -> bool {
+        self.is_grey(epsilon.clone()) && self.value >= T::one()
             || self.value.abs_diff_eq(&T::one(), epsilon)
     }
 
     /// Returns true if `value == 0`
-    pub fn is_black(&self, epsilon: T::Epsilon) -> bool {
+    fn is_black(&self, epsilon: T::Epsilon) -> bool {
         debug_assert!(self.value >= -epsilon.clone());
         self.value.abs_diff_eq(&T::zero(), epsilon)
     }
-
-    /// Returns true, if `self` and `other` are either both white or both black
-    fn both_black_or_both_white(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.is_white(epsilon.clone()) && other.is_white(epsilon.clone())
-            || self.is_black(epsilon.clone()) && other.is_black(epsilon)
-    }
-
-    /// Returns true, if `self` and `other` are both fully desaturated
-    fn both_greyscale(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.is_grey(epsilon.clone()) && other.is_grey(epsilon)
-    }
 }
 
-impl<T> PartialEq for Okhsv<T>
-where
-    T: PartialEq,
-    OklabHue<T>: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue && self.saturation == other.saturation && self.value == other.value
-    }
-}
-impl<T> Eq for Okhsv<T>
-where
-    T: Eq,
-    OklabHue<T>: Eq,
-{
-}
 #[cfg(feature = "approx")]
-impl<T> AbsDiffEq for Okhsv<T>
+impl<S, O, T> VisuallyEqual<O, S, T> for Okhsv<T>
 where
     T: PartialOrd
         + HasBoolMask<Mask = bool>
@@ -141,138 +120,20 @@ where
         + Neg<Output = T>
         + Clone,
     T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
-    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+    S: Borrow<Self> + Copy,
+    O: Borrow<Self> + Copy,
 {
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone())
-            || self.hue.abs_diff_eq(&other.hue, epsilon.clone())
-                && self
+    fn visually_eq(s: S, o: O, epsilon: T::Epsilon) -> bool {
+        VisuallyEqual::both_black_or_both_white(s, o, epsilon.clone())
+            || VisuallyEqual::both_greyscale(s, o, epsilon.clone())
+                && s.borrow()
+                    .value
+                    .abs_diff_eq(&o.borrow().value, epsilon.clone())
+            || s.borrow().hue.abs_diff_eq(&o.borrow().hue, epsilon.clone())
+                && s.borrow()
                     .saturation
-                    .abs_diff_eq(&other.saturation, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon)
-    }
-    fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        !(self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone()))
-            && self.hue.abs_diff_ne(&other.hue, epsilon.clone())
-            || self
-                .saturation
-                .abs_diff_ne(&other.saturation, epsilon.clone())
-            || self.value.abs_diff_ne(&other.value, epsilon)
-    }
-}
-#[cfg(feature = "approx")]
-impl<T> RelativeEq for Okhsv<T>
-where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + RealAngle
-        + SignedAngle
-        + Zero
-        + One
-        + AngleEq<Mask = bool>
-        + Sub<Output = T>
-        + RelativeEq<Epsilon = T>
-        + Neg<Output = T>
-        + Clone,
-    T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
-    OklabHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    fn default_max_relative() -> T::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone())
-            || self
-                .hue
-                .relative_eq(&other.hue, epsilon.clone(), max_relative.clone())
-                && self.saturation.relative_eq(
-                    &other.saturation,
-                    epsilon.clone(),
-                    max_relative.clone(),
-                )
-                && self.value.relative_eq(&other.value, epsilon, max_relative)
-    }
-    fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        !(self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone()))
-            && self
-                .hue
-                .relative_ne(&other.hue, epsilon.clone(), max_relative.clone())
-            || self
-                .saturation
-                .relative_ne(&other.saturation, epsilon.clone(), max_relative.clone())
-            || self.value.relative_ne(&other.value, epsilon, max_relative)
-    }
-}
-#[cfg(feature = "approx")]
-impl<T> UlpsEq for Okhsv<T>
-where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + RealAngle
-        + SignedAngle
-        + Zero
-        + One
-        + AngleEq<Mask = bool>
-        + Sub<Output = T>
-        + UlpsEq<Epsilon = T>
-        + Neg<Output = T>
-        + Clone,
-    T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
-    OklabHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone())
-            || self.hue.ulps_eq(&other.hue, epsilon.clone(), max_ulps)
-                && self
-                    .saturation
-                    .ulps_eq(&other.saturation, epsilon.clone(), max_ulps)
-                && self.value.ulps_eq(&other.value, epsilon, max_ulps)
-    }
-    fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        !(self.both_black_or_both_white(other, epsilon.clone())
-            || self.both_greyscale(other, epsilon.clone())
-                && self.value.abs_diff_eq(&other.value, epsilon.clone()))
-            && self.hue.ulps_ne(&other.hue, epsilon.clone(), max_ulps)
-            || self
-                .saturation
-                .ulps_ne(&other.saturation, epsilon.clone(), max_ulps)
-            || self.value.ulps_ne(&other.value, epsilon, max_ulps)
-    }
-}
-
-impl<T> Copy for Okhsv<T> where T: Copy {}
-
-impl<T> Clone for Okhsv<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Okhsv<T> {
-        Okhsv {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            value: self.value.clone(),
-        }
+                    .abs_diff_eq(&o.borrow().saturation, epsilon.clone())
+                && s.borrow().value.abs_diff_eq(&o.borrow().value, epsilon)
     }
 }
 
@@ -446,8 +307,8 @@ mod tests {
 
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
+    use crate::visual::VisuallyEqual;
     use crate::{encoding, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
-
     #[test]
     fn test_roundtrip_okhsv_oklab_is_original() {
         let colors = [
@@ -507,7 +368,7 @@ mod tests {
             println!("Okhsv: {:?}", okhsv);
             let roundtrip_color = Oklab::from_color_unclamped(okhsv);
             assert!(
-                relative_eq!(roundtrip_color, color, epsilon = EPSILON),
+                Oklab::visually_eq(roundtrip_color, color, EPSILON),
                 "'{}' failed.\n{:?}\n!=\n{:?}",
                 name,
                 roundtrip_color,
@@ -598,68 +459,68 @@ mod tests {
 
     #[test]
     fn black_eq_different_black() {
-        assert_abs_diff_eq!(
+        assert!(Okhsv::visually_eq(
             Okhsv::from_color_unclamped(Oklab::new(0.0, 1.0, 0.0)),
             Okhsv::from_color_unclamped(Oklab::new(0.0, 0.0, 1.0)),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
     }
 
     #[test]
     fn white_eq_different_white() {
-        assert_abs_diff_eq!(
+        assert!(Okhsv::visually_eq(
             Okhsv::new(240.0, 0.0, 1.0),
             Okhsv::new(24.0, 0.0, 1.0),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
     }
 
     #[test]
     fn white_ne_grey_or_black() {
-        assert_abs_diff_ne!(
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(0.0, 0.0, 0.0),
             Okhsv::new(0.0, 0.0, 1.0),
-            epsilon = 1e-12
-        );
-        assert_abs_diff_ne!(
+            1e-12
+        ));
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(0.0, 0.0, 0.3),
             Okhsv::new(0.0, 0.0, 1.0),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
     }
 
     #[test]
     fn color_neq_different_color() {
-        assert_abs_diff_ne!(
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(10.0, 0.01, 0.5),
             Okhsv::new(11.0, 0.01, 0.5),
-            epsilon = 1e-12
-        );
-        assert_abs_diff_ne!(
+            1e-12
+        ));
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(10.0, 0.01, 0.5),
             Okhsv::new(10.0, 0.02, 0.5),
-            epsilon = 1e-12
-        );
-        assert_abs_diff_ne!(
+            1e-12
+        ));
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(10.0, 0.01, 0.5),
             Okhsv::new(10.0, 0.01, 0.6),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
     }
 
     #[test]
     fn grey_vs_grey() {
         // greys of different lightness are not equal
-        assert_abs_diff_ne!(
+        assert!(!Okhsv::visually_eq(
             Okhsv::new(0.0, 0.0, 0.3),
             Okhsv::new(0.0, 0.0, 0.4),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
         // greys of same lightness but different hue are equal
-        assert_abs_diff_eq!(
+        assert!(Okhsv::visually_eq(
             Okhsv::new(0.0, 0.0, 0.3),
             Okhsv::new(12.0, 0.0, 0.3),
-            epsilon = 1e-12
-        );
+            1e-12
+        ));
     }
 }

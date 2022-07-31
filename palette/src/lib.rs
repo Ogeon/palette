@@ -456,6 +456,8 @@ pub mod white_point;
 mod xyz;
 mod yxy;
 
+mod visual;
+
 #[doc(hidden)]
 pub mod matrix;
 

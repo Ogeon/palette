@@ -354,12 +354,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
-
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
+    use crate::visual::{VisualColor, VisuallyEqual};
     use crate::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
-
+    use core::str::FromStr;
     #[test]
     fn test_roundtrip_okhsl_oklab_is_original() {
         let colors = [
@@ -423,7 +422,7 @@ mod tests {
             println!("Okhsl: {:?}", okhsl);
             let roundtrip_color = Oklab::from_color_unclamped(okhsl);
             assert!(
-                relative_eq!(roundtrip_color, color, epsilon = EPSILON),
+                Oklab::visually_eq(roundtrip_color, color, EPSILON),
                 "'{}' failed.\n{:?}\n!=\n{:?}",
                 name,
                 roundtrip_color,
