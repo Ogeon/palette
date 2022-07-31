@@ -1,8 +1,4 @@
-use core::fmt::Debug;
-use core::ops::{Mul, Neg, Sub};
-
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
+#[cfg(feature = "approx")]
 use crate::angle::{AngleEq, HalfRotation, SignedAngle};
 use crate::convert::IntoColorUnclamped;
 use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
@@ -14,6 +10,11 @@ use crate::{
     num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
     ok_utils, Alpha, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
 };
+#[cfg(feature = "approx")]
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use core::fmt::Debug;
+#[cfg(feature = "approx")]
+use core::ops::{Mul, Neg, Sub};
 
 /// Okhsv with an alpha component. See the [`Okhsva` implementation in
 /// `Alpha`](crate::Alpha#Okhsva).
@@ -64,7 +65,9 @@ pub struct Okhsv<T = f32> {
     /// `Okhsv`'s `value` component goes from black to non-black -- a maximally bright color..
     pub value: T,
 }
+
 //impl_eq!(Okhsv, [hue, saturation, value]);
+#[cfg(feature = "approx")]
 impl<T> Okhsv<T>
 where
     T: PartialOrd
@@ -123,6 +126,7 @@ where
     OklabHue<T>: Eq,
 {
 }
+#[cfg(feature = "approx")]
 impl<T> AbsDiffEq for Okhsv<T>
 where
     T: PartialOrd
@@ -166,6 +170,7 @@ where
             || self.value.abs_diff_ne(&other.value, epsilon)
     }
 }
+#[cfg(feature = "approx")]
 impl<T> RelativeEq for Okhsv<T>
 where
     T: PartialOrd
@@ -213,6 +218,7 @@ where
             || self.value.relative_ne(&other.value, epsilon, max_relative)
     }
 }
+#[cfg(feature = "approx")]
 impl<T> UlpsEq for Okhsv<T>
 where
     T: PartialOrd
@@ -300,7 +306,6 @@ impl<T> Okhsv<T> {
 impl<T> FromColorUnclamped<Oklab<T>> for Okhsv<T>
 where
     T: Real
-        + AbsDiffEq
         + PartialOrd
         + HasBoolMask<Mask = bool>
         + MinMax
@@ -398,7 +403,6 @@ where
 impl<T> FromColorUnclamped<Okhwb<T>> for Okhsv<T>
 where
     T: Real
-        + AbsDiffEq
         + PartialOrd
         + MinMax
         + Copy

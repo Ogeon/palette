@@ -352,7 +352,6 @@ where
 impl<T> FromColorUnclamped<Okhsl<T>> for Oklab<T>
 where
     T: Real
-        + AbsDiffEq
         + One
         + Zero
         + Arithmetics
@@ -425,7 +424,6 @@ where
 impl<T> FromColorUnclamped<Okhsv<T>> for Oklab<T>
 where
     T: Real
-        + AbsDiffEq
         + PartialOrd
         + HasBoolMask<Mask = bool>
         + MinMax
@@ -438,8 +436,7 @@ where
         + Cbrt
         + Trigonometry
         + RealAngle
-        + FromScalar
-        + Debug,
+        + FromScalar,
     T::Scalar: Real
         + PartialOrd
         + Zero
@@ -607,6 +604,7 @@ impl_color_div!(Oklab<T>, [l, a, b]);
 impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);
 
+#[cfg(feature = "approx")]
 impl<T> Oklab<T>
 where
     T: AbsDiffEq + One + Zero,
@@ -650,6 +648,7 @@ where
     }
 }
 impl<T> Eq for Oklab<T> where T: Eq {}
+#[cfg(feature = "approx")]
 impl<T> AbsDiffEq for Oklab<T>
 where
     T: AbsDiffEq + One + Zero,
@@ -678,6 +677,7 @@ where
                 || self.b.abs_diff_ne(&other.b, epsilon))
     }
 }
+#[cfg(feature = "approx")]
 impl<T> RelativeEq for Oklab<T>
 where
     T: RelativeEq + One + Zero,
@@ -708,6 +708,7 @@ where
                 || self.b.relative_ne(&other.b, epsilon, max_relative))
     }
 }
+#[cfg(feature = "approx")]
 impl<T> UlpsEq for Oklab<T>
 where
     T: UlpsEq + One + Zero,

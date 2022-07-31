@@ -1,8 +1,6 @@
+#[cfg(feature = "approx")]
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::fmt::Debug;
-
-use approx::AbsDiffEq;
-use approx::RelativeEq;
-use approx::UlpsEq;
 
 use crate::num::{FromScalar, Hypot, Recip, Sqrt};
 use crate::white_point::D65;

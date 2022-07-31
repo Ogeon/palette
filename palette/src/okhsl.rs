@@ -1,7 +1,8 @@
-use core::fmt::Debug;
-use core::ops::Neg;
-
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use core::fmt::Debug;
+#[cfg(feature = "approx")]
+use core::ops::Neg;
 
 use crate::angle::AngleEq;
 use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
@@ -128,7 +129,7 @@ impl<T> Okhsl<T> {
         Self::new(hue, saturation, lightness)
     }
 }
-
+#[cfg(feature = "approx")]
 impl<T> Okhsl<T>
 where
     T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
@@ -178,6 +179,7 @@ where
     OklabHue<T>: Eq,
 {
 }
+#[cfg(feature = "approx")]
 impl<T> AbsDiffEq for Okhsl<T>
 where
     T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
@@ -212,6 +214,7 @@ where
                 || self.lightness.abs_diff_ne(&other.lightness, epsilon))
     }
 }
+#[cfg(feature = "approx")]
 impl<T> RelativeEq for Okhsl<T>
 where
     T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + RelativeEq + AbsDiffEq<Epsilon = T>,
@@ -251,6 +254,7 @@ where
                     .relative_ne(&other.lightness, epsilon, max_relative))
     }
 }
+#[cfg(feature = "approx")]
 impl<T> UlpsEq for Okhsl<T>
 where
     T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + UlpsEq + AbsDiffEq<Epsilon = T>,
