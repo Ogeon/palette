@@ -4,6 +4,7 @@ use core::{
     ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
 };
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
@@ -576,6 +577,7 @@ impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 impl_array_casts!(Hwb<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
 
+#[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Hwb<S, T>
 where
     T: Stimulus + PartialOrd + Add<Output = T> + AbsDiffEq + Clone,
@@ -605,6 +607,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<S, T> RelativeEq for Hwb<S, T>
 where
     T: Stimulus + PartialOrd + Add<Output = T> + RelativeEq + Clone,
@@ -637,6 +640,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<S, T> UlpsEq for Hwb<S, T>
 where
     T: Stimulus + PartialOrd + Add<Output = T> + UlpsEq + Clone,

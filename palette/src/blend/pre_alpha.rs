@@ -1,5 +1,6 @@
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+#[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::{
@@ -177,6 +178,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> AbsDiffEq for PreAlpha<C>
 where
     C: AbsDiffEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,
@@ -195,6 +197,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> RelativeEq for PreAlpha<C>
 where
     C: RelativeEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,
@@ -217,6 +220,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 impl<C, T> UlpsEq for PreAlpha<C>
 where
     C: UlpsEq<Epsilon = T::Epsilon> + Premultiply<Scalar = T>,

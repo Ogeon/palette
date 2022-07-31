@@ -2,6 +2,7 @@ on:
   pull_request:
     branches:
       - master
+      - "[0-9]+.[0-9]+"
   push:
     branches:
       - staging
@@ -15,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        toolchain: [1.55.0, stable, beta, nightly]
+        toolchain: [1.60.0, stable, beta, nightly]
     runs-on: ${{ matrix.os }}
     env:
       RUSTFLAGS: -D warnings
@@ -27,7 +28,18 @@ jobs:
           override: true
           target: thumbv6m-none-eabi
           profile: minimal
-      - uses: actions-rs/cargo@v1
+      - name: Minimal check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -v -p palette --no-default-features --features std
+      - name: find-crate check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -v -p palette --no-default-features --features "std find-crate"
+      - name: Default check
+        uses: actions-rs/cargo@v1
         with:
           command: check
           args: -v --workspace --exclude no_std_test
