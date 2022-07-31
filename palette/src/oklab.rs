@@ -252,7 +252,7 @@ where
 
 fn linear_srgb_to_oklab<T>(c: LinSrgb<T>) -> Oklab<T>
 where
-    T: Real + Arithmetics + Cbrt + Copy + Debug,
+    T: Real + Arithmetics + Cbrt + Copy,
 {
     let l = T::from_f64(0.4122214708) * c.red
         + T::from_f64(0.5363325363) * c.green
@@ -276,7 +276,6 @@ where
         T::from_f64(0.0259040371) * l_ + T::from_f64(0.7827717662) * m_
             - T::from_f64(0.8086757660) * s_,
     );
-    //println!("linear srgb {c:?} -> {oklab:?}",);
     oklab
 }
 
@@ -304,7 +303,7 @@ where
 
 impl<S, T> FromColorUnclamped<Rgb<S, T>> for Oklab<T>
 where
-    T: Real + Cbrt + Arithmetics + FromScalar + Copy + Debug,
+    T: Real + Cbrt + Arithmetics + FromScalar + Copy,
     T::Scalar: Recip
         + IsValidDivisor<Mask = bool>
         + Arithmetics
@@ -322,7 +321,7 @@ where
         if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
             // Use direct sRGB to Oklab conversion
             // fixme: why does the direct conversion produce relevant differences
-            // to the conversion via XYZ?
+            //  to the conversion via XYZ?
             linear_srgb_to_oklab(rgb.into_linear().reinterpret_as())
         } else {
             // Convert via XYZ
@@ -352,7 +351,6 @@ where
 impl<T> FromColorUnclamped<Okhsl<T>> for Oklab<T>
 where
     T: Real
-        + Debug
         + AbsDiffEq
         + One
         + Zero
@@ -618,17 +616,18 @@ where
     /// **Note:** `sRGB` to `Oklab` conversion uses `f32` constants.
     /// A tolerance `epsilon >= 1e-8` is required to reliably detect white.
     /// Conversion of `sRGB` via XYZ requires `epsilon >= 1e-5`
-    pub fn is_white(&self, epsilon: T::Epsilon) -> bool {
+    pub(crate) fn is_white(&self, epsilon: T::Epsilon) -> bool {
         self.l.abs_diff_eq(&T::one(), epsilon)
     }
 
     /// Returns true, if `lightness == 0`
-    pub fn is_black(&self, epsilon: T::Epsilon) -> bool {
+    pub(crate) fn is_black(&self, epsilon: T::Epsilon) -> bool {
         self.l.abs_diff_eq(&T::zero(), epsilon)
     }
 
     /// Returns true, if `chroma == 0`
-    pub fn is_grey(&self, epsilon: T::Epsilon) -> bool {
+    #[allow(dead_code)]
+    pub(crate) fn is_grey(&self, epsilon: T::Epsilon) -> bool {
         self.a.abs_diff_eq(&T::zero(), epsilon.clone()) && self.b.abs_diff_eq(&T::zero(), epsilon)
     }
 
@@ -661,8 +660,8 @@ where
         T::default_epsilon()
     }
 
-    /// Returns true, if `self ` and `other` are visually indiscernible, even
-    /// if they hold are both black or both white and their `a` and `b` values differ.
+    /// Returns true, if `self ` and `other` are visually indiscernible, specially
+    /// if they are both black or both white and their `a` and `b` values differ.
     ///
     /// `epsilon` must be large enough to detect white (see [Oklab::is_white])
     fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
@@ -847,11 +846,10 @@ mod test {
         let oklab = Oklab::from_color_unclamped(lin_rgb);
 
         // values from Ok Color Picker, which seems to use  Björn Ottosson's original
-        // algorithm, but from the direct srgb2oklab conversion
-        // (not via the XYZ color space)
-        assert!(abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-3));
-        assert!(abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-3));
-        assert!(abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-3));
+        // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
+        assert!(abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-9));
+        assert!(abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-9));
+        assert!(abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-9));
     }
 
     #[test]

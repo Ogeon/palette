@@ -1,12 +1,9 @@
-use crate::angle::RealAngle;
 use crate::convert::IntoColorUnclamped;
 use crate::num::{
     Arithmetics, Cbrt, FromScalar, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
     Trigonometry, Zero,
 };
 use crate::{HasBoolMask, LinSrgb, Oklab};
-use approx::abs_diff_eq;
-use approx::AbsDiffEq;
 use core::fmt::Debug;
 
 /// Finds intersection of the line defined by
@@ -19,9 +16,6 @@ use core::fmt::Debug;
 fn find_gamut_intersection<T>(a: T, b: T, l1: T, c1: T, l0: T, cusp: Option<LC<T>>) -> T
 where
     T: Real
-        + Debug
-        + RealAngle
-        + AbsDiffEq
         + One
         + Zero
         + Arithmetics
@@ -44,8 +38,6 @@ where
         + Clone
         + FromScalar<Scalar = T::Scalar>,
 {
-    assert_normalized_hue(a, b);
-
     // Find the cusp of the gamut triangle
     let cusp = cusp.unwrap_or_else(|| LC::find_cusp(a, b));
 
@@ -150,9 +142,6 @@ pub struct ChromaValues<T> {
 impl<T> ChromaValues<T>
 where
     T: Real
-        + Debug
-        + RealAngle
-        + AbsDiffEq
         + One
         + Zero
         + Arithmetics
@@ -175,7 +164,6 @@ where
         + FromScalar<Scalar = T::Scalar>,
 {
     pub fn from_normalized(lightness: T, a_: T, b_: T) -> Self {
-        assert_normalized_hue(a_, b_);
         let cusp = LC::find_cusp(a_, b_);
 
         let max_chroma =
@@ -216,15 +204,6 @@ where
     }
 }
 
-pub(crate) fn assert_normalized_hue<T>(a: T, b: T)
-where
-    T: One + Powi + Arithmetics + Debug + AbsDiffEq + Copy,
-{
-    if cfg!(debug_assertions) && !abs_diff_eq!(a.powi(2) + b.powi(2), T::one()) {
-        panic!("{:?}²+{:?}² == {:?} != 1", a, b, a.powi(2) + b.powi(2));
-    }
-}
-
 /// A lightness/chroma representation of a point in the `sRGB` gamut for a fixed hue.
 ///
 /// Gamut is the range of representable colors of a color space. In this case the
@@ -248,9 +227,6 @@ pub(crate) struct LC<T> {
 impl<T> LC<T>
 where
     T: Real
-        + Debug
-        + RealAngle
-        + AbsDiffEq
         + PartialOrd
         + HasBoolMask<Mask = bool>
         + MinMax
@@ -277,15 +253,9 @@ where
     ///
     /// Normalized means, that `a² + b² == 1`
     pub fn find_cusp(a: T, b: T) -> Self {
-        //println!("find cusp {a:?}, {b:?}");
-        assert_normalized_hue(a, b);
         // First, find the maximum saturation (saturation S = C/L)
         let max_saturation = Self::max_saturation(a, b);
-        //println!(
-        //    "max saturation of hue {:?}: {:?}",
-        //    T::from_f64(180.0) + T::atan2(-b, -a).radians_to_degrees(),
-        //    max_saturation
-        //);
+
         // Convert to linear sRGB to find the first point where at least one of r,g or b >= 1:
         let rgb_at_max: LinSrgb<T> =
             Oklab::new(T::one(), max_saturation * a, max_saturation * b).into_color_unclamped();
@@ -307,15 +277,14 @@ where
     /// Panics, if
     /// `a²+b² != 1`
     fn max_saturation(a: T, b: T) -> T {
-        assert_normalized_hue(a, b);
-        // Max saturation will be when one of r, g or b goes below zero.
+        // Max saturation will be reached, when one of r, g or b goes below zero.
         // Select different coefficients depending on which component goes below zero first
         // wl, wm and ws are coefficients for https://en.wikipedia.org/wiki/LMS_color_space
         // -- the color space modelling human perception.
+        // FIXME: For `f32`, on some (all?) AMD CPUs the wrong optimization coefficients are picked.
         let (k0, k1, k2, k3, k4, wl, wm, ws) =
             if T::from_f64(-1.88170328) * a - T::from_f64(0.80936493) * b > T::one() {
-                //println!("red component at zero first");
-                // red component
+                // red component at zero first
                 (
                     T::from_f64(1.19086277),
                     T::from_f64(1.76576728),
@@ -327,8 +296,7 @@ where
                     T::from_f64(0.2309699292),
                 )
             } else if T::from_f64(1.81444104) * a - T::from_f64(1.19445276) * b > T::one() {
-                //println!("green component at zero first");
-                // green component
+                //green component at zero first
                 (
                     T::from_f64(0.73956515),
                     T::from_f64(-0.45954404),
@@ -340,8 +308,7 @@ where
                     T::from_f64(-0.3413193965),
                 )
             } else {
-                //println!("blue component at zero first");
-                // blue component
+                //blue component at zero first
                 (
                     T::from_f64(1.35733652),
                     T::from_f64(-0.00915799),
@@ -354,20 +321,15 @@ where
                 )
             };
 
-        //println!("k0: {k0:?}, k1: {k1:?}, k2: {k2:?}, k3: {k3:?}, k4: {k4:?}");
         // Approximate max saturation using a polynomial
         let mut approx_max_saturation = k0 + k1 * a + k2 * b + k3 * a.powi(2) + k4 * a * b;
-        //println!("Initial approx_max_saturation {approx_max_saturation:?}");
+
         // Get closer with Halley's method
         let k_l = T::from_f64(0.3963377774) * a + T::from_f64(0.2158037573) * b;
         let k_m = T::from_f64(-0.1055613458) * a - T::from_f64(0.0638541728) * b;
         let k_s = T::from_f64(-0.0894841775) * a - T::from_f64(1.2914855480) * b;
 
-        // For most hues the first step gives an error less than 10e6.
-        // For some blue hues, where the dS/dh is close to infinite, the error is larger.
-        // For pure SRGB blue the optimization process oscillates after more than 4 iterations
-        // due to rounding errors even with f64.
-        // TODO: find out which blue hues are problematic and use a 3 or 4 iterations for them
+        // A single iteration generally gets us quite close (1e-6).
         const MAX_ITER: usize = 1;
         for _i in 0..MAX_ITER {
             let l_ = T::one() + approx_max_saturation * k_l;
@@ -397,7 +359,6 @@ where
 
             approx_max_saturation =
                 approx_max_saturation - f * f1 / (f1.powi(2) - T::from_f64(0.5) * f * f2);
-            //println!("Iteration {_i}, approx_max_saturation {approx_max_saturation:?}");
         }
         approx_max_saturation
     }

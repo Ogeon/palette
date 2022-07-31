@@ -127,7 +127,8 @@ where
         )
     }
 }
-// wenn weiß ?== 100% || weiß 0% && schwraz 100%-> hue egal
+
+// if white == 100% || white  == 0% && black == 100% -> hue does not matter
 impl_eq_hue!(Okhwb, OklabHue, [hue, whiteness, blackness]);
 
 #[cfg(test)]
@@ -177,9 +178,11 @@ mod tests {
             ),
         ];
 
-        // unlike in okhsv and okhsl we are using f32 here, which is
+        // unlike in okhsv and okhsl (but like in olhsf::tests::blue)
+        // we are using f32 here, which for some AMD CPUs is
         // broken already in the reference implementation.
-        // We need a huge tolerance. Even this tolerace works only because
+        //
+        // We need a huge tolerance. Even this tolerance works only because
         // `crate::ok_utils::max_saturation::MAX_ITER == 1` accidentally hides the
         // real error. If raised the error becomes much larger.
         //FIXME: Fix the error and use a small tolerance

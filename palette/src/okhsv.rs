@@ -523,10 +523,12 @@ mod tests {
         let color = Oklab::<f64>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
         let okhsv = Okhsv::from_color_unclamped(color);
         println!("Okhsv f64: {:?}\n", okhsv);
-        // HSV values of the reference implementation
+        // HSV values of the reference implementation (in C)
         // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
         // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
         // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+
+        // compare to the reference implementation values
         assert_abs_diff_eq!(
             okhsv.hue,
             OklabHue::new(264.0520206380550121),
@@ -538,31 +540,28 @@ mod tests {
         let color = Oklab::<f32>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
         let okhsv = Okhsv::from_color_unclamped(color);
         println!("Okhsv f32: {:?}", okhsv);
-        // HSV values of the reference implementation (printed with more double digits despite using float)
-        // 1 iteration : 264.0520324707031250, 0.9239708185195923, 1.0000002384185791
-        // 2 iterations: 264.0520324707031250, -1.0219360589981079, 0.9999997615814209
-        // 3 iterations: 264.0520324707031250, 0.1297522187232971, 0.9999999403953552
         assert_abs_diff_eq!(
             okhsv.hue,
             OklabHue::new(264.0520324707031250),
             epsilon = 1e-6
         );
 
-        // Different machines take different paths because the algorithm is not robust wrt. floating point errors.
-        assert!(
-            // unlucky path
-            abs_diff_eq!(okhsv.saturation, 0.9239708185195923, epsilon = 1e-6)
-                ||
-            // correct path
-            abs_diff_eq!(okhsv.saturation, 0.9999911, epsilon = 1e-6)
-        );
-        assert!(
-            // unlucky path
-            abs_diff_eq!(okhsv.value, 1.0000002384185791, epsilon = 1e-6)
-                ||
-            // correct path
-            abs_diff_eq!(okhsv.value, 0.9999911, epsilon = 1e-6)
-        );
+        // compare to the ideal values
+        // FIXME: The algorithm is not robust wrt. floating point errors.
+        //  See `ok_utils:LC::max_saturation`.
+        //  .
+        //  HSV values of the reference implementation (in C) on an unlucky machine
+        //  (printed with double-precision despite using float-precision for compuation)
+        //  1 iteration : 264.0520324707031250, 0.9239708185195923, 1.0000002384185791
+        //  2 iterations: 264.0520324707031250, -1.0219360589981079, 0.9999997615814209
+        //  3 iterations: 264.0520324707031250, 0.1297522187232971, 0.9999999403953552
+        //  .
+        //  With lucky machines (like the integration machine) the okhsv.saturation
+        //  and okhsv.value already in the first iteration are 0.9999911
+        //  .
+        //  If a solution is found, reduce epsilon to 1e-6.
+        assert_abs_diff_eq!(okhsv.saturation, 1.0, epsilon = 1e-1);
+        assert_abs_diff_eq!(okhsv.value, 1.0, epsilon = 1e-1);
     }
 
     #[test]

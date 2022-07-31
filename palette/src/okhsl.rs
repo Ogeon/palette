@@ -17,6 +17,32 @@ use crate::{
 /// Okhsl with an alpha component.
 pub type Okhsla<T = f32> = Alpha<Okhsl<T>, T>;
 
+///<span id="Okhsla"></span>[`Okhsla`](crate::Okhsla) implementations.
+impl<T, A> Alpha<Okhsl<T>, A> {
+    /// Create an Oklab color with transparency.
+    pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
+        Alpha {
+            color: Okhsl::new(hue, saturation, lightness),
+            alpha,
+        }
+    }
+
+    /// Convert to a `(hue, saturation, lightness, alpha)` tuple.
+    pub fn into_components(self) -> (OklabHue<T>, T, T, A) {
+        (
+            self.color.hue,
+            self.color.saturation,
+            self.color.lightness,
+            self.alpha,
+        )
+    }
+
+    /// Convert from a `(hue, saturation, lightness, alpha)` tuple.
+    pub fn from_components((hue, saturation, lightness, alpha): (OklabHue<T>, T, T, A)) -> Self {
+        Self::new(hue, saturation, lightness, alpha)
+    }
+}
+
 /// A Hue/Saturation/Lightness representation of [`Oklab`] in the `sRGB` color space.
 ///
 /// Allows
@@ -67,6 +93,21 @@ pub struct Okhsl<T = f32> {
     pub lightness: T,
 }
 
+impl<T> Copy for Okhsl<T> where T: Copy {}
+
+impl<T> Clone for Okhsl<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Okhsl<T> {
+        Okhsl {
+            hue: self.hue.clone(),
+            saturation: self.saturation.clone(),
+            lightness: self.lightness.clone(),
+        }
+    }
+}
+
 impl<T> Okhsl<T> {
     /// Create an Okhsl color.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, lightness: T) -> Self {
@@ -95,19 +136,20 @@ where
     OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
 {
     /// Returns true, if `saturation == 0`
-    pub fn is_grey(&self, epsilon: T::Epsilon) -> bool {
+    #[allow(dead_code)]
+    pub(crate) fn is_grey(&self, epsilon: T::Epsilon) -> bool {
         debug_assert!(self.saturation >= -epsilon.clone());
         self.saturation.abs_diff_eq(&T::zero(), epsilon)
     }
 
     /// Returns true, if `self.lightness >= 1`,
     /// i.e. colors outside the sRGB gamut are also considered white
-    pub fn is_white(&self, epsilon: T::Epsilon) -> bool {
+    pub(crate) fn is_white(&self, epsilon: T::Epsilon) -> bool {
         self.lightness > T::one() || self.lightness.abs_diff_eq(&T::one(), epsilon)
     }
 
     /// Returns true, if `self.lightness == 0`.
-    pub fn is_black(&self, epsilon: T::Epsilon) -> bool {
+    pub(crate) fn is_black(&self, epsilon: T::Epsilon) -> bool {
         debug_assert!(self.lightness >= -epsilon.clone());
         self.lightness <= epsilon
     }
@@ -241,8 +283,6 @@ where
 impl<T> FromColorUnclamped<Oklab<T>> for Okhsl<T>
 where
     T: Real
-        + Debug
-        + AbsDiffEq
         + One
         + Zero
         + Arithmetics

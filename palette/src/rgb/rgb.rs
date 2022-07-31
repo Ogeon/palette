@@ -743,7 +743,7 @@ where
 
 impl<S, T> FromColorUnclamped<Oklab<T>> for Rgb<S, T>
 where
-    T: Real + Powi + Arithmetics + FromScalar + Copy + Debug,
+    T: Real + Powi + Arithmetics + FromScalar + Copy,
     T::Scalar: Recip
         + IsValidDivisor<Mask = bool>
         + Arithmetics
