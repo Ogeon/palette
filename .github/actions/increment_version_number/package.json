@@ -10,7 +10,7 @@
     "build": "ncc build src/index.ts -m -o dist && ncc build src/run_local.ts -m -o local"
   },
   "dependencies": {
-    "@actions/core": "^1.4.0",
+    "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.0",
     "@actions/io": "^1.1.1",
     "@iarna/toml": "^2.2.5",
