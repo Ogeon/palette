@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["gamma","Gamma encoding."],["linear","Linear encoding"],["srgb","The sRGB standard."]],"trait":[["FromLinear","A transfer function from linear space."],["IntoLinear","A transfer function to linear space."]]});
+window.SIDEBAR_ITEMS = {"mod":[["gamma","Gamma encoding."],["linear","Linear encoding"],["srgb","The sRGB standard."]],"trait":[["FromLinear","A transfer function from linear space."],["IntoLinear","A transfer function to linear space."]]};

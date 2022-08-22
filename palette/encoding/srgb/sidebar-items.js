@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Srgb","The sRGB standard, color space, and transfer function."]]});
+window.SIDEBAR_ITEMS = {"struct":[["Srgb","The sRGB standard, color space, and transfer function."]]};
