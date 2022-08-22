@@ -43,7 +43,13 @@ pub type Laba<Wp = D65, T = f32> = Alpha<Lab<Wp, T>, T>;
 /// spaces, because of its ability to represent all of their colors, and
 /// sometimes in color manipulation, because of its perceptual uniformity. This
 /// means that the perceptual difference between two colors is equal to their
-/// numerical difference.
+/// numerical difference. It was, however, [never designed for the perceptual
+/// qualities required for gamut mapping](http://www.brucelindbloom.com/UPLab.html).
+/// For perceptually uniform color manipulation the newer color spaces based on
+/// [`Oklab`](crate::Oklab) are preferable:
+/// [`Oklch`](crate::Oklch), [`Okhsv`](crate::Okhsv), [`Okhsl`](crate::Okhsl),
+/// [`Okhwb`](crate::Okhwb) (Note that the latter three are tied to the sRGB gamut
+/// and reference white).
 ///
 /// The parameters of L\*a\*b\* are quite different, compared to many other
 /// color spaces, so manipulating them manually may be unintuitive.

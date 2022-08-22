@@ -19,12 +19,14 @@ use rand::{
 };
 
 #[cfg(feature = "approx")]
-use crate::{angle::HalfRotation, num::Zero};
+use crate::angle::HalfRotation;
+use crate::num::Zero;
 
 #[cfg(feature = "random")]
 use crate::angle::FullRotation;
 
 use crate::angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle};
+use crate::num::{Arithmetics, Trigonometry};
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -523,12 +525,52 @@ impl_uniform!(UniformRgbHue, RgbHue);
 impl_uniform!(UniformLuvHue, LuvHue);
 impl_uniform!(UniformOklabHue, OklabHue);
 
+impl<T> OklabHue<T>
+where
+    T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
+{
+    /// Returns `a` and `b` values for this hue at the given `croma`
+    #[inline(always)]
+    pub fn ab(self, chroma: T) -> (T, T) {
+        let hue_rad = self.into_raw_radians();
+        let (sin, cos) = hue_rad.sin_cos();
+        (chroma.clone() * cos, chroma * sin)
+    }
+
+    /// Returns a hue from `a` and `b`, with a normalized angle, i.e. an angle in the half
+    /// open interval [0° .. 360°).
+    /// If `a` and `b` are both `zero`, returns `None`
+    #[inline(always)]
+    pub fn from_ab(a: T, b: T) -> Option<Self> {
+        if a == T::zero() && b == T::zero() {
+            None
+        } else {
+            // atan2 returns values in the interval [-π .. π]
+            // instead of
+            //   let hue_rad = T::atan2(b,a);
+            // use negative a and be and rotate, to ensure the hue is normalized,
+            let hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
+            Some(Self::from_radians(hue_rad))
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::{
         angle::{SignedAngle, UnsignedAngle},
-        RgbHue,
+        OklabHue, RgbHue,
     };
+
+    #[test]
+    fn oklabhue_ab_roundtrip() {
+        for degree in [0.0_f64, 90.0, 30.0, 330.0, 120.0, 240.0] {
+            let hue = OklabHue::from_degrees(degree);
+            let (a, b) = hue.ab(10000.0);
+            let roundtrip_hue = OklabHue::from_ab(a, b).unwrap();
+            assert_abs_diff_eq!(roundtrip_hue, hue);
+        }
+    }
 
     #[test]
     fn normalize_angle_0_360() {

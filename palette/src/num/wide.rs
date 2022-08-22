@@ -10,6 +10,16 @@ macro_rules! impl_wide_float {
                 fn from_f64(n: f64) -> $ty {
                     $ty::splat(n as $scalar)
                 }
+
+                #[inline]
+                fn neg_inf() -> $ty{
+                    $ty::splat($scalar::NEG_INFINITY)
+                }
+
+                #[inline]
+                fn inf() -> $ty{
+                    $ty::splat($scalar::INFINITY)
+                }
             }
 
             impl FromScalar for $ty {

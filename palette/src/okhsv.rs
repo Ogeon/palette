@@ -1,28 +1,27 @@
-#[cfg(feature = "approx")]
-use crate::angle::{AngleEq, HalfRotation, SignedAngle};
+use core::fmt::Debug;
+
+pub use alpha::Okhsva;
+#[cfg(feature = "random")]
+pub use random::UniformOkhsv;
+
+use crate::angle::FromAngle;
 use crate::convert::IntoColorUnclamped;
-use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
+use crate::num::{
+    Arithmetics, Cbrt, FromScalar, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
+    Trigonometry, Zero,
+};
 use crate::ok_utils::{LC, ST};
-#[cfg(feature = "approx")]
-use crate::visual::{VisualColor, VisuallyEqual};
+use crate::stimulus::{FromStimulus, Stimulus};
 use crate::white_point::D65;
 use crate::{
-    angle::RealAngle,
-    convert::FromColorUnclamped,
-    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
-    ok_utils, Alpha, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
+    angle::RealAngle, convert::FromColorUnclamped, ok_utils, HasBoolMask, LinSrgb, Okhwb, Oklab,
+    OklabHue,
 };
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-#[cfg(feature = "approx")]
-use core::borrow::Borrow;
-use core::fmt::Debug;
-#[cfg(feature = "approx")]
-use core::ops::{Mul, Neg, Sub};
 
-/// Okhsv with an alpha component. See the [`Okhsva` implementation in
-/// `Alpha`](crate::Alpha#Okhsva).
-pub type Okhsva<T = f32> = Alpha<Okhsv<T>, T>;
+mod alpha;
+mod properties;
+#[cfg(feature = "random")]
+mod random;
 
 /// A Hue/Saturation/Value representation of [`Oklab`] in the `sRGB` color space.
 ///
@@ -70,70 +69,58 @@ pub struct Okhsv<T = f32> {
     pub value: T,
 }
 
-impl_eq_hue!(Okhsv, OklabHue, [hue, saturation, value]);
-
-#[cfg(feature = "approx")]
-impl<T> VisualColor<T> for Okhsv<T>
+impl<T, H: Into<OklabHue<T>>> From<(H, T, T)> for Okhsv<T>
 where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + AbsDiffEq<Epsilon = T>
-        + One
-        + Zero
-        + Neg<Output = T>,
-    T::Epsilon: Clone,
-    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+    T: Zero + MinMax,
 {
-    /// Returns true, if `saturation == 0`
-    fn is_grey(&self, epsilon: T::Epsilon) -> bool {
-        self.saturation.abs_diff_eq(&T::zero(), epsilon)
-    }
-
-    /// Returns true, if `Self::is_grey` && `value >= 1`,
-    /// i.e. the color's hue is irrelevant **and** it is at or beyond the
-    /// `sRGB` maximum brightness. A color at or beyond maximum brightness isn't
-    /// necessarily white. It can also be a bright shining hue.
-    fn is_white(&self, epsilon: T::Epsilon) -> bool {
-        self.is_grey(epsilon.clone()) && self.value >= T::one()
-            || self.value.abs_diff_eq(&T::one(), epsilon)
-    }
-
-    /// Returns true if `value == 0`
-    fn is_black(&self, epsilon: T::Epsilon) -> bool {
-        debug_assert!(self.value >= -epsilon.clone());
-        self.value.abs_diff_eq(&T::zero(), epsilon)
+    fn from(components: (H, T, T)) -> Self {
+        Self::from_components(components)
     }
 }
 
-#[cfg(feature = "approx")]
-impl<S, O, T> VisuallyEqual<O, S, T> for Okhsv<T>
+impl<T> HasBoolMask for Okhsv<T>
 where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + RealAngle
-        + SignedAngle
-        + Zero
-        + One
-        + AngleEq<Mask = bool>
-        + Sub<Output = T>
-        + AbsDiffEq<Epsilon = T>
-        + Neg<Output = T>
-        + Clone,
-    T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
-    S: Borrow<Self> + Copy,
-    O: Borrow<Self> + Copy,
+    T: HasBoolMask,
 {
-    fn visually_eq(s: S, o: O, epsilon: T::Epsilon) -> bool {
-        VisuallyEqual::both_black_or_both_white(s, o, epsilon.clone())
-            || VisuallyEqual::both_greyscale(s, o, epsilon.clone())
-                && s.borrow()
-                    .value
-                    .abs_diff_eq(&o.borrow().value, epsilon.clone())
-            || s.borrow().hue.abs_diff_eq(&o.borrow().hue, epsilon.clone())
-                && s.borrow()
-                    .saturation
-                    .abs_diff_eq(&o.borrow().saturation, epsilon.clone())
-                && s.borrow().value.abs_diff_eq(&o.borrow().value, epsilon)
+    type Mask = T::Mask;
+}
+
+impl<T> Default for Okhsv<T>
+where
+    T: Real + Stimulus,
+    OklabHue<T>: Default,
+{
+    fn default() -> Okhsv<T> {
+        Okhsv::new(
+            OklabHue::default(),
+            Self::min_saturation(),
+            Self::min_value(),
+        )
+    }
+}
+
+impl<T> Okhsv<T>
+where
+    T: Real + Stimulus,
+{
+    /// Return the `saturation` value minimum.
+    pub fn min_saturation() -> T {
+        T::zero()
+    }
+
+    /// Return the `saturation` value maximum.
+    pub fn max_saturation() -> T {
+        T::max_intensity()
+    }
+
+    /// Return the `value` value minimum.
+    pub fn min_value() -> T {
+        T::zero()
+    }
+
+    /// Return the `value` value maximum.
+    pub fn max_value() -> T {
+        T::max_intensity()
     }
 }
 
@@ -144,6 +131,18 @@ impl<T> Okhsv<T> {
             hue: hue.into(),
             saturation,
             value,
+        }
+    }
+
+    /// Convert into another component type.
+    pub fn into_format<U>(self) -> Okhsv<U>
+    where
+        U: FromStimulus<T> + FromAngle<T>,
+    {
+        Okhsv {
+            hue: self.hue.into_format(),
+            saturation: U::from_stimulus(self.saturation),
+            value: U::from_stimulus(self.value),
         }
     }
 
@@ -180,7 +179,6 @@ where
         + Hypot
         + One
         + FromScalar
-        + Debug
         + RealAngle,
     T::Scalar: Real
         + Zero
@@ -190,82 +188,74 @@ where
         + IsValidDivisor<Mask = bool>
         + Arithmetics
         + Clone
-        + FromScalar<Scalar = T::Scalar>
-        + Debug,
+        + FromScalar<Scalar = T::Scalar>,
 {
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
-        //println!("Lab {:?}, {:?}, {:?}", lab.l, lab.a, lab.b);
         if lab.l == T::zero() {
             // the color is pure black
             return Self::new(T::zero(), T::zero(), T::zero());
         }
-        if lab.a == T::zero() && lab.b == T::zero() {
-            // `a` describes how green/red the color is, `b` how blue/yellow the color is
-            // both are zero -> the color is totally desaturated.
+
+        if let Some(hue) = lab.try_hue() {
+            let (chroma, normalized_ab) = lab.chroma_and_normalized_ab();
+            let (a_, b_) =
+                normalized_ab.expect("There is a hue, thus there also are normalized a and b");
+
+            // For each hue the sRGB gamut can be drawn on a 2-dimensional space.
+            // Let L_r, the lightness in relation to the possible luminance of sRGB, be spread
+            // along the y-axis (bottom is black, top is bright) and Chroma along the x-axis
+            // (left is desaturated, right is colorful). The gamut then takes a triangular shape,
+            // with a concave top side and a cusp to the right.
+            // To use saturation and brightness values, the gamut must be mapped to a square.
+            // The lower point of the triangle is expanded to the lower side of the square.
+            // The left side remains unchanged and the cusp of the triangle moves to the upper right.
+            let cusp = LC::find_cusp(a_, b_);
+            let st_max = ST::<T>::from(cusp);
+
+            let s_0 = T::from_f64(0.5);
+            let k = T::one() - s_0 / st_max.s;
+
+            // first we find L_v, C_v, L_vt and C_vt
+            let t = st_max.t / (chroma + lab.l * st_max.t);
+            let l_v = t * lab.l;
+            let c_v = t * chroma;
+
+            let l_vt = ok_utils::toe_inv(l_v);
+            let c_vt = c_v * l_vt / l_v;
+
+            // we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
+            let rgb_scale: LinSrgb<T> =
+                Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+            let lightness_scale_factor = T::cbrt(
+                T::one()
+                    / T::max(
+                        T::max(rgb_scale.red, rgb_scale.green),
+                        T::max(rgb_scale.blue, T::zero()),
+                    ),
+            );
+
+            //chroma = chroma / lightness_scale_factor;
+
+            // use L_r instead of L and also scale C by L_r/L
+            let l_r = ok_utils::toe(lab.l / lightness_scale_factor);
+            //chroma = chroma * l_r / (lab.l / lightness_scale_factor);
+
+            // we can now compute v and s:
+            let v = l_r / l_v;
+            let s = (s_0 + st_max.t) * c_v / ((st_max.t * s_0) + st_max.t * k * c_v);
+
+            Self::new(hue, s, v)
+        } else {
+            // the color is totally desaturated.
             let v = ok_utils::toe(lab.l);
-
-            return Self::new(T::zero(), T::zero(), v);
+            Self::new(T::zero(), T::zero(), v)
         }
-
-        // compute hue and chroma as for OkLCh
-        // we will use hue as is.
-        let chroma = T::hypot(lab.a, lab.b);
-        let a_ = lab.a / chroma;
-        let b_ = lab.b / chroma;
-
-        // use negative a and be and rotate, to ensure hue is normalized
-        let hue = T::from_f64(180.0) + T::atan2(-lab.b, -lab.a).radians_to_degrees();
-
-        // For each hue the sRGB gamut can be drawn on a 2-dimensional space.
-        // Let L_r, the lightness in relation to the possible luminance of sRGB, be spread
-        // along the y-axis (bottom is black, top is bright) and Chroma along the x-axis
-        // (left is desaturated, right is colorful). The gamut then takes a triangular shape,
-        // with a concave top side and a cusp to the right.
-        // To use saturation and brightness values, the gamut must be mapped to a square.
-        // The lower point of the triangle is expanded to the lower side of the square.
-        // The left side remains unchanged and the cusp of the triangle moves to the upper right.
-        let cusp = LC::find_cusp(a_, b_);
-        //println!("CSUP: L: {:?}, C: {:?}", cusp.lightness, cusp.chroma);
-        let st_max: ST<T> = cusp.into();
-        let s_0 = T::from_f64(0.5);
-        let k = T::one() - s_0 / st_max.s;
-
-        // first we find L_v, C_v, L_vt and C_vt
-        let t = st_max.t / (chroma + lab.l * st_max.t);
-        let l_v = t * lab.l;
-        let c_v = t * chroma;
-
-        let l_vt = ok_utils::toe_inv(l_v);
-        let c_vt = c_v * l_vt / l_v;
-
-        // we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
-        let rgb_scale: LinSrgb<T> = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
-        let lightness_scale_factor = T::cbrt(
-            T::one()
-                / T::max(
-                    T::max(rgb_scale.red, rgb_scale.green),
-                    T::max(rgb_scale.blue, T::zero()),
-                ),
-        );
-
-        //chroma = chroma / lightness_scale_factor;
-
-        // use L_r instead of L and also scale C by L_r/L
-        let l_r = ok_utils::toe(lab.l / lightness_scale_factor);
-        //chroma = chroma * l_r / (lab.l / lightness_scale_factor);
-
-        // we can now compute v and s:
-        let v = l_r / l_v;
-        let s = (s_0 + st_max.t) * c_v / ((st_max.t * s_0) + st_max.t * k * c_v);
-
-        Self::new(hue, s, v)
     }
 }
 impl<T> FromColorUnclamped<Okhwb<T>> for Okhsv<T>
 where
     T: Real
         + PartialOrd
-        + MinMax
         + Copy
         + Powi
         + Sqrt
@@ -276,7 +266,6 @@ where
         + Hypot
         + One
         + FromScalar
-        + Debug
         + RealAngle,
     T::Scalar: Real
         + Zero
@@ -286,8 +275,7 @@ where
         + IsValidDivisor<Mask = bool>
         + Arithmetics
         + Clone
-        + FromScalar<Scalar = T::Scalar>
-        + Debug,
+        + FromScalar<Scalar = T::Scalar>,
 {
     fn from_color_unclamped(hwb: Okhwb<T>) -> Self {
         if hwb.blackness == T::one() {
@@ -308,7 +296,8 @@ mod tests {
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
     use crate::visual::VisuallyEqual;
-    use crate::{encoding, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+    use crate::{encoding, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+
     #[test]
     fn test_roundtrip_okhsv_oklab_is_original() {
         let colors = [
@@ -522,5 +511,51 @@ mod tests {
             Okhsv::new(12.0, 0.0, 0.3),
             1e-12
         ));
+    }
+
+    #[test]
+    fn srgb_gamut_containment() {
+        {
+            println!("sRGB Red");
+            let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0));
+            println!("{:?}", oklab);
+            let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
+            println!("{:?}", okhsv);
+            assert!(okhsv.is_within_bounds());
+        }
+
+        {
+            println!("Double sRGB Red");
+            let oklab = Oklab::from_color_unclamped(LinSrgb::new(2.0, 0.0, 0.0));
+            println!("{:?}", oklab);
+            let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
+            println!("{:?}", okhsv);
+            assert!(!okhsv.is_within_bounds());
+            let clamped_okhsv = okhsv.clamp();
+            println!("Clamped: {:?}", clamped_okhsv);
+            assert!(clamped_okhsv.is_within_bounds());
+            let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
+            println!("Clamped as unclamped Linear sRGB: {:?}", linsrgb);
+        }
+
+        {
+            println!("P3 Yellow");
+            // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&precision=17
+            let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, -0.098273600140966));
+            println!("{:?}", oklab);
+            let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
+            println!("{:?}", okhsv);
+            assert!(!okhsv.is_within_bounds());
+            let clamped_okhsv = okhsv.clamp();
+            println!("Clamped: {:?}", clamped_okhsv);
+            assert!(clamped_okhsv.is_within_bounds());
+            let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
+            println!(
+                "Clamped as unclamped Linear sRGB: {:?}\n\
+                May be different, but should be visually indistinguishable from\n\
+                color.js' gamut mapping red: 1 green: 0.9876530763223166 blue: 0",
+                linsrgb
+            );
+        }
     }
 }

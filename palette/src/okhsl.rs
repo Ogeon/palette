@@ -1,48 +1,20 @@
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use core::fmt::Debug;
-#[cfg(feature = "approx")]
-use core::ops::Neg;
+pub use alpha::Okhsla;
 
-use crate::angle::AngleEq;
 use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
 use crate::ok_utils::{toe, ChromaValues};
 use crate::white_point::D65;
 use crate::{
-    angle::RealAngle,
+    angle::{FromAngle, RealAngle},
     convert::FromColorUnclamped,
     num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
-    Alpha, HasBoolMask, Oklab, OklabHue,
+    stimulus::{FromStimulus, Stimulus},
+    HasBoolMask, Oklab, OklabHue,
 };
 
-/// Okhsl with an alpha component.
-pub type Okhsla<T = f32> = Alpha<Okhsl<T>, T>;
-
-///<span id="Okhsla"></span>[`Okhsla`](crate::Okhsla) implementations.
-impl<T, A> Alpha<Okhsl<T>, A> {
-    /// Create an Oklab color with transparency.
-    pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
-        Alpha {
-            color: Okhsl::new(hue, saturation, lightness),
-            alpha,
-        }
-    }
-
-    /// Convert to a `(hue, saturation, lightness, alpha)` tuple.
-    pub fn into_components(self) -> (OklabHue<T>, T, T, A) {
-        (
-            self.color.hue,
-            self.color.saturation,
-            self.color.lightness,
-            self.alpha,
-        )
-    }
-
-    /// Convert from a `(hue, saturation, lightness, alpha)` tuple.
-    pub fn from_components((hue, saturation, lightness, alpha): (OklabHue<T>, T, T, A)) -> Self {
-        Self::new(hue, saturation, lightness, alpha)
-    }
-}
+mod alpha;
+mod properties;
+#[cfg(feature = "random")]
+mod random;
 
 /// A Hue/Saturation/Lightness representation of [`Oklab`] in the `sRGB` color space.
 ///
@@ -51,7 +23,7 @@ impl<T, A> Alpha<Okhsl<T>, A> {
 /// * changing lightness/chroma/saturation, while keeping perceived hue constant
 /// * changing the perceived saturation (more or less) proportionally with the numerical
 /// amount of change (unlike HSLuv)
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
@@ -82,31 +54,18 @@ pub struct Okhsl<T = f32> {
     /// For v == 0 the saturation is irrelevant.
     pub saturation: T,
 
-    /// The amount of black and white "paint in the mixture".
-    /// While changes do not affect the saturation, they do affect
+    /// The relative luminance of the color, where  
     /// * `0.0` corresponds to pure black
     /// * `1.0` corresponds to white
     ///
-    /// `Okhsv`'s `value` component goes from black to non-black
-    /// -- a maximally bright color.
+    /// This luminance is visually similar to [Cielab](crate::Lab)'s luminance for a
+    /// `D65` reference white point.
     ///
-    /// `Okhsl`'s `lightness` component goes from black to white.
+    /// `Okhsv`'s `value` component goes from black to non-black
+    /// -- a maximally bright color in the `sRGB` gamut.
+    ///
+    /// `Okhsl`'s `lightness` component goes from black to white in the `sRGB` color space.
     pub lightness: T,
-}
-
-impl<T> Copy for Okhsl<T> where T: Copy {}
-
-impl<T> Clone for Okhsl<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Okhsl<T> {
-        Okhsl {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-        }
-    }
 }
 
 impl<T> Okhsl<T> {
@@ -119,6 +78,26 @@ impl<T> Okhsl<T> {
         }
     }
 
+    /// Convert into another component type.
+    pub fn into_format<U>(self) -> Okhsl<U>
+    where
+        U: FromStimulus<T> + FromAngle<T>,
+    {
+        Okhsl {
+            hue: self.hue.into_format(),
+            saturation: U::from_stimulus(self.saturation),
+            lightness: U::from_stimulus(self.lightness),
+        }
+    }
+
+    /// Convert from another component type.
+    pub fn from_format<U>(color: Okhsl<U>) -> Self
+    where
+        T: FromStimulus<U> + FromAngle<U>,
+    {
+        color.into_format()
+    }
+
     /// Convert to a `(h, s, l)` tuple.
     pub fn into_components(self) -> (OklabHue<T>, T, T) {
         (self.hue, self.saturation, self.lightness)
@@ -129,159 +108,32 @@ impl<T> Okhsl<T> {
         Self::new(hue, saturation, lightness)
     }
 }
-#[cfg(feature = "approx")]
+
 impl<T> Okhsl<T>
 where
-    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
-    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
-    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
+    T: Stimulus,
 {
-    /// Returns true, if `saturation == 0`
-    #[allow(dead_code)]
-    pub(crate) fn is_grey(&self, epsilon: T::Epsilon) -> bool {
-        debug_assert!(self.saturation >= -epsilon.clone());
-        self.saturation.abs_diff_eq(&T::zero(), epsilon)
+    /// Return the `saturation` value minimum.
+    pub fn min_saturation() -> T {
+        T::zero()
     }
 
-    /// Returns true, if `self.lightness >= 1`,
-    /// i.e. colors outside the sRGB gamut are also considered white
-    pub(crate) fn is_white(&self, epsilon: T::Epsilon) -> bool {
-        self.lightness > T::one() || self.lightness.abs_diff_eq(&T::one(), epsilon)
+    /// Return the `saturation` value maximum.
+    pub fn max_saturation() -> T {
+        T::max_intensity()
     }
 
-    /// Returns true, if `self.lightness == 0`.
-    pub(crate) fn is_black(&self, epsilon: T::Epsilon) -> bool {
-        debug_assert!(self.lightness >= -epsilon.clone());
-        self.lightness <= epsilon
+    /// Return the `lightness` value minimum.
+    pub fn min_lightness() -> T {
+        T::zero()
     }
 
-    /// Returns true, if `self` and `other` are either both white or both black
-    fn both_black_or_both_white(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.is_white(epsilon.clone()) && other.is_white(epsilon.clone())
-            || self.is_black(epsilon.clone()) && other.is_black(epsilon)
+    /// Return the `lightness` value maximum.
+    pub fn max_lightness() -> T {
+        T::max_intensity()
     }
 }
 
-impl<T> PartialEq for Okhsl<T>
-where
-    T: PartialEq,
-    OklabHue<T>: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue
-            && self.saturation == other.saturation
-            && self.lightness == other.lightness
-    }
-}
-impl<T> Eq for Okhsl<T>
-where
-    T: Eq + AngleEq,
-    OklabHue<T>: Eq,
-{
-}
-#[cfg(feature = "approx")]
-impl<T> AbsDiffEq for Okhsl<T>
-where
-    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + AbsDiffEq<Epsilon = T>,
-    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
-    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    /// Returns true, if `self ` and `other` are visually indiscernible, even
-    /// if they hold are both black or both white and their `hue` and
-    /// `saturation` values differ.
-    ///
-    /// `epsilon` must be large enough to detect white (see [Oklab::is_white])
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.hue.abs_diff_eq(&other.hue, epsilon.clone())
-                && self
-                    .saturation
-                    .abs_diff_eq(&other.saturation, epsilon.clone())
-                && self.lightness.abs_diff_eq(&other.lightness, epsilon)
-    }
-    fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self.hue.abs_diff_ne(&other.hue, epsilon.clone())
-                || self
-                    .saturation
-                    .abs_diff_ne(&other.saturation, epsilon.clone())
-                || self.lightness.abs_diff_ne(&other.lightness, epsilon))
-    }
-}
-#[cfg(feature = "approx")]
-impl<T> RelativeEq for Okhsl<T>
-where
-    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + RelativeEq + AbsDiffEq<Epsilon = T>,
-    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
-    OklabHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    fn default_max_relative() -> T::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self
-                .hue
-                .relative_eq(&other.hue, epsilon.clone(), max_relative.clone())
-                && self.saturation.relative_eq(
-                    &other.saturation,
-                    epsilon.clone(),
-                    max_relative.clone(),
-                )
-                && self
-                    .lightness
-                    .relative_eq(&other.lightness, epsilon, max_relative)
-    }
-    fn relative_ne(&self, other: &Self, epsilon: T::Epsilon, max_relative: T::Epsilon) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self
-                .hue
-                .relative_ne(&other.hue, epsilon.clone(), max_relative.clone())
-                || self.saturation.relative_ne(
-                    &other.saturation,
-                    epsilon.clone(),
-                    max_relative.clone(),
-                )
-                || self
-                    .lightness
-                    .relative_ne(&other.lightness, epsilon, max_relative))
-    }
-}
-#[cfg(feature = "approx")]
-impl<T> UlpsEq for Okhsl<T>
-where
-    T: PartialOrd + HasBoolMask<Mask = bool> + One + Zero + UlpsEq + AbsDiffEq<Epsilon = T>,
-    T::Epsilon: Clone + Neg<Output = T::Epsilon>,
-    OklabHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        self.both_black_or_both_white(other, epsilon.clone())
-            || self.hue.ulps_eq(&other.hue, epsilon.clone(), max_ulps)
-                && self
-                    .saturation
-                    .ulps_eq(&other.saturation, epsilon.clone(), max_ulps)
-                && self.lightness.ulps_eq(&other.lightness, epsilon, max_ulps)
-    }
-    fn ulps_ne(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-        !self.both_black_or_both_white(other, epsilon.clone())
-            && (self.hue.ulps_ne(&other.hue, epsilon.clone(), max_ulps)
-                || self
-                    .saturation
-                    .ulps_ne(&other.saturation, epsilon.clone(), max_ulps)
-                || self.lightness.ulps_ne(&other.lightness, epsilon, max_ulps))
-    }
-}
 /// # See
 /// See [`srgb_to_okhsl`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
 impl<T> FromColorUnclamped<Oklab<T>> for Okhsl<T>
@@ -311,54 +163,80 @@ where
         + FromScalar<Scalar = T::Scalar>,
 {
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
+        // refer to the SRGB reference-white-based lightness L_r as l for consistency with HSL
         let l = toe(lab.l);
 
-        if lab.a == T::zero() && lab.b == T::zero() {
+        if let Some(h) = lab.try_hue() {
+            let (chroma, normalized_ab) = lab.chroma_and_normalized_ab();
+            let (a_, b_) =
+                normalized_ab.expect("There is a hue, thus there also are normalized a and b");
+            let cs = ChromaValues::from_normalized(lab.l, a_, b_);
+
+            // Inverse of the interpolation in okhsl_to_srgb:
+
+            let mid = T::from_f64(0.8);
+            let mid_inv = T::from_f64(1.25);
+
+            let s = if chroma < cs.mid {
+                let k_1 = mid * cs.zero;
+                let k_2 = T::one() - k_1 / cs.mid;
+
+                let t = chroma / (k_1 + k_2 * chroma);
+                t * mid
+            } else {
+                let k_0 = cs.mid;
+                let k_1 = (T::one() - mid) * (cs.mid * mid_inv).powi(2) / cs.zero;
+                let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+
+                let t = (chroma - k_0) / (k_1 + k_2 * (chroma - k_0));
+                mid + (T::one() - mid) * t
+            };
+
+            Self::new(h, s, l)
+        } else {
             // `a` describes how green/red the color is, `b` how blue/yellow the color is
             // both are zero -> the color is totally desaturated.
-            return Self::new(T::zero(), T::zero(), l);
+            Self::new(T::zero(), T::zero(), l)
         }
-
-        let chroma = T::hypot(lab.a, lab.b);
-        let a_ = lab.a / chroma;
-        let b_ = lab.b / chroma;
-
-        // use negative a and be and rotate, to ensure hue is normalized
-        let h = T::from_f64(180.0) + T::atan2(-lab.b, -lab.a).radians_to_degrees();
-
-        let cs = ChromaValues::from_normalized(lab.l, a_, b_);
-
-        // Inverse of the interpolation in okhsl_to_srgb:
-
-        let mid = T::from_f64(0.8);
-        let mid_inv = T::from_f64(1.25);
-
-        let s = if chroma < cs.mid {
-            let k_1 = mid * cs.zero;
-            let k_2 = T::one() - k_1 / cs.mid;
-
-            let t = chroma / (k_1 + k_2 * chroma);
-            t * mid
-        } else {
-            let k_0 = cs.mid;
-            let k_1 = (T::one() - mid) * (cs.mid * mid_inv).powi(2) / cs.zero;
-            let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
-
-            let t = (chroma - k_0) / (k_1 + k_2 * (chroma - k_0));
-            mid + (T::one() - mid) * t
-        };
-
-        Self::new(h, s, l)
     }
 }
 
+impl<T> HasBoolMask for Okhsl<T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
+impl<T> Default for Okhsl<T>
+where
+    T: Stimulus,
+    OklabHue<T>: Default,
+{
+    fn default() -> Okhsl<T> {
+        Okhsl::new(
+            OklabHue::default(),
+            Self::min_saturation(),
+            Self::min_lightness(),
+        )
+    }
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<T> bytemuck::Zeroable for Okhsl<T> where T: bytemuck::Zeroable {}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<T> bytemuck::Pod for Okhsl<T> where T: bytemuck::Pod {}
+
 #[cfg(test)]
 mod tests {
+    use core::str::FromStr;
+
     use crate::convert::FromColorUnclamped;
     use crate::rgb::Rgb;
     use crate::visual::{VisualColor, VisuallyEqual};
     use crate::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
-    use core::str::FromStr;
+
     #[test]
     fn test_roundtrip_okhsl_oklab_is_original() {
         let colors = [

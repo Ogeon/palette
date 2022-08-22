@@ -4,7 +4,7 @@ use crate::{
     bool_mask::LazySelect,
     hues::{LuvHue, RgbHue},
     num::{Arithmetics, Cbrt, One, PartialCmp, Powi, Real, Sqrt},
-    Hsl, Hsluv, Hsv,
+    Hsl, Hsluv, Hsv, Okhsl, Okhsv, OklabHue,
 };
 
 // Based on https://stackoverflow.com/q/4778147 and https://math.stackexchange.com/q/18686,
@@ -34,6 +34,20 @@ where
 }
 
 #[inline]
+pub fn sample_okhsv<T>(hue: OklabHue<T>, r1: T, r2: T) -> Okhsv<T>
+where
+    T: Cbrt + Sqrt,
+{
+    let (value, saturation) = (r1.cbrt(), r2.sqrt());
+
+    Okhsv {
+        hue,
+        saturation,
+        value,
+    }
+}
+
+#[inline]
 pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
 where
     T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
@@ -44,6 +58,19 @@ where
         saturation: r2.sqrt(),
         lightness: sample_bicone_height(r1),
         standard: PhantomData,
+    }
+}
+
+#[inline]
+pub fn sample_okhsl<T>(hue: OklabHue<T>, r1: T, r2: T) -> Okhsl<T>
+where
+    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect<T> + Clone,
+{
+    Okhsl {
+        hue,
+        saturation: r2.sqrt(),
+        lightness: sample_bicone_height(r1),
     }
 }
 

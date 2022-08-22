@@ -27,6 +27,14 @@ pub trait Real {
     /// Create a number from an `f64` value, mainly for converting constants.
     #[must_use]
     fn from_f64(n: f64) -> Self;
+
+    /// Returns the negative infinity (−∞).
+    #[must_use]
+    fn neg_inf() -> Self;
+
+    /// Returns the infinity (∞).
+    #[must_use]
+    fn inf() -> Self;
 }
 
 /// Trait for creating a vectorized value from a scalar value.
@@ -420,6 +428,13 @@ macro_rules! impl_float {
                 #[inline]
                 fn from_f64(n: f64) -> $ty {
                     n as $ty
+                }
+                #[inline]
+                fn neg_inf()-> $ty{
+                    $ty::NEG_INFINITY
+                }
+                fn inf()-> $ty{
+                    $ty::INFINITY
                 }
             }
 

@@ -1,8 +1,13 @@
+//! Traits and functions used in Ok* color spaces
+#[cfg(test)]
+use crate::angle::RealAngle;
 use crate::convert::IntoColorUnclamped;
 use crate::num::{
     Arithmetics, Cbrt, FromScalar, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
     Trigonometry, Zero,
 };
+#[cfg(test)]
+use crate::OklabHue;
 use crate::{HasBoolMask, LinSrgb, Oklab};
 use core::fmt::Debug;
 
@@ -204,15 +209,17 @@ where
     }
 }
 
-/// A lightness/chroma representation of a point in the `sRGB` gamut for a fixed hue.
+/// A `lightness`-`chroma` representation of a point in the `sRGB` gamut for a fixed hue.
 ///
 /// Gamut is the range of representable colors of a color space. In this case the
 /// `sRGB` color space.
 ///
-/// For each hue the geometrical shape of the `sRGB` gamut forms a specific triangle
-/// with a concave upper line.
+/// Only together are `lightness` and `chroma` guaranteed to be inside the `sRGB` gamut.
+/// While a color with lower `chroma` will  always stay in the gamut, a color of raised
+/// *and lowered* lightness might move the point outside the gamut.
 ///
-///# See [LC diagram samples](https://bottosson.github.io/posts/gamutclipping/#gamut-clipping)
+///# See
+/// [LC diagram samples](https://bottosson.github.io/posts/gamutclipping/#gamut-clipping)
 #[derive(Debug, Copy, Clone)]
 pub(crate) struct LC<T> {
     /// The lightness of the color. 0 corresponds to black. 1 corresponds to white
@@ -223,6 +230,14 @@ pub(crate) struct LC<T> {
     ///Note: the maximum representable value depends on the lightness and the hue.
     pub chroma: T,
 }
+
+/// The number of iterations used for optimizing the result of [`LC::max_saturation`].
+///
+/// Must match [`MAX_SRGB_SATURATION_INACCURACY`]
+pub(crate) const MAX_SRGB_SATURATION_SEARCH_MAX_ITER: usize = 1;
+/// The expected inaccuracy of the result of [`LC::max_saturation`], optimized with
+/// [`MAX_SRGB_SATURATION_SEARCH_MAX_ITER`] iterations
+pub(crate) const MAX_SRGB_SATURATION_INACCURACY: f64 = 1e-6;
 
 impl<T> LC<T>
 where
@@ -249,13 +264,13 @@ where
         + FromScalar<Scalar = T::Scalar>,
 {
     /// Returns the cusp of the geometrical shape of representable `sRGB` colors for
-    /// normalized `a` and `b` values of a hue in `OKlab`.
+    /// normalized `a` and `b` values of an `OKlabHue`, where "normalized" means, `a² + b² == 1`.
     ///
-    /// Normalized means, that `a² + b² == 1`
+    /// The cusp solely depends on the maximum saturation of the hue, but is expressed as a
+    /// combination of lightness and chroma.
     pub fn find_cusp(a: T, b: T) -> Self {
         // First, find the maximum saturation (saturation S = C/L)
         let max_saturation = Self::max_saturation(a, b);
-
         // Convert to linear sRGB to find the first point where at least one of r,g or b >= 1:
         let rgb_at_max: LinSrgb<T> =
             Oklab::new(T::one(), max_saturation * a, max_saturation * b).into_color_unclamped();
@@ -267,15 +282,16 @@ where
             chroma: max_lightness * max_saturation,
         }
     }
-    /// Returns the maximum `sRGB`-saturation (chroma / lightness) for a given hue,
-    /// described by of vectors `a` and `b`,
-    /// where `a` describes the green/redness of the hue
-    /// and `b` describes the blue/yellowness of the hue
-    /// and `a` and `b` are normalized to a chroma of `1`.
+
+    /// Returns the maximum `sRGB`-saturation (chroma / lightness) for the hue (`a` and `b`).
     ///
-    /// # Panics
-    /// Panics, if
-    /// `a²+b² != 1`
+    /// # Arguments
+    /// * `a` - the green/redness of the hue
+    /// * `b` -  the blue/yellowness of the hue
+    ///
+    ///  `a` and `b` must be normalized to a chroma (`a²+b²`) of `1`.
+    /// # See
+    /// [Original C-Version](https://bottosson.github.io/posts/gamutclipping/#intersection-with-srgb-gamut)
     fn max_saturation(a: T, b: T) -> T {
         // Max saturation will be reached, when one of r, g or b goes below zero.
         // Select different coefficients depending on which component goes below zero first
@@ -323,15 +339,12 @@ where
 
         // Approximate max saturation using a polynomial
         let mut approx_max_saturation = k0 + k1 * a + k2 * b + k3 * a.powi(2) + k4 * a * b;
-
         // Get closer with Halley's method
         let k_l = T::from_f64(0.3963377774) * a + T::from_f64(0.2158037573) * b;
         let k_m = T::from_f64(-0.1055613458) * a - T::from_f64(0.0638541728) * b;
         let k_s = T::from_f64(-0.0894841775) * a - T::from_f64(1.2914855480) * b;
 
-        // A single iteration generally gets us quite close (1e-6).
-        const MAX_ITER: usize = 1;
-        for _i in 0..MAX_ITER {
+        for _i in 0..MAX_SRGB_SATURATION_SEARCH_MAX_ITER {
             let l_ = T::one() + approx_max_saturation * k_l;
             let m_ = T::one() + approx_max_saturation * k_m;
             let s_ = T::one() + approx_max_saturation * k_s;
@@ -364,7 +377,44 @@ where
     }
 }
 
-/// Alternative representation of `LC`, that allows computing the maximum chroma `C`
+#[cfg(test)]
+impl<T> OklabHue<T>
+where
+    T: Real
+        + RealAngle
+        + PartialOrd
+        + HasBoolMask<Mask = bool>
+        + MinMax
+        + Copy
+        + Powi
+        + Sqrt
+        + Cbrt
+        + Arithmetics
+        + Trigonometry
+        + Zero
+        + One
+        + FromScalar
+        //fixme: remove
+        + Debug,
+    T::Scalar: Real
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
+{
+    pub(crate) fn srgb_limits(self) -> (LC<T>, T, T) {
+        let normalized_hue_vector = self.ab(T::one());
+        let lc = LC::find_cusp(normalized_hue_vector.0, normalized_hue_vector.1);
+        let a = lc.chroma.clone() * normalized_hue_vector.0.clone();
+        let b = lc.chroma.clone() * normalized_hue_vector.1.clone();
+        (lc, a, b)
+    }
+}
+
+/// A representation of [`LC`], that allows computing the maximum chroma `C`
 /// for a given lightness `L` in the gamut triangle of a hue as
 /// ```text
 /// C
@@ -398,7 +448,11 @@ where
     /// Returns a smooth approximation of the location of the cusp.
     ///
     /// This polynomial was created by an optimization process.
-    /// It has been designed so that `S_mid < S_max` and `T_mid < T_max`
+    /// It has been designed so that
+    ///
+    ///   `S_mid < S_max` and
+    ///
+    ///   `T_mid < T_max`
     #[rustfmt::skip]
     fn mid(a_: T, b_: T) -> ST<T>
 
@@ -424,19 +478,22 @@ where
     }
 }
 
-/// Maps a `oklab_lightness` to a a lightness `L_r`.
+/// Maps an `oklab_lightness` to an *sRGB* reference-white based lightness `L_r`.
 ///
-/// The `Oklab` lightness is scale independent, i.e. `0` is black, `1` is pure white, but
-/// the luminosity of pure white is undefined. `Oklab`'s lightness is not limited to the human
-/// ability to see nor a displays to produce color. Lightness values may mean different things in
-/// different contexts (maximum display luminosity, background color and other viewing conditions).
+/// The `Oklab` lightness is relative, i.e. `0` is black, `1` is pure white, but
+/// `Oklab` is scale independent -- i.e. the luminosity of `luminance == 1.0` is undefined.
+/// Lightness values may mean different things in different contexts (maximum display
+/// luminosity, background brightness and other viewing conditions).
 ///
-/// `sRGB` however has a well defined dynamic range and a clear reference white luminance.
+/// *sRGB* however has a well defined dynamic range and a
+/// [D65](https://en.wikipedia.org/wiki/Illuminant_D65) reference white luminance.
 /// Mapping `1` to that luminance is just a matter of definition. But is say `0.8` `Oklab`
 /// lightness equal to `0.5` or `0.9` `sRGB` luminance?
 ///   
 /// The shape and weights of `L_r` are chosen to closely matches the lightness estimate of
 /// the `CIELab` color space and be nearly equal at `0.5`.
+///
+/// Inverse of [`toe_inv`]
 ///
 /// # See
 /// https://bottosson.github.io/posts/colorpicker/#intermission---a-new-lightness-estimate-for-oklab
@@ -455,8 +512,7 @@ where
             ))
 }
 
-/// Maps a lightness based on a defined dynamic range and a reference white luminance
-/// to `Oklab`s scale-free luminance.
+/// Maps a *sRGB* reference-white based lightness to `Oklab`s scale-independent luminance.
 ///
 /// Inverse of [`toe`]
 pub(crate) fn toe_inv<T>(l_r: T) -> T
@@ -503,45 +559,57 @@ mod tests {
     }
 
     #[test]
-    fn print_max_srgb_chroma_of_all_hues() {
-        let mut max_chroma: (OklabHue<f64>, LC<f64>) = (
-            OklabHue::new(f64::NAN),
-            LC {
+    fn print_min_max_srgb_chroma_of_all_hues() {
+        struct HueLc<T: Real> {
+            hue: OklabHue<T>,
+            lc: LC<T>,
+        }
+
+        let mut min_chroma: HueLc<f64> = HueLc {
+            hue: OklabHue::new(f64::NAN),
+            lc: LC {
+                lightness: 0.0,
+                chroma: f64::INFINITY,
+            },
+        };
+        let mut max_chroma: HueLc<f64> = HueLc {
+            hue: OklabHue::new(f64::NAN),
+            lc: LC {
                 lightness: 0.0,
                 chroma: 0.0,
             },
-        );
+        };
         let mut min_a = f64::INFINITY;
         let mut min_b = f64::INFINITY;
         let mut max_a = -f64::INFINITY;
         let mut max_b = -f64::INFINITY;
 
+        // use 300000 for actually computing values (takes < 10 seconds)
         const SAMPLE_RESOLUTION: usize = 3;
 
         for i in 0..SAMPLE_RESOLUTION * 360 {
-            let hue = i as f64 / (SAMPLE_RESOLUTION as f64);
-            let hue_radians = hue.to_radians();
-            let normalized_hue_vector = (f64::cos(hue_radians), f64::sin(hue_radians));
-            let lc = LC::find_cusp(normalized_hue_vector.0, normalized_hue_vector.1);
-            let a = lc.chroma * normalized_hue_vector.0;
-            let b = lc.chroma * normalized_hue_vector.1;
-            if lc.chroma > max_chroma.1.chroma {
-                max_chroma = (OklabHue::new(hue), lc);
+            let hue: OklabHue<f64> = OklabHue::new(i as f64 / (SAMPLE_RESOLUTION as f64));
+            let (lc, a, b) = hue.srgb_limits();
+            if lc.chroma < min_chroma.lc.chroma {
+                min_chroma = HueLc { hue, lc };
+            }
+            if lc.chroma > max_chroma.lc.chroma {
+                max_chroma = HueLc { hue, lc };
             }
             max_a = f64::max(max_a, a);
             min_a = f64::min(min_a, a);
             max_b = f64::max(max_b, b);
             min_b = f64::min(min_b, b);
         }
-        let max_chroma_hue = max_chroma.0;
-        let max_chroma_hue_radians = max_chroma_hue.into_raw_radians();
-        let max_chroma = max_chroma.1.chroma;
+        let (max_chroma_a, max_chroma_b) = max_chroma.hue.ab(max_chroma.lc.chroma);
+        println!(
+            "Min chroma {} at hue {:?}°.",
+            min_chroma.lc.chroma, min_chroma.hue,
+        );
+
         println!(
             "Max chroma {} at hue {:?}° (Oklab a and b {}, {}).",
-            max_chroma,
-            max_chroma_hue,
-            max_chroma * f64::cos(max_chroma_hue_radians),
-            max_chroma * f64::sin(max_chroma_hue_radians)
+            max_chroma.lc.chroma, max_chroma.hue, max_chroma_a, max_chroma_b
         );
         println!("{} <= a <= {}", min_a, max_a);
         println!("{} <= b <= {}", min_b, max_b);
