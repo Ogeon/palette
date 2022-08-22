@@ -14,15 +14,8 @@ where
 {
     /// Create an Oklch color with transparency.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
-        Self::new_const(l, chroma, hue.into(), alpha)
-    }
-
-    /// Create an Oklch color with transparency. This is the same as
-    /// `Oklcha::new` without the generic hue type. It's temporary until `const
-    /// fn` supports traits.
-    pub const fn new_const(l: T, chroma: T, hue: OklabHue<T>, alpha: A) -> Self {
         Alpha {
-            color: Oklch::new_const(l, chroma, hue),
+            color: Oklch::new(l, chroma, hue),
             alpha,
         }
     }

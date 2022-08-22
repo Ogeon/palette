@@ -54,13 +54,11 @@ where
 {
     /// Create an Oklch color.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H) -> Self {
-        Self::new_const(l, chroma, hue.into())
-    }
-
-    /// Create an Oklch color. This is the same as `Oklch::new` without the
-    /// generic hue type. It's temporary until `const fn` supports traits.
-    pub const fn new_const(l: T, chroma: T, hue: OklabHue<T>) -> Self {
-        Oklch { l, chroma, hue }
+        Oklch {
+            l,
+            chroma,
+            hue: hue.into(),
+        }
     }
 
     /// Convert to a `(L, C, h)` tuple.
