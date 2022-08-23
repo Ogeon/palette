@@ -9,7 +9,6 @@ use crate::num::{
 #[cfg(test)]
 use crate::OklabHue;
 use crate::{HasBoolMask, LinSrgb, Oklab};
-use core::fmt::Debug;
 
 /// Finds intersection of the line defined by
 ///
@@ -393,9 +392,7 @@ where
         + Trigonometry
         + Zero
         + One
-        + FromScalar
-        //fixme: remove
-        + Debug,
+        + FromScalar,
     T::Scalar: Real
         + Zero
         + One
@@ -431,7 +428,7 @@ pub(crate) struct ST<T> {
 
 impl<T> From<LC<T>> for ST<T>
 where
-    T: Real + Arithmetics + One + Copy,
+    T: Arithmetics + One + Copy,
 {
     fn from(lc: LC<T>) -> Self {
         ST {

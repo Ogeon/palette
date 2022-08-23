@@ -17,6 +17,9 @@ mod alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual_eq;
 
 /// A Hue/Whiteness/Blackness representation of [`Oklab`] in the `sRGB` color space.
 /// # See
@@ -65,7 +68,7 @@ impl<T> Okhwb<T> {
 
     /// Create an `Okhwb` color. This is the same as `Okhwb::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(hue: OklabHue<T>, whiteness: T, blackness: T) -> Self {
+    pub const fn new_const(hue: OklabHue<T>, whiteness: T, blackness: T) -> Self {
         Self {
             hue,
             whiteness,
@@ -96,7 +99,7 @@ impl<T> Okhwb<T> {
 
 impl<T> Okhwb<T>
 where
-    T: Real + Stimulus,
+    T: Stimulus,
 {
     /// Return the `whiteness` value minimum.
     pub fn min_whiteness() -> T {
@@ -167,7 +170,7 @@ where
 
 impl<T> Default for Okhwb<T>
 where
-    T: Real + Stimulus,
+    T: Stimulus,
     OklabHue<T>: Default,
 {
     fn default() -> Okhwb<T> {

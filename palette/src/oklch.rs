@@ -1,9 +1,10 @@
 pub use alpha::Oklcha;
 
+use crate::num::UpperBounded;
 use crate::{
     bool_mask::HasBoolMask,
     convert::FromColorUnclamped,
-    num::{Arithmetics, Hypot, One, Real, Zero},
+    num::{Hypot, One, Zero},
     white_point::D65,
     GetHue, Oklab, OklabHue, Xyz,
 };
@@ -48,10 +49,7 @@ pub struct Oklch<T = f32> {
     pub hue: OklabHue<T>,
 }
 
-impl<T> Oklch<T>
-where
-    T: Real,
-{
+impl<T> Oklch<T> {
     /// Create an `Oklch` color.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H) -> Self {
         Oklch {
@@ -63,7 +61,7 @@ where
 
     /// Create an `Oklch` color. This is the same as `Oklch::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(l: T, chroma: T, hue: OklabHue<T>) -> Self {
+    pub const fn new_const(l: T, chroma: T, hue: OklabHue<T>) -> Self {
         Oklch { l, chroma, hue }
     }
 
@@ -80,7 +78,7 @@ where
 
 impl<T> Oklch<T>
 where
-    T: Real + Zero + One,
+    T: Zero + One + UpperBounded,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -99,7 +97,7 @@ where
 
     /// Return the `chroma` value maximum.
     pub fn max_chroma() -> T {
-        T::inf()
+        T::max_value()
     }
 }
 
@@ -122,7 +120,7 @@ where
 
 impl<T> FromColorUnclamped<Oklab<T>> for Oklch<T>
 where
-    T: Real + Zero + Hypot + Clone + PartialEq + Arithmetics,
+    T: Hypot + Clone,
     Oklab<T>: GetHue<Hue = OklabHue<T>>,
 {
     fn from_color_unclamped(color: Oklab<T>) -> Self {
@@ -132,19 +130,13 @@ where
     }
 }
 
-impl<T, H: Into<OklabHue<T>>> From<(T, T, H)> for Oklch<T>
-where
-    T: Real,
-{
+impl<T, H: Into<OklabHue<T>>> From<(T, T, H)> for Oklch<T> {
     fn from(components: (T, T, H)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T> From<Oklch<T>> for (T, T, OklabHue<T>)
-where
-    T: Real,
-{
+impl<T> From<Oklch<T>> for (T, T, OklabHue<T>) {
     fn from(color: Oklch<T>) -> (T, T, OklabHue<T>) {
         color.into_components()
     }
@@ -159,7 +151,7 @@ where
 
 impl<T> Default for Oklch<T>
 where
-    T: Real + Zero + One,
+    T: Zero + One + UpperBounded,
     OklabHue<T>: Default,
 {
     fn default() -> Oklch<T> {
@@ -183,7 +175,7 @@ mod test {
             Oklch< f64>;
             clamped {
                 l: 0.0 => 1.0,
-                chroma: 0.0 => f64::INFINITY
+                chroma: 0.0 => f64::MAX
             }
             clamped_min {}
             unclamped {
@@ -197,7 +189,7 @@ mod test {
         assert_relative_eq!(Oklch::<f32>::min_l(), 0.0);
         assert_relative_eq!(Oklch::<f32>::max_l(), 1.0);
         assert_relative_eq!(Oklch::<f32>::min_chroma(), 0.0);
-        assert_relative_eq!(Oklch::<f32>::max_chroma(), f32::INFINITY);
+        assert_relative_eq!(Oklch::<f32>::max_chroma(), f32::MAX);
     }
 
     #[cfg(feature = "serializing")]

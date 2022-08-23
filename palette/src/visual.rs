@@ -1,10 +1,7 @@
-#[cfg(feature = "approx")]
 use approx::AbsDiffEq;
-#[cfg(feature = "approx")]
 use core::borrow::Borrow;
 
 /// Methods to tell the tell about the visual characteristics of the color
-#[cfg(feature = "approx")]
 pub trait VisualColor<T>
 where
     T: AbsDiffEq<Epsilon = T>,
@@ -25,7 +22,6 @@ where
 }
 
 /// Methods to compare visual characteristics of two colors
-#[cfg(feature = "approx")]
 pub trait VisuallyEqual<O, S, T>: VisualColor<T>
 where
     T: AbsDiffEq<Epsilon = T> + Clone,

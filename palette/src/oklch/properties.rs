@@ -3,6 +3,7 @@ use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
+use crate::num::UpperBounded;
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
@@ -23,12 +24,12 @@ impl_is_within_bounds! {
         l => [Self::min_l(), Self::max_l()],
         chroma => [Self::min_chroma(), Self::max_chroma()]
     }
-    where T: Real+Zero + One
+    where T: Zero + One +  UpperBounded
 }
 
 impl<T> Clamp for Oklch<T>
 where
-    T: Real + Zero + One + num::Clamp,
+    T: num::Clamp + Zero + One + UpperBounded,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -42,7 +43,7 @@ where
 
 impl<T> ClampAssign for Oklch<T>
 where
-    T: Real + Zero + One + num::ClampAssign,
+    T: num::ClampAssign + Zero + One + UpperBounded,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -52,8 +53,8 @@ where
 }
 
 impl_mix_hue!(Oklch { l, chroma });
-impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: One);
-impl_saturate!(Oklch increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} where T: One);
+impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: Zero + One + UpperBounded);
+impl_saturate!(Oklch increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} where T: Zero + One + UpperBounded);
 
 impl<T> GetHue for Oklch<T>
 where

@@ -1,21 +1,13 @@
-#[cfg(feature = "approx")]
-use core::borrow::Borrow;
 use core::ops::BitOr;
-#[cfg(feature = "approx")]
-use core::ops::Neg;
+
 use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-#[cfg(feature = "approx")]
-use crate::angle::{AngleEq, HalfRotation, SignedAngle};
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
-use crate::num::{Abs, Exp, Hypot, Powi, Sqrt};
-#[cfg(feature = "approx")]
-use crate::visual::{VisualColor, VisuallyEqual};
-#[cfg(feature = "approx")]
-use crate::HasBoolMask;
+use crate::num::{Abs, Exp, LowerBounded, Powi, Sqrt, UpperBounded};
+
 use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
@@ -39,12 +31,12 @@ impl_is_within_bounds! {
         a => [Self::min_a(), Self::max_a()],
         b => [Self::min_b(), Self::max_b()]
     }
-    where T: Real
+    where T: Zero + One + LowerBounded + UpperBounded
 }
 
 impl<T> Clamp for Oklab<T>
 where
-    T: Real + Arithmetics + Hypot + Clone + num::Clamp,
+    T: num::Clamp + Zero + One + LowerBounded + UpperBounded,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -57,7 +49,7 @@ where
 
 impl<T> ClampAssign for Oklab<T>
 where
-    T: Real + num::ClampAssign,
+    T: num::ClampAssign + Zero + One + LowerBounded + UpperBounded,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -66,7 +58,7 @@ where
 }
 
 impl_mix!(Oklab);
-impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b});
+impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b} where T:  One + LowerBounded + UpperBounded);
 impl_premultiply!(Oklab { l, a, b });
 
 impl<T> GetHue for Oklab<T>
@@ -114,64 +106,6 @@ impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);
 
 impl_eq!(Oklab, [l, a, b]);
-
-#[cfg(feature = "approx")]
-impl<T> VisualColor<T> for Oklab<T>
-where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + AbsDiffEq<Epsilon = T>
-        + One
-        + Zero
-        + Neg<Output = T>,
-    T::Epsilon: Clone,
-    OklabHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
-{
-    /// Returns true, if `chroma == 0`
-    #[allow(dead_code)]
-    fn is_grey(&self, epsilon: T::Epsilon) -> bool {
-        self.a.abs_diff_eq(&T::zero(), epsilon.clone()) && self.b.abs_diff_eq(&T::zero(), epsilon)
-    }
-
-    /// Returns true, if `lightness >= 1`
-    ///
-    /// **Note:** `sRGB` to `Oklab` conversion uses `f32` constants.
-    /// A tolerance `epsilon >= 1e-8` is required to reliably detect white.
-    /// Conversion of `sRGB` via XYZ requires `epsilon >= 1e-5`
-    fn is_white(&self, epsilon: T::Epsilon) -> bool {
-        self.l >= T::one() || self.l.abs_diff_eq(&T::one(), epsilon)
-    }
-
-    /// Returns true, if `lightness == 0`
-    fn is_black(&self, epsilon: T::Epsilon) -> bool {
-        self.l.abs_diff_eq(&T::zero(), epsilon)
-    }
-}
-#[cfg(feature = "approx")]
-impl<S, O, T> VisuallyEqual<O, S, T> for Oklab<T>
-where
-    T: PartialOrd
-        + HasBoolMask<Mask = bool>
-        + RealAngle
-        + SignedAngle
-        + Zero
-        + One
-        + AngleEq<Mask = bool>
-        + Sub<Output = T>
-        + AbsDiffEq<Epsilon = T>
-        + Neg<Output = T>
-        + Clone,
-    T::Epsilon: Clone + HalfRotation + Mul<Output = T::Epsilon>,
-    S: Borrow<Self> + Copy,
-    O: Borrow<Self> + Copy,
-{
-    fn visually_eq(s: S, o: O, epsilon: T::Epsilon) -> bool {
-        VisuallyEqual::both_black_or_both_white(s, o, epsilon.clone())
-            || s.borrow().l.abs_diff_eq(&o.borrow().l, epsilon.clone())
-                && s.borrow().a.abs_diff_eq(&o.borrow().a, epsilon.clone())
-                && s.borrow().b.abs_diff_eq(&o.borrow().b, epsilon)
-    }
-}
 
 impl<T> RelativeContrast for Oklab<T>
 where

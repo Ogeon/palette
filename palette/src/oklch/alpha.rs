@@ -22,7 +22,7 @@ where
 
     /// Create an `Oklcha` color. This is the same as `Oklcha::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(l: T, chroma: T, hue: OklabHue<T>, alpha: A) -> Self {
+    pub const fn new_const(l: T, chroma: T, hue: OklabHue<T>, alpha: A) -> Self {
         Alpha {
             color: Oklch::new_const(l, chroma, hue),
             alpha,

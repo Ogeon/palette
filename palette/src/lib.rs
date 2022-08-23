@@ -456,6 +456,8 @@ pub mod white_point;
 mod xyz;
 mod yxy;
 
+#[cfg(test)]
+#[cfg(feature = "approx")]
 mod visual;
 
 #[doc(hidden)]

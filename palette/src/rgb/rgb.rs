@@ -762,8 +762,8 @@ where
     fn from_color_unclamped(oklab: Oklab<T>) -> Self {
         if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
             // Use direct sRGB to Oklab conversion
-            // fixme: why does the direct conversion produce relevant differences
-            // to the conversion via XYZ?
+            // Rounding errors are likely a contributing factor to differences.
+            // Also the conversion via XYZ doesn't use pre-defined matrices (yet)
             oklab_to_linear_srgb(oklab).into_color_unclamped()
         } else {
             // Convert via XYZ

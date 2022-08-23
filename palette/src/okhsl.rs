@@ -15,6 +15,9 @@ mod alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual_eq;
 
 /// A Hue/Saturation/Lightness representation of [`Oklab`] in the `sRGB` color space.
 ///
@@ -80,7 +83,7 @@ impl<T> Okhsl<T> {
 
     /// Create an `Okhsl` color. This is the same as `Okhsl::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(hue: OklabHue<T>, saturation: T, lightness: T) -> Self {
+    pub const fn new_const(hue: OklabHue<T>, saturation: T, lightness: T) -> Self {
         Self {
             hue,
             saturation,

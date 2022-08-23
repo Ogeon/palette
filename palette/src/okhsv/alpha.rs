@@ -21,7 +21,7 @@ impl<T, A> Alpha<Okhsv<T>, A> {
 
     /// Create an `Okhsva` color. This is the same as `Okhsva::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(hue: OklabHue<T>, saturation: T, value: T, alpha: A) -> Self {
+    pub const fn new_const(hue: OklabHue<T>, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
             color: Okhsv::new_const(hue, saturation, value),
             alpha,

@@ -6,7 +6,7 @@ pub use alpha::Oklaba;
 
 use crate::convert::IntoColorUnclamped;
 use crate::encoding::{IntoLinear, Srgb};
-use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
+use crate::num::{FromScalar, Hypot, LowerBounded, Powi, Recip, Sqrt, UpperBounded};
 use crate::ok_utils::{toe_inv, ChromaValues, LC, ST};
 use crate::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
 use crate::{
@@ -23,6 +23,10 @@ mod alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual_eq;
+
 // Using recalculated matrix values from
 // https://github.com/LeaVerou/color.js/blob/master/src/spaces/oklab.js
 //
@@ -201,68 +205,36 @@ impl<T> Oklab<T> {
 // In the sRGB gamut `Oklab`s chroma (and thus a and b) are bounded.
 impl<T> Oklab<T>
 where
-    T: Real,
+    T: Zero + One + LowerBounded + UpperBounded,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
-        T::from_f64(0.0)
+        T::zero()
     }
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        T::from_f64(1.0)
+        T::one()
     }
 
     /// Return the `a` value minimum.
     pub fn min_a() -> T {
-        T::neg_inf()
+        T::min_value()
     }
 
     /// Return the `a` value maximum.
     pub fn max_a() -> T {
-        T::inf()
+        T::max_value()
     }
 
     /// Return the `b` value minimum.
     pub fn min_b() -> T {
-        T::neg_inf()
+        T::min_value()
     }
 
     /// Return the `b` value maximum.
     pub fn max_b() -> T {
-        T::inf()
-    }
-
-    /// Return the `a` value minimum in the *sRBG* gamut.
-    ///
-    /// This value is in the *sRBG* gamut only for a single `l` and `b` value.
-    pub fn min_srgb_a() -> T {
-        // according to ok_utils::tests::print_min_max_srgb_chroma_of_all_hues
-        T::from_f64(-0.2338876204567534)
-    }
-
-    /// Return the `a` value maximum in the *sRBG* gamut.
-    ///
-    /// This value is in the *sRBG* gamut only for a single `l` and `b` value.
-    pub fn max_srgb_a() -> T {
-        // according to ok_utils::tests::print_min_max_srgb_chroma_of_all_hues
-        T::from_f64(0.2762038774359256)
-    }
-
-    /// Return the `b` value minimum in the *sRBG* gamut.
-    ///
-    /// This value is in the *sRBG* gamut only for a single `l` and `a` value.
-    pub fn min_srgb_b() -> T {
-        // according to ok_utils::tests::print_min_max_srgb_chroma_of_all_hues
-        T::from_f64(-0.3115317233440153)
-    }
-
-    /// Return the `b` value maximum in the *sRBG* gamut.
-    ///
-    /// This value is in the *sRBG* gamut only for a single `l` and `a` value.
-    pub fn max_srgb_b() -> T {
-        // according to ok_utils::tests::print_min_max_srgb_chroma_of_all_hues
-        T::from_f64(0.1985697136998345)
+        T::max_value()
     }
 }
 
@@ -278,13 +250,17 @@ where
 
 impl<T> Oklab<T>
 where
-    T: Real + Arithmetics + Zero + Hypot + Clone + PartialEq,
+    T: Hypot + Clone,
 {
     /// Returns the chroma
     pub fn chroma(&self) -> T {
         T::hypot(self.a.clone(), self.b.clone())
     }
-
+}
+impl<T> Oklab<T>
+where
+    T: Arithmetics + Zero + Hypot + Clone + PartialEq,
+{
     /// Returns the `chroma` -- the euclidean norm of `a` and `b`.
     /// If `chroma > 0.0` returns normalized versions of `a` and `b`
     pub fn chroma_and_normalized_ab(&self) -> (T, Option<(T, T)>) {
@@ -394,8 +370,8 @@ where
     fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
         if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
             // Use direct sRGB to Oklab conversion
-            // fixme: why does the direct conversion produce relevant differences
-            //  to the conversion via XYZ?
+            // Rounding errors are likely a contributing factor to differences.
+            // Also the conversion via XYZ doesn't use pre-defined matrices (yet)
             linear_srgb_to_oklab(rgb.into_linear().reinterpret_as())
         } else {
             // Convert via XYZ
@@ -741,11 +717,11 @@ mod test {
     #[test]
     fn check_min_max_components() {
         assert_eq!(Oklab::<f32>::min_l(), 0.0);
-        assert_relative_eq!(Oklab::<f32>::min_a(), f32::NEG_INFINITY);
-        assert_relative_eq!(Oklab::<f32>::min_b(), f32::NEG_INFINITY);
+        assert_relative_eq!(Oklab::<f32>::min_a(), f32::MIN);
+        assert_relative_eq!(Oklab::<f32>::min_b(), f32::MIN);
         assert_eq!(Oklab::<f32>::max_l(), 1.0);
-        assert_relative_eq!(Oklab::<f32>::max_a(), f32::INFINITY);
-        assert_relative_eq!(Oklab::<f32>::max_b(), f32::INFINITY);
+        assert_relative_eq!(Oklab::<f32>::max_a(), f32::MAX);
+        assert_relative_eq!(Oklab::<f32>::max_b(), f32::MAX);
     }
 
     #[cfg(feature = "serializing")]

@@ -22,6 +22,9 @@ mod alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual_eq;
 
 /// A Hue/Saturation/Value representation of [`Oklab`] in the `sRGB` color space.
 ///
@@ -87,7 +90,7 @@ where
 
 impl<T> Default for Okhsv<T>
 where
-    T: Real + Stimulus,
+    T: Stimulus,
     OklabHue<T>: Default,
 {
     fn default() -> Okhsv<T> {
@@ -101,7 +104,7 @@ where
 
 impl<T> Okhsv<T>
 where
-    T: Real + Stimulus,
+    T: Stimulus,
 {
     /// Return the `saturation` value minimum.
     pub fn min_saturation() -> T {
@@ -136,7 +139,7 @@ impl<T> Okhsv<T> {
 
     /// Create an `Okhsv` color. This is the same as `Okhsv::new` without the
     /// generic hue type. It's temporary until `const fn` supports traits.
-    pub fn new_const(hue: OklabHue<T>, saturation: T, value: T) -> Self {
+    pub const fn new_const(hue: OklabHue<T>, saturation: T, value: T) -> Self {
         Self {
             hue,
             saturation,

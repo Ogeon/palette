@@ -1,13 +1,13 @@
 use super::Oklab;
-use crate::num::Real;
+use crate::num::One;
 use rand::distributions::uniform::{SampleBorrow, SampleUniform, UniformSampler};
 use rand::distributions::{Distribution, Standard, Uniform};
 use rand::Rng;
-use std::ops::{Mul, Sub};
+use std::ops::{Add, Mul, Sub};
 
 impl<T> Distribution<Oklab<T>> for Standard
 where
-    T: Real + Mul<Output = T> + Sub<Output = T>,
+    T: Mul<Output = T> + Add<Output = T> + Sub<Output = T> + One,
     Standard: Distribution<T>,
 {
     // `a` and `b` both range from (-1.0, 1.0)
@@ -26,8 +26,8 @@ where
 where {
         Oklab::new(
             rng.gen(),
-            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
-            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
+            rng.gen() * (T::one() + T::one()) - T::one(),
+            rng.gen() * (T::one() + T::one()) - T::one(),
         )
     }
 }
