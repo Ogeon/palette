@@ -78,6 +78,16 @@ impl<T> Okhsl<T> {
         }
     }
 
+    /// Create an `Okhsl` color. This is the same as `Okhsl::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, saturation: T, lightness: T) -> Self {
+        Self {
+            hue,
+            saturation,
+            lightness,
+        }
+    }
+
     /// Convert into another component type.
     pub fn into_format<U>(self) -> Okhsl<U>
     where

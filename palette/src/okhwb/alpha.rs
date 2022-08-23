@@ -1,7 +1,4 @@
-use core::fmt::Debug;
-
 use crate::angle::FromAngle;
-use crate::num::{MinMax, Zero};
 use crate::okhwb::Okhwb;
 use crate::stimulus::FromStimulus;
 use crate::{Alpha, OklabHue};
@@ -11,17 +8,20 @@ use crate::{Alpha, OklabHue};
 pub type Okhwba<T = f32> = Alpha<Okhwb<T>, T>;
 
 ///<span id="Okhwba"></span>[`Okhwba`](crate::Okhwba) implementations.
-impl<T, A> Alpha<Okhwb<T>, A>
-where
-    T: Zero
-        + MinMax
-        //fixme: remove
-        + Debug,
-{
-    /// Create an OKHWB color with transparency.
+impl<T, A> Alpha<Okhwb<T>, A> {
+    /// Create an `Okhwb` color with transparency.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, whiteness: T, blackness: T, alpha: A) -> Self {
         Alpha {
             color: Okhwb::new(hue.into(), whiteness, blackness),
+            alpha,
+        }
+    }
+
+    /// Create an `Okhwba` color. This is the same as `Okhwba::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, whiteness: T, blackness: T, alpha: A) -> Self {
+        Alpha {
+            color: Okhwb::new_const(hue, whiteness, blackness),
             alpha,
         }
     }
@@ -42,10 +42,6 @@ where
     pub fn from_format<U, B>(color: Alpha<Okhwb<U>, B>) -> Self
     where
         T: FromStimulus<U> + FromAngle<U>,
-        U: Zero
-            + MinMax
-            //fixme: remove
-            + Debug,
         A: FromStimulus<B>,
     {
         color.into_format()

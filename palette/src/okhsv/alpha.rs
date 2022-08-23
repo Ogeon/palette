@@ -10,14 +10,20 @@ use crate::Alpha;
 pub type Okhsva<T = f32> = Alpha<Okhsv<T>, T>;
 
 ///<span id="Hsva"></span>[`Hsva`](crate::Hsva) implementations.
-impl<T, A> Alpha<Okhsv<T>, A>
-where
-    T: Zero + MinMax,
-{
-    /// Create an HSV color with transparency.
+impl<T, A> Alpha<Okhsv<T>, A> {
+    /// Create an `Okhsv` color with transparency.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, value: T, alpha: A) -> Self {
         Alpha {
             color: Okhsv::new(hue.into(), saturation, value),
+            alpha,
+        }
+    }
+
+    /// Create an `Okhsva` color. This is the same as `Okhsva::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, saturation: T, value: T, alpha: A) -> Self {
+        Alpha {
+            color: Okhsv::new_const(hue, saturation, value),
             alpha,
         }
     }
@@ -62,28 +68,19 @@ where
     }
 }
 
-impl<T> From<Okhsv<T>> for (OklabHue<T>, T, T)
-where
-    T: Zero + MinMax,
-{
+impl<T> From<Okhsv<T>> for (OklabHue<T>, T, T) {
     fn from(color: Okhsv<T>) -> (OklabHue<T>, T, T) {
         color.into_components()
     }
 }
 
-impl<T, H: Into<OklabHue<T>>, A> From<(H, T, T, A)> for Alpha<Okhsv<T>, A>
-where
-    T: Zero + MinMax,
-{
+impl<T, H: Into<OklabHue<T>>, A> From<(H, T, T, A)> for Alpha<Okhsv<T>, A> {
     fn from(components: (H, T, T, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T, A> From<Alpha<Okhsv<T>, A>> for (OklabHue<T>, T, T, A)
-where
-    T: Zero + MinMax,
-{
+impl<T, A> From<Alpha<Okhsv<T>, A>> for (OklabHue<T>, T, T, A) {
     fn from(color: Alpha<Okhsv<T>, A>) -> (OklabHue<T>, T, T, A) {
         color.into_components()
     }

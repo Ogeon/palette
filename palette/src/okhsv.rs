@@ -125,10 +125,20 @@ where
 }
 
 impl<T> Okhsv<T> {
-    /// Create an Okhsv color.
+    /// Create an `Okhsv` color.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, value: T) -> Self {
         Self {
             hue: hue.into(),
+            saturation,
+            value,
+        }
+    }
+
+    /// Create an `Okhsv` color. This is the same as `Okhsv::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, saturation: T, value: T) -> Self {
+        Self {
+            hue,
             saturation,
             value,
         }

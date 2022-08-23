@@ -52,13 +52,20 @@ pub struct Okhwb<T = f32> {
     pub blackness: T,
 }
 
-impl<T> Okhwb<T>
-where
-    T: Zero,
-{
-    /// Create an Okhwb color.
+impl<T> Okhwb<T> {
+    /// Create an `Okhwb` color.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, whiteness: T, blackness: T) -> Self {
         let hue = hue.into();
+        Self {
+            hue,
+            whiteness,
+            blackness,
+        }
+    }
+
+    /// Create an `Okhwb` color. This is the same as `Okhwb::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, whiteness: T, blackness: T) -> Self {
         Self {
             hue,
             whiteness,

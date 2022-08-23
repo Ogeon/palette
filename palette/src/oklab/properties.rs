@@ -113,7 +113,7 @@ impl_color_div!(Oklab<T>, [l, a, b]);
 impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);
 
-impl_eq_hue!(Oklab, OklabHue, [l, a, b]);
+impl_eq!(Oklab, [l, a, b]);
 
 #[cfg(feature = "approx")]
 impl<T> VisualColor<T> for Oklab<T>

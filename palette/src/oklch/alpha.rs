@@ -20,6 +20,15 @@ where
         }
     }
 
+    /// Create an `Oklcha` color. This is the same as `Oklcha::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(l: T, chroma: T, hue: OklabHue<T>, alpha: A) -> Self {
+        Alpha {
+            color: Oklch::new_const(l, chroma, hue),
+            alpha,
+        }
+    }
+
     /// Convert to a `(L, C, h, alpha)` tuple.
     pub fn into_components(self) -> (T, T, OklabHue<T>, A) {
         (self.color.l, self.color.chroma, self.color.hue, self.alpha)

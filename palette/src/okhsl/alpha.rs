@@ -8,10 +8,19 @@ pub type Okhsla<T = f32> = Alpha<Okhsl<T>, T>;
 
 ///<span id="Okhsla"></span>[`Okhsla`](crate::Okhsla) implementations.
 impl<T, A> Alpha<Okhsl<T>, A> {
-    /// Create an Oklab color with transparency.
+    /// Create an 'Okhsl' color with transparency.
     pub fn new<H: Into<OklabHue<T>>>(hue: H, saturation: T, lightness: T, alpha: A) -> Self {
         Alpha {
             color: Okhsl::new(hue, saturation, lightness),
+            alpha,
+        }
+    }
+
+    /// Create an `Okhsla` color. This is the same as `Okhsla::new` without the
+    /// generic hue type. It's temporary until `const fn` supports traits.
+    pub fn new_const(hue: OklabHue<T>, saturation: T, lightness: T, alpha: A) -> Self {
+        Alpha {
+            color: Okhsl::new_const(hue, saturation, lightness),
             alpha,
         }
     }
