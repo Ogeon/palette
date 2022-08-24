@@ -1,4 +1,3 @@
-use crate::num::Real;
 use crate::{Alpha, OklabHue};
 
 use super::Oklch;
@@ -8,10 +7,7 @@ use super::Oklch;
 pub type Oklcha<T = f32> = Alpha<Oklch<T>, T>;
 
 ///<span id="Oklcha"></span>[`Oklcha`](crate::Oklcha) implementations.
-impl<T, A> Alpha<Oklch<T>, A>
-where
-    T: Real,
-{
+impl<T, A> Alpha<Oklch<T>, A> {
     /// Create an Oklch color with transparency.
     pub fn new<H: Into<OklabHue<T>>>(l: T, chroma: T, hue: H, alpha: A) -> Self {
         Alpha {
@@ -40,19 +36,13 @@ where
     }
 }
 
-impl<T, H: Into<OklabHue<T>>, A> From<(T, T, H, A)> for Alpha<Oklch<T>, A>
-where
-    T: Real,
-{
+impl<T, H: Into<OklabHue<T>>, A> From<(T, T, H, A)> for Alpha<Oklch<T>, A> {
     fn from(components: (T, T, H, A)) -> Self {
         Self::from_components(components)
     }
 }
 
-impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A)
-where
-    T: Real,
-{
+impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
     fn from(color: Alpha<Oklch<T>, A>) -> (T, T, OklabHue<T>, A) {
         color.into_components()
     }
