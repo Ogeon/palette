@@ -6,7 +6,7 @@ use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, Sub
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 use crate::color_difference::{get_ciede_difference, LabColorDiff};
-use crate::num::{Abs, Exp, LowerBounded, Powi, Sqrt, UpperBounded};
+use crate::num::{Abs, Exp, Powi, Sqrt};
 
 use crate::{
     angle::RealAngle,
@@ -27,16 +27,14 @@ use super::Oklab;
 
 impl_is_within_bounds! {
     Oklab {
-        l => [Self::min_l(), Self::max_l()],
-        a => [Self::min_a(), Self::max_a()],
-        b => [Self::min_b(), Self::max_b()]
+        l => [Self::min_l(), Self::max_l()]
     }
-    where T: Zero + One + LowerBounded + UpperBounded
+    where T: Zero + One
 }
 
 impl<T> Clamp for Oklab<T>
 where
-    T: num::Clamp + Zero + One + LowerBounded + UpperBounded,
+    T: num::Clamp + Zero + One,
 {
     #[inline]
     fn clamp(self) -> Self {
@@ -49,7 +47,7 @@ where
 
 impl<T> ClampAssign for Oklab<T>
 where
-    T: num::ClampAssign + Zero + One + LowerBounded + UpperBounded,
+    T: num::ClampAssign + Zero + One,
 {
     #[inline]
     fn clamp_assign(&mut self) {
@@ -58,7 +56,7 @@ where
 }
 
 impl_mix!(Oklab);
-impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b} where T:  One + LowerBounded + UpperBounded);
+impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b} where T:  One);
 impl_premultiply!(Oklab { l, a, b });
 
 impl<T> GetHue for Oklab<T>

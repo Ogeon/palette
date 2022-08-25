@@ -1,6 +1,5 @@
 pub use alpha::Oklcha;
 
-use crate::num::UpperBounded;
 use crate::{
     bool_mask::HasBoolMask,
     convert::FromColorUnclamped,
@@ -78,7 +77,7 @@ impl<T> Oklch<T> {
 
 impl<T> Oklch<T>
 where
-    T: Zero + One + UpperBounded,
+    T: Zero + One,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -93,11 +92,6 @@ where
     /// Return the `chroma` value minimum.
     pub fn min_chroma() -> T {
         T::zero()
-    }
-
-    /// Return the `chroma` value maximum.
-    pub fn max_chroma() -> T {
-        T::max_value()
     }
 }
 
@@ -151,7 +145,7 @@ where
 
 impl<T> Default for Oklch<T>
 where
-    T: Zero + One + UpperBounded,
+    T: Zero + One,
     OklabHue<T>: Default,
 {
     fn default() -> Oklch<T> {
@@ -171,11 +165,11 @@ mod test {
 
     #[test]
     fn ranges() {
+        // chroma: 0.0 => infinity
         assert_ranges! {
             Oklch< f64>;
             clamped {
-                l: 0.0 => 1.0,
-                chroma: 0.0 => f64::MAX
+                l: 0.0 => 1.0
             }
             clamped_min {}
             unclamped {
@@ -189,7 +183,6 @@ mod test {
         assert_relative_eq!(Oklch::<f32>::min_l(), 0.0);
         assert_relative_eq!(Oklch::<f32>::max_l(), 1.0);
         assert_relative_eq!(Oklch::<f32>::min_chroma(), 0.0);
-        assert_relative_eq!(Oklch::<f32>::max_chroma(), f32::MAX);
     }
 
     #[cfg(feature = "serializing")]

@@ -55,18 +55,6 @@ pub trait IntoScalarArray<const N: usize>: FromScalar {
     fn into_array(self) -> [Self::Scalar; N];
 }
 
-/// Numbers which have lower bounds
-pub trait LowerBounded {
-    /// Returns the smallest finite number this type can represent
-    fn min_value() -> Self;
-}
-
-/// Numbers which have upper bounds
-pub trait UpperBounded {
-    /// Returns the largest finite number this type can represent
-    fn max_value() -> Self;
-}
-
 /// Methods for the value `0`.
 pub trait Zero {
     /// Create a new `0` value.
@@ -339,18 +327,6 @@ macro_rules! impl_uint {
                 }
             }
 
-            impl LowerBounded for $ty {
-                fn min_value() -> Self{
-                    $ty::MIN
-                }
-            }
-
-            impl UpperBounded for $ty {
-                fn max_value() -> Self{
-                    $ty::MAX
-                }
-            }
-
             impl MinMax for $ty {
                 #[inline]
                 fn min(self, other: Self) -> Self {
@@ -482,18 +458,6 @@ macro_rules! impl_float {
                 #[inline]
                 fn one() -> Self {
                     1.0
-                }
-            }
-
-            impl LowerBounded for $ty {
-                fn min_value() -> Self{
-                    $ty::MIN
-                }
-            }
-
-            impl UpperBounded for $ty {
-                fn max_value() -> Self{
-                    $ty::MAX
                 }
             }
 

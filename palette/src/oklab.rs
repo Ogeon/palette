@@ -6,7 +6,7 @@ pub use alpha::Oklaba;
 
 use crate::convert::IntoColorUnclamped;
 use crate::encoding::{IntoLinear, Srgb};
-use crate::num::{FromScalar, Hypot, LowerBounded, Powi, Recip, Sqrt, UpperBounded};
+use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
 use crate::ok_utils::{toe_inv, ChromaValues, LC, ST};
 use crate::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
 use crate::{
@@ -126,9 +126,12 @@ pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
 /// which the eye is assumed to be adapted.
 ///
 /// # Clamping
-/// `Oklab` is not limited to *sRGB*'s gamut. [`Clamp`ing](Clamp) will only clamp `l`.
-/// To ensure a color is within the *sRGB* gamut, convert it to `Okhsv`, clamp it there and convert
-/// it back to `Oklab`.
+/// [`Clamp`ing](Clamp) will only clamp `l`. Clamping does not guarantee the color to be inside
+/// the perceptible or any display-dependent color space (like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsv`, clamp it there
+/// and convert it back to `Oklab`.
+///
 /// ```
 /// // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&precision=17
 /// # use approx::assert_abs_diff_eq;
@@ -147,6 +150,15 @@ pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
 /// of the perceptually closest locations in the `sRGB` gamut. Gamut mapping -- unlike clamping --
 /// is an expensive operation. To get computationally cheaper (and perceptually much worse) results,
 /// convert directly to [`Srgb`] and clamp there.  
+///
+/// # Lightening / Darkening
+/// [`Lighten`ing](crate::Lighten) and [`Darken`ing](crate::Darken) will change `l`, as expected. However,
+/// either operation may leave an implicit color space (the percetible or a display
+/// dependent color space like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`, lighten/darken
+/// it there and convert it back to `Oklab`.
+
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -205,7 +217,7 @@ impl<T> Oklab<T> {
 // In the sRGB gamut `Oklab`s chroma (and thus a and b) are bounded.
 impl<T> Oklab<T>
 where
-    T: Zero + One + LowerBounded + UpperBounded,
+    T: Zero + One,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
@@ -215,26 +227,6 @@ where
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
         T::one()
-    }
-
-    /// Return the `a` value minimum.
-    pub fn min_a() -> T {
-        T::min_value()
-    }
-
-    /// Return the `a` value maximum.
-    pub fn max_a() -> T {
-        T::max_value()
-    }
-
-    /// Return the `b` value minimum.
-    pub fn min_b() -> T {
-        T::min_value()
-    }
-
-    /// Return the `b` value maximum.
-    pub fn max_b() -> T {
-        T::max_value()
     }
 }
 
@@ -717,11 +709,7 @@ mod test {
     #[test]
     fn check_min_max_components() {
         assert_eq!(Oklab::<f32>::min_l(), 0.0);
-        assert_relative_eq!(Oklab::<f32>::min_a(), f32::MIN);
-        assert_relative_eq!(Oklab::<f32>::min_b(), f32::MIN);
         assert_eq!(Oklab::<f32>::max_l(), 1.0);
-        assert_relative_eq!(Oklab::<f32>::max_a(), f32::MAX);
-        assert_relative_eq!(Oklab::<f32>::max_b(), f32::MAX);
     }
 
     #[cfg(feature = "serializing")]

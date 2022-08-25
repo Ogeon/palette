@@ -3,18 +3,16 @@ use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use crate::num::UpperBounded;
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    MixAssign, OklabHue, RelativeContrast, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 use super::Oklch;
@@ -22,20 +20,20 @@ use super::Oklch;
 impl_is_within_bounds! {
     Oklch {
         l => [Self::min_l(), Self::max_l()],
-        chroma => [Self::min_chroma(), Self::max_chroma()]
+        chroma => [Self::min_chroma(),None]
     }
-    where T: Zero + One +  UpperBounded
+    where T: Zero + One
 }
 
 impl<T> Clamp for Oklch<T>
 where
-    T: num::Clamp + Zero + One + UpperBounded,
+    T: num::Clamp + Zero + One,
 {
     #[inline]
     fn clamp(self) -> Self {
         Self::new(
             clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
+            clamp_min(self.chroma, Self::min_chroma()),
             self.hue,
         )
     }
@@ -43,18 +41,17 @@ where
 
 impl<T> ClampAssign for Oklch<T>
 where
-    T: num::ClampAssign + Zero + One + UpperBounded,
+    T: num::ClampAssign + Zero + One,
 {
     #[inline]
     fn clamp_assign(&mut self) {
         clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.chroma, Self::min_chroma(), Self::max_chroma());
+        clamp_min_assign(&mut self.chroma, Self::min_chroma());
     }
 }
 
 impl_mix_hue!(Oklch { l, chroma });
-impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: Zero + One + UpperBounded);
-impl_saturate!(Oklch increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} where T: Zero + One + UpperBounded);
+impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: Zero + One);
 
 impl<T> GetHue for Oklch<T>
 where
