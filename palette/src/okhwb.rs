@@ -236,6 +236,8 @@ mod tests {
             ),
         ];
 
+        const EPSILON: f64 = 1e-14;
+
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
                 crate::Srgb::<f64>::from_color_unclamped(color).into_format();
@@ -252,32 +254,35 @@ mod tests {
             let okhwb = Okhwb::from_color_unclamped(color);
             println!("Okhwb: {:?}", okhwb);
             assert!(
-                Okhwb::visually_eq(okhwb, okhwb_from_okhsv, f64::EPSILON),
-                "Okhwb \n{:?} is not visually equal to Okhwb from Okhsv \n{:?}\nwithin epsilon {}",
+                Okhwb::visually_eq(okhwb, okhwb_from_okhsv, EPSILON),
+                "Okhwb \n{:?} is not visually equal to Okhwb from Okhsv \n{:?}\nwithin EPSILON {}",
                 okhwb,
                 okhwb_from_okhsv,
-                f64::EPSILON
+                EPSILON
             );
             let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
             assert!(
-                Okhsv::visually_eq(okhsv, okhsv_from_okhwb, f64::EPSILON),
-                "Okhsv \n{:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{:?}\nwithin epsilon {}",
+                Okhsv::visually_eq(okhsv, okhsv_from_okhwb, EPSILON),
+                "Okhsv \n{:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{:?}\nwithin EPSILON {}",
                 okhsv,
-                okhsv_from_okhwb,f64::EPSILON
+                okhsv_from_okhwb, EPSILON
             );
 
             let roundtrip_color = Oklab::from_color_unclamped(okhwb);
             let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
             assert!(
-                Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, f64::EPSILON),
-                "roundtrip color \n{:?} does not match \n{:?}\nwithin epsilon {}",
+                Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, EPSILON),
+                "roundtrip color \n{:?} does not match \n{:?}\nwithin EPSILON {}",
                 roundtrip_color,
                 oklab_from_okhsv,
-                f64::EPSILON
+                EPSILON
             );
             assert!(
-                Oklab::visually_eq(roundtrip_color, color, f64::EPSILON),
-                "'{}' failed. {:?} != {:?}",
+                Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                "'{}' failed.\n\
+                {:?}\n\
+                !=\n\
+                \n{:?}\n",
                 name,
                 roundtrip_color,
                 color
