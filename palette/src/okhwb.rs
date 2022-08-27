@@ -236,19 +236,9 @@ mod tests {
             ),
         ];
 
-        // unlike in okhsv and okhsl (but like in olhsf::tests::blue)
-        // we are using f32 here, which for some AMD CPUs is
-        // broken already in the reference implementation.
-        //
-        // We need a huge tolerance. Even this tolerance works only because
-        // `crate::ok_utils::max_saturation::MAX_ITER == 1` accidentally hides the
-        // real error. If raised the error becomes much larger.
-        //FIXME: Fix the error and use a small tolerance
-        const EPSILON: f32 = 1e-1;
-
         for (name, color) in colors {
             let rgb: Rgb<encoding::Srgb, u8> =
-                crate::Srgb::<f32>::from_color_unclamped(color).into_format();
+                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
             println!(
                 "\n\
             roundtrip of {} (#{:x} / {:?})\n\
@@ -261,35 +251,32 @@ mod tests {
             let okhwb_from_okhsv = Okhwb::from_color_unclamped(okhsv);
             let okhwb = Okhwb::from_color_unclamped(color);
             println!("Okhwb: {:?}", okhwb);
-            let epsilon = f32::EPSILON;
             assert!(
-                Okhwb::visually_eq(okhwb, okhwb_from_okhsv, f32::EPSILON),
+                Okhwb::visually_eq(okhwb, okhwb_from_okhsv, f64::EPSILON),
                 "Okhwb \n{:?} is not visually equal to Okhwb from Okhsv \n{:?}\nwithin epsilon {}",
                 okhwb,
                 okhwb_from_okhsv,
-                epsilon
+                f64::EPSILON
             );
             let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
-            let epsilon = f32::EPSILON;
             assert!(
-                Okhsv::visually_eq(okhsv, okhsv_from_okhwb, f32::EPSILON),
+                Okhsv::visually_eq(okhsv, okhsv_from_okhwb, f64::EPSILON),
                 "Okhsv \n{:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{:?}\nwithin epsilon {}",
                 okhsv,
-                okhsv_from_okhwb,  epsilon
+                okhsv_from_okhwb,f64::EPSILON
             );
 
             let roundtrip_color = Oklab::from_color_unclamped(okhwb);
             let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
-            let epsilon = f32::EPSILON;
             assert!(
-                Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, epsilon),
+                Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, f64::EPSILON),
                 "roundtrip color \n{:?} does not match \n{:?}\nwithin epsilon {}",
                 roundtrip_color,
                 oklab_from_okhsv,
-                epsilon
+                f64::EPSILON
             );
             assert!(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                Oklab::visually_eq(roundtrip_color, color, f64::EPSILON),
                 "'{}' failed. {:?} != {:?}",
                 name,
                 roundtrip_color,

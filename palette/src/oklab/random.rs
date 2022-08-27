@@ -11,17 +11,6 @@ where
     Standard: Distribution<T>,
 {
     // `a` and `b` both range from (-1.0, 1.0)
-    // TODO: the choice for a and b is random and rather bad:
-    //  1. a and b are unlimited. Oklab can express the whole electro-magnetic spectrum
-    //  2. Oklab is a perceptual color space. It would make sense to limit random
-    //  values to the limits of human perception.
-    //  https://bottosson.github.io/posts/oklab/#luo-rigg-dataset-and-full-gamut
-    //  shows, that at least for some L, a should not be greater than 0.5, to
-    //  avoid leaving the perceivable gamut. Though it could go to -2.5.
-    //  3. If people want random sRGB values: Expressing the sRGB bounds in Oklab is
-    //  beyond my abilities. However, it is not necessary either. It can be done in
-    //  Okhsv, Okhsl or Okhwb. Maybe we should  not offer the ability in Oklab and
-    //  encourage sampling in the color spaces that are limited to sRGB gamut.
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Oklab<T>
 where {
         Oklab::new(

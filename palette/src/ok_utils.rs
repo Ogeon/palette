@@ -296,7 +296,6 @@ where
         // Select different coefficients depending on which component goes below zero first
         // wl, wm and ws are coefficients for https://en.wikipedia.org/wiki/LMS_color_space
         // -- the color space modelling human perception.
-        // FIXME: For `f32`, on some (all?) AMD CPUs the wrong optimization coefficients are picked.
         let (k0, k1, k2, k3, k4, wl, wm, ws) =
             if T::from_f64(-1.88170328) * a - T::from_f64(0.80936493) * b > T::one() {
                 // red component at zero first
@@ -610,5 +609,23 @@ mod tests {
         );
         println!("{} <= a <= {}", min_a, max_a);
         println!("{} <= b <= {}", min_b, max_b);
+    }
+
+    #[test]
+    fn max_saturation_f64_eq_f32() {
+        let lin_srgb = LinSrgb::new(0.0, 0.0, 1.0);
+        let oklab_64 = Oklab::<f64>::from_color_unclamped(lin_srgb);
+        let (normalized_a, normalized_b) = oklab_64.chroma_and_normalized_ab().1.unwrap();
+        let saturation_64 = LC::max_saturation(normalized_a, normalized_b);
+        let saturation_32 = LC::max_saturation(normalized_a as f32, normalized_b as f32);
+
+        // EPSILON should be 1e-6. See issue https://github.com/Ogeon/palette/issues/296
+        const EPSILON: f32 = 3e-1;
+        assert_relative_eq!(
+            saturation_32,
+            saturation_64 as f32,
+            epsilon = EPSILON,
+            max_relative = EPSILON
+        );
     }
 }

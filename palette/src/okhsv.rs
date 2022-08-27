@@ -387,9 +387,11 @@ mod tests {
     /// value: 1.0
     #[test]
     fn blue() {
-        let color = Oklab::<f64>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
-        let okhsv = Okhsv::from_color_unclamped(color);
-        println!("Okhsv f64: {:?}\n", okhsv);
+        let lin_srgb_blue = LinSrgb::new(0.0, 0.0, 1.0);
+        let oklab_blue_64 = Oklab::<f64>::from_color_unclamped(lin_srgb_blue);
+        let okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
+
+        println!("Okhsv f64: {:?}\n", okhsv_blue_64);
         // HSV values of the reference implementation (in C)
         // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
         // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
@@ -397,38 +399,16 @@ mod tests {
 
         // compare to the reference implementation values
         assert_abs_diff_eq!(
-            okhsv.hue,
+            okhsv_blue_64.hue,
             OklabHue::new(264.0520206380550121),
             epsilon = 1e-12
         );
-        assert_abs_diff_eq!(okhsv.saturation, 0.9999910912349018, epsilon = 1e-12);
-        assert_abs_diff_eq!(okhsv.value, 0.9999999646150918, epsilon = 1e-12);
-
-        let color = Oklab::<f32>::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0));
-        let okhsv = Okhsv::from_color_unclamped(color);
-        println!("Okhsv f32: {:?}", okhsv);
         assert_abs_diff_eq!(
-            okhsv.hue,
-            OklabHue::new(264.0520324707031250),
-            epsilon = 1e-6
+            okhsv_blue_64.saturation,
+            0.9999910912349018,
+            epsilon = 1e-12
         );
-
-        // compare to the ideal values
-        // FIXME: The algorithm is not robust wrt. floating point errors.
-        //  See `ok_utils:LC::max_saturation`.
-        //  .
-        //  HSV values of the reference implementation (in C) on an unlucky machine
-        //  (printed with double-precision despite using float-precision for compuation)
-        //  1 iteration : 264.0520324707031250, 0.9239708185195923, 1.0000002384185791
-        //  2 iterations: 264.0520324707031250, -1.0219360589981079, 0.9999997615814209
-        //  3 iterations: 264.0520324707031250, 0.1297522187232971, 0.9999999403953552
-        //  .
-        //  With lucky machines (like the integration machine) the okhsv.saturation
-        //  and okhsv.value already in the first iteration are 0.9999911
-        //  .
-        //  If a solution is found, reduce epsilon to 1e-6.
-        assert_abs_diff_eq!(okhsv.saturation, 1.0, epsilon = 1e-1);
-        assert_abs_diff_eq!(okhsv.value, 1.0, epsilon = 1e-1);
+        assert_abs_diff_eq!(okhsv_blue_64.value, 0.9999999646150918, epsilon = 1e-12);
     }
 
     #[test]

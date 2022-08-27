@@ -183,14 +183,7 @@ macro_rules! make_hues {
 
         impl<T> Eq for $name<T> where T: AngleEq<Mask = bool> + Eq {}
 
-        // For hues, the difference is calculated and compared to zero. However due to
-        // the way floating point's work this is not so simple.
-        //
-        // Reference:
-        // https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-        //
-        // The recommendation is use 180 * epsilon as the epsilon and do not compare by
-        // ulps. Because of this we loose some precision for values close to 0.0.
+
         #[cfg(feature = "approx")]
         impl<T> AbsDiffEq for $name<T>
         where
@@ -200,16 +193,20 @@ macro_rules! make_hues {
             type Epsilon = T::Epsilon;
 
             fn default_epsilon() -> Self::Epsilon {
+                // For hues, angles in (normalized) degrees are compared.
+                // Scaling from radians to degrees raises the order of magnitude of the
+                // error by 180/PI.
+                // Scale the default epsilon accordingly for absolute comparisons.
+                // Scaling is not required for relative comparisons (including ulps), as
+                // there the error is scaled to unit size anyway
                 T::default_epsilon() * T::Epsilon::half_rotation()
             }
 
             fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::abs_diff_eq(&diff, &T::zero(), epsilon)
+                T::abs_diff_eq(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon)
             }
             fn abs_diff_ne(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::abs_diff_ne(&diff, &T::zero(), epsilon)
+                T::abs_diff_ne(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon)
             }
         }
 
@@ -220,7 +217,7 @@ macro_rules! make_hues {
             T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
         {
             fn default_max_relative() -> Self::Epsilon {
-                T::default_max_relative() * T::Epsilon::half_rotation()
+                T::default_max_relative()
             }
 
             fn relative_eq(
@@ -229,8 +226,7 @@ macro_rules! make_hues {
                 epsilon: T::Epsilon,
                 max_relative: T::Epsilon,
             ) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::relative_eq(&diff, &T::zero(), epsilon, max_relative)
+                T::relative_eq(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon, max_relative)
             }
             fn relative_ne(
                 &self,
@@ -238,8 +234,7 @@ macro_rules! make_hues {
                 epsilon: Self::Epsilon,
                 max_relative: Self::Epsilon,
             ) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::relative_ne(&diff, &T::zero(), epsilon, max_relative)
+                T::relative_ne(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon, max_relative)
             }
         }
 
@@ -250,16 +245,14 @@ macro_rules! make_hues {
             T::Epsilon: HalfRotation + Mul<Output = T::Epsilon>,
         {
             fn default_max_ulps() -> u32 {
-                T::default_max_ulps() * 180 // This should probably depend on T
+                T::default_max_ulps()
             }
 
             fn ulps_eq(&self, other: &Self, epsilon: T::Epsilon, max_ulps: u32) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::ulps_eq(&diff, &T::zero(), epsilon, max_ulps)
+                T::ulps_eq(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon, max_ulps)
             }
             fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                let diff: T = (self.clone() - other.clone()).into_degrees();
-                T::ulps_ne(&diff, &T::zero(), epsilon, max_ulps)
+                T::ulps_ne(&self.clone().into_degrees(), &other.clone().into_degrees(), epsilon, max_ulps)
             }
         }
 
