@@ -1164,8 +1164,8 @@ impl std::error::Error for FromHexError {
 impl<S> FromStr for Rgb<S, u8> {
     type Err = FromHexError;
 
-    // Parses a color hex code of format '#ff00bb' or '#abc' into a
-    // Rgb<S, u8> instance.
+    /// Parses a color hex code of format '#ff00bb' or '#abc' into a
+    /// [`Rgb<S, u8>`] instance.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
         let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
         match hex_code.len() {
