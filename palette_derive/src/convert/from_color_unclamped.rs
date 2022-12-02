@@ -144,7 +144,7 @@ fn prepare_from_impl(
                     parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>)
                 }
             }
-            "Oklab" | "Oklch" => {
+            "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
                 parse_quote!(#nearest_color_path::<#component>)
             }
             _ => {

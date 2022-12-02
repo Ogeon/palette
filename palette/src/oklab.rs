@@ -1,52 +1,59 @@
-use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::any::TypeId;
+use core::fmt::Debug;
+use core::ops::Mul;
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+pub use alpha::Oklaba;
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
+use crate::convert::IntoColorUnclamped;
+use crate::encoding::{IntoLinear, Srgb};
+use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
+use crate::ok_utils::{toe_inv, ChromaValues, LC, ST};
+use crate::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
-    bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    bool_mask::HasBoolMask,
     convert::FromColorUnclamped,
     matrix::multiply_xyz,
-    num::{
-        self, Arithmetics, Cbrt, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Trigonometry, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mat3,
-    Mix, MixAssign, OklabHue, Oklch, RelativeContrast, Xyz,
+    LinSrgb, Mat3, Okhsl, Okhsv, OklabHue, Oklch, Xyz,
 };
 
+mod alpha;
+mod properties;
+#[cfg(feature = "random")]
+mod random;
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual_eq;
+
+// Using recalculated matrix values from
+// https://github.com/LeaVerou/color.js/blob/master/src/spaces/oklab.js
+//
+// see https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
+// and the following https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-945714988
+
+/// XYZ to LSM transformation matrix
 #[rustfmt::skip]
 fn m1<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(0.8189330101), T::from_f64(0.3618667424), T::from_f64(-0.1288597137),
-        T::from_f64(0.0329845436), T::from_f64(0.9293118715), T::from_f64(0.0361456387),
-        T::from_f64(0.0482003018), T::from_f64(0.2643662691), T::from_f64(0.6338517070),
+        T::from_f64(0.8190224432164319), T::from_f64(0.3619062562801221), T::from_f64(-0.12887378261216414),
+        T::from_f64(0.0329836671980271), T::from_f64(0.9292868468965546), T::from_f64(0.03614466816999844),
+        T::from_f64(0.048177199566046255), T::from_f64(0.26423952494422764), T::from_f64(0.6335478258136937),
     ]
 }
 
+/// LMS to XYZ transformation matrix
 #[rustfmt::skip]
 pub(crate) fn m1_inv<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(1.2270138511), T::from_f64(-0.5577999807), T::from_f64(0.2812561490),
-        T::from_f64(-0.0405801784), T::from_f64(1.1122568696), T::from_f64(-0.0716766787),
-        T::from_f64(-0.0763812845), T::from_f64(-0.4214819784), T::from_f64(1.5861632204),
+        T::from_f64(1.2268798733741557), T::from_f64(-0.5578149965554813), T::from_f64(0.28139105017721583),
+        T::from_f64(-0.04057576262431372), T::from_f64(1.1122868293970594), T::from_f64(-0.07171106666151701),
+        T::from_f64(-0.07637294974672142), T::from_f64(-0.4214933239627914), T::from_f64(1.5869240244272418),
     ]
 }
 
+/// LMS to Oklab transformation matrix
 #[rustfmt::skip]
 fn m2<T: Real>() -> Mat3<T> {
     [
@@ -56,57 +63,136 @@ fn m2<T: Real>() -> Mat3<T> {
     ]
 }
 
+/// Oklab to LMS transformation matrix
 #[rustfmt::skip]
+#[allow(clippy::excessive_precision)]
 pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
     [
-        T::from_f64(0.9999999985), T::from_f64(0.3963377922), T::from_f64(0.2158037581),
-        T::from_f64(1.0000000089), T::from_f64(-0.1055613423), T::from_f64(-0.0638541748),
-        T::from_f64(1.0000000547), T::from_f64(-0.0894841821), T::from_f64(-1.2914855379),
+        T::from_f64(0.99999999845051981432), T::from_f64(0.39633779217376785678), T::from_f64(0.21580375806075880339),
+        T::from_f64(1.0000000088817607767), T::from_f64(-0.1055613423236563494), T::from_f64(-0.063854174771705903402),
+        T::from_f64(1.0000000546724109177), T::from_f64(-0.089484182094965759684), T::from_f64(-1.2914855378640917399),
     ]
 }
 
-/// Oklab with an alpha component. See the [`Oklaba` implementation in
-/// `Alpha`](crate::Alpha#Oklaba).
-pub type Oklaba<T = f32> = Alpha<Oklab<T>, T>;
-
 /// The [Oklab color space](https://bottosson.github.io/posts/oklab/).
 ///
-/// Oklab is a perceptually-uniform color space similar in structure to
-/// [L\*a\*b\*](crate::Lab), but tries to have a better perceptual uniformity.
-/// It assumes a D65 whitepoint and normal well-lit viewing conditions.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+/// # Characteristics
+/// `Oklab` is a *perceptual* color space. It does not relate to an output device
+/// (a monitor or printer) but instead relates to the
+/// [CIE standard observer](https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_standard_observer)
+/// -- an averaging of the results of color matching experiments under
+/// laboratory conditions.
+///
+/// `Oklab` is a uniform color space
+/// ([Compare to the HSV color space](https://bottosson.github.io/posts/oklab/#comparing-oklab-to-hsv)).
+/// It is useful for things like:
+/// * Turning an image grayscale, while keeping the perceived lightness the same
+/// * Increasing the saturation of colors, while maintaining perceived hue and lightness
+/// * Creating smooth and uniform looking transitions between colors
+///
+/// `Oklab`'s structure is similar to [L\*a\*b\*](crate::Lab). It is based on the
+/// [opponent color model of human vision](https://en.wikipedia.org/wiki/Opponent_process),
+/// where red and green form an opponent pair, and blue and yellow form an opponent pair.
+///
+/// `Oklab` uses [D65](https://en.wikipedia.org/wiki/Illuminant_D65)'s
+/// whitepoint -- daylight illumination, which is also used by sRGB, rec2020 and Display P3 color
+/// spaces -- and assumes normal well-lit viewing conditions, to which the eye is adapted.
+/// Thus `Oklab`s lightness `l` technically is a measure of relative brightness -- a subjective
+/// measure -- not relative luminance. The lightness is scale/exposure-independend, i.e.
+/// independent of the actual luminance of the color, as displayed by some medium, and
+/// even for blindingly bright colors or very bright or dark viewing conditions assumes, that the
+/// eye is adapted to the color's luminance and the hue and chroma are perceived linearly.
+///
+///
+/// `Oklab`'s chroma is unlimited. Thus it can represent colors of any color space (including HDR).
+/// `l` is in the range `0.0 .. 1.0` and `a` and `b` are unbounded.
+///
+/// # Conversions
+/// [`Oklch`] is a cylindrical form of `Oklab`.
+///
+/// `Oklab` colors converted from valid (i.e. clamped) `sRGB` will be in the `sRGB` gamut.
+///
+/// [`Okhsv`], [`Okhwb`] and [`Okhsl`] reference the `sRGB` gamut.
+/// The transformation from `Oklab` to one of them is based on the assumption,
+/// that the transformed `Oklab` value is within `sRGB`.
+///
+/// `Okhsv`, `Okhwb` and `Okhsl` are not applicable to HDR, which also come with
+/// color spaces with wider gamuts. They require
+/// [additional research](https://bottosson.github.io/posts/colorpicker/#ideas-for-future-work).
+///
+/// When a `Oklab` color is converted from [`Srgb`](crate::rgb::Srgb) or a equivalent color space,
+/// e.g. [`Hsv`], [`Okhsv`], [`Hsl`], [`Okhsl`], [`Hwb`], [`Okhwb`], it's lightness will be
+/// relative to the (user controlled) maximum contrast and luminance of the display device, to
+/// which the eye is assumed to be adapted.
+///
+/// # Clamping
+/// [`Clamp`ing](Clamp) will only clamp `l`. Clamping does not guarantee the color to be inside
+/// the perceptible or any display-dependent color space (like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsv`, clamp it there
+/// and convert it back to `Oklab`.
+///
+/// ```
+/// // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&precision=17
+/// # use approx::assert_abs_diff_eq;
+/// # use palette::{convert::FromColorUnclamped,IsWithinBounds, LinSrgb, Okhsv, Oklab};
+/// # use palette::Clamp;
+/// let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, -0.098273600140966));
+/// let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
+/// assert!(!okhsv.is_within_bounds());
+/// let clamped_okhsv = okhsv.clamp();
+/// assert!(clamped_okhsv.is_within_bounds());
+/// let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
+/// let  expected = LinSrgb::new(1.0, 0.9876530763223166, 0.0);
+/// assert_abs_diff_eq!(expected, linsrgb, epsilon = 0.02);
+/// ```
+/// Since the conversion contains a gamut mapping, it will map the color to one
+/// of the perceptually closest locations in the `sRGB` gamut. Gamut mapping -- unlike clamping --
+/// is an expensive operation. To get computationally cheaper (and perceptually much worse) results,
+/// convert directly to [`Srgb`] and clamp there.  
+///
+/// # Lightening / Darkening
+/// [`Lighten`ing](crate::Lighten) and [`Darken`ing](crate::Darken) will change `l`, as expected. However,
+/// either operation may leave an implicit color space (the percetible or a display
+/// dependent color space like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`, lighten/darken
+/// it there and convert it back to `Oklab`.
+
+#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
     white_point = "D65",
     component = "T",
-    skip_derives(Oklab, Oklch, Xyz)
+    skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz, Rgb)
 )]
 #[repr(C)]
 pub struct Oklab<T = f32> {
-    /// L is the lightness of the color. 0 gives absolute black and 1 gives the brightest white.
+    /// `l` is the lightness of the color. `0` gives absolute black and `1` gives the
+    /// full white point luminance of the display medium.
+    ///
+    /// [D65 (normalized with Y=1, i.e. white according to the adaption of the eye) transforms to
+    /// L=1,a=0,b=0](https://bottosson.github.io/posts/oklab/#how-oklab-was-derived).
+    /// However intermediate values differ from those of CIELab non-linearly. For visually
+    /// similar values, transform using [`toe`](crate::ok_utils::toe) and
+    /// [`toe_inv`](crate::ok_utils::toe_inv). These transformations are also use when
+    /// converting to [`Okhsv`], [`Okhsl`] and [`Okhwb`].
+    ///
     pub l: T,
 
-    /// a goes from red at -1 to green at 1.
+    /// `a` changes the hue from reddish to greenish, when moving from positive
+    /// to negative values and becomes more intense with larger absolute values.
+    ///
+    /// The exact orientation is determined by `b`
     pub a: T,
 
-    /// b goes from yellow at -1 to blue at 1.
+    /// `b` changes the hue from yellowish to blueish, when moving from positive
+    /// to negative values and becomes more intense with larger absolute values.
+    ///
+    /// [Positive b is oriented to the same yellow color as
+    /// CAM16](https://bottosson.github.io/posts/oklab/#how-oklab-was-derived)
     pub b: T,
-}
-
-impl<T> Copy for Oklab<T> where T: Copy {}
-
-impl<T> Clone for Oklab<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Oklab<T> {
-        Oklab {
-            l: self.l.clone(),
-            a: self.a.clone(),
-            b: self.b.clone(),
-        }
-    }
 }
 
 impl<T> Oklab<T> {
@@ -126,59 +212,56 @@ impl<T> Oklab<T> {
     }
 }
 
+// component bounds
+// For `Oklab` in general a and b are unbounded.
+// In the sRGB gamut `Oklab`s chroma (and thus a and b) are bounded.
 impl<T> Oklab<T>
 where
-    T: Real,
+    T: Zero + One,
 {
     /// Return the `l` value minimum.
     pub fn min_l() -> T {
-        T::from_f64(0.0)
+        T::zero()
     }
 
     /// Return the `l` value maximum.
     pub fn max_l() -> T {
-        T::from_f64(1.0)
-    }
-
-    /// Return the `a` value minimum.
-    pub fn min_a() -> T {
-        T::from_f64(-1.0)
-    }
-
-    /// Return the `a` value maximum.
-    pub fn max_a() -> T {
-        T::from_f64(1.0)
-    }
-
-    /// Return the `b` value minimum.
-    pub fn min_b() -> T {
-        T::from_f64(-1.0)
-    }
-
-    /// Return the `b` value maximum.
-    pub fn max_b() -> T {
-        T::from_f64(1.0)
+        T::one()
     }
 }
 
-///<span id="Oklaba"></span>[`Oklaba`](crate::Oklaba) implementations.
-impl<T, A> Alpha<Oklab<T>, A> {
-    /// Create an Oklab color with transparency.
-    pub const fn new(l: T, a: T, b: T, alpha: A) -> Self {
-        Alpha {
-            color: Oklab::new(l, a, b),
-            alpha,
-        }
+impl<T> Oklab<T>
+where
+    T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
+{
+    /// Returns the hue, if at least one of `a` and `b` are non-zero  
+    pub fn try_hue(&self) -> Option<OklabHue<T>> {
+        OklabHue::from_ab(self.a.clone(), self.b.clone())
     }
+}
 
-    /// Convert to a `(L, a, b, alpha)` tuple.
-    pub fn into_components(self) -> (T, T, T, A) {
-        (self.color.l, self.color.a, self.color.b, self.alpha)
+impl<T> Oklab<T>
+where
+    T: Hypot + Clone,
+{
+    /// Returns the chroma
+    pub fn chroma(&self) -> T {
+        T::hypot(self.a.clone(), self.b.clone())
     }
-
-    /// Convert from a `(L, a, b, alpha)` tuple.
-    pub fn from_components((l, a, b, alpha): (T, T, T, A)) -> Self {
-        Self::new(l, a, b, alpha)
+}
+impl<T> Oklab<T>
+where
+    T: Arithmetics + Zero + Hypot + Clone + PartialEq,
+{
+    /// Returns the `chroma` -- the euclidean norm of `a` and `b`.
+    /// If `chroma > 0.0` returns normalized versions of `a` and `b`
+    pub fn chroma_and_normalized_ab(&self) -> (T, Option<(T, T)>) {
+        let chroma = self.chroma();
+        (
+            chroma.clone(),
+            (chroma != T::zero())
+                .then(|| (self.a.clone() / chroma.clone(), self.b.clone() / chroma)),
+        )
     }
 }
 
@@ -210,6 +293,85 @@ where
     }
 }
 
+fn linear_srgb_to_oklab<T>(c: LinSrgb<T>) -> Oklab<T>
+where
+    T: Real + Arithmetics + Cbrt + Copy,
+{
+    let l = T::from_f64(0.4122214708) * c.red
+        + T::from_f64(0.5363325363) * c.green
+        + T::from_f64(0.0514459929) * c.blue;
+    let m = T::from_f64(0.2119034982) * c.red
+        + T::from_f64(0.6806995451) * c.green
+        + T::from_f64(0.1073969566) * c.blue;
+    let s = T::from_f64(0.0883024619) * c.red
+        + T::from_f64(0.2817188376) * c.green
+        + T::from_f64(0.6299787005) * c.blue;
+
+    let l_ = l.cbrt();
+    let m_ = m.cbrt();
+    let s_ = s.cbrt();
+
+    Oklab::new(
+        T::from_f64(0.2104542553) * l_ + T::from_f64(0.7936177850) * m_
+            - T::from_f64(0.0040720468) * s_,
+        T::from_f64(1.9779984951) * l_ - T::from_f64(2.4285922050) * m_
+            + T::from_f64(0.4505937099) * s_,
+        T::from_f64(0.0259040371) * l_ + T::from_f64(0.7827717662) * m_
+            - T::from_f64(0.8086757660) * s_,
+    )
+}
+
+pub(crate) fn oklab_to_linear_srgb<T>(c: Oklab<T>) -> LinSrgb<T>
+where
+    T: Real + Arithmetics + Copy,
+{
+    let l_ = c.l + T::from_f64(0.3963377774) * c.a + T::from_f64(0.2158037573) * c.b;
+    let m_ = c.l - T::from_f64(0.1055613458) * c.a - T::from_f64(0.0638541728) * c.b;
+    let s_ = c.l - T::from_f64(0.0894841775) * c.a - T::from_f64(1.2914855480) * c.b;
+
+    let l = l_ * l_ * l_;
+    let m = m_ * m_ * m_;
+    let s = s_ * s_ * s_;
+
+    LinSrgb::new(
+        T::from_f64(4.0767416621) * l - T::from_f64(3.3077115913) * m
+            + T::from_f64(0.2309699292) * s,
+        T::from_f64(-1.2684380046) * l + T::from_f64(2.6097574011) * m
+            - T::from_f64(0.3413193965) * s,
+        T::from_f64(-0.0041960863) * l - T::from_f64(0.7034186147) * m
+            + T::from_f64(1.7076147010) * s,
+    )
+}
+
+impl<S, T> FromColorUnclamped<Rgb<S, T>> for Oklab<T>
+where
+    T: Real + Cbrt + Arithmetics + FromScalar + Copy,
+    T::Scalar: Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + FromScalar<Scalar = T::Scalar>
+        + Real
+        + Zero
+        + One
+        + Clone,
+    S: RgbStandard,
+    S::TransferFn: IntoLinear<T, T>,
+    S::Space: RgbSpace<WhitePoint = D65> + 'static,
+    <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
+{
+    fn from_color_unclamped(rgb: Rgb<S, T>) -> Self {
+        if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
+            // Use direct sRGB to Oklab conversion
+            // Rounding errors are likely a contributing factor to differences.
+            // Also the conversion via XYZ doesn't use pre-defined matrices (yet)
+            linear_srgb_to_oklab(rgb.into_linear().reinterpret_as())
+        } else {
+            // Convert via XYZ
+            Xyz::from_color_unclamped(rgb).into_color_unclamped()
+        }
+    }
+}
+
 impl<T> FromColorUnclamped<Oklch<T>> for Oklab<T>
 where
     T: RealAngle + Zero + MinMax + Trigonometry + Mul<Output = T> + Clone,
@@ -226,6 +388,163 @@ where
     }
 }
 
+/// # See
+/// See [`okhsl_to_srgb`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
+impl<T> FromColorUnclamped<Okhsl<T>> for Oklab<T>
+where
+    T: Real
+        + One
+        + Zero
+        + Arithmetics
+        + Sqrt
+        + MinMax
+        + Copy
+        + PartialOrd
+        + HasBoolMask<Mask = bool>
+        + Powi
+        + Cbrt
+        + Trigonometry
+        + FromScalar
+        + RealAngle,
+    T::Scalar: Real
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
+{
+    fn from_color_unclamped(hsl: Okhsl<T>) -> Self {
+        let h = hsl.hue;
+        let s = hsl.saturation;
+        let l = hsl.lightness;
+
+        if l == T::one() {
+            return Oklab::new(T::one(), T::zero(), T::zero());
+        } else if l == T::zero() {
+            return Oklab::new(T::zero(), T::zero(), T::zero());
+        }
+
+        let (a_, b_) = h.ab(T::one());
+        let oklab_lightness = toe_inv(l);
+
+        let cs = ChromaValues::from_normalized(oklab_lightness, a_, b_);
+
+        // Interpolate the three values for C so that:
+        // At s=0: dC/ds = cs.zero, C = 0
+        // At s=0.8: C = cs.mid
+        // At s=1.0: C = cs.max
+
+        let mid = T::from_f64(0.8);
+        let mid_inv = T::from_f64(1.25);
+
+        let chroma = if s < mid {
+            let t = mid_inv * s;
+
+            let k_1 = mid * cs.zero;
+            let k_2 = T::one() - k_1 / cs.mid;
+
+            t * k_1 / (T::one() - k_2 * t)
+        } else {
+            let t = (s - mid) / (T::one() - mid);
+
+            let k_0 = cs.mid;
+            let k_1 = (T::one() - mid) * cs.mid * cs.mid * mid_inv * mid_inv / cs.zero;
+            let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+
+            k_0 + t * k_1 / (T::one() - k_2 * t)
+        };
+
+        Oklab::new(oklab_lightness, chroma * a_, chroma * b_)
+    }
+}
+
+impl<T> FromColorUnclamped<Okhsv<T>> for Oklab<T>
+where
+    T: Real
+        + PartialOrd
+        + HasBoolMask<Mask = bool>
+        + MinMax
+        + Powi
+        + Arithmetics
+        + Copy
+        + One
+        + Zero
+        + Sqrt
+        + Cbrt
+        + Trigonometry
+        + RealAngle
+        + FromScalar,
+    T::Scalar: Real
+        + PartialOrd
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
+{
+    fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
+        if hsv.saturation == T::zero() {
+            // totally desaturated color -- the triangle is just the 0-chroma-line
+            if hsv.value == T::zero() {
+                // pure black
+                return Self {
+                    l: T::zero(),
+                    a: T::zero(),
+                    b: T::zero(),
+                };
+            }
+            let l = toe_inv(hsv.value);
+            return Self {
+                l,
+                a: T::zero(),
+                b: T::zero(),
+            };
+        }
+
+        let h_radians = hsv.hue.into_raw_radians();
+        let a_ = T::cos(h_radians);
+        let b_ = T::sin(h_radians);
+
+        let cusp = LC::find_cusp(a_, b_);
+        let cusp: ST<T> = cusp.into();
+        let s_0 = T::from_f64(0.5);
+        let k = T::one() - s_0 / cusp.s;
+
+        // first we compute L and V as if the gamut is a perfect triangle
+
+        // L, C, when v == 1:
+        let l_v = T::one() - hsv.saturation * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+        let c_v = hsv.saturation * cusp.t * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+
+        // then we compensate for both toe and the curved top part of the triangle:
+        let l_vt = toe_inv(l_v);
+        let c_vt = c_v * l_vt / l_v;
+
+        let mut lightness = hsv.value * l_v;
+        let mut chroma = hsv.value * c_v;
+        let lightness_new = toe_inv(lightness);
+        chroma = chroma * lightness_new / lightness;
+        // the values may be outside the normal range
+        let rgb_scale: LinSrgb<T> = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+        let lightness_scale_factor = T::cbrt(
+            T::one()
+                / T::max(
+                    T::max(rgb_scale.red, rgb_scale.green),
+                    T::max(rgb_scale.blue, T::zero()),
+                ),
+        );
+
+        lightness = lightness_new * lightness_scale_factor;
+        chroma = chroma * lightness_scale_factor;
+
+        Oklab::new(lightness, chroma * a_, chroma * b_)
+    }
+}
+
 impl<T> From<(T, T, T)> for Oklab<T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
@@ -235,68 +554,6 @@ impl<T> From<(T, T, T)> for Oklab<T> {
 impl<T> From<Oklab<T>> for (T, T, T) {
     fn from(color: Oklab<T>) -> (T, T, T) {
         color.into_components()
-    }
-}
-
-impl<T, A> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T, A> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Oklab<T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
-
-impl_is_within_bounds! {
-    Oklab {
-        l => [Self::min_l(), Self::max_l()],
-        a => [Self::min_a(), Self::max_a()],
-        b => [Self::min_b(), Self::max_b()]
-    }
-    where T: Real
-}
-
-impl<T> Clamp for Oklab<T>
-where
-    T: Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.a, Self::min_a(), Self::max_a()),
-            clamp(self.b, Self::min_b(), Self::max_b()),
-        )
-    }
-}
-
-impl<T> ClampAssign for Oklab<T>
-where
-    T: Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.a, Self::min_a(), Self::max_a());
-        clamp_assign(&mut self.b, Self::min_b(), Self::max_b());
-    }
-}
-
-impl_mix!(Oklab);
-impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b});
-impl_premultiply!(Oklab { l, a, b });
-
-impl<T> GetHue for Oklab<T>
-where
-    T: RealAngle + Trigonometry + Clone,
-{
-    type Hue = OklabHue<T>;
-
-    fn get_hue(&self) -> OklabHue<T> {
-        OklabHue::from_radians(self.b.clone().atan2(self.a.clone()))
     }
 }
 
@@ -316,111 +573,6 @@ where
     }
 }
 
-impl_color_add!(Oklab<T>, [l, a, b]);
-impl_color_sub!(Oklab<T>, [l, a, b]);
-impl_color_mul!(Oklab<T>, [l, a, b]);
-impl_color_div!(Oklab<T>, [l, a, b]);
-
-impl_array_casts!(Oklab<T>, [T; 3]);
-impl_simd_array_conversion!(Oklab, [l, a, b]);
-
-impl_eq!(Oklab, [l, a, b]);
-
-impl<T> RelativeContrast for Oklab<T>
-where
-    T: Real + Arithmetics + PartialCmp,
-    T::Mask: LazySelect<T>,
-    Xyz<D65, T>: FromColor<Self>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn get_contrast_ratio(self, other: Self) -> T {
-        let xyz1 = Xyz::from_color(self);
-        let xyz2 = Xyz::from_color(other);
-
-        contrast_ratio(xyz1.y, xyz2.y)
-    }
-}
-
-#[cfg(feature = "random")]
-impl<T> Distribution<Oklab<T>> for Standard
-where
-    T: Real + Mul<Output = T> + Sub<Output = T>,
-    Standard: Distribution<T>,
-{
-    // `a` and `b` both range from (-1.0, 1.0)
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Oklab<T>
-where {
-        Oklab::new(
-            rng.gen(),
-            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
-            rng.gen() * T::from_f64(2.0) - T::from_f64(1.0),
-        )
-    }
-}
-
-#[cfg(feature = "random")]
-pub struct UniformOklab<T>
-where
-    T: SampleUniform,
-{
-    l: Uniform<T>,
-    a: Uniform<T>,
-    b: Uniform<T>,
-}
-
-#[cfg(feature = "random")]
-impl<T> SampleUniform for Oklab<T>
-where
-    T: Clone + SampleUniform,
-{
-    type Sampler = UniformOklab<T>;
-}
-
-#[cfg(feature = "random")]
-impl<T> UniformSampler for UniformOklab<T>
-where
-    T: Clone + SampleUniform,
-{
-    type X = Oklab<T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        Self {
-            l: Uniform::new::<_, T>(low.l, high.l),
-            a: Uniform::new::<_, T>(low.a, high.a),
-            b: Uniform::new::<_, T>(low.b, high.b),
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        Self {
-            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
-            a: Uniform::new_inclusive::<_, T>(low.a, high.a),
-            b: Uniform::new_inclusive::<_, T>(low.b, high.b),
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Oklab<T>
-where {
-        Oklab::new(self.l.sample(rng), self.a.sample(rng), self.b.sample(rng))
-    }
-}
-
 #[cfg(feature = "bytemuck")]
 unsafe impl<T> bytemuck::Zeroable for Oklab<T> where T: bytemuck::Zeroable {}
 
@@ -429,28 +581,116 @@ unsafe impl<T> bytemuck::Pod for Oklab<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
+    use core::str::FromStr;
+
+    use crate::rgb::Rgb;
+    use crate::visual::VisuallyEqual;
+    use crate::{FromColor, Lab, LinSrgb, Srgb};
+
     use super::*;
-    use crate::{FromColor, LinSrgb};
+
+    /// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
+    #[test]
+    fn lightness_of_white_is_one() {
+        let rgb: Srgb<f64> = Rgb::from_str("#ffffff").unwrap().into_format();
+        let lin_rgb = LinSrgb::from_color_unclamped(rgb);
+        let oklab = Oklab::from_color_unclamped(lin_rgb);
+        println!("white {rgb:?} == {oklab:?}");
+        assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-7);
+        assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-7);
+        assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-7);
+
+        let lab: Lab<D65, f64> = Lab::from_components((100.0, 0.0, 0.0));
+        let rgb: Srgb<f64> = Srgb::from_color_unclamped(lab);
+        let oklab = Oklab::from_color_unclamped(lab);
+        println!("white {lab:?} == {rgb:?} == {oklab:?}");
+        assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-4);
+        assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-4);
+        assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-4);
+    }
+
+    #[test]
+    fn blue_srgb() {
+        // use f64 to be comparable to javascript
+        let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap().into_format();
+        let lin_rgb = LinSrgb::from_color_unclamped(rgb);
+        let oklab = Oklab::from_color_unclamped(lin_rgb);
+
+        // values from Ok Color Picker, which seems to use  Björn Ottosson's original
+        // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
+        assert!(abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-9));
+        assert!(abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-9));
+        assert!(abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-9));
+    }
 
     #[test]
     fn red() {
         let a = Oklab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-        let b = Oklab::new(0.627986, 0.224840, 0.125798);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        let b = Oklab::new(0.6279553606145516, 0.22486306106597395, 0.1258462985307351);
+        assert!(Oklab::visually_eq(a, b, 1e-8));
     }
 
     #[test]
     fn green() {
         let a = Oklab::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-        let b = Oklab::new(0.866432, -0.233916, 0.179417);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        let b = Oklab::new(
+            0.8664396115356694,
+            -0.23388757418790812,
+            0.17949847989672985,
+        );
+        assert!(Oklab::visually_eq(a, b, 1e-8));
     }
 
     #[test]
     fn blue() {
         let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-        let b = Oklab::new(0.451977, -0.032429, -0.311611);
-        assert_relative_eq!(a, b, epsilon = 0.00001);
+        println!("Oklab blue: {:?}", a);
+        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        let b = Oklab::new(0.4520137183853429, -0.0324569841687640, -0.3115281476783751);
+        assert!(Oklab::visually_eq(a, b, 1e-8));
+    }
+
+    #[test]
+    fn black_eq_different_black() {
+        assert!(Oklab::visually_eq(
+            Oklab::new(0.0, 1.0, 0.0),
+            Oklab::new(0.0, 0.0, 1.0),
+            1e-8
+        ));
+    }
+
+    #[test]
+    fn white_eq_different_white() {
+        assert!(Oklab::visually_eq(
+            Oklab::new(1.0, 1.0, 0.0),
+            Oklab::new(1.0, 0.0, 1.0),
+            1e-8
+        ));
+    }
+
+    #[test]
+    fn white_ne_black() {
+        assert!(!Oklab::visually_eq(
+            Oklab::new(1.0, 1.0, 0.0),
+            Oklab::new(0.0, 0.0, 1.0),
+            1e-8
+        ));
+        assert!(!Oklab::visually_eq(
+            Oklab::new(1.0, 1.0, 0.0),
+            Oklab::new(0.0, 1.0, 0.0),
+            1e-8
+        ));
+    }
+
+    #[test]
+    fn non_bw_neq_different_non_bw() {
+        assert!(!Oklab::visually_eq(
+            Oklab::new(0.3, 1.0, 0.0),
+            Oklab::new(0.3, 0.0, 1.0),
+            1e-8
+        ));
     }
 
     #[test]
@@ -458,23 +698,18 @@ mod test {
         assert_ranges! {
             Oklab<f64>;
             clamped {
-                l: 0.0 => 1.0,
-                a: -1.0 => 1.0,
-                b: -1.0 => 1.0
+                l: 0.0 => 1.0
+                // a and b are unbounded --> not part of test
             }
             clamped_min {}
             unclamped {}
-        }
+        };
     }
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Oklab::<f32>::min_l(), 0.0);
-        assert_relative_eq!(Oklab::<f32>::min_a(), -1.0);
-        assert_relative_eq!(Oklab::<f32>::min_b(), -1.0);
-        assert_relative_eq!(Oklab::<f32>::max_l(), 1.0);
-        assert_relative_eq!(Oklab::<f32>::max_a(), 1.0);
-        assert_relative_eq!(Oklab::<f32>::max_b(), 1.0);
+        assert_eq!(Oklab::<f32>::min_l(), 0.0);
+        assert_eq!(Oklab::<f32>::max_l(), 1.0);
     }
 
     #[cfg(feature = "serializing")]

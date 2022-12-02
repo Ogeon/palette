@@ -338,9 +338,11 @@ macro_rules! impl_uint_casts_self {
 }
 
 macro_rules! impl_uint_casts_other {
+    /*
     ($self_ty: ident < $($ty_param: ident),+ > $($rest: tt)*) => {
         impl_uint_casts_other!([$($ty_param),+] $self_ty < $($ty_param),+ > $($rest)*);
     };
+    */
     ([$($ty_param: ident),+] $self_ty: ident < $($self_ty_param: ty),+ >, $uint: ty $(, where $($where: tt)+)?) => {
         impl<$($ty_param)+> AsRef<$self_ty<$($self_ty_param),+>> for $uint
         $(where $($where)+)?

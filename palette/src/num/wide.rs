@@ -10,6 +10,7 @@ macro_rules! impl_wide_float {
                 fn from_f64(n: f64) -> $ty {
                     $ty::splat(n as $scalar)
                 }
+
             }
 
             impl FromScalar for $ty {

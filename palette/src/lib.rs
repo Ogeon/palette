@@ -239,6 +239,9 @@ pub use lch::{Lch, Lcha};
 pub use lchuv::{Lchuv, Lchuva};
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 pub use luv::{Luv, Luva};
+pub use okhsl::{Okhsl, Okhsla};
+pub use okhsv::{Okhsv, Okhsva};
+pub use okhwb::{Okhwb, Okhwba};
 pub use oklab::{Oklab, Oklaba};
 pub use oklch::{Oklch, Oklcha};
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
@@ -440,6 +443,10 @@ pub mod luma;
 mod luv;
 mod luv_bounds;
 pub mod num;
+mod ok_utils;
+mod okhsl;
+mod okhsv;
+mod okhwb;
 mod oklab;
 mod oklch;
 mod relative_contrast;
@@ -448,6 +455,10 @@ pub mod stimulus;
 pub mod white_point;
 mod xyz;
 mod yxy;
+
+#[cfg(test)]
+#[cfg(feature = "approx")]
+mod visual;
 
 #[doc(hidden)]
 pub mod matrix;

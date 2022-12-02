@@ -109,7 +109,9 @@ pub fn get_convert_color_type(
                 )
             }
         }
-        "Oklab" | "Oklch" => (parse_quote!(#color_path<#component>), UsedInput::default()),
+        "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
+            (parse_quote!(#color_path<#component>), UsedInput::default())
+        }
         _ => (
             parse_quote!(#color_path<#white_point, #component>),
             UsedInput { white_point: true },

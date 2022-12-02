@@ -91,6 +91,7 @@ macro_rules! impl_lighten {
 
 macro_rules! impl_saturate {
     ($ty: ident increase $($input: tt)+) => {
+        // add empty generics brackets
         impl_saturate!($ty<> increase $($input)+);
     };
     ($($input: tt)+) => {
