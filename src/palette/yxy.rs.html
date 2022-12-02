@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/yxy.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>yxy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/yxy.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>yxy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -530,537 +530,537 @@
 <span id="530">530</span>
 <span id="531">531</span>
 <span id="532">532</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+</pre><pre class="rust"><code><span class="kw">use </span>core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand</span>::{
-    <span class="ident">distributions</span>::{
-        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
-        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span>rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
     },
-    <span class="ident">Rng</span>,
+    Rng,
 };
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
-    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
-    <span class="ident">convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>},
-    <span class="ident">encoding::IntoLinear</span>,
-    <span class="ident">luma::LumaStandard</span>,
-    <span class="ident">num</span>::{
-        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>,
-        <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>,
+<span class="kw">use crate</span>::{
+    blend::{PreAlpha, Premultiply},
+    bool_mask::{HasBoolMask, LazySelect},
+    clamp, clamp_assign, contrast_ratio,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::IntoLinear,
+    luma::LumaStandard,
+    num::{
+        <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
+        PartialCmp, Real, Zero,
     },
-    <span class="ident">stimulus::Stimulus</span>,
-    <span class="ident">white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">D65</span>},
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Luma</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
-    <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
+    stimulus::Stimulus,
+    white_point::{WhitePoint, D65},
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
+    RelativeContrast, Xyz,
 };
 
-<span class="doccomment">/// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation</span>
-<span class="doccomment">/// in `Alpha`](crate::Alpha#Yxya).</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Yxya</span><span class="op">&lt;</span><span class="ident">Wp</span> <span class="op">=</span> <span class="ident">D65</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
+/// in `Alpha`](crate::Alpha#Yxya).
+</span><span class="kw">pub type </span>Yxya&lt;Wp = D65, T = f32&gt; = Alpha&lt;Yxy&lt;Wp, T&gt;, T&gt;;
 
-<span class="doccomment">/// The CIE 1931 Yxy (xyY)  color space.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Yxy is a luminance-chromaticity color space derived from the CIE XYZ</span>
-<span class="doccomment">/// color space. It is widely used to define colors. The chromaticity diagrams</span>
-<span class="doccomment">/// for the color spaces are a plot of this color space&#39;s x and y coordinates.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Conversions and operations on this color space depend on the white point.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">ArrayCast</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">palette</span>(
-    <span class="ident">palette_internal</span>,
-    <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;Wp&quot;</span>,
-    <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
-    <span class="ident">skip_derives</span>(<span class="ident">Xyz</span>, <span class="ident">Yxy</span>, <span class="ident">Luma</span>)
-)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">alias</span> <span class="op">=</span> <span class="string">&quot;xyY&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span> <span class="op">=</span> <span class="ident">D65</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// x chromaticity co-ordinate derived from XYZ color space as X/(X+Y+Z).</span>
-    <span class="doccomment">/// Typical range is between 0 and 1</span>
-    <span class="kw">pub</span> <span class="ident">x</span>: <span class="ident">T</span>,
+<span class="doccomment">/// The CIE 1931 Yxy (xyY)  color space.
+///
+/// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
+/// color space. It is widely used to define colors. The chromaticity diagrams
+/// for the color spaces are a plot of this color space&#39;s x and y coordinates.
+///
+/// Conversions and operations on this color space depend on the white point.
+</span><span class="attribute">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[palette(
+    palette_internal,
+    white_point = <span class="string">&quot;Wp&quot;</span>,
+    component = <span class="string">&quot;T&quot;</span>,
+    skip_derives(Xyz, Yxy, Luma)
+)]
+#[repr(C)]
+#[doc(alias = <span class="string">&quot;xyY&quot;</span>)]
+</span><span class="kw">pub struct </span>Yxy&lt;Wp = D65, T = f32&gt; {
+    <span class="doccomment">/// x chromaticity co-ordinate derived from XYZ color space as X/(X+Y+Z).
+    /// Typical range is between 0 and 1
+    </span><span class="kw">pub </span>x: T,
 
-    <span class="doccomment">/// y chromaticity co-ordinate derived from XYZ color space as Y/(X+Y+Z).</span>
-    <span class="doccomment">/// Typical range is between 0 and 1</span>
-    <span class="kw">pub</span> <span class="ident">y</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// y chromaticity co-ordinate derived from XYZ color space as Y/(X+Y+Z).
+    /// Typical range is between 0 and 1
+    </span><span class="kw">pub </span>y: T,
 
-    <span class="doccomment">/// luma (Y) was a measure of the brightness or luminance of a color.</span>
-    <span class="doccomment">/// It is the same as the Y from the XYZ color space. Its range is from</span>
-    <span class="doccomment">///0 to 1, where 0 is black and 1 is white.</span>
-    <span class="kw">pub</span> <span class="ident">luma</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// luma (Y) was a measure of the brightness or luminance of a color.
+    /// It is the same as the Y from the XYZ color space. Its range is from
+    ///0 to 1, where 0 is black and 1 is white.
+    </span><span class="kw">pub </span>luma: T,
 
-    <span class="doccomment">/// The white point associated with the color&#39;s illuminant and observer.</span>
-    <span class="doccomment">/// D65 for 2 degree observer is used by default.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">serde</span>(<span class="ident">skip</span>))]</span>
-    <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">unsafe_zero_sized</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">white_point</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// The white point associated with the color&#39;s illuminant and observer.
+    /// D65 for 2 degree observer is used by default.
+    </span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    #[palette(unsafe_zero_sized)]
+    </span><span class="kw">pub </span>white_point: PhantomData&lt;Wp&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Copy</span> {}
+<span class="kw">impl</span>&lt;Wp, T&gt; Copy <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: Copy {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Clone <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">clone</span>(),
-            <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">clone</span>(),
-            <span class="ident">luma</span>: <span class="self">self</span>.<span class="ident">luma</span>.<span class="ident">clone</span>(),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Yxy&lt;Wp, T&gt; {
+        Yxy {
+            x: <span class="self">self</span>.x.clone(),
+            y: <span class="self">self</span>.y.clone(),
+            luma: <span class="self">self</span>.luma.clone(),
+            white_point: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a CIE Yxy color.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>,
-            <span class="ident">y</span>,
-            <span class="ident">luma</span>,
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Yxy&lt;Wp, T&gt; {
+    <span class="doccomment">/// Create a CIE Yxy color.
+    </span><span class="kw">pub const fn </span>new(x: T, y: T, luma: T) -&gt; Yxy&lt;Wp, T&gt; {
+        Yxy {
+            x,
+            y,
+            luma,
+            white_point: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        (<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">luma</span>)
+    <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    </span><span class="kw">pub fn </span>into_components(<span class="self">self</span>) -&gt; (T, T, T) {
+        (<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.luma)
     }
 
-    <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>)
+    <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    </span><span class="kw">pub fn </span>from_components((x, y, luma): (T, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(x, y, luma)
     }
 
-    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
-    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
-    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
-    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
-    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::new</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">luma</span>)
+    <span class="doccomment">/// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn&#39;t change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color&#39;s appearance.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>with_white_point&lt;NewWp&gt;(<span class="self">self</span>) -&gt; Yxy&lt;NewWp, T&gt; {
+        Yxy::new(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.luma)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + One,
 {
-    <span class="doccomment">/// Return the `x` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_x</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+    <span class="doccomment">/// Return the `x` value minimum.
+    </span><span class="kw">pub fn </span>min_x() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `x` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_x</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::one</span>()
+    <span class="doccomment">/// Return the `x` value maximum.
+    </span><span class="kw">pub fn </span>max_x() -&gt; T {
+        T::one()
     }
 
-    <span class="doccomment">/// Return the `y` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_y</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+    <span class="doccomment">/// Return the `y` value minimum.
+    </span><span class="kw">pub fn </span>min_y() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `y` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_y</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::one</span>()
+    <span class="doccomment">/// Return the `y` value maximum.
+    </span><span class="kw">pub fn </span>max_y() -&gt; T {
+        T::one()
     }
 
-    <span class="doccomment">/// Return the `luma` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_luma</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+    <span class="doccomment">/// Return the `luma` value minimum.
+    </span><span class="kw">pub fn </span>min_luma() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `luma` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_luma</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::one</span>()
+    <span class="doccomment">/// Return the `luma` value maximum.
+    </span><span class="kw">pub fn </span>max_luma() -&gt; T {
+        T::one()
     }
 }
 
-<span class="doccomment">///&lt;span id=&quot;Yxya&quot;&gt;&lt;/span&gt;[`Yxya`](crate::Yxya) implementations.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a CIE Yxy color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">T</span>, <span class="ident">y</span>: <span class="ident">T</span>, <span class="ident">luma</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">Yxy::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>),
-            <span class="ident">alpha</span>,
+<span class="doccomment">///&lt;span id=&quot;Yxya&quot;&gt;&lt;/span&gt;[`Yxya`](crate::Yxya) implementations.
+</span><span class="kw">impl</span>&lt;Wp, T, A&gt; Alpha&lt;Yxy&lt;Wp, T&gt;, A&gt; {
+    <span class="doccomment">/// Create a CIE Yxy color with transparency.
+    </span><span class="kw">pub const fn </span>new(x: T, y: T, luma: T, alpha: A) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: Yxy::new(x, y, luma),
+            alpha,
         }
     }
 
-    <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-        (<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">luma</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
+    <span class="doccomment">/// Convert to a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    </span><span class="kw">pub fn </span>into_components(<span class="self">self</span>) -&gt; (T, T, T, A) {
+        (<span class="self">self</span>.color.x, <span class="self">self</span>.color.y, <span class="self">self</span>.color.luma, <span class="self">self</span>.alpha)
     }
 
-    <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>, <span class="ident">alpha</span>)
+    <span class="doccomment">/// Convert from a `(x, y, luma)`, a.k.a. `(x, y, Y)` tuple.
+    </span><span class="kw">pub fn </span>from_components((x, y, luma, alpha): (T, T, T, A)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(x, y, luma, alpha)
     }
 
-    <span class="doccomment">/// Changes the reference white point without changing the color value.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function doesn&#39;t change the numerical values, and thus the color it</span>
-    <span class="doccomment">/// represents in an absolute sense. However, the appearance of the color</span>
-    <span class="doccomment">/// may not be the same when observed with the new white point. The effect</span>
-    <span class="doccomment">/// would be similar to taking a photo with an incorrect white balance.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [chromatic_adaptation](crate::chromatic_adaptation) for operations</span>
-    <span class="doccomment">/// that can change the white point while preserving the color&#39;s appearance.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_white_point</span><span class="op">&lt;</span><span class="ident">NewWp</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-        <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">NewWp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">y</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">luma</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
+    <span class="doccomment">/// Changes the reference white point without changing the color value.
+    ///
+    /// This function doesn&#39;t change the numerical values, and thus the color it
+    /// represents in an absolute sense. However, the appearance of the color
+    /// may not be the same when observed with the new white point. The effect
+    /// would be similar to taking a photo with an incorrect white balance.
+    ///
+    /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
+    /// that can change the white point while preserving the color&#39;s appearance.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>with_white_point&lt;NewWp&gt;(<span class="self">self</span>) -&gt; Alpha&lt;Yxy&lt;NewWp, T&gt;, A&gt; {
+        Alpha::&lt;Yxy&lt;NewWp, T&gt;, A&gt;::new(<span class="self">self</span>.color.x, <span class="self">self</span>.color.y, <span class="self">self</span>.color.luma, <span class="self">self</span>.alpha)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
+<span class="kw">impl</span>&lt;Wp, T&gt; From&lt;(T, T, T)&gt; <span class="kw">for </span>Yxy&lt;Wp, T&gt; {
+    <span class="kw">fn </span>from(components: (T, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_components(components)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
+<span class="kw">impl</span>&lt;Wp, T&gt; From&lt;Yxy&lt;Wp, T&gt;&gt; <span class="kw">for </span>(T, T, T) {
+    <span class="kw">fn </span>from(color: Yxy&lt;Wp, T&gt;) -&gt; (T, T, T) {
+        color.into_components()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
+<span class="kw">impl</span>&lt;Wp, T, A&gt; From&lt;(T, T, T, A)&gt; <span class="kw">for </span>Alpha&lt;Yxy&lt;Wp, T&gt;, A&gt; {
+    <span class="kw">fn </span>from(components: (T, T, T, A)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_components(components)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">color</span>
+<span class="kw">impl</span>&lt;Wp, T, A&gt; From&lt;Alpha&lt;Yxy&lt;Wp, T&gt;, A&gt;&gt; <span class="kw">for </span>(T, T, T, A) {
+    <span class="kw">fn </span>from(color: Alpha&lt;Yxy&lt;Wp, T&gt;, A&gt;) -&gt; (T, T, T, A) {
+        color.into_components()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Yxy&lt;Wp, T&gt;&gt; <span class="kw">for </span>Yxy&lt;Wp, T&gt; {
+    <span class="kw">fn </span>from_color_unclamped(color: Yxy&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        color
+    }
+}
+
+<span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Xyz&lt;Wp, T&gt;&gt; <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + IsValidDivisor + Arithmetics + Clone,
+    T::Mask: LazySelect&lt;T&gt; + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">Xyz</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>, .. } <span class="op">=</span> <span class="ident">xyz</span>;
+    <span class="kw">fn </span>from_color_unclamped(xyz: Xyz&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>Xyz { x, y, z, .. } = xyz;
 
-        <span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">y</span> <span class="op">+</span> <span class="ident">z</span>;
+        <span class="kw">let </span>sum = x.clone() + <span class="kw-2">&amp;</span>y + z;
 
-        <span class="comment">// If denominator is zero, NAN or INFINITE leave x and y at the default 0</span>
-        <span class="kw">let</span> <span class="ident">mask</span> <span class="op">=</span> <span class="ident">sum</span>.<span class="ident">is_valid_divisor</span>();
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="macro">lazy_select!</span> {
-                <span class="kw">if</span> <span class="ident">mask</span>.<span class="ident">clone</span>() =&gt; <span class="ident">x</span> <span class="op">/</span> <span class="kw-2">&amp;</span><span class="ident">sum</span>,
-                <span class="kw">else</span> =&gt; <span class="ident">T::zero</span>(),
+        <span class="comment">// If denominator is zero, NAN or INFINITE leave x and y at the default 0
+        </span><span class="kw">let </span>mask = sum.is_valid_divisor();
+        Yxy {
+            x: <span class="macro">lazy_select! </span>{
+                <span class="kw">if </span>mask.clone() =&gt; x / <span class="kw-2">&amp;</span>sum,
+                <span class="kw">else </span>=&gt; T::zero(),
             },
-            <span class="ident">y</span>: <span class="macro">lazy_select!</span> {
-                <span class="kw">if</span> <span class="ident">mask</span> =&gt; <span class="ident">y</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">sum</span>,
-                <span class="kw">else</span> =&gt; <span class="ident">T::zero</span>()
+            y: <span class="macro">lazy_select! </span>{
+                <span class="kw">if </span>mask =&gt; y.clone() / sum,
+                <span class="kw">else </span>=&gt; T::zero()
             },
-            <span class="ident">luma</span>: <span class="ident">y</span>,
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+            luma: y,
+            white_point: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">LumaStandard</span>,
-    <span class="ident">S::TransferFn</span>: <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="self">Self</span>: <span class="ident">Default</span>,
+<span class="kw">impl</span>&lt;T, S&gt; FromColorUnclamped&lt;Luma&lt;S, T&gt;&gt; <span class="kw">for </span>Yxy&lt;S::WhitePoint, T&gt;
+<span class="kw">where
+    </span>S: LumaStandard,
+    S::TransferFn: IntoLinear&lt;T, T&gt;,
+    <span class="self">Self</span>: Default,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">luma</span>: <span class="ident">luma</span>.<span class="ident">into_linear</span>().<span class="ident">luma</span>,
-            ..<span class="ident">Default::default</span>()
+    <span class="kw">fn </span>from_color_unclamped(luma: Luma&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
+        Yxy {
+            luma: luma.into_linear().luma,
+            ..Default::default()
         }
     }
 }
 
-<span class="macro">impl_is_within_bounds!</span> {
-    <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {
-        <span class="ident">x</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_x</span>(), <span class="ident"><span class="self">Self</span>::max_x</span>()],
-        <span class="ident">y</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_y</span>(), <span class="ident"><span class="self">Self</span>::max_y</span>()],
-        <span class="ident">luma</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()]
+<span class="macro">impl_is_within_bounds! </span>{
+    Yxy&lt;Wp&gt; {
+        x =&gt; [<span class="self">Self</span>::min_x(), <span class="self">Self</span>::max_x()],
+        y =&gt; [<span class="self">Self</span>::min_y(), <span class="self">Self</span>::max_y()],
+        luma =&gt; [<span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma()]
     }
-    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span>
+    <span class="kw">where </span>T: Zero + One
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Clamp <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + One + num::Clamp,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">x</span>, <span class="ident"><span class="self">Self</span>::min_x</span>(), <span class="ident"><span class="self">Self</span>::max_x</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">y</span>, <span class="ident"><span class="self">Self</span>::min_y</span>(), <span class="ident"><span class="self">Self</span>::max_y</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">luma</span>, <span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(
+            clamp(<span class="self">self</span>.x, <span class="self">Self</span>::min_x(), <span class="self">Self</span>::max_x()),
+            clamp(<span class="self">self</span>.y, <span class="self">Self</span>::min_y(), <span class="self">Self</span>::max_y()),
+            clamp(<span class="self">self</span>.luma, <span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma()),
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; ClampAssign <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + One + num::ClampAssign,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">x</span>, <span class="ident"><span class="self">Self</span>::min_x</span>(), <span class="ident"><span class="self">Self</span>::max_x</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">y</span>, <span class="ident"><span class="self">Self</span>::min_y</span>(), <span class="ident"><span class="self">Self</span>::max_y</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">luma</span>, <span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>());
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.x, <span class="self">Self</span>::min_x(), <span class="self">Self</span>::max_x());
+        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.y, <span class="self">Self</span>::min_y(), <span class="self">Self</span>::max_y());
+        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.luma, <span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma());
     }
 }
 
-<span class="macro">impl_mix!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>);
-<span class="macro">impl_lighten!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">luma</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_luma</span>(), <span class="ident"><span class="self">Self</span>::max_luma</span>()]} <span class="ident">other</span> {<span class="ident">x</span>, <span class="ident">y</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">One</span>);
-<span class="macro">impl_premultiply!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
+<span class="macro">impl_mix!</span>(Yxy&lt;Wp&gt;);
+<span class="macro">impl_lighten!</span>(Yxy&lt;Wp&gt; increase {luma =&gt; [<span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma()]} other {x, y} phantom: white_point <span class="kw">where </span>T: One);
+<span class="macro">impl_premultiply!</span>(Yxy&lt;Wp&gt; {x, y, luma} phantom: white_point);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; HasBoolMask <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">type </span>Mask = T::Mask;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span>,
-    <span class="ident">Wp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Default <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero,
+    Wp: WhitePoint&lt;T&gt;,
+    Xyz&lt;Wp, T&gt;: IntoColorUnclamped&lt;<span class="self">Self</span>&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="comment">// The default for x and y are the white point x and y ( from the default D65).</span>
-        <span class="comment">// Since Y (luma) is 0.0, this makes the default color black just like for</span>
-        <span class="comment">// other colors. The reason for not using 0 for x and y is that this</span>
-        <span class="comment">// outside the usual color gamut and might cause scaling issues.</span>
-        <span class="ident">Yxy</span> {
-            <span class="ident">luma</span>: <span class="ident">T::zero</span>(),
-            ..<span class="ident">Wp::get_xyz</span>().<span class="ident">with_white_point</span>().<span class="ident">into_color_unclamped</span>()
+    <span class="kw">fn </span>default() -&gt; Yxy&lt;Wp, T&gt; {
+        <span class="comment">// The default for x and y are the white point x and y ( from the default D65).
+        // Since Y (luma) is 0.0, this makes the default color black just like for
+        // other colors. The reason for not using 0 for x and y is that this
+        // outside the usual color gamut and might cause scaling issues.
+        </span>Yxy {
+            luma: T::zero(),
+            ..Wp::get_xyz().with_white_point().into_color_unclamped()
         }
     }
 }
 
-<span class="macro">impl_color_add!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>], <span class="ident">white_point</span>);
-<span class="macro">impl_color_sub!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>], <span class="ident">white_point</span>);
-<span class="macro">impl_color_mul!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>], <span class="ident">white_point</span>);
-<span class="macro">impl_color_div!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>], <span class="ident">white_point</span>);
+<span class="macro">impl_color_add!</span>(Yxy&lt;Wp, T&gt;, [x, y, luma], white_point);
+<span class="macro">impl_color_sub!</span>(Yxy&lt;Wp, T&gt;, [x, y, luma], white_point);
+<span class="macro">impl_color_mul!</span>(Yxy&lt;Wp, T&gt;, [x, y, luma], white_point);
+<span class="macro">impl_color_div!</span>(Yxy&lt;Wp, T&gt;, [x, y, luma], white_point);
 
-<span class="macro">impl_array_casts!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
-<span class="macro">impl_simd_array_conversion!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>], <span class="ident">white_point</span>);
+<span class="macro">impl_array_casts!</span>(Yxy&lt;Wp, T&gt;, [T; <span class="number">3</span>]);
+<span class="macro">impl_simd_array_conversion!</span>(Yxy&lt;Wp&gt;, [x, y, luma], white_point);
 
-<span class="macro">impl_eq!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">y</span>, <span class="ident">x</span>, <span class="ident">luma</span>]);
+<span class="macro">impl_eq!</span>(Yxy&lt;Wp&gt;, [y, x, luma]);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type </span>Scalar = T;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
-        <span class="ident">contrast_ratio</span>(<span class="self">self</span>.<span class="ident">luma</span>, <span class="ident">other</span>.<span class="ident">luma</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>get_contrast_ratio(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; T {
+        contrast_ratio(<span class="self">self</span>.luma, other.luma)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
-<span class="kw">where</span>
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; Distribution&lt;Yxy&lt;Wp, T&gt;&gt; <span class="kw">for </span>Standard
+<span class="kw">where
+    </span>Standard: Distribution&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
-            <span class="ident">y</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
-            <span class="ident">luma</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Yxy&lt;Wp, T&gt; {
+        Yxy {
+            x: rng.gen(),
+            y: rng.gen(),
+            luma: rng.gen(),
+            white_point: PhantomData,
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">pub struct </span>UniformYxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: SampleUniform,
 {
-    <span class="ident">x</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">y</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">luma</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">white_point</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>,
+    x: Uniform&lt;T&gt;,
+    y: Uniform&lt;T&gt;,
+    luma: Uniform&lt;T&gt;,
+    white_point: PhantomData&lt;Wp&gt;,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; SampleUniform <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Clone + SampleUniform,
 {
-    <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Sampler = UniformYxy&lt;Wp, T&gt;;
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformYxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; UniformSampler <span class="kw">for </span>UniformYxy&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Clone + SampleUniform,
 {
-    <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>X = Yxy&lt;Wp, T&gt;;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let </span>low = low_b.borrow();
+        <span class="kw">let </span>high = high_b.borrow();
 
-        <span class="ident">UniformYxy</span> {
-            <span class="ident">x</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
-            <span class="ident">y</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">y</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
-            <span class="ident">luma</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">luma</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">luma</span>.<span class="ident">clone</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+        UniformYxy {
+            x: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(low.x.clone(), high.x.clone()),
+            y: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(low.y.clone(), high.y.clone()),
+            luma: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(low.luma.clone(), high.luma.clone()),
+            white_point: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new_inclusive&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>();
+        <span class="kw">let </span>low = low_b.borrow();
+        <span class="kw">let </span>high = high_b.borrow();
 
-        <span class="ident">UniformYxy</span> {
-            <span class="ident">x</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">x</span>.<span class="ident">clone</span>()),
-            <span class="ident">y</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">y</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">y</span>.<span class="ident">clone</span>()),
-            <span class="ident">luma</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">luma</span>.<span class="ident">clone</span>(), <span class="ident">high</span>.<span class="ident">luma</span>.<span class="ident">clone</span>()),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+        UniformYxy {
+            x: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(low.x.clone(), high.x.clone()),
+            y: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(low.y.clone(), high.y.clone()),
+            luma: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(low.luma.clone(), high.luma.clone()),
+            white_point: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy</span> {
-            <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="ident">luma</span>: <span class="self">self</span>.<span class="ident">luma</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Yxy&lt;Wp, T&gt; {
+        Yxy {
+            x: <span class="self">self</span>.x.sample(rng),
+            y: <span class="self">self</span>.y.sample(rng),
+            luma: <span class="self">self</span>.luma.sample(rng),
+            white_point: PhantomData,
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp, T&gt; bytemuck::Zeroable <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Pod</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Yxy</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::white_point::D65</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromColor</span>, <span class="ident">LinLuma</span>, <span class="ident">LinSrgb</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">super</span>::Yxy;
+    <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
+    <span class="kw">use crate</span>::{FromColor, LinLuma, LinSrgb};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">luma</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">LinLuma::new</span>(<span class="number">0.5</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Yxy::new</span>(<span class="number">0.312727</span>, <span class="number">0.329023</span>, <span class="number">0.5</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>luma() {
+        <span class="kw">let </span>a = Yxy::&lt;D65&gt;::from_color(LinLuma::new(<span class="number">0.5</span>));
+        <span class="kw">let </span>b = Yxy::new(<span class="number">0.312727</span>, <span class="number">0.329023</span>, <span class="number">0.5</span>);
+        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">red</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Yxy::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Yxy::new</span>(<span class="number">0.64</span>, <span class="number">0.33</span>, <span class="number">0.212673</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>red() {
+        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+        <span class="kw">let </span>b = Yxy::new(<span class="number">0.64</span>, <span class="number">0.33</span>, <span class="number">0.212673</span>);
+        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">green</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Yxy::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Yxy::new</span>(<span class="number">0.3</span>, <span class="number">0.6</span>, <span class="number">0.715152</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>green() {
+        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+        <span class="kw">let </span>b = Yxy::new(<span class="number">0.3</span>, <span class="number">0.6</span>, <span class="number">0.715152</span>);
+        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">blue</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Yxy::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Yxy::new</span>(<span class="number">0.15</span>, <span class="number">0.06</span>, <span class="number">0.072175</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>blue() {
+        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+        <span class="kw">let </span>b = Yxy::new(<span class="number">0.15</span>, <span class="number">0.06</span>, <span class="number">0.072175</span>);
+        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ranges</span>() {
-        <span class="macro">assert_ranges!</span> {
-            <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
-            <span class="ident">clamped</span> {
-                <span class="ident">x</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
-                <span class="ident">y</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
-                <span class="ident">luma</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>
-            }
-            <span class="ident">clamped_min</span> {}
-            <span class="ident">unclamped</span> {}
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ranges() {
+        <span class="macro">assert_ranges! </span>{
+            Yxy&lt;D65, f64&gt;;
+            clamped {
+                x: <span class="number">0.0 </span>=&gt; <span class="number">1.0</span>,
+                y: <span class="number">0.0 </span>=&gt; <span class="number">1.0</span>,
+                luma: <span class="number">0.0 </span>=&gt; <span class="number">1.0
+            </span>}
+            clamped_min {}
+            unclamped {}
         }
     }
 
-    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span>: <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>);
-    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span>: <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">luma</span>);
+    <span class="macro">raw_pixel_conversion_tests!</span>(Yxy&lt;D65&gt;: x, y, luma);
+    <span class="macro">raw_pixel_conversion_fail_tests!</span>(Yxy&lt;D65&gt;: x, y, luma);
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::min_x</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::min_y</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::min_luma</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::max_x</span>(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::max_y</span>(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::max_luma</span>(), <span class="number">1.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>check_min_max_components() {
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_x(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_y(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_luma(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_x(), <span class="number">1.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_y(), <span class="number">1.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_luma(), <span class="number">1.0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Yxy</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Yxy::&lt;D65&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">serialized</span>, <span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Yxy</span> <span class="op">=</span> <span class="ident">::serde_json::from_str</span>(<span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>deserialized: Yxy = ::serde_json::from_str(<span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">Yxy::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
+        <span class="macro">assert_eq!</span>(deserialized, Yxy::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-    <span class="macro">test_uniform_distribution!</span> {
-        <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f32</span><span class="op">&gt;</span> {
-            <span class="ident">x</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">y</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">luma</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>)
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+    </span><span class="macro">test_uniform_distribution! </span>{
+        Yxy&lt;D65, f32&gt; {
+            x: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            y: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            luma: (<span class="number">0.0</span>, <span class="number">1.0</span>)
         },
-        <span class="ident">min</span>: <span class="ident">Yxy::new</span>(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-        <span class="ident">max</span>: <span class="ident">Yxy::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>),
+        min: Yxy::new(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
+        max: Yxy::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>),
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/hsluv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hsluv.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/hsluv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hsluv.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -572,579 +572,579 @@
 <span id="572">572</span>
 <span id="573">573</span>
 <span id="574">574</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+</pre><pre class="rust"><code><span class="kw">use </span>core::{
+    marker::PhantomData,
+    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand</span>::{
-    <span class="ident">distributions</span>::{
-        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
-        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span>rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
     },
-    <span class="ident">Rng</span>,
+    Rng,
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::num</span>::{<span class="ident">Cbrt</span>, <span class="ident">Sqrt</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::num::{Cbrt, Sqrt};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">angle</span>::{<span class="ident">RealAngle</span>, <span class="ident">SignedAngle</span>},
-    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
-    <span class="ident">convert::FromColorUnclamped</span>,
-    <span class="ident">luv_bounds::LuvBounds</span>,
-    <span class="ident">num</span>::{
-        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>,
-        <span class="ident">Zero</span>,
+<span class="kw">use crate</span>::{
+    angle::{RealAngle, SignedAngle},
+    bool_mask::{HasBoolMask, LazySelect},
+    clamp, clamp_assign, contrast_ratio,
+    convert::FromColorUnclamped,
+    luv_bounds::LuvBounds,
+    num::{
+        <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Powi, Real,
+        Zero,
     },
-    <span class="ident">white_point::D65</span>,
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lchuv</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>,
-    <span class="ident">LuvHue</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>,
-    <span class="ident">ShiftHueAssign</span>, <span class="ident">WithHue</span>, <span class="ident">Xyz</span>,
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
+    LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
+    ShiftHueAssign, WithHue, Xyz,
 };
 
-<span class="doccomment">/// HSLuv with an alpha component. See the [`Hsluva` implementation in</span>
-<span class="doccomment">/// `Alpha`](crate::Alpha#Hsluva).</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Hsluva</span><span class="op">&lt;</span><span class="ident">Wp</span> <span class="op">=</span> <span class="ident">D65</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// HSLuv with an alpha component. See the [`Hsluva` implementation in
+/// `Alpha`](crate::Alpha#Hsluva).
+</span><span class="kw">pub type </span>Hsluva&lt;Wp = D65, T = f32&gt; = Alpha&lt;Hsluv&lt;Wp, T&gt;, T&gt;;
 
-<span class="doccomment">/// HSLuv color space.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The HSLuv color space can be seen as a cylindrical version of</span>
-<span class="doccomment">/// [CIELUV](crate::luv::Luv), similar to</span>
-<span class="doccomment">/// [LCHuv](crate::lchuv::Lchuv), with the additional benefit of</span>
-<span class="doccomment">/// streching the chroma values to a uniform saturation range [0.0,</span>
-<span class="doccomment">/// 100.0]. This makes HSLuv much more convenient for generating</span>
-<span class="doccomment">/// colors than Lchuv, as the set of valid saturation values is</span>
-<span class="doccomment">/// independent of lightness and hue.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">ArrayCast</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">palette</span>(
-    <span class="ident">palette_internal</span>,
-    <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;Wp&quot;</span>,
-    <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
-    <span class="ident">skip_derives</span>(<span class="ident">Lchuv</span>, <span class="ident">Hsluv</span>)
-)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span> <span class="op">=</span> <span class="ident">D65</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The hue of the color, in degrees. Decides if it&#39;s red, blue, purple,</span>
-    <span class="doccomment">/// etc.</span>
-    <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">unsafe_same_layout_as</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">hue</span>: <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// HSLuv color space.
+///
+/// The HSLuv color space can be seen as a cylindrical version of
+/// [CIELUV](crate::luv::Luv), similar to
+/// [LCHuv](crate::lchuv::Lchuv), with the additional benefit of
+/// streching the chroma values to a uniform saturation range [0.0,
+/// 100.0]. This makes HSLuv much more convenient for generating
+/// colors than Lchuv, as the set of valid saturation values is
+/// independent of lightness and hue.
+</span><span class="attribute">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[palette(
+    palette_internal,
+    white_point = <span class="string">&quot;Wp&quot;</span>,
+    component = <span class="string">&quot;T&quot;</span>,
+    skip_derives(Lchuv, Hsluv)
+)]
+#[repr(C)]
+</span><span class="kw">pub struct </span>Hsluv&lt;Wp = D65, T = f32&gt; {
+    <span class="doccomment">/// The hue of the color, in degrees. Decides if it&#39;s red, blue, purple,
+    /// etc.
+    </span><span class="attribute">#[palette(unsafe_same_layout_as = <span class="string">&quot;T&quot;</span>)]
+    </span><span class="kw">pub </span>hue: LuvHue&lt;T&gt;,
 
-    <span class="doccomment">/// The colorfulness of the color, as a percentage of the maximum</span>
-    <span class="doccomment">/// available chroma. 0.0 gives gray scale colors and 100.0 will</span>
-    <span class="doccomment">/// give absolutely clear colors.</span>
-    <span class="kw">pub</span> <span class="ident">saturation</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// The colorfulness of the color, as a percentage of the maximum
+    /// available chroma. 0.0 gives gray scale colors and 100.0 will
+    /// give absolutely clear colors.
+    </span><span class="kw">pub </span>saturation: T,
 
-    <span class="doccomment">/// Decides how light the color will look. 0.0 will be black, 50.0 will give</span>
-    <span class="doccomment">/// a clear color, and 100.0 will give white.</span>
-    <span class="kw">pub</span> <span class="ident">l</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// Decides how light the color will look. 0.0 will be black, 50.0 will give
+    /// a clear color, and 100.0 will give white.
+    </span><span class="kw">pub </span>l: T,
 
-    <span class="doccomment">/// The white point and RGB primaries this color is adapted to. The default</span>
-    <span class="doccomment">/// is the sRGB standard.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">serde</span>(<span class="ident">skip</span>))]</span>
-    <span class="attribute">#[<span class="ident">palette</span>(<span class="ident">unsafe_zero_sized</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">white_point</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// The white point and RGB primaries this color is adapted to. The default
+    /// is the sRGB standard.
+    </span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    #[palette(unsafe_zero_sized)]
+    </span><span class="kw">pub </span>white_point: PhantomData&lt;Wp&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Copy</span> {}
+<span class="kw">impl</span>&lt;Wp, T&gt; Copy <span class="kw">for </span>Hsluv&lt;Wp, T&gt; <span class="kw">where </span>T: Copy {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Clone <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Hsluv</span> {
-            <span class="ident">hue</span>: <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>(),
-            <span class="ident">saturation</span>: <span class="self">self</span>.<span class="ident">saturation</span>.<span class="ident">clone</span>(),
-            <span class="ident">l</span>: <span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>(),
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Hsluv&lt;Wp, T&gt; {
+        Hsluv {
+            hue: <span class="self">self</span>.hue.clone(),
+            saturation: <span class="self">self</span>.saturation.clone(),
+            l: <span class="self">self</span>.l.clone(),
+            white_point: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create an HSLuv color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">l</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">l</span>)
+<span class="kw">impl</span>&lt;Wp, T&gt; Hsluv&lt;Wp, T&gt; {
+    <span class="doccomment">/// Create an HSLuv color.
+    </span><span class="kw">pub fn </span>new&lt;H: Into&lt;LuvHue&lt;T&gt;&gt;&gt;(hue: H, saturation: T, l: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new_const(hue.into(), saturation, l)
     }
 
-    <span class="doccomment">/// Create an HSLuv color. This is the same as `Hsluv::new` without the</span>
-    <span class="doccomment">/// generic hue type. It&#39;s temporary until `const fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">l</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Hsluv</span> {
-            <span class="ident">hue</span>,
-            <span class="ident">saturation</span>,
-            <span class="ident">l</span>,
-            <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    <span class="doccomment">/// Create an HSLuv color. This is the same as `Hsluv::new` without the
+    /// generic hue type. It&#39;s temporary until `const fn` supports traits.
+    </span><span class="kw">pub const fn </span>new_const(hue: LuvHue&lt;T&gt;, saturation: T, l: T) -&gt; <span class="self">Self </span>{
+        Hsluv {
+            hue,
+            saturation,
+            l,
+            white_point: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Convert to a `(hue, saturation, l)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        (<span class="self">self</span>.<span class="ident">hue</span>, <span class="self">self</span>.<span class="ident">saturation</span>, <span class="self">self</span>.<span class="ident">l</span>)
+    <span class="doccomment">/// Convert to a `(hue, saturation, l)` tuple.
+    </span><span class="kw">pub fn </span>into_components(<span class="self">self</span>) -&gt; (LuvHue&lt;T&gt;, T, T) {
+        (<span class="self">self</span>.hue, <span class="self">self</span>.saturation, <span class="self">self</span>.l)
     }
 
-    <span class="doccomment">/// Convert from a `(hue, saturation, l)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>)
+    <span class="doccomment">/// Convert from a `(hue, saturation, l)` tuple.
+    </span><span class="kw">pub fn </span>from_components&lt;H: Into&lt;LuvHue&lt;T&gt;&gt;&gt;((hue, saturation, l): (H, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(hue, saturation, l)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + Real,
 {
-    <span class="doccomment">/// Return the `saturation` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_saturation</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+    <span class="doccomment">/// Return the `saturation` value minimum.
+    </span><span class="kw">pub fn </span>min_saturation() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `saturation` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_saturation</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">100.0</span>)
+    <span class="doccomment">/// Return the `saturation` value maximum.
+    </span><span class="kw">pub fn </span>max_saturation() -&gt; T {
+        T::from_f64(<span class="number">100.0</span>)
     }
 
-    <span class="doccomment">/// Return the `l` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_l</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+    <span class="doccomment">/// Return the `l` value minimum.
+    </span><span class="kw">pub fn </span>min_l() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `l` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_l</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">100.0</span>)
+    <span class="doccomment">/// Return the `l` value maximum.
+    </span><span class="kw">pub fn </span>max_l() -&gt; T {
+        T::from_f64(<span class="number">100.0</span>)
     }
 }
 
-<span class="doccomment">///&lt;span id=&quot;Hsluva&quot;&gt;&lt;/span&gt;[`Hsluva`](crate::Hsluva) implementations.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create an HSLuv color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="ident">H</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new_const</span>(<span class="ident">hue</span>.<span class="ident">into</span>(), <span class="ident">saturation</span>, <span class="ident">l</span>, <span class="ident">alpha</span>)
+<span class="doccomment">///&lt;span id=&quot;Hsluva&quot;&gt;&lt;/span&gt;[`Hsluva`](crate::Hsluva) implementations.
+</span><span class="kw">impl</span>&lt;Wp, T, A&gt; Alpha&lt;Hsluv&lt;Wp, T&gt;, A&gt; {
+    <span class="doccomment">/// Create an HSLuv color with transparency.
+    </span><span class="kw">pub fn </span>new&lt;H: Into&lt;LuvHue&lt;T&gt;&gt;&gt;(hue: H, saturation: T, l: T, alpha: A) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new_const(hue.into(), saturation, l, alpha)
     }
 
-    <span class="doccomment">/// Create an HSLuv color with transparency. This is the same as</span>
-    <span class="doccomment">/// `Hsluva::new` without the generic hue type. It&#39;s temporary until `const</span>
-    <span class="doccomment">/// fn` supports traits.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_const</span>(<span class="ident">hue</span>: <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">saturation</span>: <span class="ident">T</span>, <span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">Hsluv::new_const</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>),
-            <span class="ident">alpha</span>,
+    <span class="doccomment">/// Create an HSLuv color with transparency. This is the same as
+    /// `Hsluva::new` without the generic hue type. It&#39;s temporary until `const
+    /// fn` supports traits.
+    </span><span class="kw">pub const fn </span>new_const(hue: LuvHue&lt;T&gt;, saturation: T, l: T, alpha: A) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: Hsluv::new_const(hue, saturation, l),
+            alpha,
         }
     }
 
-    <span class="doccomment">/// Convert to a `(hue, saturation, l, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
+    <span class="doccomment">/// Convert to a `(hue, saturation, l, alpha)` tuple.
+    </span><span class="kw">pub fn </span>into_components(<span class="self">self</span>) -&gt; (LuvHue&lt;T&gt;, T, T, A) {
         (
-            <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">hue</span>,
-            <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturation</span>,
-            <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">l</span>,
-            <span class="self">self</span>.<span class="ident">alpha</span>,
+            <span class="self">self</span>.color.hue,
+            <span class="self">self</span>.color.saturation,
+            <span class="self">self</span>.color.l,
+            <span class="self">self</span>.alpha,
         )
     }
 
-    <span class="doccomment">/// Convert from a `(hue, saturation, l, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>((<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>, <span class="ident">alpha</span>): (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>, <span class="ident">alpha</span>)
+    <span class="doccomment">/// Convert from a `(hue, saturation, l, alpha)` tuple.
+    </span><span class="kw">pub fn </span>from_components&lt;H: Into&lt;LuvHue&lt;T&gt;&gt;&gt;((hue, saturation, l, alpha): (H, T, T, A)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(hue, saturation, l, alpha)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">hsluv</span>
+<span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Hsluv&lt;Wp, T&gt;&gt; <span class="kw">for </span>Hsluv&lt;Wp, T&gt; {
+    <span class="kw">fn </span>from_color_unclamped(hsluv: Hsluv&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        hsluv
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lchuv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Lchuv&lt;Wp, T&gt;&gt; <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + RealAngle + Into&lt;f64&gt; + Powi + Arithmetics + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Lchuv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// convert the chroma to a saturation based on the max</span>
-        <span class="comment">// saturation at a particular hue.</span>
-        <span class="kw">let</span> <span class="ident">max_chroma</span> <span class="op">=</span>
-            <span class="ident">LuvBounds::from_lightness</span>(<span class="ident">color</span>.<span class="ident">l</span>.<span class="ident">clone</span>()).<span class="ident">max_chroma_at_hue</span>(<span class="ident">color</span>.<span class="ident">hue</span>.<span class="ident">clone</span>());
+    <span class="kw">fn </span>from_color_unclamped(color: Lchuv&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="comment">// convert the chroma to a saturation based on the max
+        // saturation at a particular hue.
+        </span><span class="kw">let </span>max_chroma =
+            LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
 
-        <span class="ident">Hsluv::new</span>(
-            <span class="ident">color</span>.<span class="ident">hue</span>,
-            <span class="ident">color</span>.<span class="ident">chroma</span> <span class="op">/</span> <span class="ident">max_chroma</span> <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">100.0</span>),
-            <span class="ident">color</span>.<span class="ident">l</span>,
+        Hsluv::new(
+            color.hue,
+            color.chroma / max_chroma * T::from_f64(<span class="number">100.0</span>),
+            color.l,
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
+<span class="kw">impl</span>&lt;Wp, T, H: Into&lt;LuvHue&lt;T&gt;&gt;&gt; From&lt;(H, T, T)&gt; <span class="kw">for </span>Hsluv&lt;Wp, T&gt; {
+    <span class="kw">fn </span>from(components: (H, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_components(components)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
+<span class="kw">impl</span>&lt;Wp, T&gt; From&lt;Hsluv&lt;Wp, T&gt;&gt; <span class="kw">for </span>(LuvHue&lt;T&gt;, T, T) {
+    <span class="kw">fn </span>from(color: Hsluv&lt;Wp, T&gt;) -&gt; (LuvHue&lt;T&gt;, T, T) {
+        color.into_components()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">H</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
+<span class="kw">impl</span>&lt;Wp, T, H: Into&lt;LuvHue&lt;T&gt;&gt;, A&gt; From&lt;(H, T, T, A)&gt; <span class="kw">for </span>Alpha&lt;Hsluv&lt;Wp, T&gt;, A&gt; {
+    <span class="kw">fn </span>from(components: (H, T, T, A)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_components(components)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
+<span class="kw">impl</span>&lt;Wp, T, A&gt; From&lt;Alpha&lt;Hsluv&lt;Wp, T&gt;, A&gt;&gt; <span class="kw">for </span>(LuvHue&lt;T&gt;, T, T, A) {
+    <span class="kw">fn </span>from(color: Alpha&lt;Hsluv&lt;Wp, T&gt;, A&gt;) -&gt; (LuvHue&lt;T&gt;, T, T, A) {
+        color.into_components()
     }
 }
 
-<span class="macro">impl_is_within_bounds!</span> {
-    <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {
-        <span class="ident">saturation</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_saturation</span>(), <span class="ident"><span class="self">Self</span>::max_saturation</span>()],
-        <span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]
+<span class="macro">impl_is_within_bounds! </span>{
+    Hsluv&lt;Wp&gt; {
+        saturation =&gt; [<span class="self">Self</span>::min_saturation(), <span class="self">Self</span>::max_saturation()],
+        l =&gt; [<span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()]
     }
-    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span>
+    <span class="kw">where </span>T: Real + Zero
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; Clamp <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + Real + num::Clamp,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="self">self</span>.<span class="ident">hue</span>,
-            <span class="ident">clamp</span>(
-                <span class="self">self</span>.<span class="ident">saturation</span>,
-                <span class="ident"><span class="self">Self</span>::min_saturation</span>(),
-                <span class="ident"><span class="self">Self</span>::max_saturation</span>(),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(
+            <span class="self">self</span>.hue,
+            clamp(
+                <span class="self">self</span>.saturation,
+                <span class="self">Self</span>::min_saturation(),
+                <span class="self">Self</span>::max_saturation(),
             ),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()),
+            clamp(<span class="self">self</span>.l, <span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()),
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; ClampAssign <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Zero + Real + num::ClampAssign,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(
-            <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">saturation</span>,
-            <span class="ident"><span class="self">Self</span>::min_saturation</span>(),
-            <span class="ident"><span class="self">Self</span>::max_saturation</span>(),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        clamp_assign(
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.saturation,
+            <span class="self">Self</span>::min_saturation(),
+            <span class="self">Self</span>::max_saturation(),
         );
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>());
+        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.l, <span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l());
     }
 }
 
-<span class="macro">impl_mix_hue!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> {<span class="ident">saturation</span>, <span class="ident">l</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
-<span class="macro">impl_lighten!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]} <span class="ident">other</span> {<span class="ident">hue</span>, <span class="ident">saturation</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
-<span class="macro">impl_saturate!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span> <span class="ident">increase</span> {<span class="ident">saturation</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_saturation</span>(), <span class="ident"><span class="self">Self</span>::max_saturation</span>()]} <span class="ident">other</span> {<span class="ident">hue</span>, <span class="ident">l</span>} <span class="ident">phantom</span>: <span class="ident">white_point</span>);
+<span class="macro">impl_mix_hue!</span>(Hsluv&lt;Wp&gt; {saturation, l} phantom: white_point);
+<span class="macro">impl_lighten!</span>(Hsluv&lt;Wp&gt; increase {l =&gt; [<span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()]} other {hue, saturation} phantom: white_point);
+<span class="macro">impl_saturate!</span>(Hsluv&lt;Wp&gt; increase {saturation =&gt; [<span class="self">Self</span>::min_saturation(), <span class="self">Self</span>::max_saturation()]} other {hue, l} phantom: white_point);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; GetHue <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Clone,
 {
-    <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Hue = LuvHue&lt;T&gt;;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">clone</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>get_hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LuvHue&lt;T&gt; {
+        <span class="self">self</span>.hue.clone()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">H</span><span class="op">&gt;</span> <span class="ident">WithHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T, H&gt; WithHue&lt;H&gt; <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>H: Into&lt;LuvHue&lt;T&gt;&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
-        <span class="self">self</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>with_hue(<span class="kw-2">mut </span><span class="self">self</span>, hue: H) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.hue = hue.into();
+        <span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;Wp, T, H&gt; SetHue&lt;H&gt; <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>H: Into&lt;LuvHue&lt;T&gt;&gt;,
+{
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>set_hue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hue: H) {
+        <span class="self">self</span>.hue = hue.into();
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span>, <span class="ident">H</span><span class="op">&gt;</span> <span class="ident">SetHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">H</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; ShiftHue <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Add&lt;Output = T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into</span>();
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>shift_hue(<span class="kw-2">mut </span><span class="self">self</span>, amount: <span class="self">Self</span>::Scalar) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.hue = <span class="self">self</span>.hue + amount;
+        <span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;Wp, T&gt; ShiftHueAssign <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: AddAssign,
+{
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>shift_hue_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amount: <span class="self">Self</span>::Scalar) {
+        <span class="self">self</span>.hue += amount;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ShiftHue</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; HasBoolMask <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type </span>Mask = T::Mask;
+}
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span> <span class="ident">amount</span>;
-        <span class="self">self</span>
+<span class="kw">impl</span>&lt;Wp, T&gt; Default <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + Zero,
+    LuvHue&lt;T&gt;: Default,
+{
+    <span class="kw">fn </span>default() -&gt; Hsluv&lt;Wp, T&gt; {
+        Hsluv::new(LuvHue::default(), <span class="self">Self</span>::min_saturation(), <span class="self">Self</span>::min_l())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ShiftHueAssign</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">AddAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+<span class="macro">impl_color_add!</span>(Hsluv&lt;Wp, T&gt;, [hue, saturation, l], white_point);
+<span class="macro">impl_color_sub!</span>(Hsluv&lt;Wp, T&gt;, [hue, saturation, l], white_point);
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">hue</span> <span class="op">+</span><span class="op">=</span> <span class="ident">amount</span>;
+<span class="macro">impl_array_casts!</span>(Hsluv&lt;Wp, T&gt;, [T; <span class="number">3</span>]);
+<span class="macro">impl_simd_array_conversion_hue!</span>(Hsluv&lt;Wp&gt;, [saturation, l], white_point);
+
+<span class="macro">impl_eq_hue!</span>(Hsluv&lt;Wp&gt;, LuvHue, [hue, saturation, l]);
+
+<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect&lt;T&gt;,
+    Xyz&lt;Wp, T&gt;: FromColor&lt;<span class="self">Self</span>&gt;,
+{
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>get_contrast_ratio(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; T {
+        <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
+        <span class="kw">let </span>xyz2 = Xyz::from_color(other);
+
+        contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; Distribution&lt;Hsluv&lt;Wp, T&gt;&gt; <span class="kw">for </span>Standard
+<span class="kw">where
+    </span>T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt; + Clone,
+    Standard: Distribution&lt;T&gt; + Distribution&lt;LuvHue&lt;T&gt;&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span>,
-    <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Default</span>,
-{
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Hsluv::new</span>(<span class="ident">LuvHue::default</span>(), <span class="ident"><span class="self">Self</span>::min_saturation</span>(), <span class="ident"><span class="self">Self</span>::min_l</span>())
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Hsluv&lt;Wp, T&gt; {
+        <span class="kw">crate</span>::random_sampling::sample_hsluv(rng.gen::&lt;LuvHue&lt;T&gt;&gt;(), rng.gen(), rng.gen())
     }
 }
 
-<span class="macro">impl_color_add!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>], <span class="ident">white_point</span>);
-<span class="macro">impl_color_sub!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>], <span class="ident">white_point</span>);
-
-<span class="macro">impl_array_casts!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
-<span class="macro">impl_simd_array_conversion_hue!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, [<span class="ident">saturation</span>, <span class="ident">l</span>], <span class="ident">white_point</span>);
-
-<span class="macro">impl_eq_hue!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>, <span class="ident">LuvHue</span>, [<span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">l</span>]);
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">pub struct </span>UniformHsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: SampleUniform,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">xyz1</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">xyz2</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="ident">other</span>);
-
-        <span class="ident">contrast_ratio</span>(<span class="ident">xyz1</span>.<span class="ident">y</span>, <span class="ident">xyz2</span>.<span class="ident">y</span>)
-    }
+    hue: <span class="kw">crate</span>::hues::UniformLuvHue&lt;T&gt;,
+    u1: Uniform&lt;T&gt;,
+    u2: Uniform&lt;T&gt;,
+    space: PhantomData&lt;Wp&gt;,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; SampleUniform <span class="kw">for </span>Hsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
+    T::Mask: LazySelect&lt;T&gt; + Clone,
+    LuvHue&lt;T&gt;: SampleBorrow&lt;LuvHue&lt;T&gt;&gt;,
+    <span class="kw">crate</span>::hues::UniformLuvHue&lt;T&gt;: UniformSampler&lt;X = LuvHue&lt;T&gt;&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="kw">crate</span>::random_sampling::sample_hsluv</span>(<span class="ident">rng</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>(), <span class="ident">rng</span>.<span class="ident">gen</span>())
-    }
+    <span class="kw">type </span>Sampler = UniformHsluv&lt;Wp, T&gt;;
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformHsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; UniformSampler <span class="kw">for </span>UniformHsluv&lt;Wp, T&gt;
+<span class="kw">where
+    </span>T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
+    T::Mask: LazySelect&lt;T&gt; + Clone,
+    LuvHue&lt;T&gt;: SampleBorrow&lt;LuvHue&lt;T&gt;&gt;,
+    <span class="kw">crate</span>::hues::UniformLuvHue&lt;T&gt;: UniformSampler&lt;X = LuvHue&lt;T&gt;&gt;,
 {
-    <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformLuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">u1</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">u2</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">space</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Wp</span><span class="op">&gt;</span>,
-}
+    <span class="kw">type </span>X = Hsluv&lt;Wp, T&gt;;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident"><span class="kw">crate</span>::hues::UniformLuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-{
-    <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformHsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformHsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Powi</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident"><span class="kw">crate</span>::hues::UniformLuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">UniformSampler</span><span class="op">&lt;</span><span class="ident">X</span> <span class="op">=</span> <span class="ident">LuvHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-{
-    <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::random_sampling::invert_hsluv_sample</span>;
+        <span class="kw">use </span><span class="kw">crate</span>::random_sampling::invert_hsluv_sample;
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let </span>low = low_b.borrow().clone();
+        <span class="kw">let </span>high = high_b.borrow().clone();
 
-        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>): (<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">=</span> <span class="ident">invert_hsluv_sample</span>(<span class="ident">low</span>.<span class="ident">saturation</span>, <span class="ident">low</span>.<span class="ident">l</span>);
-        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>): (<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">=</span> <span class="ident">invert_hsluv_sample</span>(<span class="ident">high</span>.<span class="ident">saturation</span>, <span class="ident">high</span>.<span class="ident">l</span>);
+        <span class="kw">let </span>(r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
+        <span class="kw">let </span>(r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
 
-        <span class="ident">UniformHsluv</span> {
-            <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformLuvHue::new</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
-            <span class="ident">u1</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r1_min</span>, <span class="ident">r1_max</span>),
-            <span class="ident">u2</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r2_min</span>, <span class="ident">r2_max</span>),
-            <span class="ident">space</span>: <span class="ident">PhantomData</span>,
+        UniformHsluv {
+            hue: <span class="kw">crate</span>::hues::UniformLuvHue::new(low.hue, high.hue),
+            u1: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(r1_min, r1_max),
+            u2: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(r2_min, r2_max),
+            space: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new_inclusive&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::random_sampling::invert_hsluv_sample</span>;
+        <span class="kw">use </span><span class="kw">crate</span>::random_sampling::invert_hsluv_sample;
 
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let </span>low = low_b.borrow().clone();
+        <span class="kw">let </span>high = high_b.borrow().clone();
 
-        <span class="kw">let</span> (<span class="ident">r1_min</span>, <span class="ident">r2_min</span>): (<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">=</span> <span class="ident">invert_hsluv_sample</span>(<span class="ident">low</span>.<span class="ident">saturation</span>, <span class="ident">low</span>.<span class="ident">l</span>);
-        <span class="kw">let</span> (<span class="ident">r1_max</span>, <span class="ident">r2_max</span>): (<span class="ident">T</span>, <span class="ident">T</span>) <span class="op">=</span> <span class="ident">invert_hsluv_sample</span>(<span class="ident">high</span>.<span class="ident">saturation</span>, <span class="ident">high</span>.<span class="ident">l</span>);
+        <span class="kw">let </span>(r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
+        <span class="kw">let </span>(r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
 
-        <span class="ident">UniformHsluv</span> {
-            <span class="ident">hue</span>: <span class="ident"><span class="kw">crate</span>::hues::UniformLuvHue::new_inclusive</span>(<span class="ident">low</span>.<span class="ident">hue</span>, <span class="ident">high</span>.<span class="ident">hue</span>),
-            <span class="ident">u1</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r1_min</span>, <span class="ident">r1_max</span>),
-            <span class="ident">u2</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r2_min</span>, <span class="ident">r2_max</span>),
-            <span class="ident">space</span>: <span class="ident">PhantomData</span>,
+        UniformHsluv {
+            hue: <span class="kw">crate</span>::hues::UniformLuvHue::new_inclusive(low.hue, high.hue),
+            u1: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(r1_min, r1_max),
+            u2: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(r2_min, r2_max),
+            space: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="kw">crate</span>::random_sampling::sample_hsluv</span>(
-            <span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="self">self</span>.<span class="ident">u1</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="self">self</span>.<span class="ident">u2</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Hsluv&lt;Wp, T&gt; {
+        <span class="kw">crate</span>::random_sampling::sample_hsluv(
+            <span class="self">self</span>.hue.sample(rng),
+            <span class="self">self</span>.u1.sample(rng),
+            <span class="self">self</span>.u2.sample(rng),
         )
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp, T&gt; bytemuck::Zeroable <span class="kw">for </span>Hsluv&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>: <span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Pod</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Hsluv&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Hsluv</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">white_point::D65</span>, <span class="ident">FromColor</span>, <span class="ident">Lchuv</span>, <span class="ident">LuvHue</span>, <span class="ident">Saturate</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">super</span>::Hsluv;
+    <span class="kw">use crate</span>::{white_point::D65, FromColor, Lchuv, LuvHue, Saturate};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lchuv_round_trip</span>() {
-        <span class="kw">for</span> <span class="ident">hue</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="op">=</span><span class="number">20</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="number">18.0</span>) {
-            <span class="kw">for</span> <span class="ident">sat</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="op">=</span><span class="number">20</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="number">5.0</span>) {
-                <span class="kw">for</span> <span class="ident">l</span> <span class="kw">in</span> (<span class="number">1</span>..<span class="op">=</span><span class="number">20</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="number">5.0</span>) {
-                    <span class="kw">let</span> <span class="ident">hsluv</span> <span class="op">=</span> <span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">hue</span>, <span class="ident">sat</span>, <span class="ident">l</span>);
-                    <span class="kw">let</span> <span class="ident">lchuv</span> <span class="op">=</span> <span class="ident">Lchuv::from_color</span>(<span class="ident">hsluv</span>);
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_hsluv</span> <span class="op">=</span> <span class="ident">Hsluv::from_color</span>(<span class="ident">lchuv</span>);
-                    <span class="kw">if</span> <span class="ident">to_hsluv</span>.<span class="ident">l</span> <span class="op">&lt;</span> <span class="number">1e-8</span> {
-                        <span class="ident">to_hsluv</span>.<span class="ident">hue</span> <span class="op">=</span> <span class="ident">LuvHue::from</span>(<span class="number">0.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>lchuv_round_trip() {
+        <span class="kw">for </span>hue <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">18.0</span>) {
+            <span class="kw">for </span>sat <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">5.0</span>) {
+                <span class="kw">for </span>l <span class="kw">in </span>(<span class="number">1</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">5.0</span>) {
+                    <span class="kw">let </span>hsluv = Hsluv::&lt;D65, <span class="kw">_</span>&gt;::new(hue, sat, l);
+                    <span class="kw">let </span>lchuv = Lchuv::from_color(hsluv);
+                    <span class="kw">let </span><span class="kw-2">mut </span>to_hsluv = Hsluv::from_color(lchuv);
+                    <span class="kw">if </span>to_hsluv.l &lt; <span class="number">1e-8 </span>{
+                        to_hsluv.hue = LuvHue::from(<span class="number">0.0</span>);
                     }
-                    <span class="macro">assert_relative_eq!</span>(<span class="ident">hsluv</span>, <span class="ident">to_hsluv</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">1e-5</span>);
+                    <span class="macro">assert_relative_eq!</span>(hsluv, to_hsluv, epsilon = <span class="number">1e-5</span>);
                 }
             }
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ranges</span>() {
-        <span class="macro">assert_ranges!</span> {
-            <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">f64</span><span class="op">&gt;</span>;
-            <span class="ident">clamped</span> {
-                <span class="ident">saturation</span>: <span class="number">0.0</span> =&gt; <span class="number">100.0</span>,
-                <span class="ident">l</span>: <span class="number">0.0</span> =&gt; <span class="number">100.0</span>
-            }
-            <span class="ident">clamped_min</span> {}
-            <span class="ident">unclamped</span> {
-                <span class="ident">hue</span>: <span class="op">-</span><span class="number">360.0</span> =&gt; <span class="number">360.0</span>
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ranges() {
+        <span class="macro">assert_ranges! </span>{
+            Hsluv&lt;D65, f64&gt;;
+            clamped {
+                saturation: <span class="number">0.0 </span>=&gt; <span class="number">100.0</span>,
+                l: <span class="number">0.0 </span>=&gt; <span class="number">100.0
+            </span>}
+            clamped_min {}
+            unclamped {
+                hue: -<span class="number">360.0 </span>=&gt; <span class="number">360.0
+            </span>}
+        }
+    }
+
+    <span class="doccomment">/// Check that the arithmetic operations (add/sub) are all
+    /// implemented.
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_arithmetic() {
+        <span class="kw">let </span>hsl = Hsluv::&lt;D65&gt;::new(<span class="number">120.0</span>, <span class="number">40.0</span>, <span class="number">30.0</span>);
+        <span class="kw">let </span>hsl2 = Hsluv::new(<span class="number">200.0</span>, <span class="number">30.0</span>, <span class="number">40.0</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>_hsl3 = hsl + hsl2;
+        _hsl3 += hsl2;
+        <span class="kw">let </span><span class="kw-2">mut </span>_hsl4 = hsl2 + <span class="number">0.3</span>;
+        _hsl4 += <span class="number">0.1</span>;
+
+        _hsl3 = hsl2 - hsl;
+        _hsl3 = _hsl4 - <span class="number">0.1</span>;
+        _hsl4 -= _hsl3;
+        _hsl3 -= <span class="number">0.1</span>;
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>saturate() {
+        <span class="kw">for </span>sat <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">10</span>).map(|s| s <span class="kw">as </span>f64 * <span class="number">10.0</span>) {
+            <span class="kw">for </span>a <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">10</span>).map(|l| l <span class="kw">as </span>f64 * <span class="number">10.0</span>) {
+                <span class="kw">let </span>hsl = Hsluv::&lt;D65, <span class="kw">_</span>&gt;::new(<span class="number">150.0</span>, sat, a);
+                <span class="kw">let </span>hsl_sat_fixed = hsl.saturate_fixed(<span class="number">0.1</span>);
+                <span class="kw">let </span>expected_sat_fixed = Hsluv::new(<span class="number">150.0</span>, (sat + <span class="number">10.0</span>).min(<span class="number">100.0</span>), a);
+                <span class="macro">assert_relative_eq!</span>(hsl_sat_fixed, expected_sat_fixed);
+
+                <span class="kw">let </span>hsl_sat = hsl.saturate(<span class="number">0.1</span>);
+                <span class="kw">let </span>expected_sat = Hsluv::new(<span class="number">150.0</span>, (sat + (<span class="number">100.0 </span>- sat) * <span class="number">0.1</span>).min(<span class="number">100.0</span>), a);
+                <span class="macro">assert_relative_eq!</span>(hsl_sat, expected_sat);
             }
         }
     }
 
-    <span class="doccomment">/// Check that the arithmetic operations (add/sub) are all</span>
-    <span class="doccomment">/// implemented.</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_arithmetic</span>() {
-        <span class="kw">let</span> <span class="ident">hsl</span> <span class="op">=</span> <span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">120.0</span>, <span class="number">40.0</span>, <span class="number">30.0</span>);
-        <span class="kw">let</span> <span class="ident">hsl2</span> <span class="op">=</span> <span class="ident">Hsluv::new</span>(<span class="number">200.0</span>, <span class="number">30.0</span>, <span class="number">40.0</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_hsl3</span> <span class="op">=</span> <span class="ident">hsl</span> <span class="op">+</span> <span class="ident">hsl2</span>;
-        <span class="ident">_hsl3</span> <span class="op">+</span><span class="op">=</span> <span class="ident">hsl2</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_hsl4</span> <span class="op">=</span> <span class="ident">hsl2</span> <span class="op">+</span> <span class="number">0.3</span>;
-        <span class="ident">_hsl4</span> <span class="op">+</span><span class="op">=</span> <span class="number">0.1</span>;
+    <span class="macro">raw_pixel_conversion_tests!</span>(Hsluv&lt;D65&gt;: hue, saturation, lightness);
+    <span class="macro">raw_pixel_conversion_fail_tests!</span>(Hsluv&lt;D65&gt;: hue, saturation, lightness);
 
-        <span class="ident">_hsl3</span> <span class="op">=</span> <span class="ident">hsl2</span> <span class="op">-</span> <span class="ident">hsl</span>;
-        <span class="ident">_hsl3</span> <span class="op">=</span> <span class="ident">_hsl4</span> <span class="op">-</span> <span class="number">0.1</span>;
-        <span class="ident">_hsl4</span> <span class="op">-</span><span class="op">=</span> <span class="ident">_hsl3</span>;
-        <span class="ident">_hsl3</span> <span class="op">-</span><span class="op">=</span> <span class="number">0.1</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>check_min_max_components() {
+        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::min_saturation(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::max_saturation(), <span class="number">100.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::max_l(), <span class="number">100.0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate</span>() {
-        <span class="kw">for</span> <span class="ident">sat</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="op">=</span><span class="number">10</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="number">10.0</span>) {
-            <span class="kw">for</span> <span class="ident">a</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="op">=</span><span class="number">10</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="number">10.0</span>) {
-                <span class="kw">let</span> <span class="ident">hsl</span> <span class="op">=</span> <span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">150.0</span>, <span class="ident">sat</span>, <span class="ident">a</span>);
-                <span class="kw">let</span> <span class="ident">hsl_sat_fixed</span> <span class="op">=</span> <span class="ident">hsl</span>.<span class="ident">saturate_fixed</span>(<span class="number">0.1</span>);
-                <span class="kw">let</span> <span class="ident">expected_sat_fixed</span> <span class="op">=</span> <span class="ident">Hsluv::new</span>(<span class="number">150.0</span>, (<span class="ident">sat</span> <span class="op">+</span> <span class="number">10.0</span>).<span class="ident">min</span>(<span class="number">100.0</span>), <span class="ident">a</span>);
-                <span class="macro">assert_relative_eq!</span>(<span class="ident">hsl_sat_fixed</span>, <span class="ident">expected_sat_fixed</span>);
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Hsluv::&lt;D65&gt;::new(<span class="number">120.0</span>, <span class="number">80.0</span>, <span class="number">60.0</span>)).unwrap();
 
-                <span class="kw">let</span> <span class="ident">hsl_sat</span> <span class="op">=</span> <span class="ident">hsl</span>.<span class="ident">saturate</span>(<span class="number">0.1</span>);
-                <span class="kw">let</span> <span class="ident">expected_sat</span> <span class="op">=</span> <span class="ident">Hsluv::new</span>(<span class="number">150.0</span>, (<span class="ident">sat</span> <span class="op">+</span> (<span class="number">100.0</span> <span class="op">-</span> <span class="ident">sat</span>) <span class="op">*</span> <span class="number">0.1</span>).<span class="ident">min</span>(<span class="number">100.0</span>), <span class="ident">a</span>);
-                <span class="macro">assert_relative_eq!</span>(<span class="ident">hsl_sat</span>, <span class="ident">expected_sat</span>);
-            }
-        }
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;hue&quot;:120.0,&quot;saturation&quot;:80.0,&quot;l&quot;:60.0}&quot;#</span>);
     }
 
-    <span class="macro">raw_pixel_conversion_tests!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
-    <span class="macro">raw_pixel_conversion_fail_tests!</span>(<span class="ident">Hsluv</span><span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span>: <span class="ident">hue</span>, <span class="ident">saturation</span>, <span class="ident">lightness</span>);
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>deserialized: Hsluv =
+            ::serde_json::from_str(<span class="string">r#&quot;{&quot;hue&quot;:120.0,&quot;saturation&quot;:80.0,&quot;l&quot;:60.0}&quot;#</span>).unwrap();
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::min_saturation</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::min_l</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::max_saturation</span>(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::max_l</span>(), <span class="number">100.0</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Hsluv</span>::<span class="op">&lt;</span><span class="ident">D65</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">120.0</span>, <span class="number">80.0</span>, <span class="number">60.0</span>)).<span class="ident">unwrap</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">serialized</span>, <span class="string">r#&quot;{&quot;hue&quot;:120.0,&quot;saturation&quot;:80.0,&quot;l&quot;:60.0}&quot;#</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Hsluv</span> <span class="op">=</span>
-            <span class="ident">::serde_json::from_str</span>(<span class="string">r#&quot;{&quot;hue&quot;:120.0,&quot;saturation&quot;:80.0,&quot;l&quot;:60.0}&quot;#</span>).<span class="ident">unwrap</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">Hsluv::new</span>(<span class="number">120.0</span>, <span class="number">80.0</span>, <span class="number">60.0</span>));
+        <span class="macro">assert_eq!</span>(deserialized, Hsluv::new(<span class="number">120.0</span>, <span class="number">80.0</span>, <span class="number">60.0</span>));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

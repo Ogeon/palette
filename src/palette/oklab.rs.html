@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/oklab.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>oklab.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/oklab.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>oklab.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -504,511 +504,981 @@
 <span id="504">504</span>
 <span id="505">505</span>
 <span id="506">506</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+</pre><pre class="rust"><code><span class="kw">use </span>core::any::TypeId;
+<span class="kw">use </span>core::fmt::Debug;
+<span class="kw">use </span>core::ops::Mul;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
+<span class="kw">pub use </span>alpha::Oklaba;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand</span>::{
-    <span class="ident">distributions</span>::{
-        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
-        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
-    },
-    <span class="ident">Rng</span>,
+<span class="kw">use </span><span class="kw">crate</span>::convert::IntoColorUnclamped;
+<span class="kw">use </span><span class="kw">crate</span>::encoding::{IntoLinear, Srgb};
+<span class="kw">use </span><span class="kw">crate</span>::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
+<span class="kw">use </span><span class="kw">crate</span>::ok_utils::{toe_inv, ChromaValues, LC, ST};
+<span class="kw">use </span><span class="kw">crate</span>::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
+<span class="kw">use crate</span>::{
+    angle::RealAngle,
+    bool_mask::HasBoolMask,
+    convert::FromColorUnclamped,
+    matrix::multiply_xyz,
+    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    white_point::D65,
+    LinSrgb, Mat3, Okhsl, Okhsv, OklabHue, Oklch, Xyz,
 };
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">angle::RealAngle</span>,
-    <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
-    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>, <span class="ident">contrast_ratio</span>,
-    <span class="ident">convert::FromColorUnclamped</span>,
-    <span class="ident">matrix::multiply_xyz</span>,
-    <span class="ident">num</span>::{
-        <span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">Cbrt</span>, <span class="ident">FromScalarArray</span>, <span class="ident">IntoScalarArray</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>,
-        <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>,
-    },
-    <span class="ident">stimulus::Stimulus</span>,
-    <span class="ident">white_point::D65</span>,
-    <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">FromColor</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mat3</span>,
-    <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">OklabHue</span>, <span class="ident">Oklch</span>, <span class="ident">RelativeContrast</span>, <span class="ident">Xyz</span>,
-};
+<span class="kw">mod </span>alpha;
+<span class="kw">mod </span>properties;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">mod </span>random;
+<span class="attribute">#[cfg(test)]
+#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">mod </span>visual_eq;
 
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="kw">fn</span> <span class="ident">m1</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Real</span><span class="op">&gt;</span>() -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="comment">// Using recalculated matrix values from
+// https://github.com/LeaVerou/color.js/blob/master/src/spaces/oklab.js
+//
+// see https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
+// and the following https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-945714988
+
+</span><span class="doccomment">/// XYZ to LSM transformation matrix
+</span><span class="attribute">#[rustfmt::skip]
+</span><span class="kw">fn </span>m1&lt;T: Real&gt;() -&gt; Mat3&lt;T&gt; {
     [
-        <span class="ident">T::from_f64</span>(<span class="number">0.8189330101</span>), <span class="ident">T::from_f64</span>(<span class="number">0.3618667424</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.1288597137</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">0.0329845436</span>), <span class="ident">T::from_f64</span>(<span class="number">0.9293118715</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0361456387</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">0.0482003018</span>), <span class="ident">T::from_f64</span>(<span class="number">0.2643662691</span>), <span class="ident">T::from_f64</span>(<span class="number">0.6338517070</span>),
+        T::from_f64(<span class="number">0.8190224432164319</span>), T::from_f64(<span class="number">0.3619062562801221</span>), T::from_f64(-<span class="number">0.12887378261216414</span>),
+        T::from_f64(<span class="number">0.0329836671980271</span>), T::from_f64(<span class="number">0.9292868468965546</span>), T::from_f64(<span class="number">0.03614466816999844</span>),
+        T::from_f64(<span class="number">0.048177199566046255</span>), T::from_f64(<span class="number">0.26423952494422764</span>), T::from_f64(<span class="number">0.6335478258136937</span>),
     ]
 }
 
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">m1_inv</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Real</span><span class="op">&gt;</span>() -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="doccomment">/// LMS to XYZ transformation matrix
+</span><span class="attribute">#[rustfmt::skip]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>m1_inv&lt;T: Real&gt;() -&gt; Mat3&lt;T&gt; {
     [
-        <span class="ident">T::from_f64</span>(<span class="number">1.2270138511</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.5577999807</span>), <span class="ident">T::from_f64</span>(<span class="number">0.2812561490</span>),
-        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0405801784</span>), <span class="ident">T::from_f64</span>(<span class="number">1.1122568696</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0716766787</span>),
-        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0763812845</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.4214819784</span>), <span class="ident">T::from_f64</span>(<span class="number">1.5861632204</span>),
+        T::from_f64(<span class="number">1.2268798733741557</span>), T::from_f64(-<span class="number">0.5578149965554813</span>), T::from_f64(<span class="number">0.28139105017721583</span>),
+        T::from_f64(-<span class="number">0.04057576262431372</span>), T::from_f64(<span class="number">1.1122868293970594</span>), T::from_f64(-<span class="number">0.07171106666151701</span>),
+        T::from_f64(-<span class="number">0.07637294974672142</span>), T::from_f64(-<span class="number">0.4214933239627914</span>), T::from_f64(<span class="number">1.5869240244272418</span>),
     ]
 }
 
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="kw">fn</span> <span class="ident">m2</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Real</span><span class="op">&gt;</span>() -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="doccomment">/// LMS to Oklab transformation matrix
+</span><span class="attribute">#[rustfmt::skip]
+</span><span class="kw">fn </span>m2&lt;T: Real&gt;() -&gt; Mat3&lt;T&gt; {
     [
-        <span class="ident">T::from_f64</span>(<span class="number">0.2104542553</span>), <span class="ident">T::from_f64</span>(<span class="number">0.7936177850</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0040720468</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">1.9779984951</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">2.4285922050</span>), <span class="ident">T::from_f64</span>(<span class="number">0.4505937099</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">0.0259040371</span>), <span class="ident">T::from_f64</span>(<span class="number">0.7827717662</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.8086757660</span>),
+        T::from_f64(<span class="number">0.2104542553</span>), T::from_f64(<span class="number">0.7936177850</span>), T::from_f64(-<span class="number">0.0040720468</span>),
+        T::from_f64(<span class="number">1.9779984951</span>), T::from_f64(-<span class="number">2.4285922050</span>), T::from_f64(<span class="number">0.4505937099</span>),
+        T::from_f64(<span class="number">0.0259040371</span>), T::from_f64(<span class="number">0.7827717662</span>), T::from_f64(-<span class="number">0.8086757660</span>),
     ]
 }
 
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">m2_inv</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Real</span><span class="op">&gt;</span>() -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="doccomment">/// Oklab to LMS transformation matrix
+</span><span class="attribute">#[rustfmt::skip]
+#[allow(clippy::excessive_precision)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>m2_inv&lt;T: Real&gt;() -&gt; Mat3&lt;T&gt; {
     [
-        <span class="ident">T::from_f64</span>(<span class="number">0.9999999985</span>), <span class="ident">T::from_f64</span>(<span class="number">0.3963377922</span>), <span class="ident">T::from_f64</span>(<span class="number">0.2158037581</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">1.0000000089</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.1055613423</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0638541748</span>),
-        <span class="ident">T::from_f64</span>(<span class="number">1.0000000547</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0894841821</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">1.2914855379</span>),
+        T::from_f64(<span class="number">0.99999999845051981432</span>), T::from_f64(<span class="number">0.39633779217376785678</span>), T::from_f64(<span class="number">0.21580375806075880339</span>),
+        T::from_f64(<span class="number">1.0000000088817607767</span>), T::from_f64(-<span class="number">0.1055613423236563494</span>), T::from_f64(-<span class="number">0.063854174771705903402</span>),
+        T::from_f64(<span class="number">1.0000000546724109177</span>), T::from_f64(-<span class="number">0.089484182094965759684</span>), T::from_f64(-<span class="number">1.2914855378640917399</span>),
     ]
 }
 
-<span class="doccomment">/// Oklab with an alpha component. See the [`Oklaba` implementation in</span>
-<span class="doccomment">/// `Alpha`](crate::Alpha#Oklaba).</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Oklaba</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// The [Oklab color space](https://bottosson.github.io/posts/oklab/).
+///
+/// # Characteristics
+/// `Oklab` is a *perceptual* color space. It does not relate to an output device
+/// (a monitor or printer) but instead relates to the
+/// [CIE standard observer](https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_standard_observer)
+/// -- an averaging of the results of color matching experiments under
+/// laboratory conditions.
+///
+/// `Oklab` is a uniform color space
+/// ([Compare to the HSV color space](https://bottosson.github.io/posts/oklab/#comparing-oklab-to-hsv)).
+/// It is useful for things like:
+/// * Turning an image grayscale, while keeping the perceived lightness the same
+/// * Increasing the saturation of colors, while maintaining perceived hue and lightness
+/// * Creating smooth and uniform looking transitions between colors
+///
+/// `Oklab`&#39;s structure is similar to [L\*a\*b\*](crate::Lab). It is based on the
+/// [opponent color model of human vision](https://en.wikipedia.org/wiki/Opponent_process),
+/// where red and green form an opponent pair, and blue and yellow form an opponent pair.
+///
+/// `Oklab` uses [D65](https://en.wikipedia.org/wiki/Illuminant_D65)&#39;s
+/// whitepoint -- daylight illumination, which is also used by sRGB, rec2020 and Display P3 color
+/// spaces -- and assumes normal well-lit viewing conditions, to which the eye is adapted.
+/// Thus `Oklab`s lightness `l` technically is a measure of relative brightness -- a subjective
+/// measure -- not relative luminance. The lightness is scale/exposure-independend, i.e.
+/// independent of the actual luminance of the color, as displayed by some medium, and
+/// even for blindingly bright colors or very bright or dark viewing conditions assumes, that the
+/// eye is adapted to the color&#39;s luminance and the hue and chroma are perceived linearly.
+///
+///
+/// `Oklab`&#39;s chroma is unlimited. Thus it can represent colors of any color space (including HDR).
+/// `l` is in the range `0.0 .. 1.0` and `a` and `b` are unbounded.
+///
+/// # Conversions
+/// [`Oklch`] is a cylindrical form of `Oklab`.
+///
+/// `Oklab` colors converted from valid (i.e. clamped) `sRGB` will be in the `sRGB` gamut.
+///
+/// [`Okhsv`], [`Okhwb`] and [`Okhsl`] reference the `sRGB` gamut.
+/// The transformation from `Oklab` to one of them is based on the assumption,
+/// that the transformed `Oklab` value is within `sRGB`.
+///
+/// `Okhsv`, `Okhwb` and `Okhsl` are not applicable to HDR, which also come with
+/// color spaces with wider gamuts. They require
+/// [additional research](https://bottosson.github.io/posts/colorpicker/#ideas-for-future-work).
+///
+/// When a `Oklab` color is converted from [`Srgb`](crate::rgb::Srgb) or a equivalent color space,
+/// e.g. [`Hsv`], [`Okhsv`], [`Hsl`], [`Okhsl`], [`Hwb`], [`Okhwb`], it&#39;s lightness will be
+/// relative to the (user controlled) maximum contrast and luminance of the display device, to
+/// which the eye is assumed to be adapted.
+///
+/// # Clamping
+/// [`Clamp`ing](Clamp) will only clamp `l`. Clamping does not guarantee the color to be inside
+/// the perceptible or any display-dependent color space (like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsv`, clamp it there
+/// and convert it back to `Oklab`.
+///
+/// ```
+/// // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&amp;precision=17
+/// # use approx::assert_abs_diff_eq;
+/// # use palette::{convert::FromColorUnclamped,IsWithinBounds, LinSrgb, Okhsv, Oklab};
+/// # use palette::Clamp;
+/// let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, -0.098273600140966));
+/// let okhsv: Okhsv&lt;f64&gt; = Okhsv::from_color_unclamped(oklab);
+/// assert!(!okhsv.is_within_bounds());
+/// let clamped_okhsv = okhsv.clamp();
+/// assert!(clamped_okhsv.is_within_bounds());
+/// let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
+/// let  expected = LinSrgb::new(1.0, 0.9876530763223166, 0.0);
+/// assert_abs_diff_eq!(expected, linsrgb, epsilon = 0.02);
+/// ```
+/// Since the conversion contains a gamut mapping, it will map the color to one
+/// of the perceptually closest locations in the `sRGB` gamut. Gamut mapping -- unlike clamping --
+/// is an expensive operation. To get computationally cheaper (and perceptually much worse) results,
+/// convert directly to [`Srgb`] and clamp there.  
+///
+/// # Lightening / Darkening
+/// [`Lighten`ing](crate::Lighten) and [`Darken`ing](crate::Darken) will change `l`, as expected. However,
+/// either operation may leave an implicit color space (the percetible or a display
+/// dependent color space like *sRGB*).
+///
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`, lighten/darken
+/// it there and convert it back to `Oklab`.
 
-<span class="doccomment">/// The [Oklab color space](https://bottosson.github.io/posts/oklab/).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Oklab is a perceptually-uniform color space similar in structure to</span>
-<span class="doccomment">/// [L\*a\*b\*](crate::Lab), but tries to have a better perceptual uniformity.</span>
-<span class="doccomment">/// It assumes a D65 whitepoint and normal well-lit viewing conditions.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">ArrayCast</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">palette</span>(
-    <span class="ident">palette_internal</span>,
-    <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;D65&quot;</span>,
-    <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
-    <span class="ident">skip_derives</span>(<span class="ident">Oklab</span>, <span class="ident">Oklch</span>, <span class="ident">Xyz</span>)
-)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// L is the lightness of the color. 0 gives absolute black and 1 gives the brightest white.</span>
-    <span class="kw">pub</span> <span class="ident">l</span>: <span class="ident">T</span>,
+</span><span class="attribute">#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[palette(
+    palette_internal,
+    white_point = <span class="string">&quot;D65&quot;</span>,
+    component = <span class="string">&quot;T&quot;</span>,
+    skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz, Rgb)
+)]
+#[repr(C)]
+</span><span class="kw">pub struct </span>Oklab&lt;T = f32&gt; {
+    <span class="doccomment">/// `l` is the lightness of the color. `0` gives absolute black and `1` gives the
+    /// full white point luminance of the display medium.
+    ///
+    /// [D65 (normalized with Y=1, i.e. white according to the adaption of the eye) transforms to
+    /// L=1,a=0,b=0](https://bottosson.github.io/posts/oklab/#how-oklab-was-derived).
+    /// However intermediate values differ from those of CIELab non-linearly. For visually
+    /// similar values, transform using [`toe`](crate::ok_utils::toe) and
+    /// [`toe_inv`](crate::ok_utils::toe_inv). These transformations are also use when
+    /// converting to [`Okhsv`], [`Okhsl`] and [`Okhwb`].
+    ///
+    </span><span class="kw">pub </span>l: T,
 
-    <span class="doccomment">/// a goes from red at -1 to green at 1.</span>
-    <span class="kw">pub</span> <span class="ident">a</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// `a` changes the hue from reddish to greenish, when moving from positive
+    /// to negative values and becomes more intense with larger absolute values.
+    ///
+    /// The exact orientation is determined by `b`
+    </span><span class="kw">pub </span>a: T,
 
-    <span class="doccomment">/// b goes from yellow at -1 to blue at 1.</span>
-    <span class="kw">pub</span> <span class="ident">b</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// `b` changes the hue from yellowish to blueish, when moving from positive
+    /// to negative values and becomes more intense with larger absolute values.
+    ///
+    /// [Positive b is oriented to the same yellow color as
+    /// CAM16](https://bottosson.github.io/posts/oklab/#how-oklab-was-derived)
+    </span><span class="kw">pub </span>b: T,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Copy</span> {}
+<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt; {
+    <span class="doccomment">/// Create an Oklab color.
+    </span><span class="kw">pub const fn </span>new(l: T, a: T, b: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ l, a, b }
+    }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
+    <span class="doccomment">/// Convert to a `(L, a, b)` tuple.
+    </span><span class="kw">pub fn </span>into_components(<span class="self">self</span>) -&gt; (T, T, T) {
+        (<span class="self">self</span>.l, <span class="self">self</span>.a, <span class="self">self</span>.b)
+    }
+
+    <span class="doccomment">/// Convert from a `(L, a, b)` tuple.
+    </span><span class="kw">pub fn </span>from_components((l, a, b): (T, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(l, a, b)
+    }
+}
+
+<span class="comment">// component bounds
+// For `Oklab` in general a and b are unbounded.
+// In the sRGB gamut `Oklab`s chroma (and thus a and b) are bounded.
+</span><span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Zero + One,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Oklab</span> {
-            <span class="ident">l</span>: <span class="self">self</span>.<span class="ident">l</span>.<span class="ident">clone</span>(),
-            <span class="ident">a</span>: <span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>(),
-            <span class="ident">b</span>: <span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>(),
-        }
+    <span class="doccomment">/// Return the `l` value minimum.
+    </span><span class="kw">pub fn </span>min_l() -&gt; T {
+        T::zero()
+    }
+
+    <span class="doccomment">/// Return the `l` value maximum.
+    </span><span class="kw">pub fn </span>max_l() -&gt; T {
+        T::one()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create an Oklab color.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span> }
-    }
-
-    <span class="doccomment">/// Convert to a `(L, a, b)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        (<span class="self">self</span>.<span class="ident">l</span>, <span class="self">self</span>.<span class="ident">a</span>, <span class="self">self</span>.<span class="ident">b</span>)
-    }
-
-    <span class="doccomment">/// Convert from a `(L, a, b)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span>,
+<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
 {
-    <span class="doccomment">/// Return the `l` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_l</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">0.0</span>)
-    }
-
-    <span class="doccomment">/// Return the `l` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_l</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">1.0</span>)
-    }
-
-    <span class="doccomment">/// Return the `a` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_a</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">1.0</span>)
-    }
-
-    <span class="doccomment">/// Return the `a` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_a</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">1.0</span>)
-    }
-
-    <span class="doccomment">/// Return the `b` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_b</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">1.0</span>)
-    }
-
-    <span class="doccomment">/// Return the `b` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_b</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::from_f64</span>(<span class="number">1.0</span>)
+    <span class="doccomment">/// Returns the hue, if at least one of `a` and `b` are non-zero  
+    </span><span class="kw">pub fn </span>try_hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;OklabHue&lt;T&gt;&gt; {
+        OklabHue::from_ab(<span class="self">self</span>.a.clone(), <span class="self">self</span>.b.clone())
     }
 }
 
-<span class="doccomment">///&lt;span id=&quot;Oklaba&quot;&gt;&lt;/span&gt;[`Oklaba`](crate::Oklaba) implementations.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create an Oklab color with transparency.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">l</span>: <span class="ident">T</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">Oklab::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>),
-            <span class="ident">alpha</span>,
-        }
-    }
-
-    <span class="doccomment">/// Convert to a `(L, a, b, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_components</span>(<span class="self">self</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-        (<span class="self">self</span>.<span class="ident">color</span>.<span class="ident">l</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">a</span>, <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">b</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
-    }
-
-    <span class="doccomment">/// Convert from a `(L, a, b, alpha)` tuple.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_components</span>((<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>): (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">alpha</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">color</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Cbrt</span> <span class="op">+</span> <span class="ident">Arithmetics</span>,
+<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Hypot + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">m1</span> <span class="op">=</span> <span class="ident">m1</span>();
-        <span class="kw">let</span> <span class="ident">m2</span> <span class="op">=</span> <span class="ident">m2</span>();
-
-        <span class="kw">let</span> <span class="ident">Xyz</span> {
-            <span class="ident">x</span>: <span class="ident">l</span>, <span class="ident">y</span>: <span class="ident">m</span>, <span class="ident">z</span>: <span class="ident">s</span>, ..
-        } <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">m1</span>, <span class="ident">color</span>.<span class="ident">with_white_point</span>());
-
-        <span class="kw">let</span> <span class="ident">l_m_s_</span> <span class="op">=</span> <span class="ident">Xyz::new</span>(<span class="ident">l</span>.<span class="ident">cbrt</span>(), <span class="ident">m</span>.<span class="ident">cbrt</span>(), <span class="ident">s</span>.<span class="ident">cbrt</span>());
-
-        <span class="kw">let</span> <span class="ident">Xyz</span> {
-            <span class="ident">x</span>: <span class="ident">l</span>, <span class="ident">y</span>: <span class="ident">a</span>, <span class="ident">z</span>: <span class="ident">b</span>, ..
-        } <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">m2</span>, <span class="ident">l_m_s_</span>);
-
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>)
+    <span class="doccomment">/// Returns the chroma
+    </span><span class="kw">pub fn </span>chroma(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T {
+        T::hypot(<span class="self">self</span>.a.clone(), <span class="self">self</span>.b.clone())
     }
 }
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Arithmetics + Zero + Hypot + Clone + PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">Oklch</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">sin_hue</span>, <span class="ident">cos_hue</span>) <span class="op">=</span> <span class="ident">color</span>.<span class="ident">hue</span>.<span class="ident">into_raw_radians</span>().<span class="ident">sin_cos</span>();
-        <span class="kw">let</span> <span class="ident">chroma</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">chroma</span>.<span class="ident">max</span>(<span class="ident">T::zero</span>());
-
-        <span class="ident">Oklab</span> {
-            <span class="ident">l</span>: <span class="ident">color</span>.<span class="ident">l</span>,
-            <span class="ident">a</span>: <span class="ident">cos_hue</span> <span class="op">*</span> <span class="ident">chroma</span>.<span class="ident">clone</span>(),
-            <span class="ident">b</span>: <span class="ident">sin_hue</span> <span class="op">*</span> <span class="ident">chroma</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">components</span>: (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>)) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_components</span>(<span class="ident">components</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">A</span><span class="op">&gt;</span>) -&gt; (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">A</span>) {
-        <span class="ident">color</span>.<span class="ident">into_components</span>()
-    }
-}
-
-<span class="macro">impl_is_within_bounds!</span> {
-    <span class="ident">Oklab</span> {
-        <span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()],
-        <span class="ident">a</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_a</span>(), <span class="ident"><span class="self">Self</span>::max_a</span>()],
-        <span class="ident">b</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_b</span>(), <span class="ident"><span class="self">Self</span>::max_b</span>()]
-    }
-    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Real</span>
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">a</span>, <span class="ident"><span class="self">Self</span>::min_a</span>(), <span class="ident"><span class="self">Self</span>::max_a</span>()),
-            <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">b</span>, <span class="ident"><span class="self">Self</span>::min_b</span>(), <span class="ident"><span class="self">Self</span>::max_b</span>()),
+    <span class="doccomment">/// Returns the `chroma` -- the euclidean norm of `a` and `b`.
+    /// If `chroma &gt; 0.0` returns normalized versions of `a` and `b`
+    </span><span class="kw">pub fn </span>chroma_and_normalized_ab(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (T, <span class="prelude-ty">Option</span>&lt;(T, T)&gt;) {
+        <span class="kw">let </span>chroma = <span class="self">self</span>.chroma();
+        (
+            chroma.clone(),
+            (chroma != T::zero())
+                .then(|| (<span class="self">self</span>.a.clone() / chroma.clone(), <span class="self">self</span>.b.clone() / chroma)),
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">l</span>, <span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">a</span>, <span class="ident"><span class="self">Self</span>::min_a</span>(), <span class="ident"><span class="self">Self</span>::max_a</span>());
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">b</span>, <span class="ident"><span class="self">Self</span>::min_b</span>(), <span class="ident"><span class="self">Self</span>::max_b</span>());
+<span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Oklab&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt; {
+    <span class="kw">fn </span>from_color_unclamped(color: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        color
     }
 }
 
-<span class="macro">impl_mix!</span>(<span class="ident">Oklab</span>);
-<span class="macro">impl_lighten!</span>(<span class="ident">Oklab</span> <span class="ident">increase</span> {<span class="ident">l</span> =&gt; [<span class="ident"><span class="self">Self</span>::min_l</span>(), <span class="ident"><span class="self">Self</span>::max_l</span>()]} <span class="ident">other</span> {<span class="ident">a</span>, <span class="ident">b</span>});
-<span class="macro">impl_premultiply!</span>(<span class="ident">Oklab</span> { <span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span> });
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">Trigonometry</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Xyz&lt;D65, T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Real + Cbrt + Arithmetics,
 {
-    <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">fn </span>from_color_unclamped(color: Xyz&lt;D65, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>m1 = m1();
+        <span class="kw">let </span>m2 = m2();
 
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">OklabHue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">OklabHue::from_radians</span>(<span class="self">self</span>.<span class="ident">b</span>.<span class="ident">clone</span>().<span class="ident">atan2</span>(<span class="self">self</span>.<span class="ident">a</span>.<span class="ident">clone</span>()))
+        <span class="kw">let </span>Xyz {
+            x: l, y: m, z: s, ..
+        } = multiply_xyz(m1, color.with_white_point());
+
+        <span class="kw">let </span>l_m_s_ = Xyz::new(l.cbrt(), m.cbrt(), s.cbrt());
+
+        <span class="kw">let </span>Xyz {
+            x: l, y: a, z: b, ..
+        } = multiply_xyz(m2, l_m_s_);
+
+        <span class="self">Self</span>::new(l, a, b)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">fn </span>linear_srgb_to_oklab&lt;T&gt;(c: LinSrgb&lt;T&gt;) -&gt; Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Real + Arithmetics + Cbrt + Copy,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">let </span>l = T::from_f64(<span class="number">0.4122214708</span>) * c.red
+        + T::from_f64(<span class="number">0.5363325363</span>) * c.green
+        + T::from_f64(<span class="number">0.0514459929</span>) * c.blue;
+    <span class="kw">let </span>m = T::from_f64(<span class="number">0.2119034982</span>) * c.red
+        + T::from_f64(<span class="number">0.6806995451</span>) * c.green
+        + T::from_f64(<span class="number">0.1073969566</span>) * c.blue;
+    <span class="kw">let </span>s = T::from_f64(<span class="number">0.0883024619</span>) * c.red
+        + T::from_f64(<span class="number">0.2817188376</span>) * c.green
+        + T::from_f64(<span class="number">0.6299787005</span>) * c.blue;
+
+    <span class="kw">let </span>l_ = l.cbrt();
+    <span class="kw">let </span>m_ = m.cbrt();
+    <span class="kw">let </span>s_ = s.cbrt();
+
+    Oklab::new(
+        T::from_f64(<span class="number">0.2104542553</span>) * l_ + T::from_f64(<span class="number">0.7936177850</span>) * m_
+            - T::from_f64(<span class="number">0.0040720468</span>) * s_,
+        T::from_f64(<span class="number">1.9779984951</span>) * l_ - T::from_f64(<span class="number">2.4285922050</span>) * m_
+            + T::from_f64(<span class="number">0.4505937099</span>) * s_,
+        T::from_f64(<span class="number">0.0259040371</span>) * l_ + T::from_f64(<span class="number">0.7827717662</span>) * m_
+            - T::from_f64(<span class="number">0.8086757660</span>) * s_,
+    )
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span>,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>oklab_to_linear_srgb&lt;T&gt;(c: Oklab&lt;T&gt;) -&gt; LinSrgb&lt;T&gt;
+<span class="kw">where
+    </span>T: Real + Arithmetics + Copy,
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">T::zero</span>(), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
-    }
+    <span class="kw">let </span>l_ = c.l + T::from_f64(<span class="number">0.3963377774</span>) * c.a + T::from_f64(<span class="number">0.2158037573</span>) * c.b;
+    <span class="kw">let </span>m_ = c.l - T::from_f64(<span class="number">0.1055613458</span>) * c.a - T::from_f64(<span class="number">0.0638541728</span>) * c.b;
+    <span class="kw">let </span>s_ = c.l - T::from_f64(<span class="number">0.0894841775</span>) * c.a - T::from_f64(<span class="number">1.2914855480</span>) * c.b;
+
+    <span class="kw">let </span>l = l_ * l_ * l_;
+    <span class="kw">let </span>m = m_ * m_ * m_;
+    <span class="kw">let </span>s = s_ * s_ * s_;
+
+    LinSrgb::new(
+        T::from_f64(<span class="number">4.0767416621</span>) * l - T::from_f64(<span class="number">3.3077115913</span>) * m
+            + T::from_f64(<span class="number">0.2309699292</span>) * s,
+        T::from_f64(-<span class="number">1.2684380046</span>) * l + T::from_f64(<span class="number">2.6097574011</span>) * m
+            - T::from_f64(<span class="number">0.3413193965</span>) * s,
+        T::from_f64(-<span class="number">0.0041960863</span>) * l - T::from_f64(<span class="number">0.7034186147</span>) * m
+            + T::from_f64(<span class="number">1.7076147010</span>) * s,
+    )
 }
 
-<span class="macro">impl_color_add!</span>(<span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-<span class="macro">impl_color_sub!</span>(<span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-<span class="macro">impl_color_mul!</span>(<span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-<span class="macro">impl_color_div!</span>(<span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-
-<span class="macro">impl_array_casts!</span>(<span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="number">3</span>]);
-<span class="macro">impl_simd_array_conversion!</span>(<span class="ident">Oklab</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-
-<span class="macro">impl_eq!</span>(<span class="ident">Oklab</span>, [<span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>]);
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeContrast</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">D65</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;S, T&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Real + Cbrt + Arithmetics + FromScalar + Copy,
+    T::Scalar: Recip
+        + IsValidDivisor&lt;Mask = bool&gt;
+        + Arithmetics
+        + FromScalar&lt;Scalar = T::Scalar&gt;
+        + Real
+        + Zero
+        + One
+        + Clone,
+    S: RgbStandard,
+    S::TransferFn: IntoLinear&lt;T, T&gt;,
+    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">&#39;static</span>,
+    &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">xyz1</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">xyz2</span> <span class="op">=</span> <span class="ident">Xyz::from_color</span>(<span class="ident">other</span>);
-
-        <span class="ident">contrast_ratio</span>(<span class="ident">xyz1</span>.<span class="ident">y</span>, <span class="ident">xyz2</span>.<span class="ident">y</span>)
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-{
-    <span class="comment">// `a` and `b` both range from (-1.0, 1.0)</span>
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span> {
-        <span class="ident">Oklab::new</span>(
-            <span class="ident">rng</span>.<span class="ident">gen</span>(),
-            <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">1.0</span>),
-            <span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">1.0</span>),
-        )
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformOklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
-{
-    <span class="ident">l</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">a</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">b</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-{
-    <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformOklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformOklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-{
-    <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
-
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-    {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-
-        <span class="self">Self</span> {
-            <span class="ident">l</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">l</span>, <span class="ident">high</span>.<span class="ident">l</span>),
-            <span class="ident">a</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">a</span>, <span class="ident">high</span>.<span class="ident">a</span>),
-            <span class="ident">b</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">b</span>, <span class="ident">high</span>.<span class="ident">b</span>),
+    <span class="kw">fn </span>from_color_unclamped(rgb: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>TypeId::of::&lt;&lt;S <span class="kw">as </span>RgbStandard&gt;::Space&gt;() == TypeId::of::&lt;Srgb&gt;() {
+            <span class="comment">// Use direct sRGB to Oklab conversion
+            // Rounding errors are likely a contributing factor to differences.
+            // Also the conversion via XYZ doesn&#39;t use pre-defined matrices (yet)
+            </span>linear_srgb_to_oklab(rgb.into_linear().reinterpret_as())
+        } <span class="kw">else </span>{
+            <span class="comment">// Convert via XYZ
+            </span>Xyz::from_color_unclamped(rgb).into_color_unclamped()
         }
     }
+}
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-    {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+<span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Oklch&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: RealAngle + Zero + MinMax + Trigonometry + Mul&lt;Output = T&gt; + Clone,
+{
+    <span class="kw">fn </span>from_color_unclamped(color: Oklch&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(sin_hue, cos_hue) = color.hue.into_raw_radians().sin_cos();
+        <span class="kw">let </span>chroma = color.chroma.max(T::zero());
 
-        <span class="self">Self</span> {
-            <span class="ident">l</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">l</span>, <span class="ident">high</span>.<span class="ident">l</span>),
-            <span class="ident">a</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">a</span>, <span class="ident">high</span>.<span class="ident">a</span>),
-            <span class="ident">b</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">b</span>, <span class="ident">high</span>.<span class="ident">b</span>),
+        Oklab {
+            l: color.l,
+            a: cos_hue * chroma.clone(),
+            b: sin_hue * chroma,
         }
-    }
-
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span> {
-        <span class="ident">Oklab::new</span>(<span class="self">self</span>.<span class="ident">l</span>.<span class="ident">sample</span>(<span class="ident">rng</span>), <span class="self">self</span>.<span class="ident">a</span>.<span class="ident">sample</span>(<span class="ident">rng</span>), <span class="self">self</span>.<span class="ident">b</span>.<span class="ident">sample</span>(<span class="ident">rng</span>))
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span> {}
+<span class="doccomment">/// # See
+/// See [`okhsl_to_srgb`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
+</span><span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhsl&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Real
+        + One
+        + Zero
+        + Arithmetics
+        + Sqrt
+        + MinMax
+        + Copy
+        + PartialOrd
+        + HasBoolMask&lt;Mask = bool&gt;
+        + Powi
+        + Cbrt
+        + Trigonometry
+        + FromScalar
+        + RealAngle,
+    T::Scalar: Real
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor&lt;Mask = bool&gt;
+        + Arithmetics
+        + Clone
+        + FromScalar&lt;Scalar = T::Scalar&gt;,
+{
+    <span class="kw">fn </span>from_color_unclamped(hsl: Okhsl&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>h = hsl.hue;
+        <span class="kw">let </span>s = hsl.saturation;
+        <span class="kw">let </span>l = hsl.lightness;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">bytemuck::Pod</span> {}
+        <span class="kw">if </span>l == T::one() {
+            <span class="kw">return </span>Oklab::new(T::one(), T::zero(), T::zero());
+        } <span class="kw">else if </span>l == T::zero() {
+            <span class="kw">return </span>Oklab::new(T::zero(), T::zero(), T::zero());
+        }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromColor</span>, <span class="ident">LinSrgb</span>};
+        <span class="kw">let </span>(a_, b_) = h.ab(T::one());
+        <span class="kw">let </span>oklab_lightness = toe_inv(l);
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">red</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Oklab::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Oklab::new</span>(<span class="number">0.627986</span>, <span class="number">0.224840</span>, <span class="number">0.125798</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.00001</span>);
+        <span class="kw">let </span>cs = ChromaValues::from_normalized(oklab_lightness, a_, b_);
+
+        <span class="comment">// Interpolate the three values for C so that:
+        // At s=0: dC/ds = cs.zero, C = 0
+        // At s=0.8: C = cs.mid
+        // At s=1.0: C = cs.max
+
+        </span><span class="kw">let </span>mid = T::from_f64(<span class="number">0.8</span>);
+        <span class="kw">let </span>mid_inv = T::from_f64(<span class="number">1.25</span>);
+
+        <span class="kw">let </span>chroma = <span class="kw">if </span>s &lt; mid {
+            <span class="kw">let </span>t = mid_inv * s;
+
+            <span class="kw">let </span>k_1 = mid * cs.zero;
+            <span class="kw">let </span>k_2 = T::one() - k_1 / cs.mid;
+
+            t * k_1 / (T::one() - k_2 * t)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>t = (s - mid) / (T::one() - mid);
+
+            <span class="kw">let </span>k_0 = cs.mid;
+            <span class="kw">let </span>k_1 = (T::one() - mid) * cs.mid * cs.mid * mid_inv * mid_inv / cs.zero;
+            <span class="kw">let </span>k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+
+            k_0 + t * k_1 / (T::one() - k_2 * t)
+        };
+
+        Oklab::new(oklab_lightness, chroma * a_, chroma * b_)
     }
+}
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">green</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Oklab::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Oklab::new</span>(<span class="number">0.866432</span>, <span class="op">-</span><span class="number">0.233916</span>, <span class="number">0.179417</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.00001</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">blue</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Oklab::from_color</span>(<span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Oklab::new</span>(<span class="number">0.451977</span>, <span class="op">-</span><span class="number">0.032429</span>, <span class="op">-</span><span class="number">0.311611</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.00001</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ranges</span>() {
-        <span class="macro">assert_ranges!</span> {
-            <span class="ident">Oklab</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
-            <span class="ident">clamped</span> {
-                <span class="ident">l</span>: <span class="number">0.0</span> =&gt; <span class="number">1.0</span>,
-                <span class="ident">a</span>: <span class="op">-</span><span class="number">1.0</span> =&gt; <span class="number">1.0</span>,
-                <span class="ident">b</span>: <span class="op">-</span><span class="number">1.0</span> =&gt; <span class="number">1.0</span>
+<span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhsv&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Real
+        + PartialOrd
+        + HasBoolMask&lt;Mask = bool&gt;
+        + MinMax
+        + Powi
+        + Arithmetics
+        + Copy
+        + One
+        + Zero
+        + Sqrt
+        + Cbrt
+        + Trigonometry
+        + RealAngle
+        + FromScalar,
+    T::Scalar: Real
+        + PartialOrd
+        + Zero
+        + One
+        + Recip
+        + IsValidDivisor&lt;Mask = bool&gt;
+        + Arithmetics
+        + Clone
+        + FromScalar&lt;Scalar = T::Scalar&gt;,
+{
+    <span class="kw">fn </span>from_color_unclamped(hsv: Okhsv&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>hsv.saturation == T::zero() {
+            <span class="comment">// totally desaturated color -- the triangle is just the 0-chroma-line
+            </span><span class="kw">if </span>hsv.value == T::zero() {
+                <span class="comment">// pure black
+                </span><span class="kw">return </span><span class="self">Self </span>{
+                    l: T::zero(),
+                    a: T::zero(),
+                    b: T::zero(),
+                };
             }
-            <span class="ident">clamped_min</span> {}
-            <span class="ident">unclamped</span> {}
+            <span class="kw">let </span>l = toe_inv(hsv.value);
+            <span class="kw">return </span><span class="self">Self </span>{
+                l,
+                a: T::zero(),
+                b: T::zero(),
+            };
         }
+
+        <span class="kw">let </span>h_radians = hsv.hue.into_raw_radians();
+        <span class="kw">let </span>a_ = T::cos(h_radians);
+        <span class="kw">let </span>b_ = T::sin(h_radians);
+
+        <span class="kw">let </span>cusp = LC::find_cusp(a_, b_);
+        <span class="kw">let </span>cusp: ST&lt;T&gt; = cusp.into();
+        <span class="kw">let </span>s_0 = T::from_f64(<span class="number">0.5</span>);
+        <span class="kw">let </span>k = T::one() - s_0 / cusp.s;
+
+        <span class="comment">// first we compute L and V as if the gamut is a perfect triangle
+
+        // L, C, when v == 1:
+        </span><span class="kw">let </span>l_v = T::one() - hsv.saturation * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+        <span class="kw">let </span>c_v = hsv.saturation * cusp.t * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+
+        <span class="comment">// then we compensate for both toe and the curved top part of the triangle:
+        </span><span class="kw">let </span>l_vt = toe_inv(l_v);
+        <span class="kw">let </span>c_vt = c_v * l_vt / l_v;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>lightness = hsv.value * l_v;
+        <span class="kw">let </span><span class="kw-2">mut </span>chroma = hsv.value * c_v;
+        <span class="kw">let </span>lightness_new = toe_inv(lightness);
+        chroma = chroma * lightness_new / lightness;
+        <span class="comment">// the values may be outside the normal range
+        </span><span class="kw">let </span>rgb_scale: LinSrgb&lt;T&gt; = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+        <span class="kw">let </span>lightness_scale_factor = T::cbrt(
+            T::one()
+                / T::max(
+                    T::max(rgb_scale.red, rgb_scale.green),
+                    T::max(rgb_scale.blue, T::zero()),
+                ),
+        );
+
+        lightness = lightness_new * lightness_scale_factor;
+        chroma = chroma * lightness_scale_factor;
+
+        Oklab::new(lightness, chroma * a_, chroma * b_)
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; From&lt;(T, T, T)&gt; <span class="kw">for </span>Oklab&lt;T&gt; {
+    <span class="kw">fn </span>from(components: (T, T, T)) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_components(components)
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; From&lt;Oklab&lt;T&gt;&gt; <span class="kw">for </span>(T, T, T) {
+    <span class="kw">fn </span>from(color: Oklab&lt;T&gt;) -&gt; (T, T, T) {
+        color.into_components()
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; HasBoolMask <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: HasBoolMask,
+{
+    <span class="kw">type </span>Mask = T::Mask;
+}
+
+<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>Oklab&lt;T&gt;
+<span class="kw">where
+    </span>T: Zero,
+{
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(T::zero(), T::zero(), T::zero())
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;T&gt; bytemuck::Zeroable <span class="kw">for </span>Oklab&lt;T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;T&gt; bytemuck::Pod <span class="kw">for </span>Oklab&lt;T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span>core::str::FromStr;
+
+    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
+    <span class="kw">use </span><span class="kw">crate</span>::visual::VisuallyEqual;
+    <span class="kw">use crate</span>::{FromColor, Lab, LinSrgb, Srgb};
+
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="doccomment">/// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>lightness_of_white_is_one() {
+        <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">&quot;#ffffff&quot;</span>).unwrap().into_format();
+        <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
+        <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
+        <span class="macro">println!</span>(<span class="string">&quot;white {rgb:?} == {oklab:?}&quot;</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.l, <span class="number">1.0</span>, epsilon = <span class="number">1e-7</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.a, <span class="number">0.0</span>, epsilon = <span class="number">1e-7</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.b, <span class="number">0.0</span>, epsilon = <span class="number">1e-7</span>);
+
+        <span class="kw">let </span>lab: Lab&lt;D65, f64&gt; = Lab::from_components((<span class="number">100.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+        <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Srgb::from_color_unclamped(lab);
+        <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lab);
+        <span class="macro">println!</span>(<span class="string">&quot;white {lab:?} == {rgb:?} == {oklab:?}&quot;</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.l, <span class="number">1.0</span>, epsilon = <span class="number">1e-4</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.a, <span class="number">0.0</span>, epsilon = <span class="number">1e-4</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(oklab.b, <span class="number">0.0</span>, epsilon = <span class="number">1e-4</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::min_l</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::min_a</span>(), <span class="op">-</span><span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::min_b</span>(), <span class="op">-</span><span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::max_l</span>(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::max_a</span>(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Oklab</span>::<span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::max_b</span>(), <span class="number">1.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>blue_srgb() {
+        <span class="comment">// use f64 to be comparable to javascript
+        </span><span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">&quot;#0000ff&quot;</span>).unwrap().into_format();
+        <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
+        <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
+
+        <span class="comment">// values from Ok Color Picker, which seems to use  Björn Ottosson&#39;s original
+        // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
+        </span><span class="macro">assert!</span>(<span class="macro">abs_diff_eq!</span>(oklab.l, <span class="number">0.4520137183853429</span>, epsilon = <span class="number">1e-9</span>));
+        <span class="macro">assert!</span>(<span class="macro">abs_diff_eq!</span>(oklab.a, -<span class="number">0.03245698416876397</span>, epsilon = <span class="number">1e-9</span>));
+        <span class="macro">assert!</span>(<span class="macro">abs_diff_eq!</span>(oklab.b, -<span class="number">0.3115281476783751</span>, epsilon = <span class="number">1e-9</span>));
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Oklab::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).<span class="ident">unwrap</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">serialized</span>, <span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>red() {
+        <span class="kw">let </span>a = Oklab::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+        <span class="comment">// from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        </span><span class="kw">let </span>b = Oklab::new(<span class="number">0.6279553606145516</span>, <span class="number">0.22486306106597395</span>, <span class="number">0.1258462985307351</span>);
+        <span class="macro">assert!</span>(Oklab::visually_eq(a, b, <span class="number">1e-8</span>));
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Oklab</span> <span class="op">=</span> <span class="ident">::serde_json::from_str</span>(<span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>).<span class="ident">unwrap</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">Oklab::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>green() {
+        <span class="kw">let </span>a = Oklab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+        <span class="comment">// from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        </span><span class="kw">let </span>b = Oklab::new(
+            <span class="number">0.8664396115356694</span>,
+            -<span class="number">0.23388757418790812</span>,
+            <span class="number">0.17949847989672985</span>,
+        );
+        <span class="macro">assert!</span>(Oklab::visually_eq(a, b, <span class="number">1e-8</span>));
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-    <span class="macro">test_uniform_distribution!</span> {
-        <span class="ident">Oklab</span> {
-            <span class="ident">l</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">a</span>: (<span class="op">-</span><span class="number">1.0</span>, <span class="number">1.0</span>),
-            <span class="ident">b</span>: (<span class="op">-</span><span class="number">1.0</span>, <span class="number">1.0</span>)
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>blue() {
+        <span class="kw">let </span>a = Oklab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+        <span class="macro">println!</span>(<span class="string">&quot;Oklab blue: {:?}&quot;</span>, a);
+        <span class="comment">// from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+        </span><span class="kw">let </span>b = Oklab::new(<span class="number">0.4520137183853429</span>, -<span class="number">0.0324569841687640</span>, -<span class="number">0.3115281476783751</span>);
+        <span class="macro">assert!</span>(Oklab::visually_eq(a, b, <span class="number">1e-8</span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>black_eq_different_black() {
+        <span class="macro">assert!</span>(Oklab::visually_eq(
+            Oklab::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            Oklab::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+            <span class="number">1e-8
+        </span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>white_eq_different_white() {
+        <span class="macro">assert!</span>(Oklab::visually_eq(
+            Oklab::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            Oklab::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+            <span class="number">1e-8
+        </span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>white_ne_black() {
+        <span class="macro">assert!</span>(!Oklab::visually_eq(
+            Oklab::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            Oklab::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+            <span class="number">1e-8
+        </span>));
+        <span class="macro">assert!</span>(!Oklab::visually_eq(
+            Oklab::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            Oklab::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            <span class="number">1e-8
+        </span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>non_bw_neq_different_non_bw() {
+        <span class="macro">assert!</span>(!Oklab::visually_eq(
+            Oklab::new(<span class="number">0.3</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            Oklab::new(<span class="number">0.3</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+            <span class="number">1e-8
+        </span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ranges() {
+        <span class="macro">assert_ranges! </span>{
+            Oklab&lt;f64&gt;;
+            clamped {
+                l: <span class="number">0.0 </span>=&gt; <span class="number">1.0
+                </span><span class="comment">// a and b are unbounded --&gt; not part of test
+            </span>}
+            clamped_min {}
+            unclamped {}
+        };
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>check_min_max_components() {
+        <span class="macro">assert_eq!</span>(Oklab::&lt;f32&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Oklab::&lt;f32&gt;::max_l(), <span class="number">1.0</span>);
+    }
+
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Oklab::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).unwrap();
+
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>);
+    }
+
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>deserialized: Oklab = ::serde_json::from_str(<span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>).unwrap();
+
+        <span class="macro">assert_eq!</span>(deserialized, Oklab::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
+    }
+
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+    </span><span class="macro">test_uniform_distribution! </span>{
+        Oklab {
+            l: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            a: (-<span class="number">1.0</span>, <span class="number">1.0</span>),
+            b: (-<span class="number">1.0</span>, <span class="number">1.0</span>)
         },
-        <span class="ident">min</span>: <span class="ident">Oklab::new</span>(<span class="number">0.0</span>, <span class="op">-</span><span class="number">1.0</span>, <span class="op">-</span><span class="number">1.0</span>),
-        <span class="ident">max</span>: <span class="ident">Oklab::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)
+        min: Oklab::new(<span class="number">0.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>),
+        max: Oklab::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

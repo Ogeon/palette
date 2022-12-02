@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/from_into_color_unclamped_mut.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_into_color_unclamped_mut.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/from_into_color_unclamped_mut.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_into_color_unclamped_mut.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -359,366 +359,366 @@
 <span id="359">359</span>
 <span id="360">360</span>
 <span id="361">361</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>},
+</pre><pre class="rust"><code><span class="kw">use </span>core::{
+    marker::PhantomData,
+    ops::{Deref, DerefMut},
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>};
+<span class="kw">use </span><span class="kw">crate</span>::cast::{<span class="self">self</span>, ArrayCast};
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FromColorMut</span>, <span class="ident">FromColorMutGuard</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>};
+<span class="kw">use super</span>::{FromColorMut, FromColorMutGuard, FromColorUnclamped, IntoColorUnclamped};
 
-<span class="doccomment">/// Temporarily convert colors in place, without clamping.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It allows colors to be converted without using more additional memory than</span>
-<span class="doccomment">/// what is necessary for the conversion, itself. The conversion will however</span>
-<span class="doccomment">/// have to be reverted at some point, since the memory space is borrowed and</span>
-<span class="doccomment">/// has to be restored to its original format. This is enforced by a scope guard</span>
-<span class="doccomment">/// that does the opposite conversion when it&#39;s dropped.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See also [`IntoColorUnclampedMut`] and [`FromColorMut`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{convert::FromColorUnclampedMut, ShiftHueAssign, Srgb, Hsv};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let mut rgb = [</span>
-<span class="doccomment">///     Srgb::new(1.0, 0.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 1.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 0.0, 1.0),</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// {</span>
-<span class="doccomment">///     let mut hsv = &lt;[Hsv]&gt;::from_color_unclamped_mut(&amp;mut rgb);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     // All of the colors in `rgb` have been converted to `Hsv`:</span>
-<span class="doccomment">///     assert_eq!(</span>
-<span class="doccomment">///         *hsv,</span>
-<span class="doccomment">///         [</span>
-<span class="doccomment">///             Hsv::new(0.0, 1.0, 1.0),</span>
-<span class="doccomment">///             Hsv::new(120.0, 1.0, 1.0),</span>
-<span class="doccomment">///             Hsv::new(240.0, 1.0, 1.0),</span>
-<span class="doccomment">///         ]</span>
-<span class="doccomment">///     );</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     hsv.shift_hue_assign(60.0);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// } // The guard is dropped here and the colors are restored to `Srgb`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Notice how the colors in `rgb` have changed:</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     rgb,</span>
-<span class="doccomment">///     [</span>
-<span class="doccomment">///         Srgb::new(1.0, 1.0, 0.0),</span>
-<span class="doccomment">///         Srgb::new(0.0, 1.0, 1.0),</span>
-<span class="doccomment">///         Srgb::new(1.0, 0.0, 1.0),</span>
-<span class="doccomment">///     ]</span>
-<span class="doccomment">/// );</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The scope guard, [`FromColorUnclampedMutGuard`], has a few extra methods</span>
-<span class="doccomment">/// that can make multiple conversion steps more efficient. One of those is</span>
-<span class="doccomment">/// [`FromColorUnclampedMutGuard::then_into_color_unclamped_mut`], which works</span>
-<span class="doccomment">/// like [`IntoColorUnclampedMut::into_color_unclamped_mut`], but does not add</span>
-<span class="doccomment">/// an extra step when restoring to the original color type. This example will</span>
-<span class="doccomment">/// convert `Srgb → Hsv → Hsl → Srgb` instead of `Srgb → Hsv → Hsl → Hsv →</span>
-<span class="doccomment">/// Srgb`:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{convert::FromColorUnclampedMut, ShiftHueAssign, LightenAssign, Srgb, Hsv, Hsl};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let mut rgb = [</span>
-<span class="doccomment">///     Srgb::new(1.0, 0.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 1.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 0.0, 1.0),</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// {</span>
-<span class="doccomment">///     let mut hsv = &lt;[Hsv]&gt;::from_color_unclamped_mut(&amp;mut rgb);</span>
-<span class="doccomment">///     hsv.shift_hue_assign(60.0);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     let mut hsl = hsv.then_into_color_unclamped_mut::&lt;[Hsl]&gt;();</span>
-<span class="doccomment">///     hsl.lighten_assign(0.5);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// } // `then_into_color_unclamped_mut` makes the guard restore directly to `Srgb` here.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Notice how the colors in `rgb` have changed:</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     rgb,</span>
-<span class="doccomment">///     [</span>
-<span class="doccomment">///         Srgb::new(1.0, 1.0, 0.5),</span>
-<span class="doccomment">///         Srgb::new(0.5, 1.0, 1.0),</span>
-<span class="doccomment">///         Srgb::new(1.0, 0.5, 1.0),</span>
-<span class="doccomment">///     ]</span>
-<span class="doccomment">/// );</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Note</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The reused memory space could end up with unexpected values if the</span>
-<span class="doccomment">/// conversion panics or if the scope guard&#39;s `drop` function doesn&#39;t run. The</span>
-<span class="doccomment">/// default implementations of `FromColorUnclampedMut` uses [`ArrayCast`], which</span>
-<span class="doccomment">/// is only implemented for color types that can safely accept and recover from</span>
-<span class="doccomment">/// any value. Other color types will have to provide their own implementations</span>
-<span class="doccomment">/// that can handle this case.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Temporarily convert colors in place, without clamping.
+///
+/// It allows colors to be converted without using more additional memory than
+/// what is necessary for the conversion, itself. The conversion will however
+/// have to be reverted at some point, since the memory space is borrowed and
+/// has to be restored to its original format. This is enforced by a scope guard
+/// that does the opposite conversion when it&#39;s dropped.
+///
+/// See also [`IntoColorUnclampedMut`] and [`FromColorMut`].
+///
+/// ```
+/// use palette::{convert::FromColorUnclampedMut, ShiftHueAssign, Srgb, Hsv};
+///
+/// let mut rgb = [
+///     Srgb::new(1.0, 0.0, 0.0),
+///     Srgb::new(0.0, 1.0, 0.0),
+///     Srgb::new(0.0, 0.0, 1.0),
+/// ];
+///
+/// {
+///     let mut hsv = &lt;[Hsv]&gt;::from_color_unclamped_mut(&amp;mut rgb);
+///
+///     // All of the colors in `rgb` have been converted to `Hsv`:
+///     assert_eq!(
+///         *hsv,
+///         [
+///             Hsv::new(0.0, 1.0, 1.0),
+///             Hsv::new(120.0, 1.0, 1.0),
+///             Hsv::new(240.0, 1.0, 1.0),
+///         ]
+///     );
+///
+///     hsv.shift_hue_assign(60.0);
+///
+/// } // The guard is dropped here and the colors are restored to `Srgb`.
+///
+/// // Notice how the colors in `rgb` have changed:
+/// assert_eq!(
+///     rgb,
+///     [
+///         Srgb::new(1.0, 1.0, 0.0),
+///         Srgb::new(0.0, 1.0, 1.0),
+///         Srgb::new(1.0, 0.0, 1.0),
+///     ]
+/// );
+/// ```
+///
+/// The scope guard, [`FromColorUnclampedMutGuard`], has a few extra methods
+/// that can make multiple conversion steps more efficient. One of those is
+/// [`FromColorUnclampedMutGuard::then_into_color_unclamped_mut`], which works
+/// like [`IntoColorUnclampedMut::into_color_unclamped_mut`], but does not add
+/// an extra step when restoring to the original color type. This example will
+/// convert `Srgb → Hsv → Hsl → Srgb` instead of `Srgb → Hsv → Hsl → Hsv →
+/// Srgb`:
+///
+/// ```
+/// use palette::{convert::FromColorUnclampedMut, ShiftHueAssign, LightenAssign, Srgb, Hsv, Hsl};
+///
+/// let mut rgb = [
+///     Srgb::new(1.0, 0.0, 0.0),
+///     Srgb::new(0.0, 1.0, 0.0),
+///     Srgb::new(0.0, 0.0, 1.0),
+/// ];
+///
+/// {
+///     let mut hsv = &lt;[Hsv]&gt;::from_color_unclamped_mut(&amp;mut rgb);
+///     hsv.shift_hue_assign(60.0);
+///
+///     let mut hsl = hsv.then_into_color_unclamped_mut::&lt;[Hsl]&gt;();
+///     hsl.lighten_assign(0.5);
+///
+/// } // `then_into_color_unclamped_mut` makes the guard restore directly to `Srgb` here.
+///
+/// // Notice how the colors in `rgb` have changed:
+/// assert_eq!(
+///     rgb,
+///     [
+///         Srgb::new(1.0, 1.0, 0.5),
+///         Srgb::new(0.5, 1.0, 1.0),
+///         Srgb::new(1.0, 0.5, 1.0),
+///     ]
+/// );
+/// ```
+///
+/// # Note
+///
+/// The reused memory space could end up with unexpected values if the
+/// conversion panics or if the scope guard&#39;s `drop` function doesn&#39;t run. The
+/// default implementations of `FromColorUnclampedMut` uses [`ArrayCast`], which
+/// is only implemented for color types that can safely accept and recover from
+/// any value. Other color types will have to provide their own implementations
+/// that can handle this case.
+</span><span class="kw">pub trait </span>FromColorUnclampedMut&lt;T&gt;
+<span class="kw">where
+    </span>T: <span class="question-mark">?</span>Sized + FromColorUnclampedMut&lt;<span class="self">Self</span>&gt;,
 {
-    <span class="doccomment">/// Temporarily convert from another color type in place, without clamping.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This reuses the memory space, and the returned scope guard will restore</span>
-    <span class="doccomment">/// the converted colors to their original type when it&#39;s dropped.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped_mut</span>(<span class="ident">color</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Temporarily convert from another color type in place, without clamping.
+    ///
+    /// This reuses the memory space, and the returned scope guard will restore
+    /// the converted colors to their original type when it&#39;s dropped.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>from_color_unclamped_mut(color: <span class="kw-2">&amp;mut </span>T) -&gt; FromColorUnclampedMutGuard&lt;<span class="self">Self</span>, T&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayCast</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> <span class="ident">T::Array</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T, U&gt; FromColorUnclampedMut&lt;U&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: FromColorUnclamped&lt;U&gt; + ArrayCast + Clone,
+    U: FromColorUnclamped&lt;T&gt; + ArrayCast&lt;Array = T::Array&gt; + Clone,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped_mut</span>(<span class="ident">color</span>: <span class="kw-2">&amp;mut</span> <span class="ident">U</span>) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">U</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">color_clone</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">clone</span>();
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped_mut(color: <span class="kw-2">&amp;mut </span>U) -&gt; FromColorUnclampedMutGuard&lt;<span class="self">Self</span>, U&gt; {
+        <span class="kw">let </span>color_clone = color.clone();
 
-        <span class="kw">let</span> <span class="ident">result</span>: <span class="kw-2">&amp;mut</span> <span class="self">Self</span> <span class="op">=</span> <span class="ident">cast::from_array_mut</span>(<span class="ident">cast::into_array_mut</span>(<span class="ident">color</span>));
+        <span class="kw">let </span>result: <span class="kw-2">&amp;mut </span><span class="self">Self </span>= cast::from_array_mut(cast::into_array_mut(color));
 
-        <span class="kw-2">*</span><span class="ident">result</span> <span class="op">=</span> <span class="ident">color_clone</span>.<span class="ident">into_color_unclamped</span>();
+        <span class="kw-2">*</span>result = color_clone.into_color_unclamped();
 
-        <span class="ident">FromColorUnclampedMutGuard</span> {
-            <span class="ident">current</span>: <span class="prelude-val">Some</span>(<span class="ident">result</span>),
-            <span class="ident">original</span>: <span class="ident">PhantomData</span>,
+        FromColorUnclampedMutGuard {
+            current: <span class="prelude-val">Some</span>(result),
+            original: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span>[<span class="ident">U</span>]<span class="op">&gt;</span> <span class="kw">for</span> [<span class="ident">T</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayCast</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> <span class="ident">T::Array</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;T, U&gt; FromColorUnclampedMut&lt;[U]&gt; <span class="kw">for </span>[T]
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + ArrayCast + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + ArrayCast&lt;Array = T::Array&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped_mut</span>(<span class="ident">colors</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">U</span>]) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="self">Self</span>, [<span class="ident">U</span>]<span class="op">&gt;</span> {
-        <span class="kw">for</span> <span class="ident">color</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">colors</span> {
-            <span class="comment">// Forgetting the guard leaves the colors in the converted state.</span>
-            <span class="ident">core::mem::forget</span>(<span class="ident">T::from_color_unclamped_mut</span>(<span class="ident">color</span>));
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped_mut(colors: <span class="kw-2">&amp;mut </span>[U]) -&gt; FromColorUnclampedMutGuard&lt;<span class="self">Self</span>, [U]&gt; {
+        <span class="kw">for </span>color <span class="kw">in </span><span class="kw-2">&amp;mut *</span>colors {
+            <span class="comment">// Forgetting the guard leaves the colors in the converted state.
+            </span>core::mem::forget(T::from_color_unclamped_mut(color));
         }
 
-        <span class="ident">FromColorUnclampedMutGuard</span> {
-            <span class="ident">current</span>: <span class="prelude-val">Some</span>(<span class="ident">cast::from_array_slice_mut</span>(<span class="ident">cast::into_array_slice_mut</span>(
-                <span class="ident">colors</span>,
+        FromColorUnclampedMutGuard {
+            current: <span class="prelude-val">Some</span>(cast::from_array_slice_mut(cast::into_array_slice_mut(
+                colors,
             ))),
-            <span class="ident">original</span>: <span class="ident">PhantomData</span>,
+            original: PhantomData,
         }
     }
 }
 
-<span class="doccomment">/// Temporarily convert colors in place. The `Into` counterpart to</span>
-<span class="doccomment">/// [`FromColorUnclampedMut`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See [`FromColorUnclampedMut`] for more details and examples.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{convert::IntoColorUnclampedMut, ShiftHueAssign, Srgb, Hsv};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let mut rgb = [</span>
-<span class="doccomment">///     Srgb::new(1.0, 0.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 1.0, 0.0),</span>
-<span class="doccomment">///     Srgb::new(0.0, 0.0, 1.0),</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// {</span>
-<span class="doccomment">///     let hsv: &amp;mut [Hsv] = &amp;mut rgb.into_color_unclamped_mut(); // The guard is coerced into a slice.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     // All of the colors in `rgb` have been converted to `Hsv`:</span>
-<span class="doccomment">///     assert_eq!(</span>
-<span class="doccomment">///         hsv,</span>
-<span class="doccomment">///         [</span>
-<span class="doccomment">///             Hsv::new(0.0, 1.0, 1.0),</span>
-<span class="doccomment">///             Hsv::new(120.0, 1.0, 1.0),</span>
-<span class="doccomment">///             Hsv::new(240.0, 1.0, 1.0),</span>
-<span class="doccomment">///         ]</span>
-<span class="doccomment">///     );</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     hsv.shift_hue_assign(60.0);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// } // The guard is dropped here and the colors are restored to `Srgb`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Notice how the colors in `rgb` have changed:</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     rgb,</span>
-<span class="doccomment">///     [</span>
-<span class="doccomment">///         Srgb::new(1.0, 1.0, 0.0),</span>
-<span class="doccomment">///         Srgb::new(0.0, 1.0, 1.0),</span>
-<span class="doccomment">///         Srgb::new(1.0, 0.0, 1.0),</span>
-<span class="doccomment">///     ]</span>
-<span class="doccomment">/// );</span>
-<span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Temporarily convert colors in place. The `Into` counterpart to
+/// [`FromColorUnclampedMut`].
+///
+/// See [`FromColorUnclampedMut`] for more details and examples.
+///
+/// ```
+/// use palette::{convert::IntoColorUnclampedMut, ShiftHueAssign, Srgb, Hsv};
+///
+/// let mut rgb = [
+///     Srgb::new(1.0, 0.0, 0.0),
+///     Srgb::new(0.0, 1.0, 0.0),
+///     Srgb::new(0.0, 0.0, 1.0),
+/// ];
+///
+/// {
+///     let hsv: &amp;mut [Hsv] = &amp;mut rgb.into_color_unclamped_mut(); // The guard is coerced into a slice.
+///
+///     // All of the colors in `rgb` have been converted to `Hsv`:
+///     assert_eq!(
+///         hsv,
+///         [
+///             Hsv::new(0.0, 1.0, 1.0),
+///             Hsv::new(120.0, 1.0, 1.0),
+///             Hsv::new(240.0, 1.0, 1.0),
+///         ]
+///     );
+///
+///     hsv.shift_hue_assign(60.0);
+///
+/// } // The guard is dropped here and the colors are restored to `Srgb`.
+///
+/// // Notice how the colors in `rgb` have changed:
+/// assert_eq!(
+///     rgb,
+///     [
+///         Srgb::new(1.0, 1.0, 0.0),
+///         Srgb::new(0.0, 1.0, 1.0),
+///         Srgb::new(1.0, 0.0, 1.0),
+///     ]
+/// );
+/// ```
+</span><span class="kw">pub trait </span>IntoColorUnclampedMut&lt;T&gt;: FromColorUnclampedMut&lt;T&gt;
+<span class="kw">where
+    </span>T: <span class="question-mark">?</span>Sized + FromColorUnclampedMut&lt;<span class="self">Self</span>&gt;,
 {
-    <span class="doccomment">/// Temporarily convert to another color type in place, without clamping.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This reuses the memory space, and the returned scope guard will restore</span>
-    <span class="doccomment">/// the converted colors to their original type when it&#39;s dropped.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_color_unclamped_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="self">Self</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Temporarily convert to another color type in place, without clamping.
+    ///
+    /// This reuses the memory space, and the returned scope guard will restore
+    /// the converted colors to their original type when it&#39;s dropped.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>into_color_unclamped_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FromColorUnclampedMutGuard&lt;T, <span class="self">Self</span>&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">IntoColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">U</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;T, U&gt; IntoColorUnclampedMut&lt;T&gt; <span class="kw">for </span>U
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_color_unclamped_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">T::from_color_unclamped_mut</span>(<span class="self">self</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_color_unclamped_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FromColorUnclampedMutGuard&lt;T, <span class="self">Self</span>&gt; {
+        T::from_color_unclamped_mut(<span class="self">self</span>)
     }
 }
 
-<span class="doccomment">/// A scope guard that restores the guarded colors to their original type,</span>
-<span class="doccomment">/// without clamping, when dropped.</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="doccomment">/// A scope guard that restores the guarded colors to their original type,
+/// without clamping, when dropped.
+</span><span class="attribute">#[repr(transparent)]
+</span><span class="kw">pub struct </span>FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="comment">// `Option` lets us move out without triggering `Drop`.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">current</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">original</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">U</span><span class="op">&gt;</span>,
+    <span class="comment">// `Option` lets us move out without triggering `Drop`.
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) current: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T&gt;,
+    <span class="kw">pub</span>(<span class="kw">super</span>) original: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>U&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, U&gt; FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="doccomment">/// Convert the colors to another type and replace this guard.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The colors will not be converted back to the current color type before</span>
-    <span class="doccomment">/// being restored, as opposed to when `into_color_mut` is called. Instead,</span>
-    <span class="doccomment">/// they are restored directly to their original type.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">then_into_color_mut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">FromColorMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">U</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-        <span class="ident">C</span>: <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-        <span class="ident">U</span>: <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Convert the colors to another type and replace this guard.
+    ///
+    /// The colors will not be converted back to the current color type before
+    /// being restored, as opposed to when `into_color_mut` is called. Instead,
+    /// they are restored directly to their original type.
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">pub fn </span>then_into_color_mut&lt;C&gt;(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; FromColorMutGuard&lt;<span class="lifetime">&#39;a</span>, C, U&gt;
+    <span class="kw">where
+        </span>T: FromColorMut&lt;C&gt;,
+        C: FromColorMut&lt;U&gt; + FromColorMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
+        U: FromColorMut&lt;C&gt;,
     {
-        <span class="ident">FromColorMutGuard</span> {
-            <span class="ident">current</span>: <span class="self">self</span>
-                .<span class="ident">current</span>
-                .<span class="ident">take</span>()
-                .<span class="ident">map</span>(<span class="ident">C::from_color_mut</span>)
-                .<span class="ident">and_then</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">guard</span><span class="op">|</span> <span class="ident">guard</span>.<span class="ident">current</span>.<span class="ident">take</span>()),
-            <span class="ident">original</span>: <span class="ident">PhantomData</span>,
+        FromColorMutGuard {
+            current: <span class="self">self
+                </span>.current
+                .take()
+                .map(C::from_color_mut)
+                .and_then(|<span class="kw-2">mut </span>guard| guard.current.take()),
+            original: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Convert the colors to another type, without clamping, and replace this</span>
-    <span class="doccomment">/// guard.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The colors will not be converted back to the current color type before</span>
-    <span class="doccomment">/// being restored, as opposed to when `into_color_unclamped_mut` is called.</span>
-    <span class="doccomment">/// Instead, they are restored directly to their original type.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">then_into_color_unclamped_mut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">U</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-        <span class="ident">C</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-        <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Convert the colors to another type, without clamping, and replace this
+    /// guard.
+    ///
+    /// The colors will not be converted back to the current color type before
+    /// being restored, as opposed to when `into_color_unclamped_mut` is called.
+    /// Instead, they are restored directly to their original type.
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">pub fn </span>then_into_color_unclamped_mut&lt;C&gt;(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, C, U&gt;
+    <span class="kw">where
+        </span>T: FromColorUnclampedMut&lt;C&gt;,
+        C: FromColorUnclampedMut&lt;U&gt; + FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
+        U: FromColorUnclampedMut&lt;C&gt;,
     {
-        <span class="ident">FromColorUnclampedMutGuard</span> {
-            <span class="ident">current</span>: <span class="self">self</span>
-                .<span class="ident">current</span>
-                .<span class="ident">take</span>()
-                .<span class="ident">map</span>(<span class="ident">C::from_color_unclamped_mut</span>)
-                .<span class="ident">and_then</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">guard</span><span class="op">|</span> <span class="ident">guard</span>.<span class="ident">current</span>.<span class="ident">take</span>()),
-            <span class="ident">original</span>: <span class="ident">PhantomData</span>,
+        FromColorUnclampedMutGuard {
+            current: <span class="self">self
+                </span>.current
+                .take()
+                .map(C::from_color_unclamped_mut)
+                .and_then(|<span class="kw-2">mut </span>guard| guard.current.take()),
+            original: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Replace this guard with a guard that clamps the colors after restoring.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_clamped_guard</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">FromColorMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
-        <span class="ident">U</span>: <span class="ident">FromColorMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Replace this guard with a guard that clamps the colors after restoring.
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">pub fn </span>into_clamped_guard(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; FromColorMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+    <span class="kw">where
+        </span>T: FromColorMut&lt;U&gt;,
+        U: FromColorMut&lt;T&gt;,
     {
-        <span class="ident">FromColorMutGuard</span> {
-            <span class="ident">current</span>: <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">take</span>(),
-            <span class="ident">original</span>: <span class="ident">PhantomData</span>,
+        FromColorMutGuard {
+            current: <span class="self">self</span>.current.take(),
+            original: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Immediately restore the colors to their original type.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This happens automatically when the guard is dropped, but there may be</span>
-    <span class="doccomment">/// situations where it&#39;s better or more convenient to call `restore`</span>
-    <span class="doccomment">/// directly.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">restore</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">U</span> {
-        <span class="kw">let</span> <span class="ident">restored</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">current</span>
-            .<span class="ident">take</span>()
-            .<span class="ident">map</span>(<span class="ident">U::from_color_unclamped_mut</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">guard</span><span class="op">|</span> <span class="ident">guard</span>.<span class="ident">current</span>.<span class="ident">take</span>());
+    <span class="doccomment">/// Immediately restore the colors to their original type.
+    ///
+    /// This happens automatically when the guard is dropped, but there may be
+    /// situations where it&#39;s better or more convenient to call `restore`
+    /// directly.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>restore(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>U {
+        <span class="kw">let </span>restored = <span class="self">self
+            </span>.current
+            .take()
+            .map(U::from_color_unclamped_mut)
+            .and_then(|<span class="kw-2">mut </span>guard| guard.current.take());
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">restored</span>) <span class="op">=</span> <span class="ident">restored</span> {
-            <span class="ident">restored</span>
-        } <span class="kw">else</span> {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(restored) = restored {
+            restored
+        } <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, U&gt; Deref <span class="kw">for </span>FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type </span>Target = T;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">current</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">as_ref</span>() {
-            <span class="ident">current</span>
-        } <span class="kw">else</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(current) = <span class="self">self</span>.current.as_ref() {
+            current
+        } <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, U&gt; DerefMut <span class="kw">for </span>FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">current</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">as_mut</span>() {
-            <span class="ident">current</span>
-        } <span class="kw">else</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(current) = <span class="self">self</span>.current.as_mut() {
+            current
+        } <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">FromColorUnclampedMutGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">U</span>: <span class="ident">FromColorUnclampedMut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, U&gt; Drop <span class="kw">for </span>FromColorUnclampedMutGuard&lt;<span class="lifetime">&#39;a</span>, T, U&gt;
+<span class="kw">where
+    </span>T: FromColorUnclampedMut&lt;U&gt; + <span class="question-mark">?</span>Sized,
+    U: FromColorUnclampedMut&lt;T&gt; + <span class="question-mark">?</span>Sized,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">// Forgetting the guard leaves the colors in the converted state.</span>
-        <span class="ident">core::mem::forget</span>(<span class="self">self</span>.<span class="ident">current</span>.<span class="ident">take</span>().<span class="ident">map</span>(<span class="ident">U::from_color_unclamped_mut</span>));
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// Forgetting the guard leaves the colors in the converted state.
+        </span>core::mem::forget(<span class="self">self</span>.current.take().map(U::from_color_unclamped_mut));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

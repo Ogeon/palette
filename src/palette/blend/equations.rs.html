@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/equations.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>equations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/equations.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>equations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -264,271 +264,271 @@
 <span id="264">264</span>
 <span id="265">265</span>
 <span id="266">266</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Mul</span>, <span class="ident">Sub</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Mul, Sub};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">blend</span>::{<span class="ident">BlendFunction</span>, <span class="ident">PreAlpha</span>},
-    <span class="ident">cast::ArrayCast</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
+<span class="kw">use crate</span>::{
+    blend::{BlendFunction, PreAlpha},
+    cast::ArrayCast,
+    num::{Arithmetics, IsValidDivisor, MinMax, One, Real, Sqrt, Zero},
 };
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">zip_colors</span>, <span class="ident">Premultiply</span>};
+<span class="kw">use super</span>::{zip_colors, Premultiply};
 
-<span class="doccomment">/// A pair of blending equations and corresponding parameters.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The `Equations` type is similar to how blending works in OpenGL, where a</span>
-<span class="doccomment">/// blend function has can be written as `e(sp * S, dp * D)`. `e` is the</span>
-<span class="doccomment">/// equation (like `s + d`), `sp` and `dp` are the source and destination</span>
-<span class="doccomment">/// parameters, and `S` and `D` are the source and destination colors.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Equations</span> {
-    <span class="doccomment">/// The equation for the color components.</span>
-    <span class="kw">pub</span> <span class="ident">color_equation</span>: <span class="ident">Equation</span>,
+<span class="doccomment">/// A pair of blending equations and corresponding parameters.
+///
+/// The `Equations` type is similar to how blending works in OpenGL, where a
+/// blend function has can be written as `e(sp * S, dp * D)`. `e` is the
+/// equation (like `s + d`), `sp` and `dp` are the source and destination
+/// parameters, and `S` and `D` are the source and destination colors.
+</span><span class="attribute">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+</span><span class="kw">pub struct </span>Equations {
+    <span class="doccomment">/// The equation for the color components.
+    </span><span class="kw">pub </span>color_equation: Equation,
 
-    <span class="doccomment">/// The equation for the alpha component.</span>
-    <span class="kw">pub</span> <span class="ident">alpha_equation</span>: <span class="ident">Equation</span>,
+    <span class="doccomment">/// The equation for the alpha component.
+    </span><span class="kw">pub </span>alpha_equation: Equation,
 
-    <span class="doccomment">/// The parameters for the color components.</span>
-    <span class="kw">pub</span> <span class="ident">color_parameters</span>: <span class="ident">Parameters</span>,
+    <span class="doccomment">/// The parameters for the color components.
+    </span><span class="kw">pub </span>color_parameters: Parameters,
 
-    <span class="doccomment">/// The parameters for the alpha component.</span>
-    <span class="kw">pub</span> <span class="ident">alpha_parameters</span>: <span class="ident">Parameters</span>,
+    <span class="doccomment">/// The parameters for the alpha component.
+    </span><span class="kw">pub </span>alpha_parameters: Parameters,
 }
 
-<span class="kw">impl</span> <span class="ident">Equations</span> {
-    <span class="doccomment">/// Create a pair of blending equations, where all the parameters are</span>
-    <span class="doccomment">/// `One`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_equations</span>(<span class="ident">color</span>: <span class="ident">Equation</span>, <span class="ident">alpha</span>: <span class="ident">Equation</span>) -&gt; <span class="ident">Equations</span> {
-        <span class="ident">Equations</span> {
-            <span class="ident">color_equation</span>: <span class="ident">color</span>,
-            <span class="ident">alpha_equation</span>: <span class="ident">alpha</span>,
-            <span class="ident">color_parameters</span>: <span class="ident">Parameters</span> {
-                <span class="ident">source</span>: <span class="ident">Parameter::One</span>,
-                <span class="ident">destination</span>: <span class="ident">Parameter::One</span>,
+<span class="kw">impl </span>Equations {
+    <span class="doccomment">/// Create a pair of blending equations, where all the parameters are
+    /// `One`.
+    </span><span class="kw">pub fn </span>from_equations(color: Equation, alpha: Equation) -&gt; Equations {
+        Equations {
+            color_equation: color,
+            alpha_equation: alpha,
+            color_parameters: Parameters {
+                source: Parameter::One,
+                destination: Parameter::One,
             },
-            <span class="ident">alpha_parameters</span>: <span class="ident">Parameters</span> {
-                <span class="ident">source</span>: <span class="ident">Parameter::One</span>,
-                <span class="ident">destination</span>: <span class="ident">Parameter::One</span>,
+            alpha_parameters: Parameters {
+                source: Parameter::One,
+                destination: Parameter::One,
             },
         }
     }
 
-    <span class="doccomment">/// Create a pair of additive blending equations with the provided</span>
-    <span class="doccomment">/// parameters.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_parameters</span>(<span class="ident">source</span>: <span class="ident">Parameter</span>, <span class="ident">destination</span>: <span class="ident">Parameter</span>) -&gt; <span class="ident">Equations</span> {
-        <span class="ident">Equations</span> {
-            <span class="ident">color_equation</span>: <span class="ident">Equation::Add</span>,
-            <span class="ident">alpha_equation</span>: <span class="ident">Equation::Add</span>,
-            <span class="ident">color_parameters</span>: <span class="ident">Parameters</span> {
-                <span class="ident">source</span>,
-                <span class="ident">destination</span>,
+    <span class="doccomment">/// Create a pair of additive blending equations with the provided
+    /// parameters.
+    </span><span class="kw">pub fn </span>from_parameters(source: Parameter, destination: Parameter) -&gt; Equations {
+        Equations {
+            color_equation: Equation::Add,
+            alpha_equation: Equation::Add,
+            color_parameters: Parameters {
+                source,
+                destination,
             },
-            <span class="ident">alpha_parameters</span>: <span class="ident">Parameters</span> {
-                <span class="ident">source</span>,
-                <span class="ident">destination</span>,
+            alpha_parameters: Parameters {
+                source,
+                destination,
             },
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">S</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span>, <span class="kw">const</span> <span class="ident">M</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Equations</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Clone</span>
-        <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">S</span>; <span class="ident">N</span>]<span class="op">&gt;</span>,
-    <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">S</span>; <span class="ident">M</span>]<span class="op">&gt;</span>,
-    <span class="ident">S</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, S, <span class="kw">const </span>N: usize, <span class="kw">const </span>M: usize&gt; BlendFunction&lt;C&gt; <span class="kw">for </span>Equations
+<span class="kw">where
+    </span>C: Clone
+        + Premultiply&lt;Scalar = S&gt;
+        + Mul&lt;Output = C&gt;
+        + Mul&lt;S, Output = C&gt;
+        + ArrayCast&lt;Array = [S; N]&gt;,
+    PreAlpha&lt;C&gt;: ArrayCast&lt;Array = [S; M]&gt;,
+    S: Real + One + Zero + MinMax + Sqrt + IsValidDivisor + Arithmetics + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">apply_to</span>(<span class="self">self</span>, <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">destination</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">src_color</span>, <span class="kw-2">mut</span> <span class="ident">dst_color</span>) <span class="op">=</span>
-            <span class="kw">if</span> <span class="macro">matches!</span>(<span class="self">self</span>.<span class="ident">color_equation</span>, <span class="ident">Equation::Min</span> <span class="op">|</span> <span class="ident">Equation::Max</span>) {
-                (<span class="ident">source</span>.<span class="ident">color</span>.<span class="ident">clone</span>(), <span class="ident">destination</span>.<span class="ident">color</span>.<span class="ident">clone</span>())
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">col_src_param</span> <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">color_parameters</span>
-                    .<span class="ident">source</span>
-                    .<span class="ident">apply_to</span>(<span class="ident">source</span>.<span class="ident">clone</span>(), <span class="ident">destination</span>.<span class="ident">clone</span>());
-                <span class="kw">let</span> <span class="ident">col_dst_param</span> <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">color_parameters</span>
-                    .<span class="ident">destination</span>
-                    .<span class="ident">apply_to</span>(<span class="ident">source</span>.<span class="ident">clone</span>(), <span class="ident">destination</span>.<span class="ident">clone</span>());
+    <span class="kw">fn </span>apply_to(<span class="self">self</span>, source: PreAlpha&lt;C&gt;, destination: PreAlpha&lt;C&gt;) -&gt; PreAlpha&lt;C&gt; {
+        <span class="kw">let </span>(src_color, <span class="kw-2">mut </span>dst_color) =
+            <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.color_equation, Equation::Min | Equation::Max) {
+                (source.color.clone(), destination.color.clone())
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>col_src_param = <span class="self">self
+                    </span>.color_parameters
+                    .source
+                    .apply_to(source.clone(), destination.clone());
+                <span class="kw">let </span>col_dst_param = <span class="self">self
+                    </span>.color_parameters
+                    .destination
+                    .apply_to(source.clone(), destination.clone());
 
                 (
-                    <span class="ident">col_src_param</span>.<span class="ident">mul_color</span>(<span class="ident">source</span>.<span class="ident">color</span>.<span class="ident">clone</span>()),
-                    <span class="ident">col_dst_param</span>.<span class="ident">mul_color</span>(<span class="ident">destination</span>.<span class="ident">color</span>.<span class="ident">clone</span>()),
+                    col_src_param.mul_color(source.color.clone()),
+                    col_dst_param.mul_color(destination.color.clone()),
                 )
             };
 
-        <span class="kw">let</span> (<span class="ident">src_alpha</span>, <span class="ident">dst_alpha</span>) <span class="op">=</span> <span class="kw">if</span> <span class="macro">matches!</span>(<span class="self">self</span>.<span class="ident">alpha_equation</span>, <span class="ident">Equation::Min</span> <span class="op">|</span> <span class="ident">Equation::Max</span>)
+        <span class="kw">let </span>(src_alpha, dst_alpha) = <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.alpha_equation, Equation::Min | Equation::Max)
         {
-            (<span class="ident">source</span>.<span class="ident">alpha</span>, <span class="ident">destination</span>.<span class="ident">alpha</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">alpha_src_param</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="ident">alpha_parameters</span>
-                .<span class="ident">source</span>
-                .<span class="ident">apply_to</span>(<span class="ident">source</span>.<span class="ident">clone</span>(), <span class="ident">destination</span>.<span class="ident">clone</span>());
-            <span class="kw">let</span> <span class="ident">alpha_dst_param</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="ident">alpha_parameters</span>
-                .<span class="ident">destination</span>
-                .<span class="ident">apply_to</span>(<span class="ident">source</span>.<span class="ident">clone</span>(), <span class="ident">destination</span>.<span class="ident">clone</span>());
+            (source.alpha, destination.alpha)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>alpha_src_param = <span class="self">self
+                </span>.alpha_parameters
+                .source
+                .apply_to(source.clone(), destination.clone());
+            <span class="kw">let </span>alpha_dst_param = <span class="self">self
+                </span>.alpha_parameters
+                .destination
+                .apply_to(source.clone(), destination.clone());
 
             (
-                <span class="ident">alpha_src_param</span>.<span class="ident">mul_constant</span>(<span class="ident">source</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>()),
-                <span class="ident">alpha_dst_param</span>.<span class="ident">mul_constant</span>(<span class="ident">destination</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>()),
+                alpha_src_param.mul_constant(source.alpha.clone()),
+                alpha_dst_param.mul_constant(destination.alpha.clone()),
             )
         };
 
-        <span class="kw">let</span> <span class="ident">color_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">color_equation</span> {
-            <span class="ident">Equation::Add</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">src</span> <span class="op">+</span> <span class="ident">dst</span>,
-            <span class="ident">Equation::Subtract</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">src</span> <span class="op">-</span> <span class="ident">dst</span>,
-            <span class="ident">Equation::ReverseSubtract</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span>,
-            <span class="ident">Equation::Min</span> =&gt; <span class="ident">MinMax::min</span>,
-            <span class="ident">Equation::Max</span> =&gt; <span class="ident">MinMax::max</span>,
+        <span class="kw">let </span>color_op = <span class="kw">match </span><span class="self">self</span>.color_equation {
+            Equation::Add =&gt; |src, dst| src + dst,
+            Equation::Subtract =&gt; |src, dst| src - dst,
+            Equation::ReverseSubtract =&gt; |src, dst| dst - src,
+            Equation::Min =&gt; MinMax::min,
+            Equation::Max =&gt; MinMax::max,
         };
 
-        <span class="kw">let</span> <span class="ident">alpha_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">alpha_equation</span> {
-            <span class="ident">Equation::Add</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">src</span> <span class="op">+</span> <span class="ident">dst</span>,
-            <span class="ident">Equation::Subtract</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">src</span> <span class="op">-</span> <span class="ident">dst</span>,
-            <span class="ident">Equation::ReverseSubtract</span> =&gt; <span class="op">|</span><span class="ident">src</span>, <span class="ident">dst</span><span class="op">|</span> <span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span>,
-            <span class="ident">Equation::Min</span> =&gt; <span class="ident">MinMax::min</span>,
-            <span class="ident">Equation::Max</span> =&gt; <span class="ident">MinMax::max</span>,
+        <span class="kw">let </span>alpha_op = <span class="kw">match </span><span class="self">self</span>.alpha_equation {
+            Equation::Add =&gt; |src, dst| src + dst,
+            Equation::Subtract =&gt; |src, dst| src - dst,
+            Equation::ReverseSubtract =&gt; |src, dst| dst - src,
+            Equation::Min =&gt; MinMax::min,
+            Equation::Max =&gt; MinMax::max,
         };
 
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="ident">src_color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">dst_color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">color_op</span>(<span class="ident">src</span>, <span class="ident">dst</span>.<span class="ident">clone</span>());
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(src_color, <span class="kw-2">&amp;mut </span>dst_color) {
+            <span class="kw-2">*</span>dst = color_op(src, dst.clone());
         }
 
-        <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">dst_color</span>,
-            <span class="ident">alpha</span>: <span class="ident">alpha_op</span>(<span class="ident">src_alpha</span>, <span class="ident">dst_alpha</span>),
+        PreAlpha {
+            color: dst_color,
+            alpha: alpha_op(src_alpha, dst_alpha),
         }
     }
 }
 
-<span class="doccomment">/// A blending equation.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Equation</span> {
-    <span class="doccomment">/// Add the source and destination, according to `sp * S + dp * D`.</span>
-    <span class="ident">Add</span>,
+<span class="doccomment">/// A blending equation.
+</span><span class="attribute">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+</span><span class="kw">pub enum </span>Equation {
+    <span class="doccomment">/// Add the source and destination, according to `sp * S + dp * D`.
+    </span>Add,
 
-    <span class="doccomment">/// Subtract the destination from the source, according to `sp * S - dp *</span>
-    <span class="doccomment">/// D`.</span>
-    <span class="ident">Subtract</span>,
+    <span class="doccomment">/// Subtract the destination from the source, according to `sp * S - dp *
+    /// D`.
+    </span>Subtract,
 
-    <span class="doccomment">/// Subtract the source from the destination, according to `dp * D - sp *</span>
-    <span class="doccomment">/// S`.</span>
-    <span class="ident">ReverseSubtract</span>,
+    <span class="doccomment">/// Subtract the source from the destination, according to `dp * D - sp *
+    /// S`.
+    </span>ReverseSubtract,
 
-    <span class="doccomment">/// Create a color where each component is the smallest of each of the</span>
-    <span class="doccomment">/// source and destination components. A.k.a. component wise min. The</span>
-    <span class="doccomment">/// parameters are ignored.</span>
-    <span class="ident">Min</span>,
+    <span class="doccomment">/// Create a color where each component is the smallest of each of the
+    /// source and destination components. A.k.a. component wise min. The
+    /// parameters are ignored.
+    </span>Min,
 
-    <span class="doccomment">/// Create a color where each component is the largest of each of the</span>
-    <span class="doccomment">/// source and destination components. A.k.a. component wise max. The</span>
-    <span class="doccomment">/// parameters are ignored.</span>
-    <span class="ident">Max</span>,
+    <span class="doccomment">/// Create a color where each component is the largest of each of the
+    /// source and destination components. A.k.a. component wise max. The
+    /// parameters are ignored.
+    </span>Max,
 }
 
-<span class="doccomment">/// A pair of source and destination parameters.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Parameters</span> {
-    <span class="doccomment">/// The source parameter.</span>
-    <span class="kw">pub</span> <span class="ident">source</span>: <span class="ident">Parameter</span>,
+<span class="doccomment">/// A pair of source and destination parameters.
+</span><span class="attribute">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+</span><span class="kw">pub struct </span>Parameters {
+    <span class="doccomment">/// The source parameter.
+    </span><span class="kw">pub </span>source: Parameter,
 
-    <span class="doccomment">/// The destination parameter.</span>
-    <span class="kw">pub</span> <span class="ident">destination</span>: <span class="ident">Parameter</span>,
+    <span class="doccomment">/// The destination parameter.
+    </span><span class="kw">pub </span>destination: Parameter,
 }
 
-<span class="doccomment">/// A blending parameter.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Parameter</span> {
-    <span class="doccomment">/// A simple 1.</span>
-    <span class="ident">One</span>,
+<span class="doccomment">/// A blending parameter.
+</span><span class="attribute">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+</span><span class="kw">pub enum </span>Parameter {
+    <span class="doccomment">/// A simple 1.
+    </span>One,
 
-    <span class="doccomment">/// A simple 0.</span>
-    <span class="ident">Zero</span>,
+    <span class="doccomment">/// A simple 0.
+    </span>Zero,
 
-    <span class="doccomment">/// The source color, or alpha.</span>
-    <span class="ident">SourceColor</span>,
+    <span class="doccomment">/// The source color, or alpha.
+    </span>SourceColor,
 
-    <span class="doccomment">/// One minus the source color, or alpha.</span>
-    <span class="ident">OneMinusSourceColor</span>,
+    <span class="doccomment">/// One minus the source color, or alpha.
+    </span>OneMinusSourceColor,
 
-    <span class="doccomment">/// The destination color, or alpha.</span>
-    <span class="ident">DestinationColor</span>,
+    <span class="doccomment">/// The destination color, or alpha.
+    </span>DestinationColor,
 
-    <span class="doccomment">/// One minus the destination color, or alpha.</span>
-    <span class="ident">OneMinusDestinationColor</span>,
+    <span class="doccomment">/// One minus the destination color, or alpha.
+    </span>OneMinusDestinationColor,
 
-    <span class="doccomment">/// The source alpha.</span>
-    <span class="ident">SourceAlpha</span>,
+    <span class="doccomment">/// The source alpha.
+    </span>SourceAlpha,
 
-    <span class="doccomment">/// One minus the source alpha.</span>
-    <span class="ident">OneMinusSourceAlpha</span>,
+    <span class="doccomment">/// One minus the source alpha.
+    </span>OneMinusSourceAlpha,
 
-    <span class="doccomment">/// The destination alpha.</span>
-    <span class="ident">DestinationAlpha</span>,
+    <span class="doccomment">/// The destination alpha.
+    </span>DestinationAlpha,
 
-    <span class="doccomment">/// One minus the destination alpha.</span>
-    <span class="ident">OneMinusDestinationAlpha</span>,
+    <span class="doccomment">/// One minus the destination alpha.
+    </span>OneMinusDestinationAlpha,
 }
 
-<span class="kw">impl</span> <span class="ident">Parameter</span> {
-    <span class="kw">fn</span> <span class="ident">apply_to</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
+<span class="kw">impl </span>Parameter {
+    <span class="kw">fn </span>apply_to&lt;C, T, <span class="kw">const </span>N: usize&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-        <span class="ident">destination</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">ParamOut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-        <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span>,
-        <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+        source: PreAlpha&lt;C&gt;,
+        destination: PreAlpha&lt;C&gt;,
+    ) -&gt; ParamOut&lt;C&gt;
+    <span class="kw">where
+        </span>C: Premultiply&lt;Scalar = T&gt;,
+        PreAlpha&lt;C&gt;: ArrayCast&lt;Array = [T; N]&gt;,
+        T: Real + One + Zero + Sub&lt;Output = T&gt;,
     {
-        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Parameter::One</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">T::one</span>()),
-            <span class="ident">Parameter::Zero</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">T::zero</span>()),
-            <span class="ident">Parameter::SourceColor</span> =&gt; <span class="ident">ParamOut::Color</span>(<span class="ident">source</span>),
-            <span class="ident">Parameter::OneMinusSourceColor</span> =&gt; {
-                <span class="ident">ParamOut::Color</span>(<span class="op">&lt;</span>[<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">source</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">a</span>).<span class="ident">into</span>())
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            Parameter::One =&gt; ParamOut::Constant(T::one()),
+            Parameter::Zero =&gt; ParamOut::Constant(T::zero()),
+            Parameter::SourceColor =&gt; ParamOut::Color(source),
+            Parameter::OneMinusSourceColor =&gt; {
+                ParamOut::Color(&lt;[T; N]&gt;::from(source).map(|a| T::one() - a).into())
             }
-            <span class="ident">Parameter::DestinationColor</span> =&gt; <span class="ident">ParamOut::Color</span>(<span class="ident">destination</span>),
-            <span class="ident">Parameter::OneMinusDestinationColor</span> =&gt; {
-                <span class="ident">ParamOut::Color</span>(<span class="op">&lt;</span>[<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">destination</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">a</span>).<span class="ident">into</span>())
+            Parameter::DestinationColor =&gt; ParamOut::Color(destination),
+            Parameter::OneMinusDestinationColor =&gt; {
+                ParamOut::Color(&lt;[T; N]&gt;::from(destination).map(|a| T::one() - a).into())
             }
-            <span class="ident">Parameter::SourceAlpha</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">source</span>.<span class="ident">alpha</span>),
-            <span class="ident">Parameter::OneMinusSourceAlpha</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">source</span>.<span class="ident">alpha</span>),
-            <span class="ident">Parameter::DestinationAlpha</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">destination</span>.<span class="ident">alpha</span>),
-            <span class="ident">Parameter::OneMinusDestinationAlpha</span> =&gt; <span class="ident">ParamOut::Constant</span>(<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">destination</span>.<span class="ident">alpha</span>),
+            Parameter::SourceAlpha =&gt; ParamOut::Constant(source.alpha),
+            Parameter::OneMinusSourceAlpha =&gt; ParamOut::Constant(T::one() - source.alpha),
+            Parameter::DestinationAlpha =&gt; ParamOut::Constant(destination.alpha),
+            Parameter::OneMinusDestinationAlpha =&gt; ParamOut::Constant(T::one() - destination.alpha),
         }
     }
 }
 
-<span class="kw">enum</span> <span class="ident">ParamOut</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> {
-    <span class="ident">Color</span>(<span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>),
-    <span class="ident">Constant</span>(<span class="ident">C::Scalar</span>),
+<span class="kw">enum </span>ParamOut&lt;C: Premultiply&gt; {
+    Color(PreAlpha&lt;C&gt;),
+    Constant(C::Scalar),
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ParamOut</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ParamOut&lt;C&gt;
+<span class="kw">where
+    </span>C: Mul&lt;Output = C&gt; + Mul&lt;T, Output = C&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: Mul&lt;Output = T&gt; + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">mul_constant</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ParamOut::Color</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">other</span>,
-            <span class="ident">ParamOut::Constant</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span> <span class="op">*</span> <span class="ident">other</span>,
+    <span class="kw">fn </span>mul_constant(<span class="self">self</span>, other: T) -&gt; T {
+        <span class="kw">match </span><span class="self">self </span>{
+            ParamOut::Color(c) =&gt; c.alpha * other,
+            ParamOut::Constant(c) =&gt; c * other,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">mul_color</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">C</span>) -&gt; <span class="ident">C</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ParamOut::Color</span>(<span class="ident">c</span>) =&gt; <span class="ident">other</span> <span class="op">*</span> <span class="ident">c</span>.<span class="ident">color</span>,
-            <span class="ident">ParamOut::Constant</span>(<span class="ident">c</span>) =&gt; <span class="ident">other</span> <span class="op">*</span> <span class="ident">c</span>,
+    <span class="kw">fn </span>mul_color(<span class="self">self</span>, other: C) -&gt; C {
+        <span class="kw">match </span><span class="self">self </span>{
+            ParamOut::Color(c) =&gt; other * c.color,
+            ParamOut::Constant(c) =&gt; other * c,
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

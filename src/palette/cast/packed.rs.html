@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast/packed.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>packed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast/packed.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>packed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -257,264 +257,264 @@
 <span id="257">257</span>
 <span id="258">258</span>
 <span id="259">259</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
+</pre><pre class="rust"><code><span class="kw">use </span>core::marker::PhantomData;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cast::UintCast</span>;
+<span class="kw">use </span><span class="kw">crate</span>::cast::UintCast;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ArrayCast</span>;
+<span class="kw">use </span><span class="kw">super</span>::ArrayCast;
 
-<span class="doccomment">/// A color packed into a compact format, such as an unsigned integer.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `Packed` implements [ArrayCast](crate::cast::ArrayCast) and</span>
-<span class="doccomment">/// [UintCast](crate::cast::UintCast) so it can easily be constructed from</span>
-<span class="doccomment">/// slices, arrays and unsigned integers.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.</span>
-<span class="doccomment">/// use palette::{rgb::PackedArgb, cast};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let raw = &amp;[0x7F0080u32, 0x60BBCC];</span>
-<span class="doccomment">/// let colors = cast::from_uint_slice::&lt;PackedArgb&gt;(raw);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(colors.len(), 2);</span>
-<span class="doccomment">/// assert_eq!(colors[0].color, 0x7F0080);</span>
-<span class="doccomment">/// assert_eq!(colors[1].color, 0x60BBCC);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Packed Integer Type Represented in `u32`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// A common example of a packed format is when an RGBA color is encoded as a</span>
-<span class="doccomment">/// hexadecimal number (such as `0x7F0080` from above). Two hexadecimal digits</span>
-<span class="doccomment">/// (8-bits) express each value of the Red, Green, Blue, and Alpha components in</span>
-<span class="doccomment">/// the RGBA color.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note that conversion from float to integer component types in Palette rounds</span>
-<span class="doccomment">/// to nearest even: an `Rgb` component of `0.5` will convert to `0x80`/`128`,</span>
-<span class="doccomment">/// not `0x7F`/`127`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use approx::assert_relative_eq;</span>
-<span class="doccomment">/// use palette::{Srgb, Srgba};</span>
-<span class="doccomment">/// use palette::rgb::{PackedArgb, PackedRgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let packed: PackedArgb = Srgb::new(0.5, 0.0, 0.5).into_format().into();</span>
-<span class="doccomment">/// assert_eq!(0xFF80_0080, packed.color);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let unpacked: Srgba&lt;u8&gt; = PackedRgba::from(0xFFFF_FF80u32).into();</span>
-<span class="doccomment">/// assert_relative_eq!(</span>
-<span class="doccomment">///     Srgba::new(1.0, 1.0, 1.0, 0.5),</span>
-<span class="doccomment">///     unpacked.into_format(),</span>
-<span class="doccomment">///     epsilon = 0.01</span>
-<span class="doccomment">/// );</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // By default, `Packed` uses `Argb` order for creating `Rgb` colors to make</span>
-<span class="doccomment">/// // entering 6-digit hex numbers more convenient</span>
-<span class="doccomment">/// let rgb = Srgb::from(0xFF8000);</span>
-<span class="doccomment">/// assert_eq!(Srgb::new(0xFF, 0x80, 0x00), rgb);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let rgba = Srgba::from(0xFF80007F);</span>
-<span class="doccomment">/// assert_eq!(Srgba::new(0xFF, 0x80, 0x00, 0x7F), rgba);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// When an `Rgb` type is packed, the alpha value will be `0xFF` in the</span>
-<span class="doccomment">/// corresponding `u32`. Converting from a packed color type back to an `Rgb`</span>
-<span class="doccomment">/// type will disregard the alpha value.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The color packed into a type `P`, such as `u32` or `[u8; 4]`.</span>
-    <span class="kw">pub</span> <span class="ident">color</span>: <span class="ident">P</span>,
+<span class="doccomment">/// A color packed into a compact format, such as an unsigned integer.
+///
+/// `Packed` implements [ArrayCast](crate::cast::ArrayCast) and
+/// [UintCast](crate::cast::UintCast) so it can easily be constructed from
+/// slices, arrays and unsigned integers.
+///
+/// ```
+/// // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.
+/// use palette::{rgb::PackedArgb, cast};
+///
+/// let raw = &amp;[0x7F0080u32, 0x60BBCC];
+/// let colors = cast::from_uint_slice::&lt;PackedArgb&gt;(raw);
+///
+/// assert_eq!(colors.len(), 2);
+/// assert_eq!(colors[0].color, 0x7F0080);
+/// assert_eq!(colors[1].color, 0x60BBCC);
+/// ```
+///
+/// ## Packed Integer Type Represented in `u32`.
+///
+/// A common example of a packed format is when an RGBA color is encoded as a
+/// hexadecimal number (such as `0x7F0080` from above). Two hexadecimal digits
+/// (8-bits) express each value of the Red, Green, Blue, and Alpha components in
+/// the RGBA color.
+///
+/// Note that conversion from float to integer component types in Palette rounds
+/// to nearest even: an `Rgb` component of `0.5` will convert to `0x80`/`128`,
+/// not `0x7F`/`127`.
+///
+/// ```
+/// use approx::assert_relative_eq;
+/// use palette::{Srgb, Srgba};
+/// use palette::rgb::{PackedArgb, PackedRgba};
+///
+/// let packed: PackedArgb = Srgb::new(0.5, 0.0, 0.5).into_format().into();
+/// assert_eq!(0xFF80_0080, packed.color);
+///
+/// let unpacked: Srgba&lt;u8&gt; = PackedRgba::from(0xFFFF_FF80u32).into();
+/// assert_relative_eq!(
+///     Srgba::new(1.0, 1.0, 1.0, 0.5),
+///     unpacked.into_format(),
+///     epsilon = 0.01
+/// );
+///
+/// // By default, `Packed` uses `Argb` order for creating `Rgb` colors to make
+/// // entering 6-digit hex numbers more convenient
+/// let rgb = Srgb::from(0xFF8000);
+/// assert_eq!(Srgb::new(0xFF, 0x80, 0x00), rgb);
+///
+/// let rgba = Srgba::from(0xFF80007F);
+/// assert_eq!(Srgba::new(0xFF, 0x80, 0x00, 0x7F), rgba);
+/// ```
+///
+/// When an `Rgb` type is packed, the alpha value will be `0xFF` in the
+/// corresponding `u32`. Converting from a packed color type back to an `Rgb`
+/// type will disregard the alpha value.
+</span><span class="attribute">#[derive(Debug, PartialEq, Eq)]
+#[repr(transparent)]
+</span><span class="kw">pub struct </span>Packed&lt;O, P&gt; {
+    <span class="doccomment">/// The color packed into a type `P`, such as `u32` or `[u8; 4]`.
+    </span><span class="kw">pub </span>color: P,
 
-    <span class="doccomment">/// The channel order for the color components in the packed data. See</span>
-    <span class="doccomment">/// [`ComponentOrder`].</span>
-    <span class="kw">pub</span> <span class="ident">channel_order</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// The channel order for the color components in the packed data. See
+    /// [`ComponentOrder`].
+    </span><span class="kw">pub </span>channel_order: PhantomData&lt;O&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Transform a color value into a packed memory representation.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">O</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;O, P&gt; Packed&lt;O, P&gt; {
+    <span class="doccomment">/// Transform a color value into a packed memory representation.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>pack&lt;C&gt;(color: C) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>O: ComponentOrder&lt;C, P&gt;,
     {
-        <span class="ident">Packed</span> {
-            <span class="ident">color</span>: <span class="ident">O::pack</span>(<span class="ident">color</span>),
-            <span class="ident">channel_order</span>: <span class="ident">PhantomData</span>,
+        Packed {
+            color: O::pack(color),
+            channel_order: PhantomData,
         }
     }
 
-    <span class="doccomment">/// Transform a packed color into a regular color value.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpack</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">C</span>
-    <span class="kw">where</span>
-        <span class="ident">O</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Transform a packed color into a regular color value.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>unpack&lt;C&gt;(<span class="self">self</span>) -&gt; C
+    <span class="kw">where
+        </span>O: ComponentOrder&lt;C, P&gt;,
     {
-        <span class="ident">O::unpack</span>(<span class="self">self</span>.<span class="ident">color</span>)
+        O::unpack(<span class="self">self</span>.color)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">P</span>: <span class="ident">Copy</span> {}
+<span class="kw">impl</span>&lt;O, P&gt; Copy <span class="kw">for </span>Packed&lt;O, P&gt; <span class="kw">where </span>P: Copy {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;O, P&gt; Clone <span class="kw">for </span>Packed&lt;O, P&gt;
+<span class="kw">where
+    </span>P: Clone,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">clone</span>(),
-            <span class="ident">channel_order</span>: <span class="ident">PhantomData</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            color: <span class="self">self</span>.color.clone(),
+            channel_order: PhantomData,
         }
     }
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `[u8; N]`, which fulfills the</span>
-<span class="comment">// requirements of `ArrayCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">ArrayCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>];
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `[u8; N]`, which fulfills the
+// requirements of `ArrayCast`.
+</span><span class="kw">unsafe impl</span>&lt;O, T, <span class="kw">const </span>N: usize&gt; ArrayCast <span class="kw">for </span>Packed&lt;O, [T; N]&gt; {
+    <span class="kw">type </span>Array = [T; N];
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `u8`, which fulfills the</span>
-<span class="comment">// requirements of `UintCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="ident">UintCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u8</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Uint</span> <span class="op">=</span> <span class="ident">u8</span>;
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `u8`, which fulfills the
+// requirements of `UintCast`.
+</span><span class="kw">unsafe impl</span>&lt;O&gt; UintCast <span class="kw">for </span>Packed&lt;O, u8&gt; {
+    <span class="kw">type </span>Uint = u8;
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `u16`, which fulfills the</span>
-<span class="comment">// requirements of `UintCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="ident">UintCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u16</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Uint</span> <span class="op">=</span> <span class="ident">u16</span>;
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `u16`, which fulfills the
+// requirements of `UintCast`.
+</span><span class="kw">unsafe impl</span>&lt;O&gt; UintCast <span class="kw">for </span>Packed&lt;O, u16&gt; {
+    <span class="kw">type </span>Uint = u16;
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `u32`, which fulfills the</span>
-<span class="comment">// requirements of `UintCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="ident">UintCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u32</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Uint</span> <span class="op">=</span> <span class="ident">u32</span>;
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `u32`, which fulfills the
+// requirements of `UintCast`.
+</span><span class="kw">unsafe impl</span>&lt;O&gt; UintCast <span class="kw">for </span>Packed&lt;O, u32&gt; {
+    <span class="kw">type </span>Uint = u32;
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `u64`, which fulfills the</span>
-<span class="comment">// requirements of `UintCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="ident">UintCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u64</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Uint</span> <span class="op">=</span> <span class="ident">u64</span>;
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `u64`, which fulfills the
+// requirements of `UintCast`.
+</span><span class="kw">unsafe impl</span>&lt;O&gt; UintCast <span class="kw">for </span>Packed&lt;O, u64&gt; {
+    <span class="kw">type </span>Uint = u64;
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// `Packed` is a transparent wrapper around `u128`, which fulfills the</span>
-<span class="comment">// requirements of `UintCast`.</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="ident">UintCast</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u128</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Uint</span> <span class="op">=</span> <span class="ident">u128</span>;
+<span class="comment">// Safety:
+//
+// `Packed` is a transparent wrapper around `u128`, which fulfills the
+// requirements of `UintCast`.
+</span><span class="kw">unsafe impl</span>&lt;O&gt; UintCast <span class="kw">for </span>Packed&lt;O, u128&gt; {
+    <span class="kw">type </span>Uint = u128;
 }
 
-<span class="macro">impl_array_casts!</span>([<span class="ident">O</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="ident">N</span>]);
-<span class="macro">impl_uint_casts_self!</span>(<span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">P</span>, <span class="kw">where</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span>: <span class="ident">UintCast</span><span class="op">&lt;</span><span class="ident">Uint</span> <span class="op">=</span> <span class="ident">P</span><span class="op">&gt;</span>);
-<span class="macro">impl_uint_casts_other!</span>([<span class="ident">O</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u8</span>);
-<span class="macro">impl_uint_casts_other!</span>([<span class="ident">O</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u16</span><span class="op">&gt;</span>, <span class="ident">u16</span>);
-<span class="macro">impl_uint_casts_other!</span>([<span class="ident">O</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u32</span><span class="op">&gt;</span>, <span class="ident">u32</span>);
-<span class="macro">impl_uint_casts_other!</span>([<span class="ident">O</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">u64</span>);
-<span class="macro">impl_uint_casts_other!</span>([<span class="ident">O</span>] <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">u128</span><span class="op">&gt;</span>, <span class="ident">u128</span>);
+<span class="macro">impl_array_casts!</span>([O, T, <span class="kw">const </span>N: usize] Packed&lt;O, [T; N]&gt;, [T; N]);
+<span class="macro">impl_uint_casts_self!</span>(Packed&lt;O, P&gt;, P, <span class="kw">where </span>Packed&lt;O, P&gt;: UintCast&lt;Uint = P&gt;);
+<span class="macro">impl_uint_casts_other!</span>([O] Packed&lt;O, u8&gt;, u8);
+<span class="macro">impl_uint_casts_other!</span>([O] Packed&lt;O, u16&gt;, u16);
+<span class="macro">impl_uint_casts_other!</span>([O] Packed&lt;O, u32&gt;, u32);
+<span class="macro">impl_uint_casts_other!</span>([O] Packed&lt;O, u64&gt;, u64);
+<span class="macro">impl_uint_casts_other!</span>([O] Packed&lt;O, u128&gt;, u128);
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">P</span>: <span class="ident">bytemuck::Zeroable</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>: <span class="lifetime">&#39;static</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">Packed</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">P</span>: <span class="ident">bytemuck::Pod</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;O, P&gt; bytemuck::Zeroable <span class="kw">for </span>Packed&lt;O, P&gt; <span class="kw">where </span>P: bytemuck::Zeroable {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;O: <span class="lifetime">&#39;static</span>, P&gt; bytemuck::Pod <span class="kw">for </span>Packed&lt;O, P&gt; <span class="kw">where </span>P: bytemuck::Pod {}
 
-<span class="doccomment">/// Packs and unpacks color types with some component order.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// As an example, RGBA channels may be ordered as `ABGR`, `ARGB`, `BGRA`, or</span>
-<span class="doccomment">/// `RGBA`.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Combine the components of a color into the packed format.</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">P</span>;
+<span class="doccomment">/// Packs and unpacks color types with some component order.
+///
+/// As an example, RGBA channels may be ordered as `ABGR`, `ARGB`, `BGRA`, or
+/// `RGBA`.
+</span><span class="kw">pub trait </span>ComponentOrder&lt;C, P&gt; {
+    <span class="doccomment">/// Combine the components of a color into the packed format.
+    </span><span class="kw">fn </span>pack(color: C) -&gt; P;
 
-    <span class="doccomment">/// Split the packed color into its separate components.</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">P</span>) -&gt; <span class="ident">C</span>;
+    <span class="doccomment">/// Split the packed color into its separate components.
+    </span><span class="kw">fn </span>unpack(packed: P) -&gt; C;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, [<span class="ident">u8</span>; <span class="number">1</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ComponentOrder&lt;C, u8&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: ComponentOrder&lt;C, [u8; <span class="number">1</span>]&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">u8</span> {
-        <span class="kw">let</span> [<span class="ident">packed</span>] <span class="op">=</span> <span class="ident">T::pack</span>(<span class="ident">color</span>);
-        <span class="ident">packed</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>pack(color: C) -&gt; u8 {
+        <span class="kw">let </span>[packed] = T::pack(color);
+        packed
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">u8</span>) -&gt; <span class="ident">C</span> {
-        <span class="ident">T::unpack</span>([<span class="ident">packed</span>])
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">u16</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, [<span class="ident">u8</span>; <span class="number">2</span>]<span class="op">&gt;</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">u16</span> {
-        <span class="ident">u16::from_be_bytes</span>(<span class="ident">T::pack</span>(<span class="ident">color</span>))
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">u16</span>) -&gt; <span class="ident">C</span> {
-        <span class="ident">T::unpack</span>(<span class="ident">packed</span>.<span class="ident">to_be_bytes</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>unpack(packed: u8) -&gt; C {
+        T::unpack([packed])
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">u32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, [<span class="ident">u8</span>; <span class="number">4</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ComponentOrder&lt;C, u16&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: ComponentOrder&lt;C, [u8; <span class="number">2</span>]&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">u32</span> {
-        <span class="ident">u32::from_be_bytes</span>(<span class="ident">T::pack</span>(<span class="ident">color</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>pack(color: C) -&gt; u16 {
+        u16::from_be_bytes(T::pack(color))
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">u32</span>) -&gt; <span class="ident">C</span> {
-        <span class="ident">T::unpack</span>(<span class="ident">packed</span>.<span class="ident">to_be_bytes</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>unpack(packed: u16) -&gt; C {
+        T::unpack(packed.to_be_bytes())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">u64</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, [<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ComponentOrder&lt;C, u32&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: ComponentOrder&lt;C, [u8; <span class="number">4</span>]&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">u64::from_be_bytes</span>(<span class="ident">T::pack</span>(<span class="ident">color</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>pack(color: C) -&gt; u32 {
+        u32::from_be_bytes(T::pack(color))
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">u64</span>) -&gt; <span class="ident">C</span> {
-        <span class="ident">T::unpack</span>(<span class="ident">packed</span>.<span class="ident">to_be_bytes</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>unpack(packed: u32) -&gt; C {
+        T::unpack(packed.to_be_bytes())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">u128</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ComponentOrder</span><span class="op">&lt;</span><span class="ident">C</span>, [<span class="ident">u8</span>; <span class="number">16</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ComponentOrder&lt;C, u64&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: ComponentOrder&lt;C, [u8; <span class="number">8</span>]&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pack</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">u128</span> {
-        <span class="ident">u128::from_be_bytes</span>(<span class="ident">T::pack</span>(<span class="ident">color</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>pack(color: C) -&gt; u64 {
+        u64::from_be_bytes(T::pack(color))
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="ident">packed</span>: <span class="ident">u128</span>) -&gt; <span class="ident">C</span> {
-        <span class="ident">T::unpack</span>(<span class="ident">packed</span>.<span class="ident">to_be_bytes</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>unpack(packed: u64) -&gt; C {
+        T::unpack(packed.to_be_bytes())
+    }
+}
+
+<span class="kw">impl</span>&lt;C, T&gt; ComponentOrder&lt;C, u128&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: ComponentOrder&lt;C, [u8; <span class="number">16</span>]&gt;,
+{
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>pack(color: C) -&gt; u128 {
+        u128::from_be_bytes(T::pack(color))
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>unpack(packed: u128) -&gt; C {
+        T::unpack(packed.to_be_bytes())
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

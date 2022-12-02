@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -517,524 +517,524 @@
 <span id="517">517</span>
 <span id="518">518</span>
 <span id="519">519</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">bool_mask::LazySelect</span>,
-    <span class="ident">cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>},
-    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">MinMax</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Zero</span>},
-    <span class="ident">stimulus</span>::{<span class="ident">Stimulus</span>, <span class="ident">StimulusColor</span>},
-    <span class="ident">Alpha</span>,
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{
+    bool_mask::LazySelect,
+    cast::{<span class="self">self</span>, ArrayCast},
+    num::{Abs, Arithmetics, Clamp, MinMax, One, PartialCmp, Real, Sqrt, Zero},
+    stimulus::{Stimulus, StimulusColor},
+    Alpha,
 };
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">blend_alpha</span>, <span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>};
+<span class="kw">use super</span>::{blend_alpha, PreAlpha, Premultiply};
 
-<span class="doccomment">/// A trait for different ways of mixing colors together.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This implements the classic separable blend modes, [as described by</span>
-<span class="doccomment">/// W3C](https://www.w3.org/TR/compositing-1/#blending).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// _Note: The default implementations of the blend modes are meant for color</span>
-<span class="doccomment">/// components in the range [0.0, 1.0] and may otherwise produce strange</span>
-<span class="doccomment">/// results._</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Blend</span> {
-    <span class="doccomment">/// Multiply `self` with `other`. This uses the alpha component to regulate</span>
-    <span class="doccomment">/// the effect, so it&#39;s not just plain component wise multiplication.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// A trait for different ways of mixing colors together.
+///
+/// This implements the classic separable blend modes, [as described by
+/// W3C](https://www.w3.org/TR/compositing-1/#blending).
+///
+/// _Note: The default implementations of the blend modes are meant for color
+/// components in the range [0.0, 1.0] and may otherwise produce strange
+/// results._
+</span><span class="kw">pub trait </span>Blend {
+    <span class="doccomment">/// Multiply `self` with `other`. This uses the alpha component to regulate
+    /// the effect, so it&#39;s not just plain component wise multiplication.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>multiply(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Make a color which is at least as light as `self` or `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Make a color which is at least as light as `self` or `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>screen(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `other`</span>
-    <span class="doccomment">/// is light. This results in an S curve.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `other`
+    /// is light. This results in an S curve.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>overlay(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Return the darkest parts of `self` and `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Return the darkest parts of `self` and `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>darken(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Return the lightest parts of `self` and `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Return the lightest parts of `self` and `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>lighten(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Lighten `other` to reflect `self`. Results in `other` if `self` is</span>
-    <span class="doccomment">/// black.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Lighten `other` to reflect `self`. Results in `other` if `self` is
+    /// black.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>dodge(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Darken `other` to reflect `self`. Results in `other` if `self` is</span>
-    <span class="doccomment">/// white.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Darken `other` to reflect `self`. Results in `other` if `self` is
+    /// white.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>burn(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `self`</span>
-    <span class="doccomment">/// is light. This is similar to `overlay`, but depends on `self` instead</span>
-    <span class="doccomment">/// of `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Multiply `self` or `other` if other is dark, or screen them if `self`
+    /// is light. This is similar to `overlay`, but depends on `self` instead
+    /// of `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>hard_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Lighten `other` if `self` is light, or darken `other` as if it&#39;s burned</span>
-    <span class="doccomment">/// if `self` is dark. The effect is increased if the components of `self`</span>
-    <span class="doccomment">/// is further from 0.5.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Lighten `other` if `self` is light, or darken `other` as if it&#39;s burned
+    /// if `self` is dark. The effect is increased if the components of `self`
+    /// is further from 0.5.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>soft_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Return the absolute difference between `self` and `other`. It&#39;s</span>
-    <span class="doccomment">/// basically `abs(self - other)`, but regulated by the alpha component.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Return the absolute difference between `self` and `other`. It&#39;s
+    /// basically `abs(self - other)`, but regulated by the alpha component.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Similar to `difference`, but appears to result in a lower contrast.</span>
-    <span class="doccomment">/// `other` is inverted if `self` is white, and preserved if `self` is</span>
-    <span class="doccomment">/// black.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Similar to `difference`, but appears to result in a lower contrast.
+    /// `other` is inverted if `self` is white, and preserved if `self` is
+    /// black.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>exclusion(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T, <span class="kw">const </span>N: usize&gt; Blend <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply&lt;Scalar = T&gt; + StimulusColor + ArrayCast&lt;Array = [T; N]&gt; + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">multiply_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>multiply(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), multiply_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">screen_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>screen(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), screen_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">overlay_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>overlay(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), overlay_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">darken_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>darken(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), darken_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">lighten_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), lighten_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">dodge_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>dodge(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), dodge_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">burn_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>burn(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), burn_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">hard_light_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>hard_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), hard_light_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">soft_light_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>soft_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), soft_light_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">difference_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), difference_blend)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">exclusion_blend</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>exclusion(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), exclusion_blend)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">C</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T, <span class="kw">const </span>N: usize&gt; Blend <span class="kw">for </span>C
+<span class="kw">where
+    </span>C: Premultiply&lt;Scalar = T&gt; + StimulusColor + ArrayCast&lt;Array = [T; N]&gt; + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">multiply_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>multiply(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, multiply_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">screen_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>screen(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, screen_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">overlay_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>overlay(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, overlay_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">darken_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>darken(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, darken_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">lighten_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>lighten(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, lighten_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">dodge_blend</span>).<span class="ident">unpremultiply</span>().<span class="ident">color</span>
+    <span class="kw">fn </span>dodge(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, dodge_blend).unpremultiply().color
     }
 
-    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">burn_blend</span>).<span class="ident">unpremultiply</span>().<span class="ident">color</span>
+    <span class="kw">fn </span>burn(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, burn_blend).unpremultiply().color
     }
 
-    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">hard_light_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>hard_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, hard_light_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">soft_light_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>soft_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, soft_light_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">difference_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, difference_blend)
+            .unpremultiply()
+            .color
     }
 
-    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="self">self</span>);
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">BlendInput::new_opaque</span>(<span class="ident">other</span>);
-        <span class="ident">blend_separable</span>(<span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">exclusion_blend</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="kw">fn </span>exclusion(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>src = BlendInput::new_opaque(<span class="self">self</span>);
+        <span class="kw">let </span>dst = BlendInput::new_opaque(other);
+        blend_separable(src, dst, exclusion_blend)
+            .unpremultiply()
+            .color
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Blend</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StimulusColor</span> <span class="op">+</span> <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">Abs</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T, <span class="kw">const </span>N: usize&gt; Blend <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Premultiply&lt;Scalar = T&gt; + StimulusColor + ArrayCast&lt;Array = [T; N]&gt; + Clone,
+    T: Real + Zero + One + MinMax + Clamp + Sqrt + Abs + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">multiply</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">multiply_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>multiply(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), multiply_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">screen</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">screen_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>screen(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), screen_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">overlay</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">overlay_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>overlay(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), overlay_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">darken</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">darken_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>darken(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), darken_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">lighten_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), lighten_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">dodge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">dodge_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>dodge(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), dodge_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">burn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">burn_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>burn(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), burn_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hard_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">hard_light_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>hard_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), hard_light_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">soft_light</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">soft_light_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>soft_light(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), soft_light_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">difference_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), difference_blend).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">exclusion</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">blend_separable</span>(<span class="self">self</span>.<span class="ident">into</span>(), <span class="ident">other</span>.<span class="ident">into</span>(), <span class="ident">exclusion_blend</span>).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>exclusion(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        blend_separable(<span class="self">self</span>.into(), other.into(), exclusion_blend).unpremultiply()
     }
 }
 
-<span class="kw">struct</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> {
-    <span class="ident">color</span>: <span class="ident">C</span>,
-    <span class="ident">color_pre</span>: <span class="ident">C</span>,
-    <span class="ident">alpha</span>: <span class="ident">C::Scalar</span>,
+<span class="kw">struct </span>BlendInput&lt;C: Premultiply&gt; {
+    color: C,
+    color_pre: C,
+    alpha: C::Scalar,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C&gt; BlendInput&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">new_opaque</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">BlendInput</span> {
-            <span class="ident">color_pre</span>: <span class="ident">color</span>.<span class="ident">clone</span>(),
-            <span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="ident">C::Scalar::max_intensity</span>(),
+    <span class="kw">fn </span>new_opaque(color: C) -&gt; <span class="self">Self </span>{
+        BlendInput {
+            color_pre: color.clone(),
+            color,
+            alpha: C::Scalar::max_intensity(),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;Alpha&lt;C, C::Scalar&gt;&gt; <span class="kw">for </span>BlendInput&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">color_pre</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">color</span>.<span class="ident">clone</span>().<span class="ident">premultiply</span>(<span class="ident">color</span>.<span class="ident">alpha</span>);
-        <span class="ident">BlendInput</span> {
-            <span class="ident">color</span>: <span class="ident">color</span>.<span class="ident">color</span>,
-            <span class="ident">color_pre</span>: <span class="ident">color_pre</span>.<span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="ident">color_pre</span>.<span class="ident">alpha</span>,
+    <span class="kw">fn </span>from(color: Alpha&lt;C, C::Scalar&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>color_pre: PreAlpha&lt;C&gt; = color.color.clone().premultiply(color.alpha);
+        BlendInput {
+            color: color.color,
+            color_pre: color_pre.color,
+            alpha: color_pre.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;PreAlpha&lt;C&gt;&gt; <span class="kw">for </span>BlendInput&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">color_pre</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">color</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> (<span class="ident">color</span>, <span class="ident">alpha</span>) <span class="op">=</span> <span class="ident">C::unpremultiply</span>(<span class="ident">color</span>);
-        <span class="ident">BlendInput</span> {
-            <span class="ident">color</span>,
-            <span class="ident">color_pre</span>,
-            <span class="ident">alpha</span>,
+    <span class="kw">fn </span>from(color: PreAlpha&lt;C&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>color_pre = color.color.clone();
+        <span class="kw">let </span>(color, alpha) = C::unpremultiply(color);
+        BlendInput {
+            color,
+            color_pre,
+            alpha,
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">multiply_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>multiply_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Arithmetics,
 {
-    <span class="ident">src</span> <span class="op">*</span> <span class="ident">dst</span>
+    src * dst
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">screen_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>screen_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Arithmetics + Clone,
 {
-    <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span> <span class="op">*</span> <span class="ident">dst</span>
+    src.clone() + <span class="kw-2">&amp;</span>dst - src * dst
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">overlay_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>overlay_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: One + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="ident">hard_light_blend</span>(<span class="ident">dst</span>, <span class="ident">src</span>)
+    hard_light_blend(dst, src)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">darken_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">MinMax</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>darken_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: MinMax,
 {
-    <span class="ident">src</span>.<span class="ident">min</span>(<span class="ident">dst</span>)
+    src.min(dst)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">lighten_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">MinMax</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>lighten_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: MinMax,
 {
-    <span class="ident">src</span>.<span class="ident">max</span>(<span class="ident">dst</span>)
+    src.max(dst)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">dodge_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>dodge_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: One + Zero + MinMax + Arithmetics + PartialCmp,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
-    <span class="comment">// values outside it and clamp.</span>
-    <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
-        <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">T::one</span>(),
-        <span class="kw">else</span> =&gt; <span class="ident">T::one</span>().<span class="ident">min</span>(<span class="ident">dst</span> <span class="op">/</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src</span>)),
+    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for
+    // values outside it and clamp.
+    </span><span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>dst.lt_eq(<span class="kw-2">&amp;</span>T::zero()) =&gt; T::zero(),
+        <span class="kw">if </span>src.gt_eq(<span class="kw-2">&amp;</span>T::one()) =&gt; T::one(),
+        <span class="kw">else </span>=&gt; T::one().min(dst / (T::one() - src)),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">burn_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">MinMax</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>burn_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: One + Zero + MinMax + Arithmetics + PartialCmp,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for</span>
-    <span class="comment">// values outside it and clamp.</span>
-    <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">T::one</span>(),
-        <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
-        <span class="kw">else</span> =&gt; <span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">T::one</span>().<span class="ident">min</span>((<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">dst</span>) <span class="op">/</span> <span class="ident">src</span>),
+    <span class="comment">// The original algorithm assumes values within [0, 1], but we check for
+    // values outside it and clamp.
+    </span><span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>dst.gt_eq(<span class="kw-2">&amp;</span>T::one()) =&gt; T::one(),
+        <span class="kw">if </span>src.lt_eq(<span class="kw-2">&amp;</span>T::zero()) =&gt; T::zero(),
+        <span class="kw">else </span>=&gt; T::one() - T::one().min((T::one() - dst) / src),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">hard_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>hard_light_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: One + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">src</span>;
+    <span class="kw">let </span>two_src = src.clone() + src;
 
-    <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">two_src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; <span class="ident">multiply_blend</span>(<span class="ident">two_src</span>.<span class="ident">clone</span>(), <span class="ident">dst</span>.<span class="ident">clone</span>()),
-        <span class="kw">else</span> =&gt; <span class="ident">screen_blend</span>(<span class="ident">two_src</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::one</span>(), <span class="ident">dst</span>.<span class="ident">clone</span>()),
+    <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>two_src.lt_eq(<span class="kw-2">&amp;</span>T::one()) =&gt; multiply_blend(two_src.clone(), dst.clone()),
+        <span class="kw">else </span>=&gt; screen_blend(two_src.clone() - T::one(), dst.clone()),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">soft_light_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Sqrt</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>soft_light_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Real + One + Arithmetics + Sqrt + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">4.0</span>);
-    <span class="kw">let</span> <span class="ident">twelve</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">12.0</span>);
+    <span class="kw">let </span>four = T::from_f64(<span class="number">4.0</span>);
+    <span class="kw">let </span>twelve = T::from_f64(<span class="number">12.0</span>);
 
-    <span class="kw">let</span> <span class="ident">four_dst</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
-    <span class="kw">let</span> <span class="ident">two_src</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span>;
+    <span class="kw">let </span>four_dst = dst.clone() * <span class="kw-2">&amp;</span>four;
+    <span class="kw">let </span>two_src = src.clone() + <span class="kw-2">&amp;</span>src;
 
-    <span class="kw">let</span> <span class="ident">d_dst</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">four_dst</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; {
-            <span class="kw">let</span> <span class="ident">sixteen_dst</span> <span class="op">=</span> <span class="ident">four_dst</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">four</span>;
-            ((<span class="ident">sixteen_dst</span> <span class="op">-</span> <span class="ident">twelve</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">+</span> <span class="ident">four</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>
+    <span class="kw">let </span>d_dst = <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>four_dst.lt_eq(<span class="kw-2">&amp;</span>T::one()) =&gt; {
+            <span class="kw">let </span>sixteen_dst = four_dst * <span class="kw-2">&amp;</span>four;
+            ((sixteen_dst - twelve) * <span class="kw-2">&amp;</span>dst + four) * <span class="kw-2">&amp;</span>dst
         },
-        <span class="kw">else</span> =&gt; <span class="ident">dst</span>.<span class="ident">clone</span>().<span class="ident">sqrt</span>(),
+        <span class="kw">else </span>=&gt; dst.clone().sqrt(),
     };
 
-    <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">two_src</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::one</span>()) =&gt; {
-            <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">-</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">two_src</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>)
+    <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>two_src.lt_eq(<span class="kw-2">&amp;</span>T::one()) =&gt; {
+            dst.clone() - (T::one() - <span class="kw-2">&amp;</span>two_src) * <span class="kw-2">&amp;</span>dst * (T::one() - <span class="kw-2">&amp;</span>dst)
         },
-        <span class="kw">else</span> =&gt; <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> (<span class="ident">two_src</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::one</span>()) <span class="op">*</span> (<span class="ident">d_dst</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst</span>),
+        <span class="kw">else </span>=&gt; dst.clone() + (two_src.clone() - T::one()) * (d_dst - <span class="kw-2">&amp;</span>dst),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">difference_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Abs</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>difference_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Arithmetics + Abs,
 {
-    (<span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span>).<span class="ident">abs</span>()
+    (dst - src).abs()
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">exclusion_blend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>exclusion_blend&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Arithmetics + Clone,
 {
-    <span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">src</span> <span class="op">-</span> (<span class="ident">dst</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">dst</span>) <span class="op">*</span> <span class="ident">src</span>
+    dst.clone() + <span class="kw-2">&amp;</span>src - (dst.clone() + dst) * src
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">blend_separable</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="ident">F</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
-    <span class="ident">src</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    <span class="kw-2">mut</span> <span class="ident">dst</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    <span class="kw-2">mut</span> <span class="ident">blend</span>: <span class="ident">F</span>,
-) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">T</span>, <span class="ident">T</span>) -&gt; <span class="ident">T</span>,
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>blend_separable&lt;C, T, F, <span class="kw">const </span>N: usize&gt;(
+    src: BlendInput&lt;C&gt;,
+    <span class="kw-2">mut </span>dst: BlendInput&lt;C&gt;,
+    <span class="kw-2">mut </span>blend: F,
+) -&gt; PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: ArrayCast&lt;Array = [T; N]&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: One + Zero + Arithmetics + Clamp + Clone,
+    F: FnMut(T, T) -&gt; T,
 {
-    <span class="kw">let</span> <span class="ident">src_alpha</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>();
-    <span class="kw">let</span> <span class="ident">zipped_input</span> <span class="op">=</span> <span class="ident">zip_input</span>(<span class="ident">src</span>, <span class="ident">dst</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">dst</span>.<span class="ident">color_pre</span>, <span class="ident">dst</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>());
+    <span class="kw">let </span>src_alpha = src.alpha.clone();
+    <span class="kw">let </span>zipped_input = zip_input(src, dst.color, <span class="kw-2">&amp;mut </span>dst.color_pre, dst.alpha.clone());
 
-    <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">src_pre</span>, <span class="ident">src_alpha</span>, <span class="ident">dst</span>, <span class="ident">dst_pre</span>, <span class="ident">dst_alpha</span>) <span class="kw">in</span> <span class="ident">zipped_input</span> {
-        <span class="kw-2">*</span><span class="ident">dst_pre</span> <span class="op">=</span> <span class="ident">src_pre</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">dst_alpha</span>)
-            <span class="op">+</span> <span class="ident">blend</span>(<span class="ident">src</span>, <span class="ident">dst</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">src_alpha</span> <span class="op">*</span> <span class="ident">dst_alpha</span>
-            <span class="op">+</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">src_alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst_pre</span>;
+    <span class="kw">for </span>(src, src_pre, src_alpha, dst, dst_pre, dst_alpha) <span class="kw">in </span>zipped_input {
+        <span class="kw-2">*</span>dst_pre = src_pre * (T::one() - <span class="kw-2">&amp;</span>dst_alpha)
+            + blend(src, dst) * <span class="kw-2">&amp;</span>src_alpha * dst_alpha
+            + (T::one() - src_alpha) * <span class="kw-2">&amp;*</span>dst_pre;
     }
 
-    <span class="ident">PreAlpha</span> {
-        <span class="ident">color</span>: <span class="ident">dst</span>.<span class="ident">color_pre</span>,
-        <span class="ident">alpha</span>: <span class="ident">blend_alpha</span>(<span class="ident">src_alpha</span>, <span class="ident">dst</span>.<span class="ident">alpha</span>),
+    PreAlpha {
+        color: dst.color_pre,
+        alpha: blend_alpha(src_alpha, dst.alpha),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">zip_input</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
-    <span class="ident">src</span>: <span class="ident">BlendInput</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    <span class="ident">dst</span>: <span class="ident">C</span>,
-    <span class="ident">dst_pre</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">C</span>,
-    <span class="ident">dst_alpha</span>: <span class="ident">T</span>,
-) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">fn </span>zip_input&lt;<span class="lifetime">&#39;a</span>, C, T, <span class="kw">const </span>N: usize&gt;(
+    src: BlendInput&lt;C&gt;,
+    dst: C,
+    dst_pre: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C,
+    dst_alpha: T,
+) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (T, T, T, T, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T, T)&gt;
+<span class="kw">where
+    </span>C: ArrayCast&lt;Array = [T; N]&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: <span class="lifetime">&#39;a </span>+ Clone,
 {
-    <span class="kw">let</span> <span class="ident">src_alpha</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">alpha</span>;
-    <span class="ident">IntoIterator::into_iter</span>(<span class="ident">cast::into_array</span>(<span class="ident">src</span>.<span class="ident">color</span>))
-        .<span class="ident">zip</span>(<span class="ident">cast::into_array</span>(<span class="ident">src</span>.<span class="ident">color_pre</span>))
-        .<span class="ident">zip</span>(<span class="ident">cast::into_array</span>(<span class="ident">dst</span>))
-        .<span class="ident">zip</span>(<span class="ident">cast::into_array_mut</span>(<span class="ident">dst_pre</span>))
-        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(((<span class="ident">src_color</span>, <span class="ident">src_pre</span>), <span class="ident">dst_color</span>), <span class="ident">dst_pre</span>)<span class="op">|</span> {
+    <span class="kw">let </span>src_alpha = src.alpha;
+    IntoIterator::into_iter(cast::into_array(src.color))
+        .zip(cast::into_array(src.color_pre))
+        .zip(cast::into_array(dst))
+        .zip(cast::into_array_mut(dst_pre))
+        .map(<span class="kw">move </span>|(((src_color, src_pre), dst_color), dst_pre)| {
             (
-                <span class="ident">src_color</span>,
-                <span class="ident">src_pre</span>,
-                <span class="ident">src_alpha</span>.<span class="ident">clone</span>(),
-                <span class="ident">dst_color</span>,
-                <span class="ident">dst_pre</span>,
-                <span class="ident">dst_alpha</span>.<span class="ident">clone</span>(),
+                src_color,
+                src_pre,
+                src_alpha.clone(),
+                dst_color,
+                dst_pre,
+                dst_alpha.clone(),
             )
         })
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

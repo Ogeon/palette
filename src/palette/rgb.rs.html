@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -214,221 +214,221 @@
 <span id="214">214</span>
 <span id="215">215</span>
 <span id="216">216</span>
-</pre><pre class="rust"><code><span class="doccomment">//! RGB types, spaces and standards.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Linear And Non-linear RGB</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Colors in images are often &quot;gamma corrected&quot;, or converted using some</span>
-<span class="doccomment">//! non-linear transfer function into a format like sRGB before being stored or</span>
-<span class="doccomment">//! displayed. This is done as a compression method and to prevent banding; it&#39;s</span>
-<span class="doccomment">//! also a bit of a legacy from the ages of the CRT monitors, where the output</span>
-<span class="doccomment">//! from the electron gun was non-linear. The problem is that these formats are</span>
-<span class="doccomment">//! *non-linear color spaces*, which means that many operations that you may</span>
-<span class="doccomment">//! want to perform on colors (addition, subtraction, multiplication, linear</span>
-<span class="doccomment">//! interpolation, etc.) will work unexpectedly when performed in such a</span>
-<span class="doccomment">//! non-linear color space. Thus, the compression has to be reverted to restore</span>
-<span class="doccomment">//! linearity and ensure that many operations on the colors behave as expected.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! But, even when colors *are* &#39;linear&#39;, there is yet more to explore.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The most common way that colors are defined, especially for computer</span>
-<span class="doccomment">//! storage, is in terms of so-called *tristimulus values*, meaning that all</span>
-<span class="doccomment">//! colors can be represented as a vector of three values.</span>
-<span class="doccomment">//! The reason colors can generally be stored as only a three-dimensional</span>
-<span class="doccomment">//! vector, and not an *N*-dimensional one, where *N* is some number of possible</span>
-<span class="doccomment">//! wavelengths of light, is because our eyes contain only three types of cones.</span>
-<span class="doccomment">//! Each of these cones has its own sensitivity curve in response to the</span>
-<span class="doccomment">//! wavelengths of visible light, giving us three &quot;dimensions&quot; of sensitivity to color.</span>
-<span class="doccomment">//! These cones are often called the L, M, and S (for long, medium, and short)</span>
-<span class="doccomment">//! cones, and their sensitivity curves *roughly* position them as most</span>
-<span class="doccomment">//! sensitive to &quot;red&quot;, &quot;green&quot;, and &quot;blue&quot; parts of the spectrum. As such, we</span>
-<span class="doccomment">//! can choose only three values to represent any possible color that a human is</span>
-<span class="doccomment">//! able to see. An interesting consequence of this is that humans can see two</span>
-<span class="doccomment">//! different objects which are emitting *completely different actual light</span>
-<span class="doccomment">//! spectra* as the *exact same perceptual color* so long as those wavelengths,</span>
-<span class="doccomment">//! when transformed by the sensitivity curves of our cones, end up resulting in</span>
-<span class="doccomment">//! the same L, M, and S values sent to our brains.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! A **color space** (which simply refers to a set of standards by which we map</span>
-<span class="doccomment">//! a set of arbitrary values to real-world colors) which uses tristimulus</span>
-<span class="doccomment">//! values is often defined in terms of</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!  1. Its **primaries**</span>
-<span class="doccomment">//!  2. Its **reference white** or **white point**</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The **primaries** together represent the total *gamut* (i.e. displayable</span>
-<span class="doccomment">//! range of colors) of that color space. The **white point** defines a</span>
-<span class="doccomment">//! concrete tristimulus value that corresponds to a real, physical white</span>
-<span class="doccomment">//! reflecting object being lit by a known light source and observed by the</span>
-<span class="doccomment">//! &#39;standard observer&#39; (i.e. a standardized model of human color perception).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The informal &quot;RGB&quot; color space is such a tristimulus color space, since it</span>
-<span class="doccomment">//! is defined by three values, but it is underspecified since we don&#39;t know</span>
-<span class="doccomment">//! which primaries are being used (i.e. how exactly are the canonical &quot;red&quot;,</span>
-<span class="doccomment">//! &quot;green&quot;, and &quot;blue&quot; defined?), nor its white point. In most cases, when</span>
-<span class="doccomment">//! people talk about &quot;RGB&quot; or &quot;Linear RGB&quot; colors, what they are *actually*</span>
-<span class="doccomment">//! talking about is the &quot;Linear sRGB&quot; color space, which uses the primaries and</span>
-<span class="doccomment">//! white point defined in the sRGB standard, but which *does not* have the</span>
-<span class="doccomment">//! (non-linear) sRGB *transfer function* applied.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Palette takes these details into account and encodes them as type</span>
-<span class="doccomment">//! parameters, with sRGB as the default. The goal is to make it easy to use</span>
-<span class="doccomment">//! colors correctly and still allow advanced users a high degree of</span>
-<span class="doccomment">//! flexibility.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! RGB types, spaces and standards.
+//!
+//! # Linear And Non-linear RGB
+//!
+//! Colors in images are often &quot;gamma corrected&quot;, or converted using some
+//! non-linear transfer function into a format like sRGB before being stored or
+//! displayed. This is done as a compression method and to prevent banding; it&#39;s
+//! also a bit of a legacy from the ages of the CRT monitors, where the output
+//! from the electron gun was non-linear. The problem is that these formats are
+//! *non-linear color spaces*, which means that many operations that you may
+//! want to perform on colors (addition, subtraction, multiplication, linear
+//! interpolation, etc.) will work unexpectedly when performed in such a
+//! non-linear color space. Thus, the compression has to be reverted to restore
+//! linearity and ensure that many operations on the colors behave as expected.
+//!
+//! But, even when colors *are* &#39;linear&#39;, there is yet more to explore.
+//!
+//! The most common way that colors are defined, especially for computer
+//! storage, is in terms of so-called *tristimulus values*, meaning that all
+//! colors can be represented as a vector of three values.
+//! The reason colors can generally be stored as only a three-dimensional
+//! vector, and not an *N*-dimensional one, where *N* is some number of possible
+//! wavelengths of light, is because our eyes contain only three types of cones.
+//! Each of these cones has its own sensitivity curve in response to the
+//! wavelengths of visible light, giving us three &quot;dimensions&quot; of sensitivity to color.
+//! These cones are often called the L, M, and S (for long, medium, and short)
+//! cones, and their sensitivity curves *roughly* position them as most
+//! sensitive to &quot;red&quot;, &quot;green&quot;, and &quot;blue&quot; parts of the spectrum. As such, we
+//! can choose only three values to represent any possible color that a human is
+//! able to see. An interesting consequence of this is that humans can see two
+//! different objects which are emitting *completely different actual light
+//! spectra* as the *exact same perceptual color* so long as those wavelengths,
+//! when transformed by the sensitivity curves of our cones, end up resulting in
+//! the same L, M, and S values sent to our brains.
+//!
+//! A **color space** (which simply refers to a set of standards by which we map
+//! a set of arbitrary values to real-world colors) which uses tristimulus
+//! values is often defined in terms of
+//!
+//!  1. Its **primaries**
+//!  2. Its **reference white** or **white point**
+//!
+//! The **primaries** together represent the total *gamut* (i.e. displayable
+//! range of colors) of that color space. The **white point** defines a
+//! concrete tristimulus value that corresponds to a real, physical white
+//! reflecting object being lit by a known light source and observed by the
+//! &#39;standard observer&#39; (i.e. a standardized model of human color perception).
+//!
+//! The informal &quot;RGB&quot; color space is such a tristimulus color space, since it
+//! is defined by three values, but it is underspecified since we don&#39;t know
+//! which primaries are being used (i.e. how exactly are the canonical &quot;red&quot;,
+//! &quot;green&quot;, and &quot;blue&quot; defined?), nor its white point. In most cases, when
+//! people talk about &quot;RGB&quot; or &quot;Linear RGB&quot; colors, what they are *actually*
+//! talking about is the &quot;Linear sRGB&quot; color space, which uses the primaries and
+//! white point defined in the sRGB standard, but which *does not* have the
+//! (non-linear) sRGB *transfer function* applied.
+//!
+//! Palette takes these details into account and encodes them as type
+//! parameters, with sRGB as the default. The goal is to make it easy to use
+//! colors correctly and still allow advanced users a high degree of
+//! flexibility.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">encoding</span>::{<span class="self">self</span>, <span class="ident">FromLinear</span>, <span class="ident">Gamma</span>, <span class="ident">IntoLinear</span>, <span class="ident">Linear</span>},
-    <span class="ident">stimulus</span>::{<span class="ident">FromStimulus</span>, <span class="ident">Stimulus</span>},
-    <span class="ident">white_point::Any</span>,
-    <span class="ident">Yxy</span>,
+</span><span class="kw">use crate</span>::{
+    encoding::{<span class="self">self</span>, FromLinear, Gamma, IntoLinear, Linear},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::Any,
+    Yxy,
 };
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::rgb</span>::{<span class="ident">FromHexError</span>, <span class="ident">Rgb</span>, <span class="ident">Rgba</span>};
+<span class="kw">pub use </span><span class="self">self</span>::rgb::{FromHexError, Rgb, Rgba};
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">channels</span>;
-<span class="kw">mod</span> <span class="ident">rgb</span>;
+<span class="kw">pub mod </span>channels;
+<span class="kw">mod </span>rgb;
 
-<span class="doccomment">/// Non-linear sRGB.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-<span class="doccomment">/// Non-linear sRGB with an alpha component.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgba</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Non-linear sRGB.
+</span><span class="kw">pub type </span>Srgb&lt;T = f32&gt; = Rgb&lt;encoding::Srgb, T&gt;;
+<span class="doccomment">/// Non-linear sRGB with an alpha component.
+</span><span class="kw">pub type </span>Srgba&lt;T = f32&gt; = Rgba&lt;encoding::Srgb, T&gt;;
 
-<span class="doccomment">/// Linear sRGB.</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">alias</span> <span class="op">=</span> <span class="string">&quot;linear&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-<span class="doccomment">/// Linear sRGB with an alpha component.</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">alias</span> <span class="op">=</span> <span class="string">&quot;linear&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgba</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Linear sRGB.
+</span><span class="attribute">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
+</span><span class="kw">pub type </span>LinSrgb&lt;T = f32&gt; = Rgb&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
+<span class="doccomment">/// Linear sRGB with an alpha component.
+</span><span class="attribute">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
+</span><span class="kw">pub type </span>LinSrgba&lt;T = f32&gt; = Rgba&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
 
-<span class="doccomment">/// Gamma 2.2 encoded sRGB.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">GammaSrgb</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-<span class="doccomment">/// Gamma 2.2 encoded sRGB with an alpha component.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">GammaSrgba</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgba</span><span class="op">&lt;</span><span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Gamma 2.2 encoded sRGB.
+</span><span class="kw">pub type </span>GammaSrgb&lt;T = f32&gt; = Rgb&lt;Gamma&lt;encoding::Srgb&gt;, T&gt;;
+<span class="doccomment">/// Gamma 2.2 encoded sRGB with an alpha component.
+</span><span class="kw">pub type </span>GammaSrgba&lt;T = f32&gt; = Rgba&lt;Gamma&lt;encoding::Srgb&gt;, T&gt;;
 
-<span class="doccomment">/// An RGB space and a transfer function.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RgbStandard</span> {
-    <span class="doccomment">/// The RGB color space.</span>
-    <span class="kw">type</span> <span class="ident">Space</span>: <span class="ident">RgbSpace</span>;
+<span class="doccomment">/// An RGB space and a transfer function.
+</span><span class="kw">pub trait </span>RgbStandard {
+    <span class="doccomment">/// The RGB color space.
+    </span><span class="kw">type </span>Space: RgbSpace;
 
-    <span class="doccomment">/// The transfer function for the color components.</span>
-    <span class="kw">type</span> <span class="ident">TransferFn</span>;
+    <span class="doccomment">/// The transfer function for the color components.
+    </span><span class="kw">type </span>TransferFn;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Sp</span>, <span class="ident">Tf</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> (<span class="ident">Sp</span>, <span class="ident">Tf</span>)
-<span class="kw">where</span>
-    <span class="ident">Sp</span>: <span class="ident">RgbSpace</span>,
+<span class="kw">impl</span>&lt;Sp, Tf&gt; RgbStandard <span class="kw">for </span>(Sp, Tf)
+<span class="kw">where
+    </span>Sp: RgbSpace,
 {
-    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Sp</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;
+    <span class="kw">type </span>Space = Sp;
+    <span class="kw">type </span>TransferFn = Tf;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Pr</span>, <span class="ident">Wp</span>, <span class="ident">Tf</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> (<span class="ident">Pr</span>, <span class="ident">Wp</span>, <span class="ident">Tf</span>)
-<span class="kw">where</span>
-    (<span class="ident">Pr</span>, <span class="ident">Wp</span>): <span class="ident">RgbSpace</span>,
+<span class="kw">impl</span>&lt;Pr, Wp, Tf&gt; RgbStandard <span class="kw">for </span>(Pr, Wp, Tf)
+<span class="kw">where
+    </span>(Pr, Wp): RgbSpace,
 {
-    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> (<span class="ident">Pr</span>, <span class="ident">Wp</span>);
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Tf</span>;
+    <span class="kw">type </span>Space = (Pr, Wp);
+    <span class="kw">type </span>TransferFn = Tf;
 }
 
-<span class="doccomment">/// A set of primaries and a white point.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RgbSpace</span> {
-    <span class="doccomment">/// The primaries of the RGB color space.</span>
-    <span class="kw">type</span> <span class="ident">Primaries</span>;
+<span class="doccomment">/// A set of primaries and a white point.
+</span><span class="kw">pub trait </span>RgbSpace {
+    <span class="doccomment">/// The primaries of the RGB color space.
+    </span><span class="kw">type </span>Primaries;
 
-    <span class="doccomment">/// The white point of the RGB color space.</span>
-    <span class="kw">type</span> <span class="ident">WhitePoint</span>;
+    <span class="doccomment">/// The white point of the RGB color space.
+    </span><span class="kw">type </span>WhitePoint;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">RgbSpace</span> <span class="kw">for</span> (<span class="ident">P</span>, <span class="ident">W</span>) {
-    <span class="kw">type</span> <span class="ident">Primaries</span> <span class="op">=</span> <span class="ident">P</span>;
-    <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">W</span>;
+<span class="kw">impl</span>&lt;P, W&gt; RgbSpace <span class="kw">for </span>(P, W) {
+    <span class="kw">type </span>Primaries = P;
+    <span class="kw">type </span>WhitePoint = W;
 }
 
-<span class="doccomment">/// Represents the red, green and blue primaries of an RGB space.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Primary red.</span>
-    <span class="kw">fn</span> <span class="ident">red</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-    <span class="doccomment">/// Primary green.</span>
-    <span class="kw">fn</span> <span class="ident">green</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>;
-    <span class="doccomment">/// Primary blue.</span>
-    <span class="kw">fn</span> <span class="ident">blue</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Represents the red, green and blue primaries of an RGB space.
+</span><span class="kw">pub trait </span>Primaries&lt;T&gt; {
+    <span class="doccomment">/// Primary red.
+    </span><span class="kw">fn </span>red() -&gt; Yxy&lt;Any, T&gt;;
+    <span class="doccomment">/// Primary green.
+    </span><span class="kw">fn </span>green() -&gt; Yxy&lt;Any, T&gt;;
+    <span class="doccomment">/// Primary blue.
+    </span><span class="kw">fn </span>blue() -&gt; Yxy&lt;Any, T&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;LinSrgb&lt;T&gt;&gt; <span class="kw">for </span>Srgb&lt;U&gt;
+<span class="kw">where
+    </span><span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + FromLinear&lt;T, U&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgb</span>: <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">lin_srgb</span>.<span class="ident">into_encoding</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(lin_srgb: LinSrgb&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        lin_srgb.into_encoding()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;Srgb&lt;T&gt;&gt; <span class="kw">for </span>LinSrgb&lt;U&gt;
+<span class="kw">where
+    </span><span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + IntoLinear&lt;U, T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgb</span>: <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">srgb</span>.<span class="ident">into_linear</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(srgb: Srgb&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        srgb.into_linear()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">Stimulus</span>,
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;LinSrgb&lt;T&gt;&gt; <span class="kw">for </span>Srgba&lt;U&gt;
+<span class="kw">where
+    </span>U: Stimulus,
+    <span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + FromLinear&lt;T, U&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgb</span>: <span class="ident">LinSrgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">non_lin</span> <span class="op">=</span> <span class="ident">Srgb::from_linear</span>(<span class="ident">lin_srgb</span>);
-        <span class="ident">non_lin</span>.<span class="ident">into</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(lin_srgb: LinSrgb&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>non_lin = Srgb::from_linear(lin_srgb);
+        non_lin.into()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;LinSrgba&lt;T&gt;&gt; <span class="kw">for </span>Srgba&lt;U&gt;
+<span class="kw">where
+    </span>U: FromStimulus&lt;T&gt;,
+    <span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + FromLinear&lt;T, U&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">lin_srgba</span>: <span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Srgba::from_linear</span>(<span class="ident">lin_srgba</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(lin_srgba: LinSrgba&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        Srgba::from_linear(lin_srgba)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">Stimulus</span>,
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;Srgb&lt;T&gt;&gt; <span class="kw">for </span>LinSrgba&lt;U&gt;
+<span class="kw">where
+    </span>U: Stimulus,
+    <span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + IntoLinear&lt;U, T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgb</span>: <span class="ident">Srgb</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">srgb</span>.<span class="ident">into_linear</span>().<span class="ident">into</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(srgb: Srgb&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        srgb.into_linear().into()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LinSrgba</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromStimulus</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>: <span class="ident">RgbStandard</span><span class="op">&lt;</span><span class="ident">Space</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; From&lt;Srgba&lt;T&gt;&gt; <span class="kw">for </span>LinSrgba&lt;U&gt;
+<span class="kw">where
+    </span>U: FromStimulus&lt;T&gt;,
+    <span class="kw">crate</span>::encoding::Srgb: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::Srgb&gt; + IntoLinear&lt;U, T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">srgba</span>: <span class="ident">Srgba</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">srgba</span>.<span class="ident">into_linear</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(srgba: Srgba&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        srgba.into_linear()
     }
 }
 
-<span class="doccomment">/// A packed representation of RGBA in RGBA order.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PackedRgba</span><span class="op">&lt;</span><span class="ident">P</span> <span class="op">=</span> <span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::Packed</span><span class="op">&lt;</span><span class="ident">channels::Rgba</span>, <span class="ident">P</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A packed representation of RGBA in RGBA order.
+</span><span class="kw">pub type </span>PackedRgba&lt;P = u32&gt; = <span class="kw">crate</span>::cast::Packed&lt;channels::Rgba, P&gt;;
 
-<span class="doccomment">/// A packed representation of RGBA in ARGB order.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PackedArgb</span><span class="op">&lt;</span><span class="ident">P</span> <span class="op">=</span> <span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::Packed</span><span class="op">&lt;</span><span class="ident">channels::Argb</span>, <span class="ident">P</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A packed representation of RGBA in ARGB order.
+</span><span class="kw">pub type </span>PackedArgb&lt;P = u32&gt; = <span class="kw">crate</span>::cast::Packed&lt;channels::Argb, P&gt;;
 
-<span class="doccomment">/// A packed representation of RGBA in BGRA order.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PackedBgra</span><span class="op">&lt;</span><span class="ident">P</span> <span class="op">=</span> <span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::Packed</span><span class="op">&lt;</span><span class="ident">channels::Bgra</span>, <span class="ident">P</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A packed representation of RGBA in BGRA order.
+</span><span class="kw">pub type </span>PackedBgra&lt;P = u32&gt; = <span class="kw">crate</span>::cast::Packed&lt;channels::Bgra, P&gt;;
 
-<span class="doccomment">/// A packed representation of RGBA in ABGR order.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">PackedAbgr</span><span class="op">&lt;</span><span class="ident">P</span> <span class="op">=</span> <span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::Packed</span><span class="op">&lt;</span><span class="ident">channels::Abgr</span>, <span class="ident">P</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A packed representation of RGBA in ABGR order.
+</span><span class="kw">pub type </span>PackedAbgr&lt;P = u32&gt; = <span class="kw">crate</span>::cast::Packed&lt;channels::Abgr, P&gt;;
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

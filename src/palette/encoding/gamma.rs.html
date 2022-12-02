@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/gamma.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gamma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/gamma.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gamma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -88,95 +88,95 @@
 <span id="88">88</span>
 <span id="89">89</span>
 <span id="90">90</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Gamma encoding.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Gamma encoding.
 
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">marker::PhantomData</span>, <span class="ident">ops::Div</span>};
+</span><span class="kw">use </span>core::{marker::PhantomData, ops::Div};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">luma::LumaStandard</span>,
-    <span class="ident">num</span>::{<span class="ident">One</span>, <span class="ident">Powf</span>, <span class="ident">Real</span>},
-    <span class="ident">rgb</span>::{<span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
+<span class="kw">use crate</span>::{
+    luma::LumaStandard,
+    num::{One, Powf, Real},
+    rgb::{RgbSpace, RgbStandard},
 };
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FromLinear</span>, <span class="ident">IntoLinear</span>};
+<span class="kw">use super</span>::{FromLinear, IntoLinear};
 
-<span class="doccomment">/// Gamma encoding.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Gamma encoding or gamma correction is used to transform the intensity</span>
-<span class="doccomment">/// values to either match a non-linear display, like CRT, or to prevent</span>
-<span class="doccomment">/// banding among the darker colors. `GammaRgb` represents a gamma corrected</span>
-<span class="doccomment">/// RGB color, where the intensities are encoded using the following power-law</span>
-<span class="doccomment">/// expression: _V&lt;sup&gt; γ&lt;/sup&gt;_ (where _V_ is the intensity value an _γ_ is the</span>
-<span class="doccomment">/// encoding gamma).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The gamma value is stored as a simple type that represents an `f32`</span>
-<span class="doccomment">/// constant.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>: <span class="ident">Number</span> <span class="op">=</span> <span class="ident">F2p2</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span>(<span class="ident">S</span>, <span class="ident">N</span>)<span class="op">&gt;</span>);
+<span class="doccomment">/// Gamma encoding.
+///
+/// Gamma encoding or gamma correction is used to transform the intensity
+/// values to either match a non-linear display, like CRT, or to prevent
+/// banding among the darker colors. `GammaRgb` represents a gamma corrected
+/// RGB color, where the intensities are encoded using the following power-law
+/// expression: _V&lt;sup&gt; γ&lt;/sup&gt;_ (where _V_ is the intensity value an _γ_ is the
+/// encoding gamma).
+///
+/// The gamma value is stored as a simple type that represents an `f32`
+/// constant.
+</span><span class="attribute">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+</span><span class="kw">pub struct </span>Gamma&lt;S, N: Number = F2p2&gt;(PhantomData&lt;(S, N)&gt;);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Sp</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> <span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">Sp</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Sp</span>: <span class="ident">RgbSpace</span>,
-    <span class="ident">N</span>: <span class="ident">Number</span>,
+<span class="kw">impl</span>&lt;Sp, N&gt; RgbStandard <span class="kw">for </span>Gamma&lt;Sp, N&gt;
+<span class="kw">where
+    </span>Sp: RgbSpace,
+    N: Number,
 {
-    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Sp</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">GammaFn</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Space = Sp;
+    <span class="kw">type </span>TransferFn = GammaFn&lt;N&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">LumaStandard</span> <span class="kw">for</span> <span class="ident">Gamma</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">N</span>: <span class="ident">Number</span>,
+<span class="kw">impl</span>&lt;Wp, N&gt; LumaStandard <span class="kw">for </span>Gamma&lt;Wp, N&gt;
+<span class="kw">where
+    </span>N: Number,
 {
-    <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Wp</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">GammaFn</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>WhitePoint = Wp;
+    <span class="kw">type </span>TransferFn = GammaFn&lt;N&gt;;
 }
 
-<span class="doccomment">/// The transfer function for gamma encoded colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Conversion is performed using a single `powf(x, gamma)` and `powf(x, 1.0 /</span>
-<span class="doccomment">/// gamma)` call, for from and into linear respectively. This makes</span>
-<span class="doccomment">/// `GammaFn&lt;F2p2&gt;` usable as a slightly less expensive approximation of the</span>
-<span class="doccomment">/// [`Srgb`][super::Srgb] transfer function.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The gamma value is stored as a simple type that represents an `f32`</span>
-<span class="doccomment">/// constant.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GammaFn</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Number</span> <span class="op">=</span> <span class="ident">F2p2</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>);
+<span class="doccomment">/// The transfer function for gamma encoded colors.
+///
+/// Conversion is performed using a single `powf(x, gamma)` and `powf(x, 1.0 /
+/// gamma)` call, for from and into linear respectively. This makes
+/// `GammaFn&lt;F2p2&gt;` usable as a slightly less expensive approximation of the
+/// [`Srgb`][super::Srgb] transfer function.
+///
+/// The gamma value is stored as a simple type that represents an `f32`
+/// constant.
+</span><span class="attribute">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+</span><span class="kw">pub struct </span>GammaFn&lt;N: Number = F2p2&gt;(PhantomData&lt;N&gt;);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GammaFn</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">N</span>: <span class="ident">Number</span>,
+<span class="kw">impl</span>&lt;T, N&gt; IntoLinear&lt;T, T&gt; <span class="kw">for </span>GammaFn&lt;N&gt;
+<span class="kw">where
+    </span>T: Real + One + Powf + Div&lt;Output = T&gt;,
+    N: Number,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="ident">x</span>.<span class="ident">powf</span>(<span class="ident">T::one</span>() <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="ident">N::VALUE</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_linear(x: T) -&gt; T {
+        x.powf(T::one() / T::from_f64(N::VALUE))
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GammaFn</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Powf</span>,
-    <span class="ident">N</span>: <span class="ident">Number</span>,
+<span class="kw">impl</span>&lt;T, N&gt; FromLinear&lt;T, T&gt; <span class="kw">for </span>GammaFn&lt;N&gt;
+<span class="kw">where
+    </span>T: Real + Powf,
+    N: Number,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="ident">x</span>.<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="ident">N::VALUE</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_linear(x: T) -&gt; T {
+        x.powf(T::from_f64(N::VALUE))
     }
 }
 
-<span class="doccomment">/// A type level float constant.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Number</span>: <span class="lifetime">&#39;static</span> {
-    <span class="doccomment">/// The represented number.</span>
-    <span class="kw">const</span> <span class="ident">VALUE</span>: <span class="ident">f64</span>;
+<span class="doccomment">/// A type level float constant.
+</span><span class="kw">pub trait </span>Number: <span class="lifetime">&#39;static </span>{
+    <span class="doccomment">/// The represented number.
+    </span><span class="kw">const </span>VALUE: f64;
 }
 
-<span class="doccomment">/// Represents `2.2f64`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">F2p2</span>;
+<span class="doccomment">/// Represents `2.2f64`.
+</span><span class="attribute">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+</span><span class="kw">pub struct </span>F2p2;
 
-<span class="kw">impl</span> <span class="ident">Number</span> <span class="kw">for</span> <span class="ident">F2p2</span> {
-    <span class="kw">const</span> <span class="ident">VALUE</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="number">2.2</span>;
+<span class="kw">impl </span>Number <span class="kw">for </span>F2p2 {
+    <span class="kw">const </span>VALUE: f64 = <span class="number">2.2</span>;
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/gradient.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gradient.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/gradient.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gradient.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -684,691 +684,691 @@
 <span id="684">684</span>
 <span id="685">685</span>
 <span id="686">686</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Types for interpolation between multiple colors.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This module is only available if the `std` feature is enabled (this is the</span>
-<span class="doccomment">//! default).</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for interpolation between multiple colors.
+//!
+//! This module is only available if the `std` feature is enabled (this is the
+//! default).
 
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cmp::max</span>, <span class="ident">marker::PhantomData</span>};
+</span><span class="kw">use </span>core::{cmp::max, marker::PhantomData};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">clamp</span>, <span class="ident">clamp_min</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
-    <span class="ident">Mix</span>,
+<span class="kw">use crate</span>::{
+    clamp, clamp_min,
+    num::{Arithmetics, Clamp, One, Real, Zero},
+    Mix,
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;named_gradients&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">named</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;named_gradients&quot;</span>)]
+</span><span class="kw">pub mod </span>named;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; From&lt;T&gt; <span class="kw">for </span>Gradient&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Mix + Clone,
+    T: AsRef&lt;[(C::Scalar, C)]&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">col</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Gradient::with_domain</span>(<span class="ident">col</span>)
+    <span class="kw">fn </span>from(col: T) -&gt; <span class="self">Self </span>{
+        Gradient::with_domain(col)
     }
 }
 
-<span class="doccomment">/// A linear interpolation between colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It&#39;s used to smoothly transition between a series of colors, that can be</span>
-<span class="doccomment">/// either evenly spaced or have customized positions. The gradient is</span>
-<span class="doccomment">/// continuous between the control points, but it&#39;s possible to iterate over a</span>
-<span class="doccomment">/// number of evenly spaced points using the `take` method. Any point outside</span>
-<span class="doccomment">/// the domain of the gradient will have the same color as the closest control</span>
-<span class="doccomment">/// point.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Mix</span><span class="op">&gt;</span><span class="ident">::Scalar</span>, <span class="ident">C</span>)<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">T</span>, <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>)
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span>;
+<span class="doccomment">/// A linear interpolation between colors.
+///
+/// It&#39;s used to smoothly transition between a series of colors, that can be
+/// either evenly spaced or have customized positions. The gradient is
+/// continuous between the control points, but it&#39;s possible to iterate over a
+/// number of evenly spaced points using the `take` method. Any point outside
+/// the domain of the gradient will have the same color as the closest control
+/// point.
+</span><span class="attribute">#[derive(Clone, Debug)]
+</span><span class="kw">pub struct </span>Gradient&lt;C, T = Vec&lt;(&lt;C <span class="kw">as </span>Mix&gt;::Scalar, C)&gt;&gt;(T, PhantomData&lt;C&gt;)
+<span class="kw">where
+    </span>C: Mix;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Gradient&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Mix,
 {
-    <span class="doccomment">/// Get a color from the gradient. The color of the closest control point</span>
-    <span class="doccomment">/// will be returned if `i` is outside the domain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="ident">C</span>
-    <span class="kw">where</span>
-        <span class="ident">C</span>: <span class="ident">Clone</span>,
-        <span class="ident">C::Scalar</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Get a color from the gradient. The color of the closest control point
+    /// will be returned if `i` is outside the domain.
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, i: C::Scalar) -&gt; C
+    <span class="kw">where
+        </span>C: Clone,
+        C::Scalar: Arithmetics + PartialOrd + Clone,
+        T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="kw">let</span> (<span class="ident">min</span>, <span class="ident">min_color</span>) <span class="op">=</span> <span class="self">self</span>
-            .<span class="number">0</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">get</span>(<span class="number">0</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min</span> <span class="op">=</span> <span class="ident">min</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_color</span> <span class="op">=</span> <span class="ident">min_color</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_index</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let </span>(min, min_color) = <span class="self">self
+            </span>.<span class="number">0
+            </span>.as_ref()
+            .get(<span class="number">0</span>)
+            .expect(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>min = min;
+        <span class="kw">let </span><span class="kw-2">mut </span>min_color = min_color;
+        <span class="kw">let </span><span class="kw-2">mut </span>min_index = <span class="number">0</span>;
 
-        <span class="kw">if</span> <span class="ident">i</span> <span class="op">&lt;</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">min</span> {
-            <span class="kw">return</span> <span class="ident">min_color</span>.<span class="ident">clone</span>();
+        <span class="kw">if </span>i &lt;= <span class="kw-2">*</span>min {
+            <span class="kw">return </span>min_color.clone();
         }
 
-        <span class="kw">let</span> (<span class="ident">max</span>, <span class="ident">max_color</span>) <span class="op">=</span> <span class="self">self</span>
-            .<span class="number">0</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">last</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">max</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_color</span> <span class="op">=</span> <span class="ident">max_color</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>;
+        <span class="kw">let </span>(max, max_color) = <span class="self">self
+            </span>.<span class="number">0
+            </span>.as_ref()
+            .last()
+            .expect(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>max = max;
+        <span class="kw">let </span><span class="kw-2">mut </span>max_color = max_color;
+        <span class="kw">let </span><span class="kw-2">mut </span>max_index = <span class="self">self</span>.<span class="number">0</span>.as_ref().len() - <span class="number">1</span>;
 
-        <span class="kw">if</span> <span class="ident">i</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">max</span> {
-            <span class="kw">return</span> <span class="ident">max_color</span>.<span class="ident">clone</span>();
+        <span class="kw">if </span>i &gt;= <span class="kw-2">*</span>max {
+            <span class="kw">return </span>max_color.clone();
         }
 
-        <span class="kw">while</span> <span class="ident">min_index</span> <span class="op">&lt;</span> <span class="ident">max_index</span> <span class="op">-</span> <span class="number">1</span> {
-            <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">min_index</span> <span class="op">+</span> (<span class="ident">max_index</span> <span class="op">-</span> <span class="ident">min_index</span>) <span class="op">/</span> <span class="number">2</span>;
+        <span class="kw">while </span>min_index &lt; max_index - <span class="number">1 </span>{
+            <span class="kw">let </span>index = min_index + (max_index - min_index) / <span class="number">2</span>;
 
-            <span class="kw">let</span> (<span class="ident">p</span>, <span class="ident">color</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()[<span class="ident">index</span>];
+            <span class="kw">let </span>(p, color) = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.as_ref()[index];
 
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">&lt;</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">p</span> {
-                <span class="ident">max</span> <span class="op">=</span> <span class="ident">p</span>;
-                <span class="ident">max_color</span> <span class="op">=</span> <span class="ident">color</span>;
-                <span class="ident">max_index</span> <span class="op">=</span> <span class="ident">index</span>;
-            } <span class="kw">else</span> {
-                <span class="ident">min</span> <span class="op">=</span> <span class="ident">p</span>;
-                <span class="ident">min_color</span> <span class="op">=</span> <span class="ident">color</span>;
-                <span class="ident">min_index</span> <span class="op">=</span> <span class="ident">index</span>;
+            <span class="kw">if </span>i &lt;= <span class="kw-2">*</span>p {
+                max = p;
+                max_color = color;
+                max_index = index;
+            } <span class="kw">else </span>{
+                min = p;
+                min_color = color;
+                min_index = index;
             }
         }
 
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> (<span class="ident">i</span> <span class="op">-</span> <span class="ident">min</span>) <span class="op">/</span> (<span class="ident">max</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">min</span>);
+        <span class="kw">let </span>factor = (i - min) / (max.clone() - min);
 
-        <span class="ident">min_color</span>.<span class="ident">clone</span>().<span class="ident">mix</span>(<span class="ident">max_color</span>.<span class="ident">clone</span>(), <span class="ident">factor</span>)
+        min_color.clone().mix(max_color.clone(), factor)
     }
 
-    <span class="doccomment">/// Create a gradient of colors with custom spacing and domain. There must</span>
-    <span class="doccomment">/// be at least one color and they are expected to be ordered by their</span>
-    <span class="doccomment">/// position value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_domain</span>(<span class="ident">colors</span>: <span class="ident">T</span>) -&gt; <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Create a gradient of colors with custom spacing and domain. There must
+    /// be at least one color and they are expected to be ordered by their
+    /// position value.
+    </span><span class="kw">pub fn </span>with_domain(colors: T) -&gt; Gradient&lt;C, T&gt;
+    <span class="kw">where
+        </span>T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">colors</span>.<span class="ident">as_ref</span>().<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(!colors.as_ref().is_empty());
 
-        <span class="comment">//Maybe sort the colors?</span>
-        <span class="ident">Gradient</span>(<span class="ident">colors</span>, <span class="ident">PhantomData</span>)
+        <span class="comment">//Maybe sort the colors?
+        </span>Gradient(colors, PhantomData)
     }
 
-    <span class="doccomment">/// Take `n` evenly spaced colors from the gradient, as an iterator. The</span>
-    <span class="doccomment">/// iterator includes both ends of the gradient, for `n &gt; 1`, or just</span>
-    <span class="doccomment">/// the lower end of the gradient for `n = 0`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// For example, `take(5)` will include point 0.0 of the gradient, three</span>
-    <span class="doccomment">/// intermediate colors, and point 1.0 spaced apart at 1/4 the distance</span>
-    <span class="doccomment">/// between colors 0.0 and 1.0 on the gradient.</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use approx::assert_relative_eq;</span>
-    <span class="doccomment">/// use palette::{Gradient, LinSrgb};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let gradient = Gradient::new(vec![</span>
-    <span class="doccomment">///     LinSrgb::new(1.0, 1.0, 0.0),</span>
-    <span class="doccomment">///     LinSrgb::new(0.0, 0.0, 1.0),</span>
-    <span class="doccomment">/// ]);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let taken_colors: Vec&lt;_&gt; = gradient.take(5).collect();</span>
-    <span class="doccomment">/// let colors = vec![</span>
-    <span class="doccomment">///     LinSrgb::new(1.0, 1.0, 0.0),</span>
-    <span class="doccomment">///     LinSrgb::new(0.75, 0.75, 0.25),</span>
-    <span class="doccomment">///     LinSrgb::new(0.5, 0.5, 0.5),</span>
-    <span class="doccomment">///     LinSrgb::new(0.25, 0.25, 0.75),</span>
-    <span class="doccomment">///     LinSrgb::new(0.0, 0.0, 1.0),</span>
-    <span class="doccomment">/// ];</span>
-    <span class="doccomment">/// for (c1, c2) in taken_colors.iter().zip(colors.iter()) {</span>
-    <span class="doccomment">///     assert_relative_eq!(c1, c2);</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Take</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">C::Scalar</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Take `n` evenly spaced colors from the gradient, as an iterator. The
+    /// iterator includes both ends of the gradient, for `n &gt; 1`, or just
+    /// the lower end of the gradient for `n = 0`.
+    ///
+    /// For example, `take(5)` will include point 0.0 of the gradient, three
+    /// intermediate colors, and point 1.0 spaced apart at 1/4 the distance
+    /// between colors 0.0 and 1.0 on the gradient.
+    /// ```
+    /// use approx::assert_relative_eq;
+    /// use palette::{Gradient, LinSrgb};
+    ///
+    /// let gradient = Gradient::new(vec![
+    ///     LinSrgb::new(1.0, 1.0, 0.0),
+    ///     LinSrgb::new(0.0, 0.0, 1.0),
+    /// ]);
+    ///
+    /// let taken_colors: Vec&lt;_&gt; = gradient.take(5).collect();
+    /// let colors = vec![
+    ///     LinSrgb::new(1.0, 1.0, 0.0),
+    ///     LinSrgb::new(0.75, 0.75, 0.25),
+    ///     LinSrgb::new(0.5, 0.5, 0.5),
+    ///     LinSrgb::new(0.25, 0.25, 0.75),
+    ///     LinSrgb::new(0.0, 0.0, 1.0),
+    /// ];
+    /// for (c1, c2) in taken_colors.iter().zip(colors.iter()) {
+    ///     assert_relative_eq!(c1, c2);
+    /// }
+    /// ```
+    </span><span class="kw">pub fn </span>take(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; Take&lt;C, T&gt;
+    <span class="kw">where
+        </span>C::Scalar: Arithmetics + Clone,
+        T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="kw">let</span> (<span class="ident">min</span>, <span class="ident">max</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">domain</span>();
+        <span class="kw">let </span>(min, max) = <span class="self">self</span>.domain();
 
-        <span class="ident">Take</span> {
-            <span class="ident">gradient</span>: <span class="ident">MaybeSlice::NotSlice</span>(<span class="self">self</span>),
-            <span class="ident">from</span>: <span class="ident">min</span>.<span class="ident">clone</span>(),
-            <span class="ident">diff</span>: <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>,
-            <span class="ident">len</span>: <span class="ident">n</span>,
-            <span class="ident">from_head</span>: <span class="number">0</span>,
-            <span class="ident">from_end</span>: <span class="number">0</span>,
+        Take {
+            gradient: MaybeSlice::NotSlice(<span class="self">self</span>),
+            from: min.clone(),
+            diff: max - min,
+            len: n,
+            from_head: <span class="number">0</span>,
+            from_end: <span class="number">0</span>,
         }
     }
 
-    <span class="doccomment">/// Slice this gradient to limit its domain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slice</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&lt;</span><span class="ident">C::Scalar</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">R</span>) -&gt; <span class="ident">Slice</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Slice</span> {
-            <span class="ident">gradient</span>: <span class="self">self</span>,
-            <span class="ident">range</span>: <span class="ident">range</span>.<span class="ident">into</span>(),
+    <span class="doccomment">/// Slice this gradient to limit its domain.
+    </span><span class="kw">pub fn </span>slice&lt;R: Into&lt;Range&lt;C::Scalar&gt;&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, range: R) -&gt; Slice&lt;C, T&gt; {
+        Slice {
+            gradient: <span class="self">self</span>,
+            range: range.into(),
         }
     }
 
-    <span class="doccomment">/// Get the limits of this gradient&#39;s domain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">domain</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">C::Scalar</span>, <span class="ident">C::Scalar</span>)
-    <span class="kw">where</span>
-        <span class="ident">C::Scalar</span>: <span class="ident">Clone</span>,
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Get the limits of this gradient&#39;s domain.
+    </span><span class="kw">pub fn </span>domain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (C::Scalar, C::Scalar)
+    <span class="kw">where
+        </span>C::Scalar: Clone,
+        T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="kw">let</span> (<span class="ident">min</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>
-            .<span class="number">0</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">get</span>(<span class="number">0</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
-        <span class="kw">let</span> (<span class="ident">max</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>
-            .<span class="number">0</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">last</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
-        (<span class="ident">min</span>.<span class="ident">clone</span>(), <span class="ident">max</span>.<span class="ident">clone</span>())
+        <span class="kw">let </span>(min, <span class="kw">_</span>) = <span class="self">self
+            </span>.<span class="number">0
+            </span>.as_ref()
+            .get(<span class="number">0</span>)
+            .expect(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
+        <span class="kw">let </span>(max, <span class="kw">_</span>) = <span class="self">self
+            </span>.<span class="number">0
+            </span>.as_ref()
+            .last()
+            .expect(<span class="string">&quot;a Gradient must contain at least one color&quot;</span>);
+        (min.clone(), max.clone())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span>,
+<span class="kw">impl</span>&lt;C&gt; Gradient&lt;C&gt;
+<span class="kw">where
+    </span>C: Mix,
+    C::Scalar: Real + Zero + One + Arithmetics,
 {
-    <span class="doccomment">/// Create a gradient of evenly spaced colors with the domain [0.0, 1.0].</span>
-    <span class="doccomment">/// There must be at least one color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">colors</span>: <span class="ident">I</span>) -&gt; <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">points</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">colors</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> (<span class="ident">C::Scalar::zero</span>(), <span class="ident">c</span>)).<span class="ident">collect</span>();
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">points</span>.<span class="ident">is_empty</span>());
-        <span class="kw">let</span> <span class="ident">step_size</span> <span class="op">=</span> <span class="ident">C::Scalar::one</span>() <span class="op">/</span> <span class="ident">C::Scalar::from_f64</span>(<span class="ident">max</span>(<span class="ident">points</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>, <span class="number">1</span>) <span class="kw">as</span> <span class="ident">f64</span>);
+    <span class="doccomment">/// Create a gradient of evenly spaced colors with the domain [0.0, 1.0].
+    /// There must be at least one color.
+    </span><span class="kw">pub fn </span>new&lt;I: IntoIterator&lt;Item = C&gt;&gt;(colors: I) -&gt; Gradient&lt;C&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>points: Vec&lt;<span class="kw">_</span>&gt; = colors.into_iter().map(|c| (C::Scalar::zero(), c)).collect();
+        <span class="macro">assert!</span>(!points.is_empty());
+        <span class="kw">let </span>step_size = C::Scalar::one() / C::Scalar::from_f64(max(points.len() - <span class="number">1</span>, <span class="number">1</span>) <span class="kw">as </span>f64);
 
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="kw-2">&amp;mut</span> (<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">p</span>, <span class="kw">_</span>)) <span class="kw">in</span> <span class="ident">points</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
-            <span class="kw-2">*</span><span class="ident">p</span> <span class="op">=</span> <span class="ident">C::Scalar::from_f64</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">f64</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">step_size</span>;
+        <span class="kw">for </span>(i, <span class="kw-2">&amp;mut </span>(<span class="kw-2">ref mut </span>p, <span class="kw">_</span>)) <span class="kw">in </span>points.iter_mut().enumerate() {
+            <span class="kw-2">*</span>p = C::Scalar::from_f64(i <span class="kw">as </span>f64) * <span class="kw-2">&amp;</span>step_size;
         }
 
-        <span class="ident">Gradient</span>(<span class="ident">points</span>, <span class="ident">PhantomData</span>)
+        Gradient(points, PhantomData)
     }
 }
 
-<span class="doccomment">/// An iterator over interpolated colors.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Take</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Mix</span><span class="op">&gt;</span><span class="ident">::Scalar</span>, <span class="ident">C</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+<span class="doccomment">/// An iterator over interpolated colors.
+</span><span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub struct </span>Take&lt;<span class="lifetime">&#39;a</span>, C, T = Vec&lt;(&lt;C <span class="kw">as </span>Mix&gt;::Scalar, C)&gt;&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
 {
-    <span class="ident">gradient</span>: <span class="ident">MaybeSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">from</span>: <span class="ident">C::Scalar</span>,
-    <span class="ident">diff</span>: <span class="ident">C::Scalar</span>,
-    <span class="ident">len</span>: <span class="ident">usize</span>,
-    <span class="ident">from_head</span>: <span class="ident">usize</span>,
-    <span class="ident">from_end</span>: <span class="ident">usize</span>,
+    gradient: MaybeSlice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;,
+    from: C::Scalar,
+    diff: C::Scalar,
+    len: usize,
+    from_head: usize,
+    from_end: usize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Take</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; Iterator <span class="kw">for </span>Take&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C::Scalar: Real + Clamp + Arithmetics + PartialOrd + Clone,
+    C: Mix + Clone,
+    T: AsRef&lt;[(C::Scalar, C)]&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="kw">type </span>Item = C;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">from_end</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">==</span> <span class="number">1</span> {
-                <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>()))
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>()
-                    <span class="op">+</span> (<span class="self">self</span>.<span class="ident">diff</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">C::Scalar::from_f64</span>((<span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">f64</span>))
-                        <span class="op">*</span> <span class="ident">C::Scalar::from_f64</span>(<span class="self">self</span>.<span class="ident">from_head</span> <span class="kw">as</span> <span class="ident">f64</span>);
-                <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">get</span>(<span class="ident">i</span>))
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;C&gt; {
+        <span class="kw">if </span><span class="self">self</span>.from_head + <span class="self">self</span>.from_end &lt; <span class="self">self</span>.len {
+            <span class="kw">if </span><span class="self">self</span>.len == <span class="number">1 </span>{
+                <span class="self">self</span>.from_head += <span class="number">1</span>;
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.gradient.get(<span class="self">self</span>.from.clone()))
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>i = <span class="self">self</span>.from.clone()
+                    + (<span class="self">self</span>.diff.clone() / C::Scalar::from_f64((<span class="self">self</span>.len - <span class="number">1</span>) <span class="kw">as </span>f64))
+                        * C::Scalar::from_f64(<span class="self">self</span>.from_head <span class="kw">as </span>f64);
+                <span class="self">self</span>.from_head += <span class="number">1</span>;
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.gradient.get(i))
             }
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 
-    <span class="kw">fn</span> <span class="ident">size_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) {
+    <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
         (
-            <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">from_end</span>,
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">from_end</span>),
+            <span class="self">self</span>.len - <span class="self">self</span>.from_head - <span class="self">self</span>.from_end,
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.len - <span class="self">self</span>.from_head - <span class="self">self</span>.from_end),
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DoubleEndedIterator</span> <span class="kw">for</span> <span class="ident">Take</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C::Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; DoubleEndedIterator <span class="kw">for </span>Take&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C::Scalar: Real + Clamp + Arithmetics + PartialOrd + Clone,
+    C: Mix + Clone,
+    T: AsRef&lt;[(C::Scalar, C)]&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">next_back</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">from_head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">from_end</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">==</span> <span class="number">1</span> {
-                <span class="self">self</span>.<span class="ident">from_end</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>()))
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>()
-                    <span class="op">+</span> (<span class="self">self</span>.<span class="ident">diff</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">C::Scalar::from_f64</span>((<span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">f64</span>))
-                        <span class="op">*</span> <span class="ident">C::Scalar::from_f64</span>((<span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">from_end</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">f64</span>);
-                <span class="self">self</span>.<span class="ident">from_end</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">get</span>(<span class="ident">i</span>))
+    <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.from_head + <span class="self">self</span>.from_end &lt; <span class="self">self</span>.len {
+            <span class="kw">if </span><span class="self">self</span>.len == <span class="number">1 </span>{
+                <span class="self">self</span>.from_end += <span class="number">1</span>;
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.gradient.get(<span class="self">self</span>.from.clone()))
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>i = <span class="self">self</span>.from.clone()
+                    + (<span class="self">self</span>.diff.clone() / C::Scalar::from_f64((<span class="self">self</span>.len - <span class="number">1</span>) <span class="kw">as </span>f64))
+                        * C::Scalar::from_f64((<span class="self">self</span>.len - <span class="self">self</span>.from_end - <span class="number">1</span>) <span class="kw">as </span>f64);
+                <span class="self">self</span>.from_end += <span class="number">1</span>;
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.gradient.get(i))
             }
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+}
+
+<span class="doccomment">/// A slice of a Gradient that limits its domain.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>Slice&lt;<span class="lifetime">&#39;a</span>, C, T = Vec&lt;(&lt;C <span class="kw">as </span>Mix&gt;::Scalar, C)&gt;&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
+{
+    gradient: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Gradient&lt;C, T&gt;,
+    range: Range&lt;C::Scalar&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; Clone <span class="kw">for </span>Slice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
+    C::Scalar: Clone,
+{
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        Slice {
+            gradient: <span class="self">self</span>.gradient,
+            range: <span class="self">self</span>.range.clone(),
         }
     }
 }
 
-<span class="doccomment">/// A slice of a Gradient that limits its domain.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Mix</span><span class="op">&gt;</span><span class="ident">::Scalar</span>, <span class="ident">C</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; Slice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
 {
-    <span class="ident">gradient</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">C::Scalar</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Slice</span> {
-            <span class="ident">gradient</span>: <span class="self">self</span>.<span class="ident">gradient</span>,
-            <span class="ident">range</span>: <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">clone</span>(),
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-{
-    <span class="doccomment">/// Get a color from the gradient slice. The color of the closest domain</span>
-    <span class="doccomment">/// limit will be returned if `i` is outside the domain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="ident">C</span>
-    <span class="kw">where</span>
-        <span class="ident">C</span>: <span class="ident">Clone</span>,
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Get a color from the gradient slice. The color of the closest domain
+    /// limit will be returned if `i` is outside the domain.
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, i: C::Scalar) -&gt; C
+    <span class="kw">where
+        </span>C: Clone,
+        T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">range</span>.<span class="ident">clamp</span>(<span class="ident">i</span>))
+        <span class="self">self</span>.gradient.get(<span class="self">self</span>.range.clamp(i))
     }
 
-    <span class="doccomment">/// Slice this gradient slice to further limit its domain. Ranges outside</span>
-    <span class="doccomment">/// the domain will be clamped to the nearest domain limit.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slice</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Range</span><span class="op">&lt;</span><span class="ident">C::Scalar</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">R</span>) -&gt; <span class="ident">Slice</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">C::Scalar</span>: <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="doccomment">/// Slice this gradient slice to further limit its domain. Ranges outside
+    /// the domain will be clamped to the nearest domain limit.
+    </span><span class="kw">pub fn </span>slice&lt;R: Into&lt;Range&lt;C::Scalar&gt;&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, range: R) -&gt; Slice&lt;C, T&gt;
+    <span class="kw">where
+        </span>C::Scalar: PartialOrd + Clone,
     {
-        <span class="ident">Slice</span> {
-            <span class="ident">gradient</span>: <span class="self">self</span>.<span class="ident">gradient</span>,
-            <span class="ident">range</span>: <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span><span class="ident">range</span>.<span class="ident">into</span>()),
+        Slice {
+            gradient: <span class="self">self</span>.gradient,
+            range: <span class="self">self</span>.range.constrain(<span class="kw-2">&amp;</span>range.into()),
         }
     }
 
-    <span class="doccomment">/// Get the limits of this gradient slice&#39;s domain.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">domain</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">C::Scalar</span>, <span class="ident">C::Scalar</span>)
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
-        <span class="ident">C::Scalar</span>: <span class="ident">Clone</span>,
+    <span class="doccomment">/// Get the limits of this gradient slice&#39;s domain.
+    </span><span class="kw">pub fn </span>domain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (C::Scalar, C::Scalar)
+    <span class="kw">where
+        </span>T: AsRef&lt;[(C::Scalar, C)]&gt;,
+        C::Scalar: Clone,
     {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="prelude-val">Some</span>(<span class="ident">from</span>),
-            <span class="ident">to</span>: <span class="prelude-val">Some</span>(<span class="ident">to</span>),
-        } <span class="op">=</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">clone</span>()
+        <span class="kw">if let </span>Range {
+            from: <span class="prelude-val">Some</span>(from),
+            to: <span class="prelude-val">Some</span>(to),
+        } = <span class="self">self</span>.range.clone()
         {
-            (<span class="ident">from</span>, <span class="ident">to</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> (<span class="ident">from</span>, <span class="ident">to</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">gradient</span>.<span class="ident">domain</span>();
+            (from, to)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>(from, to) = <span class="self">self</span>.gradient.domain();
             (
-                <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">from</span>.<span class="ident">clone</span>().<span class="ident">unwrap_or</span>(<span class="ident">from</span>),
-                <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">to</span>.<span class="ident">clone</span>().<span class="ident">unwrap_or</span>(<span class="ident">to</span>),
+                <span class="self">self</span>.range.from.clone().unwrap_or(from),
+                <span class="self">self</span>.range.to.clone().unwrap_or(to),
             )
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; Slice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
+    T: Clone,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
 {
-    <span class="doccomment">/// Take `n` evenly spaced colors from the gradient slice, as an iterator.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Take</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Take `n` evenly spaced colors from the gradient slice, as an iterator.
+    </span><span class="kw">pub fn </span>take(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; Take&lt;C, T&gt;
+    <span class="kw">where
+        </span>T: AsRef&lt;[(C::Scalar, C)]&gt;,
     {
-        <span class="kw">let</span> (<span class="ident">min</span>, <span class="ident">max</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">domain</span>();
+        <span class="kw">let </span>(min, max) = <span class="self">self</span>.domain();
 
-        <span class="ident">Take</span> {
-            <span class="ident">gradient</span>: <span class="ident">MaybeSlice::Slice</span>(<span class="self">self</span>.<span class="ident">clone</span>()),
-            <span class="ident">from</span>: <span class="ident">min</span>.<span class="ident">clone</span>(),
-            <span class="ident">diff</span>: <span class="ident">max</span> <span class="op">-</span> <span class="ident">min</span>,
-            <span class="ident">len</span>: <span class="ident">n</span>,
-            <span class="ident">from_head</span>: <span class="number">0</span>,
-            <span class="ident">from_end</span>: <span class="number">0</span>,
+        Take {
+            gradient: MaybeSlice::Slice(<span class="self">self</span>.clone()),
+            from: min.clone(),
+            diff: max - min,
+            len: n,
+            from_head: <span class="number">0</span>,
+            from_end: <span class="number">0</span>,
         }
     }
 }
 
-<span class="doccomment">/// A domain range for gradient slices.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">from</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">to</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// A domain range for gradient slices.
+</span><span class="attribute">#[derive(Clone, Debug, PartialEq)]
+</span><span class="kw">pub struct </span>Range&lt;T&gt; {
+    from: <span class="prelude-ty">Option</span>&lt;T&gt;,
+    to: <span class="prelude-ty">Option</span>&lt;T&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T&gt; Range&lt;T&gt;
+<span class="kw">where
+    </span>T: Clamp + PartialOrd + Clone,
 {
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>().<span class="ident">unwrap_or</span>(<span class="ident">x</span>.<span class="ident">clone</span>());
-        <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to</span>.<span class="ident">clone</span>().<span class="ident">unwrap_or</span>(<span class="ident">x</span>.<span class="ident">clone</span>());
-        <span class="ident">clamp</span>(<span class="ident">x</span>, <span class="ident">min</span>, <span class="ident">max</span>)
+    <span class="kw">fn </span>clamp(<span class="kw-2">&amp;</span><span class="self">self</span>, x: T) -&gt; T {
+        <span class="kw">let </span>min = <span class="self">self</span>.from.clone().unwrap_or(x.clone());
+        <span class="kw">let </span>max = <span class="self">self</span>.to.clone().unwrap_or(x.clone());
+        clamp(x, min, max)
     }
 
-    <span class="kw">fn</span> <span class="ident">constrain</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">f</span>), <span class="prelude-val">Some</span>(<span class="ident">t</span>)) <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">from</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">to</span>) {
-            <span class="kw">if</span> <span class="ident">f</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">t</span> {
-                <span class="kw">return</span> <span class="ident">Range</span> {
-                    <span class="ident">from</span>: <span class="self">self</span>.<span class="ident">to</span>.<span class="ident">clone</span>(),
-                    <span class="ident">to</span>: <span class="self">self</span>.<span class="ident">to</span>.<span class="ident">clone</span>(),
+    <span class="kw">fn </span>constrain(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Range&lt;T&gt;) -&gt; Range&lt;T&gt; {
+        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(f), <span class="prelude-val">Some</span>(t)) = (<span class="kw-2">&amp;</span>other.from, <span class="kw-2">&amp;</span><span class="self">self</span>.to) {
+            <span class="kw">if </span>f &gt;= t {
+                <span class="kw">return </span>Range {
+                    from: <span class="self">self</span>.to.clone(),
+                    to: <span class="self">self</span>.to.clone(),
                 };
             }
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">t</span>), <span class="prelude-val">Some</span>(<span class="ident">f</span>)) <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">from</span>) {
-            <span class="kw">if</span> <span class="ident">t</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">f</span> {
-                <span class="kw">return</span> <span class="ident">Range</span> {
-                    <span class="ident">from</span>: <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>(),
-                    <span class="ident">to</span>: <span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>(),
+        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(t), <span class="prelude-val">Some</span>(f)) = (<span class="kw-2">&amp;</span>other.to, <span class="kw-2">&amp;</span><span class="self">self</span>.from) {
+            <span class="kw">if </span>t &lt;= f {
+                <span class="kw">return </span>Range {
+                    from: <span class="self">self</span>.from.clone(),
+                    to: <span class="self">self</span>.from.clone(),
                 };
             }
         }
 
-        <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="kw">match</span> (<span class="self">self</span>.<span class="ident">from</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">from</span>.<span class="ident">clone</span>()) {
-                (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">clamp_min</span>(<span class="ident">s</span>, <span class="ident">o</span>)),
-                (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">s</span>),
-                (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">o</span>),
+        Range {
+            from: <span class="kw">match </span>(<span class="self">self</span>.from.clone(), other.from.clone()) {
+                (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; <span class="prelude-val">Some</span>(clamp_min(s, o)),
+                (<span class="prelude-val">Some</span>(s), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(s),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(o)) =&gt; <span class="prelude-val">Some</span>(o),
                 (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
             },
-            <span class="ident">to</span>: <span class="kw">match</span> (<span class="self">self</span>.<span class="ident">to</span>.<span class="ident">clone</span>(), <span class="ident">other</span>.<span class="ident">to</span>.<span class="ident">clone</span>()) {
-                (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">clamp_max</span>(<span class="ident">s</span>, <span class="ident">o</span>)),
-                (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">s</span>),
-                (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">o</span>),
+            to: <span class="kw">match </span>(<span class="self">self</span>.to.clone(), other.to.clone()) {
+                (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; <span class="prelude-val">Some</span>(clamp_max(s, o)),
+                (<span class="prelude-val">Some</span>(s), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(s),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(o)) =&gt; <span class="prelude-val">Some</span>(o),
                 (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
             },
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">::std::ops::Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">range</span>: <span class="ident">::std::ops::Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="prelude-val">Some</span>(<span class="ident">range</span>.<span class="ident">start</span>),
-            <span class="ident">to</span>: <span class="prelude-val">Some</span>(<span class="ident">range</span>.<span class="ident">end</span>),
+<span class="kw">impl</span>&lt;T&gt; From&lt;::std::ops::Range&lt;T&gt;&gt; <span class="kw">for </span>Range&lt;T&gt; {
+    <span class="kw">fn </span>from(range: ::std::ops::Range&lt;T&gt;) -&gt; Range&lt;T&gt; {
+        Range {
+            from: <span class="prelude-val">Some</span>(range.start),
+            to: <span class="prelude-val">Some</span>(range.end),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">::std::ops::RangeFrom</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">range</span>: <span class="ident">::std::ops::RangeFrom</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="prelude-val">Some</span>(<span class="ident">range</span>.<span class="ident">start</span>),
-            <span class="ident">to</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl</span>&lt;T&gt; From&lt;::std::ops::RangeFrom&lt;T&gt;&gt; <span class="kw">for </span>Range&lt;T&gt; {
+    <span class="kw">fn </span>from(range: ::std::ops::RangeFrom&lt;T&gt;) -&gt; Range&lt;T&gt; {
+        Range {
+            from: <span class="prelude-val">Some</span>(range.start),
+            to: <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">::std::ops::RangeTo</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">range</span>: <span class="ident">::std::ops::RangeTo</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="prelude-val">None</span>,
-            <span class="ident">to</span>: <span class="prelude-val">Some</span>(<span class="ident">range</span>.<span class="ident">end</span>),
+<span class="kw">impl</span>&lt;T&gt; From&lt;::std::ops::RangeTo&lt;T&gt;&gt; <span class="kw">for </span>Range&lt;T&gt; {
+    <span class="kw">fn </span>from(range: ::std::ops::RangeTo&lt;T&gt;) -&gt; Range&lt;T&gt; {
+        Range {
+            from: <span class="prelude-val">None</span>,
+            to: <span class="prelude-val">Some</span>(range.end),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">::std::ops::RangeFull</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">_range</span>: <span class="ident">::std::ops::RangeFull</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Range</span> {
-            <span class="ident">from</span>: <span class="prelude-val">None</span>,
-            <span class="ident">to</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl</span>&lt;T&gt; From&lt;::std::ops::RangeFull&gt; <span class="kw">for </span>Range&lt;T&gt; {
+    <span class="kw">fn </span>from(_range: ::std::ops::RangeFull) -&gt; Range&lt;T&gt; {
+        Range {
+            from: <span class="prelude-val">None</span>,
+            to: <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">AbsDiffEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T&gt; AbsDiffEq <span class="kw">for </span>Range&lt;T&gt;
+<span class="kw">where
+    </span>T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
+    <span class="kw">type </span>Epsilon = T::Epsilon;
 
-    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_epsilon</span>()
+    <span class="kw">fn </span>default_epsilon() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_epsilon()
     }
 
-    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">from</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">from</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">abs_diff_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>()),
+    <span class="kw">fn </span>abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: T::Epsilon) -&gt; bool {
+        <span class="kw">let </span>from = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.from, <span class="kw-2">&amp;</span>other.from) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.abs_diff_eq(o, epsilon.clone()),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">to</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">abs_diff_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>),
+        <span class="kw">let </span>to = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.to, <span class="kw-2">&amp;</span>other.to) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.abs_diff_eq(o, epsilon),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="ident">from</span> <span class="op">&amp;&amp;</span> <span class="ident">to</span>
+        from &amp;&amp; to
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">RelativeEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T&gt; RelativeEq <span class="kw">for </span>Range&lt;T&gt;
+<span class="kw">where
+    </span>T: RelativeEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_max_relative</span>()
+    <span class="kw">fn </span>default_max_relative() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_max_relative()
     }
 
-    <span class="kw">fn</span> <span class="ident">relative_eq</span>(
+    <span class="kw">fn </span>relative_eq(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-        <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-        <span class="ident">max_relative</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-    ) -&gt; <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">from</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">from</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">relative_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>()),
+        other: <span class="kw-2">&amp;</span>Range&lt;T&gt;,
+        epsilon: <span class="self">Self</span>::Epsilon,
+        max_relative: <span class="self">Self</span>::Epsilon,
+    ) -&gt; bool {
+        <span class="kw">let </span>from = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.from, <span class="kw-2">&amp;</span>other.from) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.relative_eq(o, epsilon.clone(), max_relative.clone()),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">to</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">relative_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>, <span class="ident">max_relative</span>),
+        <span class="kw">let </span>to = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.to, <span class="kw-2">&amp;</span>other.to) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.relative_eq(o, epsilon, max_relative),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="ident">from</span> <span class="op">&amp;&amp;</span> <span class="ident">to</span>
+        from &amp;&amp; to
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UlpsEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T&gt; UlpsEq <span class="kw">for </span>Range&lt;T&gt;
+<span class="kw">where
+    </span>T: UlpsEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() -&gt; <span class="ident">u32</span> {
-        <span class="ident">T::default_max_ulps</span>()
+    <span class="kw">fn </span>default_max_ulps() -&gt; u32 {
+        T::default_max_ulps()
     }
 
-    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Range</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">from</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">from</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">ulps_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>),
+    <span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Range&lt;T&gt;, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
+        <span class="kw">let </span>from = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.from, <span class="kw-2">&amp;</span>other.from) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.ulps_eq(o, epsilon.clone(), max_ulps),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">to</span>) {
-            (<span class="prelude-val">Some</span>(<span class="ident">s</span>), <span class="prelude-val">Some</span>(<span class="ident">o</span>)) =&gt; <span class="ident">s</span>.<span class="ident">ulps_eq</span>(<span class="ident">o</span>, <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>),
+        <span class="kw">let </span>to = <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.to, <span class="kw-2">&amp;</span>other.to) {
+            (<span class="prelude-val">Some</span>(s), <span class="prelude-val">Some</span>(o)) =&gt; s.ulps_eq(o, epsilon, max_ulps),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
-        <span class="ident">from</span> <span class="op">&amp;&amp;</span> <span class="ident">to</span>
+        from &amp;&amp; to
     }
 }
 
-<span class="kw">enum</span> <span class="ident">MaybeSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Mix</span><span class="op">&gt;</span><span class="ident">::Scalar</span>, <span class="ident">C</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+<span class="kw">enum </span>MaybeSlice&lt;<span class="lifetime">&#39;a</span>, C, T = Vec&lt;(&lt;C <span class="kw">as </span>Mix&gt;::Scalar, C)&gt;&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
 {
-    <span class="ident">NotSlice</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Gradient</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>),
-    <span class="ident">Slice</span>(<span class="ident">Slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>),
+    NotSlice(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Gradient&lt;C, T&gt;),
+    Slice(Slice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;),
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">MaybeSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; Clone <span class="kw">for </span>MaybeSlice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C: Mix + <span class="lifetime">&#39;a</span>,
+    C::Scalar: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MaybeSlice::NotSlice</span>(<span class="ident">gradient</span>) =&gt; <span class="ident">MaybeSlice::NotSlice</span>(<span class="kw-2">*</span><span class="ident">gradient</span>),
-            <span class="ident">MaybeSlice::Slice</span>(<span class="ident">slice</span>) =&gt; <span class="ident">MaybeSlice::Slice</span>(<span class="ident">slice</span>.<span class="ident">clone</span>()),
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span><span class="self">self </span>{
+            MaybeSlice::NotSlice(gradient) =&gt; MaybeSlice::NotSlice(<span class="kw-2">*</span>gradient),
+            MaybeSlice::Slice(slice) =&gt; MaybeSlice::Slice(slice.clone()),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MaybeSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[(<span class="ident">C::Scalar</span>, <span class="ident">C</span>)]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; MaybeSlice&lt;<span class="lifetime">&#39;a</span>, C, T&gt;
+<span class="kw">where
+    </span>C: Mix + Clone + <span class="lifetime">&#39;a</span>,
+    C::Scalar: Clamp + Arithmetics + PartialOrd + Clone,
+    T: AsRef&lt;[(C::Scalar, C)]&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="ident">C</span> {
-        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">MaybeSlice::NotSlice</span>(<span class="ident">g</span>) =&gt; <span class="ident">g</span>.<span class="ident">get</span>(<span class="ident">i</span>),
-            <span class="ident">MaybeSlice::Slice</span>(<span class="kw-2">ref</span> <span class="ident">s</span>) =&gt; <span class="ident">s</span>.<span class="ident">get</span>(<span class="ident">i</span>),
+    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, i: C::Scalar) -&gt; C {
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            MaybeSlice::NotSlice(g) =&gt; g.get(i),
+            MaybeSlice::Slice(<span class="kw-2">ref </span>s) =&gt; s.get(i),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">clamp_max</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialOrd</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">max</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-    <span class="kw">if</span> <span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">max</span> {
-        <span class="ident">max</span>
-    } <span class="kw">else</span> {
-        <span class="ident">value</span>
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>clamp_max&lt;T: PartialOrd&gt;(value: T, max: T) -&gt; T {
+    <span class="kw">if </span>value &gt; max {
+        max
+    } <span class="kw">else </span>{
+        value
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Gradient</span>, <span class="ident">Range</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LinSrgb</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::{Gradient, Range};
+    <span class="kw">use </span><span class="kw">crate</span>::LinSrgb;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">range_clamp</span>() {
-        <span class="kw">let</span> <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="number">0.0</span>..<span class="number">1.0</span>).<span class="ident">into</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">clamp</span>(<span class="op">-</span><span class="number">1.0</span>), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">clamp</span>(<span class="number">2.0</span>), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">clamp</span>(<span class="number">0.5</span>), <span class="number">0.5</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>range_clamp() {
+        <span class="kw">let </span>range: Range&lt;f64&gt; = (<span class="number">0.0</span>..<span class="number">1.0</span>).into();
+        <span class="macro">assert_relative_eq!</span>(range.clamp(-<span class="number">1.0</span>), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(range.clamp(<span class="number">2.0</span>), <span class="number">1.0</span>);
+        <span class="macro">assert_relative_eq!</span>(range.clamp(<span class="number">0.5</span>), <span class="number">0.5</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">range_constrain</span>() {
-        <span class="kw">let</span> <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="number">0.0</span>..<span class="number">1.0</span>).<span class="ident">into</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span>(<span class="op">-</span><span class="number">3.0</span>..<span class="op">-</span><span class="number">5.0</span>).<span class="ident">into</span>()), (<span class="number">0.0</span>..<span class="number">0.0</span>).<span class="ident">into</span>());
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span>(<span class="op">-</span><span class="number">3.0</span>..<span class="number">0.8</span>).<span class="ident">into</span>()), (<span class="number">0.0</span>..<span class="number">0.8</span>).<span class="ident">into</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>range_constrain() {
+        <span class="kw">let </span>range: Range&lt;f64&gt; = (<span class="number">0.0</span>..<span class="number">1.0</span>).into();
+        <span class="macro">assert_relative_eq!</span>(range.constrain(<span class="kw-2">&amp;</span>(-<span class="number">3.0</span>..-<span class="number">5.0</span>).into()), (<span class="number">0.0</span>..<span class="number">0.0</span>).into());
+        <span class="macro">assert_relative_eq!</span>(range.constrain(<span class="kw-2">&amp;</span>(-<span class="number">3.0</span>..<span class="number">0.8</span>).into()), (<span class="number">0.0</span>..<span class="number">0.8</span>).into());
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span>(<span class="number">3.0</span>..<span class="number">5.0</span>).<span class="ident">into</span>()), (<span class="number">1.0</span>..<span class="number">1.0</span>).<span class="ident">into</span>());
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span>(<span class="number">0.2</span>..<span class="number">5.0</span>).<span class="ident">into</span>()), (<span class="number">0.2</span>..<span class="number">1.0</span>).<span class="ident">into</span>());
+        <span class="macro">assert_relative_eq!</span>(range.constrain(<span class="kw-2">&amp;</span>(<span class="number">3.0</span>..<span class="number">5.0</span>).into()), (<span class="number">1.0</span>..<span class="number">1.0</span>).into());
+        <span class="macro">assert_relative_eq!</span>(range.constrain(<span class="kw-2">&amp;</span>(<span class="number">0.2</span>..<span class="number">5.0</span>).into()), (<span class="number">0.2</span>..<span class="number">1.0</span>).into());
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">range</span>.<span class="ident">constrain</span>(<span class="kw-2">&amp;</span>(<span class="number">0.2</span>..<span class="number">0.8</span>).<span class="ident">into</span>()), (<span class="number">0.2</span>..<span class="number">0.8</span>).<span class="ident">into</span>());
+        <span class="macro">assert_relative_eq!</span>(range.constrain(<span class="kw-2">&amp;</span>(<span class="number">0.2</span>..<span class="number">0.8</span>).into()), (<span class="number">0.2</span>..<span class="number">0.8</span>).into());
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">simple_slice</span>() {
-        <span class="kw">let</span> <span class="ident">g1</span> <span class="op">=</span> <span class="ident">Gradient::new</span>(<span class="macro">vec!</span>[
-            <span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-            <span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>simple_slice() {
+        <span class="kw">let </span>g1 = Gradient::new(<span class="macro">vec!</span>[
+            LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
+            LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
         ]);
-        <span class="kw">let</span> <span class="ident">g2</span> <span class="op">=</span> <span class="ident">g1</span>.<span class="ident">slice</span>(..<span class="number">0.5</span>);
+        <span class="kw">let </span>g2 = g1.slice(..<span class="number">0.5</span>);
 
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g1</span>.<span class="ident">take</span>(<span class="number">9</span>).<span class="ident">take</span>(<span class="number">5</span>).<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">v2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g2</span>.<span class="ident">take</span>(<span class="number">5</span>).<span class="ident">collect</span>();
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">v1</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">v2</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
+        <span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g1.take(<span class="number">9</span>).take(<span class="number">5</span>).collect();
+        <span class="kw">let </span>v2: Vec&lt;<span class="kw">_</span>&gt; = g2.take(<span class="number">5</span>).collect();
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>v1.iter().zip(v2.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter_rev_eq_rev_iter</span>() {
-        <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">Gradient::new</span>(<span class="macro">vec!</span>[
-            <span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-            <span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
-        ]);
-
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>
-            .<span class="ident">take</span>(<span class="number">10</span>)
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">iter</span>()
-            .<span class="ident">rev</span>()
-            .<span class="ident">cloned</span>()
-            .<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">v2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">take</span>(<span class="number">10</span>).<span class="ident">rev</span>().<span class="ident">collect</span>();
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">v1</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">v2</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
-        }
-        <span class="comment">//make sure `take(1).rev()` doesn&#39;t produce NaN results</span>
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>
-            .<span class="ident">take</span>(<span class="number">1</span>)
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">iter</span>()
-            .<span class="ident">rev</span>()
-            .<span class="ident">cloned</span>()
-            .<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">v2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">take</span>(<span class="number">1</span>).<span class="ident">rev</span>().<span class="ident">collect</span>();
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">v1</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">v2</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inclusive_take</span>() {
-        <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">Gradient::new</span>(<span class="macro">vec!</span>[
-            <span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
-            <span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>iter_rev_eq_rev_iter() {
+        <span class="kw">let </span>g = Gradient::new(<span class="macro">vec!</span>[
+            LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
+            LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
         ]);
 
-        <span class="comment">//take(0) returns None</span>
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">take</span>(<span class="number">0</span>).<span class="ident">collect</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">v1</span>.<span class="ident">len</span>(), <span class="number">0</span>);
-        <span class="comment">//`Take` produces minimum gradient boundary for n=1</span>
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">take</span>(<span class="number">1</span>).<span class="ident">collect</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">v1</span>[<span class="number">0</span>], <span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="comment">//`Take` includes the maximum gradient color</span>
-        <span class="kw">let</span> <span class="ident">v1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">take</span>(<span class="number">5</span>).<span class="ident">collect</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">v1</span>[<span class="number">0</span>], <span class="ident">LinSrgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">v1</span>[<span class="number">4</span>], <span class="ident">LinSrgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+        <span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g
+            .take(<span class="number">10</span>)
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+            .iter()
+            .rev()
+            .cloned()
+            .collect();
+        <span class="kw">let </span>v2: Vec&lt;<span class="kw">_</span>&gt; = g.take(<span class="number">10</span>).rev().collect();
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>v1.iter().zip(v2.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
+        }
+        <span class="comment">//make sure `take(1).rev()` doesn&#39;t produce NaN results
+        </span><span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g
+            .take(<span class="number">1</span>)
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+            .iter()
+            .rev()
+            .cloned()
+            .collect();
+        <span class="kw">let </span>v2: Vec&lt;<span class="kw">_</span>&gt; = g.take(<span class="number">1</span>).rev().collect();
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>v1.iter().zip(v2.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
+        }
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>inclusive_take() {
+        <span class="kw">let </span>g = Gradient::new(<span class="macro">vec!</span>[
+            LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>),
+            LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+        ]);
+
+        <span class="comment">//take(0) returns None
+        </span><span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g.take(<span class="number">0</span>).collect();
+        <span class="macro">assert_eq!</span>(v1.len(), <span class="number">0</span>);
+        <span class="comment">//`Take` produces minimum gradient boundary for n=1
+        </span><span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g.take(<span class="number">1</span>).collect();
+        <span class="macro">assert_relative_eq!</span>(v1[<span class="number">0</span>], LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+        <span class="comment">//`Take` includes the maximum gradient color
+        </span><span class="kw">let </span>v1: Vec&lt;<span class="kw">_</span>&gt; = g.take(<span class="number">5</span>).collect();
+        <span class="macro">assert_relative_eq!</span>(v1[<span class="number">0</span>], LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+        <span class="macro">assert_relative_eq!</span>(v1[<span class="number">4</span>], LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

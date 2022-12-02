@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/color_difference.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>color_difference.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/color_difference.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>color_difference.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -167,174 +167,174 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">BitAnd</span>, <span class="ident">BitOr</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>core::ops::{BitAnd, BitOr};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">angle::RealAngle</span>,
-    <span class="ident">bool_mask::LazySelect</span>,
-    <span class="ident">convert::IntoColorUnclamped</span>,
-    <span class="ident">num</span>::{<span class="ident">Abs</span>, <span class="ident">Arithmetics</span>, <span class="ident">Exp</span>, <span class="ident">Hypot</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Powi</span>, <span class="ident">Real</span>, <span class="ident">Sqrt</span>, <span class="ident">Trigonometry</span>, <span class="ident">Zero</span>},
-    <span class="ident">Lab</span>, <span class="ident">Lch</span>,
+<span class="kw">use crate</span>::{
+    angle::RealAngle,
+    bool_mask::LazySelect,
+    convert::IntoColorUnclamped,
+    num::{Abs, Arithmetics, Exp, Hypot, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero},
+    Lab, Lch,
 };
 
-<span class="doccomment">/// A trait for calculating the color difference between two colors.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ColorDifference</span> {
-    <span class="doccomment">/// The type of the calculated color difference.</span>
-    <span class="kw">type</span> <span class="ident">Scalar</span>;
+<span class="doccomment">/// A trait for calculating the color difference between two colors.
+</span><span class="kw">pub trait </span>ColorDifference {
+    <span class="doccomment">/// The type of the calculated color difference.
+    </span><span class="kw">type </span>Scalar;
 
-    <span class="doccomment">/// Return the difference or distance between two colors.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_color_difference</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Scalar</span>;
+    <span class="doccomment">/// Return the difference or distance between two colors.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>get_color_difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 }
 
-<span class="doccomment">/// Container of components necessary to calculate CIEDE color difference</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Lab color lightness</span>
-    <span class="kw">pub</span> <span class="ident">l</span>: <span class="ident">T</span>,
-    <span class="doccomment">/// Lab color a* value</span>
-    <span class="kw">pub</span> <span class="ident">a</span>: <span class="ident">T</span>,
-    <span class="doccomment">/// Lab color b* value</span>
-    <span class="kw">pub</span> <span class="ident">b</span>: <span class="ident">T</span>,
-    <span class="doccomment">/// Lab color chroma value</span>
-    <span class="kw">pub</span> <span class="ident">chroma</span>: <span class="ident">T</span>,
+<span class="doccomment">/// Container of components necessary to calculate CIEDE color difference
+</span><span class="kw">pub struct </span>LabColorDiff&lt;T&gt; {
+    <span class="doccomment">/// Lab color lightness
+    </span><span class="kw">pub </span>l: T,
+    <span class="doccomment">/// Lab color a* value
+    </span><span class="kw">pub </span>a: T,
+    <span class="doccomment">/// Lab color b* value
+    </span><span class="kw">pub </span>b: T,
+    <span class="doccomment">/// Lab color chroma value
+    </span><span class="kw">pub </span>chroma: T,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Hypot</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; From&lt;Lab&lt;Wp, T&gt;&gt; <span class="kw">for </span>LabColorDiff&lt;T&gt;
+<span class="kw">where
+    </span>T: Hypot + Clone,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Color difference calculation requires Lab and chroma components. This</span>
-        <span class="comment">// function handles the conversion into those components which are then</span>
-        <span class="comment">// passed to `get_ciede_difference()` where calculation is completed.</span>
-        <span class="ident">LabColorDiff</span> {
-            <span class="ident">l</span>: <span class="ident">color</span>.<span class="ident">l</span>,
-            <span class="ident">a</span>: <span class="ident">color</span>.<span class="ident">a</span>.<span class="ident">clone</span>(),
-            <span class="ident">b</span>: <span class="ident">color</span>.<span class="ident">b</span>.<span class="ident">clone</span>(),
-            <span class="ident">chroma</span>: <span class="ident">color</span>.<span class="ident">a</span>.<span class="ident">hypot</span>(<span class="ident">color</span>.<span class="ident">b</span>),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(color: Lab&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Color difference calculation requires Lab and chroma components. This
+        // function handles the conversion into those components which are then
+        // passed to `get_ciede_difference()` where calculation is completed.
+        </span>LabColorDiff {
+            l: color.l,
+            a: color.a.clone(),
+            b: color.b.clone(),
+            chroma: color.a.hypot(color.b),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-    <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;Wp, T&gt; From&lt;Lch&lt;Wp, T&gt;&gt; <span class="kw">for </span>LabColorDiff&lt;T&gt;
+<span class="kw">where
+    </span>T: Clone,
+    Lch&lt;Wp, T&gt;: IntoColorUnclamped&lt;Lab&lt;Wp, T&gt;&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident">Wp</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">chroma</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">chroma</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">Lab</span> { <span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, .. } <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color_unclamped</span>();
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(color: Lch&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>chroma = color.chroma.clone();
+        <span class="kw">let </span>Lab { l, a, b, .. } = color.into_color_unclamped();
 
-        <span class="ident">LabColorDiff</span> { <span class="ident">l</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">chroma</span> }
+        LabColorDiff { l, a, b, chroma }
     }
 }
 
-<span class="doccomment">/// Calculate the CIEDE2000 color difference for two colors in Lab color space.</span>
-<span class="doccomment">/// There is a &quot;just noticeable difference&quot; between two colors when the delta E</span>
-<span class="doccomment">/// is roughly greater than 1. Thus, the color difference is more suited for</span>
-<span class="doccomment">/// calculating small distances between colors as opposed to large differences.</span>
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_ciede_difference</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">this</span>: <span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">other</span>: <span class="ident">LabColorDiff</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span>
-        <span class="op">+</span> <span class="ident">RealAngle</span>
-        <span class="op">+</span> <span class="ident">One</span>
-        <span class="op">+</span> <span class="ident">Zero</span>
-        <span class="op">+</span> <span class="ident">Trigonometry</span>
-        <span class="op">+</span> <span class="ident">Abs</span>
-        <span class="op">+</span> <span class="ident">Sqrt</span>
-        <span class="op">+</span> <span class="ident">Powi</span>
-        <span class="op">+</span> <span class="ident">Exp</span>
-        <span class="op">+</span> <span class="ident">Arithmetics</span>
-        <span class="op">+</span> <span class="ident">PartialCmp</span>
-        <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Mask</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">BitOr</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Mask</span><span class="op">&gt;</span>
+<span class="doccomment">/// Calculate the CIEDE2000 color difference for two colors in Lab color space.
+/// There is a &quot;just noticeable difference&quot; between two colors when the delta E
+/// is roughly greater than 1. Thus, the color difference is more suited for
+/// calculating small distances between colors as opposed to large differences.
+</span><span class="attribute">#[rustfmt::skip]
+</span><span class="kw">pub fn </span>get_ciede_difference&lt;T&gt;(this: LabColorDiff&lt;T&gt;, other: LabColorDiff&lt;T&gt;) -&gt; T
+<span class="kw">where
+    </span>T: Real
+        + RealAngle
+        + One
+        + Zero
+        + Trigonometry
+        + Abs
+        + Sqrt
+        + Powi
+        + Exp
+        + Arithmetics
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect&lt;T&gt; + BitAnd&lt;Output = T::Mask&gt; + BitOr&lt;Output = T::Mask&gt;
 {
-    <span class="kw">let</span> <span class="ident">c_bar</span> <span class="op">=</span> (<span class="ident">this</span>.<span class="ident">chroma</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">chroma</span>) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>);
-    <span class="kw">let</span> <span class="ident">c_bar_pow_seven</span> <span class="op">=</span> <span class="ident">c_bar</span>.<span class="ident">powi</span>(<span class="number">7</span>);
-    <span class="kw">let</span> <span class="ident">twenty_five_pow_seven</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">6103515625.0</span>);
-    <span class="kw">let</span> <span class="ident">pi_over_180</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="ident">core::f64::consts::PI</span> <span class="op">/</span> <span class="number">180.0</span>);
+    <span class="kw">let </span>c_bar = (this.chroma + other.chroma) / T::from_f64(<span class="number">2.0</span>);
+    <span class="kw">let </span>c_bar_pow_seven = c_bar.powi(<span class="number">7</span>);
+    <span class="kw">let </span>twenty_five_pow_seven = T::from_f64(<span class="number">6103515625.0</span>);
+    <span class="kw">let </span>pi_over_180 = T::from_f64(core::f64::consts::PI / <span class="number">180.0</span>);
 
-    <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">0.5</span>)
-        <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> (<span class="ident">c_bar_pow_seven</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">c_bar_pow_seven</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">twenty_five_pow_seven</span>)).<span class="ident">sqrt</span>());
-    <span class="kw">let</span> <span class="ident">a_one_prime</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">a</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">g</span>);
-    <span class="kw">let</span> <span class="ident">a_two_prime</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">a</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">+</span> <span class="ident">g</span>);
-    <span class="kw">let</span> <span class="ident">c_one_prime</span> <span class="op">=</span> (<span class="ident">a_one_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a_one_prime</span> <span class="op">+</span> <span class="ident">this</span>.<span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="ident">b</span>).<span class="ident">sqrt</span>();
-    <span class="kw">let</span> <span class="ident">c_two_prime</span> <span class="op">=</span> (<span class="ident">a_two_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a_two_prime</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">b</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">b</span>).<span class="ident">sqrt</span>();
+    <span class="kw">let </span>g = T::from_f64(<span class="number">0.5</span>)
+        * (T::one() - (c_bar_pow_seven.clone() / (c_bar_pow_seven + <span class="kw-2">&amp;</span>twenty_five_pow_seven)).sqrt());
+    <span class="kw">let </span>a_one_prime = this.a * (T::one() + <span class="kw-2">&amp;</span>g);
+    <span class="kw">let </span>a_two_prime = other.a * (T::one() + g);
+    <span class="kw">let </span>c_one_prime = (a_one_prime.clone() * <span class="kw-2">&amp;</span>a_one_prime + this.b.clone() * <span class="kw-2">&amp;</span>this.b).sqrt();
+    <span class="kw">let </span>c_two_prime = (a_two_prime.clone() * <span class="kw-2">&amp;</span>a_two_prime + other.b.clone() * <span class="kw-2">&amp;</span>other.b).sqrt();
 
-    <span class="kw">let</span> <span class="ident">calc_h_prime</span> <span class="op">=</span> <span class="op">|</span><span class="ident">b</span>: <span class="ident">T</span>, <span class="ident">a_prime</span>: <span class="ident">T</span><span class="op">|</span> -&gt; <span class="ident">T</span> {
-        <span class="macro">lazy_select!</span> {
-            <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) <span class="op">&amp;</span> <span class="ident">a_prime</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
-            <span class="kw">else</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">T::radians_to_degrees</span>(<span class="ident">b</span>.<span class="ident">atan2</span>(<span class="ident">a_prime</span>));
-                <span class="macro">lazy_select!</span> {
-                    <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">lt</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">result</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">360.0</span>),
-                    <span class="kw">else</span> =&gt; <span class="ident">result</span>.<span class="ident">clone</span>(),
+    <span class="kw">let </span>calc_h_prime = |b: T, a_prime: T| -&gt; T {
+        <span class="macro">lazy_select! </span>{
+            <span class="kw">if </span>b.eq(<span class="kw-2">&amp;</span>T::zero()) &amp; a_prime.eq(<span class="kw-2">&amp;</span>T::zero()) =&gt; T::zero(),
+            <span class="kw">else </span>=&gt; {
+                <span class="kw">let </span>result = T::radians_to_degrees(b.atan2(a_prime));
+                <span class="macro">lazy_select! </span>{
+                    <span class="kw">if </span>result.lt(<span class="kw-2">&amp;</span>T::zero()) =&gt; result.clone() + T::from_f64(<span class="number">360.0</span>),
+                    <span class="kw">else </span>=&gt; result.clone(),
                 }
             },
         }
     };
-    <span class="kw">let</span> <span class="ident">h_one_prime</span> <span class="op">=</span> <span class="ident">calc_h_prime</span>(<span class="ident">this</span>.<span class="ident">b</span>, <span class="ident">a_one_prime</span>);
-    <span class="kw">let</span> <span class="ident">h_two_prime</span> <span class="op">=</span> <span class="ident">calc_h_prime</span>(<span class="ident">other</span>.<span class="ident">b</span>, <span class="ident">a_two_prime</span>);
+    <span class="kw">let </span>h_one_prime = calc_h_prime(this.b, a_one_prime);
+    <span class="kw">let </span>h_two_prime = calc_h_prime(other.b, a_two_prime);
 
-    <span class="kw">let</span> <span class="ident">h_prime_diff</span> <span class="op">=</span> <span class="ident">h_two_prime</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">h_one_prime</span>;
-    <span class="kw">let</span> <span class="ident">h_prime_abs_diff</span> <span class="op">=</span> <span class="ident">h_prime_diff</span>.<span class="ident">clone</span>().<span class="ident">abs</span>();
+    <span class="kw">let </span>h_prime_diff = h_two_prime.clone() - <span class="kw-2">&amp;</span>h_one_prime;
+    <span class="kw">let </span>h_prime_abs_diff = h_prime_diff.clone().abs();
 
-    <span class="kw">let</span> <span class="ident">delta_h_prime</span>: <span class="ident">T</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">c_one_prime</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) <span class="op">|</span> <span class="ident">c_two_prime</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">T::zero</span>(),
-        <span class="kw">if</span> <span class="ident">h_prime_abs_diff</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">180.0</span>)) =&gt; <span class="ident">h_prime_diff</span>.<span class="ident">clone</span>(),
-        <span class="kw">if</span> <span class="ident">h_two_prime</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">h_one_prime</span>) =&gt; <span class="ident">h_prime_diff</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">360.0</span>),
-        <span class="kw">else</span> =&gt; <span class="ident">h_prime_diff</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">360.0</span>),
+    <span class="kw">let </span>delta_h_prime: T = <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>c_one_prime.eq(<span class="kw-2">&amp;</span>T::zero()) | c_two_prime.eq(<span class="kw-2">&amp;</span>T::zero()) =&gt; T::zero(),
+        <span class="kw">if </span>h_prime_abs_diff.lt_eq(<span class="kw-2">&amp;</span>T::from_f64(<span class="number">180.0</span>)) =&gt; h_prime_diff.clone(),
+        <span class="kw">if </span>h_two_prime.lt_eq(<span class="kw-2">&amp;</span>h_one_prime) =&gt; h_prime_diff.clone() + T::from_f64(<span class="number">360.0</span>),
+        <span class="kw">else </span>=&gt; h_prime_diff.clone() - T::from_f64(<span class="number">360.0</span>),
     };
 
-    <span class="kw">let</span> <span class="ident">delta_big_h_prime</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>)
-        <span class="op">*</span> (<span class="ident">c_one_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">c_two_prime</span>).<span class="ident">sqrt</span>()
-        <span class="op">*</span> (<span class="ident">delta_h_prime</span> <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">pi_over_180</span>).<span class="ident">sin</span>();
-    <span class="kw">let</span> <span class="ident">h_prime_sum</span> <span class="op">=</span> <span class="ident">h_one_prime</span> <span class="op">+</span> <span class="ident">h_two_prime</span>;
-    <span class="kw">let</span> <span class="ident">h_bar_prime</span> <span class="op">=</span> <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">c_one_prime</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) <span class="op">|</span> <span class="ident">c_two_prime</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::zero</span>()) =&gt; <span class="ident">h_prime_sum</span>.<span class="ident">clone</span>(),
-        <span class="kw">if</span> <span class="ident">h_prime_abs_diff</span>.<span class="ident">gt</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">180.0</span>)) =&gt; {
-            (<span class="ident">h_prime_sum</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">360.0</span>)) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>)
+    <span class="kw">let </span>delta_big_h_prime = T::from_f64(<span class="number">2.0</span>)
+        * (c_one_prime.clone() * <span class="kw-2">&amp;</span>c_two_prime).sqrt()
+        * (delta_h_prime / T::from_f64(<span class="number">2.0</span>) * <span class="kw-2">&amp;</span>pi_over_180).sin();
+    <span class="kw">let </span>h_prime_sum = h_one_prime + h_two_prime;
+    <span class="kw">let </span>h_bar_prime = <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>c_one_prime.eq(<span class="kw-2">&amp;</span>T::zero()) | c_two_prime.eq(<span class="kw-2">&amp;</span>T::zero()) =&gt; h_prime_sum.clone(),
+        <span class="kw">if </span>h_prime_abs_diff.gt(<span class="kw-2">&amp;</span>T::from_f64(<span class="number">180.0</span>)) =&gt; {
+            (h_prime_sum.clone() + T::from_f64(<span class="number">360.0</span>)) / T::from_f64(<span class="number">2.0</span>)
         },
-        <span class="kw">else</span> =&gt; <span class="ident">h_prime_sum</span>.<span class="ident">clone</span>() <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>),
+        <span class="kw">else </span>=&gt; h_prime_sum.clone() / T::from_f64(<span class="number">2.0</span>),
     };
 
-    <span class="kw">let</span> <span class="ident">l_bar</span> <span class="op">=</span> (<span class="ident">this</span>.<span class="ident">l</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">l</span>) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>);
-    <span class="kw">let</span> <span class="ident">c_bar_prime</span> <span class="op">=</span> (<span class="ident">c_one_prime</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">c_two_prime</span>) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>);
+    <span class="kw">let </span>l_bar = (this.l.clone() + <span class="kw-2">&amp;</span>other.l) / T::from_f64(<span class="number">2.0</span>);
+    <span class="kw">let </span>c_bar_prime = (c_one_prime.clone() + <span class="kw-2">&amp;</span>c_two_prime) / T::from_f64(<span class="number">2.0</span>);
 
-    <span class="kw">let</span> <span class="ident">t</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">T::one</span>()
-        <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">0.17</span>) <span class="op">*</span> ((<span class="ident">h_bar_prime</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">30.0</span>)) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">pi_over_180</span>).<span class="ident">cos</span>()
-        <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">0.24</span>) <span class="op">*</span> ((<span class="ident">h_bar_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>)) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">pi_over_180</span>).<span class="ident">cos</span>()
-        <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">0.32</span>) <span class="op">*</span> ((<span class="ident">h_bar_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">3.0</span>) <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">6.0</span>)) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">pi_over_180</span>).<span class="ident">cos</span>()
-        <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">0.20</span>) <span class="op">*</span> ((<span class="ident">h_bar_prime</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">T::from_f64</span>(<span class="number">4.0</span>) <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">63.0</span>)) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">pi_over_180</span>).<span class="ident">cos</span>();
-    <span class="kw">let</span> <span class="ident">s_l</span> <span class="op">=</span> <span class="ident">T::one</span>()
-        <span class="op">+</span> ((<span class="ident">T::from_f64</span>(<span class="number">0.015</span>) <span class="op">*</span> (<span class="ident">l_bar</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">50.0</span>)) <span class="op">*</span> (<span class="ident">l_bar</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">50.0</span>)))
-            <span class="op">/</span> ((<span class="ident">l_bar</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">50.0</span>)) <span class="op">*</span> (<span class="ident">l_bar</span> <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">50.0</span>)) <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">20.0</span>)).<span class="ident">sqrt</span>());
-    <span class="kw">let</span> <span class="ident">s_c</span> <span class="op">=</span> <span class="ident">T::one</span>() <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">0.045</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">c_bar_prime</span>;
-    <span class="kw">let</span> <span class="ident">s_h</span> <span class="op">=</span> <span class="ident">T::one</span>() <span class="op">+</span> <span class="ident">T::from_f64</span>(<span class="number">0.015</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">c_bar_prime</span> <span class="op">*</span> <span class="ident">t</span>;
+    <span class="kw">let </span>t: T = T::one()
+        - T::from_f64(<span class="number">0.17</span>) * ((h_bar_prime.clone() - T::from_f64(<span class="number">30.0</span>)) * <span class="kw-2">&amp;</span>pi_over_180).cos()
+        + T::from_f64(<span class="number">0.24</span>) * ((h_bar_prime.clone() * T::from_f64(<span class="number">2.0</span>)) * <span class="kw-2">&amp;</span>pi_over_180).cos()
+        + T::from_f64(<span class="number">0.32</span>) * ((h_bar_prime.clone() * T::from_f64(<span class="number">3.0</span>) + T::from_f64(<span class="number">6.0</span>)) * <span class="kw-2">&amp;</span>pi_over_180).cos()
+        - T::from_f64(<span class="number">0.20</span>) * ((h_bar_prime.clone() * T::from_f64(<span class="number">4.0</span>) - T::from_f64(<span class="number">63.0</span>)) * <span class="kw-2">&amp;</span>pi_over_180).cos();
+    <span class="kw">let </span>s_l = T::one()
+        + ((T::from_f64(<span class="number">0.015</span>) * (l_bar.clone() - T::from_f64(<span class="number">50.0</span>)) * (l_bar.clone() - T::from_f64(<span class="number">50.0</span>)))
+            / ((l_bar.clone() - T::from_f64(<span class="number">50.0</span>)) * (l_bar - T::from_f64(<span class="number">50.0</span>)) + T::from_f64(<span class="number">20.0</span>)).sqrt());
+    <span class="kw">let </span>s_c = T::one() + T::from_f64(<span class="number">0.045</span>) * <span class="kw-2">&amp;</span>c_bar_prime;
+    <span class="kw">let </span>s_h = T::one() + T::from_f64(<span class="number">0.015</span>) * <span class="kw-2">&amp;</span>c_bar_prime * t;
 
-    <span class="kw">let</span> <span class="ident">delta_theta</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">30.0</span>)
-        <span class="op">*</span> (<span class="op">-</span>(((<span class="ident">h_bar_prime</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">275.0</span>)) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">25.0</span>))
-            <span class="op">*</span> ((<span class="ident">h_bar_prime</span> <span class="op">-</span> <span class="ident">T::from_f64</span>(<span class="number">275.0</span>)) <span class="op">/</span> <span class="ident">T::from_f64</span>(<span class="number">25.0</span>))))
-        .<span class="ident">exp</span>();
-    <span class="kw">let</span> <span class="ident">c_bar_prime_pow_seven</span> <span class="op">=</span> <span class="ident">c_bar_prime</span>.<span class="ident">powi</span>(<span class="number">7</span>);
-    <span class="kw">let</span> <span class="ident">r_c</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">T::from_f64</span>(<span class="number">2.0</span>)
-        <span class="op">*</span> (<span class="ident">c_bar_prime_pow_seven</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">c_bar_prime_pow_seven</span> <span class="op">+</span> <span class="ident">twenty_five_pow_seven</span>)).<span class="ident">sqrt</span>();
-    <span class="kw">let</span> <span class="ident">r_t</span> <span class="op">=</span> <span class="op">-</span><span class="ident">r_c</span> <span class="op">*</span> (<span class="ident">T::from_f64</span>(<span class="number">2.0</span>) <span class="op">*</span> <span class="ident">delta_theta</span> <span class="op">*</span> <span class="ident">pi_over_180</span>).<span class="ident">sin</span>();
+    <span class="kw">let </span>delta_theta = T::from_f64(<span class="number">30.0</span>)
+        * (-(((h_bar_prime.clone() - T::from_f64(<span class="number">275.0</span>)) / T::from_f64(<span class="number">25.0</span>))
+            * ((h_bar_prime - T::from_f64(<span class="number">275.0</span>)) / T::from_f64(<span class="number">25.0</span>))))
+        .exp();
+    <span class="kw">let </span>c_bar_prime_pow_seven = c_bar_prime.powi(<span class="number">7</span>);
+    <span class="kw">let </span>r_c: T = T::from_f64(<span class="number">2.0</span>)
+        * (c_bar_prime_pow_seven.clone() / (c_bar_prime_pow_seven + twenty_five_pow_seven)).sqrt();
+    <span class="kw">let </span>r_t = -r_c * (T::from_f64(<span class="number">2.0</span>) * delta_theta * pi_over_180).sin();
 
-    <span class="kw">let</span> <span class="ident">k_l</span> <span class="op">=</span> <span class="ident">T::one</span>();
-    <span class="kw">let</span> <span class="ident">k_c</span> <span class="op">=</span> <span class="ident">T::one</span>();
-    <span class="kw">let</span> <span class="ident">k_h</span> <span class="op">=</span> <span class="ident">T::one</span>();
-    <span class="kw">let</span> <span class="ident">delta_l_prime</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">l</span> <span class="op">-</span> <span class="ident">this</span>.<span class="ident">l</span>;
-    <span class="kw">let</span> <span class="ident">delta_c_prime</span> <span class="op">=</span> <span class="ident">c_two_prime</span> <span class="op">-</span> <span class="ident">c_one_prime</span>;
+    <span class="kw">let </span>k_l = T::one();
+    <span class="kw">let </span>k_c = T::one();
+    <span class="kw">let </span>k_h = T::one();
+    <span class="kw">let </span>delta_l_prime = other.l - this.l;
+    <span class="kw">let </span>delta_c_prime = c_two_prime - c_one_prime;
 
-    ((<span class="ident">delta_l_prime</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">k_l</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_l</span>)) <span class="op">*</span> (<span class="ident">delta_l_prime</span> <span class="op">/</span> (<span class="ident">k_l</span> <span class="op">*</span> <span class="ident">s_l</span>))
-        <span class="op">+</span> (<span class="ident">delta_c_prime</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">k_c</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_c</span>)) <span class="op">*</span> (<span class="ident">delta_c_prime</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">k_c</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_c</span>))
-        <span class="op">+</span> (<span class="ident">delta_big_h_prime</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">k_h</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_h</span>)) <span class="op">*</span> (<span class="ident">delta_big_h_prime</span>.<span class="ident">clone</span>() <span class="op">/</span> (<span class="ident">k_h</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_h</span>))
-        <span class="op">+</span> (<span class="ident">r_t</span> <span class="op">*</span> <span class="ident">delta_c_prime</span> <span class="op">*</span> <span class="ident">delta_big_h_prime</span>) <span class="op">/</span> (<span class="ident">k_c</span> <span class="op">*</span> <span class="ident">s_c</span> <span class="op">*</span> <span class="ident">k_h</span> <span class="op">*</span> <span class="ident">s_h</span>))
-        .<span class="ident">sqrt</span>()
+    ((delta_l_prime.clone() / (k_l.clone() * <span class="kw-2">&amp;</span>s_l)) * (delta_l_prime / (k_l * s_l))
+        + (delta_c_prime.clone() / (k_c.clone() * <span class="kw-2">&amp;</span>s_c)) * (delta_c_prime.clone() / (k_c.clone() * <span class="kw-2">&amp;</span>s_c))
+        + (delta_big_h_prime.clone() / (k_h.clone() * <span class="kw-2">&amp;</span>s_h)) * (delta_big_h_prime.clone() / (k_h.clone() * <span class="kw-2">&amp;</span>s_h))
+        + (r_t * delta_c_prime * delta_big_h_prime) / (k_c * s_c * k_h * s_h))
+        .sqrt()
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

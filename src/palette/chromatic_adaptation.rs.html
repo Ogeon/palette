@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/chromatic_adaptation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chromatic_adaptation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/chromatic_adaptation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chromatic_adaptation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -294,140 +294,140 @@
 <span id="294">294</span>
 <span id="295">295</span>
 <span id="296">296</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Convert colors from one reference white point to another</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Chromatic adaptation is the human visual system’s ability to adjust to</span>
-<span class="doccomment">//! changes in illumination in order to preserve the appearance of object</span>
-<span class="doccomment">//! colors. It is responsible for the stable appearance of object colours</span>
-<span class="doccomment">//! despite the wide variation of light which might be reflected from an object</span>
-<span class="doccomment">//! and observed by our eyes.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This library provides three methods for chromatic adaptation Bradford (which</span>
-<span class="doccomment">//! is the default), VonKries and XyzScaling</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::Xyz;</span>
-<span class="doccomment">//! use palette::white_point::{A, C};</span>
-<span class="doccomment">//! use palette::chromatic_adaptation::AdaptInto;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let a = Xyz::&lt;A, f32&gt;::new(0.315756, 0.162732, 0.015905);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! //Will convert Xyz&lt;A, f32&gt; to Xyz&lt;C, f32&gt; using Bradford chromatic adaptation</span>
-<span class="doccomment">//! let c: Xyz&lt;C, f32&gt; = a.adapt_into();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! //Should print {x: 0.257963, y: 0.139776,z: 0.058825}</span>
-<span class="doccomment">//! println!(&quot;{:?}&quot;, c)</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Convert colors from one reference white point to another
+//!
+//! Chromatic adaptation is the human visual system’s ability to adjust to
+//! changes in illumination in order to preserve the appearance of object
+//! colors. It is responsible for the stable appearance of object colours
+//! despite the wide variation of light which might be reflected from an object
+//! and observed by our eyes.
+//!
+//! This library provides three methods for chromatic adaptation Bradford (which
+//! is the default), VonKries and XyzScaling
+//!
+//! ```
+//! use palette::Xyz;
+//! use palette::white_point::{A, C};
+//! use palette::chromatic_adaptation::AdaptInto;
+//!
+//!
+//! let a = Xyz::&lt;A, f32&gt;::new(0.315756, 0.162732, 0.015905);
+//!
+//! //Will convert Xyz&lt;A, f32&gt; to Xyz&lt;C, f32&gt; using Bradford chromatic adaptation
+//! let c: Xyz&lt;C, f32&gt; = a.adapt_into();
+//!
+//! //Should print {x: 0.257963, y: 0.139776,z: 0.058825}
+//! println!(&quot;{:?}&quot;, c)
+//! ```
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>},
-    <span class="ident">matrix</span>::{<span class="ident">multiply_3x3</span>, <span class="ident">multiply_xyz</span>, <span class="ident">Mat3</span>},
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
-    <span class="ident">white_point</span>::{<span class="ident">Any</span>, <span class="ident">WhitePoint</span>},
-    <span class="ident">Xyz</span>,
+</span><span class="kw">use crate</span>::{
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    matrix::{multiply_3x3, multiply_xyz, Mat3},
+    num::{Arithmetics, Real, Zero},
+    white_point::{Any, WhitePoint},
+    Xyz,
 };
 
-<span class="doccomment">/// Chromatic adaptation methods implemented in the library</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Method</span> {
-    <span class="doccomment">/// Bradford chromatic adaptation method</span>
-    <span class="ident">Bradford</span>,
-    <span class="doccomment">/// VonKries chromatic adaptation method</span>
-    <span class="ident">VonKries</span>,
-    <span class="doccomment">/// XyzScaling chromatic adaptation method</span>
-    <span class="ident">XyzScaling</span>,
+<span class="doccomment">/// Chromatic adaptation methods implemented in the library
+</span><span class="kw">pub enum </span>Method {
+    <span class="doccomment">/// Bradford chromatic adaptation method
+    </span>Bradford,
+    <span class="doccomment">/// VonKries chromatic adaptation method
+    </span>VonKries,
+    <span class="doccomment">/// XyzScaling chromatic adaptation method
+    </span>XyzScaling,
 }
 
-<span class="doccomment">/// Holds the matrix coefficients for the chromatic adaptation methods</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConeResponseMatrices</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">///3x3 matrix for the cone response domains</span>
-    <span class="kw">pub</span> <span class="ident">ma</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="doccomment">///3x3 matrix for the inverse of the cone response domains</span>
-    <span class="kw">pub</span> <span class="ident">inv_ma</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Holds the matrix coefficients for the chromatic adaptation methods
+</span><span class="kw">pub struct </span>ConeResponseMatrices&lt;T&gt; {
+    <span class="doccomment">///3x3 matrix for the cone response domains
+    </span><span class="kw">pub </span>ma: Mat3&lt;T&gt;,
+    <span class="doccomment">///3x3 matrix for the inverse of the cone response domains
+    </span><span class="kw">pub </span>inv_ma: Mat3&lt;T&gt;,
 }
 
-<span class="doccomment">/// Generates a conversion matrix to convert the Xyz tristimulus values from</span>
-<span class="doccomment">/// one illuminant to another (`source_wp` to `destination_wp`)</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="doccomment">/// Generates a conversion matrix to convert the Xyz tristimulus values from
+/// one illuminant to another (`source_wp` to `destination_wp`)
+</span><span class="kw">pub trait </span>TransformMatrix&lt;T&gt;
+<span class="kw">where
+    </span>T: Zero + Arithmetics + Clone,
 {
-    <span class="doccomment">/// Get the cone response functions for the chromatic adaptation method</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_cone_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ConeResponseMatrices</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Get the cone response functions for the chromatic adaptation method
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>get_cone_response(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ConeResponseMatrices&lt;T&gt;;
 
-    <span class="doccomment">/// Generates a 3x3 transformation matrix to convert color from one</span>
-    <span class="doccomment">/// reference white point to another with the given cone_response</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">generate_transform_matrix</span>(
+    <span class="doccomment">/// Generates a 3x3 transformation matrix to convert color from one
+    /// reference white point to another with the given cone_response
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>generate_transform_matrix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">source_wp</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-        <span class="ident">destination_wp</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">adapt</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_cone_response</span>();
+        source_wp: Xyz&lt;Any, T&gt;,
+        destination_wp: Xyz&lt;Any, T&gt;,
+    ) -&gt; Mat3&lt;T&gt; {
+        <span class="kw">let </span>adapt = <span class="self">self</span>.get_cone_response();
 
-        <span class="kw">let</span> <span class="ident">resp_src</span> <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">adapt</span>.<span class="ident">ma</span>.<span class="ident">clone</span>(), <span class="ident">source_wp</span>);
-        <span class="kw">let</span> <span class="ident">resp_dst</span> <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">adapt</span>.<span class="ident">ma</span>.<span class="ident">clone</span>(), <span class="ident">destination_wp</span>);
+        <span class="kw">let </span>resp_src = multiply_xyz(adapt.ma.clone(), source_wp);
+        <span class="kw">let </span>resp_dst = multiply_xyz(adapt.ma.clone(), destination_wp);
 
-        <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-        <span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> [
-            <span class="ident">resp_dst</span>.<span class="ident">x</span> <span class="op">/</span> <span class="ident">resp_src</span>.<span class="ident">x</span>, <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>(),
-            <span class="ident">T::zero</span>(), <span class="ident">resp_dst</span>.<span class="ident">y</span> <span class="op">/</span> <span class="ident">resp_src</span>.<span class="ident">y</span>, <span class="ident">T::zero</span>(),
-            <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>(), <span class="ident">resp_dst</span>.<span class="ident">z</span> <span class="op">/</span> <span class="ident">resp_src</span>.<span class="ident">z</span>,
+        <span class="attribute">#[rustfmt::skip]
+        </span><span class="kw">let </span>resp = [
+            resp_dst.x / resp_src.x, T::zero(), T::zero(),
+            T::zero(), resp_dst.y / resp_src.y, T::zero(),
+            T::zero(), T::zero(), resp_dst.z / resp_src.z,
         ];
 
-        <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">multiply_3x3</span>(<span class="ident">resp</span>, <span class="ident">adapt</span>.<span class="ident">ma</span>);
-        <span class="ident">multiply_3x3</span>(<span class="ident">adapt</span>.<span class="ident">inv_ma</span>, <span class="ident">tmp</span>)
+        <span class="kw">let </span>tmp = multiply_3x3(resp, adapt.ma);
+        multiply_3x3(adapt.inv_ma, tmp)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Method</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T&gt; TransformMatrix&lt;T&gt; <span class="kw">for </span>Method
+<span class="kw">where
+    </span>T: Real + Zero + Arithmetics + Clone,
 {
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_cone_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ConeResponseMatrices</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-             <span class="ident">Method::Bradford</span> =&gt; {
-                <span class="ident">ConeResponseMatrices</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                    <span class="ident">ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">0.8951000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.2664000</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.1614000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.7502000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.7135000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0367000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0389000</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0685000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0296000</span>)
+    <span class="attribute">#[rustfmt::skip]
+    #[inline]
+    </span><span class="kw">fn </span>get_cone_response(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ConeResponseMatrices&lt;T&gt; {
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+             Method::Bradford =&gt; {
+                ConeResponseMatrices::&lt;T&gt; {
+                    ma: [
+                        T::from_f64(<span class="number">0.8951000</span>), T::from_f64(<span class="number">0.2664000</span>), T::from_f64(-<span class="number">0.1614000</span>),
+                        T::from_f64(-<span class="number">0.7502000</span>), T::from_f64(<span class="number">1.7135000</span>), T::from_f64(<span class="number">0.0367000</span>),
+                        T::from_f64(<span class="number">0.0389000</span>), T::from_f64(-<span class="number">0.0685000</span>), T::from_f64(<span class="number">1.0296000</span>)
                     ],
-                    <span class="ident">inv_ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">0.9869929</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.1470543</span>), <span class="ident">T::from_f64</span>(<span class="number">0.1599627</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.4323053</span>), <span class="ident">T::from_f64</span>(<span class="number">0.5183603</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0492912</span>),
-                        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0085287</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0400428</span>), <span class="ident">T::from_f64</span>(<span class="number">0.9684867</span>)
-                    ],
-                }
-            }
-             <span class="ident">Method::VonKries</span> =&gt; {
-                <span class="ident">ConeResponseMatrices</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                    <span class="ident">ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">0.4002400</span>), <span class="ident">T::from_f64</span>(<span class="number">0.7076000</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0808100</span>),
-                        <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.2263000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.1653200</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0457000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.9182200</span>)
-                    ],
-                    <span class="ident">inv_ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">1.8599364</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">1.1293816</span>), <span class="ident">T::from_f64</span>(<span class="number">0.2198974</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.3611914</span>), <span class="ident">T::from_f64</span>(<span class="number">0.6388125</span>), <span class="ident">T::from_f64</span>(<span class="op">-</span><span class="number">0.0000064</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0890636</span>)
+                    inv_ma: [
+                        T::from_f64(<span class="number">0.9869929</span>), T::from_f64(-<span class="number">0.1470543</span>), T::from_f64(<span class="number">0.1599627</span>),
+                        T::from_f64(<span class="number">0.4323053</span>), T::from_f64(<span class="number">0.5183603</span>), T::from_f64(<span class="number">0.0492912</span>),
+                        T::from_f64(-<span class="number">0.0085287</span>), T::from_f64(<span class="number">0.0400428</span>), T::from_f64(<span class="number">0.9684867</span>)
                     ],
                 }
             }
-             <span class="ident">Method::XyzScaling</span> =&gt; {
-                <span class="ident">ConeResponseMatrices</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                    <span class="ident">ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>)
+             Method::VonKries =&gt; {
+                ConeResponseMatrices::&lt;T&gt; {
+                    ma: [
+                        T::from_f64(<span class="number">0.4002400</span>), T::from_f64(<span class="number">0.7076000</span>), T::from_f64(-<span class="number">0.0808100</span>),
+                        T::from_f64(-<span class="number">0.2263000</span>), T::from_f64(<span class="number">1.1653200</span>), T::from_f64(<span class="number">0.0457000</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.9182200</span>)
                     ],
-                    <span class="ident">inv_ma</span>: [
-                        <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>),
-                        <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">0.0000000</span>), <span class="ident">T::from_f64</span>(<span class="number">1.0000000</span>)
+                    inv_ma: [
+                        T::from_f64(<span class="number">1.8599364</span>), T::from_f64(-<span class="number">1.1293816</span>), T::from_f64(<span class="number">0.2198974</span>),
+                        T::from_f64(<span class="number">0.3611914</span>), T::from_f64(<span class="number">0.6388125</span>), T::from_f64(-<span class="number">0.0000064</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0890636</span>)
+                    ],
+                }
+            }
+             Method::XyzScaling =&gt; {
+                ConeResponseMatrices::&lt;T&gt; {
+                    ma: [
+                        T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>)
+                    ],
+                    inv_ma: [
+                        T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
+                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>)
                     ],
                 }
             }
@@ -435,160 +435,160 @@
     }
 }
 
-<span class="doccomment">/// Trait to convert color from one reference white point to another</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Converts a color from the source white point (Swp) to the destination white</span>
-<span class="doccomment">/// point (Dwp). Uses the bradford method for conversion by default.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AdaptFrom</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Swp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Trait to convert color from one reference white point to another
+///
+/// Converts a color from the source white point (Swp) to the destination white
+/// point (Dwp). Uses the bradford method for conversion by default.
+</span><span class="kw">pub trait </span>AdaptFrom&lt;S, Swp, Dwp, T&gt;: Sized
+<span class="kw">where
+    </span>T: Real + Zero + Arithmetics + Clone,
+    Swp: WhitePoint&lt;T&gt;,
+    Dwp: WhitePoint&lt;T&gt;,
 {
-    <span class="doccomment">/// Convert the source color to the destination color using the bradford</span>
-    <span class="doccomment">/// method by default.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_from</span>(<span class="ident">color</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::adapt_from_using</span>(<span class="ident">color</span>, <span class="ident">Method::Bradford</span>)
+    <span class="doccomment">/// Convert the source color to the destination color using the bradford
+    /// method by default.
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>adapt_from(color: S) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::adapt_from_using(color, Method::Bradford)
     }
-    <span class="doccomment">/// Convert the source color to the destination color using the specified</span>
-    <span class="doccomment">/// method.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_from_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">S</span>, <span class="ident">method</span>: <span class="ident">M</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Convert the source color to the destination color using the specified
+    /// method.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>adapt_from_using&lt;M: TransformMatrix&lt;T&gt;&gt;(color: S, method: M) -&gt; <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">D</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AdaptFrom</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">D</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Swp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Swp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">D</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;S, D, Swp, Dwp, T&gt; AdaptFrom&lt;S, Swp, Dwp, T&gt; <span class="kw">for </span>D
+<span class="kw">where
+    </span>T: Real + Zero + Arithmetics + Clone,
+    Swp: WhitePoint&lt;T&gt;,
+    Dwp: WhitePoint&lt;T&gt;,
+    S: IntoColorUnclamped&lt;Xyz&lt;Swp, T&gt;&gt;,
+    D: FromColorUnclamped&lt;Xyz&lt;Dwp, T&gt;&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_from_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">S</span>, <span class="ident">method</span>: <span class="ident">M</span>) -&gt; <span class="ident">D</span> {
-        <span class="kw">let</span> <span class="ident">src_xyz</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color_unclamped</span>().<span class="ident">with_white_point</span>();
-        <span class="kw">let</span> <span class="ident">transform_matrix</span> <span class="op">=</span> <span class="ident">method</span>.<span class="ident">generate_transform_matrix</span>(<span class="ident">Swp::get_xyz</span>(), <span class="ident">Dwp::get_xyz</span>());
-        <span class="kw">let</span> <span class="ident">dst_xyz</span> <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">transform_matrix</span>, <span class="ident">src_xyz</span>);
-        <span class="ident">D::from_color_unclamped</span>(<span class="ident">dst_xyz</span>.<span class="ident">with_white_point</span>())
-    }
-}
-
-<span class="doccomment">/// Trait to convert color with one reference white point into another</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Converts a color with the source white point (Swp) into the destination</span>
-<span class="doccomment">/// white point (Dwp). Uses the bradford method for conversion by default.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AdaptInto</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Swp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-{
-    <span class="doccomment">/// Convert the source color to the destination color using the bradford</span>
-    <span class="doccomment">/// method by default.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_into</span>(<span class="self">self</span>) -&gt; <span class="ident">D</span> {
-        <span class="self">self</span>.<span class="ident">adapt_into_using</span>(<span class="ident">Method::Bradford</span>)
-    }
-    <span class="doccomment">/// Convert the source color to the destination color using the specified</span>
-    <span class="doccomment">/// method.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_into_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">method</span>: <span class="ident">M</span>) -&gt; <span class="ident">D</span>;
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">D</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AdaptInto</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">S</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">Swp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Dwp</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">D</span>: <span class="ident">AdaptFrom</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Swp</span>, <span class="ident">Dwp</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">adapt_into_using</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">TransformMatrix</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">method</span>: <span class="ident">M</span>) -&gt; <span class="ident">D</span> {
-        <span class="ident">D::adapt_from_using</span>(<span class="self">self</span>, <span class="ident">method</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>adapt_from_using&lt;M: TransformMatrix&lt;T&gt;&gt;(color: S, method: M) -&gt; D {
+        <span class="kw">let </span>src_xyz = color.into_color_unclamped().with_white_point();
+        <span class="kw">let </span>transform_matrix = method.generate_transform_matrix(Swp::get_xyz(), Dwp::get_xyz());
+        <span class="kw">let </span>dst_xyz = multiply_xyz(transform_matrix, src_xyz);
+        D::from_color_unclamped(dst_xyz.with_white_point())
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">AdaptFrom</span>, <span class="ident">AdaptInto</span>, <span class="ident">Method</span>, <span class="ident">TransformMatrix</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::white_point</span>::{<span class="ident">WhitePoint</span>, <span class="ident">A</span>, <span class="ident">C</span>, <span class="ident">D50</span>, <span class="ident">D65</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Xyz</span>;
+<span class="doccomment">/// Trait to convert color with one reference white point into another
+///
+/// Converts a color with the source white point (Swp) into the destination
+/// white point (Dwp). Uses the bradford method for conversion by default.
+</span><span class="kw">pub trait </span>AdaptInto&lt;D, Swp, Dwp, T&gt;: Sized
+<span class="kw">where
+    </span>T: Real + Zero + Arithmetics + Clone,
+    Swp: WhitePoint&lt;T&gt;,
+    Dwp: WhitePoint&lt;T&gt;,
+{
+    <span class="doccomment">/// Convert the source color to the destination color using the bradford
+    /// method by default.
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>adapt_into(<span class="self">self</span>) -&gt; D {
+        <span class="self">self</span>.adapt_into_using(Method::Bradford)
+    }
+    <span class="doccomment">/// Convert the source color to the destination color using the specified
+    /// method.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>adapt_into_using&lt;M: TransformMatrix&lt;T&gt;&gt;(<span class="self">self</span>, method: M) -&gt; D;
+}
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">d65_to_d50_matrix_xyz_scaling</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
+<span class="kw">impl</span>&lt;S, D, Swp, Dwp, T&gt; AdaptInto&lt;D, Swp, Dwp, T&gt; <span class="kw">for </span>S
+<span class="kw">where
+    </span>T: Real + Zero + Arithmetics + Clone,
+    Swp: WhitePoint&lt;T&gt;,
+    Dwp: WhitePoint&lt;T&gt;,
+    D: AdaptFrom&lt;S, Swp, Dwp, T&gt;,
+{
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>adapt_into_using&lt;M: TransformMatrix&lt;T&gt;&gt;(<span class="self">self</span>, method: M) -&gt; D {
+        D::adapt_from_using(<span class="self">self</span>, method)
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::{AdaptFrom, AdaptInto, Method, TransformMatrix};
+    <span class="kw">use </span><span class="kw">crate</span>::white_point::{WhitePoint, A, C, D50, D65};
+    <span class="kw">use </span><span class="kw">crate</span>::Xyz;
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>d65_to_d50_matrix_xyz_scaling() {
+        <span class="kw">let </span>expected = [
             <span class="number">1.0144665</span>, <span class="number">0.0000000</span>, <span class="number">0.0000000</span>, <span class="number">0.0000000</span>, <span class="number">1.0000000</span>, <span class="number">0.0000000</span>, <span class="number">0.0000000</span>, <span class="number">0.0000000</span>,
             <span class="number">0.7578869</span>,
         ];
-        <span class="kw">let</span> <span class="ident">xyz_scaling</span> <span class="op">=</span> <span class="ident">Method::XyzScaling</span>;
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">xyz_scaling</span>.<span class="ident">generate_transform_matrix</span>(<span class="ident">D65::get_xyz</span>(), <span class="ident">D50::get_xyz</span>());
-        <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">c</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">e</span>, <span class="ident">c</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>)
+        <span class="kw">let </span>xyz_scaling = Method::XyzScaling;
+        <span class="kw">let </span>computed = xyz_scaling.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
+        <span class="kw">for </span>(e, c) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(e, c, epsilon = <span class="number">0.0001</span>)
         }
     }
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">d65_to_d50_matrix_von_kries</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
-            <span class="number">1.0160803</span>, <span class="number">0.0552297</span>, <span class="op">-</span><span class="number">0.0521326</span>, <span class="number">0.0060666</span>, <span class="number">0.9955661</span>, <span class="op">-</span><span class="number">0.0012235</span>, <span class="number">0.0000000</span>,
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>d65_to_d50_matrix_von_kries() {
+        <span class="kw">let </span>expected = [
+            <span class="number">1.0160803</span>, <span class="number">0.0552297</span>, -<span class="number">0.0521326</span>, <span class="number">0.0060666</span>, <span class="number">0.9955661</span>, -<span class="number">0.0012235</span>, <span class="number">0.0000000</span>,
             <span class="number">0.0000000</span>, <span class="number">0.7578869</span>,
         ];
-        <span class="kw">let</span> <span class="ident">von_kries</span> <span class="op">=</span> <span class="ident">Method::VonKries</span>;
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">von_kries</span>.<span class="ident">generate_transform_matrix</span>(<span class="ident">D65::get_xyz</span>(), <span class="ident">D50::get_xyz</span>());
-        <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">c</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">e</span>, <span class="ident">c</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>)
+        <span class="kw">let </span>von_kries = Method::VonKries;
+        <span class="kw">let </span>computed = von_kries.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
+        <span class="kw">for </span>(e, c) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(e, c, epsilon = <span class="number">0.0001</span>)
         }
     }
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">d65_to_d50_matrix_bradford</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
-            <span class="number">1.0478112</span>, <span class="number">0.0228866</span>, <span class="op">-</span><span class="number">0.0501270</span>, <span class="number">0.0295424</span>, <span class="number">0.9904844</span>, <span class="op">-</span><span class="number">0.0170491</span>, <span class="op">-</span><span class="number">0.0092345</span>,
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>d65_to_d50_matrix_bradford() {
+        <span class="kw">let </span>expected = [
+            <span class="number">1.0478112</span>, <span class="number">0.0228866</span>, -<span class="number">0.0501270</span>, <span class="number">0.0295424</span>, <span class="number">0.9904844</span>, -<span class="number">0.0170491</span>, -<span class="number">0.0092345</span>,
             <span class="number">0.0150436</span>, <span class="number">0.7521316</span>,
         ];
-        <span class="kw">let</span> <span class="ident">bradford</span> <span class="op">=</span> <span class="ident">Method::Bradford</span>;
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">bradford</span>.<span class="ident">generate_transform_matrix</span>(<span class="ident">D65::get_xyz</span>(), <span class="ident">D50::get_xyz</span>());
-        <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">c</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">e</span>, <span class="ident">c</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>)
+        <span class="kw">let </span>bradford = Method::Bradford;
+        <span class="kw">let </span>computed = bradford.generate_transform_matrix(D65::get_xyz(), D50::get_xyz());
+        <span class="kw">for </span>(e, c) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(e, c, epsilon = <span class="number">0.0001</span>)
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">chromatic_adaptation_from_a_to_c</span>() {
-        <span class="kw">let</span> <span class="ident">input_a</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>chromatic_adaptation_from_a_to_c() {
+        <span class="kw">let </span>input_a = Xyz::&lt;A, f32&gt;::new(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
 
-        <span class="kw">let</span> <span class="ident">expected_bradford</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.257963</span>, <span class="number">0.139776</span>, <span class="number">0.058825</span>);
-        <span class="kw">let</span> <span class="ident">expected_vonkries</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.268446</span>, <span class="number">0.159139</span>, <span class="number">0.052843</span>);
-        <span class="kw">let</span> <span class="ident">expected_xyz_scaling</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.281868</span>, <span class="number">0.162732</span>, <span class="number">0.052844</span>);
+        <span class="kw">let </span>expected_bradford = Xyz::&lt;C, f32&gt;::new(<span class="number">0.257963</span>, <span class="number">0.139776</span>, <span class="number">0.058825</span>);
+        <span class="kw">let </span>expected_vonkries = Xyz::&lt;C, f32&gt;::new(<span class="number">0.268446</span>, <span class="number">0.159139</span>, <span class="number">0.052843</span>);
+        <span class="kw">let </span>expected_xyz_scaling = Xyz::&lt;C, f32&gt;::new(<span class="number">0.281868</span>, <span class="number">0.162732</span>, <span class="number">0.052844</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_bradford</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Xyz::adapt_from</span>(<span class="ident">input_a</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_bradford</span>, <span class="ident">computed_bradford</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_bradford: Xyz&lt;C, f32&gt; = Xyz::adapt_from(input_a);
+        <span class="macro">assert_relative_eq!</span>(expected_bradford, computed_bradford, epsilon = <span class="number">0.0001</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_vonkries</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Xyz::adapt_from_using</span>(<span class="ident">input_a</span>, <span class="ident">Method::VonKries</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_vonkries</span>, <span class="ident">computed_vonkries</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_vonkries: Xyz&lt;C, f32&gt; = Xyz::adapt_from_using(input_a, Method::VonKries);
+        <span class="macro">assert_relative_eq!</span>(expected_vonkries, computed_vonkries, epsilon = <span class="number">0.0001</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_xyz_scaling</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Xyz::adapt_from_using</span>(<span class="ident">input_a</span>, <span class="ident">Method::XyzScaling</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_xyz_scaling</span>, <span class="ident">computed_xyz_scaling</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_xyz_scaling: Xyz&lt;C, <span class="kw">_</span>&gt; = Xyz::adapt_from_using(input_a, Method::XyzScaling);
+        <span class="macro">assert_relative_eq!</span>(expected_xyz_scaling, computed_xyz_scaling, epsilon = <span class="number">0.0001</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">chromatic_adaptation_into_a_to_c</span>() {
-        <span class="kw">let</span> <span class="ident">input_a</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>chromatic_adaptation_into_a_to_c() {
+        <span class="kw">let </span>input_a = Xyz::&lt;A, f32&gt;::new(<span class="number">0.315756</span>, <span class="number">0.162732</span>, <span class="number">0.015905</span>);
 
-        <span class="kw">let</span> <span class="ident">expected_bradford</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.257963</span>, <span class="number">0.139776</span>, <span class="number">0.058825</span>);
-        <span class="kw">let</span> <span class="ident">expected_vonkries</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.268446</span>, <span class="number">0.159139</span>, <span class="number">0.052843</span>);
-        <span class="kw">let</span> <span class="ident">expected_xyz_scaling</span> <span class="op">=</span> <span class="ident">Xyz</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.281868</span>, <span class="number">0.162732</span>, <span class="number">0.052844</span>);
+        <span class="kw">let </span>expected_bradford = Xyz::&lt;C, f32&gt;::new(<span class="number">0.257963</span>, <span class="number">0.139776</span>, <span class="number">0.058825</span>);
+        <span class="kw">let </span>expected_vonkries = Xyz::&lt;C, f32&gt;::new(<span class="number">0.268446</span>, <span class="number">0.159139</span>, <span class="number">0.052843</span>);
+        <span class="kw">let </span>expected_xyz_scaling = Xyz::&lt;C, f32&gt;::new(<span class="number">0.281868</span>, <span class="number">0.162732</span>, <span class="number">0.052844</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_bradford</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">input_a</span>.<span class="ident">adapt_into</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_bradford</span>, <span class="ident">computed_bradford</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_bradford: Xyz&lt;C, f32&gt; = input_a.adapt_into();
+        <span class="macro">assert_relative_eq!</span>(expected_bradford, computed_bradford, epsilon = <span class="number">0.0001</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_vonkries</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">input_a</span>.<span class="ident">adapt_into_using</span>(<span class="ident">Method::VonKries</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_vonkries</span>, <span class="ident">computed_vonkries</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_vonkries: Xyz&lt;C, f32&gt; = input_a.adapt_into_using(Method::VonKries);
+        <span class="macro">assert_relative_eq!</span>(expected_vonkries, computed_vonkries, epsilon = <span class="number">0.0001</span>);
 
-        <span class="kw">let</span> <span class="ident">computed_xyz_scaling</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">input_a</span>.<span class="ident">adapt_into_using</span>(<span class="ident">Method::XyzScaling</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected_xyz_scaling</span>, <span class="ident">computed_xyz_scaling</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.0001</span>);
+        <span class="kw">let </span>computed_xyz_scaling: Xyz&lt;C, <span class="kw">_</span>&gt; = input_a.adapt_into_using(Method::XyzScaling);
+        <span class="macro">assert_relative_eq!</span>(expected_xyz_scaling, computed_xyz_scaling, epsilon = <span class="number">0.0001</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/from_into_color.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_into_color.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/from_into_color.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>from_into_color.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -135,142 +135,142 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Clamp</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Clamp;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::cast::{<span class="self">self</span>, ArrayCast};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::FromColorUnclamped</span>;
+<span class="kw">use </span><span class="kw">super</span>::FromColorUnclamped;
 
-<span class="doccomment">///A trait for converting one color from another, in a possibly lossy way.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `U: FromColor&lt;T&gt;` is implemented for every type `U: FromColorUnclamped&lt;T&gt; +</span>
-<span class="doccomment">/// Clamp`, as well as for `Vec&lt;T&gt;` and `Box&lt;[T]&gt;` where `T` and `U` have the</span>
-<span class="doccomment">/// same memory layout.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a</span>
-<span class="doccomment">/// lossless version of this trait. See</span>
-<span class="doccomment">/// [`TryFromColor`](crate::convert::TryFromColor) for a trait that gives an</span>
-<span class="doccomment">/// error when the result is out of bounds.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # The Difference Between FromColor and From</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The conversion traits, including `FromColor`, were added to gain even more</span>
-<span class="doccomment">/// flexibility than what `From` and the other standard library traits can give.</span>
-<span class="doccomment">/// There are a few subtle, but important, differences in their semantics:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// * `FromColor` and `IntoColor` are allowed to be lossy, meaning converting `A</span>
-<span class="doccomment">///   -&gt; B -&gt; A` may result in a different value than the original. This applies</span>
-<span class="doccomment">///   to `A -&gt; A` as well.</span>
-<span class="doccomment">/// * `From&lt;Self&gt;` and `Into&lt;Self&gt;` are blanket implemented, while</span>
-<span class="doccomment">///   `FromColor&lt;Self&gt;` and `IntoColor&lt;Self&gt;` have to be manually implemented.</span>
-<span class="doccomment">///   This allows additional flexibility, such as allowing implementing</span>
-<span class="doccomment">///   `FromColor&lt;Rgb&lt;S2, T&gt;&gt; for Rgb&lt;S1, T&gt;`.</span>
-<span class="doccomment">/// * Implementing `FromColorUnclamped`,</span>
-<span class="doccomment">///   [`IsWithinBounds`](crate::IsWithinBounds) and [`Clamp`] is enough to get</span>
-<span class="doccomment">///   all the other conversion traits, while `From` and `Into` would not be</span>
-<span class="doccomment">///   possible to blanket implement in the same way. This also reduces the work</span>
-<span class="doccomment">///   that needs to be done by macros.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See the [`convert`](crate::convert) module for how to implement</span>
-<span class="doccomment">/// `FromColorUnclamped` for custom colors.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// Convert from T with values clamped to the color defined bounds.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{IsWithinBounds, FromColor, Lch, Srgb};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let rgb = Srgb::from_color(Lch::new(50.0f32, 100.0, -175.0));</span>
-    <span class="doccomment">/// assert!(rgb.is_within_bounds());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color</span>(<span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">///A trait for converting one color from another, in a possibly lossy way.
+///
+/// `U: FromColor&lt;T&gt;` is implemented for every type `U: FromColorUnclamped&lt;T&gt; +
+/// Clamp`, as well as for `Vec&lt;T&gt;` and `Box&lt;[T]&gt;` where `T` and `U` have the
+/// same memory layout.
+///
+/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a
+/// lossless version of this trait. See
+/// [`TryFromColor`](crate::convert::TryFromColor) for a trait that gives an
+/// error when the result is out of bounds.
+///
+/// # The Difference Between FromColor and From
+///
+/// The conversion traits, including `FromColor`, were added to gain even more
+/// flexibility than what `From` and the other standard library traits can give.
+/// There are a few subtle, but important, differences in their semantics:
+///
+/// * `FromColor` and `IntoColor` are allowed to be lossy, meaning converting `A
+///   -&gt; B -&gt; A` may result in a different value than the original. This applies
+///   to `A -&gt; A` as well.
+/// * `From&lt;Self&gt;` and `Into&lt;Self&gt;` are blanket implemented, while
+///   `FromColor&lt;Self&gt;` and `IntoColor&lt;Self&gt;` have to be manually implemented.
+///   This allows additional flexibility, such as allowing implementing
+///   `FromColor&lt;Rgb&lt;S2, T&gt;&gt; for Rgb&lt;S1, T&gt;`.
+/// * Implementing `FromColorUnclamped`,
+///   [`IsWithinBounds`](crate::IsWithinBounds) and [`Clamp`] is enough to get
+///   all the other conversion traits, while `From` and `Into` would not be
+///   possible to blanket implement in the same way. This also reduces the work
+///   that needs to be done by macros.
+///
+/// See the [`convert`](crate::convert) module for how to implement
+/// `FromColorUnclamped` for custom colors.
+</span><span class="kw">pub trait </span>FromColor&lt;T&gt;: Sized {
+    <span class="doccomment">/// Convert from T with values clamped to the color defined bounds.
+    ///
+    /// ```
+    /// use palette::{IsWithinBounds, FromColor, Lch, Srgb};
+    ///
+    /// let rgb = Srgb::from_color(Lch::new(50.0f32, 100.0, -175.0));
+    /// assert!(rgb.is_within_bounds());
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>from_color(t: T) -&gt; <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">U</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clamp</span>,
+<span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;T&gt; <span class="kw">for </span>U
+<span class="kw">where
+    </span>U: FromColorUnclamped&lt;T&gt; + Clamp,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color</span>(<span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_color_unclamped</span>(<span class="ident">t</span>).<span class="ident">clamp</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_color(t: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from_color_unclamped(t).clamp()
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ArrayCast</span>,
-    <span class="ident">U</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> <span class="ident">T::Array</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;Vec&lt;T&gt;&gt; <span class="kw">for </span>Vec&lt;U&gt;
+<span class="kw">where
+    </span>T: ArrayCast,
+    U: ArrayCast&lt;Array = T::Array&gt; + FromColor&lt;T&gt;,
 {
-    <span class="doccomment">/// Convert all colors in place, without reallocating.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];</span>
-    <span class="doccomment">/// let mut lch = Vec::&lt;Lch&gt;::from_color(srgb);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// lch.saturate_assign(0.1);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let srgb = Vec::&lt;Srgb&gt;::from_color(lch);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color</span>(<span class="ident">color</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">cast::map_vec_in_place</span>(<span class="ident">color</span>, <span class="ident">U::from_color</span>)
+    <span class="doccomment">/// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];
+    /// let mut lch = Vec::&lt;Lch&gt;::from_color(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Vec::&lt;Srgb&gt;::from_color(lch);
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_color(color: Vec&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        cast::map_vec_in_place(color, U::from_color)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">U</span>]<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ArrayCast</span>,
-    <span class="ident">U</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> <span class="ident">T::Array</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;Box&lt;[T]&gt;&gt; <span class="kw">for </span>Box&lt;[U]&gt;
+<span class="kw">where
+    </span>T: ArrayCast,
+    U: ArrayCast&lt;Array = T::Array&gt; + FromColor&lt;T&gt;,
 {
-    <span class="doccomment">/// Convert all colors in place, without reallocating.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();</span>
-    <span class="doccomment">/// let mut lch = Box::&lt;[Lch]&gt;::from_color(srgb);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// lch.saturate_assign(0.1);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let srgb = Box::&lt;[Srgb]&gt;::from_color(lch);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_color</span>(<span class="ident">color</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">cast::map_slice_box_in_place</span>(<span class="ident">color</span>, <span class="ident">U::from_color</span>)
+    <span class="doccomment">/// Convert all colors in place, without reallocating.
+    ///
+    /// ```
+    /// use palette::{convert::FromColor, SaturateAssign, Srgb, Lch};
+    ///
+    /// let srgb = vec![Srgb::new(0.8f32, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();
+    /// let mut lch = Box::&lt;[Lch]&gt;::from_color(srgb);
+    ///
+    /// lch.saturate_assign(0.1);
+    ///
+    /// let srgb = Box::&lt;[Srgb]&gt;::from_color(lch);
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_color(color: Box&lt;[T]&gt;) -&gt; <span class="self">Self </span>{
+        cast::map_slice_box_in_place(color, U::from_color)
     }
 }
 
-<span class="doccomment">/// A trait for converting a color into another, in a possibly lossy way.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `U: IntoColor&lt;T&gt;` is implemented for every type `T: FromColor&lt;U&gt;`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See [`FromColor`](crate::convert::FromColor) for more details.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// Convert into T with values clamped to the color defined bounds</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{IsWithinBounds, IntoColor, Lch, Srgb};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color();</span>
-    <span class="doccomment">/// assert!(rgb.is_within_bounds());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_color</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span>;
+<span class="doccomment">/// A trait for converting a color into another, in a possibly lossy way.
+///
+/// `U: IntoColor&lt;T&gt;` is implemented for every type `T: FromColor&lt;U&gt;`.
+///
+/// See [`FromColor`](crate::convert::FromColor) for more details.
+</span><span class="kw">pub trait </span>IntoColor&lt;T&gt;: Sized {
+    <span class="doccomment">/// Convert into T with values clamped to the color defined bounds
+    ///
+    /// ```
+    /// use palette::{IsWithinBounds, IntoColor, Lch, Srgb};
+    ///
+    /// let rgb: Srgb = Lch::new(50.0, 100.0, -175.0).into_color();
+    /// assert!(rgb.is_within_bounds());
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>into_color(<span class="self">self</span>) -&gt; T;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">IntoColor</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; IntoColor&lt;U&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>U: FromColor&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_color</span>(<span class="self">self</span>) -&gt; <span class="ident">U</span> {
-        <span class="ident">U::from_color</span>(<span class="self">self</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_color(<span class="self">self</span>) -&gt; U {
+        U::from_color(<span class="self">self</span>)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

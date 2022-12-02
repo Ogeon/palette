@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/blend_with.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend_with.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/blend_with.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend_with.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -87,94 +87,94 @@
 <span id="87">87</span>
 <span id="88">88</span>
 <span id="89">89</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">stimulus::Stimulus</span>, <span class="ident">Alpha</span>};
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{stimulus::Stimulus, Alpha};
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">BlendFunction</span>, <span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>};
+<span class="kw">use super</span>::{BlendFunction, PreAlpha, Premultiply};
 
-<span class="doccomment">/// Blending with a custom blend function.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This is a convenience trait that makes it possible to use [`BlendFunction`]</span>
-<span class="doccomment">/// via a method on the source color. This makes custom blending more similar to</span>
-<span class="doccomment">/// how the [`Compose`][super::Compose] and [`Blend`][super::Blend] are used,</span>
-<span class="doccomment">/// including automatic pre-multiplication.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BlendWith</span> {
-    <span class="doccomment">/// The base color type of `Self`.</span>
-    <span class="kw">type</span> <span class="ident">Color</span>: <span class="ident">Premultiply</span>;
+<span class="doccomment">/// Blending with a custom blend function.
+///
+/// This is a convenience trait that makes it possible to use [`BlendFunction`]
+/// via a method on the source color. This makes custom blending more similar to
+/// how the [`Compose`][super::Compose] and [`Blend`][super::Blend] are used,
+/// including automatic pre-multiplication.
+</span><span class="kw">pub trait </span>BlendWith {
+    <span class="doccomment">/// The base color type of `Self`.
+    </span><span class="kw">type </span>Color: Premultiply;
 
-    <span class="doccomment">/// Blend self, as the source color, with `destination`, using</span>
-    <span class="doccomment">/// `blend_function`. Anything that implements [`BlendFunction`] is</span>
-    <span class="doccomment">/// acceptable, including functions and closures.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{LinSrgb, LinSrgba};</span>
-    <span class="doccomment">/// use palette::blend::{BlendWith, PreAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// type PreRgba = PreAlpha&lt;LinSrgb&lt;f32&gt;&gt;;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// fn blend_mode(a: PreRgba, b: PreRgba) -&gt; PreRgba {</span>
-    <span class="doccomment">///    PreAlpha {</span>
-    <span class="doccomment">///        color: LinSrgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),</span>
-    <span class="doccomment">///        alpha: a.alpha * b.alpha,</span>
-    <span class="doccomment">///    }</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);</span>
-    <span class="doccomment">/// let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);</span>
-    <span class="doccomment">/// let c = a.blend_with(b, blend_mode);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">blend_with</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">destination</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Blend self, as the source color, with `destination`, using
+    /// `blend_function`. Anything that implements [`BlendFunction`] is
+    /// acceptable, including functions and closures.
+    ///
+    /// ```
+    /// use palette::{LinSrgb, LinSrgba};
+    /// use palette::blend::{BlendWith, PreAlpha};
+    ///
+    /// type PreRgba = PreAlpha&lt;LinSrgb&lt;f32&gt;&gt;;
+    ///
+    /// fn blend_mode(a: PreRgba, b: PreRgba) -&gt; PreRgba {
+    ///    PreAlpha {
+    ///        color: LinSrgb::new(a.red * b.green, a.green * b.blue, a.blue * b.red),
+    ///        alpha: a.alpha * b.alpha,
+    ///    }
+    /// }
+    ///
+    /// let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+    /// let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+    /// let c = a.blend_with(b, blend_mode);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>blend_with&lt;F&gt;(<span class="self">self</span>, destination: <span class="self">Self</span>, blend_function: F) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>F: BlendFunction&lt;<span class="self">Self</span>::Color&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">BlendWith</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="kw">impl</span>&lt;C&gt; BlendWith <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="kw">type</span> <span class="ident">Color</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="kw">type </span>Color = C;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">blend_with</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>blend_with&lt;F&gt;(<span class="self">self</span>, other: <span class="self">Self</span>, blend_function: F) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>F: BlendFunction&lt;<span class="self">Self</span>::Color&gt;,
     {
-        <span class="ident">blend_function</span>.<span class="ident">apply_to</span>(<span class="self">self</span>, <span class="ident">other</span>)
+        blend_function.apply_to(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">BlendWith</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="kw">impl</span>&lt;C&gt; BlendWith <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="kw">type</span> <span class="ident">Color</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="kw">type </span>Color = C;
 
-    <span class="kw">fn</span> <span class="ident">blend_with</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">destination</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident"><span class="kw">crate</span>::blend::BlendFunction</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span>,
+    <span class="kw">fn </span>blend_with&lt;F&gt;(<span class="self">self</span>, destination: <span class="self">Self</span>, blend_function: F) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>F: <span class="kw">crate</span>::blend::BlendFunction&lt;<span class="self">Self</span>::Color&gt;,
     {
-        <span class="self">self</span>.<span class="ident">premultiply</span>()
-            .<span class="ident">blend_with</span>(<span class="ident">destination</span>.<span class="ident">premultiply</span>(), <span class="ident">blend_function</span>)
-            .<span class="ident">unpremultiply</span>()
+        <span class="self">self</span>.premultiply()
+            .blend_with(destination.premultiply(), blend_function)
+            .unpremultiply()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">BlendWith</span> <span class="kw">for</span> <span class="ident">C</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Stimulus</span>,
+<span class="kw">impl</span>&lt;C&gt; BlendWith <span class="kw">for </span>C
+<span class="kw">where
+    </span>C: Premultiply,
+    C::Scalar: Stimulus,
 {
-    <span class="kw">type</span> <span class="ident">Color</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="kw">type </span>Color = C;
 
-    <span class="kw">fn</span> <span class="ident">blend_with</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">blend_function</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Color</span><span class="op">&gt;</span>,
+    <span class="kw">fn </span>blend_with&lt;F&gt;(<span class="self">self</span>, other: <span class="self">Self</span>, blend_function: F) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>F: BlendFunction&lt;<span class="self">Self</span>::Color&gt;,
     {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">blend_with</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>), <span class="ident">blend_function</span>)
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .blend_with(PreAlpha::new_opaque(other), blend_function)
+            .unpremultiply()
+            .color
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

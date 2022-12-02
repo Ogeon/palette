@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/srgb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>srgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/srgb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>srgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -150,157 +150,157 @@
 <span id="150">150</span>
 <span id="151">151</span>
 <span id="152">152</span>
-</pre><pre class="rust"><code><span class="doccomment">//! The sRGB standard.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! The sRGB standard.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">bool_mask::LazySelect</span>,
-    <span class="ident">encoding</span>::{<span class="ident">FromLinear</span>, <span class="ident">IntoLinear</span>},
-    <span class="ident">luma::LumaStandard</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">MulAdd</span>, <span class="ident">MulSub</span>, <span class="ident">PartialCmp</span>, <span class="ident">Powf</span>, <span class="ident">Real</span>},
-    <span class="ident">rgb</span>::{<span class="ident">Primaries</span>, <span class="ident">RgbSpace</span>, <span class="ident">RgbStandard</span>},
-    <span class="ident">white_point</span>::{<span class="ident">Any</span>, <span class="ident">D65</span>},
-    <span class="ident">Yxy</span>,
+</span><span class="kw">use crate</span>::{
+    bool_mask::LazySelect,
+    encoding::{FromLinear, IntoLinear},
+    luma::LumaStandard,
+    num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
+    rgb::{Primaries, RgbSpace, RgbStandard},
+    white_point::{Any, D65},
+    Yxy,
 };
 
-<span class="kw">use</span> <span class="ident">lookup_tables</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span>lookup_tables::<span class="kw-2">*</span>;
 
-<span class="kw">mod</span> <span class="ident">lookup_tables</span>;
+<span class="kw">mod </span>lookup_tables;
 
-<span class="doccomment">/// The sRGB standard, color space, and transfer function.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # As transfer function</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `Srgb` will not use any kind of approximation when converting from `T` to</span>
-<span class="doccomment">/// `T`. This involves calls to `powf`, which may make it too slow for certain</span>
-<span class="doccomment">/// applications.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// There are some specialized cases where it has been optimized:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// * When converting from `u8` to `f32` or `f64`, while converting to linear</span>
-<span class="doccomment">///   space. This uses lookup tables with precomputed values. `f32` will use the</span>
-<span class="doccomment">///   table provided by [fast_srgb8::srgb8_to_f32].</span>
-<span class="doccomment">/// * When converting from `f32` or `f64` to `u8`, while converting from linear</span>
-<span class="doccomment">///   space. This uses [fast_srgb8::f32_to_srgb8].</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Srgb</span>;
+<span class="doccomment">/// The sRGB standard, color space, and transfer function.
+///
+/// # As transfer function
+///
+/// `Srgb` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values. `f32` will use the
+///   table provided by [fast_srgb8::srgb8_to_f32].
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses [fast_srgb8::f32_to_srgb8].
+</span><span class="attribute">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+</span><span class="kw">pub struct </span>Srgb;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Real</span><span class="op">&gt;</span> <span class="ident">Primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">fn</span> <span class="ident">red</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::new</span>(
-            <span class="ident">T::from_f64</span>(<span class="number">0.6400</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.3300</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.212656</span>),
+<span class="kw">impl</span>&lt;T: Real&gt; Primaries&lt;T&gt; <span class="kw">for </span>Srgb {
+    <span class="kw">fn </span>red() -&gt; Yxy&lt;Any, T&gt; {
+        Yxy::new(
+            T::from_f64(<span class="number">0.6400</span>),
+            T::from_f64(<span class="number">0.3300</span>),
+            T::from_f64(<span class="number">0.212656</span>),
         )
     }
-    <span class="kw">fn</span> <span class="ident">green</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::new</span>(
-            <span class="ident">T::from_f64</span>(<span class="number">0.3000</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.6000</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.715158</span>),
+    <span class="kw">fn </span>green() -&gt; Yxy&lt;Any, T&gt; {
+        Yxy::new(
+            T::from_f64(<span class="number">0.3000</span>),
+            T::from_f64(<span class="number">0.6000</span>),
+            T::from_f64(<span class="number">0.715158</span>),
         )
     }
-    <span class="kw">fn</span> <span class="ident">blue</span>() -&gt; <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Yxy::new</span>(
-            <span class="ident">T::from_f64</span>(<span class="number">0.1500</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.0600</span>),
-            <span class="ident">T::from_f64</span>(<span class="number">0.072186</span>),
+    <span class="kw">fn </span>blue() -&gt; Yxy&lt;Any, T&gt; {
+        Yxy::new(
+            T::from_f64(<span class="number">0.1500</span>),
+            T::from_f64(<span class="number">0.0600</span>),
+            T::from_f64(<span class="number">0.072186</span>),
         )
     }
 }
 
-<span class="kw">impl</span> <span class="ident">RgbSpace</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">type</span> <span class="ident">Primaries</span> <span class="op">=</span> <span class="ident">Srgb</span>;
-    <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
+<span class="kw">impl </span>RgbSpace <span class="kw">for </span>Srgb {
+    <span class="kw">type </span>Primaries = Srgb;
+    <span class="kw">type </span>WhitePoint = D65;
 }
 
-<span class="kw">impl</span> <span class="ident">RgbStandard</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">type</span> <span class="ident">Space</span> <span class="op">=</span> <span class="ident">Srgb</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
+<span class="kw">impl </span>RgbStandard <span class="kw">for </span>Srgb {
+    <span class="kw">type </span>Space = Srgb;
+    <span class="kw">type </span>TransferFn = Srgb;
 }
 
-<span class="kw">impl</span> <span class="ident">LumaStandard</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="kw">type</span> <span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">D65</span>;
-    <span class="kw">type</span> <span class="ident">TransferFn</span> <span class="op">=</span> <span class="ident">Srgb</span>;
+<span class="kw">impl </span>LumaStandard <span class="kw">for </span>Srgb {
+    <span class="kw">type </span>WhitePoint = D65;
+    <span class="kw">type </span>TransferFn = Srgb;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">MulAdd</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T&gt; IntoLinear&lt;T, T&gt; <span class="kw">for </span>Srgb
+<span class="kw">where
+    </span>T: Real + Powf + MulAdd + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="comment">// Dividing the constants directly shows performance benefits in benchmarks for this function</span>
-        <span class="macro">lazy_select!</span> {
-            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">0.04045</span>)) =&gt; <span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">12.92</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span>,
-            <span class="kw">else</span> =&gt; <span class="ident">x</span>.<span class="ident">clone</span>().<span class="ident">mul_add</span>(<span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">1.055</span>), <span class="ident">T::from_f64</span>(<span class="number">0.055</span> <span class="op">/</span> <span class="number">1.055</span>)).<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="number">2.4</span>)),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_linear(x: T) -&gt; T {
+        <span class="comment">// Dividing the constants directly shows performance benefits in benchmarks for this function
+        </span><span class="macro">lazy_select! </span>{
+            <span class="kw">if </span>x.lt_eq(<span class="kw-2">&amp;</span>T::from_f64(<span class="number">0.04045</span>)) =&gt; T::from_f64(<span class="number">1.0 </span>/ <span class="number">12.92</span>) * <span class="kw-2">&amp;</span>x,
+            <span class="kw">else </span>=&gt; x.clone().mul_add(T::from_f64(<span class="number">1.0 </span>/ <span class="number">1.055</span>), T::from_f64(<span class="number">0.055 </span>/ <span class="number">1.055</span>)).powf(T::from_f64(<span class="number">2.4</span>)),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Powf</span> <span class="op">+</span> <span class="ident">MulSub</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T&gt; FromLinear&lt;T, T&gt; <span class="kw">for </span>Srgb
+<span class="kw">where
+    </span>T: Real + Powf + MulSub + Arithmetics + PartialCmp + Clone,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">x</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="macro">lazy_select!</span> {
-            <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_f64</span>(<span class="number">0.0031308</span>)) =&gt; <span class="ident">T::from_f64</span>(<span class="number">12.92</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span>,
-            <span class="kw">else</span> =&gt; <span class="ident">x</span>.<span class="ident">clone</span>().<span class="ident">powf</span>(<span class="ident">T::from_f64</span>(<span class="number">1.0</span> <span class="op">/</span> <span class="number">2.4</span>)).<span class="ident">mul_sub</span>(<span class="ident">T::from_f64</span>(<span class="number">1.055</span>), <span class="ident">T::from_f64</span>(<span class="number">0.055</span>)),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_linear(x: T) -&gt; T {
+        <span class="macro">lazy_select! </span>{
+            <span class="kw">if </span>x.lt_eq(<span class="kw-2">&amp;</span>T::from_f64(<span class="number">0.0031308</span>)) =&gt; T::from_f64(<span class="number">12.92</span>) * <span class="kw-2">&amp;</span>x,
+            <span class="kw">else </span>=&gt; x.clone().powf(T::from_f64(<span class="number">1.0 </span>/ <span class="number">2.4</span>)).mul_sub(T::from_f64(<span class="number">1.055</span>), T::from_f64(<span class="number">0.055</span>)),
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">f32</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">encoded</span>: <span class="ident">u8</span>) -&gt; <span class="ident">f32</span> {
-        <span class="ident">fast_srgb8::srgb8_to_f32</span>(<span class="ident">encoded</span>)
+<span class="kw">impl </span>IntoLinear&lt;f32, u8&gt; <span class="kw">for </span>Srgb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_linear(encoded: u8) -&gt; f32 {
+        fast_srgb8::srgb8_to_f32(encoded)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">f32</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">linear</span>: <span class="ident">f32</span>) -&gt; <span class="ident">u8</span> {
-        <span class="ident">fast_srgb8::f32_to_srgb8</span>(<span class="ident">linear</span>)
+<span class="kw">impl </span>FromLinear&lt;f32, u8&gt; <span class="kw">for </span>Srgb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_linear(linear: f32) -&gt; u8 {
+        fast_srgb8::f32_to_srgb8(linear)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">IntoLinear</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_linear</span>(<span class="ident">encoded</span>: <span class="ident">u8</span>) -&gt; <span class="ident">f64</span> {
-        <span class="ident">SRGB_U8_TO_F64</span>[<span class="ident">encoded</span> <span class="kw">as</span> <span class="ident">usize</span>]
+<span class="kw">impl </span>IntoLinear&lt;f64, u8&gt; <span class="kw">for </span>Srgb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_linear(encoded: u8) -&gt; f64 {
+        SRGB_U8_TO_F64[encoded <span class="kw">as </span>usize]
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromLinear</span><span class="op">&lt;</span><span class="ident">f64</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Srgb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_linear</span>(<span class="ident">linear</span>: <span class="ident">f64</span>) -&gt; <span class="ident">u8</span> {
-        <span class="ident">Srgb::from_linear</span>(<span class="ident">linear</span> <span class="kw">as</span> <span class="ident">f32</span>)
+<span class="kw">impl </span>FromLinear&lt;f64, u8&gt; <span class="kw">for </span>Srgb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_linear(linear: f64) -&gt; u8 {
+        Srgb::from_linear(linear <span class="kw">as </span>f32)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::encoding</span>::{<span class="ident">FromLinear</span>, <span class="ident">IntoLinear</span>, <span class="ident">Srgb</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, Srgb};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">u8_to_f32_to_u8</span>() {
-        <span class="kw">for</span> <span class="ident">expected</span> <span class="kw">in</span> <span class="number">0u8</span>..<span class="op">=</span><span class="number">255u8</span> {
-            <span class="kw">let</span> <span class="ident">linear</span>: <span class="ident">f32</span> <span class="op">=</span> <span class="ident">Srgb::into_linear</span>(<span class="ident">expected</span>);
-            <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">Srgb::from_linear</span>(<span class="ident">linear</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="ident">expected</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>u8_to_f32_to_u8() {
+        <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
+            <span class="kw">let </span>linear: f32 = Srgb::into_linear(expected);
+            <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
+            <span class="macro">assert_eq!</span>(result, expected);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">u8_to_f64_to_u8</span>() {
-        <span class="kw">for</span> <span class="ident">expected</span> <span class="kw">in</span> <span class="number">0u8</span>..<span class="op">=</span><span class="number">255u8</span> {
-            <span class="kw">let</span> <span class="ident">linear</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">Srgb::into_linear</span>(<span class="ident">expected</span>);
-            <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">Srgb::from_linear</span>(<span class="ident">linear</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="ident">expected</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>u8_to_f64_to_u8() {
+        <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
+            <span class="kw">let </span>linear: f64 = Srgb::into_linear(expected);
+            <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
+            <span class="macro">assert_eq!</span>(result, expected);
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

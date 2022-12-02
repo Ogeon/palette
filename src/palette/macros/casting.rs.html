@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/casting.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>casting.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/casting.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>casting.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -389,396 +389,400 @@
 <span id="389">389</span>
 <span id="390">390</span>
 <span id="391">391</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="macro">macro_rules!</span> <span class="ident">raw_pixel_conversion_tests</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">path</span>),<span class="op">+</span><span class="op">&gt;</span> : $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_f32_array</span>() {
-            <span class="macro">raw_pixel_conversion_tests!</span>(@<span class="ident">float_array_test</span> <span class="ident">f32</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>);
+<span id="392">392</span>
+<span id="393">393</span>
+</pre><pre class="rust"><code><span class="attribute">#[cfg(test)]
+</span><span class="macro">macro_rules! </span>raw_pixel_conversion_tests {
+    (<span class="macro-nonterminal">$name</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: path),+&gt; : $(<span class="macro-nonterminal">$component</span>: ident),+) =&gt; {
+        <span class="attribute">#[test]
+        </span><span class="kw">fn </span>convert_from_f32_array() {
+            <span class="macro">raw_pixel_conversion_tests!</span>(@float_array_test f32, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;: $(<span class="macro-nonterminal">$component</span>),+);
         }
 
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_f64_array</span>() {
-            <span class="macro">raw_pixel_conversion_tests!</span>(@<span class="ident">float_array_test</span> <span class="ident">f64</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>);
+        <span class="attribute">#[test]
+        </span><span class="kw">fn </span>convert_from_f64_array() {
+            <span class="macro">raw_pixel_conversion_tests!</span>(@float_array_test f64, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;: $(<span class="macro-nonterminal">$component</span>),+);
         }
 
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>() {
-            <span class="macro">raw_pixel_conversion_tests!</span>(@<span class="ident">float_slice_test</span> <span class="ident">f32</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>);
+        <span class="attribute">#[test]
+        </span><span class="kw">fn </span>convert_from_f32_slice() {
+            <span class="macro">raw_pixel_conversion_tests!</span>(@float_slice_test f32, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;: $(<span class="macro-nonterminal">$component</span>),+);
         }
 
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>() {
-            <span class="macro">raw_pixel_conversion_tests!</span>(@<span class="ident">float_slice_test</span> <span class="ident">f64</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>);
+        <span class="attribute">#[test]
+        </span><span class="kw">fn </span>convert_from_f64_slice() {
+            <span class="macro">raw_pixel_conversion_tests!</span>(@float_slice_test f64, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;: $(<span class="macro-nonterminal">$component</span>),+);
         }
     };
 
-    (@<span class="ident">float_array_test</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>: <span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">path</span>),<span class="op">+</span><span class="op">&gt;</span> : $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cast::ArrayCast</span>;
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Alpha</span>;
+    (@float_array_test <span class="macro-nonterminal">$float</span>: ty, <span class="macro-nonterminal">$name</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: path),+&gt; : $(<span class="macro-nonterminal">$component</span>: ident),+) =&gt; {
+        <span class="kw">use </span><span class="kw">crate</span>::cast::ArrayCast;
+        <span class="kw">use </span><span class="kw">crate</span>::Alpha;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span> <span class="op">=</span> <span class="number">0.0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>counter: <span class="macro-nonterminal">$float </span>= <span class="number">0.0</span>;
         $(
-            <span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">0.1</span>;
-            <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">=</span> <span class="ident">counter</span>;
-        )<span class="op">+</span>
-        <span class="kw">let</span> <span class="ident">alpha</span> <span class="op">=</span> <span class="ident">counter</span> <span class="op">+</span> <span class="number">0.1</span>;
+            counter += <span class="number">0.1</span>;
+            <span class="kw">let </span><span class="macro-nonterminal">$component </span>= counter;
+        )+
+        <span class="kw">let </span>alpha = counter + <span class="number">0.1</span>;
 
-        <span class="kw">let</span> <span class="ident">raw</span>: <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayCast</span><span class="op">&gt;</span><span class="ident">::Array</span> <span class="op">=</span> [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>];
-        <span class="kw">let</span> <span class="ident">raw_plus_1</span>: <span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayCast</span><span class="op">&gt;</span><span class="ident">::Array</span> <span class="op">=</span> [
-            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span>
-            <span class="ident">alpha</span>
+        <span class="kw">let </span>raw: &lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt; <span class="kw">as </span>ArrayCast&gt;::Array = [$(<span class="macro-nonterminal">$component</span>),+];
+        <span class="kw">let </span>raw_plus_1: &lt;Alpha&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt; <span class="kw">as </span>ArrayCast&gt;::Array = [
+            $(<span class="macro-nonterminal">$component</span>,)+
+            alpha
         ];
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::from_array</span>(<span class="ident">raw</span>);
+        <span class="kw">let </span>color: <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt; = <span class="kw">crate</span>::cast::from_array(raw);
 
-        <span class="kw">let</span> <span class="ident">color_alpha</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cast::from_array</span>(<span class="ident">raw_plus_1</span>);
+        <span class="kw">let </span>color_alpha: Alpha&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt; = <span class="kw">crate</span>::cast::from_array(raw_plus_1);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">color</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::new</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>));
+        <span class="macro">assert_eq!</span>(color, <span class="macro-nonterminal">$name::new</span>($(<span class="macro-nonterminal">$component</span>),+));
 
-        <span class="macro">assert_eq!</span>(<span class="ident">color_alpha</span>, <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span><span class="ident">::new</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span> <span class="ident">alpha</span>));
+        <span class="macro">assert_eq!</span>(color_alpha, Alpha::&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt;::new($(<span class="macro-nonterminal">$component</span>,)+ alpha));
     };
 
-    (@<span class="ident">float_slice_test</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>: <span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">path</span>),<span class="op">+</span><span class="op">&gt;</span> : $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
-        <span class="kw">use</span> <span class="ident">core::convert</span>::{<span class="ident">TryInto</span>, <span class="ident">TryFrom</span>};
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Alpha</span>;
+    (@float_slice_test <span class="macro-nonterminal">$float</span>: ty, <span class="macro-nonterminal">$name</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: path),+&gt; : $(<span class="macro-nonterminal">$component</span>: ident),+) =&gt; {
+        <span class="kw">use </span>core::convert::{TryInto, TryFrom};
+        <span class="kw">use </span><span class="kw">crate</span>::Alpha;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span> <span class="op">=</span> <span class="number">0.0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>counter: <span class="macro-nonterminal">$float </span>= <span class="number">0.0</span>;
         $(
-            <span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">0.1</span>;
-            <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">=</span> <span class="ident">counter</span>;
-        )<span class="op">+</span>
-        <span class="kw">let</span> <span class="ident">alpha</span> <span class="op">=</span> <span class="ident">counter</span> <span class="op">+</span> <span class="number">0.1</span>;
-        <span class="kw">let</span> <span class="ident">extra</span> <span class="op">=</span> <span class="ident">counter</span> <span class="op">+</span> <span class="number">0.2</span>;
-        <span class="kw">let</span> <span class="ident">raw</span>: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>];
-        <span class="kw">let</span> <span class="ident">raw_plus_1</span>: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span>
-            <span class="ident">alpha</span>
+            counter += <span class="number">0.1</span>;
+            <span class="kw">let </span><span class="macro-nonterminal">$component </span>= counter;
+        )+
+        <span class="kw">let </span>alpha = counter + <span class="number">0.1</span>;
+        <span class="kw">let </span>extra = counter + <span class="number">0.2</span>;
+        <span class="kw">let </span>raw: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$float</span>] = <span class="kw-2">&amp;</span>[$(<span class="macro-nonterminal">$component</span>),+];
+        <span class="kw">let </span>raw_plus_1: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$float</span>] = <span class="kw-2">&amp;</span>[
+            $(<span class="macro-nonterminal">$component</span>,)+
+            alpha
         ];
-        <span class="kw">let</span> <span class="ident">raw_plus_2</span>: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span>
-            <span class="ident">alpha</span>,
-            <span class="ident">extra</span>
+        <span class="kw">let </span>raw_plus_2: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$float</span>] = <span class="kw-2">&amp;</span>[
+            $(<span class="macro-nonterminal">$component</span>,)+
+            alpha,
+            extra
         ];
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">raw</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="ident">raw_plus_1</span>).<span class="ident">is_err</span>());
+        <span class="kw">let </span>color: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt; = raw.try_into().unwrap();
+        <span class="macro">assert!</span>(&lt;<span class="kw-2">&amp;</span><span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;&gt;::try_from(raw_plus_1).is_err());
 
-        <span class="kw">let</span> <span class="ident">color_alpha</span>: <span class="kw-2">&amp;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">raw_plus_1</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="ident">raw_plus_2</span>).<span class="ident">is_err</span>());
+        <span class="kw">let </span>color_alpha: <span class="kw-2">&amp;</span>Alpha&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt; = raw_plus_1.try_into().unwrap();
+        <span class="macro">assert!</span>(&lt;<span class="kw-2">&amp;</span>Alpha&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt;&gt;::try_from(raw_plus_2).is_err());
 
-        <span class="macro">assert_eq!</span>(<span class="ident">color</span>, <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::new</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>));
+        <span class="macro">assert_eq!</span>(color, <span class="kw-2">&amp;</span><span class="macro-nonterminal">$name::new</span>($(<span class="macro-nonterminal">$component</span>),+));
 
-        <span class="macro">assert_eq!</span>(<span class="ident">color_alpha</span>, <span class="kw-2">&amp;</span><span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span><span class="ident">::new</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span> <span class="ident">alpha</span>));
+        <span class="macro">assert_eq!</span>(color_alpha, <span class="kw-2">&amp;</span>Alpha::&lt;<span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt;, <span class="macro-nonterminal">$float</span>&gt;::new($(<span class="macro-nonterminal">$component</span>,)+ alpha));
     };
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="macro">macro_rules!</span> <span class="ident">raw_pixel_conversion_fail_tests</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">path</span>),<span class="op">+</span><span class="op">&gt;</span> : $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="attribute">#[<span class="ident">should_panic</span>(<span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;TryFromSliceError&quot;</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_short_f32_slice</span>() {
-            <span class="macro">raw_pixel_conversion_fail_tests!</span>(@<span class="ident">float_slice_test</span> <span class="ident">f32</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>);
+<span class="attribute">#[cfg(test)]
+</span><span class="macro">macro_rules! </span>raw_pixel_conversion_fail_tests {
+    (<span class="macro-nonterminal">$name</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: path),+&gt; : $(<span class="macro-nonterminal">$component</span>: ident),+) =&gt; {
+        <span class="attribute">#[test]
+        #[should_panic(expected = <span class="string">&quot;TryFromSliceError&quot;</span>)]
+        </span><span class="kw">fn </span>convert_from_short_f32_slice() {
+            <span class="macro">raw_pixel_conversion_fail_tests!</span>(@float_slice_test f32, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;);
         }
 
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="attribute">#[<span class="ident">should_panic</span>(<span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;TryFromSliceError&quot;</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">convert_from_short_f64_slice</span>() {
-            <span class="macro">raw_pixel_conversion_fail_tests!</span>(@<span class="ident">float_slice_test</span> <span class="ident">f64</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>);
+        <span class="attribute">#[test]
+        #[should_panic(expected = <span class="string">&quot;TryFromSliceError&quot;</span>)]
+        </span><span class="kw">fn </span>convert_from_short_f64_slice() {
+            <span class="macro">raw_pixel_conversion_fail_tests!</span>(@float_slice_test f64, <span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>),+&gt;);
         }
     };
 
-    (@<span class="ident">float_slice_test</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>: <span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">path</span>),<span class="op">+</span><span class="op">&gt;</span>) =&gt; {
-        <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
+    (@float_slice_test <span class="macro-nonterminal">$float</span>: ty, <span class="macro-nonterminal">$name</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: path),+&gt;) =&gt; {
+        <span class="kw">use </span>core::convert::TryInto;
 
-        <span class="kw">let</span> <span class="ident">raw</span>: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="number">0.1</span>];
-        <span class="kw">let</span> <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">raw</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let </span>raw: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$float</span>] = <span class="kw-2">&amp;</span>[<span class="number">0.1</span>];
+        <span class="kw">let _</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$name</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)+ <span class="macro-nonterminal">$float</span>&gt; = raw.try_into().unwrap();
     };
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_array_casts</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">ident</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>: <span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="macro">impl_array_casts!</span>([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)<span class="kw-2">*</span>);
+<span class="macro">macro_rules! </span>impl_array_casts {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; $(<span class="macro-nonterminal">$ty_param</span>: ident),+ &gt; $(<span class="macro-nonterminal">$rest</span>: tt)<span class="kw-2">*</span>) =&gt; {
+        <span class="macro">impl_array_casts!</span>([$(<span class="macro-nonterminal">$ty_param</span>),+] <span class="macro-nonterminal">$self_ty </span>&lt; $(<span class="macro-nonterminal">$ty_param</span>),+ &gt; $(<span class="macro-nonterminal">$rest</span>)<span class="kw-2">*</span>);
     };
-    ([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">tt</span>)<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>: <span class="ident">ty</span>),<span class="op">+</span> <span class="op">&gt;</span> , [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>: <span class="ident">ty</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>: <span class="ident">expr</span>] $(, <span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>] {
-                <span class="ident"><span class="kw">crate</span>::cast::into_array_ref</span>(<span class="self">self</span>)
+    ([$(<span class="macro-nonterminal">$ty_param</span>: tt)+] <span class="macro-nonterminal">$self_ty</span>: ident &lt; $(<span class="macro-nonterminal">$self_ty_param</span>: ty),+ &gt; , [<span class="macro-nonterminal">$array_item</span>: ty; <span class="macro-nonterminal">$array_len</span>: expr] $(, <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)+)<span class="question-mark">?</span>) =&gt; {
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsRef&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>] {
+                <span class="kw">crate</span>::cast::into_array_ref(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_array_ref</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsRef&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt; {
+                <span class="kw">crate</span>::cast::from_array_ref(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>] {
-                <span class="ident"><span class="kw">crate</span>::cast::into_array_mut</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsMut&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>] {
+                <span class="kw">crate</span>::cast::into_array_mut(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_array_mut</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsMut&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt; {
+                <span class="kw">crate</span>::cast::from_array_mut(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>] {
-                <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">AsRef</span>::<span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span><span class="ident">::as_ref</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsRef&lt;[<span class="macro-nonterminal">$array_item</span>]&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$array_item</span>] {
+                <span class="kw-2">&amp;*</span>AsRef::&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;::as_ref(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>] {
-                <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">AsMut</span>::<span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span><span class="ident">::as_mut</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsMut&lt;[<span class="macro-nonterminal">$array_item</span>]&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[<span class="macro-nonterminal">$array_item</span>] {
+                <span class="kw-2">&amp;mut *</span>AsMut::&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;::as_mut(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::into_array</span>(<span class="ident">color</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                <span class="kw">crate</span>::cast::into_array(color)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">array</span>: [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_array</span>(<span class="ident">array</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(array: [<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]) -&gt; <span class="self">Self </span>{
+                <span class="kw">crate</span>::cast::from_array(array)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_ref</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_ref()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]) -&gt; <span class="self">Self</span>{
-                <span class="ident">array</span>.<span class="ident">as_ref</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(array: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]) -&gt; <span class="self">Self</span>{
+                array.as_ref()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_ref</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_ref()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="kw">type</span> <span class="macro-nonterminal">Error</span> <span class="op">=</span> <span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>] <span class="kw">as</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Error</span>;
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; core::convert::TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>]&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="kw">type </span><span class="macro-nonterminal">Error </span>= &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>] <span class="kw">as </span>core::convert::TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>]&gt;&gt;::Error;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>try_from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="macro-nonterminal">$array_item</span>]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>core::convert::TryInto;
 
-                <span class="ident">slice</span>.<span class="ident">try_into</span>().<span class="ident">map</span>(<span class="ident"><span class="kw">crate</span>::cast::from_array_ref</span>)
+                slice.try_into().map(<span class="kw">crate</span>::cast::from_array_ref)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_mut</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_mut()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]) -&gt; <span class="self">Self</span>{
-                <span class="ident">array</span>.<span class="ident">as_mut</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(array: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]) -&gt; <span class="self">Self</span>{
+                array.as_mut()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_mut</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>]
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_mut()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="kw">type</span> <span class="macro-nonterminal">Error</span> <span class="op">=</span> <span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>] <span class="kw">as</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Error</span>;
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; core::convert::TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>]&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="kw">type </span><span class="macro-nonterminal">Error </span>= &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>] <span class="kw">as </span>core::convert::TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>]&gt;&gt;::Error;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>try_from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[<span class="macro-nonterminal">$array_item</span>]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>core::convert::TryInto;
 
-                <span class="ident">slice</span>.<span class="ident">try_into</span>().<span class="ident">map</span>(<span class="ident"><span class="kw">crate</span>::cast::from_array_mut</span>)
+                slice.try_into().map(<span class="kw">crate</span>::cast::from_array_mut)
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::into_array_box</span>(<span class="ident">color</span>)
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;&gt; <span class="kw">for </span>Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;) -&gt; <span class="self">Self </span>{
+                <span class="kw">crate</span>::cast::into_array_box(color)
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">array</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_item</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">array_len</span>]<span class="op">&gt;</span>) -&gt; <span class="self">Self</span>{
-                <span class="ident"><span class="kw">crate</span>::cast::from_array_box</span>(<span class="ident">array</span>)
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;&gt; <span class="kw">for </span>Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(array: Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;) -&gt; <span class="self">Self</span>{
+                <span class="kw">crate</span>::cast::from_array_box(array)
             }
         }
     }
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_uint_casts_self</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">ident</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>: <span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="macro">impl_uint_casts_self!</span>([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)<span class="kw-2">*</span>);
+<span class="macro">macro_rules! </span>impl_uint_casts_self {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; $(<span class="macro-nonterminal">$ty_param</span>: ident),+ &gt; $(<span class="macro-nonterminal">$rest</span>: tt)<span class="kw-2">*</span>) =&gt; {
+        <span class="macro">impl_uint_casts_self!</span>([$(<span class="macro-nonterminal">$ty_param</span>),+] <span class="macro-nonterminal">$self_ty </span>&lt; $(<span class="macro-nonterminal">$ty_param</span>),+ &gt; $(<span class="macro-nonterminal">$rest</span>)<span class="kw-2">*</span>);
     };
-    ([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">tt</span>)<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>: <span class="ident">ty</span>),<span class="op">+</span> <span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>: <span class="ident">ty</span> $(, <span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::into_uint_ref</span>(<span class="self">self</span>)
+    ([$(<span class="macro-nonterminal">$ty_param</span>: tt)+] <span class="macro-nonterminal">$self_ty</span>: ident &lt; $(<span class="macro-nonterminal">$self_ty_param</span>: ty),+ &gt;, <span class="macro-nonterminal">$uint</span>: ty $(, <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)+)<span class="question-mark">?</span>) =&gt; {
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsRef&lt;<span class="macro-nonterminal">$uint</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$uint </span>{
+                <span class="kw">crate</span>::cast::into_uint_ref(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::into_uint_mut</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsMut&lt;<span class="macro-nonterminal">$uint</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="macro-nonterminal">$uint </span>{
+                <span class="kw">crate</span>::cast::into_uint_mut(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">uint</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_uint</span>(<span class="ident">uint</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="macro-nonterminal">$uint</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(uint: <span class="macro-nonterminal">$uint</span>) -&gt; <span class="self">Self </span>{
+                <span class="kw">crate</span>::cast::from_uint(uint)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> $(, $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">uint</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>) -&gt; <span class="self">Self</span>{
-                <span class="ident">uint</span>.<span class="ident">as_ref</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$uint</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        <span class="kw">where
+            </span><span class="macro-nonterminal">$uint</span>: AsRef&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; $(, $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(uint: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$uint</span>) -&gt; <span class="self">Self</span>{
+                uint.as_ref()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> $(, $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">uint</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>) -&gt; <span class="self">Self</span>{
-                <span class="ident">uint</span>.<span class="ident">as_mut</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$uint</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;
+        <span class="kw">where
+            </span><span class="macro-nonterminal">$uint</span>: AsMut&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; $(, $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(uint: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$uint</span>) -&gt; <span class="self">Self</span>{
+                uint.as_mut()
             }
         }
     }
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_uint_casts_other</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">ident</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>: <span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
-        <span class="macro">impl_uint_casts_other!</span>([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>),<span class="op">+</span> <span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)<span class="kw-2">*</span>);
+<span class="macro">macro_rules! </span>impl_uint_casts_other {
+    <span class="comment">/*
+    ($self_ty: ident &lt; $($ty_param: ident),+ &gt; $($rest: tt)*) =&gt; {
+        impl_uint_casts_other!([$($ty_param),+] $self_ty &lt; $($ty_param),+ &gt; $($rest)*);
     };
-    ([$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">ident</span>),<span class="op">+</span>] <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>: <span class="ident">ty</span>),<span class="op">+</span> <span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>: <span class="ident">ty</span> $(, <span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_uint_ref</span>(<span class="self">self</span>)
+    */
+    </span>([$(<span class="macro-nonterminal">$ty_param</span>: ident),+] <span class="macro-nonterminal">$self_ty</span>: ident &lt; $(<span class="macro-nonterminal">$self_ty_param</span>: ty),+ &gt;, <span class="macro-nonterminal">$uint</span>: ty $(, <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)+)<span class="question-mark">?</span>) =&gt; {
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsRef&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$uint
+        </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt; {
+                <span class="kw">crate</span>::cast::from_uint_ref(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::from_uint_mut</span>(<span class="self">self</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; AsMut&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$uint
+        </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt; {
+                <span class="kw">crate</span>::cast::from_uint_mut(<span class="self">self</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="kw">crate</span>::cast::into_uint</span>(<span class="ident">color</span>)
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$uint
+        </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                <span class="kw">crate</span>::cast::into_uint(color)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_ref</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$uint
+        </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_ref()
             }
         }
 
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>)<span class="op">+</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uint</span>
-        $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty_param</span>),<span class="op">+</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">color</span>.<span class="ident">as_mut</span>()
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$uint
+        </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]
+            </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;) -&gt; <span class="self">Self </span>{
+                color.as_mut()
             }
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/bool_mask.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bool_mask.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/bool_mask.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bool_mask.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -173,180 +173,180 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits for abstracting over Boolean types.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! These traits are mainly useful for allowing SIMD values, where bit masks are</span>
-<span class="doccomment">//! typically used instead of `bool`.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits for abstracting over Boolean types.
+//!
+//! These traits are mainly useful for allowing SIMD values, where bit masks are
+//! typically used instead of `bool`.
 
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">BitAnd</span>, <span class="ident">BitOr</span>, <span class="ident">BitXor</span>, <span class="ident">Not</span>};
+</span><span class="kw">use </span>core::ops::{BitAnd, BitOr, BitXor, Not};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;wide&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">wide</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;wide&quot;</span>)]
+</span><span class="kw">mod </span>wide;
 
-<span class="doccomment">/// Associates a Boolean type to the implementing type.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This is primarily used in traits and functions that can accept SIMD values</span>
-<span class="doccomment">/// and return a Boolean result. SIMD values use masks to select different values for</span>
-<span class="doccomment">/// each lane and `HasBoolMask::Mask` can be used to know which type that mask</span>
-<span class="doccomment">/// has.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HasBoolMask</span> {
-    <span class="doccomment">/// The mask type to use for selecting `Self` values.</span>
-    <span class="kw">type</span> <span class="ident">Mask</span>: <span class="ident">BoolMask</span>;
+<span class="doccomment">/// Associates a Boolean type to the implementing type.
+///
+/// This is primarily used in traits and functions that can accept SIMD values
+/// and return a Boolean result. SIMD values use masks to select different values for
+/// each lane and `HasBoolMask::Mask` can be used to know which type that mask
+/// has.
+</span><span class="kw">pub trait </span>HasBoolMask {
+    <span class="doccomment">/// The mask type to use for selecting `Self` values.
+    </span><span class="kw">type </span>Mask: BoolMask;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">impl</span>&lt;T&gt; HasBoolMask <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>T
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">type </span>Mask = T::Mask;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="kw-2">mut</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">impl</span>&lt;T&gt; HasBoolMask <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span><span class="kw-2">mut </span>T
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">type </span>Mask = T::Mask;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> [<span class="ident">T</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">impl</span>&lt;T&gt; HasBoolMask <span class="kw">for </span>[T]
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">type </span>Mask = T::Mask;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> [<span class="ident">T</span>; <span class="ident">N</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; HasBoolMask <span class="kw">for </span>[T; N]
+<span class="kw">where
+    </span>T: HasBoolMask,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+    <span class="kw">type </span>Mask = T::Mask;
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_has_bool_mask</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
+<span class="macro">macro_rules! </span>impl_has_bool_mask {
+    ($(<span class="macro-nonterminal">$ty</span>:ident),+) =&gt; {
         $(
-            <span class="kw">impl</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span>;
+            <span class="kw">impl </span>HasBoolMask <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="kw">type </span>Mask = bool;
             }
-        )<span class="op">+</span>
+        )+
     };
 }
 
-<span class="macro">impl_has_bool_mask!</span>(<span class="ident">u8</span>, <span class="ident">u16</span>, <span class="ident">u32</span>, <span class="ident">u64</span>, <span class="ident">u128</span>, <span class="ident">i8</span>, <span class="ident">i16</span>, <span class="ident">i32</span>, <span class="ident">i64</span>, <span class="ident">i128</span>, <span class="ident">f32</span>, <span class="ident">f64</span>);
+<span class="macro">impl_has_bool_mask!</span>(u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64);
 
-<span class="doccomment">/// Basic methods for boolean masks.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BoolMask</span> {
-    <span class="doccomment">/// Create a new mask where each lane is set to `value`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_bool</span>(<span class="ident">value</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Basic methods for boolean masks.
+</span><span class="kw">pub trait </span>BoolMask {
+    <span class="doccomment">/// Create a new mask where each lane is set to `value`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>from_bool(value: bool) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Checks if all lanes in the mask are `true`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_true</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span>;
+    <span class="doccomment">/// Checks if all lanes in the mask are `true`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>is_true(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 
-    <span class="doccomment">/// Checks if all lanes in the mask are `false`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_false</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span>;
+    <span class="doccomment">/// Checks if all lanes in the mask are `false`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>is_false(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 }
 
-<span class="kw">impl</span> <span class="ident">BoolMask</span> <span class="kw">for</span> <span class="ident">bool</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_bool</span>(<span class="ident">value</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">value</span>
+<span class="kw">impl </span>BoolMask <span class="kw">for </span>bool {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_bool(value: bool) -&gt; <span class="self">Self </span>{
+        value
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_true</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw-2">*</span><span class="self">self</span>
-    }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>is_true(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw-2">*</span><span class="self">self
+    </span>}
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_false</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="op">!</span><span class="kw-2">*</span><span class="self">self</span>
-    }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>is_false(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        !<span class="kw-2">*</span><span class="self">self
+    </span>}
 }
 
-<span class="doccomment">/// Makes a mask bale to select between two values.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Makes a mask bale to select between two values.
+</span><span class="kw">pub trait </span>Select&lt;T&gt;
+<span class="kw">where
+    </span>T: HasBoolMask&lt;Mask = <span class="self">Self</span>&gt;,
 {
-    <span class="doccomment">/// Select lanes from `a` when corresponding lanes in `self` are `true`, and</span>
-    <span class="doccomment">/// select from `b` when `false`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">select</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>;
+    <span class="doccomment">/// Select lanes from `a` when corresponding lanes in `self` are `true`, and
+    /// select from `b` when `false`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>select(<span class="self">self</span>, a: T, b: T) -&gt; T;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">bool</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T&gt; Select&lt;T&gt; <span class="kw">for </span>bool
+<span class="kw">where
+    </span>T: HasBoolMask&lt;Mask = <span class="self">Self</span>&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">select</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">T</span>, <span class="ident">b</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">if</span> <span class="self">self</span> {
-            <span class="ident">a</span>
-        } <span class="kw">else</span> {
-            <span class="ident">b</span>
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>select(<span class="self">self</span>, a: T, b: T) -&gt; T {
+        <span class="kw">if </span><span class="self">self </span>{
+            a
+        } <span class="kw">else </span>{
+            b
         }
     }
 }
 
-<span class="doccomment">/// Like [`Select`], but can avoid evaluating the input.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Like [`Select`], but can avoid evaluating the input.
+</span><span class="kw">pub trait </span>LazySelect&lt;T&gt;: Select&lt;T&gt;
+<span class="kw">where
+    </span>T: HasBoolMask&lt;Mask = <span class="self">Self</span>&gt;,
 {
-    <span class="doccomment">/// Select lanes from the output of `a` when corresponding lanes in `self`</span>
-    <span class="doccomment">/// are `true`, and select from the output of `b` when `false`. May avoid</span>
-    <span class="doccomment">/// evaluating either option if it&#39;s not selected.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lazy_select</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">A</span>, <span class="ident">b</span>: <span class="ident">B</span>) -&gt; <span class="ident">T</span>
-    <span class="kw">where</span>
-        <span class="ident">A</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
-        <span class="ident">B</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>;
+    <span class="doccomment">/// Select lanes from the output of `a` when corresponding lanes in `self`
+    /// are `true`, and select from the output of `b` when `false`. May avoid
+    /// evaluating either option if it&#39;s not selected.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>lazy_select&lt;A, B&gt;(<span class="self">self</span>, a: A, b: B) -&gt; T
+    <span class="kw">where
+        </span>A: FnOnce() -&gt; T,
+        B: FnOnce() -&gt; T;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">bool</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T&gt; LazySelect&lt;T&gt; <span class="kw">for </span>bool
+<span class="kw">where
+    </span>T: HasBoolMask&lt;Mask = <span class="self">Self</span>&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">lazy_select</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">A</span>, <span class="ident">b</span>: <span class="ident">B</span>) -&gt; <span class="ident">T</span>
-    <span class="kw">where</span>
-        <span class="ident">A</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
-        <span class="ident">B</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>lazy_select&lt;A, B&gt;(<span class="self">self</span>, a: A, b: B) -&gt; T
+    <span class="kw">where
+        </span>A: FnOnce() -&gt; T,
+        B: FnOnce() -&gt; T,
     {
-        <span class="kw">if</span> <span class="self">self</span> {
-            <span class="ident">a</span>()
-        } <span class="kw">else</span> {
-            <span class="ident">b</span>()
+        <span class="kw">if </span><span class="self">self </span>{
+            a()
+        } <span class="kw">else </span>{
+            b()
         }
     }
 }
 
-<span class="doccomment">/// A helper trait that collects bit traits under one name.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BitOps</span>:
-    <span class="ident">Sized</span>
-    <span class="op">+</span> <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="ident">BitOr</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="ident">BitXor</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="ident">Not</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitOr</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-    <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitXor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
+<span class="doccomment">/// A helper trait that collects bit traits under one name.
+</span><span class="kw">pub trait </span>BitOps:
+    Sized
+    + BitAnd&lt;Output = <span class="self">Self</span>&gt;
+    + BitOr&lt;Output = <span class="self">Self</span>&gt;
+    + BitXor&lt;Output = <span class="self">Self</span>&gt;
+    + Not&lt;Output = <span class="self">Self</span>&gt;
+    + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitAnd&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
+    + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitOr&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
+    + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitXor&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">BitOps</span> <span class="kw">for</span> <span class="ident">T</span> <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Sized</span>
-        <span class="op">+</span> <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">BitOr</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">BitXor</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="ident">Not</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitOr</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
-        <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BitXor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span>
+<span class="kw">impl</span>&lt;T&gt; BitOps <span class="kw">for </span>T <span class="kw">where
+    </span>T: Sized
+        + BitAnd&lt;Output = <span class="self">Self</span>&gt;
+        + BitOr&lt;Output = <span class="self">Self</span>&gt;
+        + BitXor&lt;Output = <span class="self">Self</span>&gt;
+        + Not&lt;Output = <span class="self">Self</span>&gt;
+        + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitAnd&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
+        + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitOr&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
+        + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitXor&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, Output = <span class="self">Self</span>&gt;
 {
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

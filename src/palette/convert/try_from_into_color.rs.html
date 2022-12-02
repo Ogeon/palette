@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/try_from_into_color.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>try_from_into_color.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert/try_from_into_color.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>try_from_into_color.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -118,125 +118,125 @@
 <span id="118">118</span>
 <span id="119">119</span>
 <span id="120">120</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::fmt</span>;
+</pre><pre class="rust"><code><span class="kw">use </span>core::fmt;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IsWithinBounds</span>;
+<span class="kw">use </span><span class="kw">crate</span>::IsWithinBounds;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::FromColorUnclamped</span>;
+<span class="kw">use </span><span class="kw">super</span>::FromColorUnclamped;
 
-<span class="doccomment">/// The error type for a color conversion that converted a color into a color</span>
-<span class="doccomment">/// with invalid values.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">color</span>: <span class="ident">T</span>,
+<span class="doccomment">/// The error type for a color conversion that converted a color into a color
+/// with invalid values.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>OutOfBounds&lt;T&gt; {
+    color: T,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a new error wrapping a color</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">color</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">OutOfBounds</span> { <span class="ident">color</span> }
+<span class="kw">impl</span>&lt;T&gt; OutOfBounds&lt;T&gt; {
+    <span class="doccomment">/// Create a new error wrapping a color
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>new(color: T) -&gt; <span class="self">Self </span>{
+        OutOfBounds { color }
     }
 
-    <span class="doccomment">/// Consume this error and return the wrapped color</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">color</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">color</span>
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">fmt::Debug</span><span class="op">&gt;</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
-        <span class="string">&quot;color conversion is out of bounds&quot;</span>
+    <span class="doccomment">/// Consume this error and return the wrapped color
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>color(<span class="self">self</span>) -&gt; T {
+        <span class="self">self</span>.color
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;color conversion is out of bounds&quot;</span>)
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T: fmt::Debug&gt; std::error::Error <span class="kw">for </span>OutOfBounds&lt;T&gt; {
+    <span class="kw">fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="string">&quot;color conversion is out of bounds&quot;
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;T&gt; fmt::Display <span class="kw">for </span>OutOfBounds&lt;T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="macro">write!</span>(fmt, <span class="string">&quot;color conversion is out of bounds&quot;</span>)
     }
 }
 
-<span class="doccomment">/// A trait for fallible conversion of one color from another.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `U: TryFromColor&lt;T&gt;` is implemented for every type `U: FromColorUnclamped&lt;T&gt; + Clamp`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See [`FromColor`](crate::convert::FromColor) for a lossy version of this trait.</span>
-<span class="doccomment">/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See the [`convert`](crate::convert) module for how to implement `FromColorUnclamped` for</span>
-<span class="doccomment">/// custom colors.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TryFromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// Convert from T, returning ok if the color is inside of its defined</span>
-    <span class="doccomment">/// range, otherwise an `OutOfBounds` error is returned which contains</span>
-    <span class="doccomment">/// the unclamped color.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///```</span>
-    <span class="doccomment">/// use palette::convert::TryFromColor;</span>
-    <span class="doccomment">/// use palette::{Hsl, Srgb};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let rgb = match Srgb::try_from_color(Hsl::new(150.0, 1.0, 1.1)) {</span>
-    <span class="doccomment">///     Ok(color) =&gt; color,</span>
-    <span class="doccomment">///     Err(err) =&gt; {</span>
-    <span class="doccomment">///         println!(&quot;Color is out of bounds&quot;);</span>
-    <span class="doccomment">///         err.color()</span>
-    <span class="doccomment">///     }</span>
-    <span class="doccomment">/// };</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">try_from_color</span>(<span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A trait for fallible conversion of one color from another.
+///
+/// `U: TryFromColor&lt;T&gt;` is implemented for every type `U: FromColorUnclamped&lt;T&gt; + Clamp`.
+///
+/// See [`FromColor`](crate::convert::FromColor) for a lossy version of this trait.
+/// See [`FromColorUnclamped`](crate::convert::FromColorUnclamped) for a lossless version.
+///
+/// See the [`convert`](crate::convert) module for how to implement `FromColorUnclamped` for
+/// custom colors.
+</span><span class="kw">pub trait </span>TryFromColor&lt;T&gt;: Sized {
+    <span class="doccomment">/// Convert from T, returning ok if the color is inside of its defined
+    /// range, otherwise an `OutOfBounds` error is returned which contains
+    /// the unclamped color.
+    ///
+    ///```
+    /// use palette::convert::TryFromColor;
+    /// use palette::{Hsl, Srgb};
+    ///
+    /// let rgb = match Srgb::try_from_color(Hsl::new(150.0, 1.0, 1.1)) {
+    ///     Ok(color) =&gt; color,
+    ///     Err(err) =&gt; {
+    ///         println!(&quot;Color is out of bounds&quot;);
+    ///         err.color()
+    ///     }
+    /// };
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>try_from_color(t: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, OutOfBounds&lt;<span class="self">Self</span>&gt;&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">TryFromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">U</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IsWithinBounds</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; TryFromColor&lt;T&gt; <span class="kw">for </span>U
+<span class="kw">where
+    </span>U: FromColorUnclamped&lt;T&gt; + IsWithinBounds&lt;Mask = bool&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">try_from_color</span>(<span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::from_color_unclamped</span>(<span class="ident">t</span>);
-        <span class="kw">if</span> <span class="ident">this</span>.<span class="ident">is_within_bounds</span>() {
-            <span class="prelude-val">Ok</span>(<span class="ident">this</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">OutOfBounds::new</span>(<span class="ident">this</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>try_from_color(t: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, OutOfBounds&lt;<span class="self">Self</span>&gt;&gt; {
+        <span class="kw">let </span>this = <span class="self">Self</span>::from_color_unclamped(t);
+        <span class="kw">if </span>this.is_within_bounds() {
+            <span class="prelude-val">Ok</span>(this)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(OutOfBounds::new(this))
         }
     }
 }
 
-<span class="doccomment">/// A trait for fallible conversion of a color into another.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `U: TryIntoColor&lt;T&gt;` is implemented for every type `T: TryFromColor&lt;U&gt;`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See [`TryFromColor`](crate::convert::TryFromColor) for more details.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TryIntoColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// Convert into T, returning ok if the color is inside of its defined</span>
-    <span class="doccomment">/// range, otherwise an `OutOfBounds` error is returned which contains</span>
-    <span class="doccomment">/// the unclamped color.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///```</span>
-    <span class="doccomment">/// use palette::convert::TryIntoColor;</span>
-    <span class="doccomment">/// use palette::{Hsl, Srgb};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_into_color() {</span>
-    <span class="doccomment">///     Ok(color) =&gt; color,</span>
-    <span class="doccomment">///     Err(err) =&gt; {</span>
-    <span class="doccomment">///         println!(&quot;Color is out of bounds&quot;);</span>
-    <span class="doccomment">///         err.color()</span>
-    <span class="doccomment">///     }</span>
-    <span class="doccomment">/// };</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">try_into_color</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="doccomment">/// A trait for fallible conversion of a color into another.
+///
+/// `U: TryIntoColor&lt;T&gt;` is implemented for every type `T: TryFromColor&lt;U&gt;`.
+///
+/// See [`TryFromColor`](crate::convert::TryFromColor) for more details.
+</span><span class="kw">pub trait </span>TryIntoColor&lt;T&gt;: Sized {
+    <span class="doccomment">/// Convert into T, returning ok if the color is inside of its defined
+    /// range, otherwise an `OutOfBounds` error is returned which contains
+    /// the unclamped color.
+    ///
+    ///```
+    /// use palette::convert::TryIntoColor;
+    /// use palette::{Hsl, Srgb};
+    ///
+    /// let rgb: Srgb = match Hsl::new(150.0, 1.0, 1.1).try_into_color() {
+    ///     Ok(color) =&gt; color,
+    ///     Err(err) =&gt; {
+    ///         println!(&quot;Color is out of bounds&quot;);
+    ///         err.color()
+    ///     }
+    /// };
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>try_into_color(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, OutOfBounds&lt;T&gt;&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">TryIntoColor</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">TryFromColor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; TryIntoColor&lt;U&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>U: TryFromColor&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">try_into_color</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">OutOfBounds</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">U::try_from_color</span>(<span class="self">self</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>try_into_color(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;U, OutOfBounds&lt;U&gt;&gt; {
+        U::try_from_color(<span class="self">self</span>)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/relative_contrast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>relative_contrast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/relative_contrast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>relative_contrast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -162,169 +162,169 @@
 <span id="162">162</span>
 <span id="163">163</span>
 <span id="164">164</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">bool_mask</span>::{<span class="ident">HasBoolMask</span>, <span class="ident">LazySelect</span>},
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">PartialCmp</span>, <span class="ident">Real</span>},
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{
+    bool_mask::{HasBoolMask, LazySelect},
+    num::{Arithmetics, PartialCmp, Real},
 };
 
-<span class="doccomment">/// A trait for calculating relative contrast between two colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// W3C&#39;s Web Content Accessibility Guidelines (WCAG) 2.1 suggest a method</span>
-<span class="doccomment">/// to calculate accessible contrast ratios of text and background colors for</span>
-<span class="doccomment">/// those with low vision or color deficiencies, and for contrast of colors used</span>
-<span class="doccomment">/// in user interface graphics objects.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These criteria are recommendations, not hard and fast rules. Most</span>
-<span class="doccomment">/// importantly, look at the colors in action and make sure they&#39;re clear and</span>
-<span class="doccomment">/// comfortable to read. A pair of colors may pass contrast guidelines but still</span>
-<span class="doccomment">/// be uncomfortable to look at. Favor readability over only satisfying the</span>
-<span class="doccomment">/// contrast ratio metric. It is recommended to verify the contrast ratio</span>
-<span class="doccomment">/// in the output format of the colors and not to assume the contrast ratio</span>
-<span class="doccomment">/// remains exactly the same across color formats. The following example checks</span>
-<span class="doccomment">/// the contrast ratio of two colors in RGB format.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// use std::str::FromStr;</span>
-<span class="doccomment">/// use palette::{Srgb, RelativeContrast};</span>
-<span class="doccomment">/// # fn main() -&gt; Result&lt;(), palette::rgb::FromHexError&gt; {</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // the rustdoc &quot;DARK&quot; theme background and text colors</span>
-<span class="doccomment">/// let background: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();</span>
-<span class="doccomment">/// let foreground = Srgb::from_str(&quot;#ddd&quot;)?.into_format();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert!(background.has_enhanced_contrast_text(foreground));</span>
-<span class="doccomment">/// # Ok(())</span>
-<span class="doccomment">/// # }</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The possible range of contrast ratios is from 1:1 to 21:1. There is a</span>
-<span class="doccomment">/// Success Criterion for Contrast (Minimum) and a Success Criterion for</span>
-<span class="doccomment">/// Contrast (Enhanced), SC 1.4.3 and SC 1.4.6 respectively, which are concerned</span>
-<span class="doccomment">/// with text and images of text. SC 1.4.11 is a Success Criterion for &quot;non-text</span>
-<span class="doccomment">/// contrast&quot; such as user interface components and other graphics. The relative</span>
-<span class="doccomment">/// contrast is calculated by `(L1 + 0.05) / (L2 + 0.05)`, where `L1` is the</span>
-<span class="doccomment">/// luminance of the brighter color and `L2` is the luminance of the darker</span>
-<span class="doccomment">/// color both in sRGB linear space. A higher contrast ratio is generally</span>
-<span class="doccomment">/// desireable.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// For more details, visit the following links:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [Success Criterion 1.4.3 Contrast (Minimum) (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum)</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [Success Criterion 1.4.6 Contrast (Enhanced) (Level AAA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced)</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">alias</span> <span class="op">=</span> <span class="string">&quot;wcag&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RelativeContrast</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// The type of the contrast ratio.</span>
-    <span class="kw">type</span> <span class="ident">Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">PartialCmp</span>;
+<span class="doccomment">/// A trait for calculating relative contrast between two colors.
+///
+/// W3C&#39;s Web Content Accessibility Guidelines (WCAG) 2.1 suggest a method
+/// to calculate accessible contrast ratios of text and background colors for
+/// those with low vision or color deficiencies, and for contrast of colors used
+/// in user interface graphics objects.
+///
+/// These criteria are recommendations, not hard and fast rules. Most
+/// importantly, look at the colors in action and make sure they&#39;re clear and
+/// comfortable to read. A pair of colors may pass contrast guidelines but still
+/// be uncomfortable to look at. Favor readability over only satisfying the
+/// contrast ratio metric. It is recommended to verify the contrast ratio
+/// in the output format of the colors and not to assume the contrast ratio
+/// remains exactly the same across color formats. The following example checks
+/// the contrast ratio of two colors in RGB format.
+///
+/// ```rust
+/// use std::str::FromStr;
+/// use palette::{Srgb, RelativeContrast};
+/// # fn main() -&gt; Result&lt;(), palette::rgb::FromHexError&gt; {
+///
+/// // the rustdoc &quot;DARK&quot; theme background and text colors
+/// let background: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();
+/// let foreground = Srgb::from_str(&quot;#ddd&quot;)?.into_format();
+///
+/// assert!(background.has_enhanced_contrast_text(foreground));
+/// # Ok(())
+/// # }
+/// ```
+///
+/// The possible range of contrast ratios is from 1:1 to 21:1. There is a
+/// Success Criterion for Contrast (Minimum) and a Success Criterion for
+/// Contrast (Enhanced), SC 1.4.3 and SC 1.4.6 respectively, which are concerned
+/// with text and images of text. SC 1.4.11 is a Success Criterion for &quot;non-text
+/// contrast&quot; such as user interface components and other graphics. The relative
+/// contrast is calculated by `(L1 + 0.05) / (L2 + 0.05)`, where `L1` is the
+/// luminance of the brighter color and `L2` is the luminance of the darker
+/// color both in sRGB linear space. A higher contrast ratio is generally
+/// desireable.
+///
+/// For more details, visit the following links:
+///
+/// [Success Criterion 1.4.3 Contrast (Minimum) (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum)
+///
+/// [Success Criterion 1.4.6 Contrast (Enhanced) (Level AAA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced)
+///
+/// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
+</span><span class="attribute">#[doc(alias = <span class="string">&quot;wcag&quot;</span>)]
+</span><span class="kw">pub trait </span>RelativeContrast: Sized {
+    <span class="doccomment">/// The type of the contrast ratio.
+    </span><span class="kw">type </span>Scalar: Real + PartialCmp;
 
-    <span class="doccomment">/// Calculate the contrast ratio between two colors.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_contrast_ratio</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Scalar</span>;
+    <span class="doccomment">/// Calculate the contrast ratio between two colors.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>get_contrast_ratio(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 
-    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3. Contrast</span>
-    <span class="doccomment">/// is at least 4.5:1 (Level AA).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Scalar</span> <span class="kw">as</span> <span class="ident">HasBoolMask</span><span class="op">&gt;</span><span class="ident">::Mask</span> {
-        <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>)
-            .<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Scalar::from_f64</span>(<span class="number">4.5</span>))
+    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3. Contrast
+    /// is at least 4.5:1 (Level AA).
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>has_min_contrast_text(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; &lt;<span class="self">Self</span>::Scalar <span class="kw">as </span>HasBoolMask&gt;::Mask {
+        <span class="self">self</span>.get_contrast_ratio(other)
+            .gt_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::Scalar::from_f64(<span class="number">4.5</span>))
     }
 
-    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3 for large</span>
-    <span class="doccomment">/// text. Contrast is at least 3:1 (Level AA).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_large_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Scalar</span> <span class="kw">as</span> <span class="ident">HasBoolMask</span><span class="op">&gt;</span><span class="ident">::Mask</span> {
-        <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>)
-            .<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Scalar::from_f64</span>(<span class="number">3.0</span>))
+    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.3 for large
+    /// text. Contrast is at least 3:1 (Level AA).
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>has_min_contrast_large_text(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; &lt;<span class="self">Self</span>::Scalar <span class="kw">as </span>HasBoolMask&gt;::Mask {
+        <span class="self">self</span>.get_contrast_ratio(other)
+            .gt_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::Scalar::from_f64(<span class="number">3.0</span>))
     }
 
-    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6. Contrast</span>
-    <span class="doccomment">/// is at least 7:1 (Level AAA).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Scalar</span> <span class="kw">as</span> <span class="ident">HasBoolMask</span><span class="op">&gt;</span><span class="ident">::Mask</span> {
-        <span class="self">self</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">other</span>)
-            .<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Scalar::from_f64</span>(<span class="number">7.0</span>))
+    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6. Contrast
+    /// is at least 7:1 (Level AAA).
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>has_enhanced_contrast_text(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; &lt;<span class="self">Self</span>::Scalar <span class="kw">as </span>HasBoolMask&gt;::Mask {
+        <span class="self">self</span>.get_contrast_ratio(other)
+            .gt_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::Scalar::from_f64(<span class="number">7.0</span>))
     }
 
-    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6 for large</span>
-    <span class="doccomment">/// text. Contrast is at least 4.5:1 (Level AAA).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">has_enhanced_contrast_large_text</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Scalar</span> <span class="kw">as</span> <span class="ident">HasBoolMask</span><span class="op">&gt;</span><span class="ident">::Mask</span> {
-        <span class="self">self</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">other</span>)
+    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.6 for large
+    /// text. Contrast is at least 4.5:1 (Level AAA).
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>has_enhanced_contrast_large_text(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; &lt;<span class="self">Self</span>::Scalar <span class="kw">as </span>HasBoolMask&gt;::Mask {
+        <span class="self">self</span>.has_min_contrast_text(other)
     }
 
-    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.11 for graphical</span>
-    <span class="doccomment">/// objects. Contrast is at least 3:1 (Level AA).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">has_min_contrast_graphics</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Scalar</span> <span class="kw">as</span> <span class="ident">HasBoolMask</span><span class="op">&gt;</span><span class="ident">::Mask</span> {
-        <span class="self">self</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">other</span>)
+    <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.11 for graphical
+    /// objects. Contrast is at least 3:1 (Level AA).
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>has_min_contrast_graphics(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; &lt;<span class="self">Self</span>::Scalar <span class="kw">as </span>HasBoolMask&gt;::Mask {
+        <span class="self">self</span>.has_min_contrast_large_text(other)
     }
 }
 
-<span class="doccomment">/// Calculate the ratio between two `luma` values.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contrast_ratio</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">luma1</span>: <span class="ident">T</span>, <span class="ident">luma2</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">PartialCmp</span>,
-    <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Calculate the ratio between two `luma` values.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>contrast_ratio&lt;T&gt;(luma1: T, luma2: T) -&gt; T
+<span class="kw">where
+    </span>T: Real + Arithmetics + PartialCmp,
+    T::Mask: LazySelect&lt;T&gt;,
 {
-    <span class="macro">lazy_select!</span> {
-        <span class="kw">if</span> <span class="ident">luma1</span>.<span class="ident">gt</span>(<span class="kw-2">&amp;</span><span class="ident">luma2</span>) =&gt; (<span class="ident">T::from_f64</span>(<span class="number">0.05</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">luma1</span>) <span class="op">/</span> (<span class="ident">T::from_f64</span>(<span class="number">0.05</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">luma2</span>),
-        <span class="kw">else</span> =&gt; (<span class="ident">T::from_f64</span>(<span class="number">0.05</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">luma2</span>) <span class="op">/</span> (<span class="ident">T::from_f64</span>(<span class="number">0.05</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">luma1</span>)
+    <span class="macro">lazy_select! </span>{
+        <span class="kw">if </span>luma1.gt(<span class="kw-2">&amp;</span>luma2) =&gt; (T::from_f64(<span class="number">0.05</span>) + <span class="kw-2">&amp;</span>luma1) / (T::from_f64(<span class="number">0.05</span>) + <span class="kw-2">&amp;</span>luma2),
+        <span class="kw">else </span>=&gt; (T::from_f64(<span class="number">0.05</span>) + <span class="kw-2">&amp;</span>luma2) / (T::from_f64(<span class="number">0.05</span>) + <span class="kw-2">&amp;</span>luma1)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span>core::str::FromStr;
 
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::RelativeContrast</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Srgb</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::RelativeContrast;
+    <span class="kw">use </span><span class="kw">crate</span>::Srgb;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">relative_contrast</span>() {
-        <span class="kw">let</span> <span class="ident">white</span> <span class="op">=</span> <span class="ident">Srgb::new</span>(<span class="number">1.0f32</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
-        <span class="kw">let</span> <span class="ident">black</span> <span class="op">=</span> <span class="ident">Srgb::new</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>relative_contrast() {
+        <span class="kw">let </span>white = Srgb::new(<span class="number">1.0f32</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
+        <span class="kw">let </span>black = Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">21.0</span>);
+        <span class="macro">assert_relative_eq!</span>(white.get_contrast_ratio(white), <span class="number">1.0</span>);
+        <span class="macro">assert_relative_eq!</span>(white.get_contrast_ratio(black), <span class="number">21.0</span>);
         <span class="macro">assert_relative_eq!</span>(
-            <span class="ident">white</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>),
-            <span class="ident">black</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>)
+            white.get_contrast_ratio(black),
+            black.get_contrast_ratio(white)
         );
 
-        <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#600&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#600&quot;</span>).unwrap().into_format();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">13.41</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">1.56</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">13.41</span>, epsilon = <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">1.56</span>, epsilon = <span class="number">0.01</span>);
 
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="ident">white</span>));
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_text</span>(<span class="ident">black</span>) <span class="op">==</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_large_text</span>(<span class="ident">black</span>) <span class="op">==</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_text</span>(<span class="ident">black</span>) <span class="op">==</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_enhanced_contrast_large_text</span>(<span class="ident">black</span>) <span class="op">==</span> <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(<span class="ident">c1</span>.<span class="ident">has_min_contrast_graphics</span>(<span class="ident">black</span>) <span class="op">==</span> <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(c1.has_min_contrast_text(white));
+        <span class="macro">assert!</span>(c1.has_min_contrast_large_text(white));
+        <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(white));
+        <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(white));
+        <span class="macro">assert!</span>(c1.has_min_contrast_graphics(white));
+        <span class="macro">assert!</span>(c1.has_min_contrast_text(black) == <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(c1.has_min_contrast_large_text(black) == <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(black) == <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(black) == <span class="bool-val">false</span>);
+        <span class="macro">assert!</span>(c1.has_min_contrast_graphics(black) == <span class="bool-val">false</span>);
 
-        <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#066&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#066&quot;</span>).unwrap().into_format();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">6.79</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">3.09</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">6.79</span>, epsilon = <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">3.09</span>, epsilon = <span class="number">0.01</span>);
 
-        <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">Srgb::from_str</span>(<span class="string">&quot;#9f9&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into_format</span>();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#9f9&quot;</span>).unwrap().into_format();
 
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">white</span>), <span class="number">1.22</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">c1</span>.<span class="ident">get_contrast_ratio</span>(<span class="ident">black</span>), <span class="number">17.11</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">1.22</span>, epsilon = <span class="number">0.01</span>);
+        <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">17.11</span>, epsilon = <span class="number">0.01</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/hues.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hues.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/hues.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hues.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -642,552 +642,622 @@
 <span id="642">642</span>
 <span id="643">643</span>
 <span id="644">644</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident">core::ops::Mul</span>;
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+</pre><pre class="rust"><code><span class="attribute">#[cfg(any(feature = <span class="string">&quot;approx&quot;</span>, feature = <span class="string">&quot;random&quot;</span>))]
+</span><span class="kw">use </span>core::ops::Mul;
 
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">cmp::PartialEq</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+<span class="kw">use </span>core::{
+    cmp::PartialEq,
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand</span>::{
-    <span class="ident">distributions</span>::{
-        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
-        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span>rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
     },
-    <span class="ident">Rng</span>,
+    Rng,
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">angle::HalfRotation</span>, <span class="ident">num::Zero</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::angle::HalfRotation;
+<span class="kw">use </span><span class="kw">crate</span>::num::Zero;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::angle::FullRotation</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::angle::FullRotation;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::angle</span>::{<span class="ident">AngleEq</span>, <span class="ident">FromAngle</span>, <span class="ident">RealAngle</span>, <span class="ident">SignedAngle</span>, <span class="ident">UnsignedAngle</span>};
+<span class="kw">use </span><span class="kw">crate</span>::angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle};
+<span class="kw">use </span><span class="kw">crate</span>::num::{Arithmetics, Trigonometry};
 
-<span class="macro">macro_rules!</span> <span class="ident">make_hues</span> {
-    ($($(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc</span>:<span class="ident">meta</span>]</span>)<span class="op">+</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>;)<span class="op">+</span>) =&gt; ($(
-        $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc</span>]</span>)<span class="op">+</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// The hue is a circular type, where `0` and `360` is the same, and</span>
-        <span class="doccomment">/// it&#39;s normalized to `(-180, 180]` when it&#39;s converted to a linear</span>
-        <span class="doccomment">/// number (like `f32`). This makes many calculations easier, but may</span>
-        <span class="doccomment">/// also have some surprising effects if it&#39;s expected to act as a</span>
-        <span class="doccomment">/// linear number.</span>
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
-        <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">f32</span><span class="op">&gt;</span>(<span class="ident">T</span>);
+<span class="macro">macro_rules! </span>make_hues {
+    ($($(<span class="attribute">#[<span class="macro-nonterminal">$doc</span>:meta]</span>)+ <span class="kw">struct </span><span class="macro-nonterminal">$name</span>:ident;)+) =&gt; ($(
+        $(<span class="attribute">#[<span class="macro-nonterminal">$doc</span>]</span>)+
+        <span class="doccomment">///
+        /// The hue is a circular type, where `0` and `360` is the same, and
+        /// it&#39;s normalized to `(-180, 180]` when it&#39;s converted to a linear
+        /// number (like `f32`). This makes many calculations easier, but may
+        /// also have some surprising effects if it&#39;s expected to act as a
+        /// linear number.
+        </span><span class="attribute">#[derive(Clone, Copy, Debug, Default)]
+        #[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+        #[repr(C)]
+        </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name</span>&lt;T = f32&gt;(T);
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="doccomment">/// Create a new hue, specified in the default unit for the angle</span>
-            <span class="doccomment">/// type `T`.</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// `f32`, `f64` and other real number types represent degrees,</span>
-            <span class="doccomment">/// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">angle</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-                <span class="self">Self</span>(<span class="ident">angle</span>)
+        <span class="kw">impl</span>&lt;T&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="doccomment">/// Create a new hue, specified in the default unit for the angle
+            /// type `T`.
+            ///
+            /// `f32`, `f64` and other real number types represent degrees,
+            /// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub const fn </span>new(angle: T) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(angle)
             }
 
-            <span class="doccomment">/// Get the internal representation without normalizing or converting it.</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// `f32`, `f64` and other real number types represent degrees,</span>
-            <span class="doccomment">/// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="self">self</span>.<span class="number">0</span>
-            }
+            <span class="doccomment">/// Get the internal representation without normalizing or converting it.
+            ///
+            /// `f32`, `f64` and other real number types represent degrees,
+            /// while `u8` simply represents the range `[0, 360]` as `[0, 256]`.
+            </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; T {
+                <span class="self">self</span>.<span class="number">0
+            </span>}
 
-            <span class="doccomment">/// Convert into another angle type.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
-            <span class="kw">where</span>
-                <span class="ident">U</span>: <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+            <span class="doccomment">/// Convert into another angle type.
+            </span><span class="kw">pub fn </span>into_format&lt;U&gt;(<span class="self">self</span>) -&gt; <span class="macro-nonterminal">$name</span>&lt;U&gt;
+            <span class="kw">where
+                </span>U: FromAngle&lt;T&gt;,
             {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">U::from_angle</span>(<span class="self">self</span>.<span class="number">0</span>))
+                <span class="macro-nonterminal">$name</span>(U::from_angle(<span class="self">self</span>.<span class="number">0</span>))
             }
 
-            <span class="doccomment">/// Convert from another angle type.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_format</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">hue</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
-            <span class="kw">where</span>
-                <span class="ident">T</span>: <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+            <span class="doccomment">/// Convert from another angle type.
+            </span><span class="kw">pub fn </span>from_format&lt;U&gt;(hue: <span class="macro-nonterminal">$name</span>&lt;U&gt;) -&gt; <span class="self">Self
+            </span><span class="kw">where
+                </span>T: FromAngle&lt;U&gt;,
             {
-                <span class="ident">hue</span>.<span class="ident">into_format</span>()
+                hue.into_format()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">RealAngle</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="doccomment">/// Create a new hue from degrees. This is an alias for `new`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_degrees</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">degrees</span>)
+        <span class="kw">impl</span>&lt;T: RealAngle&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="doccomment">/// Create a new hue from degrees. This is an alias for `new`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>from_degrees(degrees: T) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::new(degrees)
             }
 
-            <span class="doccomment">/// Create a new hue from radians, instead of degrees.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_radians</span>(<span class="ident">radians</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-                <span class="self">Self</span>(<span class="ident">T::radians_to_degrees</span>(<span class="ident">radians</span>))
+            <span class="doccomment">/// Create a new hue from radians, instead of degrees.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>from_radians(radians: T) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(T::radians_to_degrees(radians))
             }
 
-            <span class="doccomment">/// Get the internal representation as degrees, without normalizing it.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw_degrees</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="self">self</span>.<span class="number">0</span>
-            }
+            <span class="doccomment">/// Get the internal representation as degrees, without normalizing it.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_raw_degrees(<span class="self">self</span>) -&gt; T {
+                <span class="self">self</span>.<span class="number">0
+            </span>}
 
-            <span class="doccomment">/// Get the internal representation as radians, without normalizing it.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw_radians</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="ident">T::degrees_to_radians</span>(<span class="self">self</span>.<span class="number">0</span>)
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">SignedAngle</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="doccomment">/// Get the hue as degrees, in the range `(-180, 180]`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_degrees</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_signed_angle</span>()
-            }
-
-            <span class="doccomment">/// Convert the hue to radians, in the range `(-π, π]`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_radians</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="ident">T::degrees_to_radians</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_signed_angle</span>())
+            <span class="doccomment">/// Get the internal representation as radians, without normalizing it.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_raw_radians(<span class="self">self</span>) -&gt; T {
+                T::degrees_to_radians(<span class="self">self</span>.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">UnsignedAngle</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="doccomment">/// Convert the hue to positive degrees, in the range `[0, 360)`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_positive_degrees</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_unsigned_angle</span>()
+        <span class="kw">impl</span>&lt;T: RealAngle + SignedAngle&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="doccomment">/// Get the hue as degrees, in the range `(-180, 180]`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_degrees(<span class="self">self</span>) -&gt; T {
+                <span class="self">self</span>.<span class="number">0</span>.normalize_signed_angle()
             }
 
-            <span class="doccomment">/// Convert the hue to positive radians, in the range `[0, 2π)`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_positive_radians</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
-                <span class="ident">T::degrees_to_radians</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_unsigned_angle</span>())
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">degrees</span>: <span class="ident">T</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">degrees</span>)
+            <span class="doccomment">/// Convert the hue to radians, in the range `(-π, π]`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_radians(<span class="self">self</span>) -&gt; T {
+                T::degrees_to_radians(<span class="self">self</span>.<span class="number">0</span>.normalize_signed_angle())
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">f64</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_signed_angle</span>()
+        <span class="kw">impl</span>&lt;T: RealAngle + UnsignedAngle&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="doccomment">/// Convert the hue to positive degrees, in the range `[0, 360)`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_positive_degrees(<span class="self">self</span>) -&gt; T {
+                <span class="self">self</span>.<span class="number">0</span>.normalize_unsigned_angle()
+            }
+
+            <span class="doccomment">/// Convert the hue to positive radians, in the range `[0, 2π)`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">pub fn </span>into_positive_radians(<span class="self">self</span>) -&gt; T {
+                T::degrees_to_radians(<span class="self">self</span>.<span class="number">0</span>.normalize_unsigned_angle())
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">f32</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_signed_angle</span>()
+        <span class="kw">impl</span>&lt;T&gt; From&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>from(degrees: T) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name</span>(degrees)
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">f32</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">normalize_signed_angle</span>() <span class="kw">as</span> <span class="ident">f32</span>
+        <span class="kw">impl </span>Into&lt;f64&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;f64&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>into(<span class="self">self</span>) -&gt; f64 {
+                <span class="self">self</span>.<span class="number">0</span>.normalize_signed_angle()
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">u8</span> {
-                <span class="self">self</span>.<span class="number">0</span>
+        <span class="kw">impl </span>Into&lt;f32&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;f32&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>into(<span class="self">self</span>) -&gt; f32 {
+                <span class="self">self</span>.<span class="number">0</span>.normalize_signed_angle()
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialEq</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+        <span class="kw">impl </span>Into&lt;f32&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;f64&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>into(<span class="self">self</span>) -&gt; f32 {
+                <span class="self">self</span>.<span class="number">0</span>.normalize_signed_angle() <span class="kw">as </span>f32
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialEq</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">angle_eq</span>(<span class="ident">other</span>)
+        <span class="kw">impl </span>Into&lt;u8&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;u8&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>into(<span class="self">self</span>) -&gt; u8 {
+                <span class="self">self</span>.<span class="number">0
+            </span>}
+        }
+
+        <span class="kw">impl</span>&lt;T&gt; PartialEq <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; <span class="kw">where </span>T: AngleEq&lt;Mask = bool&gt; + PartialEq {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$name</span>&lt;T&gt;) -&gt; bool {
+                <span class="self">self</span>.<span class="number">0</span>.angle_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Eq</span> {}
+        <span class="kw">impl</span>&lt;T&gt; PartialEq&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; <span class="kw">where </span>T: AngleEq&lt;Mask = bool&gt; + PartialEq {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>T) -&gt; bool {
+                <span class="self">self</span>.<span class="number">0</span>.angle_eq(other)
+            }
+        }
 
-        <span class="comment">// For hues, the difference is calculated and compared to zero. However due to</span>
-        <span class="comment">// the way floating point&#39;s work this is not so simple.</span>
-        <span class="comment">//</span>
-        <span class="comment">// Reference:</span>
-        <span class="comment">// https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/</span>
-        <span class="comment">//</span>
-        <span class="comment">// The recommendation is use 180 * epsilon as the epsilon and do not compare by</span>
-        <span class="comment">// ulps. Because of this we loose some precision for values close to 0.0.</span>
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">SignedAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AbsDiffEq</span> <span class="op">+</span> <span class="ident">Clone</span>,
-            <span class="ident">T::Epsilon</span>: <span class="ident">HalfRotation</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
+        <span class="kw">impl</span>&lt;T&gt; Eq <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; <span class="kw">where </span>T: AngleEq&lt;Mask = bool&gt; + Eq {}
+
+
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; AbsDiffEq <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: RealAngle + SignedAngle + Zero + AngleEq&lt;Mask = bool&gt; + Sub&lt;Output = T&gt; + AbsDiffEq + Clone,
+            T::Epsilon: HalfRotation + Mul&lt;Output = T::Epsilon&gt;,
         {
-            <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
+            <span class="kw">type </span>Epsilon = T::Epsilon;
 
-            <span class="kw">fn</span> <span class="ident">default_epsilon</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-                <span class="ident">T::default_epsilon</span>() <span class="op">*</span> <span class="ident">T::Epsilon::half_rotation</span>()
+            <span class="kw">fn </span>default_epsilon() -&gt; <span class="self">Self</span>::Epsilon {
+                <span class="comment">// For hues, angles in (normalized) degrees are compared.
+                // Scaling from radians to degrees raises the order of magnitude of the
+                // error by 180/PI.
+                // Scale the default epsilon accordingly for absolute comparisons.
+                // Scaling is not required for relative comparisons (including ulps), as
+                // there the error is scaled to unit size anyway
+                </span>T::default_epsilon() * T::Epsilon::half_rotation()
             }
 
-            <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>)
+            <span class="kw">fn </span>abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: T::Epsilon) -&gt; bool {
+                T::abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon)
             }
-            <span class="kw">fn</span> <span class="ident">abs_diff_ne</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::abs_diff_ne</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>)
+            <span class="kw">fn </span>abs_diff_ne(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: T::Epsilon) -&gt; bool {
+                T::abs_diff_ne(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon)
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">SignedAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">RelativeEq</span>,
-            <span class="ident">T::Epsilon</span>: <span class="ident">HalfRotation</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; RelativeEq <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: RealAngle + SignedAngle + Zero + AngleEq&lt;Mask = bool&gt; + Sub&lt;Output = T&gt; + Clone + RelativeEq,
+            T::Epsilon: HalfRotation + Mul&lt;Output = T::Epsilon&gt;,
         {
-            <span class="kw">fn</span> <span class="ident">default_max_relative</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-                <span class="ident">T::default_max_relative</span>() <span class="op">*</span> <span class="ident">T::Epsilon::half_rotation</span>()
+            <span class="kw">fn </span>default_max_relative() -&gt; <span class="self">Self</span>::Epsilon {
+                T::default_max_relative()
             }
 
-            <span class="kw">fn</span> <span class="ident">relative_eq</span>(
+            <span class="kw">fn </span>relative_eq(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-                <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>,
-                <span class="ident">max_relative</span>: <span class="ident">T::Epsilon</span>,
-            ) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>, <span class="ident">max_relative</span>)
+                other: <span class="kw-2">&amp;</span><span class="self">Self</span>,
+                epsilon: T::Epsilon,
+                max_relative: T::Epsilon,
+            ) -&gt; bool {
+                T::relative_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon, max_relative)
             }
-            <span class="kw">fn</span> <span class="ident">relative_ne</span>(
+            <span class="kw">fn </span>relative_ne(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-                <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-                <span class="ident">max_relative</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-            ) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::relative_ne</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>, <span class="ident">max_relative</span>)
+                other: <span class="kw-2">&amp;</span><span class="self">Self</span>,
+                epsilon: <span class="self">Self</span>::Epsilon,
+                max_relative: <span class="self">Self</span>::Epsilon,
+            ) -&gt; bool {
+                T::relative_ne(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon, max_relative)
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">SignedAngle</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">AngleEq</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">UlpsEq</span>,
-            <span class="ident">T::Epsilon</span>: <span class="ident">HalfRotation</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; UlpsEq <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: RealAngle + SignedAngle + Zero + AngleEq&lt;Mask = bool&gt; + Sub&lt;Output = T&gt; + Clone + UlpsEq,
+            T::Epsilon: HalfRotation + Mul&lt;Output = T::Epsilon&gt;,
         {
-            <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() -&gt; <span class="ident">u32</span> {
-                <span class="ident">T::default_max_ulps</span>() <span class="op">*</span> <span class="number">180</span> <span class="comment">// This should probably depend on T</span>
+            <span class="kw">fn </span>default_max_ulps() -&gt; u32 {
+                T::default_max_ulps()
             }
 
-            <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>)
+            <span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: T::Epsilon, max_ulps: u32) -&gt; bool {
+                T::ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon, max_ulps)
             }
-            <span class="kw">fn</span> <span class="ident">ulps_ne</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-                <span class="kw">let</span> <span class="ident">diff</span>: <span class="ident">T</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">clone</span>()).<span class="ident">into_degrees</span>();
-                <span class="ident">T::ulps_ne</span>(<span class="kw-2">&amp;</span><span class="ident">diff</span>, <span class="kw-2">&amp;</span><span class="ident">T::zero</span>(), <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>)
+            <span class="kw">fn </span>ulps_ne(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
+                T::ulps_ne(<span class="kw-2">&amp;</span><span class="self">self</span>.clone().into_degrees(), <span class="kw-2">&amp;</span>other.clone().into_degrees(), epsilon, max_ulps)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">impl</span>&lt;T: Add&lt;Output=T&gt;&gt; Add&lt;<span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;T&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;T&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self</span>.<span class="number">0 </span>+ other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">impl</span>&lt;T: Add&lt;Output=T&gt;&gt; Add&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;T&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">other</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add(<span class="self">self</span>, other: T) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self</span>.<span class="number">0 </span>+ other)
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f32</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>;
+        <span class="kw">impl </span>Add&lt;<span class="macro-nonterminal">$name</span>&lt;f32&gt;&gt; <span class="kw">for </span>f32 {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;f32&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span> <span class="op">+</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f32&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;f32&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self </span>+ other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f64</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
+        <span class="kw">impl </span>Add&lt;<span class="macro-nonterminal">$name</span>&lt;f64&gt;&gt; <span class="kw">for </span>f64 {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;f64&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span> <span class="op">+</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f64&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;f64&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self </span>+ other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
-                <span class="self">self</span>.<span class="number">0</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl</span>&lt;T: AddAssign&gt; AddAssign&lt;<span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;T&gt;) {
+                <span class="self">self</span>.<span class="number">0 </span>+= other.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) {
-                <span class="self">self</span>.<span class="number">0</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>;
+        <span class="kw">impl</span>&lt;T: AddAssign&gt; AddAssign&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: T) {
+                <span class="self">self</span>.<span class="number">0 </span>+= other;
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f32</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>) {
-                <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl </span>AddAssign&lt;<span class="macro-nonterminal">$name</span>&lt;f32&gt;&gt; <span class="kw">for </span>f32 {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f32&gt;) {
+                <span class="kw-2">*</span><span class="self">self </span>+= other.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f64</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>){
-                <span class="kw-2">*</span><span class="self">self</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl </span>AddAssign&lt;<span class="macro-nonterminal">$name</span>&lt;f64&gt;&gt; <span class="kw">for </span>f64 {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f64&gt;){
+                <span class="kw-2">*</span><span class="self">self </span>+= other.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">impl</span>&lt;T: Sub&lt;Output=T&gt;&gt; Sub&lt;<span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;T&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span>.<span class="number">0</span> <span class="op">-</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;T&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self</span>.<span class="number">0 </span>- other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">impl</span>&lt;T: Sub&lt;Output=T&gt;&gt; Sub&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;T&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span>.<span class="number">0</span> <span class="op">-</span> <span class="ident">other</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub(<span class="self">self</span>, other: T) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self</span>.<span class="number">0 </span>- other)
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f32</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>;
+        <span class="kw">impl </span>Sub&lt;<span class="macro-nonterminal">$name</span>&lt;f32&gt;&gt; <span class="kw">for </span>f32 {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;f32&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span> <span class="op">-</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f32&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;f32&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self </span>- other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f64</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
+        <span class="kw">impl </span>Sub&lt;<span class="macro-nonterminal">$name</span>&lt;f64&gt;&gt; <span class="kw">for </span>f64 {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$name</span>&lt;f64&gt;;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="self">self</span> <span class="op">-</span> <span class="ident">other</span>.<span class="number">0</span>)
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f64&gt;) -&gt; <span class="macro-nonterminal">$name</span>&lt;f64&gt; {
+                <span class="macro-nonterminal">$name</span>(<span class="self">self </span>- other.<span class="number">0</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
-                <span class="self">self</span>.<span class="number">0</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl</span>&lt;T: SubAssign&gt; SubAssign&lt;<span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;T&gt;) {
+                <span class="self">self</span>.<span class="number">0 </span>-= other.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">SubAssign</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">T</span>) {
-                <span class="self">self</span>.<span class="number">0</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>;
+        <span class="kw">impl</span>&lt;T: SubAssign&gt; SubAssign&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: T) {
+                <span class="self">self</span>.<span class="number">0 </span>-= other;
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f32</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>) {
-                <span class="kw-2">*</span><span class="self">self</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl </span>SubAssign&lt;<span class="macro-nonterminal">$name</span>&lt;f32&gt;&gt; <span class="kw">for </span>f32 {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f32&gt;) {
+                <span class="kw-2">*</span><span class="self">self </span>-= other.<span class="number">0</span>;
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">f64</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>){
-                <span class="kw-2">*</span><span class="self">self</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>;
+        <span class="kw">impl </span>SubAssign&lt;<span class="macro-nonterminal">$name</span>&lt;f64&gt;&gt; <span class="kw">for </span>f64 {
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="macro-nonterminal">$name</span>&lt;f64&gt;){
+                <span class="kw-2">*</span><span class="self">self </span>-= other.<span class="number">0</span>;
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span> <span class="op">+</span> <span class="ident">FullRotation</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-            <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; Distribution&lt;<span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span>Standard
+        <span class="kw">where
+            </span>T: RealAngle + FullRotation + Mul&lt;Output = T&gt;,
+            Standard: Distribution&lt;T&gt;,
         {
-            <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::from_degrees</span>(<span class="ident">rng</span>.<span class="ident">gen</span>() <span class="op">*</span> <span class="ident">T::full_rotation</span>())
+            <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$name::from_degrees</span>(rng.gen() * T::full_rotation())
             }
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-        <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">bytemuck::Pod</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
-    )<span class="op">+</span>)
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+        </span><span class="kw">unsafe impl</span>&lt;T: bytemuck::Zeroable&gt; bytemuck::Zeroable <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {}
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+        </span><span class="kw">unsafe impl</span>&lt;T: bytemuck::Pod&gt; bytemuck::Pod <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {}
+    )+)
 }
 
-<span class="macro">make_hues!</span> {
-    <span class="doccomment">/// A hue type for the CIE L\*a\*b\* family of color spaces.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// It&#39;s measured in degrees and it&#39;s based on the four physiological</span>
-    <span class="doccomment">/// elementary colors _red_, _yellow_, _green_ and _blue_. This makes it</span>
-    <span class="doccomment">/// different from the hue of RGB based color spaces.</span>
-    <span class="kw">struct</span> <span class="ident">LabHue</span>;
+<span class="macro">make_hues! </span>{
+    <span class="doccomment">/// A hue type for the CIE L\*a\*b\* family of color spaces.
+    ///
+    /// It&#39;s measured in degrees and it&#39;s based on the four physiological
+    /// elementary colors _red_, _yellow_, _green_ and _blue_. This makes it
+    /// different from the hue of RGB based color spaces.
+    </span><span class="kw">struct </span>LabHue;
 
-    <span class="doccomment">/// A hue type for the CIE L\*u\*v\* family of color spaces.</span>
-    <span class="kw">struct</span> <span class="ident">LuvHue</span>;
+    <span class="doccomment">/// A hue type for the CIE L\*u\*v\* family of color spaces.
+    </span><span class="kw">struct </span>LuvHue;
 
-    <span class="doccomment">/// A hue type for the RGB family of color spaces.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// It&#39;s measured in degrees and uses the three additive primaries _red_,</span>
-    <span class="doccomment">/// _green_ and _blue_.</span>
-    <span class="kw">struct</span> <span class="ident">RgbHue</span>;
+    <span class="doccomment">/// A hue type for the RGB family of color spaces.
+    ///
+    /// It&#39;s measured in degrees and uses the three additive primaries _red_,
+    /// _green_ and _blue_.
+    </span><span class="kw">struct </span>RgbHue;
 
-    <span class="doccomment">/// A hue type for the Oklab color space.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// It&#39;s measured in degrees.</span>
-    <span class="kw">struct</span> <span class="ident">OklabHue</span>;
+    <span class="doccomment">/// A hue type for the Oklab color space.
+    ///
+    /// It&#39;s measured in degrees.
+    </span><span class="kw">struct </span>OklabHue;
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_uniform</span> {
-    (  <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span>: <span class="ident">ident</span> , <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
+<span class="macro">macro_rules! </span>impl_uniform {
+    (  <span class="macro-nonterminal">$uni_ty</span>: ident , <span class="macro-nonterminal">$base_ty</span>: ident) =&gt; {
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+        </span><span class="kw">pub struct </span><span class="macro-nonterminal">$uni_ty</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: SampleUniform,
         {
-            <span class="ident">hue</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+            hue: Uniform&lt;T&gt;,
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span>
-                <span class="op">+</span> <span class="ident">UnsignedAngle</span>
-                <span class="op">+</span> <span class="ident">FullRotation</span>
-                <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>
-                <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>
-                <span class="op">+</span> <span class="ident">PartialOrd</span>
-                <span class="op">+</span> <span class="ident">Clone</span>
-                <span class="op">+</span> <span class="ident">SampleUniform</span>,
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; SampleUniform <span class="kw">for </span><span class="macro-nonterminal">$base_ty</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: RealAngle
+                + UnsignedAngle
+                + FullRotation
+                + Add&lt;Output = T&gt;
+                + Mul&lt;Output = T&gt;
+                + PartialOrd
+                + Clone
+                + SampleUniform,
         {
-            <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+            <span class="kw">type </span>Sampler = <span class="macro-nonterminal">$uni_ty</span>&lt;T&gt;;
         }
 
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">RealAngle</span>
-                <span class="op">+</span> <span class="ident">UnsignedAngle</span>
-                <span class="op">+</span> <span class="ident">FullRotation</span>
-                <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>
-                <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>
-                <span class="op">+</span> <span class="ident">PartialOrd</span>
-                <span class="op">+</span> <span class="ident">Clone</span>
-                <span class="op">+</span> <span class="ident">SampleUniform</span>,
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; UniformSampler <span class="kw">for </span><span class="macro-nonterminal">$uni_ty</span>&lt;T&gt;
+        <span class="kw">where
+            </span>T: RealAngle
+                + UnsignedAngle
+                + FullRotation
+                + Add&lt;Output = T&gt;
+                + Mul&lt;Output = T&gt;
+                + PartialOrd
+                + Clone
+                + SampleUniform,
         {
-            <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+            <span class="kw">type </span>X = <span class="macro-nonterminal">$base_ty</span>&lt;T&gt;;
 
-            <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-            <span class="kw">where</span>
-                <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-                <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+            <span class="kw">fn </span>new&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+            </span><span class="kw">where
+                </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+                B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
             {
-                <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">normalized_low</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty::into_positive_degrees</span>(<span class="ident">low</span>.<span class="ident">clone</span>());
-                <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">normalized_high</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty::into_positive_degrees</span>(<span class="ident">high</span>.<span class="ident">clone</span>());
+                <span class="kw">let </span>low = low_b.borrow().clone();
+                <span class="kw">let </span>normalized_low = <span class="macro-nonterminal">$base_ty::into_positive_degrees</span>(low.clone());
+                <span class="kw">let </span>high = high_b.borrow().clone();
+                <span class="kw">let </span>normalized_high = <span class="macro-nonterminal">$base_ty::into_positive_degrees</span>(high.clone());
 
-                <span class="kw">let</span> <span class="ident">normalized_high</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">normalized_low</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">normalized_high</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span>.<span class="number">0</span> <span class="op">&lt;</span> <span class="ident">high</span>.<span class="number">0</span> {
-                    <span class="ident">normalized_high</span> <span class="op">+</span> <span class="ident">T::full_rotation</span>()
-                } <span class="kw">else</span> {
-                    <span class="ident">normalized_high</span>
+                <span class="kw">let </span>normalized_high = <span class="kw">if </span>normalized_low &gt;= normalized_high &amp;&amp; low.<span class="number">0 </span>&lt; high.<span class="number">0 </span>{
+                    normalized_high + T::full_rotation()
+                } <span class="kw">else </span>{
+                    normalized_high
                 };
 
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span> {
-                    <span class="ident">hue</span>: <span class="ident">Uniform::new</span>(<span class="ident">normalized_low</span>, <span class="ident">normalized_high</span>),
+                <span class="macro-nonterminal">$uni_ty </span>{
+                    hue: Uniform::new(normalized_low, normalized_high),
                 }
             }
 
-            <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-            <span class="kw">where</span>
-                <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-                <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+            <span class="kw">fn </span>new_inclusive&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+            </span><span class="kw">where
+                </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+                B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
             {
-                <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">normalized_low</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty::into_positive_degrees</span>(<span class="ident">low</span>.<span class="ident">clone</span>());
-                <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">normalized_high</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty::into_positive_degrees</span>(<span class="ident">high</span>.<span class="ident">clone</span>());
+                <span class="kw">let </span>low = low_b.borrow().clone();
+                <span class="kw">let </span>normalized_low = <span class="macro-nonterminal">$base_ty::into_positive_degrees</span>(low.clone());
+                <span class="kw">let </span>high = high_b.borrow().clone();
+                <span class="kw">let </span>normalized_high = <span class="macro-nonterminal">$base_ty::into_positive_degrees</span>(high.clone());
 
-                <span class="kw">let</span> <span class="ident">normalized_high</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">normalized_low</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">normalized_high</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span>.<span class="number">0</span> <span class="op">&lt;</span> <span class="ident">high</span>.<span class="number">0</span> {
-                    <span class="ident">normalized_high</span> <span class="op">+</span> <span class="ident">T::full_rotation</span>()
-                } <span class="kw">else</span> {
-                    <span class="ident">normalized_high</span>
+                <span class="kw">let </span>normalized_high = <span class="kw">if </span>normalized_low &gt;= normalized_high &amp;&amp; low.<span class="number">0 </span>&lt; high.<span class="number">0 </span>{
+                    normalized_high + T::full_rotation()
+                } <span class="kw">else </span>{
+                    normalized_high
                 };
 
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">uni_ty</span> {
-                    <span class="ident">hue</span>: <span class="ident">Uniform::new_inclusive</span>(<span class="ident">normalized_low</span>, <span class="ident">normalized_high</span>),
+                <span class="macro-nonterminal">$uni_ty </span>{
+                    hue: Uniform::new_inclusive(normalized_low, normalized_high),
                 }
             }
 
-            <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base_ty::from</span>(<span class="self">self</span>.<span class="ident">hue</span>.<span class="ident">sample</span>(<span class="ident">rng</span>) <span class="op">*</span> <span class="ident">T::full_rotation</span>())
+            <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="macro-nonterminal">$base_ty</span>&lt;T&gt; {
+                <span class="macro-nonterminal">$base_ty::from</span>(<span class="self">self</span>.hue.sample(rng) * T::full_rotation())
             }
         }
     };
 }
 
-<span class="macro">impl_uniform!</span>(<span class="ident">UniformLabHue</span>, <span class="ident">LabHue</span>);
-<span class="macro">impl_uniform!</span>(<span class="ident">UniformRgbHue</span>, <span class="ident">RgbHue</span>);
-<span class="macro">impl_uniform!</span>(<span class="ident">UniformLuvHue</span>, <span class="ident">LuvHue</span>);
-<span class="macro">impl_uniform!</span>(<span class="ident">UniformOklabHue</span>, <span class="ident">OklabHue</span>);
+<span class="macro">impl_uniform!</span>(UniformLabHue, LabHue);
+<span class="macro">impl_uniform!</span>(UniformRgbHue, RgbHue);
+<span class="macro">impl_uniform!</span>(UniformLuvHue, LuvHue);
+<span class="macro">impl_uniform!</span>(UniformOklabHue, OklabHue);
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">crate</span>::{
-        <span class="ident">angle</span>::{<span class="ident">SignedAngle</span>, <span class="ident">UnsignedAngle</span>},
-        <span class="ident">RgbHue</span>,
+<span class="kw">impl</span>&lt;T&gt; OklabHue&lt;T&gt;
+<span class="kw">where
+    </span>T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
+{
+    <span class="doccomment">/// Returns `a` and `b` values for this hue at the given `croma`
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">pub fn </span>ab(<span class="self">self</span>, chroma: T) -&gt; (T, T) {
+        <span class="kw">let </span>hue_rad = <span class="self">self</span>.into_raw_radians();
+        <span class="kw">let </span>(sin, cos) = hue_rad.sin_cos();
+        (chroma.clone() * cos, chroma * sin)
+    }
+
+    <span class="doccomment">/// Returns a hue from `a` and `b`, with a normalized angle, i.e. an angle in the half
+    /// open interval [0° .. 360°).
+    /// If `a` and `b` are both `zero`, returns `None`
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">pub fn </span>from_ab(a: T, b: T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>a == T::zero() &amp;&amp; b == T::zero() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="comment">// atan2 returns values in the interval [-π .. π]
+            // instead of
+            //   let hue_rad = T::atan2(b,a);
+            // use negative a and be and rotate, to ensure the hue is normalized,
+            </span><span class="kw">let </span>hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
+            <span class="prelude-val">Some</span>(<span class="self">Self</span>::from_radians(hue_rad))
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use crate</span>::{
+        angle::{SignedAngle, UnsignedAngle},
+        OklabHue, RgbHue,
     };
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">normalize_angle_0_360</span>() {
-        <span class="kw">let</span> <span class="ident">inp</span> <span class="op">=</span> [
-            <span class="op">-</span><span class="number">1000.0_f32</span>,
-            <span class="op">-</span><span class="number">900.0</span>,
-            <span class="op">-</span><span class="number">360.5</span>,
-            <span class="op">-</span><span class="number">360.0</span>,
-            <span class="op">-</span><span class="number">359.5</span>,
-            <span class="op">-</span><span class="number">240.0</span>,
-            <span class="op">-</span><span class="number">180.5</span>,
-            <span class="op">-</span><span class="number">180.0</span>,
-            <span class="op">-</span><span class="number">179.5</span>,
-            <span class="op">-</span><span class="number">90.0</span>,
-            <span class="op">-</span><span class="number">0.5</span>,
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>oklabhue_ab_roundtrip() {
+        <span class="kw">for </span>degree <span class="kw">in </span>[<span class="number">0.0_f64</span>, <span class="number">90.0</span>, <span class="number">30.0</span>, <span class="number">330.0</span>, <span class="number">120.0</span>, <span class="number">240.0</span>] {
+            <span class="kw">let </span>hue = OklabHue::from_degrees(degree);
+            <span class="kw">let </span>(a, b) = hue.ab(<span class="number">10000.0</span>);
+            <span class="kw">let </span>roundtrip_hue = OklabHue::from_ab(a, b).unwrap();
+            <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue);
+        }
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>normalize_angle_0_360() {
+        <span class="kw">let </span>inp = [
+            -<span class="number">1000.0_f32</span>,
+            -<span class="number">900.0</span>,
+            -<span class="number">360.5</span>,
+            -<span class="number">360.0</span>,
+            -<span class="number">359.5</span>,
+            -<span class="number">240.0</span>,
+            -<span class="number">180.5</span>,
+            -<span class="number">180.0</span>,
+            -<span class="number">179.5</span>,
+            -<span class="number">90.0</span>,
+            -<span class="number">0.5</span>,
             <span class="number">0.0</span>,
             <span class="number">0.5</span>,
             <span class="number">90.0</span>,
@@ -1202,34 +1272,34 @@
             <span class="number">1000.0</span>,
         ];
 
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
+        <span class="kw">let </span>expected = [
             <span class="number">80.0_f32</span>, <span class="number">180.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">270.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>,
             <span class="number">90.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">240.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, <span class="number">280.0</span>,
         ];
 
-        <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">inp</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> (<span class="kw-2">*</span><span class="ident">x</span>).<span class="ident">normalize_unsigned_angle</span>())
-            .<span class="ident">collect</span>();
-        <span class="kw">for</span> (<span class="ident">res</span>, <span class="ident">exp</span>) <span class="kw">in</span> <span class="ident">result</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">expected</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">res</span>, <span class="ident">exp</span>);
+        <span class="kw">let </span>result: Vec&lt;f32&gt; = inp
+            .iter()
+            .map(|x| (<span class="kw-2">*</span>x).normalize_unsigned_angle())
+            .collect();
+        <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
+            <span class="macro">assert_relative_eq!</span>(res, exp);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">normalize_angle_180_180</span>() {
-        <span class="kw">let</span> <span class="ident">inp</span> <span class="op">=</span> [
-            <span class="op">-</span><span class="number">1000.0_f32</span>,
-            <span class="op">-</span><span class="number">900.0</span>,
-            <span class="op">-</span><span class="number">360.5</span>,
-            <span class="op">-</span><span class="number">360.0</span>,
-            <span class="op">-</span><span class="number">359.5</span>,
-            <span class="op">-</span><span class="number">240.0</span>,
-            <span class="op">-</span><span class="number">180.5</span>,
-            <span class="op">-</span><span class="number">180.0</span>,
-            <span class="op">-</span><span class="number">179.5</span>,
-            <span class="op">-</span><span class="number">90.0</span>,
-            <span class="op">-</span><span class="number">0.5</span>,
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>normalize_angle_180_180() {
+        <span class="kw">let </span>inp = [
+            -<span class="number">1000.0_f32</span>,
+            -<span class="number">900.0</span>,
+            -<span class="number">360.5</span>,
+            -<span class="number">360.0</span>,
+            -<span class="number">359.5</span>,
+            -<span class="number">240.0</span>,
+            -<span class="number">180.5</span>,
+            -<span class="number">180.0</span>,
+            -<span class="number">179.5</span>,
+            -<span class="number">90.0</span>,
+            -<span class="number">0.5</span>,
             <span class="number">0.0</span>,
             <span class="number">0.5</span>,
             <span class="number">90.0</span>,
@@ -1244,47 +1314,47 @@
             <span class="number">1000.0</span>,
         ];
 
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
-            <span class="number">80.0</span>, <span class="number">180.0</span>, <span class="op">-</span><span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="op">-</span><span class="number">179.5</span>, <span class="op">-</span><span class="number">90.0</span>, <span class="op">-</span><span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">90.0</span>,
-            <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="op">-</span><span class="number">179.5</span>, <span class="op">-</span><span class="number">120.0</span>, <span class="op">-</span><span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, <span class="op">-</span><span class="number">80.0</span>,
+        <span class="kw">let </span>expected = [
+            <span class="number">80.0</span>, <span class="number">180.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">90.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">90.0</span>,
+            <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">120.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, -<span class="number">80.0</span>,
         ];
 
-        <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">inp</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> (<span class="kw-2">*</span><span class="ident">x</span>).<span class="ident">normalize_signed_angle</span>()).<span class="ident">collect</span>();
-        <span class="kw">for</span> (<span class="ident">res</span>, <span class="ident">exp</span>) <span class="kw">in</span> <span class="ident">result</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">expected</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">res</span>, <span class="ident">exp</span>);
+        <span class="kw">let </span>result: Vec&lt;f32&gt; = inp.iter().map(|x| (<span class="kw-2">*</span>x).normalize_signed_angle()).collect();
+        <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
+            <span class="macro">assert_relative_eq!</span>(res, exp);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">float_conversion</span>() {
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="op">-</span><span class="number">180</span>..<span class="number">180</span> {
-            <span class="kw">let</span> <span class="ident">hue</span> <span class="op">=</span> <span class="ident">RgbHue::from</span>(<span class="number">4.0</span> <span class="op">*</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">f32</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>float_conversion() {
+        <span class="kw">for </span>i <span class="kw">in </span>-<span class="number">180</span>..<span class="number">180 </span>{
+            <span class="kw">let </span>hue = RgbHue::from(<span class="number">4.0 </span>* i <span class="kw">as </span>f32);
 
-            <span class="kw">let</span> <span class="ident">degs</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into_degrees</span>();
-            <span class="macro">assert!</span>(<span class="ident">degs</span> <span class="op">&gt;</span> <span class="op">-</span><span class="number">180.0</span> <span class="op">&amp;&amp;</span> <span class="ident">degs</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">180.0</span>);
+            <span class="kw">let </span>degs = hue.into_degrees();
+            <span class="macro">assert!</span>(degs &gt; -<span class="number">180.0 </span>&amp;&amp; degs &lt;= <span class="number">180.0</span>);
 
-            <span class="kw">let</span> <span class="ident">pos_degs</span> <span class="op">=</span> <span class="ident">hue</span>.<span class="ident">into_positive_degrees</span>();
-            <span class="macro">assert!</span>(<span class="ident">pos_degs</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0.0</span> <span class="op">&amp;&amp;</span> <span class="ident">pos_degs</span> <span class="op">&lt;</span> <span class="number">360.0</span>);
+            <span class="kw">let </span>pos_degs = hue.into_positive_degrees();
+            <span class="macro">assert!</span>(pos_degs &gt;= <span class="number">0.0 </span>&amp;&amp; pos_degs &lt; <span class="number">360.0</span>);
 
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">RgbHue::from</span>(<span class="ident">degs</span>), <span class="ident">RgbHue::from</span>(<span class="ident">pos_degs</span>));
+            <span class="macro">assert_relative_eq!</span>(RgbHue::from(degs), RgbHue::from(pos_degs));
         }
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">RgbHue::from_degrees</span>(<span class="number">10.2</span>)).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>RgbHue::from_degrees(<span class="number">10.2</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">serialized</span>, <span class="string">&quot;10.2&quot;</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">&quot;10.2&quot;</span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">RgbHue</span> <span class="op">=</span> <span class="ident">::serde_json::from_str</span>(<span class="string">&quot;10.2&quot;</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>deserialized: RgbHue = ::serde_json::from_str(<span class="string">&quot;10.2&quot;</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">RgbHue::from_degrees</span>(<span class="number">10.2</span>));
+        <span class="macro">assert_eq!</span>(deserialized, RgbHue::from_degrees(<span class="number">10.2</span>));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/angle.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>angle.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/angle.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>angle.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -201,208 +201,208 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits for working with angular values, such as for in hues.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits for working with angular values, such as for in hues.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">bool_mask::HasBoolMask</span>,
-    <span class="ident">num</span>::{<span class="ident">Real</span>, <span class="ident">Round</span>},
+</span><span class="kw">use crate</span>::{
+    bool_mask::HasBoolMask,
+    num::{Real, Round},
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;wide&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">wide</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;wide&quot;</span>)]
+</span><span class="kw">mod </span>wide;
 
-<span class="doccomment">/// Represents types that can express half of a rotation (i.e. 180 degrees).</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HalfRotation</span> {
-    <span class="doccomment">/// Return a value that represents half of a rotation (i.e. 180 degrees).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">half_rotation</span>() -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Represents types that can express half of a rotation (i.e. 180 degrees).
+</span><span class="kw">pub trait </span>HalfRotation {
+    <span class="doccomment">/// Return a value that represents half of a rotation (i.e. 180 degrees).
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>half_rotation() -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Represents types that can express a full rotation (i.e. 360 degrees).</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FullRotation</span> {
-    <span class="doccomment">/// Return a value that represents a full rotation (i.e. 360 degrees).</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">full_rotation</span>() -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Represents types that can express a full rotation (i.e. 360 degrees).
+</span><span class="kw">pub trait </span>FullRotation {
+    <span class="doccomment">/// Return a value that represents a full rotation (i.e. 360 degrees).
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>full_rotation() -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Angle values that are real numbers and can represent both radians and</span>
-<span class="doccomment">/// degrees.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RealAngle</span>: <span class="ident">Real</span> {
-    <span class="doccomment">/// Consider `self` to be radians and convert it to degrees.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">radians_to_degrees</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Angle values that are real numbers and can represent both radians and
+/// degrees.
+</span><span class="kw">pub trait </span>RealAngle: Real {
+    <span class="doccomment">/// Consider `self` to be radians and convert it to degrees.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>radians_to_degrees(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Consider `self` to be degrees and convert it to radians.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">degrees_to_radians</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Consider `self` to be degrees and convert it to radians.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>degrees_to_radians(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Angular equality, where 0 degrees and 360 degrees are equal.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AngleEq</span>: <span class="ident">HasBoolMask</span> {
-    <span class="doccomment">/// Check if `self` and `other` represent the same angle on a circle.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mask</span>;
+<span class="doccomment">/// Angular equality, where 0 degrees and 360 degrees are equal.
+</span><span class="kw">pub trait </span>AngleEq: HasBoolMask {
+    <span class="doccomment">/// Check if `self` and `other` represent the same angle on a circle.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>angle_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span>::Mask;
 }
 
-<span class="doccomment">/// Angle types that can represent the full circle using positive and negative</span>
-<span class="doccomment">/// values.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SignedAngle</span> {
-    <span class="doccomment">/// Normalize `self` to a range corresponding to -180 to 180 degrees.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">normalize_signed_angle</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Angle types that can represent the full circle using positive and negative
+/// values.
+</span><span class="kw">pub trait </span>SignedAngle {
+    <span class="doccomment">/// Normalize `self` to a range corresponding to -180 to 180 degrees.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>normalize_signed_angle(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Angle types that can represent the full circle as positive values.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">UnsignedAngle</span> {
-    <span class="doccomment">/// Normalize `self` to a range corresponding to 0 to 360 degrees.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">normalize_unsigned_angle</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Angle types that can represent the full circle as positive values.
+</span><span class="kw">pub trait </span>UnsignedAngle {
+    <span class="doccomment">/// Normalize `self` to a range corresponding to 0 to 360 degrees.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>normalize_unsigned_angle(<span class="self">self</span>) -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Performs value-to-value conversion between angle types. See also [`IntoAngle`].</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Performs a conversion from `angle`.</span>
-    <span class="kw">fn</span> <span class="ident">from_angle</span>(<span class="ident">angle</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Performs value-to-value conversion between angle types. See also [`IntoAngle`].
+</span><span class="kw">pub trait </span>FromAngle&lt;T&gt; {
+    <span class="doccomment">/// Performs a conversion from `angle`.
+    </span><span class="kw">fn </span>from_angle(angle: T) -&gt; <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_angle</span>(<span class="ident">angle</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">angle</span>
+<span class="kw">impl</span>&lt;T&gt; FromAngle&lt;T&gt; <span class="kw">for </span>T {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from_angle(angle: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        angle
     }
 }
 
-<span class="doccomment">/// Performs value-to-value conversion between angle types. See also [`IntoAngle`].</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Performs a conversion into `T`.</span>
-    <span class="kw">fn</span> <span class="ident">into_angle</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span>;
+<span class="doccomment">/// Performs value-to-value conversion between angle types. See also [`IntoAngle`].
+</span><span class="kw">pub trait </span>IntoAngle&lt;T&gt; {
+    <span class="doccomment">/// Performs a conversion into `T`.
+    </span><span class="kw">fn </span>into_angle(<span class="self">self</span>) -&gt; T;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">IntoAngle</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">U</span>: <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, U&gt; IntoAngle&lt;U&gt; <span class="kw">for </span>T
+<span class="kw">where
+    </span>U: FromAngle&lt;T&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_angle</span>(<span class="self">self</span>) -&gt; <span class="ident">U</span> {
-        <span class="ident">U::from_angle</span>(<span class="self">self</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>into_angle(<span class="self">self</span>) -&gt; U {
+        U::from_angle(<span class="self">self</span>)
     }
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_angle_float</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
+<span class="macro">macro_rules! </span>impl_angle_float {
+    ($(<span class="macro-nonterminal">$ty</span>: ident),+) =&gt; {
         $(
-            <span class="kw">impl</span> <span class="ident">HalfRotation</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">half_rotation</span>() -&gt; <span class="self">Self</span> {
-                    <span class="number">180.0</span>
+            <span class="kw">impl </span>HalfRotation <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>half_rotation() -&gt; <span class="self">Self </span>{
+                    <span class="number">180.0
+                </span>}
+            }
+
+            <span class="kw">impl </span>FullRotation <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>full_rotation() -&gt; <span class="self">Self </span>{
+                    <span class="number">360.0
+                </span>}
+            }
+
+            <span class="kw">impl </span>RealAngle <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>degrees_to_radians(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+                    <span class="self">self</span>.to_radians()
+                }
+
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>radians_to_degrees(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+                    <span class="self">self</span>.to_degrees()
                 }
             }
 
-            <span class="kw">impl</span> <span class="ident">FullRotation</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">full_rotation</span>() -&gt; <span class="self">Self</span> {
-                    <span class="number">360.0</span>
+            <span class="kw">impl </span>AngleEq <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>angle_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+                    <span class="self">self</span>.normalize_unsigned_angle() == other.normalize_unsigned_angle()
                 }
             }
 
-            <span class="kw">impl</span> <span class="ident">RealAngle</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">degrees_to_radians</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-                    <span class="self">self</span>.<span class="ident">to_radians</span>()
-                }
-
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">radians_to_degrees</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-                    <span class="self">self</span>.<span class="ident">to_degrees</span>()
-                }
+            <span class="kw">impl </span>SignedAngle <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>normalize_signed_angle(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+                    <span class="self">self </span>- Round::ceil(((<span class="self">self </span>+ <span class="number">180.0</span>) / <span class="number">360.0</span>) - <span class="number">1.0</span>) * <span class="number">360.0
+                </span>}
             }
 
-            <span class="kw">impl</span> <span class="ident">AngleEq</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-                    <span class="self">self</span>.<span class="ident">normalize_unsigned_angle</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">normalize_unsigned_angle</span>()
+            <span class="kw">impl </span>UnsignedAngle <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>normalize_unsigned_angle(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+                    <span class="self">self </span>- (Round::floor(<span class="self">self </span>/ <span class="number">360.0</span>) * <span class="number">360.0</span>)
                 }
             }
-
-            <span class="kw">impl</span> <span class="ident">SignedAngle</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">normalize_signed_angle</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-                    <span class="self">self</span> <span class="op">-</span> <span class="ident">Round::ceil</span>(((<span class="self">self</span> <span class="op">+</span> <span class="number">180.0</span>) <span class="op">/</span> <span class="number">360.0</span>) <span class="op">-</span> <span class="number">1.0</span>) <span class="op">*</span> <span class="number">360.0</span>
-                }
-            }
-
-            <span class="kw">impl</span> <span class="ident">UnsignedAngle</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">normalize_unsigned_angle</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-                    <span class="self">self</span> <span class="op">-</span> (<span class="ident">Round::floor</span>(<span class="self">self</span> <span class="op">/</span> <span class="number">360.0</span>) <span class="op">*</span> <span class="number">360.0</span>)
-                }
-            }
-        )<span class="op">+</span>
+        )+
     };
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_from_angle_float</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ident</span> <span class="ident">to</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_ty</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">from_angle</span>(<span class="ident">angle</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_ty</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">angle</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>
-            }
+<span class="macro">macro_rules! </span>impl_from_angle_float {
+    (<span class="macro-nonterminal">$ty</span>: ident to <span class="macro-nonterminal">$other_ty</span>: ident) =&gt; {
+        <span class="kw">impl </span>FromAngle&lt;<span class="macro-nonterminal">$other_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>from_angle(angle: <span class="macro-nonterminal">$other_ty</span>) -&gt; <span class="self">Self </span>{
+                angle <span class="kw">as </span><span class="macro-nonterminal">$ty
+            </span>}
         }
     };
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_from_angle_u8</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>) =&gt; {
+<span class="macro">macro_rules! </span>impl_from_angle_u8 {
+    ($(<span class="macro-nonterminal">$float_ty</span>: ident),<span class="kw-2">*</span>) =&gt; {
         $(
-            <span class="kw">impl</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">from_angle</span>(<span class="ident">angle</span>: <span class="ident">u8</span>) -&gt; <span class="self">Self</span> {
-                    (<span class="ident">angle</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty</span> <span class="op">/</span> <span class="number">256.0</span>) <span class="op">*</span> <span class="ident"><span class="self">Self</span>::full_rotation</span>()
+            <span class="kw">impl </span>FromAngle&lt;u8&gt; <span class="kw">for </span><span class="macro-nonterminal">$float_ty </span>{
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>from_angle(angle: u8) -&gt; <span class="self">Self </span>{
+                    (angle <span class="kw">as </span><span class="macro-nonterminal">$float_ty </span>/ <span class="number">256.0</span>) * <span class="self">Self</span>::full_rotation()
                 }
             }
 
-            <span class="kw">impl</span> <span class="ident">FromAngle</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u8</span> {
-                <span class="attribute">#[<span class="ident">inline</span>]</span>
-                <span class="kw">fn</span> <span class="ident">from_angle</span>(<span class="ident">angle</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty</span>) -&gt; <span class="self">Self</span> {
-                    <span class="kw">let</span> <span class="ident">normalized</span> <span class="op">=</span> <span class="ident">angle</span>.<span class="ident">normalize_unsigned_angle</span>() <span class="op">/</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">float_ty::full_rotation</span>();
-                    <span class="kw">let</span> <span class="ident">rounded</span> <span class="op">=</span> <span class="ident">normalized</span>.<span class="ident">round</span>();
+            <span class="kw">impl </span>FromAngle&lt;<span class="macro-nonterminal">$float_ty</span>&gt; <span class="kw">for </span>u8 {
+                <span class="attribute">#[inline]
+                </span><span class="kw">fn </span>from_angle(angle: <span class="macro-nonterminal">$float_ty</span>) -&gt; <span class="self">Self </span>{
+                    <span class="kw">let </span>normalized = angle.normalize_unsigned_angle() / <span class="macro-nonterminal">$float_ty::full_rotation</span>();
+                    <span class="kw">let </span>rounded = normalized.round();
 
-                    <span class="kw">if</span> <span class="ident">rounded</span> <span class="op">&gt;</span> <span class="number">255.5</span> {
-                        <span class="number">0</span>
-                    } <span class="kw">else</span> {
-                        <span class="ident">rounded</span> <span class="kw">as</span> <span class="ident">u8</span>
+                    <span class="kw">if </span>rounded &gt; <span class="number">255.5 </span>{
+                        <span class="number">0
+                    </span>} <span class="kw">else </span>{
+                        rounded <span class="kw">as </span>u8
                     }
                 }
             }
-        )<span class="op">*</span>
+        )*
     };
 }
 
-<span class="macro">impl_angle_float!</span>(<span class="ident">f32</span>, <span class="ident">f64</span>);
-<span class="macro">impl_from_angle_float!</span>(<span class="ident">f32</span> <span class="ident">to</span> <span class="ident">f64</span>);
-<span class="macro">impl_from_angle_float!</span>(<span class="ident">f64</span> <span class="ident">to</span> <span class="ident">f32</span>);
-<span class="macro">impl_from_angle_u8!</span>(<span class="ident">f32</span>, <span class="ident">f64</span>);
+<span class="macro">impl_angle_float!</span>(f32, f64);
+<span class="macro">impl_from_angle_float!</span>(f32 to f64);
+<span class="macro">impl_from_angle_float!</span>(f64 to f32);
+<span class="macro">impl_from_angle_u8!</span>(f32, f64);
 
-<span class="kw">impl</span> <span class="ident">HalfRotation</span> <span class="kw">for</span> <span class="ident">u8</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">half_rotation</span>() -&gt; <span class="self">Self</span> {
-        <span class="number">128</span>
+<span class="kw">impl </span>HalfRotation <span class="kw">for </span>u8 {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>half_rotation() -&gt; <span class="self">Self </span>{
+        <span class="number">128
+    </span>}
+}
+
+<span class="kw">impl </span>AngleEq <span class="kw">for </span>u8 {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>angle_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self </span>== other
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AngleEq</span> <span class="kw">for</span> <span class="ident">u8</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">angle_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span> <span class="op">==</span> <span class="ident">other</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">UnsignedAngle</span> <span class="kw">for</span> <span class="ident">u8</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">normalize_unsigned_angle</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>
-    }
+<span class="kw">impl </span>UnsignedAngle <span class="kw">for </span>u8 {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>normalize_unsigned_angle(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self
+    </span>}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

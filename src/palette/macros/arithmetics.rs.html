@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/arithmetics.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>arithmetics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/arithmetics.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>arithmetics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -387,394 +387,394 @@
 <span id="387">387</span>
 <span id="388">388</span>
 <span id="389">389</span>
-</pre><pre class="rust"><code><span class="macro">macro_rules!</span> <span class="ident">impl_color_add</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
+</pre><pre class="rust"><code><span class="macro">macro_rules! </span>impl_color_add {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$phantom_ty</span>: ident, <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+], <span class="macro-nonterminal">$phantom</span>: ident) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Add&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Add&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+ other.<span class="macro-nonterminal">$element</span>, )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Add&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Add&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>add(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+ c.clone(), )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">AddAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; AddAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: AddAssign,
         {
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; AddAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  AddAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+= c.clone(); )+
             }
         }
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>]) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+]) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Add&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Add&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
+            <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+ other.<span class="macro-nonterminal">$element</span>, )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Add&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Add&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
+            <span class="kw">fn </span>add(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+ c.clone(), )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">AddAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; AddAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: AddAssign,
         {
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; AddAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  AddAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
-            }
-        }
-    };
-}
-
-<span class="doccomment">/// Implement `Sub` and `SubAssign` traits for a color space.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Both scalars and color arithmetic are implemented.</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_color_sub</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
-                }
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
-        {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
-                }
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">SubAssign</span>,
-        {
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">SubAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
-        {
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
-            }
-        }
-    };
-
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>]) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
-                }
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
-        {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-
-            <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
-                }
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">SubAssign</span>,
-        {
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
-            }
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">SubAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
-        {
-            <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">-</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>+= c.clone(); )+
             }
         }
     };
 }
 
-<span class="doccomment">/// Implement `Mul` and `MulAssign` traits for a color space.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Both scalars and color arithmetic are implemented.</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_color_mul</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
+<span class="doccomment">/// Implement `Sub` and `SubAssign` traits for a color space.
+///
+/// Both scalars and color arithmetic are implemented.
+</span><span class="macro">macro_rules! </span>impl_color_sub {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$phantom_ty</span>: ident, <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+], <span class="macro-nonterminal">$phantom</span>: ident) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Sub&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Sub&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">*</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>- other.<span class="macro-nonterminal">$element</span>, )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Sub&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Sub&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">*</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>sub(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>- c.clone(), )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">MulAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; SubAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: SubAssign,
         {
-            <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>-= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">MulAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; SubAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  SubAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>-= c.clone(); )+
             }
         }
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>]) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">*</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+]) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Sub&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Sub&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
+        {
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+            <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>- other.<span class="macro-nonterminal">$element</span>, )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Sub&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Sub&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">*</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
+            <span class="kw">fn </span>sub(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>- c.clone(), )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">MulAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; SubAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: SubAssign,
         {
-            <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>-= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">MulAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; SubAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  SubAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>-= c.clone(); )+
             }
         }
     };
 }
 
-<span class="doccomment">/// Implement `Div` and `DivAssign` traits for a color space.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Both scalars and color arithmetic are implemented.</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_color_div</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
+<span class="doccomment">/// Implement `Mul` and `MulAssign` traits for a color space.
+///
+/// Both scalars and color arithmetic are implemented.
+</span><span class="macro">macro_rules! </span>impl_color_mul {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$phantom_ty</span>: ident, <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+], <span class="macro-nonterminal">$phantom</span>: ident) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Mul&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Mul&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>* other.<span class="macro-nonterminal">$element</span>, )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Mul&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Mul&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,
+            <span class="kw">fn </span>mul(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>* c.clone(), )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">DivAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; MulAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: MulAssign,
         {
-            <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span><span class="kw-2">*</span>= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom_ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; MulAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  MulAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span><span class="kw-2">*</span>= c.clone(); )+
             }
         }
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>: <span class="ident">ident</span> <span class="op">&gt;</span> , [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>),<span class="op">+</span>]) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+]) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Mul&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Mul&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>, )<span class="op">+</span>
+            <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>* other.<span class="macro-nonterminal">$element</span>, )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Mul&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Mul&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span> <span class="ident">c</span>.<span class="ident">clone</span>(), )<span class="op">+</span>
+            <span class="kw">fn </span>mul(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>* c.clone(), )+
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">DivAssign</span>,
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; MulAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: MulAssign,
         {
-            <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span><span class="op">=</span> <span class="ident">other</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>; )<span class="op">+</span>
+            <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span><span class="kw-2">*</span>= other.<span class="macro-nonterminal">$element</span>; )+
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self_ty</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>:  <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; MulAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  MulAssign + Clone
         {
-            <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component_ty</span>) {
-                $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span> <span class="op">/</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>(); )<span class="op">+</span>
+            <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span><span class="kw-2">*</span>= c.clone(); )+
+            }
+        }
+    };
+}
+
+<span class="doccomment">/// Implement `Div` and `DivAssign` traits for a color space.
+///
+/// Both scalars and color arithmetic are implemented.
+</span><span class="macro">macro_rules! </span>impl_color_div {
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$phantom_ty</span>: ident, <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+], <span class="macro-nonterminal">$phantom</span>: ident) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Div&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Div&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
+        {
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+            <span class="kw">fn </span>div(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/ other.<span class="macro-nonterminal">$element</span>, )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
+                }
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; Div&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Div&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
+        {
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+            <span class="kw">fn </span>div(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/ c.clone(), )+
+                    <span class="macro-nonterminal">$phantom</span>: PhantomData,
+                }
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; DivAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: DivAssign,
+        {
+            <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/= other.<span class="macro-nonterminal">$element</span>; )+
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt; DivAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$phantom_ty</span>, <span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  DivAssign + Clone
+        {
+            <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/= c.clone(); )+
+            }
+        }
+    };
+    (<span class="macro-nonterminal">$self_ty</span>: ident &lt; <span class="macro-nonterminal">$component_ty</span>: ident &gt; , [$(<span class="macro-nonterminal">$element</span>: ident),+]) =&gt; {
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Div&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Div&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt;
+        {
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+            <span class="kw">fn </span>div(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/ other.<span class="macro-nonterminal">$element</span>, )+
+                }
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; Div&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: Div&lt;Output=<span class="macro-nonterminal">$component_ty</span>&gt; + Clone
+        {
+            <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+            <span class="kw">fn </span>div(<span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="macro-nonterminal">$self_ty </span>{
+                    $( <span class="macro-nonterminal">$element</span>: <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/ c.clone(), )+
+                }
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; DivAssign&lt;<span class="self">Self</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T: DivAssign,
+        {
+            <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/= other.<span class="macro-nonterminal">$element</span>; )+
+            }
+        }
+
+        <span class="kw">impl</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt; DivAssign&lt;<span class="macro-nonterminal">$component_ty</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$self_ty</span>&lt;<span class="macro-nonterminal">$component_ty</span>&gt;
+        <span class="kw">where
+            </span>T:  DivAssign + Clone
+        {
+            <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$component_ty</span>) {
+                $( <span class="self">self</span>.<span class="macro-nonterminal">$element </span>/= c.clone(); )+
             }
         }
     };
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

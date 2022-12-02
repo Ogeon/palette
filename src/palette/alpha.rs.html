@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -174,181 +174,181 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">palette_derive::WithAlpha</span>;
+</pre><pre class="rust"><code><span class="attribute">#[doc(hidden)]
+</span><span class="kw">pub use </span>palette_derive::WithAlpha;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">num::Zero</span>, <span class="ident">stimulus::Stimulus</span>};
+<span class="kw">use crate</span>::{num::Zero, stimulus::Stimulus};
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::alpha</span>::<span class="kw-2">*</span>;
+<span class="kw">pub use </span><span class="self">self</span>::alpha::<span class="kw-2">*</span>;
 
-<span class="kw">mod</span> <span class="ident">alpha</span>;
+<span class="kw">mod </span>alpha;
 
-<span class="doccomment">/// A trait for color types that can have or be given transparency (alpha channel).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `WithAlpha` is an interface for adding, removing and setting the alpha</span>
-<span class="doccomment">/// channel of a color type. The color type itself doesn&#39;t need to store the</span>
-<span class="doccomment">/// transparency value as it can be transformed into or wrapped in a type that</span>
-<span class="doccomment">/// has a representation of transparency. This would typically be done by</span>
-<span class="doccomment">/// wrapping it in an [`Alpha`](crate::Alpha) instance.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Deriving</span>
-<span class="doccomment">/// The trait is trivial enough to be automatically derived. If the color type</span>
-<span class="doccomment">/// has a field for transparency (an alpha channel), it has to be marked with</span>
-<span class="doccomment">/// `#[palette(alpha)]` to be taken into account.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Derived without an internal alpha channel:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::WithAlpha;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// #[derive(WithAlpha)]</span>
-<span class="doccomment">/// struct CustomColor {</span>
-<span class="doccomment">///     redness: f32,</span>
-<span class="doccomment">///     glow: f32,</span>
-<span class="doccomment">///     glitter: f32,</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color = CustomColor {</span>
-<span class="doccomment">///     redness: 0.8,</span>
-<span class="doccomment">///     glow: 2.5,</span>
-<span class="doccomment">///     glitter: 1000.0</span>
-<span class="doccomment">/// };</span>
-<span class="doccomment">/// let transparent = color.with_alpha(0.3);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(transparent.alpha, 0.3);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Derived with an internal alpha channel:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::WithAlpha;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// #[derive(WithAlpha)]</span>
-<span class="doccomment">/// struct CustomColor {</span>
-<span class="doccomment">///     redness: f32,</span>
-<span class="doccomment">///     glow: f32,</span>
-<span class="doccomment">///     glitter: f32,</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///     #[palette(alpha)]</span>
-<span class="doccomment">///     alpha: u8,</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color = CustomColor {</span>
-<span class="doccomment">///     redness: 0.8,</span>
-<span class="doccomment">///     glow: 2.5,</span>
-<span class="doccomment">///     glitter: 1000.0,</span>
-<span class="doccomment">///     alpha: 255</span>
-<span class="doccomment">/// };</span>
-<span class="doccomment">/// let transparent = color.with_alpha(10);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(transparent.alpha, 10);</span>
-<span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WithAlpha</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// The opaque color type, without any transparency.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is typically `Self`.</span>
-    <span class="kw">type</span> <span class="ident">Color</span>;
+<span class="doccomment">/// A trait for color types that can have or be given transparency (alpha channel).
+///
+/// `WithAlpha` is an interface for adding, removing and setting the alpha
+/// channel of a color type. The color type itself doesn&#39;t need to store the
+/// transparency value as it can be transformed into or wrapped in a type that
+/// has a representation of transparency. This would typically be done by
+/// wrapping it in an [`Alpha`](crate::Alpha) instance.
+///
+/// # Deriving
+/// The trait is trivial enough to be automatically derived. If the color type
+/// has a field for transparency (an alpha channel), it has to be marked with
+/// `#[palette(alpha)]` to be taken into account.
+///
+/// Derived without an internal alpha channel:
+///
+/// ```
+/// use palette::WithAlpha;
+///
+/// #[derive(WithAlpha)]
+/// struct CustomColor {
+///     redness: f32,
+///     glow: f32,
+///     glitter: f32,
+/// }
+///
+/// let color = CustomColor {
+///     redness: 0.8,
+///     glow: 2.5,
+///     glitter: 1000.0
+/// };
+/// let transparent = color.with_alpha(0.3);
+///
+/// assert_eq!(transparent.alpha, 0.3);
+/// ```
+///
+/// Derived with an internal alpha channel:
+///
+/// ```
+/// use palette::WithAlpha;
+///
+/// #[derive(WithAlpha)]
+/// struct CustomColor {
+///     redness: f32,
+///     glow: f32,
+///     glitter: f32,
+///
+///     #[palette(alpha)]
+///     alpha: u8,
+/// }
+///
+/// let color = CustomColor {
+///     redness: 0.8,
+///     glow: 2.5,
+///     glitter: 1000.0,
+///     alpha: 255
+/// };
+/// let transparent = color.with_alpha(10);
+///
+/// assert_eq!(transparent.alpha, 10);
+/// ```
+</span><span class="kw">pub trait </span>WithAlpha&lt;A&gt;: Sized {
+    <span class="doccomment">/// The opaque color type, without any transparency.
+    ///
+    /// This is typically `Self`.
+    </span><span class="kw">type </span>Color;
 
-    <span class="doccomment">/// The color type with transparency applied.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is typically `Alpha&lt;Self::Color, A&gt;`.</span>
-    <span class="kw">type</span> <span class="ident">WithAlpha</span>: <span class="ident">WithAlpha</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">Color</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Color</span>, <span class="ident">WithAlpha</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::WithAlpha</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// The color type with transparency applied.
+    ///
+    /// This is typically `Alpha&lt;Self::Color, A&gt;`.
+    </span><span class="kw">type </span>WithAlpha: WithAlpha&lt;A, Color = <span class="self">Self</span>::Color, WithAlpha = <span class="self">Self</span>::WithAlpha&gt;;
 
-    <span class="doccomment">/// Transforms the color into a transparent color with the provided</span>
-    <span class="doccomment">/// alpha value. If `Self` already has a transparency, it is</span>
-    <span class="doccomment">/// overwritten.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{Srgb, WithAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let color = Srgb::new(255u8, 0, 255);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // This results in an `Alpha&lt;Srgb&lt;u8&gt;, f32&gt;`</span>
-    <span class="doccomment">/// let transparent = color.with_alpha(0.3f32);</span>
-    <span class="doccomment">/// assert_eq!(transparent.alpha, 0.3);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // This changes the transparency to 0.8</span>
-    <span class="doccomment">/// let transparent = transparent.with_alpha(0.8f32);</span>
-    <span class="doccomment">/// assert_eq!(transparent.alpha, 0.8);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">with_alpha</span>(<span class="self">self</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="ident"><span class="self">Self</span>::WithAlpha</span>;
+    <span class="doccomment">/// Transforms the color into a transparent color with the provided
+    /// alpha value. If `Self` already has a transparency, it is
+    /// overwritten.
+    ///
+    /// ```
+    /// use palette::{Srgb, WithAlpha};
+    ///
+    /// let color = Srgb::new(255u8, 0, 255);
+    ///
+    /// // This results in an `Alpha&lt;Srgb&lt;u8&gt;, f32&gt;`
+    /// let transparent = color.with_alpha(0.3f32);
+    /// assert_eq!(transparent.alpha, 0.3);
+    ///
+    /// // This changes the transparency to 0.8
+    /// let transparent = transparent.with_alpha(0.8f32);
+    /// assert_eq!(transparent.alpha, 0.8);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>with_alpha(<span class="self">self</span>, alpha: A) -&gt; <span class="self">Self</span>::WithAlpha;
 
-    <span class="doccomment">/// Removes the transparency from the color. If `Self::Color` has</span>
-    <span class="doccomment">/// an internal transparency field, that field will be set to</span>
-    <span class="doccomment">/// `A::max_intensity()` to make it opaque.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{Srgba, Srgb, WithAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let transparent = Srgba::new(255u8, 0, 255, 10);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // This unwraps the color information from the `Alpha` wrapper</span>
-    <span class="doccomment">/// let color = transparent.without_alpha();</span>
-    <span class="doccomment">/// assert_eq!(transparent.color, color);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">without_alpha</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Color</span>;
+    <span class="doccomment">/// Removes the transparency from the color. If `Self::Color` has
+    /// an internal transparency field, that field will be set to
+    /// `A::max_intensity()` to make it opaque.
+    ///
+    /// ```
+    /// use palette::{Srgba, Srgb, WithAlpha};
+    ///
+    /// let transparent = Srgba::new(255u8, 0, 255, 10);
+    ///
+    /// // This unwraps the color information from the `Alpha` wrapper
+    /// let color = transparent.without_alpha();
+    /// assert_eq!(transparent.color, color);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>without_alpha(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Color;
 
-    <span class="doccomment">/// Splits the color into separate color and transparency values.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// A color without any transparency field will return</span>
-    <span class="doccomment">/// `A::max_intensity()` instead. If `Self::Color` has an internal</span>
-    <span class="doccomment">/// transparency field, that field will be set to</span>
-    <span class="doccomment">/// `A::max_intensity()` to make it opaque.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{Srgba, Srgb, WithAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let transparent = Srgba::new(255u8, 0, 255, 10);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // This unwraps both the color and alpha from the `Alpha` wrapper</span>
-    <span class="doccomment">/// let (color, alpha) = transparent.split();</span>
-    <span class="doccomment">/// assert_eq!(transparent.color, color);</span>
-    <span class="doccomment">/// assert_eq!(transparent.alpha, alpha);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>) -&gt; (<span class="ident"><span class="self">Self</span>::Color</span>, <span class="ident">A</span>);
+    <span class="doccomment">/// Splits the color into separate color and transparency values.
+    ///
+    /// A color without any transparency field will return
+    /// `A::max_intensity()` instead. If `Self::Color` has an internal
+    /// transparency field, that field will be set to
+    /// `A::max_intensity()` to make it opaque.
+    ///
+    /// ```
+    /// use palette::{Srgba, Srgb, WithAlpha};
+    ///
+    /// let transparent = Srgba::new(255u8, 0, 255, 10);
+    ///
+    /// // This unwraps both the color and alpha from the `Alpha` wrapper
+    /// let (color, alpha) = transparent.split();
+    /// assert_eq!(transparent.color, color);
+    /// assert_eq!(transparent.alpha, alpha);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>split(<span class="self">self</span>) -&gt; (<span class="self">Self</span>::Color, A);
 
-    <span class="doccomment">/// Transforms the color into a fully opaque color with a transparency</span>
-    <span class="doccomment">/// field. If `Self` already has a transparency, it is overwritten.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{Srgb, Srgba, WithAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let color = Srgb::new(255u8, 0, 255);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let opaque: Srgba&lt;u8&gt; = color.opaque();</span>
-    <span class="doccomment">/// assert_eq!(opaque.alpha, 255);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">opaque</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::WithAlpha</span>
-    <span class="kw">where</span>
-        <span class="ident">A</span>: <span class="ident">Stimulus</span>,
+    <span class="doccomment">/// Transforms the color into a fully opaque color with a transparency
+    /// field. If `Self` already has a transparency, it is overwritten.
+    ///
+    /// ```
+    /// use palette::{Srgb, Srgba, WithAlpha};
+    ///
+    /// let color = Srgb::new(255u8, 0, 255);
+    ///
+    /// let opaque: Srgba&lt;u8&gt; = color.opaque();
+    /// assert_eq!(opaque.alpha, 255);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>opaque(<span class="self">self</span>) -&gt; <span class="self">Self</span>::WithAlpha
+    <span class="kw">where
+        </span>A: Stimulus,
     {
-        <span class="self">self</span>.<span class="ident">with_alpha</span>(<span class="ident">A::max_intensity</span>())
+        <span class="self">self</span>.with_alpha(A::max_intensity())
     }
 
-    <span class="doccomment">/// Transforms the color into a fully transparent color. If `Self`</span>
-    <span class="doccomment">/// already has a transparency, it is overwritten.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use palette::{Srgb, Srgba, WithAlpha};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let color = Srgb::new(255u8, 0, 255);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let transparent: Srgba&lt;u8&gt; = color.transparent();</span>
-    <span class="doccomment">/// assert_eq!(transparent.alpha, 0);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">transparent</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::WithAlpha</span>
-    <span class="kw">where</span>
-        <span class="ident">A</span>: <span class="ident">Zero</span>,
+    <span class="doccomment">/// Transforms the color into a fully transparent color. If `Self`
+    /// already has a transparency, it is overwritten.
+    ///
+    /// ```
+    /// use palette::{Srgb, Srgba, WithAlpha};
+    ///
+    /// let color = Srgb::new(255u8, 0, 255);
+    ///
+    /// let transparent: Srgba&lt;u8&gt; = color.transparent();
+    /// assert_eq!(transparent.alpha, 0);
+    /// ```
+    </span><span class="attribute">#[must_use]
+    #[inline]
+    </span><span class="kw">fn </span>transparent(<span class="self">self</span>) -&gt; <span class="self">Self</span>::WithAlpha
+    <span class="kw">where
+        </span>A: Zero,
     {
-        <span class="self">self</span>.<span class="ident">with_alpha</span>(<span class="ident">A::zero</span>())
+        <span class="self">self</span>.with_alpha(A::zero())
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

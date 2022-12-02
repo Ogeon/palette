@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast/uint.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>uint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast/uint.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>uint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -420,427 +420,427 @@
 <span id="420">420</span>
 <span id="421">421</span>
 <span id="422">422</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::mem</span>::{<span class="ident">transmute_copy</span>, <span class="ident">ManuallyDrop</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>core::mem::{transmute_copy, ManuallyDrop};
 
-<span class="doccomment">/// Marker trait for types that can be represented as an unsigned integer.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// A type that implements this trait is assumed to have the exact same memory</span>
-<span class="doccomment">/// layout and representation as an unsigned integer, with the current compile</span>
-<span class="doccomment">/// target&#39;s endianness. This implies a couple of useful properties:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// * Casting between `T` and `T::Uint` is free and will (or should) be</span>
-<span class="doccomment">///   optimized away.</span>
-<span class="doccomment">/// * `[T]` can be cast to and from `[T::Uint]`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This allows a number of common and useful optimizations, including casting</span>
-<span class="doccomment">/// buffers and reusing memory. It does however come with some strict</span>
-<span class="doccomment">/// requirements.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// * The type must be inhabited (eg: no</span>
-<span class="doccomment">///   [Infallible](std::convert::Infallible)).</span>
-<span class="doccomment">/// * The type must allow any bit pattern (eg: either no requirements or some</span>
-<span class="doccomment">///   ability to recover from invalid values).</span>
-<span class="doccomment">/// * The type must be either a wrapper around `Self::Uint` or be safe to transmute to and from `Self::Uint`.</span>
-<span class="doccomment">/// * The type must not contain any internal padding.</span>
-<span class="doccomment">/// * The type must be `repr(C)` or `repr(transparent)`.</span>
-<span class="doccomment">/// * The type must have the same size and alignment as `Self::Uint`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note also that the type is assumed to not implement `Drop`. This will</span>
-<span class="doccomment">/// rarely, if ever, be an issue. The requirements above ensures that the</span>
-<span class="doccomment">/// underlying field types stay the same and will be dropped.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">UintCast</span> {
-    <span class="doccomment">/// An unsigned integer with the same size as `Self`.</span>
-    <span class="kw">type</span> <span class="ident">Uint</span>;
+<span class="doccomment">/// Marker trait for types that can be represented as an unsigned integer.
+///
+/// A type that implements this trait is assumed to have the exact same memory
+/// layout and representation as an unsigned integer, with the current compile
+/// target&#39;s endianness. This implies a couple of useful properties:
+///
+/// * Casting between `T` and `T::Uint` is free and will (or should) be
+///   optimized away.
+/// * `[T]` can be cast to and from `[T::Uint]`.
+///
+/// This allows a number of common and useful optimizations, including casting
+/// buffers and reusing memory. It does however come with some strict
+/// requirements.
+///
+/// ## Safety
+///
+/// * The type must be inhabited (eg: no
+///   [Infallible](std::convert::Infallible)).
+/// * The type must allow any bit pattern (eg: either no requirements or some
+///   ability to recover from invalid values).
+/// * The type must be either a wrapper around `Self::Uint` or be safe to transmute to and from `Self::Uint`.
+/// * The type must not contain any internal padding.
+/// * The type must be `repr(C)` or `repr(transparent)`.
+/// * The type must have the same size and alignment as `Self::Uint`.
+///
+/// Note also that the type is assumed to not implement `Drop`. This will
+/// rarely, if ever, be an issue. The requirements above ensures that the
+/// underlying field types stay the same and will be dropped.
+</span><span class="kw">pub unsafe trait </span>UintCast {
+    <span class="doccomment">/// An unsigned integer with the same size as `Self`.
+    </span><span class="kw">type </span>Uint;
 }
 
-<span class="doccomment">/// Cast from a color type to an unsigned integer.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::into_uint(color), 0xFF17C64C);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It&#39;s also possible to use `From` and `Into` when casting built-in types:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::Srgba;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color = Srgba::new(23u8, 198, 76, 255);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Integers implement `Into`:</span>
-<span class="doccomment">/// let uint1: u32 = color.into();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Integers implement `From`:</span>
-<span class="doccomment">/// let uint2 = u32::from(color);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">color</span>: <span class="ident">T</span>) -&gt; <span class="ident">T::Uint</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a color type to an unsigned integer.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::into_uint(color), 0xFF17C64C);
+/// ```
+///
+/// It&#39;s also possible to use `From` and `Into` when casting built-in types:
+///
+/// ```
+/// use palette::Srgba;
+///
+/// let color = Srgba::new(23u8, 198, 76, 255);
+///
+/// // Integers implement `Into`:
+/// let uint1: u32 = color.into();
+///
+/// // Integers implement `From`:
+/// let uint2 = u32::from(color);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>into_uint&lt;T&gt;(color: T) -&gt; T::Uint
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// assert, ensures that transmuting `T` into `T::Uint` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="ident">transmute_copy</span>(<span class="kw-2">&amp;</span><span class="ident">ManuallyDrop::new</span>(<span class="ident">color</span>)) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // assert, ensures that transmuting `T` into `T::Uint` is safe.
+    </span><span class="kw">unsafe </span>{ transmute_copy(<span class="kw-2">&amp;</span>ManuallyDrop::new(color)) }
 }
 
-<span class="doccomment">/// Cast from an unsigned integer to a color type.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::from_uint::&lt;PackedArgb&gt;(0xFF17C64C), color);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It&#39;s also possible to use `From` and `Into` when casting built-in types:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::Srgba;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let uint = 0xFF17C64C;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Integers implement `Into`:</span>
-<span class="doccomment">/// let color1: Srgba&lt;u8&gt; = uint.into();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Colors implement `From`:</span>
-<span class="doccomment">/// let color2 = Srgba::from(uint);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">uint</span>: <span class="ident">T::Uint</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from an unsigned integer to a color type.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::from_uint::&lt;PackedArgb&gt;(0xFF17C64C), color);
+/// ```
+///
+/// It&#39;s also possible to use `From` and `Into` when casting built-in types:
+///
+/// ```
+/// use palette::Srgba;
+///
+/// let uint = 0xFF17C64C;
+///
+/// // Integers implement `Into`:
+/// let color1: Srgba&lt;u8&gt; = uint.into();
+///
+/// // Colors implement `From`:
+/// let color2 = Srgba::from(uint);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>from_uint&lt;T&gt;(uint: T::Uint) -&gt; T
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// assert, ensures that transmuting `T::Uint` into `T` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="ident">transmute_copy</span>(<span class="kw-2">&amp;</span><span class="ident">ManuallyDrop::new</span>(<span class="ident">uint</span>)) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // assert, ensures that transmuting `T::Uint` into `T` is safe.
+    </span><span class="kw">unsafe </span>{ transmute_copy(<span class="kw-2">&amp;</span>ManuallyDrop::new(uint)) }
 }
 
-<span class="doccomment">/// Cast from a color type reference to an unsigned integer reference.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::into_uint_ref(&amp;color), &amp;0xFF17C64C);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_ref</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T::Uint</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a color type reference to an unsigned integer reference.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::into_uint_ref(&amp;color), &amp;0xFF17C64C);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>into_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T) -&gt; <span class="kw-2">&amp;</span>T::Uint
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">value</span>: <span class="kw-2">*const</span> <span class="ident">T</span> <span class="op">=</span> <span class="ident">value</span>;
+    <span class="kw">let </span>value: <span class="kw-2">*const </span>T = value;
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">value</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>() }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>value.cast::&lt;T::Uint&gt;() }
 }
 
-<span class="doccomment">/// Cast from an unsigned integer reference to a color type reference.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::from_uint_ref::&lt;PackedArgb&gt;(&amp;0xFF17C64C), &amp;color);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_ref</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T::Uint</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from an unsigned integer reference to a color type reference.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::from_uint_ref::&lt;PackedArgb&gt;(&amp;0xFF17C64C), &amp;color);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>from_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T::Uint) -&gt; <span class="kw-2">&amp;</span>T
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">value</span>: <span class="kw-2">*const</span> <span class="ident">T::Uint</span> <span class="op">=</span> <span class="ident">value</span>;
+    <span class="kw">let </span>value: <span class="kw-2">*const </span>T::Uint = value;
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">value</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>value.cast::&lt;T&gt;() }
 }
 
-<span class="doccomment">/// Cast from a mutable color type reference to a mutable unsigned integer reference.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let mut color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::into_uint_mut(&amp;mut color), &amp;mut 0xFF17C64C);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_mut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T::Uint</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a mutable color type reference to a mutable unsigned integer reference.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let mut color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::into_uint_mut(&amp;mut color), &amp;mut 0xFF17C64C);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>into_uint_mut&lt;T&gt;(value: <span class="kw-2">&amp;mut </span>T) -&gt; <span class="kw-2">&amp;mut </span>T::Uint
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">value</span>: <span class="kw-2">*mut</span> <span class="ident">T</span> <span class="op">=</span> <span class="ident">value</span>;
+    <span class="kw">let </span>value: <span class="kw-2">*mut </span>T = value;
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">value</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>() }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>value.cast::&lt;T::Uint&gt;() }
 }
 
-<span class="doccomment">/// Cast from a mutable unsigned integer reference to a mutable color type reference.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let mut color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();</span>
-<span class="doccomment">/// assert_eq!(cast::from_uint_mut::&lt;PackedArgb&gt;(&amp;mut 0xFF17C64C), &amp;mut color);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_mut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T::Uint</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a mutable unsigned integer reference to a mutable color type reference.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let mut color: PackedArgb = Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into();
+/// assert_eq!(cast::from_uint_mut::&lt;PackedArgb&gt;(&amp;mut 0xFF17C64C), &amp;mut color);
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>from_uint_mut&lt;T&gt;(value: <span class="kw-2">&amp;mut </span>T::Uint) -&gt; <span class="kw-2">&amp;mut </span>T
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">value</span>: <span class="kw-2">*mut</span> <span class="ident">T::Uint</span> <span class="op">=</span> <span class="ident">value</span>;
+    <span class="kw">let </span>value: <span class="kw-2">*mut </span>T::Uint = value;
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">value</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>value.cast::&lt;T&gt;() }
 }
 
-<span class="doccomment">/// Cast from a slice of colors to a slice of unsigned integers.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: &amp;[PackedArgb] = &amp;[</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">/// assert_eq!(cast::into_uint_slice(colors), &amp;[0xFF17C64C, 0xFF5D12D6])</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_slice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">T::Uint</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a slice of colors to a slice of unsigned integers.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: &amp;[PackedArgb] = &amp;[
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::into_uint_slice(colors), &amp;[0xFF17C64C, 0xFF5D12D6])
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>into_uint_slice&lt;T&gt;(values: <span class="kw-2">&amp;</span>[T]) -&gt; <span class="kw-2">&amp;</span>[T::Uint]
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="comment">// The length is the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">core::slice::from_raw_parts</span>(<span class="ident">values</span>.<span class="ident">as_ptr</span>().<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    // The length is the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts(values.as_ptr().cast::&lt;T::Uint&gt;(), values.len()) }
 }
 
-<span class="doccomment">/// Cast from a slice of unsigned integers to a slice of colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: &amp;[PackedArgb] = &amp;[</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">/// assert_eq!(cast::from_uint_slice::&lt;PackedArgb&gt;(&amp;[0xFF17C64C, 0xFF5D12D6]), colors)</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_slice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="ident">T::Uint</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">T</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a slice of unsigned integers to a slice of colors.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: &amp;[PackedArgb] = &amp;[
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::from_uint_slice::&lt;PackedArgb&gt;(&amp;[0xFF17C64C, 0xFF5D12D6]), colors)
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>from_uint_slice&lt;T&gt;(values: <span class="kw-2">&amp;</span>[T::Uint]) -&gt; <span class="kw-2">&amp;</span>[T]
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="comment">// The length is the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">core::slice::from_raw_parts</span>(<span class="ident">values</span>.<span class="ident">as_ptr</span>().<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    // The length is the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts(values.as_ptr().cast::&lt;T&gt;(), values.len()) }
 }
 
-<span class="doccomment">/// Cast from a mutable slice of colors to a mutable slice of unsigned integers.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: &amp;mut [PackedArgb] = &amp;mut [</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">/// assert_eq!(cast::into_uint_slice_mut(colors), &amp;mut [0xFF17C64C, 0xFF5D12D6])</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_slice_mut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">T</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">T::Uint</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a mutable slice of colors to a mutable slice of unsigned integers.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: &amp;mut [PackedArgb] = &amp;mut [
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::into_uint_slice_mut(colors), &amp;mut [0xFF17C64C, 0xFF5D12D6])
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>into_uint_slice_mut&lt;T&gt;(values: <span class="kw-2">&amp;mut </span>[T]) -&gt; <span class="kw-2">&amp;mut </span>[T::Uint]
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="comment">// The length is the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">core::slice::from_raw_parts_mut</span>(<span class="ident">values</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    // The length is the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::&lt;T::Uint&gt;(), values.len()) }
 }
 
-<span class="doccomment">/// Cast from a mutable slice of unsigned integers to a mutable slice of colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: &amp;mut [PackedArgb] = &amp;mut [</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">/// assert_eq!(cast::from_uint_slice_mut::&lt;PackedArgb&gt;(&amp;mut [0xFF17C64C, 0xFF5D12D6]), colors)</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_slice_mut</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">T::Uint</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">T</span>]
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a mutable slice of unsigned integers to a mutable slice of colors.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: &amp;mut [PackedArgb] = &amp;mut [
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::from_uint_slice_mut::&lt;PackedArgb&gt;(&amp;mut [0xFF17C64C, 0xFF5D12D6]), colors)
+/// ```
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>from_uint_slice_mut&lt;T&gt;(values: <span class="kw-2">&amp;mut </span>[T::Uint]) -&gt; <span class="kw-2">&amp;mut </span>[T]
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="comment">// The length is the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">core::slice::from_raw_parts_mut</span>(<span class="ident">values</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    // The length is the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts_mut(values.as_mut_ptr().cast::&lt;T&gt;(), values.len()) }
 }
 
-<span class="doccomment">/// Cast from a boxed slice of colors to a boxed slice of unsigned integers.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: Box&lt;[PackedArgb]&gt; = vec![</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ].into_boxed_slice();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     cast::into_uint_slice_box(colors),</span>
-<span class="doccomment">///     vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_slice_box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T::Uint</span>]<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a boxed slice of colors to a boxed slice of unsigned integers.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: Box&lt;[PackedArgb]&gt; = vec![
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ].into_boxed_slice();
+///
+/// assert_eq!(
+///     cast::into_uint_slice_box(colors),
+///     vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()
+/// )
+/// ```
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>into_uint_slice_box&lt;T&gt;(values: Box&lt;[T]&gt;) -&gt; Box&lt;[T::Uint]&gt;
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">raw</span>: <span class="kw-2">*mut</span> [<span class="ident">T::Uint</span>] <span class="op">=</span> <span class="ident">into_uint_slice_mut</span>(<span class="ident">Box::leak</span>(<span class="ident">values</span>));
+    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T::Uint] = into_uint_slice_mut(Box::leak(values));
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="ident">Box::from_raw</span>(<span class="ident">raw</span>) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    </span><span class="kw">unsafe </span>{ Box::from_raw(raw) }
 }
 
-<span class="doccomment">/// Cast from a boxed slice of unsigned integers to a boxed slice of colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: Box&lt;[PackedArgb]&gt; = vec![</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ].into_boxed_slice();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     cast::from_uint_slice_box(vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()),</span>
-<span class="doccomment">///     colors</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_slice_box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T::Uint</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a boxed slice of unsigned integers to a boxed slice of colors.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: Box&lt;[PackedArgb]&gt; = vec![
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ].into_boxed_slice();
+///
+/// assert_eq!(
+///     cast::from_uint_slice_box(vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()),
+///     colors
+/// )
+/// ```
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>from_uint_slice_box&lt;T&gt;(values: Box&lt;[T::Uint]&gt;) -&gt; Box&lt;[T]&gt;
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let</span> <span class="ident">raw</span>: <span class="kw-2">*mut</span> [<span class="ident">T</span>] <span class="op">=</span> <span class="ident">from_uint_slice_mut</span>(<span class="ident">Box::leak</span>(<span class="ident">values</span>));
+    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T] = from_uint_slice_mut(Box::leak(values));
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="kw">unsafe</span> { <span class="ident">Box::from_raw</span>(<span class="ident">raw</span>) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    </span><span class="kw">unsafe </span>{ Box::from_raw(raw) }
 }
 
-<span class="doccomment">/// Cast from a `Vec` of colors to a `Vec` of unsigned integers.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: Vec&lt;PackedArgb&gt; = vec![</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     cast::into_uint_vec(colors),</span>
-<span class="doccomment">///     vec![0xFF17C64C, 0xFF5D12D6]</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_uint_vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a `Vec` of colors to a `Vec` of unsigned integers.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: Vec&lt;PackedArgb&gt; = vec![
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+///
+/// assert_eq!(
+///     cast::into_uint_vec(colors),
+///     vec![0xFF17C64C, 0xFF5D12D6]
+/// )
+/// ```
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>into_uint_vec&lt;T&gt;(values: Vec&lt;T&gt;) -&gt; Vec&lt;T::Uint&gt;
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">ManuallyDrop::new</span>(<span class="ident">values</span>);
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
+    <span class="kw">let </span><span class="kw-2">mut </span>values = ManuallyDrop::new(values);
 
-    <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">values</span>.<span class="ident">as_mut_ptr</span>();
+    <span class="kw">let </span>raw = values.as_mut_ptr();
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T` as `T::Uint` is safe.</span>
-    <span class="comment">// Length and capacity are the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">Vec::from_raw_parts</span>(<span class="ident">raw</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>(), <span class="ident">values</span>.<span class="ident">capacity</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
+    // Length and capacity are the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ Vec::from_raw_parts(raw.cast::&lt;T::Uint&gt;(), values.len(), values.capacity()) }
 }
 
-<span class="doccomment">/// Cast from a `Vec` of unsigned integers to a `Vec` of colors.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{cast, rgb::PackedArgb, Srgba};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let colors: Vec&lt;PackedArgb&gt; = vec![</span>
-<span class="doccomment">///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),</span>
-<span class="doccomment">///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()</span>
-<span class="doccomment">/// ];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     cast::from_uint_vec::&lt;PackedArgb&gt;(vec![0xFF17C64C, 0xFF5D12D6]),</span>
-<span class="doccomment">///     colors</span>
-<span class="doccomment">/// )</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uint_vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">UintCast</span>,
+<span class="doccomment">/// Cast from a `Vec` of unsigned integers to a `Vec` of colors.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: Vec&lt;PackedArgb&gt; = vec![
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+///
+/// assert_eq!(
+///     cast::from_uint_vec::&lt;PackedArgb&gt;(vec![0xFF17C64C, 0xFF5D12D6]),
+///     colors
+/// )
+/// ```
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>from_uint_vec&lt;T&gt;(values: Vec&lt;T::Uint&gt;) -&gt; Vec&lt;T&gt;
+<span class="kw">where
+    </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T::Uint</span><span class="op">&gt;</span>(), <span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>());
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">ManuallyDrop::new</span>(<span class="ident">values</span>);
+    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
+    <span class="kw">let </span><span class="kw-2">mut </span>values = ManuallyDrop::new(values);
 
-    <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">values</span>.<span class="ident">as_mut_ptr</span>();
+    <span class="kw">let </span>raw = values.as_mut_ptr();
 
-    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size</span>
-    <span class="comment">// and alignment asserts, ensures that reading `T::Uint` as `T` is safe.</span>
-    <span class="comment">// Length and capacity are the same because the size is the same.</span>
-    <span class="kw">unsafe</span> { <span class="ident">Vec::from_raw_parts</span>(<span class="ident">raw</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">values</span>.<span class="ident">len</span>(), <span class="ident">values</span>.<span class="ident">capacity</span>()) }
+    <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
+    // Length and capacity are the same because the size is the same.
+    </span><span class="kw">unsafe </span>{ Vec::from_raw_parts(raw.cast::&lt;T&gt;(), values.len(), values.capacity()) }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

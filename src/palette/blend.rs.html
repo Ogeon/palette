@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -116,123 +116,123 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Color blending and blending equations.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Palette offers both OpenGL style blending equations, as well as most of the</span>
-<span class="doccomment">//! SVG composition operators (also common in photo manipulation software). The</span>
-<span class="doccomment">//! composition operators are all implemented in the [`Compose`] and [`Blend`]</span>
-<span class="doccomment">//! traits, and ready to use with any appropriate color type:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::{blend::Blend, LinSrgba};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);</span>
-<span class="doccomment">//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);</span>
-<span class="doccomment">//! let c = a.overlay(b);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Blending equations can be defined using the</span>
-<span class="doccomment">//! [`Equations`](crate::blend::Equations) type, which is then passed to the</span>
-<span class="doccomment">//! `blend` function, from the `Blend` trait:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::LinSrgba;</span>
-<span class="doccomment">//! use palette::blend::{BlendWith, Equations, Parameter};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let blend_mode = Equations::from_parameters(</span>
-<span class="doccomment">//!    Parameter::SourceAlpha,</span>
-<span class="doccomment">//!    Parameter::OneMinusSourceAlpha</span>
-<span class="doccomment">//! );</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);</span>
-<span class="doccomment">//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);</span>
-<span class="doccomment">//! let c = a.blend_with(b, blend_mode);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Note that blending will use [premultiplied alpha](crate::blend::PreAlpha),</span>
-<span class="doccomment">//! which may result in loss of some color information in some cases. One such</span>
-<span class="doccomment">//! case is that a completely transparent resultant color will become black.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Color blending and blending equations.
+//!
+//! Palette offers both OpenGL style blending equations, as well as most of the
+//! SVG composition operators (also common in photo manipulation software). The
+//! composition operators are all implemented in the [`Compose`] and [`Blend`]
+//! traits, and ready to use with any appropriate color type:
+//!
+//! ```
+//! use palette::{blend::Blend, LinSrgba};
+//!
+//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+//! let c = a.overlay(b);
+//! ```
+//!
+//! Blending equations can be defined using the
+//! [`Equations`](crate::blend::Equations) type, which is then passed to the
+//! `blend` function, from the `Blend` trait:
+//!
+//! ```
+//! use palette::LinSrgba;
+//! use palette::blend::{BlendWith, Equations, Parameter};
+//!
+//! let blend_mode = Equations::from_parameters(
+//!    Parameter::SourceAlpha,
+//!    Parameter::OneMinusSourceAlpha
+//! );
+//!
+//! let a = LinSrgba::new(0.2, 0.5, 0.1, 0.8);
+//! let b = LinSrgba::new(0.6, 0.3, 0.5, 0.1);
+//! let c = a.blend_with(b, blend_mode);
+//! ```
+//!
+//! Note that blending will use [premultiplied alpha](crate::blend::PreAlpha),
+//! which may result in loss of some color information in some cases. One such
+//! case is that a completely transparent resultant color will become black.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">cast</span>::{<span class="self">self</span>, <span class="ident">ArrayCast</span>},
-    <span class="ident">clamp</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
-    <span class="ident">stimulus::Stimulus</span>,
+</span><span class="kw">use crate</span>::{
+    cast::{<span class="self">self</span>, ArrayCast},
+    clamp,
+    num::{Arithmetics, Clamp, One, Real, Zero},
+    stimulus::Stimulus,
 };
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
-    <span class="ident">blend::Blend</span>,
-    <span class="ident">blend_with::BlendWith</span>,
-    <span class="ident">compose::Compose</span>,
-    <span class="ident">equations</span>::{<span class="ident">Equation</span>, <span class="ident">Equations</span>, <span class="ident">Parameter</span>, <span class="ident">Parameters</span>},
-    <span class="ident">pre_alpha::PreAlpha</span>,
+<span class="kw">pub use </span><span class="self">self</span>::{
+    blend::Blend,
+    blend_with::BlendWith,
+    compose::Compose,
+    equations::{Equation, Equations, Parameter, Parameters},
+    pre_alpha::PreAlpha,
 };
 
-<span class="kw">mod</span> <span class="ident">blend</span>;
-<span class="kw">mod</span> <span class="ident">blend_with</span>;
-<span class="kw">mod</span> <span class="ident">compose</span>;
-<span class="kw">mod</span> <span class="ident">equations</span>;
-<span class="kw">mod</span> <span class="ident">pre_alpha</span>;
+<span class="kw">mod </span>blend;
+<span class="kw">mod </span>blend_with;
+<span class="kw">mod </span>compose;
+<span class="kw">mod </span>equations;
+<span class="kw">mod </span>pre_alpha;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test;
 
-<span class="doccomment">/// A trait for custom blend functions.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="doccomment">/// A trait for custom blend functions.
+</span><span class="kw">pub trait </span>BlendFunction&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="doccomment">/// Apply this blend function to a pair of colors.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">apply_to</span>(<span class="self">self</span>, <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">destination</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Apply this blend function to a pair of colors.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>apply_to(<span class="self">self</span>, source: PreAlpha&lt;C&gt;, destination: PreAlpha&lt;C&gt;) -&gt; PreAlpha&lt;C&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">BlendFunction</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">F</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
-    <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, F&gt; BlendFunction&lt;C&gt; <span class="kw">for </span>F
+<span class="kw">where
+    </span>C: Premultiply,
+    F: FnOnce(PreAlpha&lt;C&gt;, PreAlpha&lt;C&gt;) -&gt; PreAlpha&lt;C&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">apply_to</span>(<span class="self">self</span>, <span class="ident">source</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">destination</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        (<span class="self">self</span>)(<span class="ident">source</span>, <span class="ident">destination</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>apply_to(<span class="self">self</span>, source: PreAlpha&lt;C&gt;, destination: PreAlpha&lt;C&gt;) -&gt; PreAlpha&lt;C&gt; {
+        (<span class="self">self</span>)(source, destination)
     }
 }
 
-<span class="doccomment">/// Alpha masking and unmasking.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Premultiply</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// The color&#39;s component type.</span>
-    <span class="kw">type</span> <span class="ident">Scalar</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Stimulus</span>;
+<span class="doccomment">/// Alpha masking and unmasking.
+</span><span class="kw">pub trait </span>Premultiply: Sized {
+    <span class="doccomment">/// The color&#39;s component type.
+    </span><span class="kw">type </span>Scalar: Real + Stimulus;
 
-    <span class="doccomment">/// Alpha mask the color.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is done by multiplying the color&#39;s component by `alpha`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">premultiply</span>(<span class="self">self</span>, <span class="ident">alpha</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Alpha mask the color.
+    ///
+    /// This is done by multiplying the color&#39;s component by `alpha`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>premultiply(<span class="self">self</span>, alpha: <span class="self">Self</span>::Scalar) -&gt; PreAlpha&lt;<span class="self">Self</span>&gt;;
 
-    <span class="doccomment">/// Alpha unmask the color, resulting in a color and transparency pair.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is done by dividing the masked color&#39;s component by `alpha`, or</span>
-    <span class="doccomment">/// returning a black color if `alpha` is `0`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">unpremultiply</span>(<span class="ident">premultiplied</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; (<span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Scalar</span>);
+    <span class="doccomment">/// Alpha unmask the color, resulting in a color and transparency pair.
+    ///
+    /// This is done by dividing the masked color&#39;s component by `alpha`, or
+    /// returning a black color if `alpha` is `0`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>unpremultiply(premultiplied: PreAlpha&lt;<span class="self">Self</span>&gt;) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>::Scalar);
 }
 
-<span class="kw">fn</span> <span class="ident">blend_alpha</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">T</span>, <span class="ident">dst</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">fn </span>blend_alpha&lt;T&gt;(src: T, dst: T) -&gt; T
+<span class="kw">where
+    </span>T: Zero + One + Arithmetics + Clamp + Clone,
 {
-    <span class="ident">clamp</span>(<span class="ident">src</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">dst</span> <span class="op">-</span> <span class="ident">src</span> <span class="op">*</span> <span class="ident">dst</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>())
+    clamp(src.clone() + <span class="kw-2">&amp;</span>dst - src * dst, T::zero(), T::one())
 }
 
-<span class="kw">fn</span> <span class="ident">zip_colors</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
-    <span class="ident">src</span>: <span class="ident">C</span>,
-    <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">C</span>,
-) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>)<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="lifetime">&#39;a</span>,
+<span class="kw">fn </span>zip_colors&lt;<span class="lifetime">&#39;a</span>, C, T, <span class="kw">const </span>N: usize&gt;(
+    src: C,
+    dst: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C,
+) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (T, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T)&gt;
+<span class="kw">where
+    </span>C: ArrayCast&lt;Array = [T; N]&gt;,
+    T: <span class="lifetime">&#39;a</span>,
 {
-    <span class="ident">IntoIterator::into_iter</span>(<span class="ident">cast::into_array</span>(<span class="ident">src</span>)).<span class="ident">zip</span>(<span class="ident">cast::into_array_mut</span>(<span class="ident">dst</span>))
+    IntoIterator::into_iter(cast::into_array(src)).zip(cast::into_array_mut(dst))
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -724,731 +724,731 @@
 <span id="724">724</span>
 <span id="725">725</span>
 <span id="726">726</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits for converting between color spaces.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Deriving</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! `FromColorUnclamped` can be derived in a mostly automatic way.</span>
-<span class="doccomment">//! The default minimum requirement is to implement `FromColorUnclamped&lt;Xyz&gt;`, but it can</span>
-<span class="doccomment">//! also be customized to make use of generics and have other manual implementations.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! It is also recommended to derive or implement [`WithAlpha`](crate::WithAlpha),</span>
-<span class="doccomment">//! to be able to convert between all `Alpha` wrapped color types.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Configuration Attributes</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The derives can be configured using one or more `#[palette(...)]` attributes.</span>
-<span class="doccomment">//! They can be attached to either the item itself, or to the fields.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use palette::rgb::{RgbStandard, RgbSpace};</span>
-<span class="doccomment">//! # use palette::convert::FromColorUnclamped;</span>
-<span class="doccomment">//! # use palette::{Xyz, stimulus::Stimulus};</span>
-<span class="doccomment">//! #</span>
-<span class="doccomment">//! #[derive(FromColorUnclamped)]</span>
-<span class="doccomment">//! #[palette(</span>
-<span class="doccomment">//!     component = &quot;T&quot;,</span>
-<span class="doccomment">//!     rgb_standard = &quot;S&quot;,</span>
-<span class="doccomment">//! )]</span>
-<span class="doccomment">//! #[repr(C)]</span>
-<span class="doccomment">//! struct ExampleType&lt;S, T&gt; {</span>
-<span class="doccomment">//!     // ...</span>
-<span class="doccomment">//!     #[palette(alpha)]</span>
-<span class="doccomment">//!     alpha: T,</span>
-<span class="doccomment">//!     standard: std::marker::PhantomData&lt;S&gt;,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;&gt; for ExampleType&lt;S, T&gt;</span>
-<span class="doccomment">//! # where</span>
-<span class="doccomment">//! #   S: RgbStandard,</span>
-<span class="doccomment">//! #   T: Stimulus,</span>
-<span class="doccomment">//! # {</span>
-<span class="doccomment">//! #   fn from_color_unclamped(color: Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;) -&gt; Self {</span>
-<span class="doccomment">//! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}</span>
-<span class="doccomment">//! #   }</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! #</span>
-<span class="doccomment">//! # impl&lt;S, T&gt; FromColorUnclamped&lt;ExampleType&lt;S, T&gt;&gt; for Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;</span>
-<span class="doccomment">//! # where</span>
-<span class="doccomment">//! #   S: RgbStandard,</span>
-<span class="doccomment">//! #   Self: Default,</span>
-<span class="doccomment">//! # {</span>
-<span class="doccomment">//! #   fn from_color_unclamped(color: ExampleType&lt;S, T&gt;) -&gt; Self {</span>
-<span class="doccomment">//! #       Xyz::default()</span>
-<span class="doccomment">//! #   }</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Item Attributes</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for these colors.</span>
-<span class="doccomment">//! They are instead to be implemented manually, and serve as the basis for the automatic</span>
-<span class="doccomment">//! implementations.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `white_point = &quot;some::white_point::Type&quot;`: Sets the white</span>
-<span class="doccomment">//! point type that should be used when deriving. The default is `D65`, but it</span>
-<span class="doccomment">//! may be any other type, including type parameters.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `component = &quot;some::component::Type&quot;`: Sets the color</span>
-<span class="doccomment">//! component type that should be used when deriving. The default is `f32`, but</span>
-<span class="doccomment">//! it may be any other type, including type parameters.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `rgb_standard = &quot;some::rgb_standard::Type&quot;`: Sets the RGB standard</span>
-<span class="doccomment">//! type that should be used when deriving. The default is to either use `Srgb`</span>
-<span class="doccomment">//! or a best effort to convert between standards, but sometimes it has to be set</span>
-<span class="doccomment">//! to a specific type. This also accepts type parameters.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard</span>
-<span class="doccomment">//! type that should be used when deriving, similar to `rgb_standard`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Field Attributes</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `alpha`: Specifies field as the color&#39;s transparency value.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Minimum requirements implementation:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use palette::convert::FromColorUnclamped;</span>
-<span class="doccomment">//! use palette::{Srgb, Xyz, IntoColor};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! /// A custom version of Xyz that stores integer values from 0 to 100.</span>
-<span class="doccomment">//! #[derive(PartialEq, Debug, FromColorUnclamped)]</span>
-<span class="doccomment">//! struct Xyz100 {</span>
-<span class="doccomment">//!     x: u8,</span>
-<span class="doccomment">//!     y: u8,</span>
-<span class="doccomment">//!     z: u8,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // We have to implement at least one &quot;manual&quot; conversion. The default</span>
-<span class="doccomment">//! // is to and from `Xyz`, but it can be customized with `skip_derives(...)`.</span>
-<span class="doccomment">//! impl FromColorUnclamped&lt;Xyz&gt; for Xyz100 {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: Xyz) -&gt; Xyz100 {</span>
-<span class="doccomment">//!         Xyz100 {</span>
-<span class="doccomment">//!             x: (color.x * 100.0) as u8,</span>
-<span class="doccomment">//!             y: (color.y * 100.0) as u8,</span>
-<span class="doccomment">//!             z: (color.z * 100.0) as u8,</span>
-<span class="doccomment">//!         }</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl FromColorUnclamped&lt;Xyz100&gt; for Xyz {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: Xyz100) -&gt; Xyz {</span>
-<span class="doccomment">//!         Xyz::new(</span>
-<span class="doccomment">//!             color.x as f32 / 100.0,</span>
-<span class="doccomment">//!             color.y as f32 / 100.0,</span>
-<span class="doccomment">//!             color.z as f32 / 100.0,</span>
-<span class="doccomment">//!         )</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//!     // Start with an Xyz100 color.</span>
-<span class="doccomment">//!     let xyz = Xyz100 {</span>
-<span class="doccomment">//!         x: 59,</span>
-<span class="doccomment">//!         y: 75,</span>
-<span class="doccomment">//!         z: 42,</span>
-<span class="doccomment">//!     };</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // Convert the color to sRGB.</span>
-<span class="doccomment">//!     let rgb: Srgb = xyz.into_color();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With generic components:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! #[macro_use]</span>
-<span class="doccomment">//! extern crate approx;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! use palette::cast::{self, ArrayCast};</span>
-<span class="doccomment">//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};</span>
-<span class="doccomment">//! use palette::encoding::Linear;</span>
-<span class="doccomment">//! use palette::white_point::D65;</span>
-<span class="doccomment">//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};</span>
-<span class="doccomment">//! use palette::{Hsv, Srgb, IntoColor};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! /// sRGB, but with a reversed memory layout.</span>
-<span class="doccomment">//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]</span>
-<span class="doccomment">//! #[palette(</span>
-<span class="doccomment">//!     skip_derives(Rgb),</span>
-<span class="doccomment">//!     component = &quot;T&quot;,</span>
-<span class="doccomment">//!     rgb_standard = &quot;palette::encoding::Srgb&quot;</span>
-<span class="doccomment">//! )]</span>
-<span class="doccomment">//! #[repr(C)] // Makes sure the memory layout is as we want it.</span>
-<span class="doccomment">//! struct Bgr&lt;T&gt; {</span>
-<span class="doccomment">//!     blue: T,</span>
-<span class="doccomment">//!     green: T,</span>
-<span class="doccomment">//!     red: T,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // It converts from and into any linear Rgb type that has the</span>
-<span class="doccomment">//! // D65 white point, which is the default if we don&#39;t specify</span>
-<span class="doccomment">//! // anything else with the `white_point` attribute argument.</span>
-<span class="doccomment">//! impl&lt;S, T&gt; FromColorUnclamped&lt;Bgr&lt;T&gt;&gt; for Rgb&lt;S, T&gt;</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,</span>
-<span class="doccomment">//!     Srgb&lt;T&gt;: IntoColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: Bgr&lt;T&gt;) -&gt; Rgb&lt;S, T&gt; {</span>
-<span class="doccomment">//!         Srgb::new(color.red, color.green, color.blue)</span>
-<span class="doccomment">//!             .into_color_unclamped()</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl&lt;S, T&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; for Bgr&lt;T&gt;</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     S: RgbStandard,</span>
-<span class="doccomment">//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,</span>
-<span class="doccomment">//!     Srgb&lt;T&gt;: FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; Bgr&lt;T&gt; {</span>
-<span class="doccomment">//!         let color = Srgb::from_color_unclamped(color);</span>
-<span class="doccomment">//!         Bgr {</span>
-<span class="doccomment">//!             blue: color.blue,</span>
-<span class="doccomment">//!             green: color.green,</span>
-<span class="doccomment">//!             red: color.red,</span>
-<span class="doccomment">//!         }</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//!     let buffer = vec![</span>
-<span class="doccomment">//!         0.0f64,</span>
-<span class="doccomment">//!         0.0,</span>
-<span class="doccomment">//!         0.0,</span>
-<span class="doccomment">//!         0.0,</span>
-<span class="doccomment">//!         0.5,</span>
-<span class="doccomment">//!         0.25,</span>
-<span class="doccomment">//!     ];</span>
-<span class="doccomment">//!     let hsv: Hsv&lt;_, f64&gt; = cast::from_component_slice::&lt;Bgr&lt;_&gt;&gt;(&amp;buffer)[1]</span>
-<span class="doccomment">//!         .into_color();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With alpha component:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! #[macro_use]</span>
-<span class="doccomment">//! extern crate approx;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! use palette::{LinSrgba, Srgb, IntoColor, WithAlpha};</span>
-<span class="doccomment">//! use palette::rgb::Rgb;</span>
-<span class="doccomment">//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! /// CSS style sRGB.</span>
-<span class="doccomment">//! #[palette(</span>
-<span class="doccomment">//!     skip_derives(Rgb),</span>
-<span class="doccomment">//!     rgb_standard = &quot;palette::encoding::Srgb&quot;</span>
-<span class="doccomment">//! )]</span>
-<span class="doccomment">//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]</span>
-<span class="doccomment">//! struct CssRgb {</span>
-<span class="doccomment">//!     red: u8,</span>
-<span class="doccomment">//!     green: u8,</span>
-<span class="doccomment">//!     blue: u8,</span>
-<span class="doccomment">//!     #[palette(alpha)]</span>
-<span class="doccomment">//!     alpha: f32,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // We will write a conversion function for opaque RGB and</span>
-<span class="doccomment">//! // `impl_default_conversions` will take care of preserving</span>
-<span class="doccomment">//! // the transparency for us.</span>
-<span class="doccomment">//! impl&lt;S&gt; FromColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt; for CssRgb</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     Srgb&lt;f32&gt;: FromColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt;</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: Rgb&lt;S, f32&gt;) -&gt; CssRgb{</span>
-<span class="doccomment">//!         let srgb = Srgb::from_color_unclamped(color)</span>
-<span class="doccomment">//!             .into_format();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!         CssRgb {</span>
-<span class="doccomment">//!             red: srgb.red,</span>
-<span class="doccomment">//!             green: srgb.green,</span>
-<span class="doccomment">//!             blue: srgb.blue,</span>
-<span class="doccomment">//!             alpha: 1.0</span>
-<span class="doccomment">//!         }</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl&lt;S&gt; FromColorUnclamped&lt;CssRgb&gt; for Rgb&lt;S, f32&gt;</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     Srgb&lt;f32&gt;: IntoColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt;</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     fn from_color_unclamped(color: CssRgb) -&gt; Rgb&lt;S, f32&gt;{</span>
-<span class="doccomment">//!         Srgb::new(color.red, color.green, color.blue)</span>
-<span class="doccomment">//!             .into_format()</span>
-<span class="doccomment">//!             .into_color_unclamped()</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//!     let css_color = CssRgb {</span>
-<span class="doccomment">//!         red: 187,</span>
-<span class="doccomment">//!         green: 0,</span>
-<span class="doccomment">//!         blue: 255,</span>
-<span class="doccomment">//!         alpha: 0.3,</span>
-<span class="doccomment">//!     };</span>
-<span class="doccomment">//!     let color: LinSrgba = css_color.into_color();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits for converting between color spaces.
+//!
+//! # Deriving
+//!
+//! `FromColorUnclamped` can be derived in a mostly automatic way.
+//! The default minimum requirement is to implement `FromColorUnclamped&lt;Xyz&gt;`, but it can
+//! also be customized to make use of generics and have other manual implementations.
+//!
+//! It is also recommended to derive or implement [`WithAlpha`](crate::WithAlpha),
+//! to be able to convert between all `Alpha` wrapped color types.
+//!
+//! ## Configuration Attributes
+//!
+//! The derives can be configured using one or more `#[palette(...)]` attributes.
+//! They can be attached to either the item itself, or to the fields.
+//!
+//! ```
+//! # use palette::rgb::{RgbStandard, RgbSpace};
+//! # use palette::convert::FromColorUnclamped;
+//! # use palette::{Xyz, stimulus::Stimulus};
+//! #
+//! #[derive(FromColorUnclamped)]
+//! #[palette(
+//!     component = &quot;T&quot;,
+//!     rgb_standard = &quot;S&quot;,
+//! )]
+//! #[repr(C)]
+//! struct ExampleType&lt;S, T&gt; {
+//!     // ...
+//!     #[palette(alpha)]
+//!     alpha: T,
+//!     standard: std::marker::PhantomData&lt;S&gt;,
+//! }
+//!
+//! # impl&lt;S, T&gt; FromColorUnclamped&lt;Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;&gt; for ExampleType&lt;S, T&gt;
+//! # where
+//! #   S: RgbStandard,
+//! #   T: Stimulus,
+//! # {
+//! #   fn from_color_unclamped(color: Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;) -&gt; Self {
+//! #       ExampleType {alpha: T::max_intensity(), standard: std::marker::PhantomData}
+//! #   }
+//! # }
+//! #
+//! # impl&lt;S, T&gt; FromColorUnclamped&lt;ExampleType&lt;S, T&gt;&gt; for Xyz&lt;&lt;S::Space as RgbSpace&gt;::WhitePoint, T&gt;
+//! # where
+//! #   S: RgbStandard,
+//! #   Self: Default,
+//! # {
+//! #   fn from_color_unclamped(color: ExampleType&lt;S, T&gt;) -&gt; Self {
+//! #       Xyz::default()
+//! #   }
+//! # }
+//! ```
+//!
+//! ### Item Attributes
+//!
+//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for these colors.
+//! They are instead to be implemented manually, and serve as the basis for the automatic
+//! implementations.
+//!
+//! * `white_point = &quot;some::white_point::Type&quot;`: Sets the white
+//! point type that should be used when deriving. The default is `D65`, but it
+//! may be any other type, including type parameters.
+//!
+//! * `component = &quot;some::component::Type&quot;`: Sets the color
+//! component type that should be used when deriving. The default is `f32`, but
+//! it may be any other type, including type parameters.
+//!
+//! * `rgb_standard = &quot;some::rgb_standard::Type&quot;`: Sets the RGB standard
+//! type that should be used when deriving. The default is to either use `Srgb`
+//! or a best effort to convert between standards, but sometimes it has to be set
+//! to a specific type. This also accepts type parameters.
+//!
+//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard
+//! type that should be used when deriving, similar to `rgb_standard`.
+//!
+//! ### Field Attributes
+//!
+//! * `alpha`: Specifies field as the color&#39;s transparency value.
+//!
+//! ## Examples
+//!
+//! Minimum requirements implementation:
+//!
+//! ```rust
+//! use palette::convert::FromColorUnclamped;
+//! use palette::{Srgb, Xyz, IntoColor};
+//!
+//! /// A custom version of Xyz that stores integer values from 0 to 100.
+//! #[derive(PartialEq, Debug, FromColorUnclamped)]
+//! struct Xyz100 {
+//!     x: u8,
+//!     y: u8,
+//!     z: u8,
+//! }
+//!
+//! // We have to implement at least one &quot;manual&quot; conversion. The default
+//! // is to and from `Xyz`, but it can be customized with `skip_derives(...)`.
+//! impl FromColorUnclamped&lt;Xyz&gt; for Xyz100 {
+//!     fn from_color_unclamped(color: Xyz) -&gt; Xyz100 {
+//!         Xyz100 {
+//!             x: (color.x * 100.0) as u8,
+//!             y: (color.y * 100.0) as u8,
+//!             z: (color.z * 100.0) as u8,
+//!         }
+//!     }
+//! }
+//!
+//! impl FromColorUnclamped&lt;Xyz100&gt; for Xyz {
+//!     fn from_color_unclamped(color: Xyz100) -&gt; Xyz {
+//!         Xyz::new(
+//!             color.x as f32 / 100.0,
+//!             color.y as f32 / 100.0,
+//!             color.z as f32 / 100.0,
+//!         )
+//!     }
+//! }
+//!
+//! fn main() {
+//!     // Start with an Xyz100 color.
+//!     let xyz = Xyz100 {
+//!         x: 59,
+//!         y: 75,
+//!         z: 42,
+//!     };
+//!
+//!     // Convert the color to sRGB.
+//!     let rgb: Srgb = xyz.into_color();
+//!
+//!     assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
+//! }
+//! ```
+//!
+//! With generic components:
+//!
+//! ```rust
+//! #[macro_use]
+//! extern crate approx;
+//!
+//! use palette::cast::{self, ArrayCast};
+//! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
+//! use palette::encoding::Linear;
+//! use palette::white_point::D65;
+//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
+//! use palette::{Hsv, Srgb, IntoColor};
+//!
+//! /// sRGB, but with a reversed memory layout.
+//! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]
+//! #[palette(
+//!     skip_derives(Rgb),
+//!     component = &quot;T&quot;,
+//!     rgb_standard = &quot;palette::encoding::Srgb&quot;
+//! )]
+//! #[repr(C)] // Makes sure the memory layout is as we want it.
+//! struct Bgr&lt;T&gt; {
+//!     blue: T,
+//!     green: T,
+//!     red: T,
+//! }
+//!
+//! // It converts from and into any linear Rgb type that has the
+//! // D65 white point, which is the default if we don&#39;t specify
+//! // anything else with the `white_point` attribute argument.
+//! impl&lt;S, T&gt; FromColorUnclamped&lt;Bgr&lt;T&gt;&gt; for Rgb&lt;S, T&gt;
+//! where
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,
+//!     Srgb&lt;T&gt;: IntoColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,
+//! {
+//!     fn from_color_unclamped(color: Bgr&lt;T&gt;) -&gt; Rgb&lt;S, T&gt; {
+//!         Srgb::new(color.red, color.green, color.blue)
+//!             .into_color_unclamped()
+//!     }
+//! }
+//!
+//! impl&lt;S, T&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; for Bgr&lt;T&gt;
+//! where
+//!     S: RgbStandard,
+//!     S::Space: RgbSpace&lt;WhitePoint = D65&gt;,
+//!     Srgb&lt;T&gt;: FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,
+//! {
+//!     fn from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; Bgr&lt;T&gt; {
+//!         let color = Srgb::from_color_unclamped(color);
+//!         Bgr {
+//!             blue: color.blue,
+//!             green: color.green,
+//!             red: color.red,
+//!         }
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let buffer = vec![
+//!         0.0f64,
+//!         0.0,
+//!         0.0,
+//!         0.0,
+//!         0.5,
+//!         0.25,
+//!     ];
+//!     let hsv: Hsv&lt;_, f64&gt; = cast::from_component_slice::&lt;Bgr&lt;_&gt;&gt;(&amp;buffer)[1]
+//!         .into_color();
+//!
+//!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
+//! }
+//! ```
+//!
+//! With alpha component:
+//!
+//! ```rust
+//! #[macro_use]
+//! extern crate approx;
+//!
+//! use palette::{LinSrgba, Srgb, IntoColor, WithAlpha};
+//! use palette::rgb::Rgb;
+//! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
+//!
+//! /// CSS style sRGB.
+//! #[palette(
+//!     skip_derives(Rgb),
+//!     rgb_standard = &quot;palette::encoding::Srgb&quot;
+//! )]
+//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
+//! struct CssRgb {
+//!     red: u8,
+//!     green: u8,
+//!     blue: u8,
+//!     #[palette(alpha)]
+//!     alpha: f32,
+//! }
+//!
+//! // We will write a conversion function for opaque RGB and
+//! // `impl_default_conversions` will take care of preserving
+//! // the transparency for us.
+//! impl&lt;S&gt; FromColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt; for CssRgb
+//! where
+//!     Srgb&lt;f32&gt;: FromColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt;
+//! {
+//!     fn from_color_unclamped(color: Rgb&lt;S, f32&gt;) -&gt; CssRgb{
+//!         let srgb = Srgb::from_color_unclamped(color)
+//!             .into_format();
+//!
+//!         CssRgb {
+//!             red: srgb.red,
+//!             green: srgb.green,
+//!             blue: srgb.blue,
+//!             alpha: 1.0
+//!         }
+//!     }
+//! }
+//!
+//! impl&lt;S&gt; FromColorUnclamped&lt;CssRgb&gt; for Rgb&lt;S, f32&gt;
+//! where
+//!     Srgb&lt;f32&gt;: IntoColorUnclamped&lt;Rgb&lt;S, f32&gt;&gt;
+//! {
+//!     fn from_color_unclamped(color: CssRgb) -&gt; Rgb&lt;S, f32&gt;{
+//!         Srgb::new(color.red, color.green, color.blue)
+//!             .into_format()
+//!             .into_color_unclamped()
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let css_color = CssRgb {
+//!         red: 187,
+//!         green: 0,
+//!         blue: 255,
+//!         alpha: 0.3,
+//!     };
+//!     let color: LinSrgba = css_color.into_color();
+//!
+//!     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
+//! }
+//! ```
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
-    <span class="ident">from_into_color</span>::<span class="kw-2">*</span>, <span class="ident">from_into_color_mut</span>::<span class="kw-2">*</span>, <span class="ident">from_into_color_unclamped</span>::<span class="kw-2">*</span>,
-    <span class="ident">from_into_color_unclamped_mut</span>::<span class="kw-2">*</span>, <span class="ident">try_from_into_color</span>::<span class="kw-2">*</span>,
+</span><span class="kw">pub use </span><span class="self">self</span>::{
+    from_into_color::<span class="kw-2">*</span>, from_into_color_mut::<span class="kw-2">*</span>, from_into_color_unclamped::<span class="kw-2">*</span>,
+    from_into_color_unclamped_mut::<span class="kw-2">*</span>, try_from_into_color::<span class="kw-2">*</span>,
 };
 
-<span class="kw">mod</span> <span class="ident">from_into_color</span>;
-<span class="kw">mod</span> <span class="ident">from_into_color_mut</span>;
-<span class="kw">mod</span> <span class="ident">from_into_color_unclamped</span>;
-<span class="kw">mod</span> <span class="ident">from_into_color_unclamped_mut</span>;
-<span class="kw">mod</span> <span class="ident">try_from_into_color</span>;
+<span class="kw">mod </span>from_into_color;
+<span class="kw">mod </span>from_into_color_mut;
+<span class="kw">mod </span>from_into_color_unclamped;
+<span class="kw">mod </span>from_into_color_unclamped_mut;
+<span class="kw">mod </span>try_from_into_color;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>core::marker::PhantomData;
 
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FromColor</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColor</span>};
-    <span class="kw">use</span> <span class="kw">crate</span>::{
-        <span class="ident">bool_mask</span>::{<span class="ident">BoolMask</span>, <span class="ident">HasBoolMask</span>},
-        <span class="ident">encoding::linear::Linear</span>,
-        <span class="ident">luma</span>::{<span class="ident">Luma</span>, <span class="ident">LumaStandard</span>},
-        <span class="ident">num</span>::{<span class="ident">One</span>, <span class="ident">Zero</span>},
-        <span class="ident">rgb</span>::{<span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>},
-        <span class="ident">Alpha</span>, <span class="ident">Clamp</span>, <span class="ident">Hsl</span>, <span class="ident">Hsluv</span>, <span class="ident">Hsv</span>, <span class="ident">Hwb</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lab</span>, <span class="ident">Lch</span>, <span class="ident">Luv</span>, <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
+    <span class="kw">use super</span>::{FromColor, FromColorUnclamped, IntoColor};
+    <span class="kw">use crate</span>::{
+        bool_mask::{BoolMask, HasBoolMask},
+        encoding::linear::Linear,
+        luma::{Luma, LumaStandard},
+        num::{One, Zero},
+        rgb::{Rgb, RgbSpace},
+        Alpha, Clamp, Hsl, Hsluv, Hsv, Hwb, IsWithinBounds, Lab, Lch, Luv, Xyz, Yxy,
     };
 
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
-    <span class="attribute">#[<span class="ident">palette</span>(
-        <span class="ident">skip_derives</span>(<span class="ident">Xyz</span>, <span class="ident">Luma</span>),
-        <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;f64&quot;</span>,
-        <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;Linear&lt;S&gt;&quot;</span>,
-        <span class="ident">palette_internal</span>,
-        <span class="ident">palette_internal_not_base_type</span>
-    )]</span>
-    <span class="kw">struct</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>);
+    <span class="attribute">#[derive(FromColorUnclamped, WithAlpha)]
+    #[palette(
+        skip_derives(Xyz, Luma),
+        component = <span class="string">&quot;f64&quot;</span>,
+        rgb_standard = <span class="string">&quot;Linear&lt;S&gt;&quot;</span>,
+        palette_internal,
+        palette_internal_not_base_type
+    )]
+    </span><span class="kw">struct </span>WithXyz&lt;S&gt;(PhantomData&lt;S&gt;);
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-            <span class="kw-2">*</span><span class="self">self</span>
-        }
+    <span class="kw">impl</span>&lt;S&gt; Clone <span class="kw">for </span>WithXyz&lt;S&gt; {
+        <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+            <span class="kw-2">*</span><span class="self">self
+        </span>}
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {}
+    <span class="kw">impl</span>&lt;S&gt; Copy <span class="kw">for </span>WithXyz&lt;S&gt; {}
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span>;
+    <span class="kw">impl</span>&lt;S&gt; HasBoolMask <span class="kw">for </span>WithXyz&lt;S&gt; {
+        <span class="kw">type </span>Mask = bool;
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-            <span class="bool-val">true</span>
-        }
+    <span class="kw">impl</span>&lt;S&gt; IsWithinBounds <span class="kw">for </span>WithXyz&lt;S&gt; {
+        <span class="kw">fn </span>is_within_bounds(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+            <span class="bool-val">true
+        </span>}
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-            <span class="self">self</span>
-        }
+    <span class="kw">impl</span>&lt;S&gt; Clamp <span class="kw">for </span>WithXyz&lt;S&gt; {
+        <span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+            <span class="self">self
+        </span>}
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">S2</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S1</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">S1</span>: <span class="ident">RgbSpace</span>,
-        <span class="ident">S2</span>: <span class="ident">RgbSpace</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">S1::WhitePoint</span><span class="op">&gt;</span>,
+    <span class="kw">impl</span>&lt;S1, S2&gt; FromColorUnclamped&lt;WithXyz&lt;S2&gt;&gt; <span class="kw">for </span>WithXyz&lt;S1&gt;
+    <span class="kw">where
+        </span>S1: RgbSpace,
+        S2: RgbSpace&lt;WhitePoint = S1::WhitePoint&gt;,
     {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S2</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">WithXyz</span>(<span class="ident">PhantomData</span>)
+        <span class="kw">fn </span>from_color_unclamped(_color: WithXyz&lt;S2&gt;) -&gt; <span class="self">Self </span>{
+            WithXyz(PhantomData)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">WithXyz</span>(<span class="ident">PhantomData</span>)
+    <span class="kw">impl</span>&lt;S: RgbSpace&gt; FromColorUnclamped&lt;Xyz&lt;S::WhitePoint, f64&gt;&gt; <span class="kw">for </span>WithXyz&lt;S&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: Xyz&lt;S::WhitePoint, f64&gt;) -&gt; <span class="self">Self </span>{
+            WithXyz(PhantomData)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">RgbSpace</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">f64</span><span class="op">&gt;</span> {
-            <span class="ident">Xyz::new</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
+    <span class="kw">impl</span>&lt;S: RgbSpace&gt; FromColorUnclamped&lt;WithXyz&lt;S&gt;&gt; <span class="kw">for </span>Xyz&lt;S::WhitePoint, f64&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: WithXyz&lt;S&gt;) -&gt; Xyz&lt;S::WhitePoint, f64&gt; {
+            Xyz::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
-        <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span>
+    <span class="kw">impl</span>&lt;Rs: RgbSpace, Ls: LumaStandard&lt;WhitePoint = Rs::WhitePoint&gt;&gt;
+        FromColorUnclamped&lt;Luma&lt;Ls, f64&gt;&gt; <span class="kw">for </span>WithXyz&lt;Rs&gt;
     {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">WithXyz</span>(<span class="ident">PhantomData</span>)
+        <span class="kw">fn </span>from_color_unclamped(_color: Luma&lt;Ls, f64&gt;) -&gt; <span class="self">Self </span>{
+            WithXyz(PhantomData)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Rs</span>: <span class="ident">RgbSpace</span>, <span class="ident">Ls</span>: <span class="ident">LumaStandard</span><span class="op">&lt;</span><span class="ident">WhitePoint</span> <span class="op">=</span> <span class="ident">Rs::WhitePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>
-        <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Ls</span>, <span class="ident">f64</span><span class="op">&gt;</span>
+    <span class="kw">impl</span>&lt;Rs: RgbSpace, Ls: LumaStandard&lt;WhitePoint = Rs::WhitePoint&gt;&gt;
+        FromColorUnclamped&lt;WithXyz&lt;Rs&gt;&gt; <span class="kw">for </span>Luma&lt;Ls, f64&gt;
     {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident">Rs</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">Luma::new</span>(<span class="number">1.0</span>)
+        <span class="kw">fn </span>from_color_unclamped(_color: WithXyz&lt;Rs&gt;) -&gt; <span class="self">Self </span>{
+            Luma::new(<span class="number">1.0</span>)
         }
     }
 
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">FromColorUnclamped</span>, <span class="ident">WithAlpha</span>)]</span>
-    <span class="attribute">#[<span class="ident">palette</span>(
-        <span class="ident">skip_derives</span>(<span class="ident">Lch</span>, <span class="ident">Luma</span>),
-        <span class="ident">white_point</span> <span class="op">=</span> <span class="string">&quot;crate::white_point::E&quot;</span>,
-        <span class="ident">component</span> <span class="op">=</span> <span class="string">&quot;T&quot;</span>,
-        <span class="ident">rgb_standard</span> <span class="op">=</span> <span class="string">&quot;Linear&lt;(crate::encoding::Srgb, crate::white_point::E)&gt;&quot;</span>,
-        <span class="ident">palette_internal</span>,
-        <span class="ident">palette_internal_not_base_type</span>
-    )]</span>
-    <span class="kw">struct</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+    <span class="attribute">#[derive(Copy, Clone, FromColorUnclamped, WithAlpha)]
+    #[palette(
+        skip_derives(Lch, Luma),
+        white_point = <span class="string">&quot;crate::white_point::E&quot;</span>,
+        component = <span class="string">&quot;T&quot;</span>,
+        rgb_standard = <span class="string">&quot;Linear&lt;(crate::encoding::Srgb, crate::white_point::E)&gt;&quot;</span>,
+        palette_internal,
+        palette_internal_not_base_type
+    )]
+    </span><span class="kw">struct </span>WithoutXyz&lt;T&gt;(PhantomData&lt;T&gt;);
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+    <span class="kw">impl</span>&lt;T&gt; HasBoolMask <span class="kw">for </span>WithoutXyz&lt;T&gt;
+    <span class="kw">where
+        </span>T: HasBoolMask,
     {
-        <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">T::Mask</span>;
+        <span class="kw">type </span>Mask = T::Mask;
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">HasBoolMask</span>,
+    <span class="kw">impl</span>&lt;T&gt; IsWithinBounds <span class="kw">for </span>WithoutXyz&lt;T&gt;
+    <span class="kw">where
+        </span>T: HasBoolMask,
     {
-        <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T::Mask</span> {
-            <span class="ident">T::Mask::from_bool</span>(<span class="bool-val">true</span>)
+        <span class="kw">fn </span>is_within_bounds(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T::Mask {
+            T::Mask::from_bool(<span class="bool-val">true</span>)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-            <span class="self">self</span>
+    <span class="kw">impl</span>&lt;T&gt; Clamp <span class="kw">for </span>WithoutXyz&lt;T&gt; {
+        <span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+            <span class="self">self
+        </span>}
+    }
+
+    <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;WithoutXyz&lt;T&gt;&gt; <span class="kw">for </span>WithoutXyz&lt;T&gt; {
+        <span class="kw">fn </span>from_color_unclamped(color: WithoutXyz&lt;T&gt;) -&gt; <span class="self">Self </span>{
+            color
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">color</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">color</span>
+    <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Lch&lt;<span class="kw">crate</span>::white_point::E, T&gt;&gt; <span class="kw">for </span>WithoutXyz&lt;T&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: Lch&lt;<span class="kw">crate</span>::white_point::E, T&gt;) -&gt; <span class="self">Self </span>{
+            WithoutXyz(PhantomData)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">WithoutXyz</span>(<span class="ident">PhantomData</span>)
+    <span class="kw">impl</span>&lt;T: One + Zero&gt; FromColorUnclamped&lt;WithoutXyz&lt;T&gt;&gt; <span class="kw">for </span>Lch&lt;<span class="kw">crate</span>::white_point::E, T&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: WithoutXyz&lt;T&gt;) -&gt; Lch&lt;<span class="kw">crate</span>::white_point::E, T&gt; {
+            Lch::new(T::one(), T::zero(), T::zero())
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">One</span> <span class="op">+</span> <span class="ident">Zero</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="ident">Lch::new</span>(<span class="ident">T::one</span>(), <span class="ident">T::zero</span>(), <span class="ident">T::zero</span>())
+    <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, T&gt;&gt; <span class="kw">for </span>WithoutXyz&lt;T&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, T&gt;) -&gt; <span class="self">Self </span>{
+            WithoutXyz(PhantomData)
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-            <span class="ident">WithoutXyz</span>(<span class="ident">PhantomData</span>)
+    <span class="kw">impl</span>&lt;T: One&gt; FromColorUnclamped&lt;WithoutXyz&lt;T&gt;&gt; <span class="kw">for </span>Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, T&gt; {
+        <span class="kw">fn </span>from_color_unclamped(_color: WithoutXyz&lt;T&gt;) -&gt; Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, T&gt; {
+            Luma::new(T::one())
         }
     }
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">One</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">_color</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="ident">Luma::new</span>(<span class="ident">T::one</span>())
-        }
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_with_xyz() {
+        <span class="kw">let </span>color: WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt; = WithXyz(Default::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(color);
+
+        <span class="kw">let </span>xyz: Xyz&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(xyz);
+
+        <span class="kw">let </span>yxy: Yxy&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(yxy);
+
+        <span class="kw">let </span>lab: Lab&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(lab);
+
+        <span class="kw">let </span>lch: Lch&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(lch);
+
+        <span class="kw">let </span>luv: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(luv);
+
+        <span class="kw">let </span>rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(rgb);
+
+        <span class="kw">let </span>hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsl);
+
+        <span class="kw">let </span>hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsluv);
+
+        <span class="kw">let </span>hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsv);
+
+        <span class="kw">let </span>hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hwb);
+
+        <span class="kw">let </span>luma: Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(luma);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_with_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">WithXyz</span>(<span class="ident">Default::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">color</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_with_xyz_alpha() {
+        <span class="kw">let </span>color: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; =
+            Alpha::from(WithXyz(Default::default()));
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(color);
 
-        <span class="kw">let</span> <span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">xyz</span>);
+        <span class="kw">let </span>xyz: Alpha&lt;Xyz&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Xyz::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(xyz);
 
-        <span class="kw">let</span> <span class="ident">yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">yxy</span>);
+        <span class="kw">let </span>yxy: Alpha&lt;Yxy&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Yxy::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(yxy);
 
-        <span class="kw">let</span> <span class="ident">lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lab</span>);
+        <span class="kw">let </span>lab: Alpha&lt;Lab&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Lab::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(lab);
 
-        <span class="kw">let</span> <span class="ident">lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lch</span>);
+        <span class="kw">let </span>lch: Alpha&lt;Lch&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Lch::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(lch);
 
-        <span class="kw">let</span> <span class="ident">luv</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luv</span>);
+        <span class="kw">let </span>luv: Alpha&lt;Luv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Luv::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(luv);
 
-        <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">rgb</span>);
+        <span class="kw">let </span>rgb: Alpha&lt;Rgb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Rgb::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(rgb);
 
-        <span class="kw">let</span> <span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsl</span>);
+        <span class="kw">let </span>hsl: Alpha&lt;Hsl&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Hsl::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsl);
 
-        <span class="kw">let</span> <span class="ident">hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsluv</span>);
+        <span class="kw">let </span>hsluv: Alpha&lt;Hsluv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Hsluv::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsluv);
 
-        <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsv</span>);
+        <span class="kw">let </span>hsv: Alpha&lt;Hsv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Hsv::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hsv);
 
-        <span class="kw">let</span> <span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hwb</span>);
+        <span class="kw">let </span>hwb: Alpha&lt;Hwb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = Alpha::from(Hwb::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(hwb);
 
-        <span class="kw">let</span> <span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luma</span>);
+        <span class="kw">let </span>luma: Alpha&lt;Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt;, u8&gt; =
+            Alpha::from(Luma::&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt;::default());
+        <span class="kw">let _ </span>= WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;::from_color(luma);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_with_xyz_alpha</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Alpha::from</span>(<span class="ident">WithXyz</span>(<span class="ident">Default::default</span>()));
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">color</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_with_xyz_into_alpha() {
+        <span class="kw">let </span>color: WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt; = WithXyz(Default::default());
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(color);
 
-        <span class="kw">let</span> <span class="ident">xyz</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Xyz::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">xyz</span>);
+        <span class="kw">let </span>xyz: Xyz&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(xyz);
 
-        <span class="kw">let</span> <span class="ident">yxy</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Yxy::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">yxy</span>);
+        <span class="kw">let </span>yxy: Yxy&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(yxy);
 
-        <span class="kw">let</span> <span class="ident">lab</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Lab::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lab</span>);
+        <span class="kw">let </span>lab: Lab&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(lab);
 
-        <span class="kw">let</span> <span class="ident">lch</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Lch::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lch</span>);
+        <span class="kw">let </span>lch: Lch&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(lch);
 
-        <span class="kw">let</span> <span class="ident">luv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Luv::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luv</span>);
+        <span class="kw">let </span>luv: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(luv);
 
-        <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Rgb::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">rgb</span>);
+        <span class="kw">let </span>rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(rgb);
 
-        <span class="kw">let</span> <span class="ident">hsl</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Hsl::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsl</span>);
+        <span class="kw">let </span>hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsl);
 
-        <span class="kw">let</span> <span class="ident">hsluv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Hsluv::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsluv</span>);
+        <span class="kw">let </span>hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsluv);
 
-        <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Hsv::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsv</span>);
+        <span class="kw">let </span>hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsv);
 
-        <span class="kw">let</span> <span class="ident">hwb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Alpha::from</span>(<span class="ident">Hwb::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hwb</span>);
+        <span class="kw">let </span>hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hwb);
 
-        <span class="kw">let</span> <span class="ident">luma</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Alpha::from</span>(<span class="ident">Luma</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luma</span>);
+        <span class="kw">let </span>luma: Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(luma);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_with_xyz_into_alpha</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">WithXyz</span>(<span class="ident">Default::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">color</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_with_xyz_alpha_into_alpha() {
+        <span class="kw">let </span>color: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; =
+            Alpha::from(WithXyz(Default::default()));
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(color);
 
-        <span class="kw">let</span> <span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">xyz</span>);
+        <span class="kw">let </span>xyz: Xyz&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(xyz);
 
-        <span class="kw">let</span> <span class="ident">yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">yxy</span>);
+        <span class="kw">let </span>yxy: Yxy&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(yxy);
 
-        <span class="kw">let</span> <span class="ident">lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lab</span>);
+        <span class="kw">let </span>lab: Lab&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(lab);
 
-        <span class="kw">let</span> <span class="ident">lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lch</span>);
+        <span class="kw">let </span>lch: Lch&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(lch);
 
-        <span class="kw">let</span> <span class="ident">luv</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luv</span>);
+        <span class="kw">let </span>luv: Luv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(luv);
 
-        <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">rgb</span>);
+        <span class="kw">let </span>rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(rgb);
 
-        <span class="kw">let</span> <span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsl</span>);
+        <span class="kw">let </span>hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsl);
 
-        <span class="kw">let</span> <span class="ident">hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsluv</span>);
+        <span class="kw">let </span>hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsluv);
 
-        <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsv</span>);
+        <span class="kw">let </span>hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hsv);
 
-        <span class="kw">let</span> <span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hwb</span>);
+        <span class="kw">let </span>hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(hwb);
 
-        <span class="kw">let</span> <span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luma</span>);
+        <span class="kw">let </span>luma: Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= Alpha::&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt;::from_color(luma);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_with_xyz_alpha_into_alpha</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Alpha::from</span>(<span class="ident">WithXyz</span>(<span class="ident">Default::default</span>()));
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">color</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>into_from_with_xyz() {
+        <span class="kw">let </span>color = WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;(PhantomData);
 
-        <span class="kw">let</span> <span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">xyz</span>);
-
-        <span class="kw">let</span> <span class="ident">yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">yxy</span>);
-
-        <span class="kw">let</span> <span class="ident">lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lab</span>);
-
-        <span class="kw">let</span> <span class="ident">lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lch</span>);
-
-        <span class="kw">let</span> <span class="ident">luv</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luv</span>);
-
-        <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">rgb</span>);
-
-        <span class="kw">let</span> <span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsl</span>);
-
-        <span class="kw">let</span> <span class="ident">hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsluv</span>);
-
-        <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsv</span>);
-
-        <span class="kw">let</span> <span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hwb</span>);
-
-        <span class="kw">let</span> <span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Alpha</span>::<span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luma</span>);
+        <span class="kw">let </span>_self: WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt; = color.into_color();
+        <span class="kw">let </span>_xyz: Xyz&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_yxy: Yxy&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lab: Lab&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lch: Lch&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luv: Luv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luma: Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt; = color.into_color();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_from_with_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>into_from_with_xyz_alpha() {
+        <span class="kw">let </span>color: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; =
+            Alpha::from(WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;(PhantomData));
 
-        <span class="kw">let</span> <span class="ident">_self</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luv</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
+        <span class="kw">let </span>_self: WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt; = color.into_color();
+        <span class="kw">let </span>_xyz: Xyz&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_yxy: Yxy&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lab: Lab&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lch: Lch&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luv: Luv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luma: Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt; = color.into_color();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_from_with_xyz_alpha</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Alpha::from</span>(<span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>into_alpha_from_with_xyz() {
+        <span class="kw">let </span>color = WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;(PhantomData);
 
-        <span class="kw">let</span> <span class="ident">_self</span>: <span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luv</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
+        <span class="kw">let </span>_self: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_xyz: Alpha&lt;Xyz&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_yxy: Alpha&lt;Yxy&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_lab: Alpha&lt;Lab&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_lch: Alpha&lt;Lch&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_luv: Alpha&lt;Luv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_rgb: Alpha&lt;Rgb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsl: Alpha&lt;Hsl&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsluv: Alpha&lt;Hsluv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsv: Alpha&lt;Hsv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hwb: Alpha&lt;Hwb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_luma: Alpha&lt;Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt;, u8&gt; = color.into_color();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_alpha_from_with_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>into_alpha_from_with_xyz_alpha() {
+        <span class="kw">let </span>color: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; =
+            Alpha::from(WithXyz::&lt;<span class="kw">crate</span>::encoding::Srgb&gt;(PhantomData));
 
-        <span class="kw">let</span> <span class="ident">_self</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_xyz</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_yxy</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lab</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lch</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_rgb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsl</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsluv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hwb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luma</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
+        <span class="kw">let </span>_self: Alpha&lt;WithXyz&lt;<span class="kw">crate</span>::encoding::Srgb&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_xyz: Alpha&lt;Xyz&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_yxy: Alpha&lt;Yxy&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_lab: Alpha&lt;Lab&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_lch: Alpha&lt;Lch&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_luv: Alpha&lt;Luv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_rgb: Alpha&lt;Rgb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsl: Alpha&lt;Hsl&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsluv: Alpha&lt;Hsluv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hsv: Alpha&lt;Hsv&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_hwb: Alpha&lt;Hwb&lt;<span class="kw">_</span>, f64&gt;, u8&gt; = color.into_color();
+        <span class="kw">let </span>_luma: Alpha&lt;Luma&lt;<span class="kw">crate</span>::encoding::Srgb, f64&gt;, u8&gt; = color.into_color();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_alpha_from_with_xyz_alpha</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Alpha::from</span>(<span class="ident">WithXyz</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_without_xyz() {
+        <span class="kw">let </span>color: WithoutXyz&lt;f64&gt; = WithoutXyz(Default::default());
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(color);
 
-        <span class="kw">let</span> <span class="ident">_self</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">WithXyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_xyz</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_yxy</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Yxy</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lab</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lab</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lch</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Lch</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_rgb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsl</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsluv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsv</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hwb</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luma</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">Luma</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
+        <span class="kw">let </span>xyz: Xyz&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(xyz);
+
+        <span class="kw">let </span>yxy: Yxy&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(yxy);
+
+        <span class="kw">let </span>lab: Lab&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(lab);
+
+        <span class="kw">let </span>lch: Lch&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(lch);
+
+        <span class="kw">let </span>luv: Luv&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(luv);
+
+        <span class="kw">let </span>rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(rgb);
+
+        <span class="kw">let </span>hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(hsl);
+
+        <span class="kw">let </span>hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(hsluv);
+
+        <span class="kw">let </span>hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(hsv);
+
+        <span class="kw">let </span>hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(hwb);
+
+        <span class="kw">let </span>luma: Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, f64&gt; = Default::default();
+        <span class="kw">let _ </span>= WithoutXyz::&lt;f64&gt;::from_color(luma);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_without_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">color</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>(<span class="ident">Default::default</span>());
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">color</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>into_without_xyz() {
+        <span class="kw">let </span>color = WithoutXyz::&lt;f64&gt;(PhantomData);
 
-        <span class="kw">let</span> <span class="ident">xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">xyz</span>);
-
-        <span class="kw">let</span> <span class="ident">yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">yxy</span>);
-
-        <span class="kw">let</span> <span class="ident">lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lab</span>);
-
-        <span class="kw">let</span> <span class="ident">lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">lch</span>);
-
-        <span class="kw">let</span> <span class="ident">luv</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luv</span>);
-
-        <span class="kw">let</span> <span class="ident">rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">rgb</span>);
-
-        <span class="kw">let</span> <span class="ident">hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsl</span>);
-
-        <span class="kw">let</span> <span class="ident">hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsluv</span>);
-
-        <span class="kw">let</span> <span class="ident">hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hsv</span>);
-
-        <span class="kw">let</span> <span class="ident">hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">hwb</span>);
-
-        <span class="kw">let</span> <span class="ident">luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_color</span>(<span class="ident">luma</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">into_without_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">WithoutXyz</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span>);
-
-        <span class="kw">let</span> <span class="ident">_self</span>: <span class="ident">WithoutXyz</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_xyz</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_yxy</span>: <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lab</span>: <span class="ident">Lab</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_lch</span>: <span class="ident">Lch</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luv</span>: <span class="ident">Luv</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_rgb</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsl</span>: <span class="ident">Hsl</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsluv</span>: <span class="ident">Hsluv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hsv</span>: <span class="ident">Hsv</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_hwb</span>: <span class="ident">Hwb</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
-        <span class="kw">let</span> <span class="ident">_luma</span>: <span class="ident">Luma</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::white_point::E</span><span class="op">&gt;</span>, <span class="ident">f64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">color</span>.<span class="ident">into_color</span>();
+        <span class="kw">let </span>_self: WithoutXyz&lt;f64&gt; = color.into_color();
+        <span class="kw">let </span>_xyz: Xyz&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = color.into_color();
+        <span class="kw">let </span>_yxy: Yxy&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lab: Lab&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = color.into_color();
+        <span class="kw">let </span>_lch: Lch&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luv: Luv&lt;<span class="kw">crate</span>::white_point::E, f64&gt; = color.into_color();
+        <span class="kw">let </span>_rgb: Rgb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsl: Hsl&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsluv: Hsluv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hsv: Hsv&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_hwb: Hwb&lt;<span class="kw">_</span>, f64&gt; = color.into_color();
+        <span class="kw">let </span>_luma: Luma&lt;Linear&lt;<span class="kw">crate</span>::white_point::E&gt;, f64&gt; = color.into_color();
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

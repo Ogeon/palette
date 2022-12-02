@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/compose.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>compose.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/compose.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>compose.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -216,223 +216,223 @@
 <span id="216">216</span>
 <span id="217">217</span>
 <span id="218">218</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">cast::ArrayCast</span>,
-    <span class="ident">clamp</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">Clamp</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
-    <span class="ident">stimulus::Stimulus</span>,
-    <span class="ident">Alpha</span>,
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{
+    cast::ArrayCast,
+    clamp,
+    num::{Arithmetics, Clamp, One, Real, Zero},
+    stimulus::Stimulus,
+    Alpha,
 };
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">blend_alpha</span>, <span class="ident">zip_colors</span>, <span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>};
+<span class="kw">use super</span>::{blend_alpha, zip_colors, PreAlpha, Premultiply};
 
-<span class="doccomment">/// The Porter Duff composition operators, [as described by</span>
-<span class="doccomment">/// W3C](https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This set of operators exclude the variants where source and destination are</span>
-<span class="doccomment">/// swapped, as well as the &quot;clear&quot;, &quot;copy&quot; and &quot;destination&quot; operators. Those</span>
-<span class="doccomment">/// can easily be achieved using other means.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Compose</span> {
-    <span class="doccomment">/// Place `self` over `other`. This is the good old common alpha composition</span>
-    <span class="doccomment">/// equation.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// The Porter Duff composition operators, [as described by
+/// W3C](https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators).
+///
+/// This set of operators exclude the variants where source and destination are
+/// swapped, as well as the &quot;clear&quot;, &quot;copy&quot; and &quot;destination&quot; operators. Those
+/// can easily be achieved using other means.
+</span><span class="kw">pub trait </span>Compose {
+    <span class="doccomment">/// Place `self` over `other`. This is the good old common alpha composition
+    /// equation.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>over(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Results in the parts of `self` that overlaps the visible parts of</span>
-    <span class="doccomment">/// `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Results in the parts of `self` that overlaps the visible parts of
+    /// `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>inside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Results in the parts of `self` that lies outside the visible parts of</span>
-    <span class="doccomment">/// `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Results in the parts of `self` that lies outside the visible parts of
+    /// `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>outside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Place `self` over only the visible parts of `other`.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Place `self` over only the visible parts of `other`.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>atop(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Results in either `self` or `other`, where they do not overlap.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Results in either `self` or `other`, where they do not overlap.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>xor(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
-    <span class="doccomment">/// Add `self` and `other`. This uses the alpha component to regulate the</span>
-    <span class="doccomment">/// effect, so it&#39;s not just plain component wise addition.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
+    <span class="doccomment">/// Add `self` and `other`. This uses the alpha component to regulate the
+    /// effect, so it&#39;s not just plain component wise addition.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>plus(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Compose</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clamp</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, T, <span class="kw">const </span>N: usize&gt; Compose <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: ArrayCast&lt;Array = [T; N]&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: Real + Zero + One + Arithmetics + Clamp + Clone,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">+</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>over(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src + (T::one() - <span class="kw-2">&amp;</span><span class="self">self</span>.alpha) * <span class="kw-2">&amp;*</span>dst;
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">blend_alpha</span>(<span class="self">self</span>.<span class="ident">alpha</span>, <span class="ident">other</span>.<span class="ident">alpha</span>);
+        other.alpha = blend_alpha(<span class="self">self</span>.alpha, other.alpha);
 
-        <span class="ident">other</span>
+        other
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>inside(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src * <span class="kw-2">&amp;</span>other.alpha;
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        other.alpha = clamp(<span class="self">self</span>.alpha * other.alpha, T::zero(), T::one());
 
-        <span class="ident">other</span>
+        other
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>);
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>outside(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src * (T::one() - <span class="kw-2">&amp;</span>other.alpha);
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">alpha</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="ident">other</span>.<span class="ident">alpha</span>), <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        other.alpha = clamp(<span class="self">self</span>.alpha * (T::one() - other.alpha), T::zero(), T::one());
 
-        <span class="ident">other</span>
+        other
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">+</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>atop(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src * <span class="kw-2">&amp;</span>other.alpha + (T::one() - <span class="kw-2">&amp;</span><span class="self">self</span>.alpha) * <span class="kw-2">&amp;*</span>dst;
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        other.alpha = clamp(other.alpha, T::zero(), T::one());
 
-        <span class="ident">other</span>
+        other
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">T::one</span>() <span class="op">+</span> <span class="ident">T::one</span>();
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>xor(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>two = || T::one() + T::one();
 
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">*</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>) <span class="op">+</span> (<span class="ident">T::one</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">alpha</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst</span>;
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src * (T::one() - <span class="kw-2">&amp;</span>other.alpha) + (T::one() - <span class="kw-2">&amp;</span><span class="self">self</span>.alpha) * <span class="kw-2">&amp;*</span>dst;
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">clamp</span>(
-            <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">two</span>() <span class="op">*</span> <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">alpha</span>,
-            <span class="ident">T::zero</span>(),
-            <span class="ident">T::one</span>(),
+        other.alpha = clamp(
+            <span class="self">self</span>.alpha.clone() + <span class="kw-2">&amp;</span>other.alpha - two() * <span class="self">self</span>.alpha * other.alpha,
+            T::zero(),
+            T::one(),
         );
 
-        <span class="ident">other</span>
+        other
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">for</span> (<span class="ident">src</span>, <span class="ident">dst</span>) <span class="kw">in</span> <span class="ident">zip_colors</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="ident">color</span>) {
-            <span class="kw-2">*</span><span class="ident">dst</span> <span class="op">=</span> <span class="ident">src</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">dst</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>plus(<span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">for </span>(src, dst) <span class="kw">in </span>zip_colors(<span class="self">self</span>.color, <span class="kw-2">&amp;mut </span>other.color) {
+            <span class="kw-2">*</span>dst = src + <span class="kw-2">&amp;*</span>dst;
         }
 
-        <span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+        other.alpha = clamp(<span class="self">self</span>.alpha + other.alpha, T::zero(), T::one());
 
-        <span class="ident">other</span>
+        other
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Compose</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
-    <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Compose</span>,
+<span class="kw">impl</span>&lt;C&gt; Compose <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt;
+<span class="kw">where
+    </span>C: Premultiply,
+    PreAlpha&lt;C&gt;: Compose,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>().<span class="ident">over</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>()).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>over(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply().over(other.premultiply()).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>()
-            .<span class="ident">inside</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>())
-            .<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>inside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply()
+            .inside(other.premultiply())
+            .unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>()
-            .<span class="ident">outside</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>())
-            .<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>outside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply()
+            .outside(other.premultiply())
+            .unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>().<span class="ident">atop</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>()).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>atop(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply().atop(other.premultiply()).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>().<span class="ident">xor</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>()).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>xor(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply().xor(other.premultiply()).unpremultiply()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">premultiply</span>().<span class="ident">plus</span>(<span class="ident">other</span>.<span class="ident">premultiply</span>()).<span class="ident">unpremultiply</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>plus(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.premultiply().plus(other.premultiply()).unpremultiply()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Compose</span> <span class="kw">for</span> <span class="ident">C</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Stimulus</span>,
-    <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Compose</span>,
+<span class="kw">impl</span>&lt;C&gt; Compose <span class="kw">for </span>C
+<span class="kw">where
+    </span>C: Premultiply,
+    C::Scalar: Stimulus,
+    PreAlpha&lt;C&gt;: Compose,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">over</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">over</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>over(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .over(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">inside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">inside</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>inside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .inside(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">outside</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">outside</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>outside(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .outside(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">atop</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">atop</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>atop(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .atop(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">xor</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">xor</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>xor(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .xor(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">plus</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">PreAlpha::new_opaque</span>(<span class="self">self</span>)
-            .<span class="ident">plus</span>(<span class="ident">PreAlpha::new_opaque</span>(<span class="ident">other</span>))
-            .<span class="ident">unpremultiply</span>()
-            .<span class="ident">color</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>plus(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        PreAlpha::new_opaque(<span class="self">self</span>)
+            .plus(PreAlpha::new_opaque(other))
+            .unpremultiply()
+            .color
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

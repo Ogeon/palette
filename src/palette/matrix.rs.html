@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/matrix.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matrix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/matrix.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matrix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -281,288 +281,288 @@
 <span id="281">281</span>
 <span id="282">282</span>
 <span id="283">283</span>
-</pre><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in</span>
-<span class="doccomment">//! chromatic adaptation and conversion calculations.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in
+//! chromatic adaptation and conversion calculations.
 
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
+</span><span class="kw">use </span>core::marker::PhantomData;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">convert::IntoColorUnclamped</span>,
-    <span class="ident">encoding::Linear</span>,
-    <span class="ident">num</span>::{<span class="ident">Arithmetics</span>, <span class="ident">FromScalar</span>, <span class="ident">IsValidDivisor</span>, <span class="ident">Recip</span>},
-    <span class="ident">rgb</span>::{<span class="ident">Primaries</span>, <span class="ident">Rgb</span>, <span class="ident">RgbSpace</span>},
-    <span class="ident">white_point</span>::{<span class="ident">Any</span>, <span class="ident">WhitePoint</span>},
-    <span class="ident">Xyz</span>, <span class="ident">Yxy</span>,
+<span class="kw">use crate</span>::{
+    convert::IntoColorUnclamped,
+    encoding::Linear,
+    num::{Arithmetics, FromScalar, IsValidDivisor, Recip},
+    rgb::{Primaries, Rgb, RgbSpace},
+    white_point::{Any, WhitePoint},
+    Xyz, Yxy,
 };
 
-<span class="doccomment">/// A 9 element array representing a 3x3 matrix.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="number">9</span>];
+<span class="doccomment">/// A 9 element array representing a 3x3 matrix.
+</span><span class="kw">pub type </span>Mat3&lt;T&gt; = [T; <span class="number">9</span>];
 
-<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_xyz</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">f</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span>,
+<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>multiply_xyz&lt;T&gt;(c: Mat3&lt;T&gt;, f: Xyz&lt;Any, T&gt;) -&gt; Xyz&lt;Any, T&gt;
+<span class="kw">where
+    </span>T: Arithmetics,
 {
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths</span>
-    <span class="kw">let</span> [<span class="ident">c0</span>, <span class="ident">c1</span>, <span class="ident">c2</span>, <span class="ident">c3</span>, <span class="ident">c4</span>, <span class="ident">c5</span>, <span class="ident">c6</span>, <span class="ident">c7</span>, <span class="ident">c8</span>] <span class="op">=</span> <span class="ident">c</span>;
+    <span class="comment">// Input Mat3 is destructured to avoid panic paths
+    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
-    <span class="kw">let</span> <span class="ident">x1</span> <span class="op">=</span> <span class="ident">c0</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">x</span>;
-    <span class="kw">let</span> <span class="ident">y1</span> <span class="op">=</span> <span class="ident">c3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">x</span>;
-    <span class="kw">let</span> <span class="ident">z1</span> <span class="op">=</span> <span class="ident">c6</span> <span class="op">*</span> <span class="ident">f</span>.<span class="ident">x</span>;
-    <span class="kw">let</span> <span class="ident">x2</span> <span class="op">=</span> <span class="ident">c1</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">y</span>;
-    <span class="kw">let</span> <span class="ident">y2</span> <span class="op">=</span> <span class="ident">c4</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">y</span>;
-    <span class="kw">let</span> <span class="ident">z2</span> <span class="op">=</span> <span class="ident">c7</span> <span class="op">*</span> <span class="ident">f</span>.<span class="ident">y</span>;
-    <span class="kw">let</span> <span class="ident">x3</span> <span class="op">=</span> <span class="ident">c2</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">z</span>;
-    <span class="kw">let</span> <span class="ident">y3</span> <span class="op">=</span> <span class="ident">c5</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">z</span>;
-    <span class="kw">let</span> <span class="ident">z3</span> <span class="op">=</span> <span class="ident">c8</span> <span class="op">*</span> <span class="ident">f</span>.<span class="ident">z</span>;
+    <span class="kw">let </span>x1 = c0 * <span class="kw-2">&amp;</span>f.x;
+    <span class="kw">let </span>y1 = c3 * <span class="kw-2">&amp;</span>f.x;
+    <span class="kw">let </span>z1 = c6 * f.x;
+    <span class="kw">let </span>x2 = c1 * <span class="kw-2">&amp;</span>f.y;
+    <span class="kw">let </span>y2 = c4 * <span class="kw-2">&amp;</span>f.y;
+    <span class="kw">let </span>z2 = c7 * f.y;
+    <span class="kw">let </span>x3 = c2 * <span class="kw-2">&amp;</span>f.z;
+    <span class="kw">let </span>y3 = c5 * <span class="kw-2">&amp;</span>f.z;
+    <span class="kw">let </span>z3 = c8 * f.z;
 
-    <span class="ident">Xyz</span> {
-        <span class="ident">x</span>: <span class="ident">x1</span> <span class="op">+</span> <span class="ident">x2</span> <span class="op">+</span> <span class="ident">x3</span>,
-        <span class="ident">y</span>: <span class="ident">y1</span> <span class="op">+</span> <span class="ident">y2</span> <span class="op">+</span> <span class="ident">y3</span>,
-        <span class="ident">z</span>: <span class="ident">z1</span> <span class="op">+</span> <span class="ident">z2</span> <span class="op">+</span> <span class="ident">z3</span>,
-        <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    Xyz {
+        x: x1 + x2 + x3,
+        y: y1 + y2 + y3,
+        z: z1 + z2 + z3,
+        white_point: PhantomData,
     }
 }
-<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color to return an RGB color.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_xyz_to_rgb</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">V</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">f</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">V</span><span class="op">&gt;</span>) -&gt; <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">V</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">RgbSpace</span>,
-    <span class="ident">V</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">FromScalar</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>multiply_xyz_to_rgb&lt;S, V, T&gt;(c: Mat3&lt;T&gt;, f: Xyz&lt;S::WhitePoint, V&gt;) -&gt; Rgb&lt;Linear&lt;S&gt;, V&gt;
+<span class="kw">where
+    </span>S: RgbSpace,
+    V: Arithmetics + FromScalar&lt;Scalar = T&gt;,
 {
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths. red, green, and blue</span>
-    <span class="comment">// can&#39;t be extracted like in `multiply_xyz` to get a performance increase</span>
-    <span class="kw">let</span> [<span class="ident">c0</span>, <span class="ident">c1</span>, <span class="ident">c2</span>, <span class="ident">c3</span>, <span class="ident">c4</span>, <span class="ident">c5</span>, <span class="ident">c6</span>, <span class="ident">c7</span>, <span class="ident">c8</span>] <span class="op">=</span> <span class="ident">c</span>;
+    <span class="comment">// Input Mat3 is destructured to avoid panic paths. red, green, and blue
+    // can&#39;t be extracted like in `multiply_xyz` to get a performance increase
+    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
-    <span class="ident">Rgb</span> {
-        <span class="ident">red</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c0</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">x</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c1</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">y</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c2</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">z</span>),
-        <span class="ident">green</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c3</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">x</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c4</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">y</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c5</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">z</span>),
-        <span class="ident">blue</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c6</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">x</span>) <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c7</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">y</span>) <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c8</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">z</span>),
-        <span class="ident">standard</span>: <span class="ident">PhantomData</span>,
+    Rgb {
+        red: (V::from_scalar(c0) * <span class="kw-2">&amp;</span>f.x)
+            + (V::from_scalar(c1) * <span class="kw-2">&amp;</span>f.y)
+            + (V::from_scalar(c2) * <span class="kw-2">&amp;</span>f.z),
+        green: (V::from_scalar(c3) * <span class="kw-2">&amp;</span>f.x)
+            + (V::from_scalar(c4) * <span class="kw-2">&amp;</span>f.y)
+            + (V::from_scalar(c5) * <span class="kw-2">&amp;</span>f.z),
+        blue: (V::from_scalar(c6) * f.x) + (V::from_scalar(c7) * f.y) + (V::from_scalar(c8) * f.z),
+        standard: PhantomData,
     }
 }
-<span class="doccomment">/// Multiply the 3x3 matrix with an RGB color to return an XYZ color.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_rgb_to_xyz</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">V</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">f</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">V</span><span class="op">&gt;</span>) -&gt; <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">S::WhitePoint</span>, <span class="ident">V</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">RgbSpace</span>,
-    <span class="ident">V</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">FromScalar</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>multiply_rgb_to_xyz&lt;S, V, T&gt;(c: Mat3&lt;T&gt;, f: Rgb&lt;Linear&lt;S&gt;, V&gt;) -&gt; Xyz&lt;S::WhitePoint, V&gt;
+<span class="kw">where
+    </span>S: RgbSpace,
+    V: Arithmetics + FromScalar&lt;Scalar = T&gt;,
 {
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths. Same problem as</span>
-    <span class="comment">// `multiply_xyz_to_rgb` for extracting x, y, z</span>
-    <span class="kw">let</span> [<span class="ident">c0</span>, <span class="ident">c1</span>, <span class="ident">c2</span>, <span class="ident">c3</span>, <span class="ident">c4</span>, <span class="ident">c5</span>, <span class="ident">c6</span>, <span class="ident">c7</span>, <span class="ident">c8</span>] <span class="op">=</span> <span class="ident">c</span>;
+    <span class="comment">// Input Mat3 is destructured to avoid panic paths. Same problem as
+    // `multiply_xyz_to_rgb` for extracting x, y, z
+    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
 
-    <span class="ident">Xyz</span> {
-        <span class="ident">x</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c0</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">red</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c1</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">green</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c2</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">blue</span>),
-        <span class="ident">y</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c3</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">red</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c4</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">green</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c5</span>) <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">blue</span>),
-        <span class="ident">z</span>: (<span class="ident">V::from_scalar</span>(<span class="ident">c6</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">red</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c7</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">green</span>)
-            <span class="op">+</span> (<span class="ident">V::from_scalar</span>(<span class="ident">c8</span>) <span class="op">*</span> <span class="ident">f</span>.<span class="ident">blue</span>),
-        <span class="ident">white_point</span>: <span class="ident">PhantomData</span>,
+    Xyz {
+        x: (V::from_scalar(c0) * <span class="kw-2">&amp;</span>f.red)
+            + (V::from_scalar(c1) * <span class="kw-2">&amp;</span>f.green)
+            + (V::from_scalar(c2) * <span class="kw-2">&amp;</span>f.blue),
+        y: (V::from_scalar(c3) * <span class="kw-2">&amp;</span>f.red)
+            + (V::from_scalar(c4) * <span class="kw-2">&amp;</span>f.green)
+            + (V::from_scalar(c5) * <span class="kw-2">&amp;</span>f.blue),
+        z: (V::from_scalar(c6) * f.red)
+            + (V::from_scalar(c7) * f.green)
+            + (V::from_scalar(c8) * f.blue),
+        white_point: PhantomData,
     }
 }
 
-<span class="doccomment">/// Multiply two 3x3 matrices.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_3x3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">c</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">f</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="doccomment">/// Multiply two 3x3 matrices.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>multiply_3x3&lt;T&gt;(c: Mat3&lt;T&gt;, f: Mat3&lt;T&gt;) -&gt; Mat3&lt;T&gt;
+<span class="kw">where
+    </span>T: Arithmetics + Clone,
 {
-    <span class="comment">// Input Mat3 are destructured to avoid panic paths</span>
-    <span class="kw">let</span> [<span class="ident">c0</span>, <span class="ident">c1</span>, <span class="ident">c2</span>, <span class="ident">c3</span>, <span class="ident">c4</span>, <span class="ident">c5</span>, <span class="ident">c6</span>, <span class="ident">c7</span>, <span class="ident">c8</span>] <span class="op">=</span> <span class="ident">c</span>;
-    <span class="kw">let</span> [<span class="ident">f0</span>, <span class="ident">f1</span>, <span class="ident">f2</span>, <span class="ident">f3</span>, <span class="ident">f4</span>, <span class="ident">f5</span>, <span class="ident">f6</span>, <span class="ident">f7</span>, <span class="ident">f8</span>] <span class="op">=</span> <span class="ident">f</span>;
+    <span class="comment">// Input Mat3 are destructured to avoid panic paths
+    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
+    <span class="kw">let </span>[f0, f1, f2, f3, f4, f5, f6, f7, f8] = f;
 
-    <span class="kw">let</span> <span class="ident">o0</span> <span class="op">=</span> <span class="ident">c0</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f0</span> <span class="op">+</span> <span class="ident">c1</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f3</span> <span class="op">+</span> <span class="ident">c2</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f6</span>;
-    <span class="kw">let</span> <span class="ident">o1</span> <span class="op">=</span> <span class="ident">c0</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f1</span> <span class="op">+</span> <span class="ident">c1</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f4</span> <span class="op">+</span> <span class="ident">c2</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f7</span>;
-    <span class="kw">let</span> <span class="ident">o2</span> <span class="op">=</span> <span class="ident">c0</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f2</span> <span class="op">+</span> <span class="ident">c1</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f5</span> <span class="op">+</span> <span class="ident">c2</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f8</span>;
+    <span class="kw">let </span>o0 = c0.clone() * <span class="kw-2">&amp;</span>f0 + c1.clone() * <span class="kw-2">&amp;</span>f3 + c2.clone() * <span class="kw-2">&amp;</span>f6;
+    <span class="kw">let </span>o1 = c0.clone() * <span class="kw-2">&amp;</span>f1 + c1.clone() * <span class="kw-2">&amp;</span>f4 + c2.clone() * <span class="kw-2">&amp;</span>f7;
+    <span class="kw">let </span>o2 = c0 * <span class="kw-2">&amp;</span>f2 + c1 * <span class="kw-2">&amp;</span>f5 + c2 * <span class="kw-2">&amp;</span>f8;
 
-    <span class="kw">let</span> <span class="ident">o3</span> <span class="op">=</span> <span class="ident">c3</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f0</span> <span class="op">+</span> <span class="ident">c4</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f3</span> <span class="op">+</span> <span class="ident">c5</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f6</span>;
-    <span class="kw">let</span> <span class="ident">o4</span> <span class="op">=</span> <span class="ident">c3</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f1</span> <span class="op">+</span> <span class="ident">c4</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f4</span> <span class="op">+</span> <span class="ident">c5</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f7</span>;
-    <span class="kw">let</span> <span class="ident">o5</span> <span class="op">=</span> <span class="ident">c3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f2</span> <span class="op">+</span> <span class="ident">c4</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f5</span> <span class="op">+</span> <span class="ident">c5</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">f8</span>;
+    <span class="kw">let </span>o3 = c3.clone() * <span class="kw-2">&amp;</span>f0 + c4.clone() * <span class="kw-2">&amp;</span>f3 + c5.clone() * <span class="kw-2">&amp;</span>f6;
+    <span class="kw">let </span>o4 = c3.clone() * <span class="kw-2">&amp;</span>f1 + c4.clone() * <span class="kw-2">&amp;</span>f4 + c5.clone() * <span class="kw-2">&amp;</span>f7;
+    <span class="kw">let </span>o5 = c3 * <span class="kw-2">&amp;</span>f2 + c4 * <span class="kw-2">&amp;</span>f5 + c5 * <span class="kw-2">&amp;</span>f8;
 
-    <span class="kw">let</span> <span class="ident">o6</span> <span class="op">=</span> <span class="ident">c6</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f0</span> <span class="op">+</span> <span class="ident">c7</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f3</span> <span class="op">+</span> <span class="ident">c8</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f6</span>;
-    <span class="kw">let</span> <span class="ident">o7</span> <span class="op">=</span> <span class="ident">c6</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f1</span> <span class="op">+</span> <span class="ident">c7</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f4</span> <span class="op">+</span> <span class="ident">c8</span>.<span class="ident">clone</span>() <span class="op">*</span> <span class="ident">f7</span>;
-    <span class="kw">let</span> <span class="ident">o8</span> <span class="op">=</span> <span class="ident">c6</span> <span class="op">*</span> <span class="ident">f2</span> <span class="op">+</span> <span class="ident">c7</span> <span class="op">*</span> <span class="ident">f5</span> <span class="op">+</span> <span class="ident">c8</span> <span class="op">*</span> <span class="ident">f8</span>;
+    <span class="kw">let </span>o6 = c6.clone() * f0 + c7.clone() * f3 + c8.clone() * f6;
+    <span class="kw">let </span>o7 = c6.clone() * f1 + c7.clone() * f4 + c8.clone() * f7;
+    <span class="kw">let </span>o8 = c6 * f2 + c7 * f5 + c8 * f8;
 
-    [<span class="ident">o0</span>, <span class="ident">o1</span>, <span class="ident">o2</span>, <span class="ident">o3</span>, <span class="ident">o4</span>, <span class="ident">o5</span>, <span class="ident">o6</span>, <span class="ident">o7</span>, <span class="ident">o8</span>]
+    [o0, o1, o2, o3, o4, o5, o6, o7, o8]
 }
 
-<span class="doccomment">/// Invert a 3x3 matrix and panic if matrix is not invertible.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">matrix_inverse</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Recip</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="doccomment">/// Invert a 3x3 matrix and panic if matrix is not invertible.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>matrix_inverse&lt;T&gt;(a: Mat3&lt;T&gt;) -&gt; Mat3&lt;T&gt;
+<span class="kw">where
+    </span>T: Recip + IsValidDivisor&lt;Mask = bool&gt; + Arithmetics + Clone,
 {
-    <span class="comment">// This function runs fastest with assert and no destructuring. The `det`&#39;s</span>
-    <span class="comment">// location should not be changed until benched that it&#39;s faster elsewhere</span>
-    <span class="macro">assert!</span>(<span class="ident">a</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">8</span>);
+    <span class="comment">// This function runs fastest with assert and no destructuring. The `det`&#39;s
+    // location should not be changed until benched that it&#39;s faster elsewhere
+    </span><span class="macro">assert!</span>(a.len() &gt; <span class="number">8</span>);
 
-    <span class="kw">let</span> <span class="ident">d0</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">4</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">8</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">5</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">7</span>];
-    <span class="kw">let</span> <span class="ident">d1</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">3</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">8</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">5</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">6</span>];
-    <span class="kw">let</span> <span class="ident">d2</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">3</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">7</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">4</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">6</span>];
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">det</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">d0</span> <span class="op">-</span> <span class="ident">a</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">d1</span> <span class="op">+</span> <span class="ident">a</span>[<span class="number">2</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">d2</span>;
-    <span class="kw">let</span> <span class="ident">d3</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">8</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">2</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">7</span>];
-    <span class="kw">let</span> <span class="ident">d4</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">8</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">2</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">6</span>];
-    <span class="kw">let</span> <span class="ident">d5</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">7</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">6</span>];
-    <span class="kw">let</span> <span class="ident">d6</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">5</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">2</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">4</span>];
-    <span class="kw">let</span> <span class="ident">d7</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">5</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">2</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">3</span>];
-    <span class="kw">let</span> <span class="ident">d8</span> <span class="op">=</span> <span class="ident">a</span>[<span class="number">0</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">4</span>] <span class="op">-</span> <span class="ident">a</span>[<span class="number">1</span>].<span class="ident">clone</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">a</span>[<span class="number">3</span>];
+    <span class="kw">let </span>d0 = a[<span class="number">4</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">8</span>] - a[<span class="number">5</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">7</span>];
+    <span class="kw">let </span>d1 = a[<span class="number">3</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">8</span>] - a[<span class="number">5</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">6</span>];
+    <span class="kw">let </span>d2 = a[<span class="number">3</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">7</span>] - a[<span class="number">4</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">6</span>];
+    <span class="kw">let </span><span class="kw-2">mut </span>det = a[<span class="number">0</span>].clone() * <span class="kw-2">&amp;</span>d0 - a[<span class="number">1</span>].clone() * <span class="kw-2">&amp;</span>d1 + a[<span class="number">2</span>].clone() * <span class="kw-2">&amp;</span>d2;
+    <span class="kw">let </span>d3 = a[<span class="number">1</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">8</span>] - a[<span class="number">2</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">7</span>];
+    <span class="kw">let </span>d4 = a[<span class="number">0</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">8</span>] - a[<span class="number">2</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">6</span>];
+    <span class="kw">let </span>d5 = a[<span class="number">0</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">7</span>] - a[<span class="number">1</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">6</span>];
+    <span class="kw">let </span>d6 = a[<span class="number">1</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">5</span>] - a[<span class="number">2</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">4</span>];
+    <span class="kw">let </span>d7 = a[<span class="number">0</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">5</span>] - a[<span class="number">2</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">3</span>];
+    <span class="kw">let </span>d8 = a[<span class="number">0</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">4</span>] - a[<span class="number">1</span>].clone() * <span class="kw-2">&amp;</span>a[<span class="number">3</span>];
 
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">det</span>.<span class="ident">is_valid_divisor</span>() {
+    <span class="kw">if </span>!det.is_valid_divisor() {
         <span class="macro">panic!</span>(<span class="string">&quot;The given matrix is not invertible&quot;</span>)
     }
-    <span class="ident">det</span> <span class="op">=</span> <span class="ident">det</span>.<span class="ident">recip</span>();
+    det = det.recip();
 
     [
-        <span class="ident">d0</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="op">-</span><span class="ident">d3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="ident">d6</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="op">-</span><span class="ident">d1</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="ident">d4</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="op">-</span><span class="ident">d7</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="ident">d2</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="op">-</span><span class="ident">d5</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">det</span>,
-        <span class="ident">d8</span> <span class="op">*</span> <span class="ident">det</span>,
+        d0 * <span class="kw-2">&amp;</span>det,
+        -d3 * <span class="kw-2">&amp;</span>det,
+        d6 * <span class="kw-2">&amp;</span>det,
+        -d1 * <span class="kw-2">&amp;</span>det,
+        d4 * <span class="kw-2">&amp;</span>det,
+        -d7 * <span class="kw-2">&amp;</span>det,
+        d2 * <span class="kw-2">&amp;</span>det,
+        -d5 * <span class="kw-2">&amp;</span>det,
+        d8 * det,
     ]
 }
 
-<span class="doccomment">/// Generates the Srgb to Xyz transformation matrix for a given white point.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rgb_to_xyz_matrix</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span><span class="op">&gt;</span>() -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">RgbSpace</span>,
-    <span class="ident">S::Primaries</span>: <span class="ident">Primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">S::WhitePoint</span>: <span class="ident">WhitePoint</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Recip</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">bool</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">FromScalar</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">Yxy</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Generates the Srgb to Xyz transformation matrix for a given white point.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub fn </span>rgb_to_xyz_matrix&lt;S, T&gt;() -&gt; Mat3&lt;T&gt;
+<span class="kw">where
+    </span>S: RgbSpace,
+    S::Primaries: Primaries&lt;T&gt;,
+    S::WhitePoint: WhitePoint&lt;T&gt;,
+    T: Recip + IsValidDivisor&lt;Mask = bool&gt; + Arithmetics + Clone + FromScalar&lt;Scalar = T&gt;,
+    Yxy&lt;Any, T&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T&gt;&gt;,
 {
-    <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">S::Primaries::red</span>().<span class="ident">into_color_unclamped</span>();
-    <span class="kw">let</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">S::Primaries::green</span>().<span class="ident">into_color_unclamped</span>();
-    <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">S::Primaries::blue</span>().<span class="ident">into_color_unclamped</span>();
+    <span class="kw">let </span>r = S::Primaries::red().into_color_unclamped();
+    <span class="kw">let </span>g = S::Primaries::green().into_color_unclamped();
+    <span class="kw">let </span>b = S::Primaries::blue().into_color_unclamped();
 
-    <span class="kw">let</span> <span class="ident">matrix</span> <span class="op">=</span> <span class="ident">mat3_from_primaries</span>(<span class="ident">r</span>, <span class="ident">g</span>, <span class="ident">b</span>);
+    <span class="kw">let </span>matrix = mat3_from_primaries(r, g, b);
 
-    <span class="kw">let</span> <span class="ident">s_matrix</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">multiply_xyz_to_rgb</span>(
-        <span class="ident">matrix_inverse</span>(<span class="ident">matrix</span>.<span class="ident">clone</span>()),
-        <span class="ident">S::WhitePoint::get_xyz</span>().<span class="ident">with_white_point</span>(),
+    <span class="kw">let </span>s_matrix: Rgb&lt;Linear&lt;S&gt;, T&gt; = multiply_xyz_to_rgb(
+        matrix_inverse(matrix.clone()),
+        S::WhitePoint::get_xyz().with_white_point(),
     );
 
-    <span class="comment">// Destructuring has some performance benefits, don&#39;t change unless measured</span>
-    <span class="kw">let</span> [<span class="ident">t0</span>, <span class="ident">t1</span>, <span class="ident">t2</span>, <span class="ident">t3</span>, <span class="ident">t4</span>, <span class="ident">t5</span>, <span class="ident">t6</span>, <span class="ident">t7</span>, <span class="ident">t8</span>] <span class="op">=</span> <span class="ident">matrix</span>;
+    <span class="comment">// Destructuring has some performance benefits, don&#39;t change unless measured
+    </span><span class="kw">let </span>[t0, t1, t2, t3, t4, t5, t6, t7, t8] = matrix;
 
     [
-        <span class="ident">t0</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">red</span>,
-        <span class="ident">t1</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">green</span>,
-        <span class="ident">t2</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">blue</span>,
-        <span class="ident">t3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">red</span>,
-        <span class="ident">t4</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">green</span>,
-        <span class="ident">t5</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_matrix</span>.<span class="ident">blue</span>,
-        <span class="ident">t6</span> <span class="op">*</span> <span class="ident">s_matrix</span>.<span class="ident">red</span>,
-        <span class="ident">t7</span> <span class="op">*</span> <span class="ident">s_matrix</span>.<span class="ident">green</span>,
-        <span class="ident">t8</span> <span class="op">*</span> <span class="ident">s_matrix</span>.<span class="ident">blue</span>,
+        t0 * <span class="kw-2">&amp;</span>s_matrix.red,
+        t1 * <span class="kw-2">&amp;</span>s_matrix.green,
+        t2 * <span class="kw-2">&amp;</span>s_matrix.blue,
+        t3 * <span class="kw-2">&amp;</span>s_matrix.red,
+        t4 * <span class="kw-2">&amp;</span>s_matrix.green,
+        t5 * <span class="kw-2">&amp;</span>s_matrix.blue,
+        t6 * s_matrix.red,
+        t7 * s_matrix.green,
+        t8 * s_matrix.blue,
     ]
 }
 
-<span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">mat3_from_primaries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">r</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">g</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">Xyz</span><span class="op">&lt;</span><span class="ident">Any</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Mat3</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="attribute">#[rustfmt::skip]
+#[inline]
+</span><span class="kw">fn </span>mat3_from_primaries&lt;T&gt;(r: Xyz&lt;Any, T&gt;, g: Xyz&lt;Any, T&gt;, b: Xyz&lt;Any, T&gt;) -&gt; Mat3&lt;T&gt; {
     [
-        <span class="ident">r</span>.<span class="ident">x</span>, <span class="ident">g</span>.<span class="ident">x</span>, <span class="ident">b</span>.<span class="ident">x</span>,
-        <span class="ident">r</span>.<span class="ident">y</span>, <span class="ident">g</span>.<span class="ident">y</span>, <span class="ident">b</span>.<span class="ident">y</span>,
-        <span class="ident">r</span>.<span class="ident">z</span>, <span class="ident">g</span>.<span class="ident">z</span>, <span class="ident">b</span>.<span class="ident">z</span>,
+        r.x, g.x, b.x,
+        r.y, g.y, b.y,
+        r.z, g.z, b.z,
     ]
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">matrix_inverse</span>, <span class="ident">multiply_3x3</span>, <span class="ident">multiply_xyz</span>, <span class="ident">rgb_to_xyz_matrix</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::chromatic_adaptation::AdaptInto</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::encoding</span>::{<span class="ident">Linear</span>, <span class="ident">Srgb</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rgb::Rgb</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::white_point::D50</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Xyz</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
+    <span class="kw">use </span><span class="kw">crate</span>::chromatic_adaptation::AdaptInto;
+    <span class="kw">use </span><span class="kw">crate</span>::encoding::{Linear, Srgb};
+    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
+    <span class="kw">use </span><span class="kw">crate</span>::white_point::D50;
+    <span class="kw">use </span><span class="kw">crate</span>::Xyz;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">matrix_multiply_3x3</span>() {
-        <span class="kw">let</span> <span class="ident">inp1</span> <span class="op">=</span> [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>, <span class="number">3.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">3.0</span>];
-        <span class="kw">let</span> <span class="ident">inp2</span> <span class="op">=</span> [<span class="number">4.0</span>, <span class="number">5.0</span>, <span class="number">6.0</span>, <span class="number">6.0</span>, <span class="number">5.0</span>, <span class="number">4.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>, <span class="number">5.0</span>];
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [<span class="number">28.0</span>, <span class="number">33.0</span>, <span class="number">29.0</span>, <span class="number">28.0</span>, <span class="number">31.0</span>, <span class="number">31.0</span>, <span class="number">26.0</span>, <span class="number">33.0</span>, <span class="number">31.0</span>];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>matrix_multiply_3x3() {
+        <span class="kw">let </span>inp1 = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>, <span class="number">3.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">3.0</span>];
+        <span class="kw">let </span>inp2 = [<span class="number">4.0</span>, <span class="number">5.0</span>, <span class="number">6.0</span>, <span class="number">6.0</span>, <span class="number">5.0</span>, <span class="number">4.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>, <span class="number">5.0</span>];
+        <span class="kw">let </span>expected = [<span class="number">28.0</span>, <span class="number">33.0</span>, <span class="number">29.0</span>, <span class="number">28.0</span>, <span class="number">31.0</span>, <span class="number">31.0</span>, <span class="number">26.0</span>, <span class="number">33.0</span>, <span class="number">31.0</span>];
 
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">multiply_3x3</span>(<span class="ident">inp1</span>, <span class="ident">inp2</span>);
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
+        <span class="kw">let </span>computed = multiply_3x3(inp1, inp2);
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">matrix_multiply_xyz</span>() {
-        <span class="kw">let</span> <span class="ident">inp1</span> <span class="op">=</span> [<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.3</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.3</span>];
-        <span class="kw">let</span> <span class="ident">inp2</span> <span class="op">=</span> <span class="ident">Xyz::new</span>(<span class="number">0.4</span>, <span class="number">0.6</span>, <span class="number">0.8</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>matrix_multiply_xyz() {
+        <span class="kw">let </span>inp1 = [<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.3</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.3</span>];
+        <span class="kw">let </span>inp2 = Xyz::new(<span class="number">0.4</span>, <span class="number">0.6</span>, <span class="number">0.8</span>);
 
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">Xyz::new</span>(<span class="number">0.4</span>, <span class="number">0.32</span>, <span class="number">0.38</span>);
+        <span class="kw">let </span>expected = Xyz::new(<span class="number">0.4</span>, <span class="number">0.32</span>, <span class="number">0.38</span>);
 
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">multiply_xyz</span>(<span class="ident">inp1</span>, <span class="ident">inp2</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected</span>, <span class="ident">computed</span>)
+        <span class="kw">let </span>computed = multiply_xyz(inp1, inp2);
+        <span class="macro">assert_relative_eq!</span>(expected, computed)
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">matrix_inverse_check_1</span>() {
-        <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">f64</span>; <span class="number">9</span>] <span class="op">=</span> [<span class="number">3.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>, <span class="op">-</span><span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>matrix_inverse_check_1() {
+        <span class="kw">let </span>input: [f64; <span class="number">9</span>] = [<span class="number">3.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>, -<span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>];
 
-        <span class="kw">let</span> <span class="ident">expected</span>: [<span class="ident">f64</span>; <span class="number">9</span>] <span class="op">=</span> [<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.0</span>, <span class="op">-</span><span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">1.0</span>, <span class="number">0.2</span>, <span class="op">-</span><span class="number">0.3</span>, <span class="number">0.0</span>];
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">matrix_inverse</span>(<span class="ident">input</span>);
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
+        <span class="kw">let </span>expected: [f64; <span class="number">9</span>] = [<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.0</span>, -<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">1.0</span>, <span class="number">0.2</span>, -<span class="number">0.3</span>, <span class="number">0.0</span>];
+        <span class="kw">let </span>computed = matrix_inverse(input);
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
         }
     }
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">matrix_inverse_check_2</span>() {
-        <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">f64</span>; <span class="number">9</span>] <span class="op">=</span> [<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>matrix_inverse_check_2() {
+        <span class="kw">let </span>input: [f64; <span class="number">9</span>] = [<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>];
 
-        <span class="kw">let</span> <span class="ident">expected</span>: [<span class="ident">f64</span>; <span class="number">9</span>] <span class="op">=</span> [<span class="op">-</span><span class="number">1.0</span>, <span class="op">-</span><span class="number">1.0</span>, <span class="number">2.0</span>, <span class="op">-</span><span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, <span class="op">-</span><span class="number">2.0</span>];
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">matrix_inverse</span>(<span class="ident">input</span>);
-        <span class="kw">for</span> (<span class="ident">t1</span>, <span class="ident">t2</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">t1</span>, <span class="ident">t2</span>);
+        <span class="kw">let </span>expected: [f64; <span class="number">9</span>] = [-<span class="number">1.0</span>, -<span class="number">1.0</span>, <span class="number">2.0</span>, -<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.0</span>, -<span class="number">2.0</span>];
+        <span class="kw">let </span>computed = matrix_inverse(input);
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
         }
     }
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
-    <span class="kw">fn</span> <span class="ident">matrix_inverse_panic</span>() {
-        <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">f64</span>; <span class="number">9</span>] <span class="op">=</span> [<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="op">-</span><span class="number">4.0</span>, <span class="number">6.0</span>, <span class="number">1.0</span>];
-        <span class="ident">matrix_inverse</span>(<span class="ident">input</span>);
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>matrix_inverse_panic() {
+        <span class="kw">let </span>input: [f64; <span class="number">9</span>] = [<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, -<span class="number">4.0</span>, <span class="number">6.0</span>, <span class="number">1.0</span>];
+        matrix_inverse(input);
     }
 
-    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">d65_rgb_conversion_matrix</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> [
+    <span class="attribute">#[rustfmt::skip]
+    #[test]
+    </span><span class="kw">fn </span>d65_rgb_conversion_matrix() {
+        <span class="kw">let </span>expected = [
             <span class="number">0.4124564</span>, <span class="number">0.3575761</span>, <span class="number">0.1804375</span>,
             <span class="number">0.2126729</span>, <span class="number">0.7151522</span>, <span class="number">0.0721750</span>,
-            <span class="number">0.0193339</span>, <span class="number">0.1191920</span>, <span class="number">0.9503041</span>
-        ];
-        <span class="kw">let</span> <span class="ident">computed</span> <span class="op">=</span> <span class="ident">rgb_to_xyz_matrix</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">f64</span><span class="op">&gt;</span>();
-        <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">c</span>) <span class="kw">in</span> <span class="ident">expected</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">computed</span>.<span class="ident">iter</span>()) {
-            <span class="macro">assert_relative_eq!</span>(<span class="ident">e</span>, <span class="ident">c</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>)
+            <span class="number">0.0193339</span>, <span class="number">0.1191920</span>, <span class="number">0.9503041
+        </span>];
+        <span class="kw">let </span>computed = rgb_to_xyz_matrix::&lt;Srgb, f64&gt;();
+        <span class="kw">for </span>(e, c) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(e, c, epsilon = <span class="number">0.000001</span>)
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">d65_to_d50</span>() {
-        <span class="kw">let</span> <span class="ident">input</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
-        <span class="kw">let</span> <span class="ident">expected</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span>(<span class="ident">Srgb</span>, <span class="ident">D50</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rgb::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>d65_to_d50() {
+        <span class="kw">let </span>input: Rgb&lt;Linear&lt;Srgb&gt;&gt; = Rgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
+        <span class="kw">let </span>expected: Rgb&lt;Linear&lt;(Srgb, D50)&gt;&gt; = Rgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
 
-        <span class="kw">let</span> <span class="ident">computed</span>: <span class="ident">Rgb</span><span class="op">&lt;</span><span class="ident">Linear</span><span class="op">&lt;</span>(<span class="ident">Srgb</span>, <span class="ident">D50</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">adapt_into</span>();
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">expected</span>, <span class="ident">computed</span>, <span class="ident">epsilon</span> <span class="op">=</span> <span class="number">0.000001</span>);
+        <span class="kw">let </span>computed: Rgb&lt;Linear&lt;(Srgb, D50)&gt;&gt; = input.adapt_into();
+        <span class="macro">assert_relative_eq!</span>(expected, computed, epsilon = <span class="number">0.000001</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

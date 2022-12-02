@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha/alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha/alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -894,901 +894,901 @@
 <span id="894">894</span>
 <span id="895">895</span>
 <span id="896">896</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">fmt</span>,
-    <span class="ident">ops</span>::{
-        <span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">BitAnd</span>, <span class="ident">Deref</span>, <span class="ident">DerefMut</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>,
+</pre><pre class="rust"><code><span class="kw">use </span>core::{
+    fmt,
+    ops::{
+        Add, AddAssign, BitAnd, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign,
     },
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">rand</span>::{
-    <span class="ident">distributions</span>::{
-        <span class="ident">uniform</span>::{<span class="ident">SampleBorrow</span>, <span class="ident">SampleUniform</span>, <span class="ident">Uniform</span>, <span class="ident">UniformSampler</span>},
-        <span class="ident">Distribution</span>, <span class="ident">Standard</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">use </span>rand::{
+    distributions::{
+        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, Standard,
     },
-    <span class="ident">Rng</span>,
+    Rng,
 };
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">blend</span>::{<span class="ident">PreAlpha</span>, <span class="ident">Premultiply</span>},
-    <span class="ident">bool_mask::HasBoolMask</span>,
-    <span class="ident">cast::ArrayCast</span>,
-    <span class="ident">clamp</span>, <span class="ident">clamp_assign</span>,
-    <span class="ident">convert</span>::{<span class="ident">FromColorUnclamped</span>, <span class="ident">IntoColorUnclamped</span>},
-    <span class="ident">num</span>::{<span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">PartialCmp</span>, <span class="ident">Zero</span>},
-    <span class="ident">stimulus::Stimulus</span>,
-    <span class="ident">ArrayExt</span>, <span class="ident">Clamp</span>, <span class="ident">ClampAssign</span>, <span class="ident">GetHue</span>, <span class="ident">IsWithinBounds</span>, <span class="ident">Lighten</span>, <span class="ident">LightenAssign</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>,
-    <span class="ident">NextArray</span>, <span class="ident">Saturate</span>, <span class="ident">SaturateAssign</span>, <span class="ident">SetHue</span>, <span class="ident">ShiftHue</span>, <span class="ident">ShiftHueAssign</span>, <span class="ident">WithAlpha</span>, <span class="ident">WithHue</span>,
+<span class="kw">use crate</span>::{
+    blend::{PreAlpha, Premultiply},
+    bool_mask::HasBoolMask,
+    cast::ArrayCast,
+    clamp, clamp_assign,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{<span class="self">self</span>, Arithmetics, One, PartialCmp, Zero},
+    stimulus::Stimulus,
+    ArrayExt, Clamp, ClampAssign, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    NextArray, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
 };
 
-<span class="doccomment">/// An alpha component wrapper for colors.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The color.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">serde</span>(<span class="ident">flatten</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">color</span>: <span class="ident">C</span>,
+<span class="doccomment">/// An alpha component wrapper for colors.
+</span><span class="attribute">#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[repr(C)]
+</span><span class="kw">pub struct </span>Alpha&lt;C, T&gt; {
+    <span class="doccomment">/// The color.
+    </span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(flatten))]
+    </span><span class="kw">pub </span>color: C,
 
-    <span class="doccomment">/// The transparency component. 0.0 is fully transparent and 1.0 is fully</span>
-    <span class="doccomment">/// opaque.</span>
-    <span class="kw">pub</span> <span class="ident">alpha</span>: <span class="ident">T</span>,
+    <span class="doccomment">/// The transparency component. 0.0 is fully transparent and 1.0 is fully
+    /// opaque.
+    </span><span class="kw">pub </span>alpha: T,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Alpha mask the color by its transparency.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">premultiply</span>(<span class="self">self</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="ident">PreAlpha::new</span>(<span class="self">self</span>.<span class="ident">color</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
+<span class="kw">impl</span>&lt;C: Premultiply&gt; Alpha&lt;C, C::Scalar&gt; {
+    <span class="doccomment">/// Alpha mask the color by its transparency.
+    </span><span class="kw">pub fn </span>premultiply(<span class="self">self</span>) -&gt; PreAlpha&lt;C&gt; {
+        PreAlpha::new(<span class="self">self</span>.color, <span class="self">self</span>.alpha)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>: <span class="ident">Stimulus</span><span class="op">&gt;</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Return the `alpha` value minimum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">min_alpha</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::zero</span>()
+<span class="kw">impl</span>&lt;C, T: Stimulus&gt; Alpha&lt;C, T&gt; {
+    <span class="doccomment">/// Return the `alpha` value minimum.
+    </span><span class="kw">pub fn </span>min_alpha() -&gt; T {
+        T::zero()
     }
 
-    <span class="doccomment">/// Return the `alpha` value maximum.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_alpha</span>() -&gt; <span class="ident">T</span> {
-        <span class="ident">T::max_intensity</span>()
+    <span class="doccomment">/// Return the `alpha` value maximum.
+    </span><span class="kw">pub fn </span>max_alpha() -&gt; T {
+        T::max_intensity()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">PartialEq</span>,
-    <span class="ident">C</span>: <span class="ident">PartialEq</span>,
+<span class="kw">impl</span>&lt;C, T&gt; PartialEq <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: PartialEq,
+    C: PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">color</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">alpha</span>
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.color == other.color &amp;&amp; <span class="self">self</span>.alpha == other.alpha
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Eq</span>,
-    <span class="ident">C</span>: <span class="ident">Eq</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Eq <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Eq,
+    C: Eq,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C1</span>: <span class="ident">WithAlpha</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">C2</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">FromColorUnclamped</span><span class="op">&lt;</span><span class="ident">C1</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C2</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C1::Color</span>: <span class="ident">IntoColorUnclamped</span><span class="op">&lt;</span><span class="ident">C2</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C1: WithAlpha&lt;T&gt;, C2, T&gt; FromColorUnclamped&lt;C1&gt; <span class="kw">for </span>Alpha&lt;C2, T&gt;
+<span class="kw">where
+    </span>C1::Color: IntoColorUnclamped&lt;C2&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">from_color_unclamped</span>(<span class="ident">other</span>: <span class="ident">C1</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">color</span>, <span class="ident">alpha</span>) <span class="op">=</span> <span class="ident">other</span>.<span class="ident">split</span>();
+    <span class="kw">fn </span>from_color_unclamped(other: C1) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(color, alpha) = other.split();
 
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">color</span>.<span class="ident">into_color_unclamped</span>(),
-            <span class="ident">alpha</span>,
+        Alpha {
+            color: color.into_color_unclamped(),
+            alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">WithAlpha</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">A</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Color</span> <span class="op">=</span> <span class="ident">C</span>;
-    <span class="kw">type</span> <span class="ident">WithAlpha</span> <span class="op">=</span> <span class="self">Self</span>;
+<span class="kw">impl</span>&lt;C, A&gt; WithAlpha&lt;A&gt; <span class="kw">for </span>Alpha&lt;C, A&gt; {
+    <span class="kw">type </span>Color = C;
+    <span class="kw">type </span>WithAlpha = <span class="self">Self</span>;
 
-    <span class="kw">fn</span> <span class="ident">with_alpha</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">alpha</span>: <span class="ident">A</span>) -&gt; <span class="ident"><span class="self">Self</span>::WithAlpha</span> {
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="ident">alpha</span>;
-        <span class="self">self</span>
+    <span class="kw">fn </span>with_alpha(<span class="kw-2">mut </span><span class="self">self</span>, alpha: A) -&gt; <span class="self">Self</span>::WithAlpha {
+        <span class="self">self</span>.alpha = alpha;
+        <span class="self">self
+    </span>}
+
+    <span class="kw">fn </span>without_alpha(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Color {
+        <span class="self">self</span>.color
     }
 
-    <span class="kw">fn</span> <span class="ident">without_alpha</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Color</span> {
-        <span class="self">self</span>.<span class="ident">color</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>) -&gt; (<span class="ident"><span class="self">Self</span>::Color</span>, <span class="ident">A</span>) {
-        (<span class="self">self</span>.<span class="ident">color</span>, <span class="self">self</span>.<span class="ident">alpha</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">C</span>;
-
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">C</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">color</span>
+    <span class="kw">fn </span>split(<span class="self">self</span>) -&gt; (<span class="self">Self</span>::Color, A) {
+        (<span class="self">self</span>.color, <span class="self">self</span>.alpha)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">C</span> {
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">color</span>
+<span class="kw">impl</span>&lt;C, T&gt; Deref <span class="kw">for </span>Alpha&lt;C, T&gt; {
+    <span class="kw">type </span>Target = C;
+
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.color
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, T&gt; DerefMut <span class="kw">for </span>Alpha&lt;C, T&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>C {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.color
+    }
+}
+
+<span class="kw">impl</span>&lt;C&gt; Mix <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt;
+<span class="kw">where
+    </span>C: Mix,
+    C::Scalar: Zero + One + num::Clamp + Arithmetics + Clone,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
+    <span class="kw">type </span>Scalar = C::Scalar;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">C::Scalar::zero</span>(), <span class="ident">C::Scalar::one</span>());
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>mix(<span class="kw-2">mut </span><span class="self">self</span>, other: <span class="self">Self</span>, factor: C::Scalar) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
 
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">mix</span>(<span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">factor</span>.<span class="ident">clone</span>());
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">alpha</span>);
+        <span class="self">self</span>.color = <span class="self">self</span>.color.mix(other.color, factor.clone());
+        <span class="self">self</span>.alpha = <span class="self">self</span>.alpha.clone() + factor * (other.alpha - <span class="self">self</span>.alpha);
 
-        <span class="self">self</span>
-    }
+        <span class="self">self
+    </span>}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">MixAssign</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C&gt; MixAssign <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt;
+<span class="kw">where
+    </span>C: MixAssign,
+    C::Scalar: Zero + One + num::Clamp + Arithmetics + AddAssign + Clone,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
+    <span class="kw">type </span>Scalar = C::Scalar;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">C::Scalar::zero</span>(), <span class="ident">C::Scalar::one</span>());
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>mix_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>, factor: C::Scalar) {
+        <span class="kw">let </span>factor = clamp(factor, C::Scalar::zero(), C::Scalar::one());
 
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">mix_assign</span>(<span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">factor</span>.<span class="ident">clone</span>());
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>());
+        <span class="self">self</span>.color.mix_assign(other.color, factor.clone());
+        <span class="self">self</span>.alpha += factor * (other.alpha - <span class="self">self</span>.alpha.clone());
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Lighten</span><span class="op">&gt;</span> <span class="ident">Lighten</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
+<span class="kw">impl</span>&lt;C: Lighten&gt; Lighten <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt; {
+    <span class="kw">type </span>Scalar = C::Scalar;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">lighten</span>(<span class="ident">factor</span>),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten(<span class="self">self</span>, factor: C::Scalar) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: <span class="self">self</span>.color.lighten(factor),
+            alpha: <span class="self">self</span>.alpha,
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">lighten_fixed</span>(<span class="ident">amount</span>),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LightenAssign</span><span class="op">&gt;</span> <span class="ident">LightenAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">lighten_assign</span>(<span class="ident">factor</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lighten_fixed_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">C::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">lighten_fixed_assign</span>(<span class="ident">amount</span>);
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">GetHue</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">GetHue</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Hue</span> <span class="op">=</span> <span class="ident">C::Hue</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">get_hue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">C::Hue</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">get_hue</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="ident">H</span><span class="op">&gt;</span> <span class="ident">WithHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">WithHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">with_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">with_hue</span>(<span class="ident">hue</span>);
-        <span class="self">self</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>, <span class="ident">H</span><span class="op">&gt;</span> <span class="ident">SetHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">SetHue</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">set_hue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">hue</span>: <span class="ident">H</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">set_hue</span>(<span class="ident">hue</span>);
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ShiftHue</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ShiftHue</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">shift_hue</span>(<span class="ident">amount</span>);
-        <span class="self">self</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ShiftHueAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ShiftHueAssign</span>,
-{
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">shift_hue_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident"><span class="self">Self</span>::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">shift_hue_assign</span>(<span class="ident">amount</span>);
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Saturate</span><span class="op">&gt;</span> <span class="ident">Saturate</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate</span>(<span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturate</span>(<span class="ident">factor</span>),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>,
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_fixed</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturate_fixed</span>(<span class="ident">amount</span>),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten_fixed(<span class="self">self</span>, amount: C::Scalar) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: <span class="self">self</span>.color.lighten_fixed(amount),
+            alpha: <span class="self">self</span>.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">SaturateAssign</span><span class="op">&gt;</span> <span class="ident">SaturateAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">C::Scalar</span>;
+<span class="kw">impl</span>&lt;C: LightenAssign&gt; LightenAssign <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt; {
+    <span class="kw">type </span>Scalar = C::Scalar;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">factor</span>: <span class="ident">C::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturate_assign</span>(<span class="ident">factor</span>);
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, factor: C::Scalar) {
+        <span class="self">self</span>.color.lighten_assign(factor);
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">saturate_fixed_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">C::Scalar</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">saturate_fixed_assign</span>(<span class="ident">amount</span>);
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IsWithinBounds</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">IsWithinBounds</span>,
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">PartialCmp</span> <span class="op">+</span> <span class="ident">IsWithinBounds</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">C::Mask</span><span class="op">&gt;</span>,
-    <span class="ident">C::Mask</span>: <span class="ident">BitAnd</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">C::Mask</span><span class="op">&gt;</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_within_bounds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">C::Mask</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">is_within_bounds</span>()
-            <span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">gt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::min_alpha</span>())
-            <span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">lt_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::max_alpha</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>lighten_fixed_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amount: C::Scalar) {
+        <span class="self">self</span>.color.lighten_fixed_assign(amount);
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clamp</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Clamp</span>,
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">num::Clamp</span>,
+<span class="kw">impl</span>&lt;C: GetHue, T&gt; GetHue <span class="kw">for </span>Alpha&lt;C, T&gt; {
+    <span class="kw">type </span>Hue = C::Hue;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>get_hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; C::Hue {
+        <span class="self">self</span>.color.get_hue()
+    }
+}
+
+<span class="kw">impl</span>&lt;C, T, H&gt; WithHue&lt;H&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: WithHue&lt;H&gt;,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">clamp</span>(),
-            <span class="ident">alpha</span>: <span class="ident">clamp</span>(<span class="self">self</span>.<span class="ident">alpha</span>, <span class="ident"><span class="self">Self</span>::min_alpha</span>(), <span class="ident"><span class="self">Self</span>::max_alpha</span>()),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>with_hue(<span class="kw-2">mut </span><span class="self">self</span>, hue: H) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.color = <span class="self">self</span>.color.with_hue(hue);
+        <span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;C, T, H&gt; SetHue&lt;H&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: SetHue&lt;H&gt;,
+{
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>set_hue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hue: H) {
+        <span class="self">self</span>.color.set_hue(hue);
+    }
+}
+
+<span class="kw">impl</span>&lt;C, T&gt; ShiftHue <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: ShiftHue,
+{
+    <span class="kw">type </span>Scalar = C::Scalar;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>shift_hue(<span class="kw-2">mut </span><span class="self">self</span>, amount: <span class="self">Self</span>::Scalar) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.color = <span class="self">self</span>.color.shift_hue(amount);
+        <span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;C, T&gt; ShiftHueAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: ShiftHueAssign,
+{
+    <span class="kw">type </span>Scalar = C::Scalar;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>shift_hue_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amount: <span class="self">Self</span>::Scalar) {
+        <span class="self">self</span>.color.shift_hue_assign(amount);
+    }
+}
+
+<span class="kw">impl</span>&lt;C: Saturate&gt; Saturate <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt; {
+    <span class="kw">type </span>Scalar = C::Scalar;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>saturate(<span class="self">self</span>, factor: C::Scalar) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: <span class="self">self</span>.color.saturate(factor),
+            alpha: <span class="self">self</span>.alpha,
+        }
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>saturate_fixed(<span class="self">self</span>, amount: C::Scalar) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: <span class="self">self</span>.color.saturate_fixed(amount),
+            alpha: <span class="self">self</span>.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ClampAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ClampAssign</span>,
-    <span class="ident">T</span>: <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">num::ClampAssign</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">clamp_assign</span>();
-        <span class="ident">clamp_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">alpha</span>, <span class="ident"><span class="self">Self</span>::min_alpha</span>(), <span class="ident"><span class="self">Self</span>::max_alpha</span>());
+<span class="kw">impl</span>&lt;C: SaturateAssign&gt; SaturateAssign <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt; {
+    <span class="kw">type </span>Scalar = C::Scalar;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>saturate_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, factor: C::Scalar) {
+        <span class="self">self</span>.color.saturate_assign(factor);
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>saturate_fixed_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amount: C::Scalar) {
+        <span class="self">self</span>.color.saturate_fixed_assign(amount);
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">ArrayCast</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">ArrayCast</span><span class="op">&gt;</span><span class="ident">::Array</span> <span class="kw">as</span> <span class="ident">ArrayExt</span><span class="op">&gt;</span><span class="ident">::Item</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span>,
-    <span class="ident">C::Array</span>: <span class="ident">NextArray</span>,
+<span class="kw">impl</span>&lt;C, T&gt; IsWithinBounds <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: IsWithinBounds,
+    T: Stimulus + PartialCmp + IsWithinBounds&lt;Mask = C::Mask&gt;,
+    C::Mask: BitAnd&lt;Output = C::Mask&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Array</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">C::Array</span> <span class="kw">as</span> <span class="ident">NextArray</span><span class="op">&gt;</span><span class="ident">::Next</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>is_within_bounds(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; C::Mask {
+        <span class="self">self</span>.color.is_within_bounds()
+            &amp; <span class="self">self</span>.alpha.gt_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::min_alpha())
+            &amp; <span class="self">self</span>.alpha.lt_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::max_alpha())
+    }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">HasBoolMask</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">HasBoolMask</span>,
-    <span class="ident">T</span>: <span class="ident">HasBoolMask</span><span class="op">&lt;</span><span class="ident">Mask</span> <span class="op">=</span> <span class="ident">C::Mask</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Clamp <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Clamp,
+    T: Stimulus + num::Clamp,
 {
-    <span class="kw">type</span> <span class="ident">Mask</span> <span class="op">=</span> <span class="ident">C::Mask</span>;
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Default</span>, <span class="ident">T</span>: <span class="ident">Stimulus</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">C::default</span>(),
-            <span class="ident">alpha</span>: <span class="ident"><span class="self">Self</span>::max_alpha</span>(),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        Alpha {
+            color: <span class="self">self</span>.color.clamp(),
+            alpha: clamp(<span class="self">self</span>.alpha, <span class="self">Self</span>::min_alpha(), <span class="self">Self</span>::max_alpha()),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">AbsDiffEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, T&gt; ClampAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: ClampAssign,
+    T: Stimulus + num::ClampAssign,
 {
-    <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
-
-    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_epsilon</span>()
-    }
-
-    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">epsilon</span>: <span class="ident">T::Epsilon</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.color.clamp_assign();
+        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alpha, <span class="self">Self</span>::min_alpha(), <span class="self">Self</span>::max_alpha());
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">RelativeEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">RelativeEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="kw">unsafe impl</span>&lt;C&gt; ArrayCast <span class="kw">for </span>Alpha&lt;C, &lt;&lt;C <span class="kw">as </span>ArrayCast&gt;::Array <span class="kw">as </span>ArrayExt&gt;::Item&gt;
+<span class="kw">where
+    </span>C: ArrayCast,
+    C::Array: NextArray,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_max_relative</span>()
+    <span class="kw">type </span>Array = &lt;C::Array <span class="kw">as </span>NextArray&gt;::Next;
+}
+
+<span class="kw">impl</span>&lt;C, T&gt; HasBoolMask <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: HasBoolMask,
+    T: HasBoolMask&lt;Mask = C::Mask&gt;,
+{
+    <span class="kw">type </span>Mask = C::Mask;
+}
+
+<span class="kw">impl</span>&lt;C: Default, T: Stimulus&gt; Default <span class="kw">for </span>Alpha&lt;C, T&gt; {
+    <span class="kw">fn </span>default() -&gt; Alpha&lt;C, T&gt; {
+        Alpha {
+            color: C::default(),
+            alpha: <span class="self">Self</span>::max_alpha(),
+        }
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; AbsDiffEq <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: AbsDiffEq&lt;Epsilon = T::Epsilon&gt;,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
+{
+    <span class="kw">type </span>Epsilon = T::Epsilon;
+
+    <span class="kw">fn </span>default_epsilon() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_epsilon()
     }
 
-    <span class="kw">fn</span> <span class="ident">relative_eq</span>(
+    <span class="kw">fn </span>abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: T::Epsilon) -&gt; bool {
+        <span class="self">self</span>.color.abs_diff_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone())
+            &amp;&amp; <span class="self">self</span>.alpha.abs_diff_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon)
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; RelativeEq <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: RelativeEq&lt;Epsilon = T::Epsilon&gt;,
+    T: RelativeEq,
+    T::Epsilon: Clone,
+{
+    <span class="kw">fn </span>default_max_relative() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_max_relative()
+    }
+
+    <span class="kw">fn </span>relative_eq(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-        <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-        <span class="ident">max_relative</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-    ) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>
-            .<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>, <span class="ident">max_relative</span>)
+        other: <span class="kw-2">&amp;</span>Alpha&lt;C, T&gt;,
+        epsilon: <span class="self">Self</span>::Epsilon,
+        max_relative: <span class="self">Self</span>::Epsilon,
+    ) -&gt; bool {
+        <span class="self">self</span>.color
+            .relative_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone(), max_relative.clone())
+            &amp;&amp; <span class="self">self</span>.alpha.relative_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon, max_relative)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">UlpsEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">UlpsEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; UlpsEq <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: UlpsEq&lt;Epsilon = T::Epsilon&gt;,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() -&gt; <span class="ident">u32</span> {
-        <span class="ident">T::default_max_ulps</span>()
+    <span class="kw">fn </span>default_max_ulps() -&gt; u32 {
+        T::default_max_ulps()
     }
 
-    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>)
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>)
+    <span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Alpha&lt;C, T&gt;, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
+        <span class="self">self</span>.color.ulps_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone(), max_ulps)
+            &amp;&amp; <span class="self">self</span>.alpha.ulps_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon, max_ulps)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Add</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Add</span>,
-    <span class="ident">T</span>: <span class="ident">Add</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Add <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Add,
+    T: Add,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Add&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">alpha</span>,
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: Alpha&lt;C, T&gt;) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color + other.color,
+            alpha: <span class="self">self</span>.alpha + other.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Add</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; Add&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Add + Clone,
+    C: Add&lt;T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Add&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">clone</span>(),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span> <span class="ident">c</span>,
+    <span class="kw">fn </span>add(<span class="self">self</span>, c: T) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color + c.clone(),
+            alpha: <span class="self">self</span>.alpha + c,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AddAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">AddAssign</span>,
-    <span class="ident">T</span>: <span class="ident">AddAssign</span>,
+<span class="kw">impl</span>&lt;C, T&gt; AddAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: AddAssign,
+    T: AddAssign,
 {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">color</span>;
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">alpha</span>;
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Alpha&lt;C, T&gt;) {
+        <span class="self">self</span>.color += other.color;
+        <span class="self">self</span>.alpha += other.alpha;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; AddAssign&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: AddAssign + Clone,
+    C: AddAssign&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span><span class="op">=</span> <span class="ident">c</span>;
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: T) {
+        <span class="self">self</span>.color += c.clone();
+        <span class="self">self</span>.alpha += c;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Sub</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Sub</span>,
-    <span class="ident">T</span>: <span class="ident">Sub</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Sub <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Sub,
+    T: Sub,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Sub</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Sub&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">-</span> <span class="ident">other</span>.<span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">other</span>.<span class="ident">alpha</span>,
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: Alpha&lt;C, T&gt;) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color - other.color,
+            alpha: <span class="self">self</span>.alpha - other.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Sub</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; Sub&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Sub + Clone,
+    C: Sub&lt;T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Sub</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Sub&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">-</span> <span class="ident">c</span>.<span class="ident">clone</span>(),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="ident">c</span>,
+    <span class="kw">fn </span>sub(<span class="self">self</span>, c: T) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color - c.clone(),
+            alpha: <span class="self">self</span>.alpha - c,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SubAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">SubAssign</span>,
-    <span class="ident">T</span>: <span class="ident">SubAssign</span>,
+<span class="kw">impl</span>&lt;C, T&gt; SubAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: SubAssign,
+    T: SubAssign,
 {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">color</span>;
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">-</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">alpha</span>;
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Alpha&lt;C, T&gt;) {
+        <span class="self">self</span>.color -= other.color;
+        <span class="self">self</span>.alpha -= other.alpha;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">SubAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; SubAssign&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: SubAssign + Clone,
+    C: SubAssign&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">-</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">-</span><span class="op">=</span> <span class="ident">c</span>;
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: T) {
+        <span class="self">self</span>.color -= c.clone();
+        <span class="self">self</span>.alpha -= c;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mul</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mul</span>,
-    <span class="ident">T</span>: <span class="ident">Mul</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Mul <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Mul,
+    T: Mul,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Mul</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Mul&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">alpha</span>,
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: Alpha&lt;C, T&gt;) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color * other.color,
+            alpha: <span class="self">self</span>.alpha * other.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Mul</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; Mul&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Mul + Clone,
+    C: Mul&lt;T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Mul</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Mul&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">*</span> <span class="ident">c</span>.<span class="ident">clone</span>(),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">*</span> <span class="ident">c</span>,
+    <span class="kw">fn </span>mul(<span class="self">self</span>, c: T) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color * c.clone(),
+            alpha: <span class="self">self</span>.alpha * c,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MulAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">MulAssign</span>,
-    <span class="ident">T</span>: <span class="ident">MulAssign</span>,
+<span class="kw">impl</span>&lt;C, T&gt; MulAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: MulAssign,
+    T: MulAssign,
 {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">color</span>;
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">alpha</span>;
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Alpha&lt;C, T&gt;) {
+        <span class="self">self</span>.color <span class="kw-2">*</span>= other.color;
+        <span class="self">self</span>.alpha <span class="kw-2">*</span>= other.alpha;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">MulAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; MulAssign&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: MulAssign + Clone,
+    C: MulAssign&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="kw-2">*</span><span class="op">=</span> <span class="ident">c</span>;
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: T) {
+        <span class="self">self</span>.color <span class="kw-2">*</span>= c.clone();
+        <span class="self">self</span>.alpha <span class="kw-2">*</span>= c;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Div</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Div</span>,
-    <span class="ident">T</span>: <span class="ident">Div</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Div <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: Div,
+    T: Div,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Div</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Div&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">/</span> <span class="ident">other</span>.<span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">/</span> <span class="ident">other</span>.<span class="ident">alpha</span>,
+    <span class="kw">fn </span>div(<span class="self">self</span>, other: Alpha&lt;C, T&gt;) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color / other.color,
+            alpha: <span class="self">self</span>.alpha / other.alpha,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Div</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; Div&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Div + Clone,
+    C: Div&lt;T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C::Output</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Div</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = Alpha&lt;C::Output, &lt;T <span class="kw">as </span>Div&gt;::Output&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span> <span class="op">/</span> <span class="ident">c</span>.<span class="ident">clone</span>(),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">/</span> <span class="ident">c</span>,
+    <span class="kw">fn </span>div(<span class="self">self</span>, c: T) -&gt; <span class="self">Self</span>::Output {
+        Alpha {
+            color: <span class="self">self</span>.color / c.clone(),
+            alpha: <span class="self">self</span>.alpha / c,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DivAssign</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">DivAssign</span>,
-    <span class="ident">T</span>: <span class="ident">DivAssign</span>,
+<span class="kw">impl</span>&lt;C, T&gt; DivAssign <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: DivAssign,
+    T: DivAssign,
 {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">/</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">color</span>;
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">/</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">alpha</span>;
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Alpha&lt;C, T&gt;) {
+        <span class="self">self</span>.color /= other.color;
+        <span class="self">self</span>.alpha /= other.alpha;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">DivAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
-    <span class="ident">C</span>: <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;T, C&gt; DivAssign&lt;T&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: DivAssign + Clone,
+    C: DivAssign&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">/</span><span class="op">=</span> <span class="ident">c</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">/</span><span class="op">=</span> <span class="ident">c</span>;
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: T) {
+        <span class="self">self</span>.color /= c.clone();
+        <span class="self">self</span>.alpha /= c;
     }
 }
 
-<span class="macro">impl_array_casts!</span>([<span class="ident">C</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span>] <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>, [<span class="ident">T</span>; <span class="ident">N</span>], <span class="kw">where</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span>);
+<span class="macro">impl_array_casts!</span>([C, T, <span class="kw">const </span>N: usize] Alpha&lt;C, T&gt;, [T; N], <span class="kw">where </span>Alpha&lt;C, T&gt;: ArrayCast&lt;Array = [T; N]&gt;);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>: <span class="ident">Stimulus</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="ident"><span class="self">Self</span>::max_alpha</span>(),
+<span class="kw">impl</span>&lt;C, T: Stimulus&gt; From&lt;C&gt; <span class="kw">for </span>Alpha&lt;C, T&gt; {
+    <span class="kw">fn </span>from(color: C) -&gt; Alpha&lt;C, T&gt; {
+        Alpha {
+            color,
+            alpha: <span class="self">Self</span>::max_alpha(),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt::LowerHex</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">fmt::LowerHex</span>,
-    <span class="ident">C</span>: <span class="ident">fmt::LowerHex</span>,
+<span class="kw">impl</span>&lt;C, T&gt; fmt::LowerHex <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: fmt::LowerHex,
+    C: fmt::LowerHex,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">width</span>().<span class="ident">unwrap_or</span>(<span class="ident">::core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="number">2</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
-            <span class="ident">f</span>,
+            f,
             <span class="string">&quot;{:0width$x}{:0width$x}&quot;</span>,
-            <span class="self">self</span>.<span class="ident">color</span>,
-            <span class="self">self</span>.<span class="ident">alpha</span>,
-            <span class="ident">width</span> <span class="op">=</span> <span class="ident">size</span>
+            <span class="self">self</span>.color,
+            <span class="self">self</span>.alpha,
+            width = size
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt::UpperHex</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">fmt::UpperHex</span>,
-    <span class="ident">C</span>: <span class="ident">fmt::UpperHex</span>,
+<span class="kw">impl</span>&lt;C, T&gt; fmt::UpperHex <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: fmt::UpperHex,
+    C: fmt::UpperHex,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">width</span>().<span class="ident">unwrap_or</span>(<span class="ident">::core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="number">2</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
-            <span class="ident">f</span>,
+            f,
             <span class="string">&quot;{:0width$X}{:0width$X}&quot;</span>,
-            <span class="self">self</span>.<span class="ident">color</span>,
-            <span class="self">self</span>.<span class="ident">alpha</span>,
-            <span class="ident">width</span> <span class="op">=</span> <span class="ident">size</span>
+            <span class="self">self</span>.color,
+            <span class="self">self</span>.alpha,
+            width = size
         )
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span>
-<span class="kw">where</span>
-    <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; Distribution&lt;Alpha&lt;C, T&gt;&gt; <span class="kw">for </span>Standard
+<span class="kw">where
+    </span>Standard: Distribution&lt;C&gt; + Distribution&lt;T&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
-            <span class="ident">alpha</span>: <span class="ident">rng</span>.<span class="ident">gen</span>(),
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Alpha&lt;C, T&gt; {
+        Alpha {
+            color: rng.gen(),
+            alpha: rng.gen(),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UniformAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">SampleUniform</span>,
-    <span class="ident">C</span>: <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">pub struct </span>UniformAlpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: SampleUniform,
+    C: SampleUniform,
 {
-    <span class="ident">color</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    <span class="ident">alpha</span>: <span class="ident">Uniform</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    color: Uniform&lt;C&gt;,
+    alpha: Uniform&lt;T&gt;,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SampleUniform</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">C</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; SampleUniform <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Clone + SampleUniform,
+    C: Clone + SampleUniform,
 {
-    <span class="kw">type</span> <span class="ident">Sampler</span> <span class="op">=</span> <span class="ident">UniformAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Sampler = UniformAlpha&lt;C, T&gt;;
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UniformSampler</span> <span class="kw">for</span> <span class="ident">UniformAlpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
-    <span class="ident">C</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">SampleUniform</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; UniformSampler <span class="kw">for </span>UniformAlpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: Clone + SampleUniform,
+    C: Clone + SampleUniform,
 {
-    <span class="kw">type</span> <span class="ident">X</span> <span class="op">=</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>X = Alpha&lt;C, T&gt;;
 
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let </span>low = low_b.borrow().clone();
+        <span class="kw">let </span>high = high_b.borrow().clone();
 
-        <span class="ident">UniformAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">color</span>, <span class="ident">high</span>.<span class="ident">color</span>),
-            <span class="ident">alpha</span>: <span class="ident">Uniform::new</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">alpha</span>, <span class="ident">high</span>.<span class="ident">alpha</span>),
+        UniformAlpha {
+            color: Uniform::new::&lt;C, <span class="kw">_</span>&gt;(low.color, high.color),
+            alpha: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(low.alpha, high.alpha),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_inclusive</span><span class="op">&lt;</span><span class="ident">B1</span>, <span class="ident">B2</span><span class="op">&gt;</span>(<span class="ident">low_b</span>: <span class="ident">B1</span>, <span class="ident">high_b</span>: <span class="ident">B2</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">B1</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
-        <span class="ident">B2</span>: <span class="ident">SampleBorrow</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::X</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sized</span>,
+    <span class="kw">fn </span>new_inclusive&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
+        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
     {
-        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">low_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">high_b</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>();
+        <span class="kw">let </span>low = low_b.borrow().clone();
+        <span class="kw">let </span>high = high_b.borrow().clone();
 
-        <span class="ident">UniformAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">color</span>, <span class="ident">high</span>.<span class="ident">color</span>),
-            <span class="ident">alpha</span>: <span class="ident">Uniform::new_inclusive</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">low</span>.<span class="ident">alpha</span>, <span class="ident">high</span>.<span class="ident">alpha</span>),
+        UniformAlpha {
+            color: Uniform::new_inclusive::&lt;C, <span class="kw">_</span>&gt;(low.color, high.color),
+            alpha: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(low.alpha, high.alpha),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">Alpha</span> {
-            <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
-            <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">sample</span>(<span class="ident">rng</span>),
+    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Alpha&lt;C, T&gt; {
+        Alpha {
+            color: <span class="self">self</span>.color.sample(rng),
+            alpha: <span class="self">self</span>.alpha.sample(rng),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">bytemuck::Zeroable</span>,
-    <span class="ident">T</span>: <span class="ident">bytemuck::Zeroable</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;C, T&gt; bytemuck::Zeroable <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>C: bytemuck::Zeroable,
+    T: bytemuck::Zeroable,
 {
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// It is a requirement of `ArrayCast` that the in-memory representation of `C`</span>
-<span class="comment">// is made of `T`s. Because `T` is `Pod`, `Alpha&lt;C, T&gt;` is `Pod` as well because</span>
-<span class="comment">// no internal padding can be introduced during monomorphization.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">bytemuck::Pod</span>,
-    <span class="ident">C</span>: <span class="ident">bytemuck::Pod</span> <span class="op">+</span> <span class="ident">ArrayCast</span>,
+<span class="comment">// Safety:
+//
+// It is a requirement of `ArrayCast` that the in-memory representation of `C`
+// is made of `T`s. Because `T` is `Pod`, `Alpha&lt;C, T&gt;` is `Pod` as well because
+// no internal padding can be introduced during monomorphization.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;C, T&gt; bytemuck::Pod <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="kw">where
+    </span>T: bytemuck::Pod,
+    C: bytemuck::Pod + ArrayCast,
 {
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::encoding::Srgb</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rgb::Rgba</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">crate</span>::encoding::Srgb;
+    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgba;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lower_hex</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>lower_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
-            <span class="string">&quot;abc123a1&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
+            <span class="string">&quot;abc123a1&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lower_hex_small_numbers</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>lower_hex_small_numbers() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;01020304&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;01020304&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0001000200030004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;0001000200030004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;00000001000000020000000300000004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;00000001000000020000000300000004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">lower_hex_custom_width</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>lower_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">upper_hex</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>upper_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
-            <span class="string">&quot;ABC123A1&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
+            <span class="string">&quot;ABC123A1&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">upper_hex_small_numbers</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>upper_hex_small_numbers() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;01020304&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;01020304&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0001000200030004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;0001000200030004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;00000001000000020000000300000004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;00000001000000020000000300000004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">upper_hex_custom_width</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>upper_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;</span>
-        );
+            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">&quot;001002003004&quot;
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">check_min_max_components</span>() {
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::min_alpha</span>(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(<span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::max_alpha</span>(), <span class="number">1.0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>check_min_max_components() {
+        <span class="macro">assert_relative_eq!</span>(Rgba::&lt;Srgb&gt;::min_alpha(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Rgba::&lt;Srgb&gt;::max_alpha(), <span class="number">1.0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>)).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Rgba::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>)).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">serialized</span>,
-            <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>
-        );
+            serialized,
+            <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Rgba</span><span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">::serde_json::from_str</span>(<span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>deserialized: Rgba&lt;Srgb&gt; =
+            ::serde_json::from_str(<span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">Rgba</span>::<span class="op">&lt;</span><span class="ident">Srgb</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>));
+        <span class="macro">assert_eq!</span>(deserialized, Rgba::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>));
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;random&quot;</span>)]</span>
-    <span class="macro">test_uniform_distribution!</span> {
-        <span class="ident">Rgba</span><span class="op">&lt;</span><span class="ident">Srgb</span>, <span class="ident">f32</span><span class="op">&gt;</span> {
-            <span class="ident">red</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">green</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">blue</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="ident">alpha</span>: (<span class="number">0.0</span>, <span class="number">1.0</span>)
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+    </span><span class="macro">test_uniform_distribution! </span>{
+        Rgba&lt;Srgb, f32&gt; {
+            red: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            green: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            blue: (<span class="number">0.0</span>, <span class="number">1.0</span>),
+            alpha: (<span class="number">0.0</span>, <span class="number">1.0</span>)
         },
-        <span class="ident">min</span>: <span class="ident">Rgba::new</span>(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-        <span class="ident">max</span>: <span class="ident">Rgba::new</span>(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)
+        min: Rgba::new(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
+        max: Rgba::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

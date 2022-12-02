@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/pre_alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pre_alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/blend/pre_alpha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pre_alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -400,407 +400,407 @@
 <span id="400">400</span>
 <span id="401">401</span>
 <span id="402">402</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Deref</span>, <span class="ident">DerefMut</span>, <span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">approx</span>::{<span class="ident">AbsDiffEq</span>, <span class="ident">RelativeEq</span>, <span class="ident">UlpsEq</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">cast::ArrayCast</span>,
-    <span class="ident">clamp</span>,
-    <span class="ident">num</span>::{<span class="self">self</span>, <span class="ident">Arithmetics</span>, <span class="ident">One</span>, <span class="ident">Real</span>, <span class="ident">Zero</span>},
-    <span class="ident">stimulus::Stimulus</span>,
-    <span class="ident">Alpha</span>, <span class="ident">ArrayExt</span>, <span class="ident">Mix</span>, <span class="ident">MixAssign</span>, <span class="ident">NextArray</span>,
+<span class="kw">use crate</span>::{
+    cast::ArrayCast,
+    clamp,
+    num::{<span class="self">self</span>, Arithmetics, One, Real, Zero},
+    stimulus::Stimulus,
+    Alpha, ArrayExt, Mix, MixAssign, NextArray,
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Premultiply</span>;
+<span class="kw">use </span><span class="kw">super</span>::Premultiply;
 
-<span class="doccomment">/// Premultiplied alpha wrapper.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Premultiplied, or alpha masked, or associated alpha colors have had their</span>
-<span class="doccomment">/// component values multiplied with their alpha value. They are commonly used</span>
-<span class="doccomment">/// in composition algorithms and as output from computer generated graphics. It</span>
-<span class="doccomment">/// may also be preferred when interpolating between colors and in other image</span>
-<span class="doccomment">/// manipulation operations, such as blurring or resizing images.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use palette::{LinSrgb, LinSrgba};</span>
-<span class="doccomment">/// use palette::blend::{Blend, PreAlpha};</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let a = PreAlpha::from(LinSrgba::new(0.4, 0.5, 0.5, 0.3));</span>
-<span class="doccomment">/// let b = PreAlpha::from(LinSrgba::new(0.3, 0.8, 0.4, 0.4));</span>
-<span class="doccomment">/// let c = PreAlpha::from(LinSrgba::new(0.7, 0.1, 0.8, 0.8));</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let res: LinSrgba = a.screen(b).overlay(c).into();</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note that converting to and from premultiplied alpha will cause the alpha</span>
-<span class="doccomment">/// component to be clamped to [0.0, 1.0], and fully transparent colors will</span>
-<span class="doccomment">/// become black.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The premultiplied color components (`original.color * original.alpha`).</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>, <span class="ident">serde</span>(<span class="ident">flatten</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">color</span>: <span class="ident">C</span>,
+<span class="doccomment">/// Premultiplied alpha wrapper.
+///
+/// Premultiplied, or alpha masked, or associated alpha colors have had their
+/// component values multiplied with their alpha value. They are commonly used
+/// in composition algorithms and as output from computer generated graphics. It
+/// may also be preferred when interpolating between colors and in other image
+/// manipulation operations, such as blurring or resizing images.
+///
+/// ```
+/// use palette::{LinSrgb, LinSrgba};
+/// use palette::blend::{Blend, PreAlpha};
+///
+/// let a = PreAlpha::from(LinSrgba::new(0.4, 0.5, 0.5, 0.3));
+/// let b = PreAlpha::from(LinSrgba::new(0.3, 0.8, 0.4, 0.4));
+/// let c = PreAlpha::from(LinSrgba::new(0.7, 0.1, 0.8, 0.8));
+///
+/// let res: LinSrgba = a.screen(b).overlay(c).into();
+/// ```
+///
+/// Note that converting to and from premultiplied alpha will cause the alpha
+/// component to be clamped to [0.0, 1.0], and fully transparent colors will
+/// become black.
+</span><span class="attribute">#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[repr(C)]
+</span><span class="kw">pub struct </span>PreAlpha&lt;C: Premultiply&gt; {
+    <span class="doccomment">/// The premultiplied color components (`original.color * original.alpha`).
+    </span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(flatten))]
+    </span><span class="kw">pub </span>color: C,
 
-    <span class="doccomment">/// The transparency component. 0.0 is fully transparent and 1.0 is fully</span>
-    <span class="doccomment">/// opaque.</span>
-    <span class="kw">pub</span> <span class="ident">alpha</span>: <span class="ident">C::Scalar</span>,
+    <span class="doccomment">/// The transparency component. 0.0 is fully transparent and 1.0 is fully
+    /// opaque.
+    </span><span class="kw">pub </span>alpha: C::Scalar,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="kw">impl</span>&lt;C&gt; PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="doccomment">/// Alpha mask `color` with `alpha`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">color</span>: <span class="ident">C</span>, <span class="ident">alpha</span>: <span class="ident">C::Scalar</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">color</span>.<span class="ident">premultiply</span>(<span class="ident">alpha</span>)
+    <span class="doccomment">/// Alpha mask `color` with `alpha`.
+    </span><span class="kw">pub fn </span>new(color: C, alpha: C::Scalar) -&gt; <span class="self">Self </span>{
+        color.premultiply(alpha)
     }
 
-    <span class="doccomment">/// Create an opaque alpha masked color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_opaque</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">C::Scalar</span>: <span class="ident">Stimulus</span>,
+    <span class="doccomment">/// Create an opaque alpha masked color.
+    </span><span class="kw">pub fn </span>new_opaque(color: C) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>C::Scalar: Stimulus,
     {
-        <span class="self">Self</span> {
-            <span class="ident">color</span>,
-            <span class="ident">alpha</span>: <span class="ident">C::Scalar::max_intensity</span>(),
+        <span class="self">Self </span>{
+            color,
+            alpha: C::Scalar::max_intensity(),
         }
     }
 
-    <span class="doccomment">/// Alpha unmask the color.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpremultiply</span>(<span class="self">self</span>) -&gt; <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">color</span>, <span class="ident">alpha</span>) <span class="op">=</span> <span class="ident">C::unpremultiply</span>(<span class="self">self</span>);
-        <span class="ident">Alpha</span> { <span class="ident">color</span>, <span class="ident">alpha</span> }
+    <span class="doccomment">/// Alpha unmask the color.
+    </span><span class="kw">pub fn </span>unpremultiply(<span class="self">self</span>) -&gt; Alpha&lt;C, C::Scalar&gt; {
+        <span class="kw">let </span>(color, alpha) = C::unpremultiply(<span class="self">self</span>);
+        Alpha { color, alpha }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">PartialEq</span>,
+<span class="kw">impl</span>&lt;C&gt; PartialEq <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: PartialEq + Premultiply,
+    C::Scalar: PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">color</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">alpha</span>
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.color == other.color &amp;&amp; <span class="self">self</span>.alpha == other.alpha
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Eq</span>,
+<span class="kw">impl</span>&lt;C&gt; Eq <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Eq + Premultiply,
+    C::Scalar: Eq,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;Alpha&lt;C, C::Scalar&gt;&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">color</span>.<span class="ident">color</span>.<span class="ident">premultiply</span>(<span class="ident">color</span>.<span class="ident">alpha</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(color: Alpha&lt;C, C::Scalar&gt;) -&gt; <span class="self">Self </span>{
+        color.color.premultiply(color.alpha)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Alpha</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">C::Scalar</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;PreAlpha&lt;C&gt;&gt; <span class="kw">for </span>Alpha&lt;C, C::Scalar&gt;
+<span class="kw">where
+    </span>C: Premultiply,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">color</span>, <span class="ident">alpha</span>) <span class="op">=</span> <span class="ident">C::unpremultiply</span>(<span class="ident">color</span>);
-        <span class="ident">Alpha</span> { <span class="ident">color</span>, <span class="ident">alpha</span> }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>from(color: PreAlpha&lt;C&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(color, alpha) = C::unpremultiply(color);
+        Alpha { color, alpha }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Stimulus</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;C&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Premultiply,
+    C::Scalar: Stimulus,
 {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">color</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">color</span>.<span class="ident">premultiply</span>(<span class="ident">C::Scalar::max_intensity</span>())
+    <span class="kw">fn </span>from(color: C) -&gt; <span class="self">Self </span>{
+        color.premultiply(C::Scalar::max_intensity())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Mix</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Mix</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;C, T&gt; Mix <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Mix&lt;Scalar = T&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: Real + Zero + One + num::Clamp + Arithmetics + Clone,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type </span>Scalar = T;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>mix(<span class="kw-2">mut </span><span class="self">self</span>, other: <span class="self">Self</span>, factor: T) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>factor = clamp(factor, T::zero(), T::one());
 
-        <span class="self">self</span>.<span class="ident">color</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">mix</span>(<span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">factor</span>.<span class="ident">clone</span>());
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">alpha</span>);
+        <span class="self">self</span>.color = <span class="self">self</span>.color.mix(other.color, factor.clone());
+        <span class="self">self</span>.alpha = <span class="self">self</span>.alpha.clone() + factor * (other.alpha - <span class="self">self</span>.alpha);
 
-        <span class="self">self</span>
+        <span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;C, T&gt; MixAssign <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: MixAssign&lt;Scalar = T&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: Real + Zero + One + num::Clamp + Arithmetics + AddAssign + Clone,
+{
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>mix_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>, factor: T) {
+        <span class="kw">let </span>factor = clamp(factor, T::zero(), T::one());
+
+        <span class="self">self</span>.color.mix_assign(other.color, factor.clone());
+        <span class="self">self</span>.alpha += factor * (other.alpha - <span class="self">self</span>.alpha.clone());
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MixAssign</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">MixAssign</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> <span class="op">+</span> <span class="ident">num::Clamp</span> <span class="op">+</span> <span class="ident">Arithmetics</span> <span class="op">+</span> <span class="ident">AddAssign</span> <span class="op">+</span> <span class="ident">Clone</span>,
+<span class="kw">unsafe impl</span>&lt;C, T&gt; ArrayCast <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: ArrayCast + Premultiply&lt;Scalar = T&gt;,
+    C::Array: NextArray + ArrayExt&lt;Item = T&gt;,
 {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">mix_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>, <span class="ident">factor</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">factor</span> <span class="op">=</span> <span class="ident">clamp</span>(<span class="ident">factor</span>, <span class="ident">T::zero</span>(), <span class="ident">T::one</span>());
-
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">mix_assign</span>(<span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">factor</span>.<span class="ident">clone</span>());
-        <span class="self">self</span>.<span class="ident">alpha</span> <span class="op">+</span><span class="op">=</span> <span class="ident">factor</span> <span class="op">*</span> (<span class="ident">other</span>.<span class="ident">alpha</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">clone</span>());
-    }
+    <span class="kw">type </span>Array = &lt;C::Array <span class="kw">as </span>NextArray&gt;::Next;
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ArrayCast</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ArrayCast</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">C::Array</span>: <span class="ident">NextArray</span> <span class="op">+</span> <span class="ident">ArrayExt</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C&gt; Default <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: Default + Premultiply,
+    C::Scalar: Stimulus,
 {
-    <span class="kw">type</span> <span class="ident">Array</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">C::Array</span> <span class="kw">as</span> <span class="ident">NextArray</span><span class="op">&gt;</span><span class="ident">::Next</span>;
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">Stimulus</span>,
-{
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">C::default</span>(),
-            <span class="ident">alpha</span>: <span class="ident">C::Scalar::max_intensity</span>(),
+    <span class="kw">fn </span>default() -&gt; PreAlpha&lt;C&gt; {
+        PreAlpha {
+            color: C::default(),
+            alpha: C::Scalar::max_intensity(),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AbsDiffEq</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">AbsDiffEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; AbsDiffEq <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: AbsDiffEq&lt;Epsilon = T::Epsilon&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: AbsDiffEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">type</span> <span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span>;
+    <span class="kw">type </span>Epsilon = T::Epsilon;
 
-    <span class="kw">fn</span> <span class="ident">default_epsilon</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_epsilon</span>()
+    <span class="kw">fn </span>default_epsilon() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_epsilon()
     }
 
-    <span class="kw">fn</span> <span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">abs_diff_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>)
+    <span class="kw">fn </span>abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>PreAlpha&lt;C&gt;, epsilon: <span class="self">Self</span>::Epsilon) -&gt; bool {
+        <span class="self">self</span>.color.abs_diff_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone())
+            &amp;&amp; <span class="self">self</span>.alpha.abs_diff_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">RelativeEq</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">RelativeEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">RelativeEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; RelativeEq <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: RelativeEq&lt;Epsilon = T::Epsilon&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: RelativeEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_relative</span>() -&gt; <span class="ident"><span class="self">Self</span>::Epsilon</span> {
-        <span class="ident">T::default_max_relative</span>()
+    <span class="kw">fn </span>default_max_relative() -&gt; <span class="self">Self</span>::Epsilon {
+        T::default_max_relative()
     }
 
-    <span class="kw">fn</span> <span class="ident">relative_eq</span>(
+    <span class="kw">fn </span>relative_eq(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-        <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-        <span class="ident">max_relative</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>,
-    ) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>
-            .<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_relative</span>.<span class="ident">clone</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">relative_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>, <span class="ident">max_relative</span>)
+        other: <span class="kw-2">&amp;</span>PreAlpha&lt;C&gt;,
+        epsilon: <span class="self">Self</span>::Epsilon,
+        max_relative: <span class="self">Self</span>::Epsilon,
+    ) -&gt; bool {
+        <span class="self">self</span>.color
+            .relative_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone(), max_relative.clone())
+            &amp;&amp; <span class="self">self</span>.alpha.relative_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon, max_relative)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;approx&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">UlpsEq</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">UlpsEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">T::Epsilon</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">T</span>: <span class="ident">UlpsEq</span>,
-    <span class="ident">T::Epsilon</span>: <span class="ident">Clone</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C, T&gt; UlpsEq <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: UlpsEq&lt;Epsilon = T::Epsilon&gt; + Premultiply&lt;Scalar = T&gt;,
+    T: UlpsEq,
+    T::Epsilon: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">default_max_ulps</span>() -&gt; <span class="ident">u32</span> {
-        <span class="ident">T::default_max_ulps</span>()
+    <span class="kw">fn </span>default_max_ulps() -&gt; u32 {
+        T::default_max_ulps()
     }
 
-    <span class="kw">fn</span> <span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">epsilon</span>: <span class="ident"><span class="self">Self</span>::Epsilon</span>, <span class="ident">max_ulps</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">color</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">color</span>, <span class="ident">epsilon</span>.<span class="ident">clone</span>(), <span class="ident">max_ulps</span>)
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">alpha</span>.<span class="ident">ulps_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">alpha</span>, <span class="ident">epsilon</span>, <span class="ident">max_ulps</span>)
+    <span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>PreAlpha&lt;C&gt;, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
+        <span class="self">self</span>.color.ulps_eq(<span class="kw-2">&amp;</span>other.color, epsilon.clone(), max_ulps)
+            &amp;&amp; <span class="self">self</span>.alpha.ulps_eq(<span class="kw-2">&amp;</span>other.alpha, epsilon, max_ulps)
     }
 }
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_binop</span> {
+<span class="macro">macro_rules! </span>impl_binop {
     (
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span>:<span class="ident">ident</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>:<span class="ident">ident</span>,
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span>:<span class="ident">ident</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>:<span class="ident">ident</span>
+        <span class="macro-nonterminal">$op_trait</span>:ident::<span class="macro-nonterminal">$op_trait_fn</span>:ident,
+        <span class="macro-nonterminal">$op_assign_trait</span>:ident::<span class="macro-nonterminal">$op_assign_trait_fn</span>:ident
     ) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">C</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-            <span class="ident">C::Scalar</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">C::Scalar</span><span class="op">&gt;</span>,
+        <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_trait </span><span class="kw">for </span>PreAlpha&lt;C&gt;
+        <span class="kw">where
+            </span>C: <span class="macro-nonterminal">$op_trait</span>&lt;Output = C&gt; + Premultiply,
+            C::Scalar: <span class="macro-nonterminal">$op_trait</span>&lt;Output = C::Scalar&gt;,
         {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>;
+            <span class="kw">type </span>Output = PreAlpha&lt;C&gt;;
 
-            <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="ident">PreAlpha</span> {
-                    <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="ident">other</span>.<span class="ident">color</span>),
-                    <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="ident">other</span>.<span class="ident">alpha</span>),
+            <span class="kw">fn </span><span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, other: PreAlpha&lt;C&gt;) -&gt; <span class="self">Self</span>::Output {
+                PreAlpha {
+                    color: <span class="self">self</span>.color.<span class="macro-nonterminal">$op_trait_fn</span>(other.color),
+                    alpha: <span class="self">self</span>.alpha.<span class="macro-nonterminal">$op_trait_fn</span>(other.alpha),
                 }
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">C</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-            <span class="ident">C::Scalar</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span> <span class="op">+</span> <span class="ident">Real</span>,
+        <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_assign_trait </span><span class="kw">for </span>PreAlpha&lt;C&gt;
+        <span class="kw">where
+            </span>C: <span class="macro-nonterminal">$op_assign_trait </span>+ Premultiply,
+            C::Scalar: <span class="macro-nonterminal">$op_assign_trait </span>+ Real,
         {
-            <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) {
-                <span class="self">self</span>.<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="ident">other</span>.<span class="ident">color</span>);
-                <span class="self">self</span>.<span class="ident">alpha</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="ident">other</span>.<span class="ident">alpha</span>);
+            <span class="kw">fn </span><span class="macro-nonterminal">$op_assign_trait_fn</span>(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: PreAlpha&lt;C&gt;) {
+                <span class="self">self</span>.color.<span class="macro-nonterminal">$op_assign_trait_fn</span>(other.color);
+                <span class="self">self</span>.alpha.<span class="macro-nonterminal">$op_assign_trait_fn</span>(other.alpha);
             }
         }
     };
 }
 
-<span class="macro">impl_binop!</span>(<span class="ident">Add::add</span>, <span class="ident">AddAssign::add_assign</span>);
-<span class="macro">impl_binop!</span>(<span class="ident">Sub::sub</span>, <span class="ident">SubAssign::sub_assign</span>);
-<span class="macro">impl_binop!</span>(<span class="ident">Mul::mul</span>, <span class="ident">MulAssign::mul_assign</span>);
-<span class="macro">impl_binop!</span>(<span class="ident">Div::div</span>, <span class="ident">DivAssign::div_assign</span>);
+<span class="macro">impl_binop!</span>(Add::add, AddAssign::add_assign);
+<span class="macro">impl_binop!</span>(Sub::sub, SubAssign::sub_assign);
+<span class="macro">impl_binop!</span>(Mul::mul, MulAssign::mul_assign);
+<span class="macro">impl_binop!</span>(Div::div, DivAssign::div_assign);
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_scalar_binop</span> {
+<span class="macro">macro_rules! </span>impl_scalar_binop {
     (
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span>:<span class="ident">ident</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>:<span class="ident">ident</span>,
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span>:<span class="ident">ident</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>:<span class="ident">ident</span>,
-        [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span>),<span class="op">+</span>]
+        <span class="macro-nonterminal">$op_trait</span>:ident::<span class="macro-nonterminal">$op_trait_fn</span>:ident,
+        <span class="macro-nonterminal">$op_assign_trait</span>:ident::<span class="macro-nonterminal">$op_assign_trait_fn</span>:ident,
+        [$(<span class="macro-nonterminal">$ty</span>:ident),+]
     ) =&gt; {
         $(
-            <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-            <span class="kw">where</span>
-                <span class="ident">C</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>,
+            <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
+            <span class="kw">where
+                </span>C: <span class="macro-nonterminal">$op_trait</span>&lt;<span class="macro-nonterminal">$ty</span>, Output = C&gt; + Premultiply&lt;Scalar = <span class="macro-nonterminal">$ty</span>&gt;,
             {
-                <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>;
+                <span class="kw">type </span>Output = PreAlpha&lt;C&gt;;
 
-                <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                    <span class="ident">PreAlpha</span> {
-                        <span class="ident">color</span>: <span class="self">self</span>.<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="ident">c</span>),
-                        <span class="ident">alpha</span>: <span class="self">self</span>.<span class="ident">alpha</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="ident">c</span>),
+                <span class="kw">fn </span><span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, c: <span class="macro-nonterminal">$ty</span>) -&gt; <span class="self">Self</span>::Output {
+                    PreAlpha {
+                        color: <span class="self">self</span>.color.<span class="macro-nonterminal">$op_trait_fn</span>(c),
+                        alpha: <span class="self">self</span>.alpha.<span class="macro-nonterminal">$op_trait_fn</span>(c),
                     }
                 }
             }
 
-            <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>
-            <span class="kw">where</span>
-                <span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span>,
+            <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_trait</span>&lt;PreAlpha&lt;C&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$ty
+            </span><span class="kw">where
+                </span>C: Premultiply&lt;Scalar = <span class="macro-nonterminal">$ty</span>&gt;,
+                <span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$op_trait</span>&lt;<span class="macro-nonterminal">$ty</span>, Output = <span class="macro-nonterminal">$ty</span>&gt; + <span class="macro-nonterminal">$op_trait</span>&lt;C, Output = C&gt;,
             {
-                <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>;
+                <span class="kw">type </span>Output = PreAlpha&lt;C&gt;;
 
-                <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="self">self</span>, <span class="ident">color</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                    <span class="ident">PreAlpha</span> {
-                        <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="self">self</span>, <span class="ident">color</span>.<span class="ident">color</span>),
-                        <span class="ident">alpha</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_trait_fn</span>(<span class="self">self</span>, <span class="ident">color</span>.<span class="ident">alpha</span>),
+                <span class="kw">fn </span><span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color: PreAlpha&lt;C&gt;) -&gt; <span class="self">Self</span>::Output {
+                    PreAlpha {
+                        color: <span class="macro-nonterminal">$op_trait</span>::&lt;C&gt;::<span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color.color),
+                        alpha: <span class="macro-nonterminal">$op_trait</span>::&lt;<span class="macro-nonterminal">$ty</span>&gt;::<span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color.alpha),
                     }
                 }
             }
 
-            <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-            <span class="kw">where</span>
-                <span class="ident">C</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>,
+            <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_assign_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
+            <span class="kw">where
+                </span>C: <span class="macro-nonterminal">$op_assign_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; + Premultiply&lt;Scalar = <span class="macro-nonterminal">$ty</span>&gt;,
             {
-                <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) {
-                    <span class="self">self</span>.<span class="ident">color</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="ident">c</span>);
-                    <span class="self">self</span>.<span class="ident">alpha</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op_assign_trait_fn</span>(<span class="ident">c</span>);
+                <span class="kw">fn </span><span class="macro-nonterminal">$op_assign_trait_fn</span>(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="macro-nonterminal">$ty</span>) {
+                    <span class="self">self</span>.color.<span class="macro-nonterminal">$op_assign_trait_fn</span>(c);
+                    <span class="self">self</span>.alpha.<span class="macro-nonterminal">$op_assign_trait_fn</span>(c);
                 }
             }
-        )<span class="op">+</span>
+        )+
     };
 }
 
-<span class="macro">impl_scalar_binop!</span>(<span class="ident">Add::add</span>, <span class="ident">AddAssign::add_assign</span>, [<span class="ident">f32</span>, <span class="ident">f64</span>]);
-<span class="macro">impl_scalar_binop!</span>(<span class="ident">Sub::sub</span>, <span class="ident">SubAssign::sub_assign</span>, [<span class="ident">f32</span>, <span class="ident">f64</span>]);
-<span class="macro">impl_scalar_binop!</span>(<span class="ident">Mul::mul</span>, <span class="ident">MulAssign::mul_assign</span>, [<span class="ident">f32</span>, <span class="ident">f64</span>]);
-<span class="macro">impl_scalar_binop!</span>(<span class="ident">Div::div</span>, <span class="ident">DivAssign::div_assign</span>, [<span class="ident">f32</span>, <span class="ident">f64</span>]);
+<span class="macro">impl_scalar_binop!</span>(Add::add, AddAssign::add_assign, [f32, f64]);
+<span class="macro">impl_scalar_binop!</span>(Sub::sub, SubAssign::sub_assign, [f32, f64]);
+<span class="macro">impl_scalar_binop!</span>(Mul::mul, MulAssign::mul_assign, [f32, f64]);
+<span class="macro">impl_scalar_binop!</span>(Div::div, DivAssign::div_assign, [f32, f64]);
 
-<span class="macro">impl_array_casts!</span>([<span class="ident">C</span>: <span class="ident">Premultiply</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span>] <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, [<span class="ident">C::Scalar</span>; <span class="ident">N</span>], <span class="kw">where</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayCast</span><span class="op">&lt;</span><span class="ident">Array</span> <span class="op">=</span> [<span class="ident">C::Scalar</span>; <span class="ident">N</span>]<span class="op">&gt;</span>);
+<span class="macro">impl_array_casts!</span>([C: Premultiply, <span class="kw">const </span>N: usize] PreAlpha&lt;C&gt;, [C::Scalar; N], <span class="kw">where </span>PreAlpha&lt;C&gt;: ArrayCast&lt;Array = [C::Scalar; N]&gt;);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">C</span>;
+<span class="kw">impl</span>&lt;C: Premultiply&gt; Deref <span class="kw">for </span>PreAlpha&lt;C&gt; {
+    <span class="kw">type </span>Target = C;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">C</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">color</span>
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.color
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Premultiply</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">C</span> {
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">color</span>
+<span class="kw">impl</span>&lt;C: Premultiply&gt; DerefMut <span class="kw">for </span>PreAlpha&lt;C&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>C {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.color
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">bytemuck::Zeroable</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">bytemuck::Zeroable</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">bytemuck::Zeroable</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;C&gt; bytemuck::Zeroable <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: bytemuck::Zeroable + Premultiply,
+    C::Scalar: bytemuck::Zeroable,
 {
 }
 
-<span class="comment">// Safety:</span>
-<span class="comment">//</span>
-<span class="comment">// See `Alpha&lt;C, T&gt;`&#39;s implementation of `Pod`.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;bytemuck&quot;</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">bytemuck::Pod</span> <span class="kw">for</span> <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">bytemuck::Pod</span> <span class="op">+</span> <span class="ident">ArrayCast</span> <span class="op">+</span> <span class="ident">Premultiply</span>,
-    <span class="ident">C::Scalar</span>: <span class="ident">bytemuck::Pod</span>,
+<span class="comment">// Safety:
+//
+// See `Alpha&lt;C, T&gt;`&#39;s implementation of `Pod`.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="kw">unsafe impl</span>&lt;C&gt; bytemuck::Pod <span class="kw">for </span>PreAlpha&lt;C&gt;
+<span class="kw">where
+    </span>C: bytemuck::Pod + ArrayCast + Premultiply,
+    C::Scalar: bytemuck::Pod,
 {
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::PreAlpha</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LinSrgb</span>;
+<span class="attribute">#[cfg(test)]
+#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">super</span>::PreAlpha;
+    <span class="kw">use </span><span class="kw">crate</span>::LinSrgb;
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize</span>() {
-        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">LinSrgb::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>),
-            <span class="ident">alpha</span>: <span class="number">0.5</span>,
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>serialize() {
+        <span class="kw">let </span>color = PreAlpha {
+            color: LinSrgb::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>),
+            alpha: <span class="number">0.5</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">::serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">color</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>color).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">serialized</span>,
-            <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>
-        );
+            serialized,
+            <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#
+        </span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serializing&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">PreAlpha</span> {
-            <span class="ident">color</span>: <span class="ident">LinSrgb::new</span>(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>),
-            <span class="ident">alpha</span>: <span class="number">0.5</span>,
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>deserialize() {
+        <span class="kw">let </span>expected = PreAlpha {
+            color: LinSrgb::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>),
+            alpha: <span class="number">0.5</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">::serde_json::from_str</span>(<span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span>deserialized: PreAlpha&lt;<span class="kw">_</span>&gt; =
+            ::serde_json::from_str(<span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">deserialized</span>, <span class="ident">expected</span>);
+        <span class="macro">assert_eq!</span>(deserialized, expected);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

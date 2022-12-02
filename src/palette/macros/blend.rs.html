@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/blend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>blend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -52,59 +52,59 @@
 <span id="52">52</span>
 <span id="53">53</span>
 <span id="54">54</span>
-</pre><pre class="rust"><code><span class="macro">macro_rules!</span> <span class="ident">impl_premultiply</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ident</span> {$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>} $(<span class="ident">phantom</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>)<span class="question-mark">?</span> $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="macro">impl_premultiply!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span><span class="op">&gt;</span> {$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>),<span class="op">+</span>} $(<span class="ident">phantom</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>)<span class="question-mark">?</span> $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>);
+</pre><pre class="rust"><code><span class="macro">macro_rules! </span>impl_premultiply {
+    (<span class="macro-nonterminal">$ty</span>: ident {$(<span class="macro-nonterminal">$component</span>: ident),+} $(phantom: <span class="macro-nonterminal">$phantom</span>: ident)<span class="question-mark">? </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)+)<span class="question-mark">?</span>) =&gt; {
+        <span class="macro">impl_premultiply!</span>(<span class="macro-nonterminal">$ty</span>&lt;&gt; {$(<span class="macro-nonterminal">$component</span>),+} $(phantom: <span class="macro-nonterminal">$phantom</span>)<span class="question-mark">? </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?</span>);
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ident</span> <span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>: <span class="ident">ident</span>),<span class="kw-2">*</span><span class="op">&gt;</span> {$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="ident">ident</span>),<span class="op">+</span>} $(<span class="ident">phantom</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">ident</span>)<span class="question-mark">?</span> $(<span class="kw">where</span> $(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">*</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Premultiply</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">*</span> <span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">T</span>: <span class="ident">Real</span> <span class="op">+</span> <span class="ident">Stimulus</span> <span class="op">+</span> <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">IsValidDivisor</span> <span class="op">+</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-            <span class="ident">T::Mask</span>: <span class="ident">LazySelect</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
-            $($(<span class="macro-nonterminal">$</span><span class="kw">where</span>)<span class="op">+</span>)<span class="question-mark">?</span>
-        {
-            <span class="kw">type</span> <span class="macro-nonterminal">Scalar</span> <span class="op">=</span> <span class="ident">T</span>;
+    (<span class="macro-nonterminal">$ty</span>: ident &lt;$(<span class="macro-nonterminal">$ty_param</span>: ident),<span class="kw-2">*</span>&gt; {$(<span class="macro-nonterminal">$component</span>: ident),+} $(phantom: <span class="macro-nonterminal">$phantom</span>: ident)<span class="question-mark">? </span>$(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>: <span class="macro-nonterminal">tt</span>)+)<span class="question-mark">?</span>) =&gt; {
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)* T&gt; Premultiply <span class="kw">for </span><span class="macro-nonterminal">$ty</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)* T&gt;
+        <span class="kw">where
+            </span>T: Real + Stimulus + Zero + IsValidDivisor + Mul&lt;T, Output = T&gt; + Div&lt;T, Output = T&gt; + Clone,
+            T::Mask: LazySelect&lt;T&gt; + Clone,
+            $($(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
+        </span>{
+            <span class="kw">type </span><span class="macro-nonterminal">Scalar </span>= T;
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">premultiply</span>(<span class="self">self</span>, <span class="ident">alpha</span>: <span class="ident">T</span>) -&gt; <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-                <span class="ident">PreAlpha</span> {
-                    <span class="ident">color</span>: <span class="self">self</span> <span class="op">*</span> <span class="ident">alpha</span>.<span class="ident">clone</span>(),
-                    <span class="ident">alpha</span>
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>premultiply(<span class="self">self</span>, alpha: T) -&gt; PreAlpha&lt;<span class="self">Self</span>&gt; {
+                PreAlpha {
+                    color: <span class="self">self </span>* alpha.clone(),
+                    alpha
                 }
             }
 
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">unpremultiply</span>(<span class="ident">premultiplied</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; (<span class="self">Self</span>, <span class="ident">T</span>) {
-                <span class="kw">let</span> <span class="ident">PreAlpha</span> {
-                    <span class="ident">color</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>,)<span class="op">+</span> .. },
-                    <span class="ident">alpha</span>,
-                } <span class="op">=</span> <span class="ident">premultiplied</span>;
+            <span class="attribute">#[inline]
+            </span><span class="kw">fn </span>unpremultiply(premultiplied: PreAlpha&lt;<span class="self">Self</span>&gt;) -&gt; (<span class="self">Self</span>, T) {
+                <span class="kw">let </span>PreAlpha {
+                    color: <span class="macro-nonterminal">$ty </span>{ $(<span class="macro-nonterminal">$component</span>,)+ .. },
+                    alpha,
+                } = premultiplied;
 
-                <span class="kw">let</span> <span class="ident">is_valid_divisor</span> <span class="op">=</span> <span class="ident">alpha</span>.<span class="ident">is_valid_divisor</span>();
+                <span class="kw">let </span>is_valid_divisor = alpha.is_valid_divisor();
 
-                <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="self">Self</span> {
+                <span class="kw">let </span>color = <span class="self">Self </span>{
                     $(
-                        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span>: <span class="macro">lazy_select!</span> {
-                            <span class="kw">if</span> <span class="ident">is_valid_divisor</span>.<span class="ident">clone</span>() =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">component</span> <span class="op">/</span> <span class="ident">alpha</span>.<span class="ident">clone</span>(),
-                            <span class="kw">else</span> =&gt; <span class="ident">T::zero</span>()
+                        <span class="macro-nonterminal">$component</span>: <span class="macro">lazy_select! </span>{
+                            <span class="kw">if </span>is_valid_divisor.clone() =&gt; <span class="macro-nonterminal">$component </span>/ alpha.clone(),
+                            <span class="kw">else </span>=&gt; T::zero()
                         },
-                    )<span class="op">+</span>
-                    $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">phantom</span>: <span class="ident">PhantomData</span>,)<span class="question-mark">?</span>
-                };
+                    )+
+                    $(<span class="macro-nonterminal">$phantom</span>: PhantomData,)<span class="question-mark">?
+                </span>};
 
-                (<span class="ident">color</span>, <span class="ident">alpha</span>)
+                (color, alpha)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">*</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_param</span>,)<span class="op">*</span> <span class="ident">T</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="self">Self</span>: <span class="ident">Premultiply</span><span class="op">&lt;</span><span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)* T&gt; From&lt;PreAlpha&lt;<span class="self">Self</span>&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$ty</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>,)* T&gt;
+        <span class="kw">where
+            </span><span class="self">Self</span>: Premultiply&lt;Scalar = T&gt;,
         {
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">premultiplied</span>: <span class="ident">PreAlpha</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::unpremultiply</span>(<span class="ident">premultiplied</span>).<span class="number">0</span>
-            }
+            <span class="kw">fn </span>from(premultiplied: PreAlpha&lt;<span class="self">Self</span>&gt;) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::unpremultiply(premultiplied).<span class="number">0
+            </span>}
         }
     };
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

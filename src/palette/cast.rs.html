@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../palette/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -150,157 +150,157 @@
 <span id="150">150</span>
 <span id="151">151</span>
 <span id="152">152</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits and functions for casting colors to and from other data types.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The functions in this module casts without changing the underlying data. See</span>
-<span class="doccomment">//! the [`convert`](crate::convert) module for how to convert between color</span>
-<span class="doccomment">//! spaces.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Arrays and Slices</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Types that implement [`ArrayCast`] can be cast to and from arrays and slices</span>
-<span class="doccomment">//! with little to no overhead. This makes it easy to work with image buffers</span>
-<span class="doccomment">//! and types from other crates without having to copy the data first.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Casting Arrays</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Arrays can be type checked to have the correct size at compile time, making</span>
-<span class="doccomment">//! casting free after optimization has removed the overhead from asserts. The</span>
-<span class="doccomment">//! same is true for arrays in slices and `Vec`s, because the length stays the</span>
-<span class="doccomment">//! same after casting.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::{cast, Srgb, IntoColor};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198, 76]).into_linear();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let buffer = &amp;mut [[64u8, 139, 10], [93, 18, 214]];</span>
-<span class="doccomment">//! let color_buffer = cast::from_array_slice_mut::&lt;Srgb&lt;u8&gt;&gt;(buffer);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! for destination in color_buffer {</span>
-<span class="doccomment">//!     let linear_dst = destination.into_linear::&lt;f32&gt;();</span>
-<span class="doccomment">//!     *destination = (linear_dst + color).into_encoding();</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Trying to cast an array of the wrong size will not compile:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```compile_fail</span>
-<span class="doccomment">//! use palette::{cast, Srgb};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198]); // Too few components.</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Casting Component Buffers</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This is a common situation is image processing, where you have an image</span>
-<span class="doccomment">//! buffer, such as `&amp;mut [u8]`, `&amp;mut [f32]`, `Vec&lt;u8&gt;` or `Vec&lt;f32&gt;`, that you</span>
-<span class="doccomment">//! want to work with as colors. This buffer may, for example, be the content of</span>
-<span class="doccomment">//! an image file or shared with the GPU.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The downside, compared to having fixed size arrays, is that the length</span>
-<span class="doccomment">//! cannot be statically known to be a multiple of the color type&#39;s array</span>
-<span class="doccomment">//! length. This adds a bit of error handling overhead, as well as for dividing</span>
-<span class="doccomment">//! or multiplying the length.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::{cast, Srgb};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];</span>
-<span class="doccomment">//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer).is_ok());</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];</span>
-<span class="doccomment">//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer).is_err());</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! An alternative, for when the length can be trusted to be correct, is to use</span>
-<span class="doccomment">//! the `from_component_*` functions that panic on error.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This works:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use palette::{cast, Srgb};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];</span>
-<span class="doccomment">//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! But this panics:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```should_panic</span>
-<span class="doccomment">//! use palette::{cast, Srgb};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];</span>
-<span class="doccomment">//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Casting Single Colors</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The built-in color types implement `AsRef`, `AsMut`, `From`, `Into`,</span>
-<span class="doccomment">//! `TryFrom` and `TryInto` in addition to `ArrayCast` for convenient casting of</span>
-<span class="doccomment">//! single colors:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use core::convert::TryFrom;</span>
-<span class="doccomment">//! use palette::Srgb;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let color = Srgb::from([23u8, 198, 76]);</span>
-<span class="doccomment">//! let array: [u8; 3] = color.into();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let slice: &amp;[u8] = color.as_ref();</span>
-<span class="doccomment">//! assert!(&lt;&amp;Srgb&lt;u8&gt;&gt;::try_from(slice).is_ok());</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let short_slice: &amp;[f32] = &amp;[0.1, 0.5];</span>
-<span class="doccomment">//! assert!(&lt;&amp;Srgb&gt;::try_from(short_slice).is_err()); // Too few components.</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Component Order</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The component order in an array or slice is not always the same as in the</span>
-<span class="doccomment">//! color types. For example, a byte buffer that is encoded as ARGB will not</span>
-<span class="doccomment">//! cast to correct `Rgba` values. The components can be reordered after casting</span>
-<span class="doccomment">//! by using the [`Packed`] wrapper as an intermediate representation.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.</span>
-<span class="doccomment">//! use palette::{rgb::PackedArgb, cast, Srgba};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let components = &amp;[1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];</span>
-<span class="doccomment">//! let colors = cast::from_component_slice::&lt;PackedArgb&lt;_&gt;&gt;(components);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Notice how the alpha values have moved from the beginning to the end:</span>
-<span class="doccomment">//! assert_eq!(Srgba::from(colors[0]), Srgba::new(0.8, 0.2, 0.3, 1.0));</span>
-<span class="doccomment">//! assert_eq!(Srgba::from(colors[1]), Srgba::new(0.5, 0.7, 0.6, 1.0));</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Unsigned Integers</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Types that implement [`UintCast`] can be cast to and from unsigned integers</span>
-<span class="doccomment">//! of the same size. It&#39;s a bit more limited than slices and arrays but it&#39;s</span>
-<span class="doccomment">//! useful for common patterns like representing RGBA values as hexadecimal</span>
-<span class="doccomment">//! unsigned integers.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The [`Packed`] wrapper can be used as an intermediate format to make</span>
-<span class="doccomment">//! unpacking the values as simple as `from` or `into`. It&#39;s also possible to</span>
-<span class="doccomment">//! choose a channel order to be something other than what the default `From`</span>
-<span class="doccomment">//! implementations would use.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.</span>
-<span class="doccomment">//! use palette::{rgb::PackedArgb, cast, Srgba};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let raw = &amp;[0xFF7F0080u32, 0xFF60BBCC];</span>
-<span class="doccomment">//! let colors = cast::from_uint_slice::&lt;PackedArgb&gt;(raw);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(colors.len(), 2);</span>
-<span class="doccomment">//! assert_eq!(Srgba::from(colors[0]), Srgba::new(0x7F, 0x00, 0x80, 0xFF));</span>
-<span class="doccomment">//! assert_eq!(Srgba::from(colors[1]), Srgba::new(0x60, 0xBB, 0xCC, 0xFF));</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits and functions for casting colors to and from other data types.
+//!
+//! The functions in this module casts without changing the underlying data. See
+//! the [`convert`](crate::convert) module for how to convert between color
+//! spaces.
+//!
+//! # Arrays and Slices
+//!
+//! Types that implement [`ArrayCast`] can be cast to and from arrays and slices
+//! with little to no overhead. This makes it easy to work with image buffers
+//! and types from other crates without having to copy the data first.
+//!
+//! ## Casting Arrays
+//!
+//! Arrays can be type checked to have the correct size at compile time, making
+//! casting free after optimization has removed the overhead from asserts. The
+//! same is true for arrays in slices and `Vec`s, because the length stays the
+//! same after casting.
+//!
+//! ```
+//! use palette::{cast, Srgb, IntoColor};
+//!
+//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198, 76]).into_linear();
+//!
+//! let buffer = &amp;mut [[64u8, 139, 10], [93, 18, 214]];
+//! let color_buffer = cast::from_array_slice_mut::&lt;Srgb&lt;u8&gt;&gt;(buffer);
+//!
+//! for destination in color_buffer {
+//!     let linear_dst = destination.into_linear::&lt;f32&gt;();
+//!     *destination = (linear_dst + color).into_encoding();
+//! }
+//! ```
+//!
+//! Trying to cast an array of the wrong size will not compile:
+//!
+//! ```compile_fail
+//! use palette::{cast, Srgb};
+//!
+//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198]); // Too few components.
+//! ```
+//!
+//! ## Casting Component Buffers
+//!
+//! This is a common situation is image processing, where you have an image
+//! buffer, such as `&amp;mut [u8]`, `&amp;mut [f32]`, `Vec&lt;u8&gt;` or `Vec&lt;f32&gt;`, that you
+//! want to work with as colors. This buffer may, for example, be the content of
+//! an image file or shared with the GPU.
+//!
+//! The downside, compared to having fixed size arrays, is that the length
+//! cannot be statically known to be a multiple of the color type&#39;s array
+//! length. This adds a bit of error handling overhead, as well as for dividing
+//! or multiplying the length.
+//!
+//! ```
+//! use palette::{cast, Srgb};
+//!
+//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];
+//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer).is_ok());
+//!
+//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];
+//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer).is_err());
+//! ```
+//!
+//! An alternative, for when the length can be trusted to be correct, is to use
+//! the `from_component_*` functions that panic on error.
+//!
+//! This works:
+//!
+//! ```
+//! use palette::{cast, Srgb};
+//!
+//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];
+//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer);
+//! ```
+//!
+//! But this panics:
+//!
+//! ```should_panic
+//! use palette::{cast, Srgb};
+//!
+//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];
+//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer);
+//! ```
+//!
+//! ## Casting Single Colors
+//!
+//! The built-in color types implement `AsRef`, `AsMut`, `From`, `Into`,
+//! `TryFrom` and `TryInto` in addition to `ArrayCast` for convenient casting of
+//! single colors:
+//!
+//! ```
+//! use core::convert::TryFrom;
+//! use palette::Srgb;
+//!
+//! let color = Srgb::from([23u8, 198, 76]);
+//! let array: [u8; 3] = color.into();
+//!
+//! let slice: &amp;[u8] = color.as_ref();
+//! assert!(&lt;&amp;Srgb&lt;u8&gt;&gt;::try_from(slice).is_ok());
+//!
+//! let short_slice: &amp;[f32] = &amp;[0.1, 0.5];
+//! assert!(&lt;&amp;Srgb&gt;::try_from(short_slice).is_err()); // Too few components.
+//! ```
+//!
+//! ## Component Order
+//!
+//! The component order in an array or slice is not always the same as in the
+//! color types. For example, a byte buffer that is encoded as ARGB will not
+//! cast to correct `Rgba` values. The components can be reordered after casting
+//! by using the [`Packed`] wrapper as an intermediate representation.
+//!
+//! ```
+//! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.
+//! use palette::{rgb::PackedArgb, cast, Srgba};
+//!
+//! let components = &amp;[1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];
+//! let colors = cast::from_component_slice::&lt;PackedArgb&lt;_&gt;&gt;(components);
+//!
+//! // Notice how the alpha values have moved from the beginning to the end:
+//! assert_eq!(Srgba::from(colors[0]), Srgba::new(0.8, 0.2, 0.3, 1.0));
+//! assert_eq!(Srgba::from(colors[1]), Srgba::new(0.5, 0.7, 0.6, 1.0));
+//! ```
+//!
+//! # Unsigned Integers
+//!
+//! Types that implement [`UintCast`] can be cast to and from unsigned integers
+//! of the same size. It&#39;s a bit more limited than slices and arrays but it&#39;s
+//! useful for common patterns like representing RGBA values as hexadecimal
+//! unsigned integers.
+//!
+//! The [`Packed`] wrapper can be used as an intermediate format to make
+//! unpacking the values as simple as `from` or `into`. It&#39;s also possible to
+//! choose a channel order to be something other than what the default `From`
+//! implementations would use.
+//!
+//! ```
+//! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.
+//! use palette::{rgb::PackedArgb, cast, Srgba};
+//!
+//! let raw = &amp;[0xFF7F0080u32, 0xFF60BBCC];
+//! let colors = cast::from_uint_slice::&lt;PackedArgb&gt;(raw);
+//!
+//! assert_eq!(colors.len(), 2);
+//! assert_eq!(Srgba::from(colors[0]), Srgba::new(0x7F, 0x00, 0x80, 0xFF));
+//! assert_eq!(Srgba::from(colors[1]), Srgba::new(0x60, 0xBB, 0xCC, 0xFF));
+//! ```
 
-<span class="kw">mod</span> <span class="ident">array</span>;
-<span class="kw">mod</span> <span class="ident">packed</span>;
-<span class="kw">mod</span> <span class="ident">uint</span>;
+</span><span class="kw">mod </span>array;
+<span class="kw">mod </span>packed;
+<span class="kw">mod </span>uint;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{<span class="ident">array</span>::<span class="kw-2">*</span>, <span class="ident">packed</span>::<span class="kw-2">*</span>, <span class="ident">uint</span>::<span class="kw-2">*</span>};
+<span class="kw">pub use </span><span class="self">self</span>::{array::<span class="kw-2">*</span>, packed::<span class="kw-2">*</span>, uint::<span class="kw-2">*</span>};
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
