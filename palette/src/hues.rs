@@ -3,7 +3,7 @@ use core::ops::Mul;
 
 use core::{
     cmp::PartialEq,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Neg, Sub, SubAssign},
 };
 
 #[cfg(feature = "approx")]
@@ -19,14 +19,15 @@ use rand::{
 };
 
 #[cfg(feature = "approx")]
-use crate::angle::HalfRotation;
-use crate::num::Zero;
+use crate::{angle::HalfRotation, num::Zero};
 
 #[cfg(feature = "random")]
 use crate::angle::FullRotation;
 
-use crate::angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle};
-use crate::num::{Arithmetics, Trigonometry};
+use crate::{
+    angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle},
+    num::Trigonometry,
+};
 
 macro_rules! make_hues {
     ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
@@ -129,6 +130,32 @@ macro_rules! make_hues {
             #[inline]
             pub fn into_positive_radians(self) -> T {
                 T::degrees_to_radians(self.0.normalize_unsigned_angle())
+            }
+        }
+
+        impl<T: RealAngle + Trigonometry> $name<T> {
+            /// Returns a hue from `a` and `b`, normalized to `[0°, 360°)`.
+            ///
+            /// If `a` and `b` are both `0`, returns `0`,
+            #[inline(always)]
+            pub fn from_cartesian(a: T, b: T) -> Self where T: Add<T, Output = T> + Neg<Output = T> {
+                // atan2 returns values in the interval [-π, π]
+                // instead of
+                //   let hue_rad = T::atan2(b,a);
+                // use negative a and be and rotate, to ensure the hue is normalized,
+                let hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
+                Self::from_radians(hue_rad)
+            }
+
+            /// Returns `a` and `b` values for this hue, normalized to `[-1,
+            /// 1]`.
+            ///
+            /// They will have to be multiplied by a radius values, such as
+            /// saturation, value, chroma, etc., to represent a specific color.
+            #[inline(always)]
+            pub fn into_cartesian(self) -> (T, T) {
+                let (b, a) = self.into_raw_radians().sin_cos();
+                (a, b) // Note the swapped order compared to above
             }
         }
 
@@ -518,36 +545,6 @@ impl_uniform!(UniformRgbHue, RgbHue);
 impl_uniform!(UniformLuvHue, LuvHue);
 impl_uniform!(UniformOklabHue, OklabHue);
 
-impl<T> OklabHue<T>
-where
-    T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
-{
-    /// Returns `a` and `b` values for this hue at the given `croma`
-    #[inline(always)]
-    pub fn ab(self, chroma: T) -> (T, T) {
-        let hue_rad = self.into_raw_radians();
-        let (sin, cos) = hue_rad.sin_cos();
-        (chroma.clone() * cos, chroma * sin)
-    }
-
-    /// Returns a hue from `a` and `b`, with a normalized angle, i.e. an angle in the half
-    /// open interval [0° .. 360°).
-    /// If `a` and `b` are both `zero`, returns `None`
-    #[inline(always)]
-    pub fn from_ab(a: T, b: T) -> Option<Self> {
-        if a == T::zero() && b == T::zero() {
-            None
-        } else {
-            // atan2 returns values in the interval [-π .. π]
-            // instead of
-            //   let hue_rad = T::atan2(b,a);
-            // use negative a and be and rotate, to ensure the hue is normalized,
-            let hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
-            Some(Self::from_radians(hue_rad))
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::{
@@ -559,8 +556,8 @@ mod test {
     fn oklabhue_ab_roundtrip() {
         for degree in [0.0_f64, 90.0, 30.0, 330.0, 120.0, 240.0] {
             let hue = OklabHue::from_degrees(degree);
-            let (a, b) = hue.ab(10000.0);
-            let roundtrip_hue = OklabHue::from_ab(a, b).unwrap();
+            let (a, b) = hue.into_cartesian();
+            let roundtrip_hue = OklabHue::from_cartesian(a * 10000.0, b * 10000.0);
             assert_abs_diff_eq!(roundtrip_hue, hue);
         }
     }

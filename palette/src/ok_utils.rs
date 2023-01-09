@@ -1,14 +1,13 @@
 //! Traits and functions used in Ok* color spaces
+
 #[cfg(test)]
-use crate::angle::RealAngle;
-use crate::convert::IntoColorUnclamped;
-use crate::num::{
-    Arithmetics, Cbrt, FromScalar, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
-    Trigonometry, Zero,
+use crate::{angle::RealAngle, num::Trigonometry, OklabHue};
+
+use crate::{
+    convert::IntoColorUnclamped,
+    num::{Arithmetics, Cbrt, MinMax, One, Powi, Real, Sqrt, Zero},
+    HasBoolMask, LinSrgb, Oklab,
 };
-#[cfg(test)]
-use crate::OklabHue;
-use crate::{HasBoolMask, LinSrgb, Oklab};
 
 /// Finds intersection of the line defined by
 ///
@@ -17,101 +16,77 @@ use crate::{HasBoolMask, LinSrgb, Oklab};
 /// C = t * c1;
 ///
 /// a and b must be normalized so a² + b² == 1
-fn find_gamut_intersection<T>(a: T, b: T, l1: T, c1: T, l0: T, cusp: Option<LC<T>>) -> T
+fn find_gamut_intersection<T>(a: T, b: T, l1: T, c1: T, l0: T, cusp: LC<T>) -> T
 where
-    T: Real
-        + One
-        + Zero
-        + Arithmetics
-        + Sqrt
-        + MinMax
-        + Copy
-        + PartialEq
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
-        + Powi
-        + Cbrt
-        + Trigonometry
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+    T: Real + One + Zero + Arithmetics + MinMax + HasBoolMask<Mask = bool> + PartialOrd + Clone,
 {
-    // Find the cusp of the gamut triangle
-    let cusp = cusp.unwrap_or_else(|| LC::find_cusp(a, b));
-
     // Find the intersection for upper and lower half separately
-    if ((l1 - l0) * cusp.chroma - (cusp.lightness - l0) * c1) <= T::zero() {
+    if ((l1.clone() - &l0) * &cusp.chroma - (cusp.lightness.clone() - &l0) * &c1) <= T::zero() {
         // Lower half
 
-        cusp.chroma * l0 / (c1 * cusp.lightness + cusp.chroma * (l0 - l1))
+        cusp.chroma.clone() * &l0 / (c1 * cusp.lightness + cusp.chroma * (l0 - l1))
     } else {
         // Upper half
 
         // First intersect with triangle
-        let t = cusp.chroma * (l0 - T::one())
-            / (c1 * (cusp.lightness - T::one()) + cusp.chroma * (l0 - l1));
+        let t = cusp.chroma.clone() * (l0.clone() - T::one())
+            / (c1.clone() * (cusp.lightness - T::one()) + cusp.chroma * (l0.clone() - &l1));
 
         // Then one step Halley's method
         {
-            let dl = l1 - l0;
-            let dc = c1;
+            let dl = l1.clone() - &l0;
+            let dc = c1.clone();
 
-            let k_l = T::from_f64(0.3963377774) * a + T::from_f64(0.2158037573) * b;
-            let k_m = -T::from_f64(0.1055613458) * a - T::from_f64(0.0638541728) * b;
+            let k_l = T::from_f64(0.3963377774) * &a + T::from_f64(0.2158037573) * &b;
+            let k_m = -T::from_f64(0.1055613458) * &a - T::from_f64(0.0638541728) * &b;
             let k_s = -T::from_f64(0.0894841775) * a - T::from_f64(1.2914855480) * b;
 
-            let l_dt = dl + dc * k_l;
-            let m_dt = dl + dc * k_m;
-            let s_dt = dl + dc * k_s;
+            let l_dt = dl.clone() + dc.clone() * &k_l;
+            let m_dt = dl.clone() + dc.clone() * &k_m;
+            let s_dt = dl + dc * &k_s;
 
             // If higher accuracy is required, 2 or 3 iterations of the following block can be used:
             {
-                let lightness = l0 * (T::one() - t) + t * l1;
-                let chroma = t * c1;
+                let lightness = l0 * (T::one() - &t) + t.clone() * l1;
+                let chroma = t.clone() * c1;
 
-                let l_ = lightness + chroma * k_l;
-                let m_ = lightness + chroma * k_m;
+                let l_ = lightness.clone() + chroma.clone() * k_l;
+                let m_ = lightness.clone() + chroma.clone() * k_m;
                 let s_ = lightness + chroma * k_s;
 
-                let l = l_ * l_ * l_;
-                let m = m_ * m_ * m_;
-                let s = s_ * s_ * s_;
+                let l = l_.clone() * &l_ * &l_;
+                let m = m_.clone() * &m_ * &m_;
+                let s = s_.clone() * &s_ * &s_;
 
-                let ldt = T::from_f64(3.0) * l_dt * l_ * l_;
-                let mdt = T::from_f64(3.0) * m_dt * m_ * m_;
-                let sdt = T::from_f64(3.0) * s_dt * s_ * s_;
+                let ldt = T::from_f64(3.0) * &l_dt * &l_ * &l_;
+                let mdt = T::from_f64(3.0) * &m_dt * &m_ * &m_;
+                let sdt = T::from_f64(3.0) * &s_dt * &s_ * &s_;
 
-                let ldt2 = T::from_f64(6.0) * l_dt * l_dt * l_;
-                let mdt2 = T::from_f64(6.0) * m_dt * m_dt * m_;
-                let sdt2 = T::from_f64(6.0) * s_dt * s_dt * s_;
+                let ldt2 = T::from_f64(6.0) * &l_dt * l_dt * l_;
+                let mdt2 = T::from_f64(6.0) * &m_dt * m_dt * m_;
+                let sdt2 = T::from_f64(6.0) * &s_dt * s_dt * s_;
 
-                let r = T::from_f64(4.0767416621) * l - T::from_f64(3.3077115913) * m
-                    + T::from_f64(0.2309699292) * s
+                let r = T::from_f64(4.0767416621) * &l - T::from_f64(3.3077115913) * &m
+                    + T::from_f64(0.2309699292) * &s
                     - T::one();
-                let r1 = T::from_f64(4.0767416621) * ldt - T::from_f64(3.3077115913) * mdt
-                    + T::from_f64(0.2309699292) * sdt;
-                let r2 = T::from_f64(4.0767416621) * ldt2 - T::from_f64(3.3077115913) * mdt2
-                    + T::from_f64(0.2309699292) * sdt2;
+                let r1 = T::from_f64(4.0767416621) * &ldt - T::from_f64(3.3077115913) * &mdt
+                    + T::from_f64(0.2309699292) * &sdt;
+                let r2 = T::from_f64(4.0767416621) * &ldt2 - T::from_f64(3.3077115913) * &mdt2
+                    + T::from_f64(0.2309699292) * &sdt2;
 
-                let u_r = r1 / (r1 * r1 - T::from_f64(0.5) * r * r2);
-                let mut t_r = -r * u_r;
+                let u_r = r1.clone() / (r1.clone() * r1 - T::from_f64(0.5) * &r * r2);
+                let mut t_r = -r * &u_r;
 
-                let g = -T::from_f64(1.2684380046) * l + T::from_f64(2.6097574011) * m
-                    - T::from_f64(0.3413193965) * s
+                let g = -T::from_f64(1.2684380046) * &l + T::from_f64(2.6097574011) * &m
+                    - T::from_f64(0.3413193965) * &s
                     - T::one();
-                let g1 = -T::from_f64(1.2684380046) * ldt + T::from_f64(2.6097574011) * mdt
-                    - T::from_f64(0.3413193965) * sdt;
-                let g2 = -T::from_f64(1.2684380046) * ldt2 + T::from_f64(2.6097574011) * mdt2
-                    - T::from_f64(0.3413193965) * sdt2;
+                let g1 = -T::from_f64(1.2684380046) * &ldt + T::from_f64(2.6097574011) * &mdt
+                    - T::from_f64(0.3413193965) * &sdt;
+                let g2 = -T::from_f64(1.2684380046) * &ldt2 + T::from_f64(2.6097574011) * &mdt2
+                    - T::from_f64(0.3413193965) * &sdt2;
 
-                let u_g = g1 / (g1 * g1 - T::from_f64(0.5) * g * g2);
-                let mut t_g = -g * u_g;
+                let u_g = g1.clone() / (g1.clone() * g1 - T::from_f64(0.5) * &g * g2);
+                let mut t_g = -g * &u_g;
 
                 let b = -T::from_f64(0.0041960863) * l - T::from_f64(0.7034186147) * m
                     + T::from_f64(1.7076147010) * s
@@ -121,14 +96,22 @@ where
                 let b2 = -T::from_f64(0.0041960863) * ldt2 - T::from_f64(0.7034186147) * mdt2
                     + T::from_f64(1.7076147010) * sdt2;
 
-                let u_b = b1 / (b1 * b1 - T::from_f64(0.5) * b * b2);
-                let mut t_b = -b * u_b;
+                let u_b = b1.clone() / (b1.clone() * b1 - T::from_f64(0.5) * &b * b2);
+                let mut t_b = -b * &u_b;
 
                 // flt_max really is a constant, but cannot be defined as one due to the T::from_f64 function
                 let flt_max = T::from_f64(10e5);
 
-                t_r = if u_r >= T::zero() { t_r } else { flt_max };
-                t_g = if u_g >= T::zero() { t_g } else { flt_max };
+                t_r = if u_r >= T::zero() {
+                    t_r
+                } else {
+                    flt_max.clone()
+                };
+                t_g = if u_g >= T::zero() {
+                    t_g
+                } else {
+                    flt_max.clone()
+                };
                 t_b = if u_b >= T::zero() { t_b } else { flt_max };
 
                 t + T::min(t_r, T::min(t_g, t_b))
@@ -149,56 +132,58 @@ where
         + One
         + Zero
         + Arithmetics
-        + Sqrt
         + MinMax
-        + Copy
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
-        + Powi
         + Cbrt
-        + Trigonometry
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
+        + Sqrt
+        + Powi
         + Clone
-        + FromScalar<Scalar = T::Scalar>,
+        + HasBoolMask<Mask = bool>
+        + PartialOrd,
+    Oklab<T>: IntoColorUnclamped<LinSrgb<T>>,
 {
     pub fn from_normalized(lightness: T, a_: T, b_: T) -> Self {
-        let cusp = LC::find_cusp(a_, b_);
+        let cusp = LC::find_cusp(a_.clone(), b_.clone());
 
-        let max_chroma =
-            find_gamut_intersection(a_, b_, lightness, T::one(), lightness, Some(cusp));
+        let max_chroma = find_gamut_intersection(
+            a_.clone(),
+            b_.clone(),
+            lightness.clone(),
+            T::one(),
+            lightness.clone(),
+            cusp.clone(),
+        );
         let st_max = ST::from(cusp);
 
         // Scale factor to compensate for the curved part of gamut shape:
-        let k = max_chroma / T::min(lightness * st_max.s, (T::one() - lightness) * st_max.t);
+        let k = max_chroma.clone()
+            / T::min(
+                lightness.clone() * st_max.s,
+                (T::one() - &lightness) * st_max.t,
+            );
 
         let c_mid = {
             let st_mid = ST::mid(a_, b_);
 
             // Use a soft minimum function, instead of a sharp triangle shape to get a smooth value for chroma.
-            let c_a = lightness * st_mid.s;
-            let c_b = (T::one() - lightness) * st_mid.t;
+            let c_a = lightness.clone() * st_mid.s;
+            let c_b = (T::one() - &lightness) * st_mid.t;
             T::from_f64(0.9)
                 * k
                 * T::sqrt(T::sqrt(
                     T::one()
-                        / (T::one() / (c_a * c_a * c_a * c_a) + T::one() / (c_b * c_b * c_b * c_b)),
+                        / (T::one() / (c_a.clone() * &c_a * &c_a * &c_a)
+                            + T::one() / (c_b.clone() * &c_b * &c_b * &c_b)),
                 ))
         };
 
         let c_0 = {
             // for C_0, the shape is independent of hue, so ST are constant.
             // Values picked to roughly be the average values of ST.
-            let c_a = lightness * T::from_f64(0.4);
+            let c_a = lightness.clone() * T::from_f64(0.4);
             let c_b = (T::one() - lightness) * T::from_f64(0.8);
 
             // Use a soft minimum function, instead of a sharp triangle shape to get a smooth value for chroma.
-            T::sqrt(T::one() / (T::one() / (c_a * c_a) + T::one() / (c_b * c_b)))
+            T::sqrt(T::one() / (T::one() / (c_a.clone() * c_a) + T::one() / (c_b.clone() * c_b)))
         };
         Self {
             zero: c_0,
@@ -240,44 +225,32 @@ pub(crate) const MAX_SRGB_SATURATION_INACCURACY: f64 = 1e-6;
 
 impl<T> LC<T>
 where
-    T: Real
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
-        + MinMax
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + One
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+    T: Real + One + Arithmetics + Powi + HasBoolMask<Mask = bool> + PartialOrd + Clone,
 {
     /// Returns the cusp of the geometrical shape of representable `sRGB` colors for
     /// normalized `a` and `b` values of an `OKlabHue`, where "normalized" means, `a² + b² == 1`.
     ///
     /// The cusp solely depends on the maximum saturation of the hue, but is expressed as a
     /// combination of lightness and chroma.
-    pub fn find_cusp(a: T, b: T) -> Self {
+    pub fn find_cusp(a: T, b: T) -> Self
+    where
+        T: MinMax + Cbrt,
+        Oklab<T>: IntoColorUnclamped<LinSrgb<T>>,
+    {
         // First, find the maximum saturation (saturation S = C/L)
-        let max_saturation = Self::max_saturation(a, b);
+        let max_saturation = Self::max_saturation(a.clone(), b.clone());
         // Convert to linear sRGB to find the first point where at least one of r,g or b >= 1:
-        let rgb_at_max: LinSrgb<T> =
-            Oklab::new(T::one(), max_saturation * a, max_saturation * b).into_color_unclamped();
+        let rgb_at_max: LinSrgb<T> = Oklab::new(
+            T::one(),
+            max_saturation.clone() * a,
+            max_saturation.clone() * b,
+        )
+        .into_color_unclamped();
 
         let max_lightness =
             T::cbrt(T::one() / T::max(T::max(rgb_at_max.red, rgb_at_max.green), rgb_at_max.blue));
         Self {
-            lightness: max_lightness,
+            lightness: max_lightness.clone(),
             chroma: max_lightness * max_saturation,
         }
     }
@@ -297,7 +270,7 @@ where
         // wl, wm and ws are coefficients for https://en.wikipedia.org/wiki/LMS_color_space
         // -- the color space modelling human perception.
         let (k0, k1, k2, k3, k4, wl, wm, ws) =
-            if T::from_f64(-1.88170328) * a - T::from_f64(0.80936493) * b > T::one() {
+            if T::from_f64(-1.88170328) * &a - T::from_f64(0.80936493) * &b > T::one() {
                 // red component at zero first
                 (
                     T::from_f64(1.19086277),
@@ -309,7 +282,7 @@ where
                     T::from_f64(-3.3077115913),
                     T::from_f64(0.2309699292),
                 )
-            } else if T::from_f64(1.81444104) * a - T::from_f64(1.19445276) * b > T::one() {
+            } else if T::from_f64(1.81444104) * &a - T::from_f64(1.19445276) * &b > T::one() {
                 //green component at zero first
                 (
                     T::from_f64(0.73956515),
@@ -336,40 +309,41 @@ where
             };
 
         // Approximate max saturation using a polynomial
-        let mut approx_max_saturation = k0 + k1 * a + k2 * b + k3 * a.powi(2) + k4 * a * b;
+        let mut approx_max_saturation =
+            k0 + k1 * &a + k2 * &b + k3 * a.clone().powi(2) + k4 * &a * &b;
         // Get closer with Halley's method
-        let k_l = T::from_f64(0.3963377774) * a + T::from_f64(0.2158037573) * b;
-        let k_m = T::from_f64(-0.1055613458) * a - T::from_f64(0.0638541728) * b;
+        let k_l = T::from_f64(0.3963377774) * &a + T::from_f64(0.2158037573) * &b;
+        let k_m = T::from_f64(-0.1055613458) * &a - T::from_f64(0.0638541728) * &b;
         let k_s = T::from_f64(-0.0894841775) * a - T::from_f64(1.2914855480) * b;
 
         for _i in 0..MAX_SRGB_SATURATION_SEARCH_MAX_ITER {
-            let l_ = T::one() + approx_max_saturation * k_l;
-            let m_ = T::one() + approx_max_saturation * k_m;
-            let s_ = T::one() + approx_max_saturation * k_s;
+            let l_ = T::one() + approx_max_saturation.clone() * &k_l;
+            let m_ = T::one() + approx_max_saturation.clone() * &k_m;
+            let s_ = T::one() + approx_max_saturation.clone() * &k_s;
 
-            let l = l_.powi(3);
-            let m = m_.powi(3);
-            let s = s_.powi(3);
+            let l = l_.clone().powi(3);
+            let m = m_.clone().powi(3);
+            let s = s_.clone().powi(3);
 
             // first derivative components
-            let l_ds = T::from_f64(3.0) * k_l * l_.powi(2);
-            let m_ds = T::from_f64(3.0) * k_m * m_.powi(2);
-            let s_ds = T::from_f64(3.0) * k_s * s_.powi(2);
+            let l_ds = T::from_f64(3.0) * &k_l * l_.clone().powi(2);
+            let m_ds = T::from_f64(3.0) * &k_m * m_.clone().powi(2);
+            let s_ds = T::from_f64(3.0) * &k_s * s_.clone().powi(2);
 
             // second derivative components
-            let l_ds2 = T::from_f64(6.0) * k_l.powi(2) * l_;
-            let m_ds2 = T::from_f64(6.0) * k_m.powi(2) * m_;
-            let s_ds2 = T::from_f64(6.0) * k_s.powi(2) * s_;
+            let l_ds2 = T::from_f64(6.0) * k_l.clone().powi(2) * l_;
+            let m_ds2 = T::from_f64(6.0) * k_m.clone().powi(2) * m_;
+            let s_ds2 = T::from_f64(6.0) * k_s.clone().powi(2) * s_;
 
             // let x be the approximate maximum saturation and
             // i the current iteration
             // f = f(x_i), f1 = f'(x_i), f2 = f''(x_i) for
-            let f = wl * l + wm * m + ws * s;
-            let f1 = wl * l_ds + wm * m_ds + ws * s_ds;
-            let f2 = wl * l_ds2 + wm * m_ds2 + ws * s_ds2;
+            let f = wl.clone() * l + wm.clone() * m + ws.clone() * s;
+            let f1 = wl.clone() * l_ds + wm.clone() * m_ds + ws.clone() * s_ds;
+            let f2 = wl.clone() * l_ds2 + wm.clone() * m_ds2 + ws.clone() * s_ds2;
 
             approx_max_saturation =
-                approx_max_saturation - f * f1 / (f1.powi(2) - T::from_f64(0.5) * f * f2);
+                approx_max_saturation - f.clone() * &f1 / (f1.powi(2) - T::from_f64(0.5) * f * f2);
         }
         approx_max_saturation
     }
@@ -378,34 +352,26 @@ where
 #[cfg(test)]
 impl<T> OklabHue<T>
 where
-    T: Real
-        + RealAngle
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
-        + MinMax
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
+    T: RealAngle
+        + One
         + Arithmetics
         + Trigonometry
-        + Zero
-        + One
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+        + MinMax
+        + Cbrt
+        + Powi
+        + HasBoolMask<Mask = bool>
+        + PartialOrd
+        + Clone,
+    Oklab<T>: IntoColorUnclamped<LinSrgb<T>>,
 {
     pub(crate) fn srgb_limits(self) -> (LC<T>, T, T) {
-        let normalized_hue_vector = self.ab(T::one());
-        let lc = LC::find_cusp(normalized_hue_vector.0, normalized_hue_vector.1);
-        let a = lc.chroma.clone() * normalized_hue_vector.0.clone();
-        let b = lc.chroma.clone() * normalized_hue_vector.1.clone();
+        let normalized_hue_vector = self.into_cartesian();
+        let lc = LC::find_cusp(
+            normalized_hue_vector.0.clone(),
+            normalized_hue_vector.1.clone(),
+        );
+        let a = lc.chroma.clone() * normalized_hue_vector.0;
+        let b = lc.chroma.clone() * normalized_hue_vector.1;
         (lc, a, b)
     }
 }
@@ -427,11 +393,11 @@ pub(crate) struct ST<T> {
 
 impl<T> From<LC<T>> for ST<T>
 where
-    T: Arithmetics + One + Copy,
+    T: Arithmetics + One + Clone,
 {
     fn from(lc: LC<T>) -> Self {
         ST {
-            s: lc.chroma / lc.lightness,
+            s: lc.chroma.clone() / &lc.lightness,
             t: lc.chroma / (T::one() - lc.lightness),
         }
     }
@@ -439,7 +405,7 @@ where
 
 impl<T> ST<T>
 where
-    T: Real + Arithmetics + Copy + One,
+    T: Real + Arithmetics + One + Clone,
 {
     /// Returns a smooth approximation of the location of the cusp.
     ///
@@ -450,24 +416,22 @@ where
     ///
     ///   `T_mid < T_max`
     #[rustfmt::skip]
-    fn mid(a_: T, b_: T) -> ST<T>
-
-    {
+    fn mid(a_: T, b_: T) -> ST<T> {
         let s = T::from_f64(0.11516993) + T::one() / (
             T::from_f64(7.44778970)
-                + T::from_f64(4.15901240) * b_
-                + a_ * (T::from_f64(-2.19557347)+ T::from_f64(1.75198401) * b_
-                + a_ * (T::from_f64(-2.13704948) - T::from_f64(10.02301043) * b_
-                + a_ * (T::from_f64(-4.24894561) + T::from_f64(5.38770819) * b_+ T::from_f64(4.69891013) * a_
+                + T::from_f64(4.15901240) * &b_
+                + a_.clone() * (T::from_f64(-2.19557347)+ T::from_f64(1.75198401) * &b_
+                + a_.clone() * (T::from_f64(-2.13704948) - T::from_f64(10.02301043) * &b_
+                + a_.clone() * (T::from_f64(-4.24894561) + T::from_f64(5.38770819) * &b_+ T::from_f64(4.69891013) * &a_
             )))
         );
 
         let t = T::from_f64(0.11239642)+ T::one()/ (
-            T::from_f64(1.61320320) - T::from_f64(0.68124379) * b_
-                + a_ * (T::from_f64(0.40370612)
-                + T::from_f64(0.90148123) * b_
-                + a_ * (T::from_f64(-0.27087943) + T::from_f64(0.61223990) * b_
-                + a_ * (T::from_f64(0.00299215) - T::from_f64(0.45399568) * b_ - T::from_f64(0.14661872) * a_
+            T::from_f64(1.61320320) - T::from_f64(0.68124379) * &b_
+                + a_.clone() * (T::from_f64(0.40370612)
+                + T::from_f64(0.90148123) * &b_
+                + a_.clone() * (T::from_f64(-0.27087943) + T::from_f64(0.61223990) * &b_
+                + a_.clone() * (T::from_f64(0.00299215) - T::from_f64(0.45399568) * b_ - T::from_f64(0.14661872) * a_
             )))
         );
         ST { s, t }
@@ -485,7 +449,7 @@ where
 /// [D65](https://en.wikipedia.org/wiki/Illuminant_D65) reference white luminance.
 /// Mapping `1` to that luminance is just a matter of definition. But is say `0.8` `Oklab`
 /// lightness equal to `0.5` or `0.9` `sRGB` luminance?
-///   
+///
 /// The shape and weights of `L_r` are chosen to closely matches the lightness estimate of
 /// the `CIELab` color space and be nearly equal at `0.5`.
 ///
@@ -495,15 +459,15 @@ where
 /// https://bottosson.github.io/posts/colorpicker/#intermission---a-new-lightness-estimate-for-oklab
 pub(crate) fn toe<T>(oklab_lightness: T) -> T
 where
-    T: Real + Copy + Powi + Sqrt + Arithmetics + One,
+    T: Real + Powi + Sqrt + Arithmetics + One + Clone,
 {
     let k_1 = T::from_f64(0.206);
     let k_2 = T::from_f64(0.03);
-    let k_3 = (T::one() + k_1) / (T::one() + k_2);
+    let k_3 = (T::one() + &k_1) / (T::one() + &k_2);
     T::from_f64(0.5)
-        * (k_3 * oklab_lightness - k_1
+        * (k_3.clone() * &oklab_lightness - &k_1
             + T::sqrt(
-                (k_3 * oklab_lightness - k_1).powi(2)
+                (k_3.clone() * &oklab_lightness - k_1).powi(2)
                     + T::from_f64(4.0) * k_2 * k_3 * oklab_lightness,
             ))
 }
@@ -513,12 +477,12 @@ where
 /// Inverse of [`toe`]
 pub(crate) fn toe_inv<T>(l_r: T) -> T
 where
-    T: Real + Copy + Powi + Arithmetics + One,
+    T: Real + Powi + Arithmetics + One + Clone,
 {
     let k_1 = T::from_f64(0.206);
     let k_2 = T::from_f64(0.03);
-    let k_3 = (T::one() + k_1) / (T::one() + k_2);
-    (l_r.powi(2) + k_1 * l_r) / (k_3 * (l_r + k_2))
+    let k_3 = (T::one() + &k_1) / (T::one() + &k_2);
+    (l_r.clone().powi(2) + k_1 * &l_r) / (k_3 * (l_r + k_2))
 }
 
 #[cfg(test)]
@@ -597,7 +561,13 @@ mod tests {
             max_b = f64::max(max_b, b);
             min_b = f64::min(min_b, b);
         }
-        let (max_chroma_a, max_chroma_b) = max_chroma.hue.ab(max_chroma.lc.chroma);
+
+        let (normalized_a, normalized_b) = max_chroma.hue.into_cartesian();
+        let (max_chroma_a, max_chroma_b) = (
+            normalized_a * max_chroma.lc.chroma,
+            normalized_b * max_chroma.lc.chroma,
+        );
+
         println!(
             "Min chroma {} at hue {:?}°.",
             min_chroma.lc.chroma, min_chroma.hue,
@@ -615,7 +585,10 @@ mod tests {
     fn max_saturation_f64_eq_f32() {
         let lin_srgb = LinSrgb::new(0.0, 0.0, 1.0);
         let oklab_64 = Oklab::<f64>::from_color_unclamped(lin_srgb);
-        let (normalized_a, normalized_b) = oklab_64.chroma_and_normalized_ab().1.unwrap();
+        let (normalized_a, normalized_b) = (
+            oklab_64.a / oklab_64.get_chroma(),
+            oklab_64.b / oklab_64.get_chroma(),
+        );
         let saturation_64 = LC::max_saturation(normalized_a, normalized_b);
         let saturation_32 = LC::max_saturation(normalized_a as f32, normalized_b as f32);
 

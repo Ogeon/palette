@@ -2,15 +2,13 @@ use core::fmt::Debug;
 
 pub use alpha::Okhwba;
 
-use crate::angle::{FromAngle, RealAngle};
-use crate::num::{FromScalar, Hypot, Recip, Sqrt};
-use crate::stimulus::{FromStimulus, Stimulus};
-use crate::white_point::D65;
-use crate::HasBoolMask;
 use crate::{
+    angle::FromAngle,
     convert::FromColorUnclamped,
-    num::{Arithmetics, Cbrt, IsValidDivisor, One, Real, Trigonometry, Zero},
-    Okhsv, OklabHue,
+    num::{Arithmetics, One},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::D65,
+    HasBoolMask, Okhsv, OklabHue,
 };
 
 mod alpha;
@@ -21,9 +19,8 @@ mod random;
 #[cfg(feature = "approx")]
 mod visual_eq;
 
-/// A Hue/Whiteness/Blackness representation of [`Oklab`] in the `sRGB` color space.
-/// # See
-/// https://bottosson.github.io/posts/colorpicker/#okhwb
+/// A Hue/Whiteness/Blackness representation of [`Oklab`][crate::Oklab] in the
+/// `sRGB` color space, similar to [`Hwb`][crate::Okhwb].
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -34,7 +31,7 @@ mod visual_eq;
 )]
 #[repr(C)]
 pub struct Okhwb<T = f32> {
-    /// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    /// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -124,40 +121,16 @@ where
 
 impl<T> FromColorUnclamped<Okhsv<T>> for Okhwb<T>
 where
-    T: Real
-        + Copy
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + Hypot
-        + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+    T: One + Arithmetics,
 {
     /// Converts `lab` to `Okhwb` in the bounds of sRGB.
-    ///
-    /// # See
-    /// https://bottosson.github.io/posts/colorpicker/#okhwb
-    /// See [`srgb_to_okhwb`](https://bottosson.github.io/posts/colorpicker/#okhwb-2).
-    /// This implementation differs from srgb_to_okhwb in that it starts with the `lab`
-    /// value and produces hues in degrees, whereas `srgb_to_okhwb` produces degree/360.
     fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
-        Self::new(
-            hsv.hue,
-            (T::one() - hsv.saturation) * hsv.value,
-            T::one() - hsv.value,
-        )
+        // See <https://bottosson.github.io/posts/colorpicker/#okhwb>.
+        Self {
+            hue: hsv.hue,
+            whiteness: (T::one() - hsv.saturation) * &hsv.value,
+            blackness: T::one() - hsv.value,
+        }
     }
 }
 
@@ -194,6 +167,8 @@ mod tests {
     use crate::rgb::Rgb;
     use crate::visual::VisuallyEqual;
     use crate::{encoding, LinSrgb, Okhsv, Okhwb, Oklab};
+
+    test_convert_into_from_xyz!(Okhwb);
 
     #[test]
     fn test_roundtrip_okhwb_oklab_is_original() {

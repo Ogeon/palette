@@ -448,6 +448,8 @@ mod test {
     use crate::white_point::D65;
     use crate::{FromColor, LinLuma, LinSrgb};
 
+    test_convert_into_from_xyz!(Yxy);
+
     #[test]
     fn luma() {
         let a = Yxy::<D65>::from_color(LinLuma::new(0.5));

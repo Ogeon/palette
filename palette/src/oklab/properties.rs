@@ -1,6 +1,6 @@
 use core::ops::BitOr;
 
-use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -61,12 +61,12 @@ impl_premultiply!(Oklab { l, a, b });
 
 impl<T> GetHue for Oklab<T>
 where
-    T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + Default + PartialEq,
+    T: RealAngle + Trigonometry + Add<T, Output = T> + Neg<Output = T> + Clone,
 {
     type Hue = OklabHue<T>;
 
     fn get_hue(&self) -> OklabHue<T> {
-        self.try_hue().unwrap_or_default()
+        OklabHue::from_cartesian(self.a.clone(), self.b.clone())
     }
 }
 

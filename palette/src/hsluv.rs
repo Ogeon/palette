@@ -479,6 +479,8 @@ mod test {
     use super::Hsluv;
     use crate::{white_point::D65, FromColor, Lchuv, LuvHue, Saturate};
 
+    test_convert_into_from_xyz!(Hsluv);
+
     #[test]
     fn lchuv_round_trip() {
         for hue in (0..=20).map(|x| x as f64 * 18.0) {

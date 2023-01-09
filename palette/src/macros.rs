@@ -21,6 +21,8 @@ mod lazy_select;
 mod simd;
 #[macro_use]
 mod clamp;
+#[macro_use]
+mod convert;
 
 #[cfg(feature = "random")]
 #[macro_use]

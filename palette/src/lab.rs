@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 #[cfg(feature = "approx")]
@@ -295,12 +295,12 @@ impl_premultiply!(Lab<Wp> {l, a, b} phantom: white_point);
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where
-    T: RealAngle + Trigonometry + Clone,
+    T: RealAngle + Trigonometry + Add<T, Output = T> + Neg<Output = T> + Clone,
 {
     type Hue = LabHue<T>;
 
     fn get_hue(&self) -> LabHue<T> {
-        LabHue::from_radians(self.b.clone().atan2(self.a.clone()))
+        LabHue::from_cartesian(self.a.clone(), self.b.clone())
     }
 }
 
@@ -468,6 +468,8 @@ mod test {
     use super::Lab;
     use crate::white_point::D65;
     use crate::{FromColor, LinSrgb};
+
+    test_convert_into_from_xyz!(Lab);
 
     #[test]
     fn red() {

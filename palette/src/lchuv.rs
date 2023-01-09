@@ -479,6 +479,8 @@ mod test {
     use crate::white_point::D65;
     use crate::Lchuv;
 
+    test_convert_into_from_xyz!(Lchuv);
+
     #[test]
     fn ranges() {
         assert_ranges! {

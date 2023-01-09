@@ -5,7 +5,7 @@ use crate::{
     convert::FromColorUnclamped,
     num::{Hypot, One, Zero},
     white_point::D65,
-    GetHue, Oklab, OklabHue, Xyz,
+    GetHue, Oklab, OklabHue,
 };
 
 mod alpha;
@@ -29,7 +29,7 @@ mod random;
     palette_internal,
     white_point = "D65",
     component = "T",
-    skip_derives(Oklab, Oklch, Xyz)
+    skip_derives(Oklab, Oklch)
 )]
 #[repr(C)]
 pub struct Oklch<T = f32> {
@@ -101,17 +101,6 @@ impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T> {
     }
 }
 
-impl<T> FromColorUnclamped<Xyz<D65, T>> for Oklch<T>
-where
-    Oklab<T>: FromColorUnclamped<Xyz<D65, T>>,
-    Self: FromColorUnclamped<Oklab<T>>,
-{
-    fn from_color_unclamped(color: Xyz<D65, T>) -> Self {
-        let lab = Oklab::<T>::from_color_unclamped(color);
-        Self::from_color_unclamped(lab)
-    }
-}
-
 impl<T> FromColorUnclamped<Oklab<T>> for Oklch<T>
 where
     T: Hypot + Clone,
@@ -119,7 +108,7 @@ where
 {
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         let hue = color.get_hue();
-        let chroma = color.chroma();
+        let chroma = color.get_chroma();
         Oklch::new(color.l, chroma, hue)
     }
 }
@@ -162,6 +151,8 @@ unsafe impl<T> bytemuck::Pod for Oklch<T> where T: bytemuck::Pod {}
 #[cfg(test)]
 mod test {
     use crate::Oklch;
+
+    test_convert_into_from_xyz!(Oklch);
 
     #[test]
     fn ranges() {

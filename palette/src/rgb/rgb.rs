@@ -19,9 +19,6 @@ use rand::{
     Rng,
 };
 
-use crate::num::Powi;
-use crate::oklab::oklab_to_linear_srgb;
-use crate::white_point::D65;
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
@@ -37,9 +34,10 @@ use crate::{
         self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
     },
+    oklab::oklab_to_linear_srgb,
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
-    white_point::{Any, WhitePoint},
+    white_point::{Any, WhitePoint, D65},
     Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
     Mix, MixAssign, Oklab, RelativeContrast, RgbHue, Xyz, Yxy,
 };
@@ -744,20 +742,12 @@ where
 
 impl<S, T> FromColorUnclamped<Oklab<T>> for Rgb<S, T>
 where
-    T: Real + Powi + Arithmetics + FromScalar + Copy,
-    T::Scalar: Recip
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + FromScalar<Scalar = T::Scalar>
-        + Real
-        + Zero
-        + One
-        + Clone,
-    S: RgbStandard + 'static,
+    T: Real + Arithmetics + Copy,
+    S: RgbStandard,
     S::TransferFn: FromLinear<T, T>,
-    S::Space: RgbSpace<WhitePoint = D65>,
-    <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
-    Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
+    S::Space: RgbSpace<WhitePoint = D65> + 'static,
+    Rgb<Linear<Srgb>, T>: IntoColorUnclamped<Self>,
+    Xyz<D65, T>: FromColorUnclamped<Oklab<T>> + IntoColorUnclamped<Self>,
 {
     fn from_color_unclamped(oklab: Oklab<T>) -> Self {
         if TypeId::of::<<S as RgbStandard>::Space>() == TypeId::of::<Srgb>() {
@@ -829,10 +819,9 @@ where
     fn get_hue(&self) -> RgbHue<T> {
         let sqrt_3: T = T::from_f64(1.73205081);
 
-        RgbHue::from_radians(
-            (sqrt_3 * (self.green.clone() - self.blue.clone())).atan2(
-                self.red.clone() * T::from_f64(2.0) - self.green.clone() - self.blue.clone(),
-            ),
+        RgbHue::from_cartesian(
+            self.red.clone() * T::from_f64(2.0) - self.green.clone() - self.blue.clone(),
+            sqrt_3 * (self.green.clone() - self.blue.clone()),
         )
     }
 }
@@ -1406,6 +1395,8 @@ mod test {
     use crate::rgb::channels;
 
     use super::{Rgb, Rgba};
+
+    test_convert_into_from_xyz!(Rgb);
 
     #[test]
     fn ranges() {
