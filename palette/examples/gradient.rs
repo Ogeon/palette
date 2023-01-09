@@ -1,47 +1,63 @@
-#[cfg(not(feature = "std"))]
 fn main() {
-    println!("You can't use gradients without the standard library");
-}
-
-#[cfg(feature = "std")]
-fn main() {
-    use palette::{FromColor, Gradient, IntoColor, Lch, LinSrgb, Srgb};
+    use enterpolation::{
+        linear::{ConstEquidistantLinear, Linear},
+        Curve, Merge,
+    };
+    use palette::{FromColor, IntoColor, Lch, LinSrgb, Mix, Srgb};
 
     use image::{GenericImage, GenericImageView, RgbImage};
 
-    //A gradient of evenly spaced colors
-    let grad1 = Gradient::new(vec![
+    // A gradient of evenly spaced colors
+    let grad1 = ConstEquidistantLinear::<f64, _, 3>::equidistant_unchecked([
         LinSrgb::new(1.0, 0.1, 0.1),
         LinSrgb::new(0.1, 0.1, 1.0),
         LinSrgb::new(0.1, 1.0, 0.1),
     ]);
 
-    //The same colors as in grad1, but with the blue point shifted down
-    let grad2 = Gradient::with_domain(vec![
-        (0.0, LinSrgb::new(1.0, 0.1, 0.1)),
-        (0.25, LinSrgb::new(0.1, 0.1, 1.0)),
-        (1.0, LinSrgb::new(0.1, 1.0, 0.1)),
-    ]);
+    // The same colors as in grad1, but with the blue point shifted down
+    let grad2 = Linear::builder()
+        .elements([
+            LinSrgb::new(1.0, 0.1, 0.1),
+            LinSrgb::new(0.1, 0.1, 1.0),
+            LinSrgb::new(0.1, 1.0, 0.1),
+        ])
+        .knots([0.0, 0.25, 1.0])
+        .build()
+        .unwrap();
 
-    //The same colors and offsets as in grad1, but in a color space where the hue
+    // Currently necessary while hues don't implement multiplication.
+    #[derive(Clone, Copy, Debug)]
+    struct Adapter<T>(T);
+
+    impl<T: Mix> Merge<T::Scalar> for Adapter<T> {
+        fn merge(self, to: Self, factor: T::Scalar) -> Self {
+            Adapter(self.0.mix(to.0, factor))
+        }
+    }
+
+    // The same colors and offsets as in grad1, but in a color space where the hue
     // is a component
-    let grad3 = Gradient::new(vec![
-        Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1)),
-        Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0)),
-        Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1)),
+    let grad3 = Linear::equidistant_unchecked([
+        Adapter(Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1))),
+        Adapter(Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0))),
+        Adapter(Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1))),
     ]);
 
-    //The same colors and color space as in grad3, but with the blue point
+    // The same colors and color space as in grad3, but with the blue point
     // shifted down
-    let grad4 = Gradient::with_domain(vec![
-        (0.0, Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1))),
-        (0.25, Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0))),
-        (1.0, Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1))),
-    ]);
+    let grad4 = Linear::builder()
+        .elements([
+            Adapter(Lch::from_color(LinSrgb::new(1.0, 0.1, 0.1))),
+            Adapter(Lch::from_color(LinSrgb::new(0.1, 0.1, 1.0))),
+            Adapter(Lch::from_color(LinSrgb::new(0.1, 1.0, 0.1))),
+        ])
+        .knots([0.0, 0.25, 1.0])
+        .build()
+        .unwrap();
 
     let mut image = RgbImage::new(256, 128);
 
-    for (i, ((c1, c2), (c3, c4))) in grad1
+    for (i, ((c1, c2), (Adapter(c3), Adapter(c4)))) in grad1
         .take(256)
         .zip(grad2.take(256))
         .zip(grad3.take(256).zip(grad4.take(256)))

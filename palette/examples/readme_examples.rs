@@ -129,9 +129,10 @@ fn color_operations_2() {
 
 #[cfg(feature = "std")]
 fn gradients_1() {
-    use palette::{Gradient, LinSrgb};
+    use enterpolation::{linear::ConstEquidistantLinear, Curve};
+    use palette::LinSrgb;
 
-    let gradient = Gradient::new(vec![
+    let gradient = ConstEquidistantLinear::<f32, _, 3>::equidistant_unchecked([
         LinSrgb::new(0.00, 0.05, 0.20),
         LinSrgb::new(0.70, 0.10, 0.20),
         LinSrgb::new(0.95, 0.90, 0.30),
@@ -147,33 +148,9 @@ fn gradients_1() {
     display_colors(
         "example-data/output/readme_gradients_1.png",
         &[
-            DisplayType::Continuous(&|i| gradient.get(i).into_encoding()),
-            DisplayType::Discrete(&taken_srgb8_colors),
-        ],
-    );
-}
-
-#[cfg(feature = "std")]
-fn gradients_2() {
-    use palette::{Gradient, LinSrgb};
-
-    let gradient = Gradient::from([
-        (0.0, LinSrgb::new(0.00, 0.05, 0.20)), // A pair of position and color.
-        (0.2, LinSrgb::new(0.70, 0.10, 0.20)),
-        (1.0, LinSrgb::new(0.95, 0.90, 0.30)),
-    ]);
-
-    let taken_colors: Vec<_> = gradient.take(10).collect();
-
-    // Write example image
-    let taken_srgb8_colors: Vec<_> = taken_colors
-        .into_iter()
-        .map(|color| color.into_encoding())
-        .collect();
-    display_colors(
-        "example-data/output/readme_gradients_2.png",
-        &[
-            DisplayType::Continuous(&|i| gradient.get(i).into_encoding()),
+            DisplayType::Continuous(&|i| {
+                enterpolation::Generator::gen(&gradient, i).into_encoding()
+            }),
             DisplayType::Discrete(&taken_srgb8_colors),
         ],
     );
@@ -250,6 +227,4 @@ fn main() {
     color_operations_2();
     #[cfg(feature = "std")]
     gradients_1();
-    #[cfg(feature = "std")]
-    gradients_2();
 }

@@ -9,10 +9,9 @@ A color management and conversion library that focuses on maintaining correctnes
 * Type system representations of color spaces, including RGB, HSL, HSV, HWB, L\*a\*b\*, L\*C\*h°, XYZ and xyY.
 * Copy free conversion to and from color buffers allows simple integration with other crates and systems.
 * Color operations implemented as traits, such as arithmetic, lighten/darken, hue shifting, mixing/interpolating, and SVG blend functions.
-* Provides types for creating gradients.
 * Color spaces can be customized, using type parameters, to support different levels of precision, linearity, white points, RGB standards, etc.
-* Supports `#[no_std]`, with only gradients disabled.
-* Optional `serde` and `rand` integration.
+* Supports `#[no_std]`.
+* Optional `serde`, `rand`, and `bytemuck` integration.
 
 ## Minimum Supported Rust Version (MSRV)
 
@@ -42,7 +41,6 @@ These features are enabled by default:
 
 * `"named"` - Enables color constants, located in the `named` module.
 * `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors.
-* `"named_gradients"`- Enables gradient constants, located in `gradient::named`. This requires the standard library.
 * `"std"` - Enables use of the standard library.
 * `"approx"` - Enables approximate comparison using [`approx`].
 
@@ -57,12 +55,7 @@ These features are disabled by default:
 
 ### Using palette in an embedded environment
 
-Palette supports `#![no_std]` environments by disabling the `"std"` feature. However, there are some things that are unavailable without the standard library:
-
-* Gradients are unavailable, because they depend heavily on Vectors.
-* Serialization using `serde` is unavailable.
-
-It uses [`libm`] to provide the floating-point operations that are typically in `std`.
+Palette supports `#![no_std]` environments by disabling the `"std"` feature. It uses [`libm`] to provide the floating-point operations that are typically in `std`. However, serializing with `serde` is not available without the standard library.
 
 ## Examples
 
@@ -189,12 +182,13 @@ There's also the option to explicitly convert to and from premultiplied alpha, t
 
 ### Gradients
 
-The `Gradient` type provides basic support for linear gradients in any color space that implements the `Mix` trait. As an example, the `Gradient::take` method returns an iterator over a number of points along the gradient:
+Most color types are directly compatible with gradient and interpolation crates, such as [`enterpolation`]:
 
 ```rust
-use palette::{Gradient, LinSrgb};
+use enterpolation::{linear::ConstEquidistantLinear, Curve};
+use palette::LinSrgb;
 
-let gradient = Gradient::new(vec![
+let gradient = ConstEquidistantLinear::<f32, _, 3>::equidistant_unchecked([
     LinSrgb::new(0.00, 0.05, 0.20),
     LinSrgb::new(0.70, 0.10, 0.20),
     LinSrgb::new(0.95, 0.90, 0.30),
@@ -206,24 +200,6 @@ let taken_colors: Vec<_> = gradient.take(10).collect();
 Here's the gradient as both its continuous form and as the 10 colors from `.take(10)`:
 
 ![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_1.png)
-
-There's also support for arbitrary spacing between the input points:
-
-```rust
-use palette::{Gradient, LinSrgb};
-
-let gradient = Gradient::from([
-    (0.0, LinSrgb::new(0.00, 0.05, 0.20)), // A pair of position and color.
-    (0.2, LinSrgb::new(0.70, 0.10, 0.20)),
-    (1.0, LinSrgb::new(0.95, 0.90, 0.30)),
-]);
-
-let taken_colors: Vec<_> = gradient.take(10).collect();
-```
-
-Here's the gradient after the middle point has been moved more towards the beginning:
-
-![An illustration of the gradient with the continuous form above a row of discrete color swatches.](https://raw.githubusercontent.com/Ogeon/palette/05e60121f3ab39aba972c477f258c70d0495551d/gfx/readme_gradients_2.png)
 
 ### Customizing Color Spaces
 
@@ -356,3 +332,4 @@ at your option.
 [`bytemuck`]: https://crates.io/crates/bytemuck
 [`wide`]: https://crates.io/crates/wide
 [`approx`]: https://crates.io/crates/approx
+[`enterpolation`]: https://crates.io/crates/enterpolation
