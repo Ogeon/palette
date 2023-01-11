@@ -1,14 +1,13 @@
 pub use alpha::Okhsla;
 
-use crate::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
-use crate::ok_utils::{toe, ChromaValues};
-use crate::white_point::D65;
 use crate::{
-    angle::{FromAngle, RealAngle},
-    convert::FromColorUnclamped,
-    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    angle::FromAngle,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{Arithmetics, Cbrt, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Zero},
+    ok_utils::{toe, ChromaValues},
     stimulus::{FromStimulus, Stimulus},
-    HasBoolMask, Oklab, OklabHue,
+    white_point::D65,
+    GetHue, HasBoolMask, LinSrgb, Oklab, OklabHue,
 };
 
 mod alpha;
@@ -36,7 +35,7 @@ mod visual_eq;
 )]
 #[repr(C)]
 pub struct Okhsl<T = f32> {
-    /// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    /// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -57,7 +56,7 @@ pub struct Okhsl<T = f32> {
     /// For v == 0 the saturation is irrelevant.
     pub saturation: T,
 
-    /// The relative luminance of the color, where  
+    /// The relative luminance of the color, where
     /// * `0.0` corresponds to pure black
     /// * `1.0` corresponds to white
     ///
@@ -155,35 +154,25 @@ where
         + One
         + Zero
         + Arithmetics
-        + Sqrt
-        + MinMax
-        + Copy
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
         + Powi
-        + Cbrt
+        + Sqrt
         + Hypot
-        + Trigonometry
-        + RealAngle
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
+        + MinMax
+        + Cbrt
         + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+        + HasBoolMask<Mask = bool>
+        + PartialOrd
+        + Clone,
+    Oklab<T>: GetHue<Hue = OklabHue<T>> + IntoColorUnclamped<LinSrgb<T>>,
 {
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
         // refer to the SRGB reference-white-based lightness L_r as l for consistency with HSL
-        let l = toe(lab.l);
+        let l = toe(lab.l.clone());
 
-        if let Some(h) = lab.try_hue() {
-            let (chroma, normalized_ab) = lab.chroma_and_normalized_ab();
-            let (a_, b_) =
-                normalized_ab.expect("There is a hue, thus there also are normalized a and b");
-            let cs = ChromaValues::from_normalized(lab.l, a_, b_);
+        let chroma = lab.get_chroma();
+        let hue = lab.get_hue();
+        if chroma.is_valid_divisor() {
+            let cs = ChromaValues::from_normalized(lab.l, lab.a / &chroma, lab.b / &chroma);
 
             // Inverse of the interpolation in okhsl_to_srgb:
 
@@ -191,21 +180,21 @@ where
             let mid_inv = T::from_f64(1.25);
 
             let s = if chroma < cs.mid {
-                let k_1 = mid * cs.zero;
-                let k_2 = T::one() - k_1 / cs.mid;
+                let k_1 = mid.clone() * cs.zero;
+                let k_2 = T::one() - k_1.clone() / cs.mid;
 
-                let t = chroma / (k_1 + k_2 * chroma);
+                let t = chroma.clone() / (k_1 + k_2 * chroma);
                 t * mid
             } else {
-                let k_0 = cs.mid;
-                let k_1 = (T::one() - mid) * (cs.mid * mid_inv).powi(2) / cs.zero;
-                let k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+                let k_0 = cs.mid.clone();
+                let k_1 = (T::one() - &mid) * (cs.mid.clone() * mid_inv).powi(2) / cs.zero;
+                let k_2 = T::one() - k_1.clone() / (cs.max - cs.mid);
 
-                let t = (chroma - k_0) / (k_1 + k_2 * (chroma - k_0));
-                mid + (T::one() - mid) * t
+                let t = (chroma.clone() - &k_0) / (k_1 + k_2 * (chroma - k_0));
+                mid.clone() + (T::one() - mid) * t
             };
 
-            Self::new(h, s, l)
+            Self::new(hue, s, l)
         } else {
             // `a` describes how green/red the color is, `b` how blue/yellow the color is
             // both are zero -> the color is totally desaturated.
@@ -249,6 +238,8 @@ mod tests {
     use crate::rgb::Rgb;
     use crate::visual::{VisualColor, VisuallyEqual};
     use crate::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
+
+    test_convert_into_from_xyz!(Okhsl);
 
     #[test]
     fn test_roundtrip_okhsl_oklab_is_original() {

@@ -1189,6 +1189,8 @@ mod test {
     use crate::encoding::Srgb;
     use crate::Luma;
 
+    test_convert_into_from_xyz!(Luma);
+
     #[test]
     fn ranges() {
         assert_ranges! {

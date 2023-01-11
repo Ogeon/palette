@@ -787,6 +787,8 @@ mod test {
     use super::Hwb;
     use crate::{Clamp, FromColor, Srgb};
 
+    test_convert_into_from_xyz!(Hwb);
+
     #[test]
     fn red() {
         let a = Hwb::from_color(Srgb::new(1.0, 0.0, 0.0));

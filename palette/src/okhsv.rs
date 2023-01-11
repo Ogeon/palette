@@ -4,18 +4,17 @@ pub use alpha::Okhsva;
 #[cfg(feature = "random")]
 pub use random::UniformOkhsv;
 
-use crate::angle::FromAngle;
-use crate::convert::IntoColorUnclamped;
-use crate::num::{
-    Arithmetics, Cbrt, FromScalar, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
-    Trigonometry, Zero,
-};
-use crate::ok_utils::{LC, ST};
-use crate::stimulus::{FromStimulus, Stimulus};
-use crate::white_point::D65;
 use crate::{
-    angle::RealAngle, convert::FromColorUnclamped, ok_utils, HasBoolMask, LinSrgb, Okhwb, Oklab,
-    OklabHue,
+    angle::FromAngle,
+    bool_mask::LazySelect,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{
+        Arithmetics, Cbrt, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero,
+    },
+    ok_utils::{self, LC, ST},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::D65,
+    GetHue, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
 };
 
 mod alpha;
@@ -30,8 +29,8 @@ mod visual_eq;
 ///
 /// Allows
 /// * changing lightness/chroma/saturation while keeping perceived Hue constant
-/// (like HSV promises but delivers only partially)  
-/// * finding the strongest color (maximum chroma) at s == 1 (like HSV)  
+/// (like HSV promises but delivers only partially)
+/// * finding the strongest color (maximum chroma) at s == 1 (like HSV)
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -42,7 +41,7 @@ mod visual_eq;
 )]
 #[repr(C)]
 pub struct Okhsv<T = f32> {
-    /// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    /// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -179,10 +178,8 @@ impl<T> Okhsv<T> {
 impl<T> FromColorUnclamped<Oklab<T>> for Okhsv<T>
 where
     T: Real
-        + PartialOrd
-        + HasBoolMask<Mask = bool>
         + MinMax
-        + Copy
+        + Clone
         + Powi
         + Sqrt
         + Cbrt
@@ -191,17 +188,10 @@ where
         + Zero
         + Hypot
         + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
         + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+        + HasBoolMask<Mask = bool>
+        + PartialOrd,
+    Oklab<T>: GetHue<Hue = OklabHue<T>> + IntoColorUnclamped<LinSrgb<T>>,
 {
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
         if lab.l == T::zero() {
@@ -209,10 +199,10 @@ where
             return Self::new(T::zero(), T::zero(), T::zero());
         }
 
-        if let Some(hue) = lab.try_hue() {
-            let (chroma, normalized_ab) = lab.chroma_and_normalized_ab();
-            let (a_, b_) =
-                normalized_ab.expect("There is a hue, thus there also are normalized a and b");
+        let chroma = lab.get_chroma();
+        let hue = lab.get_hue();
+        if chroma.is_valid_divisor() {
+            let (a_, b_) = (lab.a / &chroma, lab.b / &chroma);
 
             // For each hue the sRGB gamut can be drawn on a 2-dimensional space.
             // Let L_r, the lightness in relation to the possible luminance of sRGB, be spread
@@ -222,23 +212,23 @@ where
             // To use saturation and brightness values, the gamut must be mapped to a square.
             // The lower point of the triangle is expanded to the lower side of the square.
             // The left side remains unchanged and the cusp of the triangle moves to the upper right.
-            let cusp = LC::find_cusp(a_, b_);
+            let cusp = LC::find_cusp(a_.clone(), b_.clone());
             let st_max = ST::<T>::from(cusp);
 
             let s_0 = T::from_f64(0.5);
-            let k = T::one() - s_0 / st_max.s;
+            let k = T::one() - s_0.clone() / st_max.s;
 
             // first we find L_v, C_v, L_vt and C_vt
-            let t = st_max.t / (chroma + lab.l * st_max.t);
-            let l_v = t * lab.l;
+            let t = st_max.t.clone() / (chroma.clone() + lab.l.clone() * &st_max.t);
+            let l_v = t.clone() * &lab.l;
             let c_v = t * chroma;
 
-            let l_vt = ok_utils::toe_inv(l_v);
-            let c_vt = c_v * l_vt / l_v;
+            let l_vt = ok_utils::toe_inv(l_v.clone());
+            let c_vt = c_v.clone() * &l_vt / &l_v;
 
             // we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
             let rgb_scale: LinSrgb<T> =
-                Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+                Oklab::new(l_vt, a_ * &c_vt, b_ * c_vt).into_color_unclamped();
             let lightness_scale_factor = T::cbrt(
                 T::one()
                     / T::max(
@@ -255,7 +245,8 @@ where
 
             // we can now compute v and s:
             let v = l_r / l_v;
-            let s = (s_0 + st_max.t) * c_v / ((st_max.t * s_0) + st_max.t * k * c_v);
+            let s =
+                (s_0.clone() + &st_max.t) * &c_v / ((st_max.t.clone() * s_0) + st_max.t * k * c_v);
 
             Self::new(hue, s, v)
         } else {
@@ -267,38 +258,29 @@ where
 }
 impl<T> FromColorUnclamped<Okhwb<T>> for Okhsv<T>
 where
-    T: Real
-        + PartialOrd
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + Hypot
-        + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
-        + IsValidDivisor<Mask = bool>
-        + Arithmetics
-        + Clone
-        + FromScalar<Scalar = T::Scalar>,
+    T: One + Zero + IsValidDivisor + Arithmetics,
+    T::Mask: LazySelect<T>,
 {
     fn from_color_unclamped(hwb: Okhwb<T>) -> Self {
-        if hwb.blackness == T::one() {
-            return Self::new(hwb.hue, T::zero(), T::zero());
+        let Okhwb {
+            hue,
+            whiteness,
+            blackness,
+        } = hwb;
+
+        let value = T::one() - blackness;
+
+        // avoid divide by zero
+        let saturation = lazy_select! {
+            if value.is_valid_divisor() => T::one() - (whiteness / &value),
+            else => T::zero(),
+        };
+
+        Self {
+            hue,
+            saturation,
+            value,
         }
-        Self::new(
-            hwb.hue,
-            T::one() - hwb.whiteness / (T::one() - hwb.blackness),
-            T::one() - hwb.blackness,
-        )
     }
 }
 
@@ -310,6 +292,8 @@ mod tests {
     use crate::rgb::Rgb;
     use crate::visual::VisuallyEqual;
     use crate::{encoding, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+
+    test_convert_into_from_xyz!(Okhsv);
 
     #[test]
     fn test_roundtrip_okhsv_oklab_is_original() {

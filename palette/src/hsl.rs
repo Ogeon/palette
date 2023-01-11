@@ -755,6 +755,8 @@ mod test {
     use super::Hsl;
     use crate::{FromColor, Hsv, Srgb};
 
+    test_convert_into_from_xyz!(Hsl);
+
     #[test]
     fn red() {
         let a = Hsl::from_color(Srgb::new(1.0, 0.0, 0.0));
