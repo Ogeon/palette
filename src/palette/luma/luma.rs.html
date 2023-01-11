@@ -1282,6 +1282,8 @@
 <span id="1282">1282</span>
 <span id="1283">1283</span>
 <span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     convert::TryInto,
@@ -2473,6 +2475,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::encoding::Srgb;
     <span class="kw">use </span><span class="kw">crate</span>::Luma;
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Luma);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>ranges() {
         <span class="macro">assert_ranges! </span>{
@@ -2567,4 +2571,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

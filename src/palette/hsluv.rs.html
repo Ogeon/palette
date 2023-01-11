@@ -572,6 +572,8 @@
 <span id="572">572</span>
 <span id="573">573</span>
 <span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
@@ -1053,6 +1055,8 @@
     <span class="kw">use </span><span class="kw">super</span>::Hsluv;
     <span class="kw">use crate</span>::{white_point::D65, FromColor, Lchuv, LuvHue, Saturate};
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Hsluv);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>lchuv_round_trip() {
         <span class="kw">for </span>hue <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">18.0</span>) {
@@ -1147,4 +1151,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

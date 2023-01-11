@@ -265,44 +265,17 @@
 <span id="265">265</span>
 <span id="266">266</span>
 <span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::fmt::Debug;
 
 <span class="kw">pub use </span>alpha::Okhwba;
 
-<span class="kw">use </span><span class="kw">crate</span>::angle::{FromAngle, RealAngle};
-<span class="kw">use </span><span class="kw">crate</span>::num::{FromScalar, Hypot, Recip, Sqrt};
-<span class="kw">use </span><span class="kw">crate</span>::stimulus::{FromStimulus, Stimulus};
-<span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
-<span class="kw">use </span><span class="kw">crate</span>::HasBoolMask;
 <span class="kw">use crate</span>::{
+    angle::FromAngle,
     convert::FromColorUnclamped,
-    num::{Arithmetics, Cbrt, IsValidDivisor, One, Real, Trigonometry, Zero},
-    Okhsv, OklabHue,
+    num::{Arithmetics, One},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::D65,
+    HasBoolMask, Okhsv, OklabHue,
 };
 
 <span class="kw">mod </span>alpha;
@@ -313,9 +286,8 @@
 #[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
 </span><span class="kw">mod </span>visual_eq;
 
-<span class="doccomment">/// A Hue/Whiteness/Blackness representation of [`Oklab`] in the `sRGB` color space.
-/// # See
-/// https://bottosson.github.io/posts/colorpicker/#okhwb
+<span class="doccomment">/// A Hue/Whiteness/Blackness representation of [`Oklab`][crate::Oklab] in the
+/// `sRGB` color space, similar to [`Hwb`][crate::Okhwb].
 </span><span class="attribute">#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
 #[palette(
@@ -326,7 +298,7 @@
 )]
 #[repr(C)]
 </span><span class="kw">pub struct </span>Okhwb&lt;T = f32&gt; {
-    <span class="doccomment">/// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    <span class="doccomment">/// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -416,40 +388,16 @@
 
 <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhsv&lt;T&gt;&gt; <span class="kw">for </span>Okhwb&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
-        + Copy
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + Hypot
-        + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+    </span>T: One + Arithmetics,
 {
     <span class="doccomment">/// Converts `lab` to `Okhwb` in the bounds of sRGB.
-    ///
-    /// # See
-    /// https://bottosson.github.io/posts/colorpicker/#okhwb
-    /// See [`srgb_to_okhwb`](https://bottosson.github.io/posts/colorpicker/#okhwb-2).
-    /// This implementation differs from srgb_to_okhwb in that it starts with the `lab`
-    /// value and produces hues in degrees, whereas `srgb_to_okhwb` produces degree/360.
     </span><span class="kw">fn </span>from_color_unclamped(hsv: Okhsv&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::new(
-            hsv.hue,
-            (T::one() - hsv.saturation) * hsv.value,
-            T::one() - hsv.value,
-        )
+        <span class="comment">// See &lt;https://bottosson.github.io/posts/colorpicker/#okhwb&gt;.
+        </span><span class="self">Self </span>{
+            hue: hsv.hue,
+            whiteness: (T::one() - hsv.saturation) * <span class="kw-2">&amp;</span>hsv.value,
+            blackness: T::one() - hsv.value,
+        }
     }
 }
 
@@ -486,6 +434,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
     <span class="kw">use </span><span class="kw">crate</span>::visual::VisuallyEqual;
     <span class="kw">use crate</span>::{encoding, LinSrgb, Okhsv, Okhwb, Oklab};
+
+    <span class="macro">test_convert_into_from_xyz!</span>(Okhwb);
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_roundtrip_okhwb_oklab_is_original() {
@@ -583,4 +533,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

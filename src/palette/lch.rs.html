@@ -553,6 +553,8 @@
 <span id="553">553</span>
 <span id="554">554</span>
 <span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, BitOr, Sub, SubAssign},
@@ -1052,6 +1054,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
     <span class="kw">use </span><span class="kw">crate</span>::Lch;
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Lch);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>ranges() {
         <span class="macro">assert_ranges! </span>{
@@ -1109,4 +1113,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

@@ -860,6 +860,8 @@
 <span id="860">860</span>
 <span id="861">861</span>
 <span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     marker::PhantomData,
@@ -1616,6 +1618,8 @@
     <span class="kw">use </span><span class="kw">super</span>::Hsv;
     <span class="kw">use crate</span>::{FromColor, Hsl, Srgb};
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Hsv);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>red() {
         <span class="kw">let </span>a = Hsv::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
@@ -1723,4 +1727,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

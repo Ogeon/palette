@@ -674,15 +674,12 @@
 <span id="674">674</span>
 <span id="675">675</span>
 <span id="676">676</span>
-<span id="677">677</span>
-<span id="678">678</span>
-<span id="679">679</span>
 </pre><pre class="rust"><code><span class="attribute">#[cfg(any(feature = <span class="string">&quot;approx&quot;</span>, feature = <span class="string">&quot;random&quot;</span>))]
 </span><span class="kw">use </span>core::ops::Mul;
 
 <span class="kw">use </span>core::{
     cmp::PartialEq,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Neg, Sub, SubAssign},
 };
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
@@ -698,14 +695,15 @@
 };
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::angle::HalfRotation;
-<span class="kw">use </span><span class="kw">crate</span>::num::Zero;
+</span><span class="kw">use crate</span>::{angle::HalfRotation, num::Zero};
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::angle::FullRotation;
 
-<span class="kw">use </span><span class="kw">crate</span>::angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle};
-<span class="kw">use </span><span class="kw">crate</span>::num::{Arithmetics, Trigonometry};
+<span class="kw">use crate</span>::{
+    angle::{AngleEq, FromAngle, RealAngle, SignedAngle, UnsignedAngle},
+    num::Trigonometry,
+};
 
 <span class="macro">macro_rules! </span>make_hues {
     ($($(<span class="attribute">#[<span class="macro-nonterminal">$doc</span>:meta]</span>)+ <span class="kw">struct </span><span class="macro-nonterminal">$name</span>:ident;)+) =&gt; ($(
@@ -809,6 +807,32 @@
             </span><span class="kw">pub fn </span>into_positive_radians(<span class="self">self</span>) -&gt; T {
                 T::degrees_to_radians(<span class="self">self</span>.<span class="number">0</span>.normalize_unsigned_angle())
             }
+        }
+
+        <span class="kw">impl</span>&lt;T: RealAngle + Trigonometry&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
+            <span class="doccomment">/// Returns a hue from `a` and `b`, normalized to `[0°, 360°)`.
+            ///
+            /// If `a` and `b` are both `0`, returns `0`,
+            </span><span class="attribute">#[inline(always)]
+            </span><span class="kw">pub fn </span>from_cartesian(a: T, b: T) -&gt; <span class="self">Self </span><span class="kw">where </span>T: Add&lt;T, Output = T&gt; + Neg&lt;Output = T&gt; {
+                <span class="comment">// atan2 returns values in the interval [-π, π]
+                // instead of
+                //   let hue_rad = T::atan2(b,a);
+                // use negative a and be and rotate, to ensure the hue is normalized,
+                </span><span class="kw">let </span>hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
+                <span class="self">Self</span>::from_radians(hue_rad)
+            }
+
+            <span class="doccomment">/// Returns `a` and `b` values for this hue, normalized to `[-1,
+            /// 1]`.
+            ///
+            /// They will have to be multiplied by a radius values, such as
+            /// saturation, value, chroma, etc., to represent a specific color.
+            </span><span class="attribute">#[inline(always)]
+            </span><span class="kw">pub fn </span>into_cartesian(<span class="self">self</span>) -&gt; (T, T) {
+                <span class="kw">let </span>(b, a) = <span class="self">self</span>.into_raw_radians().sin_cos();
+                (a, b) <span class="comment">// Note the swapped order compared to above
+            </span>}
         }
 
         <span class="kw">impl</span>&lt;T&gt; From&lt;T&gt; <span class="kw">for </span><span class="macro-nonterminal">$name</span>&lt;T&gt; {
@@ -1197,36 +1221,6 @@
 <span class="macro">impl_uniform!</span>(UniformLuvHue, LuvHue);
 <span class="macro">impl_uniform!</span>(UniformOklabHue, OklabHue);
 
-<span class="kw">impl</span>&lt;T&gt; OklabHue&lt;T&gt;
-<span class="kw">where
-    </span>T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
-{
-    <span class="doccomment">/// Returns `a` and `b` values for this hue at the given `croma`
-    </span><span class="attribute">#[inline(always)]
-    </span><span class="kw">pub fn </span>ab(<span class="self">self</span>, chroma: T) -&gt; (T, T) {
-        <span class="kw">let </span>hue_rad = <span class="self">self</span>.into_raw_radians();
-        <span class="kw">let </span>(sin, cos) = hue_rad.sin_cos();
-        (chroma.clone() * cos, chroma * sin)
-    }
-
-    <span class="doccomment">/// Returns a hue from `a` and `b`, with a normalized angle, i.e. an angle in the half
-    /// open interval [0° .. 360°).
-    /// If `a` and `b` are both `zero`, returns `None`
-    </span><span class="attribute">#[inline(always)]
-    </span><span class="kw">pub fn </span>from_ab(a: T, b: T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>a == T::zero() &amp;&amp; b == T::zero() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="comment">// atan2 returns values in the interval [-π .. π]
-            // instead of
-            //   let hue_rad = T::atan2(b,a);
-            // use negative a and be and rotate, to ensure the hue is normalized,
-            </span><span class="kw">let </span>hue_rad = T::from_f64(core::f64::consts::PI) + T::atan2(-b, -a);
-            <span class="prelude-val">Some</span>(<span class="self">Self</span>::from_radians(hue_rad))
-        }
-    }
-}
-
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use crate</span>::{
@@ -1238,8 +1232,8 @@
     </span><span class="kw">fn </span>oklabhue_ab_roundtrip() {
         <span class="kw">for </span>degree <span class="kw">in </span>[<span class="number">0.0_f64</span>, <span class="number">90.0</span>, <span class="number">30.0</span>, <span class="number">330.0</span>, <span class="number">120.0</span>, <span class="number">240.0</span>] {
             <span class="kw">let </span>hue = OklabHue::from_degrees(degree);
-            <span class="kw">let </span>(a, b) = hue.ab(<span class="number">10000.0</span>);
-            <span class="kw">let </span>roundtrip_hue = OklabHue::from_ab(a, b).unwrap();
+            <span class="kw">let </span>(a, b) = hue.into_cartesian();
+            <span class="kw">let </span>roundtrip_hue = OklabHue::from_cartesian(a * <span class="number">10000.0</span>, b * <span class="number">10000.0</span>);
             <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue);
         }
     }
@@ -1357,4 +1351,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

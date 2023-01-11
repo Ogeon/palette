@@ -695,69 +695,21 @@
 <span id="695">695</span>
 <span id="696">696</span>
 <span id="697">697</span>
-<span id="698">698</span>
-<span id="699">699</span>
-<span id="700">700</span>
-<span id="701">701</span>
-<span id="702">702</span>
-<span id="703">703</span>
-<span id="704">704</span>
-<span id="705">705</span>
-<span id="706">706</span>
-<span id="707">707</span>
-<span id="708">708</span>
-<span id="709">709</span>
-<span id="710">710</span>
-<span id="711">711</span>
-<span id="712">712</span>
-<span id="713">713</span>
-<span id="714">714</span>
-<span id="715">715</span>
-<span id="716">716</span>
-<span id="717">717</span>
-<span id="718">718</span>
-<span id="719">719</span>
-<span id="720">720</span>
-<span id="721">721</span>
-<span id="722">722</span>
-<span id="723">723</span>
-<span id="724">724</span>
-<span id="725">725</span>
-<span id="726">726</span>
-<span id="727">727</span>
-<span id="728">728</span>
-<span id="729">729</span>
-<span id="730">730</span>
-<span id="731">731</span>
-<span id="732">732</span>
-<span id="733">733</span>
-<span id="734">734</span>
-<span id="735">735</span>
-<span id="736">736</span>
-<span id="737">737</span>
-<span id="738">738</span>
-<span id="739">739</span>
-<span id="740">740</span>
-<span id="741">741</span>
-</pre><pre class="rust"><code><span class="kw">use </span>core::any::TypeId;
-<span class="kw">use </span>core::fmt::Debug;
-<span class="kw">use </span>core::ops::Mul;
+</pre><pre class="rust"><code><span class="kw">use </span>core::{any::TypeId, fmt::Debug, ops::Mul};
 
 <span class="kw">pub use </span>alpha::Oklaba;
 
-<span class="kw">use </span><span class="kw">crate</span>::convert::IntoColorUnclamped;
-<span class="kw">use </span><span class="kw">crate</span>::encoding::{IntoLinear, Srgb};
-<span class="kw">use </span><span class="kw">crate</span>::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
-<span class="kw">use </span><span class="kw">crate</span>::ok_utils::{toe_inv, ChromaValues, LC, ST};
-<span class="kw">use </span><span class="kw">crate</span>::rgb::{Primaries, Rgb, RgbSpace, RgbStandard};
 <span class="kw">use crate</span>::{
     angle::RealAngle,
     bool_mask::HasBoolMask,
-    convert::FromColorUnclamped,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    encoding::{IntoLinear, Srgb},
     matrix::multiply_xyz,
-    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    num::{Arithmetics, Cbrt, Hypot, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero},
+    ok_utils::{toe_inv, ChromaValues, LC, ST},
+    rgb::{Rgb, RgbSpace, RgbStandard},
     white_point::D65,
-    LinSrgb, Mat3, Okhsl, Okhsv, OklabHue, Oklch, Xyz,
+    LinSrgb, Mat3, Okhsl, Okhsv, Oklch, Xyz,
 };
 
 <span class="kw">mod </span>alpha;
@@ -818,66 +770,75 @@
 <span class="doccomment">/// The [Oklab color space](https://bottosson.github.io/posts/oklab/).
 ///
 /// # Characteristics
-/// `Oklab` is a *perceptual* color space. It does not relate to an output device
-/// (a monitor or printer) but instead relates to the
-/// [CIE standard observer](https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_standard_observer)
+/// `Oklab` is a *perceptual* color space. It does not relate to an output
+/// device (a monitor or printer) but instead relates to the [CIE standard
+/// observer](https://en.wikipedia.org/wiki/CIE_1931_color_space#CIE_standard_observer)
 /// -- an averaging of the results of color matching experiments under
 /// laboratory conditions.
 ///
-/// `Oklab` is a uniform color space
-/// ([Compare to the HSV color space](https://bottosson.github.io/posts/oklab/#comparing-oklab-to-hsv)).
-/// It is useful for things like:
+/// `Oklab` is a uniform color space ([Compare to the HSV color
+/// space](https://bottosson.github.io/posts/oklab/#comparing-oklab-to-hsv)). It
+/// is useful for things like:
 /// * Turning an image grayscale, while keeping the perceived lightness the same
-/// * Increasing the saturation of colors, while maintaining perceived hue and lightness
+/// * Increasing the saturation of colors, while maintaining perceived hue and
+///   lightness
 /// * Creating smooth and uniform looking transitions between colors
 ///
-/// `Oklab`&#39;s structure is similar to [L\*a\*b\*](crate::Lab). It is based on the
-/// [opponent color model of human vision](https://en.wikipedia.org/wiki/Opponent_process),
-/// where red and green form an opponent pair, and blue and yellow form an opponent pair.
+/// `Oklab`&#39;s structure is similar to [L\*a\*b\*](crate::Lab). It is based on
+/// the [opponent color model of human
+/// vision](https://en.wikipedia.org/wiki/Opponent_process), where red and green
+/// form an opponent pair, and blue and yellow form an opponent pair.
 ///
 /// `Oklab` uses [D65](https://en.wikipedia.org/wiki/Illuminant_D65)&#39;s
-/// whitepoint -- daylight illumination, which is also used by sRGB, rec2020 and Display P3 color
-/// spaces -- and assumes normal well-lit viewing conditions, to which the eye is adapted.
-/// Thus `Oklab`s lightness `l` technically is a measure of relative brightness -- a subjective
-/// measure -- not relative luminance. The lightness is scale/exposure-independend, i.e.
-/// independent of the actual luminance of the color, as displayed by some medium, and
-/// even for blindingly bright colors or very bright or dark viewing conditions assumes, that the
-/// eye is adapted to the color&#39;s luminance and the hue and chroma are perceived linearly.
+/// whitepoint -- daylight illumination, which is also used by sRGB, rec2020 and
+/// Display P3 color spaces -- and assumes normal well-lit viewing conditions,
+/// to which the eye is adapted. Thus `Oklab`s lightness `l` technically is a
+/// measure of relative brightness -- a subjective measure -- not relative
+/// luminance. The lightness is scale/exposure-independend, i.e. independent of
+/// the actual luminance of the color, as displayed by some medium, and even for
+/// blindingly bright colors or very bright or dark viewing conditions assumes,
+/// that the eye is adapted to the color&#39;s luminance and the hue and chroma are
+/// perceived linearly.
 ///
 ///
-/// `Oklab`&#39;s chroma is unlimited. Thus it can represent colors of any color space (including HDR).
-/// `l` is in the range `0.0 .. 1.0` and `a` and `b` are unbounded.
+/// `Oklab`&#39;s chroma is unlimited. Thus it can represent colors of any color
+/// space (including HDR). `l` is in the range `0.0 .. 1.0` and `a` and `b` are
+/// unbounded.
 ///
 /// # Conversions
 /// [`Oklch`] is a cylindrical form of `Oklab`.
 ///
-/// `Oklab` colors converted from valid (i.e. clamped) `sRGB` will be in the `sRGB` gamut.
+/// `Oklab` colors converted from valid (i.e. clamped) `sRGB` will be in the
+/// `sRGB` gamut.
 ///
-/// [`Okhsv`], [`Okhwb`] and [`Okhsl`] reference the `sRGB` gamut.
+/// [`Okhsv`], [`Okhwb`][crate::Okhsv] and [`Okhsl`] reference the `sRGB` gamut.
 /// The transformation from `Oklab` to one of them is based on the assumption,
 /// that the transformed `Oklab` value is within `sRGB`.
 ///
 /// `Okhsv`, `Okhwb` and `Okhsl` are not applicable to HDR, which also come with
-/// color spaces with wider gamuts. They require
-/// [additional research](https://bottosson.github.io/posts/colorpicker/#ideas-for-future-work).
+/// color spaces with wider gamuts. They require [additional
+/// research](https://bottosson.github.io/posts/colorpicker/#ideas-for-future-work).
 ///
-/// When a `Oklab` color is converted from [`Srgb`](crate::rgb::Srgb) or a equivalent color space,
-/// e.g. [`Hsv`], [`Okhsv`], [`Hsl`], [`Okhsl`], [`Hwb`], [`Okhwb`], it&#39;s lightness will be
-/// relative to the (user controlled) maximum contrast and luminance of the display device, to
-/// which the eye is assumed to be adapted.
+/// When a `Oklab` color is converted from [`Srgb`](crate::rgb::Srgb) or a
+/// equivalent color space, e.g. [`Hsv`][crate::Hsv], [`Okhsv`],
+/// [`Hsl`][crate::Hsl], [`Okhsl`], [`Hwb`][crate::Hwb],
+/// [`Okhwb`][crate::Okhwb], it&#39;s lightness will be relative to the (user
+/// controlled) maximum contrast and luminance of the display device, to which
+/// the eye is assumed to be adapted.
 ///
 /// # Clamping
-/// [`Clamp`ing](Clamp) will only clamp `l`. Clamping does not guarantee the color to be inside
-/// the perceptible or any display-dependent color space (like *sRGB*).
+/// [`Clamp`][crate::Clamp]ing will only clamp `l`. Clamping does not guarantee
+/// the color to be inside the perceptible or any display-dependent color space
+/// (like *sRGB*).
 ///
-/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsv`, clamp it there
-/// and convert it back to `Oklab`.
+/// To ensure a color is within the *sRGB* gamut, it can first be converted to
+/// `Okhsv`, clamped there and converted it back to `Oklab`.
 ///
 /// ```
-/// // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&amp;precision=17
 /// # use approx::assert_abs_diff_eq;
 /// # use palette::{convert::FromColorUnclamped,IsWithinBounds, LinSrgb, Okhsv, Oklab};
 /// # use palette::Clamp;
+/// // Display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&amp;precision=17
 /// let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, -0.098273600140966));
 /// let okhsv: Okhsv&lt;f64&gt; = Okhsv::from_color_unclamped(oklab);
 /// assert!(!okhsv.is_within_bounds());
@@ -888,17 +849,18 @@
 /// assert_abs_diff_eq!(expected, linsrgb, epsilon = 0.02);
 /// ```
 /// Since the conversion contains a gamut mapping, it will map the color to one
-/// of the perceptually closest locations in the `sRGB` gamut. Gamut mapping -- unlike clamping --
-/// is an expensive operation. To get computationally cheaper (and perceptually much worse) results,
-/// convert directly to [`Srgb`] and clamp there.  
+/// of the perceptually closest locations in the `sRGB` gamut. Gamut mapping --
+/// unlike clamping -- is an expensive operation. To get computationally cheaper
+/// (and perceptually much worse) results, convert directly to [`Srgb`] and
+/// clamp there.
 ///
 /// # Lightening / Darkening
-/// [`Lighten`ing](crate::Lighten) and [`Darken`ing](crate::Darken) will change `l`, as expected. However,
-/// either operation may leave an implicit color space (the percetible or a display
-/// dependent color space like *sRGB*).
+/// [`Lighten`](crate::Lighten)ing and [`Darken`](crate::Darken)ing will change
+/// `l`, as expected. However, either operation may leave an implicit color
+/// space (the percetible or a display dependent color space like *sRGB*).
 ///
-/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`, lighten/darken
-/// it there and convert it back to `Oklab`.
+/// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`,
+/// lighten/darken it there and convert it back to `Oklab`.
 
 </span><span class="attribute">#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
@@ -913,13 +875,10 @@
     <span class="doccomment">/// `l` is the lightness of the color. `0` gives absolute black and `1` gives the
     /// full white point luminance of the display medium.
     ///
-    /// [D65 (normalized with Y=1, i.e. white according to the adaption of the eye) transforms to
+    /// [`D65` (normalized with Y=1, i.e. white according to the adaption of the
+    /// eye) transforms to
     /// L=1,a=0,b=0](https://bottosson.github.io/posts/oklab/#how-oklab-was-derived).
-    /// However intermediate values differ from those of CIELab non-linearly. For visually
-    /// similar values, transform using [`toe`](crate::ok_utils::toe) and
-    /// [`toe_inv`](crate::ok_utils::toe_inv). These transformations are also use when
-    /// converting to [`Okhsv`], [`Okhsl`] and [`Okhwb`].
-    ///
+    /// However intermediate values differ from those of CIELab non-linearly.
     </span><span class="kw">pub </span>l: T,
 
     <span class="doccomment">/// `a` changes the hue from reddish to greenish, when moving from positive
@@ -973,36 +932,11 @@
 
 <span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
 <span class="kw">where
-    </span>T: RealAngle + Zero + Arithmetics + Trigonometry + Clone + PartialEq,
-{
-    <span class="doccomment">/// Returns the hue, if at least one of `a` and `b` are non-zero  
-    </span><span class="kw">pub fn </span>try_hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;OklabHue&lt;T&gt;&gt; {
-        OklabHue::from_ab(<span class="self">self</span>.a.clone(), <span class="self">self</span>.b.clone())
-    }
-}
-
-<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
-<span class="kw">where
     </span>T: Hypot + Clone,
 {
-    <span class="doccomment">/// Returns the chroma
-    </span><span class="kw">pub fn </span>chroma(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T {
+    <span class="doccomment">/// Returns the chroma.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_chroma(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T {
         T::hypot(<span class="self">self</span>.a.clone(), <span class="self">self</span>.b.clone())
-    }
-}
-<span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
-<span class="kw">where
-    </span>T: Arithmetics + Zero + Hypot + Clone + PartialEq,
-{
-    <span class="doccomment">/// Returns the `chroma` -- the euclidean norm of `a` and `b`.
-    /// If `chroma &gt; 0.0` returns normalized versions of `a` and `b`
-    </span><span class="kw">pub fn </span>chroma_and_normalized_ab(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (T, <span class="prelude-ty">Option</span>&lt;(T, T)&gt;) {
-        <span class="kw">let </span>chroma = <span class="self">self</span>.chroma();
-        (
-            chroma.clone(),
-            (chroma != T::zero())
-                .then(|| (<span class="self">self</span>.a.clone() / chroma.clone(), <span class="self">self</span>.b.clone() / chroma)),
-        )
     }
 }
 
@@ -1086,19 +1020,11 @@
 
 <span class="kw">impl</span>&lt;S, T&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
 <span class="kw">where
-    </span>T: Real + Cbrt + Arithmetics + FromScalar + Copy,
-    T::Scalar: Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + FromScalar&lt;Scalar = T::Scalar&gt;
-        + Real
-        + Zero
-        + One
-        + Clone,
+    </span>T: Real + Cbrt + Arithmetics + Copy,
     S: RgbStandard,
     S::TransferFn: IntoLinear&lt;T, T&gt;,
     S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">&#39;static</span>,
-    &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
+    Xyz&lt;D65, T&gt;: FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(rgb: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>TypeId::of::&lt;&lt;S <span class="kw">as </span>RgbStandard&gt;::Space&gt;() == TypeId::of::&lt;Srgb&gt;() {
@@ -1118,7 +1044,7 @@
     </span>T: RealAngle + Zero + MinMax + Trigonometry + Mul&lt;Output = T&gt; + Clone,
 {
     <span class="kw">fn </span>from_color_unclamped(color: Oklch&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(sin_hue, cos_hue) = color.hue.into_raw_radians().sin_cos();
+        <span class="kw">let </span>(sin_hue, cos_hue) = color.hue.into_cartesian();
         <span class="kw">let </span>chroma = color.chroma.max(T::zero());
 
         Oklab {
@@ -1133,28 +1059,19 @@
 /// See [`okhsl_to_srgb`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
 </span><span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhsl&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
+    </span>T: RealAngle
         + One
         + Zero
         + Arithmetics
         + Sqrt
         + MinMax
-        + Copy
         + PartialOrd
         + HasBoolMask&lt;Mask = bool&gt;
         + Powi
         + Cbrt
         + Trigonometry
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + Clone,
+    Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(hsl: Okhsl&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>h = hsl.hue;
@@ -1167,10 +1084,10 @@
             <span class="kw">return </span>Oklab::new(T::zero(), T::zero(), T::zero());
         }
 
-        <span class="kw">let </span>(a_, b_) = h.ab(T::one());
+        <span class="kw">let </span>(a_, b_) = h.into_cartesian();
         <span class="kw">let </span>oklab_lightness = toe_inv(l);
 
-        <span class="kw">let </span>cs = ChromaValues::from_normalized(oklab_lightness, a_, b_);
+        <span class="kw">let </span>cs = ChromaValues::from_normalized(oklab_lightness.clone(), a_.clone(), b_.clone());
 
         <span class="comment">// Interpolate the three values for C so that:
         // At s=0: dC/ds = cs.zero, C = 0
@@ -1184,48 +1101,37 @@
             <span class="kw">let </span>t = mid_inv * s;
 
             <span class="kw">let </span>k_1 = mid * cs.zero;
-            <span class="kw">let </span>k_2 = T::one() - k_1 / cs.mid;
+            <span class="kw">let </span>k_2 = T::one() - k_1.clone() / cs.mid;
 
-            t * k_1 / (T::one() - k_2 * t)
+            t.clone() * k_1 / (T::one() - k_2 * t)
         } <span class="kw">else </span>{
-            <span class="kw">let </span>t = (s - mid) / (T::one() - mid);
+            <span class="kw">let </span>t = (s - <span class="kw-2">&amp;</span>mid) / (T::one() - <span class="kw-2">&amp;</span>mid);
 
-            <span class="kw">let </span>k_0 = cs.mid;
-            <span class="kw">let </span>k_1 = (T::one() - mid) * cs.mid * cs.mid * mid_inv * mid_inv / cs.zero;
-            <span class="kw">let </span>k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+            <span class="kw">let </span>k_0 = cs.mid.clone();
+            <span class="kw">let </span>k_1 = (T::one() - mid) * <span class="kw-2">&amp;</span>cs.mid * <span class="kw-2">&amp;</span>cs.mid * <span class="kw-2">&amp;</span>mid_inv * mid_inv / cs.zero;
+            <span class="kw">let </span>k_2 = T::one() - k_1.clone() / (cs.max - cs.mid);
 
-            k_0 + t * k_1 / (T::one() - k_2 * t)
+            k_0 + t.clone() * k_1 / (T::one() - k_2 * t)
         };
 
-        Oklab::new(oklab_lightness, chroma * a_, chroma * b_)
+        Oklab::new(oklab_lightness, chroma.clone() * a_, chroma * b_)
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhsv&lt;T&gt;&gt; <span class="kw">for </span>Oklab&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
+    </span>T: RealAngle
         + PartialOrd
         + HasBoolMask&lt;Mask = bool&gt;
         + MinMax
         + Powi
         + Arithmetics
-        + Copy
-        + One
-        + Zero
-        + Sqrt
-        + Cbrt
-        + Trigonometry
-        + RealAngle
-        + FromScalar,
-    T::Scalar: Real
-        + PartialOrd
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
         + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + One
+        + Zero
+        + Cbrt
+        + Trigonometry,
+    Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(hsv: Okhsv&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>hsv.saturation == T::zero() {
@@ -1247,30 +1153,34 @@
         }
 
         <span class="kw">let </span>h_radians = hsv.hue.into_raw_radians();
-        <span class="kw">let </span>a_ = T::cos(h_radians);
+        <span class="kw">let </span>a_ = T::cos(h_radians.clone());
         <span class="kw">let </span>b_ = T::sin(h_radians);
 
-        <span class="kw">let </span>cusp = LC::find_cusp(a_, b_);
+        <span class="kw">let </span>cusp = LC::find_cusp(a_.clone(), b_.clone());
         <span class="kw">let </span>cusp: ST&lt;T&gt; = cusp.into();
         <span class="kw">let </span>s_0 = T::from_f64(<span class="number">0.5</span>);
-        <span class="kw">let </span>k = T::one() - s_0 / cusp.s;
+        <span class="kw">let </span>k = T::one() - s_0.clone() / cusp.s;
 
         <span class="comment">// first we compute L and V as if the gamut is a perfect triangle
 
         // L, C, when v == 1:
-        </span><span class="kw">let </span>l_v = T::one() - hsv.saturation * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
-        <span class="kw">let </span>c_v = hsv.saturation * cusp.t * s_0 / (s_0 + cusp.t - cusp.t * k * hsv.saturation);
+        </span><span class="kw">let </span>l_v = T::one()
+            - hsv.saturation.clone() * s_0.clone()
+                / (s_0.clone() + <span class="kw-2">&amp;</span>cusp.t - cusp.t.clone() * <span class="kw-2">&amp;</span>k * <span class="kw-2">&amp;</span>hsv.saturation);
+        <span class="kw">let </span>c_v =
+            hsv.saturation.clone() * <span class="kw-2">&amp;</span>cusp.t * <span class="kw-2">&amp;</span>s_0 / (s_0 + <span class="kw-2">&amp;</span>cusp.t - cusp.t * k * hsv.saturation);
 
         <span class="comment">// then we compensate for both toe and the curved top part of the triangle:
-        </span><span class="kw">let </span>l_vt = toe_inv(l_v);
-        <span class="kw">let </span>c_vt = c_v * l_vt / l_v;
+        </span><span class="kw">let </span>l_vt = toe_inv(l_v.clone());
+        <span class="kw">let </span>c_vt = c_v.clone() * <span class="kw-2">&amp;</span>l_vt / <span class="kw-2">&amp;</span>l_v;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>lightness = hsv.value * l_v;
+        <span class="kw">let </span><span class="kw-2">mut </span>lightness = hsv.value.clone() * l_v;
         <span class="kw">let </span><span class="kw-2">mut </span>chroma = hsv.value * c_v;
-        <span class="kw">let </span>lightness_new = toe_inv(lightness);
-        chroma = chroma * lightness_new / lightness;
+        <span class="kw">let </span>lightness_new = toe_inv(lightness.clone());
+        chroma = chroma * <span class="kw-2">&amp;</span>lightness_new / lightness;
         <span class="comment">// the values may be outside the normal range
-        </span><span class="kw">let </span>rgb_scale: LinSrgb&lt;T&gt; = Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+        </span><span class="kw">let </span>rgb_scale: LinSrgb&lt;T&gt; =
+            Oklab::new(l_vt, a_.clone() * <span class="kw-2">&amp;</span>c_vt, b_.clone() * c_vt).into_color_unclamped();
         <span class="kw">let </span>lightness_scale_factor = T::cbrt(
             T::one()
                 / T::max(
@@ -1279,10 +1189,10 @@
                 ),
         );
 
-        lightness = lightness_new * lightness_scale_factor;
+        lightness = lightness_new * <span class="kw-2">&amp;</span>lightness_scale_factor;
         chroma = chroma * lightness_scale_factor;
 
-        Oklab::new(lightness, chroma * a_, chroma * b_)
+        Oklab::new(lightness, chroma.clone() * a_, chroma * b_)
     }
 }
 
@@ -1329,6 +1239,8 @@
     <span class="kw">use crate</span>::{FromColor, Lab, LinSrgb, Srgb};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="macro">test_convert_into_from_xyz!</span>(Oklab);
 
     <span class="doccomment">/// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
     </span><span class="attribute">#[test]
@@ -1481,4 +1393,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

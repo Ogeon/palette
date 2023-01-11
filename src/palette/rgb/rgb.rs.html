@@ -1613,15 +1613,6 @@
 <span id="1613">1613</span>
 <span id="1614">1614</span>
 <span id="1615">1615</span>
-<span id="1616">1616</span>
-<span id="1617">1617</span>
-<span id="1618">1618</span>
-<span id="1619">1619</span>
-<span id="1620">1620</span>
-<span id="1621">1621</span>
-<span id="1622">1622</span>
-<span id="1623">1623</span>
-<span id="1624">1624</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     fmt,
@@ -1643,9 +1634,6 @@
     Rng,
 };
 
-<span class="kw">use </span><span class="kw">crate</span>::num::Powi;
-<span class="kw">use </span><span class="kw">crate</span>::oklab::oklab_to_linear_srgb;
-<span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 <span class="kw">use crate</span>::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
@@ -1661,9 +1649,10 @@
         <span class="self">self</span>, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
     },
+    oklab::oklab_to_linear_srgb,
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
-    white_point::{Any, WhitePoint},
+    white_point::{Any, WhitePoint, D65},
     Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
     Mix, MixAssign, Oklab, RelativeContrast, RgbHue, Xyz, Yxy,
 };
@@ -2368,20 +2357,12 @@
 
 <span class="kw">impl</span>&lt;S, T&gt; FromColorUnclamped&lt;Oklab&lt;T&gt;&gt; <span class="kw">for </span>Rgb&lt;S, T&gt;
 <span class="kw">where
-    </span>T: Real + Powi + Arithmetics + FromScalar + Copy,
-    T::Scalar: Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + FromScalar&lt;Scalar = T::Scalar&gt;
-        + Real
-        + Zero
-        + One
-        + Clone,
-    S: RgbStandard + <span class="lifetime">&#39;static</span>,
+    </span>T: Real + Arithmetics + Copy,
+    S: RgbStandard,
     S::TransferFn: FromLinear&lt;T, T&gt;,
-    S::Space: RgbSpace&lt;WhitePoint = D65&gt;,
-    &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
-    Yxy&lt;Any, T::Scalar&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T::Scalar&gt;&gt;,
+    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">&#39;static</span>,
+    Rgb&lt;Linear&lt;Srgb&gt;, T&gt;: IntoColorUnclamped&lt;<span class="self">Self</span>&gt;,
+    Xyz&lt;D65, T&gt;: FromColorUnclamped&lt;Oklab&lt;T&gt;&gt; + IntoColorUnclamped&lt;<span class="self">Self</span>&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(oklab: Oklab&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>TypeId::of::&lt;&lt;S <span class="kw">as </span>RgbStandard&gt;::Space&gt;() == TypeId::of::&lt;Srgb&gt;() {
@@ -2453,10 +2434,9 @@
     <span class="kw">fn </span>get_hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RgbHue&lt;T&gt; {
         <span class="kw">let </span>sqrt_3: T = T::from_f64(<span class="number">1.73205081</span>);
 
-        RgbHue::from_radians(
-            (sqrt_3 * (<span class="self">self</span>.green.clone() - <span class="self">self</span>.blue.clone())).atan2(
-                <span class="self">self</span>.red.clone() * T::from_f64(<span class="number">2.0</span>) - <span class="self">self</span>.green.clone() - <span class="self">self</span>.blue.clone(),
-            ),
+        RgbHue::from_cartesian(
+            <span class="self">self</span>.red.clone() * T::from_f64(<span class="number">2.0</span>) - <span class="self">self</span>.green.clone() - <span class="self">self</span>.blue.clone(),
+            sqrt_3 * (<span class="self">self</span>.green.clone() - <span class="self">self</span>.blue.clone()),
         )
     }
 }
@@ -3031,6 +3011,8 @@
 
     <span class="kw">use super</span>::{Rgb, Rgba};
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Rgb);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>ranges() {
         <span class="macro">assert_ranges! </span>{
@@ -3247,4 +3229,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

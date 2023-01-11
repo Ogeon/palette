@@ -536,40 +536,23 @@
 <span id="536">536</span>
 <span id="537">537</span>
 <span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::fmt::Debug;
 
 <span class="kw">pub use </span>alpha::Okhsva;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub use </span>random::UniformOkhsv;
 
-<span class="kw">use </span><span class="kw">crate</span>::angle::FromAngle;
-<span class="kw">use </span><span class="kw">crate</span>::convert::IntoColorUnclamped;
-<span class="kw">use </span><span class="kw">crate</span>::num::{
-    Arithmetics, Cbrt, FromScalar, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
-    Trigonometry, Zero,
-};
-<span class="kw">use </span><span class="kw">crate</span>::ok_utils::{LC, ST};
-<span class="kw">use </span><span class="kw">crate</span>::stimulus::{FromStimulus, Stimulus};
-<span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 <span class="kw">use crate</span>::{
-    angle::RealAngle, convert::FromColorUnclamped, ok_utils, HasBoolMask, LinSrgb, Okhwb, Oklab,
-    OklabHue,
+    angle::FromAngle,
+    bool_mask::LazySelect,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{
+        Arithmetics, Cbrt, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero,
+    },
+    ok_utils::{<span class="self">self</span>, LC, ST},
+    stimulus::{FromStimulus, Stimulus},
+    white_point::D65,
+    GetHue, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
 };
 
 <span class="kw">mod </span>alpha;
@@ -584,8 +567,8 @@
 ///
 /// Allows
 /// * changing lightness/chroma/saturation while keeping perceived Hue constant
-/// (like HSV promises but delivers only partially)  
-/// * finding the strongest color (maximum chroma) at s == 1 (like HSV)  
+/// (like HSV promises but delivers only partially)
+/// * finding the strongest color (maximum chroma) at s == 1 (like HSV)
 </span><span class="attribute">#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
 #[palette(
@@ -596,7 +579,7 @@
 )]
 #[repr(C)]
 </span><span class="kw">pub struct </span>Okhsv&lt;T = f32&gt; {
-    <span class="doccomment">/// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    <span class="doccomment">/// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -733,10 +716,8 @@
 </span><span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Oklab&lt;T&gt;&gt; <span class="kw">for </span>Okhsv&lt;T&gt;
 <span class="kw">where
     </span>T: Real
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
         + MinMax
-        + Copy
+        + Clone
         + Powi
         + Sqrt
         + Cbrt
@@ -745,17 +726,10 @@
         + Zero
         + Hypot
         + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
         + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + HasBoolMask&lt;Mask = bool&gt;
+        + PartialOrd,
+    Oklab&lt;T&gt;: GetHue&lt;Hue = OklabHue&lt;T&gt;&gt; + IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(lab: Oklab&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>lab.l == T::zero() {
@@ -763,10 +737,10 @@
             </span><span class="kw">return </span><span class="self">Self</span>::new(T::zero(), T::zero(), T::zero());
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(hue) = lab.try_hue() {
-            <span class="kw">let </span>(chroma, normalized_ab) = lab.chroma_and_normalized_ab();
-            <span class="kw">let </span>(a_, b_) =
-                normalized_ab.expect(<span class="string">&quot;There is a hue, thus there also are normalized a and b&quot;</span>);
+        <span class="kw">let </span>chroma = lab.get_chroma();
+        <span class="kw">let </span>hue = lab.get_hue();
+        <span class="kw">if </span>chroma.is_valid_divisor() {
+            <span class="kw">let </span>(a_, b_) = (lab.a / <span class="kw-2">&amp;</span>chroma, lab.b / <span class="kw-2">&amp;</span>chroma);
 
             <span class="comment">// For each hue the sRGB gamut can be drawn on a 2-dimensional space.
             // Let L_r, the lightness in relation to the possible luminance of sRGB, be spread
@@ -776,23 +750,23 @@
             // To use saturation and brightness values, the gamut must be mapped to a square.
             // The lower point of the triangle is expanded to the lower side of the square.
             // The left side remains unchanged and the cusp of the triangle moves to the upper right.
-            </span><span class="kw">let </span>cusp = LC::find_cusp(a_, b_);
+            </span><span class="kw">let </span>cusp = LC::find_cusp(a_.clone(), b_.clone());
             <span class="kw">let </span>st_max = ST::&lt;T&gt;::from(cusp);
 
             <span class="kw">let </span>s_0 = T::from_f64(<span class="number">0.5</span>);
-            <span class="kw">let </span>k = T::one() - s_0 / st_max.s;
+            <span class="kw">let </span>k = T::one() - s_0.clone() / st_max.s;
 
             <span class="comment">// first we find L_v, C_v, L_vt and C_vt
-            </span><span class="kw">let </span>t = st_max.t / (chroma + lab.l * st_max.t);
-            <span class="kw">let </span>l_v = t * lab.l;
+            </span><span class="kw">let </span>t = st_max.t.clone() / (chroma.clone() + lab.l.clone() * <span class="kw-2">&amp;</span>st_max.t);
+            <span class="kw">let </span>l_v = t.clone() * <span class="kw-2">&amp;</span>lab.l;
             <span class="kw">let </span>c_v = t * chroma;
 
-            <span class="kw">let </span>l_vt = ok_utils::toe_inv(l_v);
-            <span class="kw">let </span>c_vt = c_v * l_vt / l_v;
+            <span class="kw">let </span>l_vt = ok_utils::toe_inv(l_v.clone());
+            <span class="kw">let </span>c_vt = c_v.clone() * <span class="kw-2">&amp;</span>l_vt / <span class="kw-2">&amp;</span>l_v;
 
             <span class="comment">// we can then use these to invert the step that compensates for the toe and the curved top part of the triangle:
             </span><span class="kw">let </span>rgb_scale: LinSrgb&lt;T&gt; =
-                Oklab::new(l_vt, a_ * c_vt, b_ * c_vt).into_color_unclamped();
+                Oklab::new(l_vt, a_ * <span class="kw-2">&amp;</span>c_vt, b_ * c_vt).into_color_unclamped();
             <span class="kw">let </span>lightness_scale_factor = T::cbrt(
                 T::one()
                     / T::max(
@@ -809,7 +783,8 @@
 
             // we can now compute v and s:
             </span><span class="kw">let </span>v = l_r / l_v;
-            <span class="kw">let </span>s = (s_0 + st_max.t) * c_v / ((st_max.t * s_0) + st_max.t * k * c_v);
+            <span class="kw">let </span>s =
+                (s_0.clone() + <span class="kw-2">&amp;</span>st_max.t) * <span class="kw-2">&amp;</span>c_v / ((st_max.t.clone() * s_0) + st_max.t * k * c_v);
 
             <span class="self">Self</span>::new(hue, s, v)
         } <span class="kw">else </span>{
@@ -821,38 +796,29 @@
 }
 <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Okhwb&lt;T&gt;&gt; <span class="kw">for </span>Okhsv&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
-        + PartialOrd
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + Hypot
-        + One
-        + FromScalar
-        + RealAngle,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + Hypot
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+    </span>T: One + Zero + IsValidDivisor + Arithmetics,
+    T::Mask: LazySelect&lt;T&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(hwb: Okhwb&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>hwb.blackness == T::one() {
-            <span class="kw">return </span><span class="self">Self</span>::new(hwb.hue, T::zero(), T::zero());
+        <span class="kw">let </span>Okhwb {
+            hue,
+            whiteness,
+            blackness,
+        } = hwb;
+
+        <span class="kw">let </span>value = T::one() - blackness;
+
+        <span class="comment">// avoid divide by zero
+        </span><span class="kw">let </span>saturation = <span class="macro">lazy_select! </span>{
+            <span class="kw">if </span>value.is_valid_divisor() =&gt; T::one() - (whiteness / <span class="kw-2">&amp;</span>value),
+            <span class="kw">else </span>=&gt; T::zero(),
+        };
+
+        <span class="self">Self </span>{
+            hue,
+            saturation,
+            value,
         }
-        <span class="self">Self</span>::new(
-            hwb.hue,
-            T::one() - hwb.whiteness / (T::one() - hwb.blackness),
-            T::one() - hwb.blackness,
-        )
     }
 }
 
@@ -864,6 +830,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
     <span class="kw">use </span><span class="kw">crate</span>::visual::VisuallyEqual;
     <span class="kw">use crate</span>::{encoding, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+
+    <span class="macro">test_convert_into_from_xyz!</span>(Okhsv);
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_roundtrip_okhsv_oklab_is_original() {
@@ -1107,4 +1075,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

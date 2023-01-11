@@ -602,44 +602,16 @@
 <span id="602">602</span>
 <span id="603">603</span>
 <span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Traits and functions used in Ok* color spaces
+
 </span><span class="attribute">#[cfg(test)]
-</span><span class="kw">use </span><span class="kw">crate</span>::angle::RealAngle;
-<span class="kw">use </span><span class="kw">crate</span>::convert::IntoColorUnclamped;
-<span class="kw">use </span><span class="kw">crate</span>::num::{
-    Arithmetics, Cbrt, FromScalar, IsValidDivisor, MinMax, One, Powi, Real, Recip, Sqrt,
-    Trigonometry, Zero,
+</span><span class="kw">use crate</span>::{angle::RealAngle, num::Trigonometry, OklabHue};
+
+<span class="kw">use crate</span>::{
+    convert::IntoColorUnclamped,
+    num::{Arithmetics, Cbrt, MinMax, One, Powi, Real, Sqrt, Zero},
+    HasBoolMask, LinSrgb, Oklab,
 };
-<span class="attribute">#[cfg(test)]
-</span><span class="kw">use </span><span class="kw">crate</span>::OklabHue;
-<span class="kw">use crate</span>::{HasBoolMask, LinSrgb, Oklab};
 
 <span class="doccomment">/// Finds intersection of the line defined by
 ///
@@ -648,101 +620,77 @@
 /// C = t * c1;
 ///
 /// a and b must be normalized so a² + b² == 1
-</span><span class="kw">fn </span>find_gamut_intersection&lt;T&gt;(a: T, b: T, l1: T, c1: T, l0: T, cusp: <span class="prelude-ty">Option</span>&lt;LC&lt;T&gt;&gt;) -&gt; T
+</span><span class="kw">fn </span>find_gamut_intersection&lt;T&gt;(a: T, b: T, l1: T, c1: T, l0: T, cusp: LC&lt;T&gt;) -&gt; T
 <span class="kw">where
-    </span>T: Real
-        + One
-        + Zero
-        + Arithmetics
-        + Sqrt
-        + MinMax
-        + Copy
-        + PartialEq
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
-        + Powi
-        + Cbrt
-        + Trigonometry
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+    </span>T: Real + One + Zero + Arithmetics + MinMax + HasBoolMask&lt;Mask = bool&gt; + PartialOrd + Clone,
 {
-    <span class="comment">// Find the cusp of the gamut triangle
-    </span><span class="kw">let </span>cusp = cusp.unwrap_or_else(|| LC::find_cusp(a, b));
-
     <span class="comment">// Find the intersection for upper and lower half separately
-    </span><span class="kw">if </span>((l1 - l0) * cusp.chroma - (cusp.lightness - l0) * c1) &lt;= T::zero() {
+    </span><span class="kw">if </span>((l1.clone() - <span class="kw-2">&amp;</span>l0) * <span class="kw-2">&amp;</span>cusp.chroma - (cusp.lightness.clone() - <span class="kw-2">&amp;</span>l0) * <span class="kw-2">&amp;</span>c1) &lt;= T::zero() {
         <span class="comment">// Lower half
 
-        </span>cusp.chroma * l0 / (c1 * cusp.lightness + cusp.chroma * (l0 - l1))
+        </span>cusp.chroma.clone() * <span class="kw-2">&amp;</span>l0 / (c1 * cusp.lightness + cusp.chroma * (l0 - l1))
     } <span class="kw">else </span>{
         <span class="comment">// Upper half
 
         // First intersect with triangle
-        </span><span class="kw">let </span>t = cusp.chroma * (l0 - T::one())
-            / (c1 * (cusp.lightness - T::one()) + cusp.chroma * (l0 - l1));
+        </span><span class="kw">let </span>t = cusp.chroma.clone() * (l0.clone() - T::one())
+            / (c1.clone() * (cusp.lightness - T::one()) + cusp.chroma * (l0.clone() - <span class="kw-2">&amp;</span>l1));
 
         <span class="comment">// Then one step Halley&#39;s method
         </span>{
-            <span class="kw">let </span>dl = l1 - l0;
-            <span class="kw">let </span>dc = c1;
+            <span class="kw">let </span>dl = l1.clone() - <span class="kw-2">&amp;</span>l0;
+            <span class="kw">let </span>dc = c1.clone();
 
-            <span class="kw">let </span>k_l = T::from_f64(<span class="number">0.3963377774</span>) * a + T::from_f64(<span class="number">0.2158037573</span>) * b;
-            <span class="kw">let </span>k_m = -T::from_f64(<span class="number">0.1055613458</span>) * a - T::from_f64(<span class="number">0.0638541728</span>) * b;
+            <span class="kw">let </span>k_l = T::from_f64(<span class="number">0.3963377774</span>) * <span class="kw-2">&amp;</span>a + T::from_f64(<span class="number">0.2158037573</span>) * <span class="kw-2">&amp;</span>b;
+            <span class="kw">let </span>k_m = -T::from_f64(<span class="number">0.1055613458</span>) * <span class="kw-2">&amp;</span>a - T::from_f64(<span class="number">0.0638541728</span>) * <span class="kw-2">&amp;</span>b;
             <span class="kw">let </span>k_s = -T::from_f64(<span class="number">0.0894841775</span>) * a - T::from_f64(<span class="number">1.2914855480</span>) * b;
 
-            <span class="kw">let </span>l_dt = dl + dc * k_l;
-            <span class="kw">let </span>m_dt = dl + dc * k_m;
-            <span class="kw">let </span>s_dt = dl + dc * k_s;
+            <span class="kw">let </span>l_dt = dl.clone() + dc.clone() * <span class="kw-2">&amp;</span>k_l;
+            <span class="kw">let </span>m_dt = dl.clone() + dc.clone() * <span class="kw-2">&amp;</span>k_m;
+            <span class="kw">let </span>s_dt = dl + dc * <span class="kw-2">&amp;</span>k_s;
 
             <span class="comment">// If higher accuracy is required, 2 or 3 iterations of the following block can be used:
             </span>{
-                <span class="kw">let </span>lightness = l0 * (T::one() - t) + t * l1;
-                <span class="kw">let </span>chroma = t * c1;
+                <span class="kw">let </span>lightness = l0 * (T::one() - <span class="kw-2">&amp;</span>t) + t.clone() * l1;
+                <span class="kw">let </span>chroma = t.clone() * c1;
 
-                <span class="kw">let </span>l_ = lightness + chroma * k_l;
-                <span class="kw">let </span>m_ = lightness + chroma * k_m;
+                <span class="kw">let </span>l_ = lightness.clone() + chroma.clone() * k_l;
+                <span class="kw">let </span>m_ = lightness.clone() + chroma.clone() * k_m;
                 <span class="kw">let </span>s_ = lightness + chroma * k_s;
 
-                <span class="kw">let </span>l = l_ * l_ * l_;
-                <span class="kw">let </span>m = m_ * m_ * m_;
-                <span class="kw">let </span>s = s_ * s_ * s_;
+                <span class="kw">let </span>l = l_.clone() * <span class="kw-2">&amp;</span>l_ * <span class="kw-2">&amp;</span>l_;
+                <span class="kw">let </span>m = m_.clone() * <span class="kw-2">&amp;</span>m_ * <span class="kw-2">&amp;</span>m_;
+                <span class="kw">let </span>s = s_.clone() * <span class="kw-2">&amp;</span>s_ * <span class="kw-2">&amp;</span>s_;
 
-                <span class="kw">let </span>ldt = T::from_f64(<span class="number">3.0</span>) * l_dt * l_ * l_;
-                <span class="kw">let </span>mdt = T::from_f64(<span class="number">3.0</span>) * m_dt * m_ * m_;
-                <span class="kw">let </span>sdt = T::from_f64(<span class="number">3.0</span>) * s_dt * s_ * s_;
+                <span class="kw">let </span>ldt = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>l_dt * <span class="kw-2">&amp;</span>l_ * <span class="kw-2">&amp;</span>l_;
+                <span class="kw">let </span>mdt = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>m_dt * <span class="kw-2">&amp;</span>m_ * <span class="kw-2">&amp;</span>m_;
+                <span class="kw">let </span>sdt = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>s_dt * <span class="kw-2">&amp;</span>s_ * <span class="kw-2">&amp;</span>s_;
 
-                <span class="kw">let </span>ldt2 = T::from_f64(<span class="number">6.0</span>) * l_dt * l_dt * l_;
-                <span class="kw">let </span>mdt2 = T::from_f64(<span class="number">6.0</span>) * m_dt * m_dt * m_;
-                <span class="kw">let </span>sdt2 = T::from_f64(<span class="number">6.0</span>) * s_dt * s_dt * s_;
+                <span class="kw">let </span>ldt2 = T::from_f64(<span class="number">6.0</span>) * <span class="kw-2">&amp;</span>l_dt * l_dt * l_;
+                <span class="kw">let </span>mdt2 = T::from_f64(<span class="number">6.0</span>) * <span class="kw-2">&amp;</span>m_dt * m_dt * m_;
+                <span class="kw">let </span>sdt2 = T::from_f64(<span class="number">6.0</span>) * <span class="kw-2">&amp;</span>s_dt * s_dt * s_;
 
-                <span class="kw">let </span>r = T::from_f64(<span class="number">4.0767416621</span>) * l - T::from_f64(<span class="number">3.3077115913</span>) * m
-                    + T::from_f64(<span class="number">0.2309699292</span>) * s
+                <span class="kw">let </span>r = T::from_f64(<span class="number">4.0767416621</span>) * <span class="kw-2">&amp;</span>l - T::from_f64(<span class="number">3.3077115913</span>) * <span class="kw-2">&amp;</span>m
+                    + T::from_f64(<span class="number">0.2309699292</span>) * <span class="kw-2">&amp;</span>s
                     - T::one();
-                <span class="kw">let </span>r1 = T::from_f64(<span class="number">4.0767416621</span>) * ldt - T::from_f64(<span class="number">3.3077115913</span>) * mdt
-                    + T::from_f64(<span class="number">0.2309699292</span>) * sdt;
-                <span class="kw">let </span>r2 = T::from_f64(<span class="number">4.0767416621</span>) * ldt2 - T::from_f64(<span class="number">3.3077115913</span>) * mdt2
-                    + T::from_f64(<span class="number">0.2309699292</span>) * sdt2;
+                <span class="kw">let </span>r1 = T::from_f64(<span class="number">4.0767416621</span>) * <span class="kw-2">&amp;</span>ldt - T::from_f64(<span class="number">3.3077115913</span>) * <span class="kw-2">&amp;</span>mdt
+                    + T::from_f64(<span class="number">0.2309699292</span>) * <span class="kw-2">&amp;</span>sdt;
+                <span class="kw">let </span>r2 = T::from_f64(<span class="number">4.0767416621</span>) * <span class="kw-2">&amp;</span>ldt2 - T::from_f64(<span class="number">3.3077115913</span>) * <span class="kw-2">&amp;</span>mdt2
+                    + T::from_f64(<span class="number">0.2309699292</span>) * <span class="kw-2">&amp;</span>sdt2;
 
-                <span class="kw">let </span>u_r = r1 / (r1 * r1 - T::from_f64(<span class="number">0.5</span>) * r * r2);
-                <span class="kw">let </span><span class="kw-2">mut </span>t_r = -r * u_r;
+                <span class="kw">let </span>u_r = r1.clone() / (r1.clone() * r1 - T::from_f64(<span class="number">0.5</span>) * <span class="kw-2">&amp;</span>r * r2);
+                <span class="kw">let </span><span class="kw-2">mut </span>t_r = -r * <span class="kw-2">&amp;</span>u_r;
 
-                <span class="kw">let </span>g = -T::from_f64(<span class="number">1.2684380046</span>) * l + T::from_f64(<span class="number">2.6097574011</span>) * m
-                    - T::from_f64(<span class="number">0.3413193965</span>) * s
+                <span class="kw">let </span>g = -T::from_f64(<span class="number">1.2684380046</span>) * <span class="kw-2">&amp;</span>l + T::from_f64(<span class="number">2.6097574011</span>) * <span class="kw-2">&amp;</span>m
+                    - T::from_f64(<span class="number">0.3413193965</span>) * <span class="kw-2">&amp;</span>s
                     - T::one();
-                <span class="kw">let </span>g1 = -T::from_f64(<span class="number">1.2684380046</span>) * ldt + T::from_f64(<span class="number">2.6097574011</span>) * mdt
-                    - T::from_f64(<span class="number">0.3413193965</span>) * sdt;
-                <span class="kw">let </span>g2 = -T::from_f64(<span class="number">1.2684380046</span>) * ldt2 + T::from_f64(<span class="number">2.6097574011</span>) * mdt2
-                    - T::from_f64(<span class="number">0.3413193965</span>) * sdt2;
+                <span class="kw">let </span>g1 = -T::from_f64(<span class="number">1.2684380046</span>) * <span class="kw-2">&amp;</span>ldt + T::from_f64(<span class="number">2.6097574011</span>) * <span class="kw-2">&amp;</span>mdt
+                    - T::from_f64(<span class="number">0.3413193965</span>) * <span class="kw-2">&amp;</span>sdt;
+                <span class="kw">let </span>g2 = -T::from_f64(<span class="number">1.2684380046</span>) * <span class="kw-2">&amp;</span>ldt2 + T::from_f64(<span class="number">2.6097574011</span>) * <span class="kw-2">&amp;</span>mdt2
+                    - T::from_f64(<span class="number">0.3413193965</span>) * <span class="kw-2">&amp;</span>sdt2;
 
-                <span class="kw">let </span>u_g = g1 / (g1 * g1 - T::from_f64(<span class="number">0.5</span>) * g * g2);
-                <span class="kw">let </span><span class="kw-2">mut </span>t_g = -g * u_g;
+                <span class="kw">let </span>u_g = g1.clone() / (g1.clone() * g1 - T::from_f64(<span class="number">0.5</span>) * <span class="kw-2">&amp;</span>g * g2);
+                <span class="kw">let </span><span class="kw-2">mut </span>t_g = -g * <span class="kw-2">&amp;</span>u_g;
 
                 <span class="kw">let </span>b = -T::from_f64(<span class="number">0.0041960863</span>) * l - T::from_f64(<span class="number">0.7034186147</span>) * m
                     + T::from_f64(<span class="number">1.7076147010</span>) * s
@@ -752,14 +700,22 @@
                 <span class="kw">let </span>b2 = -T::from_f64(<span class="number">0.0041960863</span>) * ldt2 - T::from_f64(<span class="number">0.7034186147</span>) * mdt2
                     + T::from_f64(<span class="number">1.7076147010</span>) * sdt2;
 
-                <span class="kw">let </span>u_b = b1 / (b1 * b1 - T::from_f64(<span class="number">0.5</span>) * b * b2);
-                <span class="kw">let </span><span class="kw-2">mut </span>t_b = -b * u_b;
+                <span class="kw">let </span>u_b = b1.clone() / (b1.clone() * b1 - T::from_f64(<span class="number">0.5</span>) * <span class="kw-2">&amp;</span>b * b2);
+                <span class="kw">let </span><span class="kw-2">mut </span>t_b = -b * <span class="kw-2">&amp;</span>u_b;
 
                 <span class="comment">// flt_max really is a constant, but cannot be defined as one due to the T::from_f64 function
                 </span><span class="kw">let </span>flt_max = T::from_f64(<span class="number">10e5</span>);
 
-                t_r = <span class="kw">if </span>u_r &gt;= T::zero() { t_r } <span class="kw">else </span>{ flt_max };
-                t_g = <span class="kw">if </span>u_g &gt;= T::zero() { t_g } <span class="kw">else </span>{ flt_max };
+                t_r = <span class="kw">if </span>u_r &gt;= T::zero() {
+                    t_r
+                } <span class="kw">else </span>{
+                    flt_max.clone()
+                };
+                t_g = <span class="kw">if </span>u_g &gt;= T::zero() {
+                    t_g
+                } <span class="kw">else </span>{
+                    flt_max.clone()
+                };
                 t_b = <span class="kw">if </span>u_b &gt;= T::zero() { t_b } <span class="kw">else </span>{ flt_max };
 
                 t + T::min(t_r, T::min(t_g, t_b))
@@ -780,56 +736,58 @@
         + One
         + Zero
         + Arithmetics
-        + Sqrt
         + MinMax
-        + Copy
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
-        + Powi
         + Cbrt
-        + Trigonometry
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
+        + Sqrt
+        + Powi
         + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + HasBoolMask&lt;Mask = bool&gt;
+        + PartialOrd,
+    Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">pub fn </span>from_normalized(lightness: T, a_: T, b_: T) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>cusp = LC::find_cusp(a_, b_);
+        <span class="kw">let </span>cusp = LC::find_cusp(a_.clone(), b_.clone());
 
-        <span class="kw">let </span>max_chroma =
-            find_gamut_intersection(a_, b_, lightness, T::one(), lightness, <span class="prelude-val">Some</span>(cusp));
+        <span class="kw">let </span>max_chroma = find_gamut_intersection(
+            a_.clone(),
+            b_.clone(),
+            lightness.clone(),
+            T::one(),
+            lightness.clone(),
+            cusp.clone(),
+        );
         <span class="kw">let </span>st_max = ST::from(cusp);
 
         <span class="comment">// Scale factor to compensate for the curved part of gamut shape:
-        </span><span class="kw">let </span>k = max_chroma / T::min(lightness * st_max.s, (T::one() - lightness) * st_max.t);
+        </span><span class="kw">let </span>k = max_chroma.clone()
+            / T::min(
+                lightness.clone() * st_max.s,
+                (T::one() - <span class="kw-2">&amp;</span>lightness) * st_max.t,
+            );
 
         <span class="kw">let </span>c_mid = {
             <span class="kw">let </span>st_mid = ST::mid(a_, b_);
 
             <span class="comment">// Use a soft minimum function, instead of a sharp triangle shape to get a smooth value for chroma.
-            </span><span class="kw">let </span>c_a = lightness * st_mid.s;
-            <span class="kw">let </span>c_b = (T::one() - lightness) * st_mid.t;
+            </span><span class="kw">let </span>c_a = lightness.clone() * st_mid.s;
+            <span class="kw">let </span>c_b = (T::one() - <span class="kw-2">&amp;</span>lightness) * st_mid.t;
             T::from_f64(<span class="number">0.9</span>)
                 * k
                 * T::sqrt(T::sqrt(
                     T::one()
-                        / (T::one() / (c_a * c_a * c_a * c_a) + T::one() / (c_b * c_b * c_b * c_b)),
+                        / (T::one() / (c_a.clone() * <span class="kw-2">&amp;</span>c_a * <span class="kw-2">&amp;</span>c_a * <span class="kw-2">&amp;</span>c_a)
+                            + T::one() / (c_b.clone() * <span class="kw-2">&amp;</span>c_b * <span class="kw-2">&amp;</span>c_b * <span class="kw-2">&amp;</span>c_b)),
                 ))
         };
 
         <span class="kw">let </span>c_0 = {
             <span class="comment">// for C_0, the shape is independent of hue, so ST are constant.
             // Values picked to roughly be the average values of ST.
-            </span><span class="kw">let </span>c_a = lightness * T::from_f64(<span class="number">0.4</span>);
+            </span><span class="kw">let </span>c_a = lightness.clone() * T::from_f64(<span class="number">0.4</span>);
             <span class="kw">let </span>c_b = (T::one() - lightness) * T::from_f64(<span class="number">0.8</span>);
 
             <span class="comment">// Use a soft minimum function, instead of a sharp triangle shape to get a smooth value for chroma.
-            </span>T::sqrt(T::one() / (T::one() / (c_a * c_a) + T::one() / (c_b * c_b)))
+            </span>T::sqrt(T::one() / (T::one() / (c_a.clone() * c_a) + T::one() / (c_b.clone() * c_b)))
         };
         <span class="self">Self </span>{
             zero: c_0,
@@ -871,44 +829,32 @@
 
 <span class="kw">impl</span>&lt;T&gt; LC&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
-        + MinMax
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
-        + Arithmetics
-        + Trigonometry
-        + Zero
-        + One
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+    </span>T: Real + One + Arithmetics + Powi + HasBoolMask&lt;Mask = bool&gt; + PartialOrd + Clone,
 {
     <span class="doccomment">/// Returns the cusp of the geometrical shape of representable `sRGB` colors for
     /// normalized `a` and `b` values of an `OKlabHue`, where &quot;normalized&quot; means, `a² + b² == 1`.
     ///
     /// The cusp solely depends on the maximum saturation of the hue, but is expressed as a
     /// combination of lightness and chroma.
-    </span><span class="kw">pub fn </span>find_cusp(a: T, b: T) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>find_cusp(a: T, b: T) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: MinMax + Cbrt,
+        Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
+    {
         <span class="comment">// First, find the maximum saturation (saturation S = C/L)
-        </span><span class="kw">let </span>max_saturation = <span class="self">Self</span>::max_saturation(a, b);
+        </span><span class="kw">let </span>max_saturation = <span class="self">Self</span>::max_saturation(a.clone(), b.clone());
         <span class="comment">// Convert to linear sRGB to find the first point where at least one of r,g or b &gt;= 1:
-        </span><span class="kw">let </span>rgb_at_max: LinSrgb&lt;T&gt; =
-            Oklab::new(T::one(), max_saturation * a, max_saturation * b).into_color_unclamped();
+        </span><span class="kw">let </span>rgb_at_max: LinSrgb&lt;T&gt; = Oklab::new(
+            T::one(),
+            max_saturation.clone() * a,
+            max_saturation.clone() * b,
+        )
+        .into_color_unclamped();
 
         <span class="kw">let </span>max_lightness =
             T::cbrt(T::one() / T::max(T::max(rgb_at_max.red, rgb_at_max.green), rgb_at_max.blue));
         <span class="self">Self </span>{
-            lightness: max_lightness,
+            lightness: max_lightness.clone(),
             chroma: max_lightness * max_saturation,
         }
     }
@@ -928,7 +874,7 @@
         // wl, wm and ws are coefficients for https://en.wikipedia.org/wiki/LMS_color_space
         // -- the color space modelling human perception.
         </span><span class="kw">let </span>(k0, k1, k2, k3, k4, wl, wm, ws) =
-            <span class="kw">if </span>T::from_f64(-<span class="number">1.88170328</span>) * a - T::from_f64(<span class="number">0.80936493</span>) * b &gt; T::one() {
+            <span class="kw">if </span>T::from_f64(-<span class="number">1.88170328</span>) * <span class="kw-2">&amp;</span>a - T::from_f64(<span class="number">0.80936493</span>) * <span class="kw-2">&amp;</span>b &gt; T::one() {
                 <span class="comment">// red component at zero first
                 </span>(
                     T::from_f64(<span class="number">1.19086277</span>),
@@ -940,7 +886,7 @@
                     T::from_f64(-<span class="number">3.3077115913</span>),
                     T::from_f64(<span class="number">0.2309699292</span>),
                 )
-            } <span class="kw">else if </span>T::from_f64(<span class="number">1.81444104</span>) * a - T::from_f64(<span class="number">1.19445276</span>) * b &gt; T::one() {
+            } <span class="kw">else if </span>T::from_f64(<span class="number">1.81444104</span>) * <span class="kw-2">&amp;</span>a - T::from_f64(<span class="number">1.19445276</span>) * <span class="kw-2">&amp;</span>b &gt; T::one() {
                 <span class="comment">//green component at zero first
                 </span>(
                     T::from_f64(<span class="number">0.73956515</span>),
@@ -967,40 +913,41 @@
             };
 
         <span class="comment">// Approximate max saturation using a polynomial
-        </span><span class="kw">let </span><span class="kw-2">mut </span>approx_max_saturation = k0 + k1 * a + k2 * b + k3 * a.powi(<span class="number">2</span>) + k4 * a * b;
+        </span><span class="kw">let </span><span class="kw-2">mut </span>approx_max_saturation =
+            k0 + k1 * <span class="kw-2">&amp;</span>a + k2 * <span class="kw-2">&amp;</span>b + k3 * a.clone().powi(<span class="number">2</span>) + k4 * <span class="kw-2">&amp;</span>a * <span class="kw-2">&amp;</span>b;
         <span class="comment">// Get closer with Halley&#39;s method
-        </span><span class="kw">let </span>k_l = T::from_f64(<span class="number">0.3963377774</span>) * a + T::from_f64(<span class="number">0.2158037573</span>) * b;
-        <span class="kw">let </span>k_m = T::from_f64(-<span class="number">0.1055613458</span>) * a - T::from_f64(<span class="number">0.0638541728</span>) * b;
+        </span><span class="kw">let </span>k_l = T::from_f64(<span class="number">0.3963377774</span>) * <span class="kw-2">&amp;</span>a + T::from_f64(<span class="number">0.2158037573</span>) * <span class="kw-2">&amp;</span>b;
+        <span class="kw">let </span>k_m = T::from_f64(-<span class="number">0.1055613458</span>) * <span class="kw-2">&amp;</span>a - T::from_f64(<span class="number">0.0638541728</span>) * <span class="kw-2">&amp;</span>b;
         <span class="kw">let </span>k_s = T::from_f64(-<span class="number">0.0894841775</span>) * a - T::from_f64(<span class="number">1.2914855480</span>) * b;
 
         <span class="kw">for </span>_i <span class="kw">in </span><span class="number">0</span>..MAX_SRGB_SATURATION_SEARCH_MAX_ITER {
-            <span class="kw">let </span>l_ = T::one() + approx_max_saturation * k_l;
-            <span class="kw">let </span>m_ = T::one() + approx_max_saturation * k_m;
-            <span class="kw">let </span>s_ = T::one() + approx_max_saturation * k_s;
+            <span class="kw">let </span>l_ = T::one() + approx_max_saturation.clone() * <span class="kw-2">&amp;</span>k_l;
+            <span class="kw">let </span>m_ = T::one() + approx_max_saturation.clone() * <span class="kw-2">&amp;</span>k_m;
+            <span class="kw">let </span>s_ = T::one() + approx_max_saturation.clone() * <span class="kw-2">&amp;</span>k_s;
 
-            <span class="kw">let </span>l = l_.powi(<span class="number">3</span>);
-            <span class="kw">let </span>m = m_.powi(<span class="number">3</span>);
-            <span class="kw">let </span>s = s_.powi(<span class="number">3</span>);
+            <span class="kw">let </span>l = l_.clone().powi(<span class="number">3</span>);
+            <span class="kw">let </span>m = m_.clone().powi(<span class="number">3</span>);
+            <span class="kw">let </span>s = s_.clone().powi(<span class="number">3</span>);
 
             <span class="comment">// first derivative components
-            </span><span class="kw">let </span>l_ds = T::from_f64(<span class="number">3.0</span>) * k_l * l_.powi(<span class="number">2</span>);
-            <span class="kw">let </span>m_ds = T::from_f64(<span class="number">3.0</span>) * k_m * m_.powi(<span class="number">2</span>);
-            <span class="kw">let </span>s_ds = T::from_f64(<span class="number">3.0</span>) * k_s * s_.powi(<span class="number">2</span>);
+            </span><span class="kw">let </span>l_ds = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>k_l * l_.clone().powi(<span class="number">2</span>);
+            <span class="kw">let </span>m_ds = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>k_m * m_.clone().powi(<span class="number">2</span>);
+            <span class="kw">let </span>s_ds = T::from_f64(<span class="number">3.0</span>) * <span class="kw-2">&amp;</span>k_s * s_.clone().powi(<span class="number">2</span>);
 
             <span class="comment">// second derivative components
-            </span><span class="kw">let </span>l_ds2 = T::from_f64(<span class="number">6.0</span>) * k_l.powi(<span class="number">2</span>) * l_;
-            <span class="kw">let </span>m_ds2 = T::from_f64(<span class="number">6.0</span>) * k_m.powi(<span class="number">2</span>) * m_;
-            <span class="kw">let </span>s_ds2 = T::from_f64(<span class="number">6.0</span>) * k_s.powi(<span class="number">2</span>) * s_;
+            </span><span class="kw">let </span>l_ds2 = T::from_f64(<span class="number">6.0</span>) * k_l.clone().powi(<span class="number">2</span>) * l_;
+            <span class="kw">let </span>m_ds2 = T::from_f64(<span class="number">6.0</span>) * k_m.clone().powi(<span class="number">2</span>) * m_;
+            <span class="kw">let </span>s_ds2 = T::from_f64(<span class="number">6.0</span>) * k_s.clone().powi(<span class="number">2</span>) * s_;
 
             <span class="comment">// let x be the approximate maximum saturation and
             // i the current iteration
             // f = f(x_i), f1 = f&#39;(x_i), f2 = f&#39;&#39;(x_i) for
-            </span><span class="kw">let </span>f = wl * l + wm * m + ws * s;
-            <span class="kw">let </span>f1 = wl * l_ds + wm * m_ds + ws * s_ds;
-            <span class="kw">let </span>f2 = wl * l_ds2 + wm * m_ds2 + ws * s_ds2;
+            </span><span class="kw">let </span>f = wl.clone() * l + wm.clone() * m + ws.clone() * s;
+            <span class="kw">let </span>f1 = wl.clone() * l_ds + wm.clone() * m_ds + ws.clone() * s_ds;
+            <span class="kw">let </span>f2 = wl.clone() * l_ds2 + wm.clone() * m_ds2 + ws.clone() * s_ds2;
 
             approx_max_saturation =
-                approx_max_saturation - f * f1 / (f1.powi(<span class="number">2</span>) - T::from_f64(<span class="number">0.5</span>) * f * f2);
+                approx_max_saturation - f.clone() * <span class="kw-2">&amp;</span>f1 / (f1.powi(<span class="number">2</span>) - T::from_f64(<span class="number">0.5</span>) * f * f2);
         }
         approx_max_saturation
     }
@@ -1009,34 +956,26 @@
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">impl</span>&lt;T&gt; OklabHue&lt;T&gt;
 <span class="kw">where
-    </span>T: Real
-        + RealAngle
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
-        + MinMax
-        + Copy
-        + Powi
-        + Sqrt
-        + Cbrt
+    </span>T: RealAngle
+        + One
         + Arithmetics
         + Trigonometry
-        + Zero
-        + One
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
-        + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + MinMax
+        + Cbrt
+        + Powi
+        + HasBoolMask&lt;Mask = bool&gt;
+        + PartialOrd
+        + Clone,
+    Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>srgb_limits(<span class="self">self</span>) -&gt; (LC&lt;T&gt;, T, T) {
-        <span class="kw">let </span>normalized_hue_vector = <span class="self">self</span>.ab(T::one());
-        <span class="kw">let </span>lc = LC::find_cusp(normalized_hue_vector.<span class="number">0</span>, normalized_hue_vector.<span class="number">1</span>);
-        <span class="kw">let </span>a = lc.chroma.clone() * normalized_hue_vector.<span class="number">0</span>.clone();
-        <span class="kw">let </span>b = lc.chroma.clone() * normalized_hue_vector.<span class="number">1</span>.clone();
+        <span class="kw">let </span>normalized_hue_vector = <span class="self">self</span>.into_cartesian();
+        <span class="kw">let </span>lc = LC::find_cusp(
+            normalized_hue_vector.<span class="number">0</span>.clone(),
+            normalized_hue_vector.<span class="number">1</span>.clone(),
+        );
+        <span class="kw">let </span>a = lc.chroma.clone() * normalized_hue_vector.<span class="number">0</span>;
+        <span class="kw">let </span>b = lc.chroma.clone() * normalized_hue_vector.<span class="number">1</span>;
         (lc, a, b)
     }
 }
@@ -1058,11 +997,11 @@
 
 <span class="kw">impl</span>&lt;T&gt; From&lt;LC&lt;T&gt;&gt; <span class="kw">for </span>ST&lt;T&gt;
 <span class="kw">where
-    </span>T: Arithmetics + One + Copy,
+    </span>T: Arithmetics + One + Clone,
 {
     <span class="kw">fn </span>from(lc: LC&lt;T&gt;) -&gt; <span class="self">Self </span>{
         ST {
-            s: lc.chroma / lc.lightness,
+            s: lc.chroma.clone() / <span class="kw-2">&amp;</span>lc.lightness,
             t: lc.chroma / (T::one() - lc.lightness),
         }
     }
@@ -1070,7 +1009,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; ST&lt;T&gt;
 <span class="kw">where
-    </span>T: Real + Arithmetics + Copy + One,
+    </span>T: Real + Arithmetics + One + Clone,
 {
     <span class="doccomment">/// Returns a smooth approximation of the location of the cusp.
     ///
@@ -1081,24 +1020,22 @@
     ///
     ///   `T_mid &lt; T_max`
     </span><span class="attribute">#[rustfmt::skip]
-    </span><span class="kw">fn </span>mid(a_: T, b_: T) -&gt; ST&lt;T&gt;
-
-    {
+    </span><span class="kw">fn </span>mid(a_: T, b_: T) -&gt; ST&lt;T&gt; {
         <span class="kw">let </span>s = T::from_f64(<span class="number">0.11516993</span>) + T::one() / (
             T::from_f64(<span class="number">7.44778970</span>)
-                + T::from_f64(<span class="number">4.15901240</span>) * b_
-                + a_ * (T::from_f64(-<span class="number">2.19557347</span>)+ T::from_f64(<span class="number">1.75198401</span>) * b_
-                + a_ * (T::from_f64(-<span class="number">2.13704948</span>) - T::from_f64(<span class="number">10.02301043</span>) * b_
-                + a_ * (T::from_f64(-<span class="number">4.24894561</span>) + T::from_f64(<span class="number">5.38770819</span>) * b_+ T::from_f64(<span class="number">4.69891013</span>) * a_
+                + T::from_f64(<span class="number">4.15901240</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(-<span class="number">2.19557347</span>)+ T::from_f64(<span class="number">1.75198401</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(-<span class="number">2.13704948</span>) - T::from_f64(<span class="number">10.02301043</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(-<span class="number">4.24894561</span>) + T::from_f64(<span class="number">5.38770819</span>) * <span class="kw-2">&amp;</span>b_+ T::from_f64(<span class="number">4.69891013</span>) * <span class="kw-2">&amp;</span>a_
             )))
         );
 
         <span class="kw">let </span>t = T::from_f64(<span class="number">0.11239642</span>)+ T::one()/ (
-            T::from_f64(<span class="number">1.61320320</span>) - T::from_f64(<span class="number">0.68124379</span>) * b_
-                + a_ * (T::from_f64(<span class="number">0.40370612</span>)
-                + T::from_f64(<span class="number">0.90148123</span>) * b_
-                + a_ * (T::from_f64(-<span class="number">0.27087943</span>) + T::from_f64(<span class="number">0.61223990</span>) * b_
-                + a_ * (T::from_f64(<span class="number">0.00299215</span>) - T::from_f64(<span class="number">0.45399568</span>) * b_ - T::from_f64(<span class="number">0.14661872</span>) * a_
+            T::from_f64(<span class="number">1.61320320</span>) - T::from_f64(<span class="number">0.68124379</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(<span class="number">0.40370612</span>)
+                + T::from_f64(<span class="number">0.90148123</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(-<span class="number">0.27087943</span>) + T::from_f64(<span class="number">0.61223990</span>) * <span class="kw-2">&amp;</span>b_
+                + a_.clone() * (T::from_f64(<span class="number">0.00299215</span>) - T::from_f64(<span class="number">0.45399568</span>) * b_ - T::from_f64(<span class="number">0.14661872</span>) * a_
             )))
         );
         ST { s, t }
@@ -1116,7 +1053,7 @@
 /// [D65](https://en.wikipedia.org/wiki/Illuminant_D65) reference white luminance.
 /// Mapping `1` to that luminance is just a matter of definition. But is say `0.8` `Oklab`
 /// lightness equal to `0.5` or `0.9` `sRGB` luminance?
-///   
+///
 /// The shape and weights of `L_r` are chosen to closely matches the lightness estimate of
 /// the `CIELab` color space and be nearly equal at `0.5`.
 ///
@@ -1126,15 +1063,15 @@
 /// https://bottosson.github.io/posts/colorpicker/#intermission---a-new-lightness-estimate-for-oklab
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>toe&lt;T&gt;(oklab_lightness: T) -&gt; T
 <span class="kw">where
-    </span>T: Real + Copy + Powi + Sqrt + Arithmetics + One,
+    </span>T: Real + Powi + Sqrt + Arithmetics + One + Clone,
 {
     <span class="kw">let </span>k_1 = T::from_f64(<span class="number">0.206</span>);
     <span class="kw">let </span>k_2 = T::from_f64(<span class="number">0.03</span>);
-    <span class="kw">let </span>k_3 = (T::one() + k_1) / (T::one() + k_2);
+    <span class="kw">let </span>k_3 = (T::one() + <span class="kw-2">&amp;</span>k_1) / (T::one() + <span class="kw-2">&amp;</span>k_2);
     T::from_f64(<span class="number">0.5</span>)
-        * (k_3 * oklab_lightness - k_1
+        * (k_3.clone() * <span class="kw-2">&amp;</span>oklab_lightness - <span class="kw-2">&amp;</span>k_1
             + T::sqrt(
-                (k_3 * oklab_lightness - k_1).powi(<span class="number">2</span>)
+                (k_3.clone() * <span class="kw-2">&amp;</span>oklab_lightness - k_1).powi(<span class="number">2</span>)
                     + T::from_f64(<span class="number">4.0</span>) * k_2 * k_3 * oklab_lightness,
             ))
 }
@@ -1144,12 +1081,12 @@
 /// Inverse of [`toe`]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>toe_inv&lt;T&gt;(l_r: T) -&gt; T
 <span class="kw">where
-    </span>T: Real + Copy + Powi + Arithmetics + One,
+    </span>T: Real + Powi + Arithmetics + One + Clone,
 {
     <span class="kw">let </span>k_1 = T::from_f64(<span class="number">0.206</span>);
     <span class="kw">let </span>k_2 = T::from_f64(<span class="number">0.03</span>);
-    <span class="kw">let </span>k_3 = (T::one() + k_1) / (T::one() + k_2);
-    (l_r.powi(<span class="number">2</span>) + k_1 * l_r) / (k_3 * (l_r + k_2))
+    <span class="kw">let </span>k_3 = (T::one() + <span class="kw-2">&amp;</span>k_1) / (T::one() + <span class="kw-2">&amp;</span>k_2);
+    (l_r.clone().powi(<span class="number">2</span>) + k_1 * <span class="kw-2">&amp;</span>l_r) / (k_3 * (l_r + k_2))
 }
 
 <span class="attribute">#[cfg(test)]
@@ -1228,7 +1165,13 @@
             max_b = f64::max(max_b, b);
             min_b = f64::min(min_b, b);
         }
-        <span class="kw">let </span>(max_chroma_a, max_chroma_b) = max_chroma.hue.ab(max_chroma.lc.chroma);
+
+        <span class="kw">let </span>(normalized_a, normalized_b) = max_chroma.hue.into_cartesian();
+        <span class="kw">let </span>(max_chroma_a, max_chroma_b) = (
+            normalized_a * max_chroma.lc.chroma,
+            normalized_b * max_chroma.lc.chroma,
+        );
+
         <span class="macro">println!</span>(
             <span class="string">&quot;Min chroma {} at hue {:?}°.&quot;</span>,
             min_chroma.lc.chroma, min_chroma.hue,
@@ -1246,7 +1189,10 @@
     </span><span class="kw">fn </span>max_saturation_f64_eq_f32() {
         <span class="kw">let </span>lin_srgb = LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);
         <span class="kw">let </span>oklab_64 = Oklab::&lt;f64&gt;::from_color_unclamped(lin_srgb);
-        <span class="kw">let </span>(normalized_a, normalized_b) = oklab_64.chroma_and_normalized_ab().<span class="number">1</span>.unwrap();
+        <span class="kw">let </span>(normalized_a, normalized_b) = (
+            oklab_64.a / oklab_64.get_chroma(),
+            oklab_64.b / oklab_64.get_chroma(),
+        );
         <span class="kw">let </span>saturation_64 = LC::max_saturation(normalized_a, normalized_b);
         <span class="kw">let </span>saturation_32 = LC::max_saturation(normalized_a <span class="kw">as </span>f32, normalized_b <span class="kw">as </span>f32);
 
@@ -1261,4 +1207,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

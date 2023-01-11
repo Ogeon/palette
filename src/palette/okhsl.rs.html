@@ -380,26 +380,16 @@
 <span id="380">380</span>
 <span id="381">381</span>
 <span id="382">382</span>
-<span id="383">383</span>
-<span id="384">384</span>
-<span id="385">385</span>
-<span id="386">386</span>
-<span id="387">387</span>
-<span id="388">388</span>
-<span id="389">389</span>
-<span id="390">390</span>
-<span id="391">391</span>
 </pre><pre class="rust"><code><span class="kw">pub use </span>alpha::Okhsla;
 
-<span class="kw">use </span><span class="kw">crate</span>::num::{FromScalar, Hypot, Powi, Recip, Sqrt};
-<span class="kw">use </span><span class="kw">crate</span>::ok_utils::{toe, ChromaValues};
-<span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 <span class="kw">use crate</span>::{
-    angle::{FromAngle, RealAngle},
-    convert::FromColorUnclamped,
-    num::{Arithmetics, Cbrt, IsValidDivisor, MinMax, One, Real, Trigonometry, Zero},
+    angle::FromAngle,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
+    num::{Arithmetics, Cbrt, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Zero},
+    ok_utils::{toe, ChromaValues},
     stimulus::{FromStimulus, Stimulus},
-    HasBoolMask, Oklab, OklabHue,
+    white_point::D65,
+    GetHue, HasBoolMask, LinSrgb, Oklab, OklabHue,
 };
 
 <span class="kw">mod </span>alpha;
@@ -427,7 +417,7 @@
 )]
 #[repr(C)]
 </span><span class="kw">pub struct </span>Okhsl&lt;T = f32&gt; {
-    <span class="doccomment">/// The hue of the color, in degrees of a circle, where for all `h`: `h+n*360 ==  h`.
+    <span class="doccomment">/// The hue of the color, in degrees of a circle.
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
@@ -448,7 +438,7 @@
     /// For v == 0 the saturation is irrelevant.
     </span><span class="kw">pub </span>saturation: T,
 
-    <span class="doccomment">/// The relative luminance of the color, where  
+    <span class="doccomment">/// The relative luminance of the color, where
     /// * `0.0` corresponds to pure black
     /// * `1.0` corresponds to white
     ///
@@ -546,35 +536,25 @@
         + One
         + Zero
         + Arithmetics
-        + Sqrt
-        + MinMax
-        + Copy
-        + PartialOrd
-        + HasBoolMask&lt;Mask = bool&gt;
         + Powi
-        + Cbrt
+        + Sqrt
         + Hypot
-        + Trigonometry
-        + RealAngle
-        + FromScalar,
-    T::Scalar: Real
-        + Zero
-        + One
-        + Recip
+        + MinMax
+        + Cbrt
         + IsValidDivisor&lt;Mask = bool&gt;
-        + Arithmetics
-        + Clone
-        + FromScalar&lt;Scalar = T::Scalar&gt;,
+        + HasBoolMask&lt;Mask = bool&gt;
+        + PartialOrd
+        + Clone,
+    Oklab&lt;T&gt;: GetHue&lt;Hue = OklabHue&lt;T&gt;&gt; + IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(lab: Oklab&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="comment">// refer to the SRGB reference-white-based lightness L_r as l for consistency with HSL
-        </span><span class="kw">let </span>l = toe(lab.l);
+        </span><span class="kw">let </span>l = toe(lab.l.clone());
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(h) = lab.try_hue() {
-            <span class="kw">let </span>(chroma, normalized_ab) = lab.chroma_and_normalized_ab();
-            <span class="kw">let </span>(a_, b_) =
-                normalized_ab.expect(<span class="string">&quot;There is a hue, thus there also are normalized a and b&quot;</span>);
-            <span class="kw">let </span>cs = ChromaValues::from_normalized(lab.l, a_, b_);
+        <span class="kw">let </span>chroma = lab.get_chroma();
+        <span class="kw">let </span>hue = lab.get_hue();
+        <span class="kw">if </span>chroma.is_valid_divisor() {
+            <span class="kw">let </span>cs = ChromaValues::from_normalized(lab.l, lab.a / <span class="kw-2">&amp;</span>chroma, lab.b / <span class="kw-2">&amp;</span>chroma);
 
             <span class="comment">// Inverse of the interpolation in okhsl_to_srgb:
 
@@ -582,21 +562,21 @@
             <span class="kw">let </span>mid_inv = T::from_f64(<span class="number">1.25</span>);
 
             <span class="kw">let </span>s = <span class="kw">if </span>chroma &lt; cs.mid {
-                <span class="kw">let </span>k_1 = mid * cs.zero;
-                <span class="kw">let </span>k_2 = T::one() - k_1 / cs.mid;
+                <span class="kw">let </span>k_1 = mid.clone() * cs.zero;
+                <span class="kw">let </span>k_2 = T::one() - k_1.clone() / cs.mid;
 
-                <span class="kw">let </span>t = chroma / (k_1 + k_2 * chroma);
+                <span class="kw">let </span>t = chroma.clone() / (k_1 + k_2 * chroma);
                 t * mid
             } <span class="kw">else </span>{
-                <span class="kw">let </span>k_0 = cs.mid;
-                <span class="kw">let </span>k_1 = (T::one() - mid) * (cs.mid * mid_inv).powi(<span class="number">2</span>) / cs.zero;
-                <span class="kw">let </span>k_2 = T::one() - (k_1) / (cs.max - cs.mid);
+                <span class="kw">let </span>k_0 = cs.mid.clone();
+                <span class="kw">let </span>k_1 = (T::one() - <span class="kw-2">&amp;</span>mid) * (cs.mid.clone() * mid_inv).powi(<span class="number">2</span>) / cs.zero;
+                <span class="kw">let </span>k_2 = T::one() - k_1.clone() / (cs.max - cs.mid);
 
-                <span class="kw">let </span>t = (chroma - k_0) / (k_1 + k_2 * (chroma - k_0));
-                mid + (T::one() - mid) * t
+                <span class="kw">let </span>t = (chroma.clone() - <span class="kw-2">&amp;</span>k_0) / (k_1 + k_2 * (chroma - k_0));
+                mid.clone() + (T::one() - mid) * t
             };
 
-            <span class="self">Self</span>::new(h, s, l)
+            <span class="self">Self</span>::new(hue, s, l)
         } <span class="kw">else </span>{
             <span class="comment">// `a` describes how green/red the color is, `b` how blue/yellow the color is
             // both are zero -&gt; the color is totally desaturated.
@@ -640,6 +620,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
     <span class="kw">use </span><span class="kw">crate</span>::visual::{VisualColor, VisuallyEqual};
     <span class="kw">use crate</span>::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
+
+    <span class="macro">test_convert_into_from_xyz!</span>(Okhsl);
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_roundtrip_okhsl_oklab_is_original() {
@@ -781,4 +763,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

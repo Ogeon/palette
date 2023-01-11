@@ -530,6 +530,8 @@
 <span id="530">530</span>
 <span id="531">531</span>
 <span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
@@ -980,6 +982,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
     <span class="kw">use crate</span>::{FromColor, LinLuma, LinSrgb};
 
+    <span class="macro">test_convert_into_from_xyz!</span>(Yxy);
+
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>luma() {
         <span class="kw">let </span>a = Yxy::&lt;D65&gt;::from_color(LinLuma::new(<span class="number">0.5</span>));
@@ -1063,4 +1067,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="palette" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>
