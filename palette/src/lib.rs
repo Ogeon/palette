@@ -227,8 +227,6 @@ use bool_mask::{BoolMask, HasBoolMask};
 use luma::Luma;
 
 pub use alpha::{Alpha, WithAlpha};
-#[cfg(feature = "std")]
-pub use gradient::Gradient;
 
 pub use hsl::{Hsl, Hsla};
 pub use hsluv::{Hsluv, Hsluva};
@@ -412,9 +410,6 @@ macro_rules! assert_ranges {
 
 #[macro_use]
 mod macros;
-
-#[cfg(feature = "std")]
-pub mod gradient;
 
 #[cfg(feature = "named")]
 pub mod named;
