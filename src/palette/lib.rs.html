@@ -1504,11 +1504,6 @@
 <span id="1504">1504</span>
 <span id="1505">1505</span>
 <span id="1506">1506</span>
-<span id="1507">1507</span>
-<span id="1508">1508</span>
-<span id="1509">1509</span>
-<span id="1510">1510</span>
-<span id="1511">1511</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and
 //! to avoid mistakes, such as mixing incompatible color types.
@@ -1738,8 +1733,6 @@
 <span class="kw">use </span>luma::Luma;
 
 <span class="kw">pub use </span>alpha::{Alpha, WithAlpha};
-<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">pub use </span>gradient::Gradient;
 
 <span class="kw">pub use </span>hsl::{Hsl, Hsla};
 <span class="kw">pub use </span>hsluv::{Hsluv, Hsluva};
@@ -1923,9 +1916,6 @@
 
 <span class="attribute">#[macro_use]
 </span><span class="kw">mod </span>macros;
-
-<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">pub mod </span>gradient;
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;named&quot;</span>)]
 </span><span class="kw">pub mod </span>named;
