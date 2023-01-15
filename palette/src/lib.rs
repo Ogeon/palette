@@ -1,76 +1,77 @@
 //! A library that makes linear color calculations and conversion easy and
-//! accessible for anyone. It uses the type system to enforce correctness and
-//! to avoid mistakes, such as mixing incompatible color types.
+//! accessible for anyone. It uses the type system to enforce correctness and to
+//! avoid mistakes, such as mixing incompatible color types.
 //!
-//! # It's Never "Just RGB"
+//! # Type Safety for Colors
 //!
-//! Colors in images are often "gamma corrected", or converted using some
-//! non-linear transfer function into a format like sRGB before being stored or
-//! displayed. This is done as a compression method and to prevent banding; it's
-//! also a bit of a legacy from the ages of the CRT monitors, where the output
-//! from the electron gun was non-linear. The problem is that these formats are
-//! *non-linear color spaces*, which means that many operations that you may
-//! want to perform on colors (addition, subtraction, multiplication, linear
-//! interpolation, etc.) will work unexpectedly when performed in such a
-//! non-linear color space. Thus, the compression has to be reverted to restore
-//! linearity and ensure that many operations on the colors behave as expected.
+//! Digital colors are not "just RGB", and not even RGB is "just RGB". There are
+//! multiple representations of color, with a variety of pros and cons, and
+//! multiple standards for how to encode and decode them. Palette represents
+//! these "color spaces" as separate types for increased expressiveness and to
+//! prevent mistakes.
 //!
-//! For example, this does not work:
+//! Taking RGB as an example, it's often stored or displayed as "gamma
+//! corrected" values, meaning that a non-linear function has been applied to
+//! its values. This encoding is not suitable for all kinds of calculations
+//! (such as rescaling) and will give visibly incorrect results. Functions that
+//! require linear RGB can therefore request, for example, [`LinSrgb`] as their
+//! input type.
 //!
 //! ```rust,compile_fail
-//! // An alias for Rgb<Srgb, T>, which is what most pictures store.
-//! use palette::Srgb;
+//! // Srgb is an alias for Rgb<Srgb, T>, which is what most pictures store.
+//! // LinSrgb is an alias for Rgb<Linear<Srgb>, T>, better for color manipulation.
+//! use palette::{Srgb, LinSrgb};
+//!
+//! fn do_something(a: LinSrgb, b: LinSrgb) -> LinSrgb {
+//! // ...
+//! # LinSrgb::default()
+//! }
 //!
 //! let orangeish = Srgb::new(1.0, 0.6, 0.0);
 //! let blueish = Srgb::new(0.0, 0.2, 1.0);
-//! let whatever_it_becomes = orangeish + blueish; // Does not compile
+//! let result = do_something(orangeish, blueish); // Does not compile
 //! ```
 //!
-//! Instead, they have to be made linear before adding:
+//! The colors will have to be decoded before being used in the function:
 //!
 //! ```rust
-//! // An alias for Rgb<Srgb, T>, which is what most pictures store.
-//! use palette::Srgb;
+//! // Srgb is an alias for Rgb<Srgb, T>, which is what most pictures store.
+//! // LinSrgb is an alias for Rgb<Linear<Srgb>, T>, better for color manipulation.
+//! use palette::{Srgb, LinSrgb};
 //!
-//! let orangeish = Srgb::new(1.0f32, 0.6, 0.0).into_linear();
+//! fn do_something(a: LinSrgb, b: LinSrgb) -> LinSrgb {
+//! // ...
+//! # LinSrgb::default()
+//! }
+//!
+//! let orangeish = Srgb::new(1.0, 0.6, 0.0).into_linear();
 //! let blueish = Srgb::new(0.0, 0.2, 1.0).into_linear();
-//! let whatever_it_becomes = orangeish + blueish;
-//!
-//! // Encode the result back into sRGB and create a byte array
-//! let pixel: [u8; 3] = Srgb::from_linear(whatever_it_becomes).into();
+//! let result = do_something(orangeish, blueish);
 //! ```
 //!
 //! See the [rgb] module for a deeper dive into RGB and (non-)linearity.
 //!
-//! # Color Spaces
+//! # Color Spaces and Conversion
 //!
-//! "RGB" and other tristimulus based spaces like CIE Xyz are probably the most
-//! widely known color spaces. These spaces are great when you want to perform
-//! physically based math on color (like in a 2D or 3D rendering program) but
-//! there are also color spaces that are not defined in terms of tristimulus
-//! values.
+//! As the previous section mentions, there are many different ways of
+//! representing colors. These "color spaces" are represented as different types
+//! in Palette, each with a description of what it is and how it works. Most of
+//! them also have two type parameters for customization:
 //!
-//! You have probably used a color picker with a rainbow wheel and a brightness
-//! slider. That may have been an HSV or an HSL color picker, where the color is
-//! encoded as hue, saturation and brightness/lightness. Even though these
-//! spaces are defined using 3 values, they *aren't* based on tristimulus
-//! values, since those three values don't have a direct relation to human
-//! vision (i.e. our L, M, and S cones).
-//! Such color spaces are excellent when it comes to humans intuitively
-//! selecting color values, and as such are the go-to choice when this
-//! interaction is needed. They can then be converted into other color spaces
-//! to perform modifications to them.
-//!
-//! There's also a group of color spaces that are designed to be perceptually
-//! uniform, meaning that the perceptual change is equal to the numerical
-//! change. An example of this is the CIE L\*a\*b\* color space. These color
-//! spaces are excellent when you want to "blend" between colors in a
-//! *perceptually pleasing* manner rather than based on *physical light intensity*.
+//! * The component type (`T`) that decides which number type is used. The
+//!   default is `f32`, but `u8`, `f64`, and any other type that implement the
+//!   required traits will work. Including SIMD types in many cases.
+//! * The reference white point (`W`) or standard (`S`) that affects the range,
+//!   encoding or display properties of the color. This varies between color
+//!   spaces and can usually be left as its default or be set via a type alias.
+//!   For example, the [`Srgb`] and [`LinSrgb`] type aliases are both variants
+//!   of the [`Rgb`][rgb::Rgb] type, but with different standard (`S`) types.
 //!
 //! Selecting the proper color space can have a big impact on how the resulting
 //! image looks (as illustrated by some of the programs in `examples`), and
-//! Palette makes the conversion between them as easy as a call to `from_color`
-//! or `into_color`.
+//! Palette makes the conversion between them as easy as a call to
+//! [`from_color`][FromColor::from_color] or
+//! [`into_color`][IntoColor::into_color].
 //!
 //! This example takes an sRGB color, converts it to CIE L\*C\*h°, a color space
 //! similar to the colloquial HSL/HSV color spaces, shifts its hue by 180° and
@@ -86,16 +87,17 @@
 //! # Transparency
 //!
 //! There are many cases where pixel transparency is important, but there are
-//! also many cases where it becomes a dead weight, if it's always stored
-//! together with the color, but not used. Palette has therefore adopted a
-//! structure where the transparency component (alpha) is attachable using the
-//! [`Alpha`](crate::Alpha) type, instead of having copies of each color
-//! space.
+//! also many cases where it would just be unused memory space. Palette has
+//! therefore adopted a structure where the transparency component (alpha) is
+//! attachable using the [`Alpha`](crate::Alpha) type. This approach has shown
+//! to be very modular and easy to maintain, compared to having transparent
+//! copies of each type.
 //!
-//! This approach comes with the extra benefit of allowing operations to
-//! selectively affect the alpha component:
+//! An additional benefit is allowing operations to selectively affect the alpha
+//! component:
 //!
 //! ```rust
+//! // Each color type has a transparent alias that ends with "a" for "alpha"
 //! use palette::{LinSrgb, LinSrgba};
 //!
 //! let mut c1 = LinSrgba::new(1.0, 0.5, 0.5, 0.8);
@@ -104,6 +106,58 @@
 //! c1.color = c1.color * c2; //Leave the alpha as it is
 //! c1.blue += 0.2; //The color components can easily be accessed
 //! c1 = c1 * 0.5; //Scale both the color and the alpha
+//! ```
+//!
+//! There's also [`PreAlpha`][blend::PreAlpha] that represents pre-multiplied
+//! alpha (also known as alpha masked colors). It's commonly used in color
+//! blending and composition.
+//!
+//! # Images and Buffers
+//!
+//! Oftentimes, pixel data is stored in a plain array or slice such as a `[u8;
+//! 3]`. The [`cast`] module allows for easy conversion between Palette colors
+//! and arrays or slices. This also helps when working with other crates or
+//! systems. Here's an example of how the pixels in an image from the `image`
+//! crate can be worked with as `Srgb<u8>`:
+//!
+//! ```rust
+//! use image::RgbImage;
+//! use palette::{Srgb, Oklab, cast, Lighten, IntoColor, FromColor};
+//!
+//! fn lighten(image: &mut RgbImage, amount: f32) {
+//!     // RgbImage can be dereferenced as [u8], allowing us to cast it as a
+//!     // component slice to sRGB with u8 components.
+//!     for pixel in cast::from_component_slice_mut::<Srgb<u8>>(image) {
+//!         // Converting to linear sRGB with f32 components, and then to Oklab.
+//!         let color: Oklab = pixel.into_linear::<f32>().into_color();
+//!
+//!         let lightened_color = color.lighten(amount);
+//!
+//!         // Converting back to non-linear sRGB with u8 components.
+//!         *pixel = Srgb::from_linear(lightened_color.into_color());
+//!     }
+//! }
+//! ```
+//!
+//! Some of the conversions are also implemented on the color types as `From`,
+//! `TryFrom`, `Into`, `TryFrom` and `AsRef`. This example shows how `from` can
+//! be used to convert a `[u8;3]` into a Palette color, `into_format` converts
+//! from  `Srgb<u8>` to `Srgb<f32>`, and finally `into` converts back from a
+//! Palette color back to a `[u8;3]`:
+//!
+//! ```rust
+//! use approx::assert_relative_eq;
+//! use palette::Srgb;
+//!
+//! let buffer = [255, 0, 255];
+//! let srgb = Srgb::from(buffer);
+//! assert_eq!(srgb, Srgb::<u8>::new(255u8, 0, 255));
+//!
+//! let srgb_float: Srgb<f32> = srgb.into_format();
+//! assert_relative_eq!(srgb_float, Srgb::new(1.0, 0.0, 1.0));
+//!
+//! let array: [u8; 3] = srgb_float.into_format().into();
+//! assert_eq!(array, buffer);
 //! ```
 //!
 //! # A Basic Workflow
@@ -127,9 +181,9 @@
 //! sometimes it's already linear.
 //!
 //! * If you are decoding an image, there may be some meta data that gives you
-//! the necessary details. Otherwise it's most commonly sRGB. Usually you
-//! will end up with a slice or vector with RGB bytes, which can easily be
-//! converted to Palette colors:
+//! the necessary details. Otherwise it's most commonly sRGB. Usually you will
+//! end up with a slice or vector with RGB bytes, which can easily be converted
+//! to Palette colors:
 //!
 //! ```rust
 //! # let mut image_buffer: Vec<u8> = vec![];
@@ -152,17 +206,16 @@
 //!
 //! * For any of the CIE color spaces, check for a specification of white point
 //! and light source. These are necessary for converting to RGB and other
-//! colors, that depend on perception and "viewing devices". Common defaults
-//! are the D65 light source and the sRGB white point. The Palette defaults
-//! should take you far.
+//! colors, that depend on perception and "viewing devices". Common defaults are
+//! the D65 light source and the sRGB white point. The Palette defaults should
+//! take you far.
 //!
 //! ## 2. Processing
 //!
 //! When your color has been decoded into some Palette type, it's ready for
 //! processing. This includes things like blending, hue shifting, darkening and
-//! conversion to other formats. Just make sure that your non-linear RGB is
-//! made linear first (`my_srgb.into_linear()`), to make the operations
-//! available.
+//! conversion to other formats. Just make sure that your non-linear RGB is made
+//! linear first (`my_srgb.into_linear()`), to make the operations available.
 //!
 //! Different color spaced have different capabilities, pros and cons. You may
 //! have to experiment a bit (or look at the example programs) to find out what
@@ -173,29 +226,6 @@
 //! When the desired processing is done, it's time to encode the colors back
 //! into some image format. The same rules applies as for the decoding, but the
 //! process reversed.
-//!
-//! # Working with Raw Data
-//!
-//! Oftentimes, pixel data is stored in a plain array or slice such as a `[u8;
-//! 3]`. The [`cast`] module allows for easy conversion between Palette colors
-//! and other crates or systems. `from` can be used to convert a `[u8;3]` into a
-//! Palette color, `into_format` converts from  `Srgb<u8>` to `Srgb<f32>`, and
-//! finally `into` converts from a Palette color back to a `[u8;3]`.
-//!
-//! ```rust
-//! use approx::assert_relative_eq;
-//! use palette::Srgb;
-//!
-//! let buffer = [255, 0, 255];
-//! let srgb = Srgb::from(buffer);
-//! assert_eq!(srgb, Srgb::<u8>::new(255u8, 0, 255));
-//!
-//! let srgb_float: Srgb<f32> = srgb.into_format();
-//! assert_relative_eq!(srgb_float, Srgb::new(1.0, 0.0, 1.0));
-//!
-//! let array: [u8; 3] = srgb_float.into_format().into();
-//! assert_eq!(array, buffer);
-//! ```
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
