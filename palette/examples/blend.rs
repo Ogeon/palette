@@ -2,8 +2,8 @@
 //! their characteristics.
 //!
 //! The output image shows the color spaces as groups of three columns. The
-//! color spaces are RGB and XYZ. The columns within a group show the foreground
-//! image with its transparency multiplied by 0%, 50%, and 100% each.
+//! color spaces are sRGB and XYZ. The columns within a group show the
+//! foreground image with its transparency multiplied by 0%, 50%, and 100% each.
 //!
 //! Each row is a different composition function, ordered from top to bottom as
 //! `multiply`, `screen`, `overlay`, `darken`, `lighten`, `dodge`, `burn`,
@@ -30,8 +30,8 @@ fn main() {
     let mut image = image::RgbaImage::new(tile_width * COLUMNS, tile_height * BLEND_FNS);
 
     for ((x, y, background), foreground) in background.enumerate_pixels().zip(foreground.pixels()) {
-        let background = Srgba::from(background.0).into_linear();
-        let foreground = Srgba::from(foreground.0).into_linear();
+        let background = Srgba::from(background.0).into_format();
+        let foreground = Srgba::from(foreground.0).into_format();
 
         let bg_rgb = background;
         let bg_xyz = Xyza::from_color(background);

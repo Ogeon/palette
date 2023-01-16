@@ -23,7 +23,7 @@ use crate::{
     cast::{ComponentOrder, Packed, UintCast},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
-    encoding::{linear::LinearFn, FromLinear, IntoLinear, Linear, Srgb},
+    encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
@@ -640,9 +640,9 @@ where
     }
 }
 
-impl_mix!(Luma<S> where S: LumaStandard<TransferFn = LinearFn>,);
-impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus, S: LumaStandard<TransferFn = LinearFn>);
-impl_premultiply!(Luma<S> {luma} phantom: standard where S: LumaStandard<TransferFn = LinearFn>);
+impl_mix!(Luma<S>);
+impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus);
+impl_premultiply!(Luma<S> {luma} phantom: standard);
 
 impl<S, T> StimulusColor for Luma<S, T> where T: Stimulus {}
 
@@ -662,205 +662,10 @@ where
     }
 }
 
-impl<S, T> Add<Luma<S, T>> for Luma<S, T>
-where
-    T: Add,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Add>::Output>;
-
-    fn add(self, other: Luma<S, T>) -> Self::Output {
-        Luma {
-            luma: self.luma + other.luma,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Add<T> for Luma<S, T>
-where
-    T: Add,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Add>::Output>;
-
-    fn add(self, c: T) -> Self::Output {
-        Luma {
-            luma: self.luma + c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> AddAssign<Luma<S, T>> for Luma<S, T>
-where
-    T: AddAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn add_assign(&mut self, other: Luma<S, T>) {
-        self.luma += other.luma;
-    }
-}
-
-impl<S, T> AddAssign<T> for Luma<S, T>
-where
-    T: AddAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn add_assign(&mut self, c: T) {
-        self.luma += c;
-    }
-}
-
-impl<S, T> Sub<Luma<S, T>> for Luma<S, T>
-where
-    T: Sub,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Sub>::Output>;
-
-    fn sub(self, other: Luma<S, T>) -> Self::Output {
-        Luma {
-            luma: self.luma - other.luma,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Sub<T> for Luma<S, T>
-where
-    T: Sub,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Sub>::Output>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Luma {
-            luma: self.luma - c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> SubAssign<Luma<S, T>> for Luma<S, T>
-where
-    T: SubAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn sub_assign(&mut self, other: Luma<S, T>) {
-        self.luma -= other.luma;
-    }
-}
-
-impl<S, T> SubAssign<T> for Luma<S, T>
-where
-    T: SubAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.luma -= c;
-    }
-}
-
-impl<S, T> Mul<Luma<S, T>> for Luma<S, T>
-where
-    T: Mul,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Mul>::Output>;
-
-    fn mul(self, other: Luma<S, T>) -> Self::Output {
-        Luma {
-            luma: self.luma * other.luma,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Mul<T> for Luma<S, T>
-where
-    T: Mul,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Mul>::Output>;
-
-    fn mul(self, c: T) -> Self::Output {
-        Luma {
-            luma: self.luma * c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> MulAssign<Luma<S, T>> for Luma<S, T>
-where
-    T: MulAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn mul_assign(&mut self, other: Luma<S, T>) {
-        self.luma *= other.luma;
-    }
-}
-
-impl<S, T> MulAssign<T> for Luma<S, T>
-where
-    T: MulAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.luma *= c;
-    }
-}
-
-impl<S, T> Div<Luma<S, T>> for Luma<S, T>
-where
-    T: Div,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Div>::Output>;
-
-    fn div(self, other: Luma<S, T>) -> Self::Output {
-        Luma {
-            luma: self.luma / other.luma,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Div<T> for Luma<S, T>
-where
-    T: Div,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    type Output = Luma<S, <T as Div>::Output>;
-
-    fn div(self, c: T) -> Self::Output {
-        Luma {
-            luma: self.luma / c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> DivAssign<Luma<S, T>> for Luma<S, T>
-where
-    T: DivAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn div_assign(&mut self, other: Luma<S, T>) {
-        self.luma /= other.luma;
-    }
-}
-
-impl<S, T> DivAssign<T> for Luma<S, T>
-where
-    T: DivAssign,
-    S: LumaStandard<TransferFn = LinearFn>,
-{
-    fn div_assign(&mut self, c: T) {
-        self.luma /= c;
-    }
-}
+impl_color_add!(Luma<S, T>, [luma], standard);
+impl_color_sub!(Luma<S, T>, [luma], standard);
+impl_color_mul!(Luma<S, T>, [luma], standard);
+impl_color_div!(Luma<S, T>, [luma], standard);
 
 impl_array_casts!(Luma<S, T>, [T; 1]);
 

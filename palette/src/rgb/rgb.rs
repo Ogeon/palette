@@ -27,7 +27,7 @@ use crate::{
     cast::{ComponentOrder, Packed},
     clamp, clamp_assign, contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    encoding::{linear::LinearFn, FromLinear, IntoLinear, Linear, Srgb},
+    encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
@@ -797,7 +797,7 @@ where
     }
 }
 
-impl_mix!(Rgb<S> where S: RgbStandard<TransferFn = LinearFn>,);
+impl_mix!(Rgb<S>);
 impl_lighten! {
     Rgb<S>
     increase {
@@ -807,7 +807,7 @@ impl_lighten! {
     }
     other {}
     phantom: standard
-    where T: Stimulus, S: RgbStandard<TransferFn = LinearFn>,
+    where T: Stimulus,
 }
 
 impl<S, T> GetHue for Rgb<S, T>
@@ -826,7 +826,7 @@ where
     }
 }
 
-impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard where S: RgbStandard<TransferFn = LinearFn>);
+impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard);
 
 impl<S, T> StimulusColor for Rgb<S, T> where T: Stimulus {}
 
@@ -846,237 +846,10 @@ where
     }
 }
 
-impl<S, T> Add<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Add,
-{
-    type Output = Rgb<S, <T as Add>::Output>;
-
-    fn add(self, other: Rgb<S, T>) -> Self::Output {
-        Rgb {
-            red: self.red + other.red,
-            green: self.green + other.green,
-            blue: self.blue + other.blue,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Add<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Add + Clone,
-{
-    type Output = Rgb<S, <T as Add>::Output>;
-
-    fn add(self, c: T) -> Self::Output {
-        Rgb {
-            red: self.red + c.clone(),
-            green: self.green + c.clone(),
-            blue: self.blue + c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> AddAssign<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: AddAssign,
-{
-    fn add_assign(&mut self, other: Rgb<S, T>) {
-        self.red += other.red;
-        self.green += other.green;
-        self.blue += other.blue;
-    }
-}
-
-impl<S, T> AddAssign<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: AddAssign + Clone,
-{
-    fn add_assign(&mut self, c: T) {
-        self.red += c.clone();
-        self.green += c.clone();
-        self.blue += c;
-    }
-}
-
-impl<S, T> Sub<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Sub,
-{
-    type Output = Rgb<S, <T as Sub>::Output>;
-
-    fn sub(self, other: Rgb<S, T>) -> Self::Output {
-        Rgb {
-            red: self.red - other.red,
-            green: self.green - other.green,
-            blue: self.blue - other.blue,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Sub<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Sub + Clone,
-{
-    type Output = Rgb<S, <T as Sub>::Output>;
-
-    fn sub(self, c: T) -> Self::Output {
-        Rgb {
-            red: self.red - c.clone(),
-            green: self.green - c.clone(),
-            blue: self.blue - c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> SubAssign<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: SubAssign,
-{
-    fn sub_assign(&mut self, other: Rgb<S, T>) {
-        self.red -= other.red;
-        self.green -= other.green;
-        self.blue -= other.blue;
-    }
-}
-
-impl<S, T> SubAssign<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: SubAssign + Clone,
-{
-    fn sub_assign(&mut self, c: T) {
-        self.red -= c.clone();
-        self.green -= c.clone();
-        self.blue -= c;
-    }
-}
-
-impl<S, T> Mul<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Mul,
-{
-    type Output = Rgb<S, <T as Mul>::Output>;
-
-    fn mul(self, other: Rgb<S, T>) -> Self::Output {
-        Rgb {
-            red: self.red * other.red,
-            green: self.green * other.green,
-            blue: self.blue * other.blue,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Mul<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Mul + Clone,
-{
-    type Output = Rgb<S, <T as Mul>::Output>;
-
-    fn mul(self, c: T) -> Self::Output {
-        Rgb {
-            red: self.red * c.clone(),
-            green: self.green * c.clone(),
-            blue: self.blue * c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> MulAssign<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: MulAssign,
-{
-    fn mul_assign(&mut self, other: Rgb<S, T>) {
-        self.red *= other.red;
-        self.green *= other.green;
-        self.blue *= other.blue;
-    }
-}
-
-impl<S, T> MulAssign<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: MulAssign + Clone,
-{
-    fn mul_assign(&mut self, c: T) {
-        self.red *= c.clone();
-        self.green *= c.clone();
-        self.blue *= c;
-    }
-}
-
-impl<S, T> Div<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Div,
-{
-    type Output = Rgb<S, <T as Div>::Output>;
-
-    fn div(self, other: Rgb<S, T>) -> Self::Output {
-        Rgb {
-            red: self.red / other.red,
-            green: self.green / other.green,
-            blue: self.blue / other.blue,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> Div<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: Div + Clone,
-{
-    type Output = Rgb<S, <T as Div>::Output>;
-
-    fn div(self, c: T) -> Self::Output {
-        Rgb {
-            red: self.red / c.clone(),
-            green: self.green / c.clone(),
-            blue: self.blue / c,
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> DivAssign<Rgb<S, T>> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: DivAssign,
-{
-    fn div_assign(&mut self, other: Rgb<S, T>) {
-        self.red /= other.red;
-        self.green /= other.green;
-        self.blue /= other.blue;
-    }
-}
-
-impl<S, T> DivAssign<T> for Rgb<S, T>
-where
-    S: RgbStandard<TransferFn = LinearFn>,
-    T: DivAssign + Clone,
-{
-    fn div_assign(&mut self, c: T) {
-        self.red /= c.clone();
-        self.green /= c.clone();
-        self.blue /= c;
-    }
-}
+impl_color_add!(Rgb<S, T>, [red, green, blue], standard);
+impl_color_sub!(Rgb<S, T>, [red, green, blue], standard);
+impl_color_mul!(Rgb<S, T>, [red, green, blue], standard);
+impl_color_div!(Rgb<S, T>, [red, green, blue], standard);
 
 impl<S, T> From<(T, T, T)> for Rgb<S, T> {
     fn from(components: (T, T, T)) -> Self {
