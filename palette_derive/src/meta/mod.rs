@@ -1,10 +1,11 @@
 use proc_macro2::TokenStream;
-use syn::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
-    parenthesized, Attribute, Fields, Ident, Index, Lit, LitStr, Meta, NestedMeta, Token, Type,
+    parse::{Parse, ParseStream, Parser, Result},
+    token::Comma,
 };
+use syn::{Attribute, Fields, Ident, Index, LitStr, Meta, Token, Type};
 
 pub use self::field_attributes::*;
 pub use self::type_item_attributes::*;
@@ -20,7 +21,8 @@ pub fn parse_namespaced_attributes<T: AttributeArgumentParser>(
 
     for attribute in attributes {
         let is_palette_attribute = attribute
-            .path
+            .meta
+            .path()
             .get_ident()
             .map(|name| name == "palette")
             .unwrap_or(false);
@@ -29,25 +31,29 @@ pub fn parse_namespaced_attributes<T: AttributeArgumentParser>(
             continue;
         }
 
-        if attribute.tokens.is_empty() {
+        let meta_list = match attribute.meta.require_list() {
+            Ok(list) => list,
+            Err(error) => {
+                errors.push(error);
+                continue;
+            }
+        };
+
+        if meta_list.tokens.is_empty() {
             errors.push(::syn::parse::Error::new(
-                attribute.path.span(),
+                attribute.path().span(),
                 "expected `palette(...)`",
             ));
 
             continue;
         }
 
-        let parse_result = parse_meta_list.parse2(attribute.tokens);
+        let parse_result =
+            Punctuated::<_, Comma>::parse_terminated.parse2(meta_list.tokens.clone());
         match parse_result {
             Ok(meta) => {
                 for argument in meta {
-                    let argument_result = match argument {
-                        NestedMeta::Meta(argument) => result.argument(argument),
-                        NestedMeta::Lit(literal) => result.literal(literal),
-                    };
-
-                    if let Err(error) = argument_result {
+                    if let Err(error) = result.argument(argument) {
                         errors.push(error);
                     }
                 }
@@ -84,7 +90,7 @@ pub fn parse_field_attributes<T: FieldAttributeArgumentParser>(
 
     for (field_name, ty, attribute) in attributes {
         let is_palette_attribute = attribute
-            .path
+            .path()
             .get_ident()
             .map(|name| name == "palette")
             .unwrap_or(false);
@@ -93,25 +99,29 @@ pub fn parse_field_attributes<T: FieldAttributeArgumentParser>(
             continue;
         }
 
-        if attribute.tokens.is_empty() {
+        let meta_list = match attribute.meta.require_list() {
+            Ok(list) => list,
+            Err(error) => {
+                errors.push(error);
+                continue;
+            }
+        };
+
+        if meta_list.tokens.is_empty() {
             errors.push(::syn::parse::Error::new(
-                attribute.path.span(),
+                attribute.path().span(),
                 "expected `palette(...)`",
             ));
 
             continue;
         }
 
-        let parse_result = parse_meta_list.parse2(attribute.tokens);
+        let parse_result =
+            Punctuated::<_, Comma>::parse_terminated.parse2(meta_list.tokens.clone());
         match parse_result {
             Ok(meta) => {
                 for argument in meta {
-                    let argument_result = match argument {
-                        NestedMeta::Meta(argument) => result.argument(&field_name, &ty, argument),
-                        NestedMeta::Lit(literal) => result.literal(&field_name, &ty, literal),
-                    };
-
-                    if let Err(error) = argument_result {
+                    if let Err(error) = result.argument(&field_name, &ty, argument) {
                         errors.push(error);
                     }
                 }
@@ -136,34 +146,6 @@ pub fn assert_path_meta(meta: &Meta) -> Result<()> {
     }
 
     Ok(())
-}
-
-pub fn parse_tuple_attribute<T: Parse>(tts: TokenStream) -> Result<Vec<T>> {
-    fn parse_generic_tuple<T: Parse>(input: ParseStream) -> Result<Vec<T>> {
-        let content;
-        parenthesized!(content in input);
-
-        let mut tuple = Vec::new();
-        loop {
-            tuple.push(content.parse()?);
-            if content.is_empty() {
-                break;
-            }
-            content.parse::<Token![,]>()?;
-            if content.is_empty() {
-                break;
-            }
-        }
-        Ok(tuple)
-    }
-
-    parse_generic_tuple.parse2(tts)
-}
-
-fn parse_meta_list(buffer: &ParseBuffer) -> syn::Result<Punctuated<NestedMeta, Token![,]>> {
-    let inner;
-    parenthesized!(inner in buffer);
-    syn::punctuated::Punctuated::parse_terminated(&inner)
 }
 
 #[derive(PartialEq)]
@@ -244,24 +226,8 @@ pub trait DataMetaParser: Default {
 
 pub trait AttributeArgumentParser: Default {
     fn argument(&mut self, argument: Meta) -> Result<()>;
-
-    fn literal(&mut self, literal: Lit) -> Result<()> {
-        Err(::syn::parse::Error::new(
-            literal.span(),
-            "unexpected literal",
-        ))
-    }
 }
 
 pub trait FieldAttributeArgumentParser: Default {
     fn argument(&mut self, field_name: &IdentOrIndex, ty: &Type, argument: Meta) -> Result<()>;
-
-    fn literal(&mut self, field_name: &IdentOrIndex, ty: &Type, literal: Lit) -> Result<()> {
-        let (_, _) = (field_name, ty);
-
-        Err(::syn::parse::Error::new(
-            literal.span(),
-            "unexpected literal",
-        ))
-    }
 }
