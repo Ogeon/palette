@@ -2,7 +2,9 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 
 use quote::{quote, ToTokens};
-use syn::{Attribute, Data, DeriveInput, Fields, Ident, Type};
+use syn::{
+    punctuated::Punctuated, token::Comma, Attribute, Data, DeriveInput, Fields, Meta, Path, Type,
+};
 
 use crate::meta::{self, FieldAttributes, IdentOrIndex, TypeItemAttributes};
 use crate::util;
@@ -125,10 +127,19 @@ fn is_allowed_repr(attributes: &[Attribute]) -> std::result::Result<bool, Vec<sy
     let mut errors = Vec::new();
 
     for attribute in attributes {
-        let attribute_name = attribute.path.get_ident().map(ToString::to_string);
+        let attribute_name = attribute.path().get_ident().map(ToString::to_string);
 
         if let Some("repr") = attribute_name.as_deref() {
-            let items = match meta::parse_tuple_attribute(attribute.tokens.clone()) {
+            let meta_list = match attribute.meta.require_list() {
+                Ok(list) => list,
+                Err(error) => {
+                    errors.push(error);
+                    continue;
+                }
+            };
+
+            let items = match meta_list.parse_args_with(Punctuated::<Meta, Comma>::parse_terminated)
+            {
                 Ok(items) => items,
                 Err(error) => {
                     errors.push(error);
@@ -136,9 +147,12 @@ fn is_allowed_repr(attributes: &[Attribute]) -> std::result::Result<bool, Vec<sy
                 }
             };
 
-            let contains_allowed_repr = items
-                .iter()
-                .any(|item: &Ident| item == "C" || item == "transparent");
+            let contains_allowed_repr = items.iter().any(|item| {
+                item.require_path_only()
+                    .ok()
+                    .and_then(Path::get_ident)
+                    .map_or(false, |ident| ident == "C" || ident == "transparent")
+            });
 
             if contains_allowed_repr {
                 return Ok(true);

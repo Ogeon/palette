@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use syn::spanned::Spanned;
+use syn::{spanned::Spanned, Expr, ExprLit};
 use syn::{Lit, Meta, MetaNameValue, Result, Type};
 
 use super::{assert_path_meta, FieldAttributeArgumentParser, IdentOrIndex};
@@ -23,7 +23,11 @@ impl FieldAttributeArgumentParser for FieldAttributes {
             }
             Some("unsafe_same_layout_as") => {
                 let substitute = if let Meta::NameValue(MetaNameValue {
-                    lit: Lit::Str(string),
+                    value:
+                        Expr::Lit(ExprLit {
+                            lit: Lit::Str(string),
+                            ..
+                        }),
                     ..
                 }) = argument
                 {

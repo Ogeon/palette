@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use quote::quote;
-use syn::spanned::Spanned;
-use syn::{Ident, Lit, Meta, MetaNameValue, NestedMeta, Result, Type};
+use syn::{punctuated::Punctuated, spanned::Spanned, token::Comma, Expr, ExprLit};
+use syn::{Ident, Lit, Meta, MetaNameValue, Result, Type};
 
 use super::AttributeArgumentParser;
 
@@ -23,33 +23,15 @@ impl AttributeArgumentParser for TypeItemAttributes {
 
         match argument_name.as_deref() {
             Some("skip_derives") => {
-                let result = if let Meta::List(list) = argument {
-                    let skipped: ::std::result::Result<_, _> = list
-                        .nested
-                        .into_iter()
-                        .map(|value| match value {
-                            NestedMeta::Meta(Meta::Path(path)) => {
-                                if let Some(name) = path.get_ident() {
-                                    Ok(name.clone())
-                                } else {
-                                    Err(path.span())
-                                }
-                            }
-                            value => Err(value.span()),
-                        })
-                        .collect();
+                if let Meta::List(list) = argument {
+                    let skipped =
+                        list.parse_args_with(Punctuated::<Ident, Comma>::parse_terminated)?;
 
-                    skipped.map(|values: Vec<Ident>| {
-                        self.skip_derives
-                            .extend(values.into_iter().map(|ident| ident.to_string()));
-                    })
+                    self.skip_derives
+                        .extend(skipped.into_iter().map(|ident| ident.to_string()));
                 } else {
-                    Err(argument.span())
-                };
-
-                if let Err(span) = result {
                     return Err(::syn::parse::Error::new(
-                        span,
+                        argument.span(),
                         "expected `skip_derives` to have a list of color type names, like `skip_derives(Xyz, Luma, Rgb)`",
                     ));
                 }
@@ -57,7 +39,11 @@ impl AttributeArgumentParser for TypeItemAttributes {
             Some("component") => {
                 if self.component.is_none() {
                     let result = if let Meta::NameValue(MetaNameValue {
-                        lit: Lit::Str(ty), ..
+                        value:
+                            Expr::Lit(ExprLit {
+                                lit: Lit::Str(ty), ..
+                            }),
+                        ..
                     }) = argument
                     {
                         self.component = Some(ty.parse()?);
@@ -80,7 +66,11 @@ impl AttributeArgumentParser for TypeItemAttributes {
             Some("white_point") => {
                 if self.white_point.is_none() {
                     let result = if let Meta::NameValue(MetaNameValue {
-                        lit: Lit::Str(ty), ..
+                        value:
+                            Expr::Lit(ExprLit {
+                                lit: Lit::Str(ty), ..
+                            }),
+                        ..
                     }) = argument
                     {
                         self.white_point = Some(ty.parse()?);
@@ -103,7 +93,11 @@ impl AttributeArgumentParser for TypeItemAttributes {
             Some("rgb_standard") => {
                 if self.rgb_standard.is_none() {
                     let result = if let Meta::NameValue(MetaNameValue {
-                        lit: Lit::Str(ty), ..
+                        value:
+                            Expr::Lit(ExprLit {
+                                lit: Lit::Str(ty), ..
+                            }),
+                        ..
                     }) = argument
                     {
                         self.rgb_standard = Some(ty.parse()?);
@@ -126,7 +120,11 @@ impl AttributeArgumentParser for TypeItemAttributes {
             Some("luma_standard") => {
                 if self.luma_standard.is_none() {
                     let result = if let Meta::NameValue(MetaNameValue {
-                        lit: Lit::Str(ty), ..
+                        value:
+                            Expr::Lit(ExprLit {
+                                lit: Lit::Str(ty), ..
+                            }),
+                        ..
                     }) = argument
                     {
                         self.luma_standard = Some(ty.parse()?);
