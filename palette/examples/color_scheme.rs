@@ -2,126 +2,110 @@ use palette::{Darken, IntoColor, Lch, Lighten, LinSrgb, ShiftHue, Srgb};
 
 use image::{GenericImage, GenericImageView, RgbImage, SubImage};
 
-use clap::{App, AppSettings, Arg, SubCommand};
+use clap::{Arg, Command};
 
 const SWATCH_SIZE: u32 = 128;
 
 fn main() {
-    let matches = App::new("color_scheme")
+    let matches = Command::new("color_scheme")
         .about("Generates a very simple color scheme from an RGB8 color.")
-        .setting(AppSettings::ArgRequiredElseHelp)
+        .arg_required_else_help(true)
         .arg(
-            Arg::with_name("red")
+            Arg::new("red")
                 .required(true)
-                .empty_values(false)
+                .value_parser(clap::value_parser!(u8))
                 .index(1)
                 .help("[0-255] The red channel of the primary color."),
         )
         .arg(
-            Arg::with_name("green")
+            Arg::new("green")
                 .required(true)
-                .empty_values(false)
+                .value_parser(clap::value_parser!(u8))
                 .index(2)
                 .help("[0-255] The green channel of the primary color."),
         )
         .arg(
-            Arg::with_name("blue")
+            Arg::new("blue")
                 .required(true)
-                .empty_values(false)
+                .value_parser(clap::value_parser!(u8))
                 .index(3)
                 .help("[0-255] The blue channel of the primary color."),
         )
         .subcommand(
-            SubCommand::with_name("triad")
+            Command::new("triad")
                 .about("A three point scheme, centered around the complementary.")
                 .arg(
-                    Arg::with_name("distance")
+                    Arg::new("distance")
                         .help("The distance between the secondary colors.")
                         .long("distance")
-                        .short("d")
+                        .short('d')
                         .value_name("degrees")
-                        .takes_value(true)
-                        .empty_values(false),
+                        .value_parser(clap::value_parser!(f32)),
                 ),
         )
         .subcommand(
-            SubCommand::with_name("analogous")
+            Command::new("analogous")
                 .about("Like triad, but centered around the primary.")
                 .arg(
-                    Arg::with_name("distance")
+                    Arg::new("distance")
                         .help("The distance between the secondary colors.")
                         .long("distance")
-                        .short("d")
+                        .short('d')
                         .value_name("degrees")
-                        .takes_value(true)
-                        .empty_values(false),
+                        .value_parser(clap::value_parser!(f32)),
                 ),
         )
         .subcommand(
-            SubCommand::with_name("rectangle")
-                .about("A four point scheme.")
-                .arg(
-                    Arg::with_name("distance")
-                        .help("The distance to the closest secondary colors.")
-                        .long("distance")
-                        .short("d")
-                        .value_name("degrees")
-                        .takes_value(true)
-                        .empty_values(false),
-                ),
+            Command::new("rectangle").about("A four point scheme.").arg(
+                Arg::new("distance")
+                    .help("The distance to the closest secondary colors.")
+                    .long("distance")
+                    .short('d')
+                    .value_name("degrees")
+                    .value_parser(clap::value_parser!(f32)),
+            ),
         )
-        .subcommand(
-            SubCommand::with_name("complementary").about("A simple two point color scheme."),
-        )
+        .subcommand(Command::new("complementary").about("A simple two point color scheme."))
         .get_matches();
 
     //Get the components of the primary color
     let red: u8 = matches
-        .value_of("red")
-        .and_then(|r| r.parse().ok())
+        .get_one::<u8>("red")
+        .copied()
         .expect("the red channel must be a number in the range [0-255]");
     let green: u8 = matches
-        .value_of("green")
-        .and_then(|r| r.parse().ok())
+        .get_one::<u8>("green")
+        .copied()
         .expect("the green channel must be a number in the range [0-255]");
     let blue: u8 = matches
-        .value_of("blue")
-        .and_then(|r| r.parse().ok())
+        .get_one::<u8>("blue")
+        .copied()
         .expect("the blue channel must be a number in the range [0-255]");
 
     let primary: Lch = Srgb::new(red, green, blue).into_linear().into_color();
 
     //Generate the secondary colors, depending on the input arguments
     let secondary = match matches.subcommand() {
-        ("triad", matches) | ("", matches) => {
+        Some(("triad", matches)) | Some(("", matches)) => {
             //Two secondary colors that are close to the complementary, or evenly spaced
-            let distance: f32 = matches
-                .and_then(|m| m.value_of("distance"))
-                .and_then(|d| d.parse().ok())
-                .unwrap_or(120.0);
+            let distance = matches.get_one::<f32>("distance").copied().unwrap_or(120.0);
 
             let shift = 180.0 - (distance / 2.0);
 
             vec![primary.shift_hue(shift), primary.shift_hue(-shift)]
         }
-        ("analogous", matches) => {
+        Some(("analogous", matches)) => {
             //Two secondary colors that are close to the primary
-            let distance: f32 = matches
-                .and_then(|m| m.value_of("distance"))
-                .and_then(|d| d.parse().ok())
-                .unwrap_or(60.0);
+            let distance = matches.get_one::<f32>("distance").copied().unwrap_or(60.0);
 
             let shift = distance / 2.0;
 
             vec![primary.shift_hue(shift), primary.shift_hue(-shift)]
         }
-        ("rectangle", matches) => {
+        Some(("rectangle", matches)) => {
             //Three secondary colors that forms a rectangle or a square, together with the
             // primary
-            let distance: f32 = matches
-                .and_then(|m| m.value_of("distance"))
-                .and_then(|d| d.parse().ok())
-                .unwrap_or(90.0);
+            let distance = matches.get_one::<f32>("distance").copied().unwrap_or(90.0);
 
             let shift1 = distance;
             let shift2 = 180.0 + distance;
@@ -132,8 +116,9 @@ fn main() {
                 primary.shift_hue(shift2),
             ]
         }
-        ("complementary", _) => vec![primary.shift_hue(180.0)], // Simply the complementary color
-        (name, _) => panic!("unknown subcommand: {}", name),
+        Some(("complementary", _)) => vec![primary.shift_hue(180.0)], // Simply the complementary color
+        Some((name, _)) => panic!("unknown subcommand: {}", name),
+        None => panic!("expected a subcommand"),
     };
 
     //Create an image for the swatches
