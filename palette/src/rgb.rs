@@ -64,7 +64,7 @@ use crate::{
     encoding::{self, FromLinear, Gamma, IntoLinear, Linear},
     stimulus::{FromStimulus, Stimulus},
     white_point::Any,
-    Yxy,
+    Mat3, Yxy,
 };
 
 pub use self::rgb::{FromHexError, Rgb, Rgba};
@@ -121,6 +121,26 @@ pub trait RgbSpace {
 
     /// The white point of the RGB color space.
     type WhitePoint;
+
+    /// Get a pre-defined matrix for converting an RGB value with this standard
+    /// into an XYZ value.
+    ///
+    /// Returning `None` (as in the default implementation) means that the
+    /// matrix will be computed dynamically, which is significantly slower.
+    #[inline(always)]
+    fn rgb_to_xyz_matrix() -> Option<Mat3<f64>> {
+        None
+    }
+
+    /// Get a pre-defined matrix for converting an XYZ value into an RGB value
+    /// with this standard.
+    ///
+    /// Returning `None` (as in the default implementation) means that the
+    /// matrix will be computed dynamically, which is significantly slower.
+    #[inline(always)]
+    fn xyz_to_rgb_matrix() -> Option<Mat3<f64>> {
+        None
+    }
 }
 
 impl<P, W> RgbSpace for (P, W) {

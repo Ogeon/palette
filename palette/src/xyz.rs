@@ -21,7 +21,7 @@ use crate::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
-    matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
+    matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
     num::{
         self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax,
         One, PartialCmp, Powi, Real, Recip, Zero,
@@ -209,8 +209,12 @@ impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
 impl<Wp, T, S> FromColorUnclamped<Rgb<S, T>> for Xyz<Wp, T>
 where
     T: Arithmetics + FromScalar,
-    T::Scalar:
-        Recip + IsValidDivisor<Mask = bool> + Arithmetics + FromScalar<Scalar = T::Scalar> + Clone,
+    T::Scalar: Real
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + FromScalar<Scalar = T::Scalar>
+        + Clone,
     Wp: WhitePoint<T::Scalar>,
     S: RgbStandard,
     S::TransferFn: IntoLinear<T, T>,
@@ -219,7 +223,10 @@ where
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
-        let transform_matrix = rgb_to_xyz_matrix::<S::Space, T::Scalar>();
+        let transform_matrix = S::Space::rgb_to_xyz_matrix().map_or_else(
+            || rgb_to_xyz_matrix::<S::Space, T::Scalar>(),
+            |matrix| matrix_map(matrix, T::Scalar::from_f64),
+        );
         multiply_rgb_to_xyz(transform_matrix, color.into_linear())
     }
 }
