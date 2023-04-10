@@ -649,6 +649,13 @@
 <a href="#649" id="649">649</a>
 <a href="#650" id="650">650</a>
 <a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
@@ -672,7 +679,7 @@
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
-    matrix::{multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
+    matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
     num::{
         <span class="self">self</span>, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax,
         One, PartialCmp, Powi, Real, Recip, Zero,
@@ -860,8 +867,12 @@
 <span class="kw">impl</span>&lt;Wp, T, S&gt; FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt; <span class="kw">for </span>Xyz&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Arithmetics + FromScalar,
-    T::Scalar:
-        Recip + IsValidDivisor&lt;Mask = bool&gt; + Arithmetics + FromScalar&lt;Scalar = T::Scalar&gt; + Clone,
+    T::Scalar: Real
+        + Recip
+        + IsValidDivisor&lt;Mask = bool&gt;
+        + Arithmetics
+        + FromScalar&lt;Scalar = T::Scalar&gt;
+        + Clone,
     Wp: WhitePoint&lt;T::Scalar&gt;,
     S: RgbStandard,
     S::TransferFn: IntoLinear&lt;T, T&gt;,
@@ -870,7 +881,10 @@
     Yxy&lt;Any, T::Scalar&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T::Scalar&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>transform_matrix = rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;();
+        <span class="kw">let </span>transform_matrix = S::Space::rgb_to_xyz_matrix().map_or_else(
+            || rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;(),
+            |matrix| matrix_map(matrix, T::Scalar::from_f64),
+        );
         multiply_rgb_to_xyz(transform_matrix, color.into_linear())
     }
 }

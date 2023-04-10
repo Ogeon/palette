@@ -1386,6 +1386,15 @@
 <a href="#1386" id="1386">1386</a>
 <a href="#1387" id="1387">1387</a>
 <a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     fmt,
@@ -1417,7 +1426,7 @@
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
+    matrix::{matrix_inverse, matrix_map, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
         <span class="self">self</span>, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
@@ -1639,6 +1648,7 @@
     ///
     /// See the transfer function types in the [`encoding`](crate::encoding)
     /// module for details and performance characteristics.
+    </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>into_linear&lt;U&gt;(<span class="self">self</span>) -&gt; Rgb&lt;Linear&lt;S::Space&gt;, U&gt;
     <span class="kw">where
         </span>S::TransferFn: IntoLinear&lt;U, T&gt;,
@@ -1664,6 +1674,7 @@
     ///
     /// See the transfer function types in the [`encoding`](crate::encoding)
     /// module for details and performance characteristics.
+    </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>from_linear&lt;U&gt;(color: Rgb&lt;Linear&lt;S::Space&gt;, U&gt;) -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>S::TransferFn: FromLinear&lt;U, T&gt;,
@@ -1977,12 +1988,19 @@
     &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
     &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::WhitePoint: WhitePoint&lt;T::Scalar&gt;,
     T: Arithmetics + FromScalar,
-    T::Scalar:
-        Recip + IsValidDivisor&lt;Mask = bool&gt; + Arithmetics + Clone + FromScalar&lt;Scalar = T::Scalar&gt;,
+    T::Scalar: Real
+        + Recip
+        + IsValidDivisor&lt;Mask = bool&gt;
+        + Arithmetics
+        + Clone
+        + FromScalar&lt;Scalar = T::Scalar&gt;,
     Yxy&lt;Any, T::Scalar&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T::Scalar&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(color: Xyz&lt;&lt;S::Space <span class="kw">as </span>RgbSpace&gt;::WhitePoint, T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>transform_matrix = matrix_inverse(rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;());
+        <span class="kw">let </span>transform_matrix = S::Space::xyz_to_rgb_matrix().map_or_else(
+            || matrix_inverse(rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;()),
+            |matrix| matrix_map(matrix, T::Scalar::from_f64),
+        );
         <span class="self">Self</span>::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
     }
 }

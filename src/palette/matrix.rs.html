@@ -281,6 +281,25 @@
 <a href="#281" id="281">281</a>
 <a href="#282" id="282">282</a>
 <a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in
 //! chromatic adaptation and conversion calculations.
 
@@ -432,6 +451,25 @@
         d2 * <span class="kw-2">&amp;</span>det,
         -d5 * <span class="kw-2">&amp;</span>det,
         d8 * det,
+    ]
+}
+
+<span class="doccomment">/// Maps a matrix from one item type to another.
+///
+/// This turned out to be easier for the compiler to optimize than `matrix.map(f)`.
+</span><span class="attr">#[inline(always)]
+</span><span class="kw">pub fn </span>matrix_map&lt;T, U&gt;(matrix: Mat3&lt;T&gt;, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(T) -&gt; U) -&gt; Mat3&lt;U&gt; {
+    <span class="kw">let </span>[m1, m2, m3, m4, m5, m6, m7, m8, m9] = matrix;
+    [
+        f(m1),
+        f(m2),
+        f(m3),
+        f(m4),
+        f(m5),
+        f(m6),
+        f(m7),
+        f(m8),
+        f(m9),
     ]
 }
 
