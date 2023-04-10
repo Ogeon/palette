@@ -9,8 +9,8 @@ This Github action updates the version number of a crate and its dependencies to
 * In compilation targets (i.e. `lib.rs`, etc.):
   * Version numbers in the `#![doc(html_root_url = "...")]` attribute.
 * In `README.md`:
-  * Any mention of `my_crate = "0.1"` for version `<1.0.0` or `my_crate = "^1.2.3"` for versions `>1.0.0`.
-  * Any mention of `version = "0.1"` for version `<1.0.0` or `version = "^1.2.3"` for versions `>1.0.0`.
+  * Any mention of `my_crate = "1.2.3"`.
+  * Any mention of `version = "1.2.3"`.
 
 ## Github Action Usage
 

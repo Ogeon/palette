@@ -71,8 +71,8 @@ export async function increment(cratePath: string | undefined, newVersion: strin
 
     const oldSemver = new SemVer(manifest.version);
     const newSemver = new SemVer(newVersion);
-    let oldFormatted = formatVersion(oldSemver);
-    let newFormatted = formatVersion(newSemver);
+    let oldFormatted = oldSemver.toString();
+    let newFormatted = newSemver.toString();
 
 
     core.info(`Current version is ${manifest.version}, formatted as ${oldFormatted}`);
@@ -185,10 +185,10 @@ export async function increment(cratePath: string | undefined, newVersion: strin
 /**
  * Formats a version number for use as a third party dependency version.
  */
-function formatVersion(version: SemVer): string {
-    if (version.major === 0) {
+function formatVersion(version: SemVer, legacy: boolean = false): string {
+    if (legacy && version.major === 0) {
         return `0.${version.minor}`;
     }
 
-    return `^${version}`;
+    return `${version}`;
 }
