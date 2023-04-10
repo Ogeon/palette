@@ -1,5 +1,34 @@
 # Changelog
 
+## Version 0.7.0 - 2023-04-10
+
+* [#308][308]: Allow RGB/XYZ conversion matrices to be pre-defined.
+* [#307][307]: Update `syn` and dev dependencies.
+* [#302][302]: Lift linearity restriction for `Rgb` and `Luma` and update docs.
+* [#301][301]: Remove the `Gradient` type and its module. Closes [#152][152], [#156][156].
+* [#282][282]: Add `Okhsv`, `Okhsl` and `Okhwb`.
+* [#297][297]: Expose doc comment for `Rgb::from_str`. Closes [#1234][1234], [#4321][4321].
+* [#286][286]: Reduce the minimum compile time a bit.
+* [#279][279]: Split the `TransferFn` trait and add lookup tables for sRGB. Closes [#126][126], [#245][245].
+* [#278][278]: Implement SIMD support and add `wide` integration.
+* [#273][273]: Split and rework the `Blend` trait and bump MSRV to 1.55.0. Closes [#243][243].
+* [#272][272]: Fix broken link to SVG color names.
+* [#270][270]: Correcting documentation link.
+* [#269][269]: Rework component traits to be more granular and remove `num_traits`.
+* [#257][257]: Add in-place conversion traits for slices and references.
+* [#256][256]: Implement `FromColorUnclamped` and `FromColor` for `Vec<T>` and `Box<[T]>`.
+* [#255][255]: Add unsigned integer casting to `cast` and make `Packed` general purpose.
+* [#254][254]: Replace the `Pixel` trait with `ArrayCast` and cast functions and increase the MSRV to 1.51.0.
+* [#251][251]: Split `Saturate` into `Saturate` and `Desaturate`.
+* [#250][250]: Split the `Hue` trait into more specific traits.
+* [#249][249]: Split `Shade` into `Lighten` and `Darken`, and add `*Assign` variants.
+* [#248][248]: Add a `MixAssign` trait and remove the `Float` requirement from `Mix`.
+* [#247][247]: Split `Clamp` into smaller traits and implement for `[T]`.
+* [#246][246]: Make most operator traits take their input by value and change `TransferFn` to `TransferFn<T>`.
+* [#240][240]: Add an Any white point. Closes [#194][194].
+* [#239][239]: Make color constructors const and remove or replace all `with_wp`. Closes [#134][134].
+* [#238][238]: Relax trait bounds for all color types.
+
 ## Version 0.6.1 - 2022-07-16
 
 * [#290][290]: Update phf to 0.11.0. Closes [#289][289].
@@ -186,7 +215,33 @@ The first published version.
 [229]: https://github.com/Ogeon/palette/pull/229
 [231]: https://github.com/Ogeon/palette/pull/231
 [235]: https://github.com/Ogeon/palette/pull/235
+[238]: https://github.com/Ogeon/palette/pull/238
+[239]: https://github.com/Ogeon/palette/pull/239
+[240]: https://github.com/Ogeon/palette/pull/240
+[246]: https://github.com/Ogeon/palette/pull/246
+[247]: https://github.com/Ogeon/palette/pull/247
+[248]: https://github.com/Ogeon/palette/pull/248
+[249]: https://github.com/Ogeon/palette/pull/249
+[250]: https://github.com/Ogeon/palette/pull/250
+[251]: https://github.com/Ogeon/palette/pull/251
+[254]: https://github.com/Ogeon/palette/pull/254
+[255]: https://github.com/Ogeon/palette/pull/255
+[256]: https://github.com/Ogeon/palette/pull/256
+[257]: https://github.com/Ogeon/palette/pull/257
+[269]: https://github.com/Ogeon/palette/pull/269
+[270]: https://github.com/Ogeon/palette/pull/270
+[272]: https://github.com/Ogeon/palette/pull/272
+[273]: https://github.com/Ogeon/palette/pull/273
+[278]: https://github.com/Ogeon/palette/pull/278
+[279]: https://github.com/Ogeon/palette/pull/279
+[282]: https://github.com/Ogeon/palette/pull/282
+[286]: https://github.com/Ogeon/palette/pull/286
 [290]: https://github.com/Ogeon/palette/pull/290
+[297]: https://github.com/Ogeon/palette/pull/297
+[301]: https://github.com/Ogeon/palette/pull/301
+[302]: https://github.com/Ogeon/palette/pull/302
+[307]: https://github.com/Ogeon/palette/pull/307
+[308]: https://github.com/Ogeon/palette/pull/308
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -225,16 +280,25 @@ The first published version.
 [112]: https://github.com/Ogeon/palette/issues/112
 [116]: https://github.com/Ogeon/palette/issues/116
 [125]: https://github.com/Ogeon/palette/issues/125
+[126]: https://github.com/Ogeon/palette/issues/126
+[134]: https://github.com/Ogeon/palette/issues/134
 [143]: https://github.com/Ogeon/palette/issues/143
 [144]: https://github.com/Ogeon/palette/issues/144
 [148]: https://github.com/Ogeon/palette/issues/148
+[152]: https://github.com/Ogeon/palette/issues/152
 [153]: https://github.com/Ogeon/palette/issues/153
+[156]: https://github.com/Ogeon/palette/issues/156
 [160]: https://github.com/Ogeon/palette/issues/160
 [174]: https://github.com/Ogeon/palette/issues/174
 [177]: https://github.com/Ogeon/palette/issues/177
 [187]: https://github.com/Ogeon/palette/issues/187
+[194]: https://github.com/Ogeon/palette/issues/194
 [206]: https://github.com/Ogeon/palette/issues/206
 [209]: https://github.com/Ogeon/palette/issues/209
 [215]: https://github.com/Ogeon/palette/issues/215
 [222]: https://github.com/Ogeon/palette/issues/222
+[243]: https://github.com/Ogeon/palette/issues/243
+[245]: https://github.com/Ogeon/palette/issues/245
 [289]: https://github.com/Ogeon/palette/issues/289
+[1234]: https://github.com/Ogeon/palette/issues/1234
+[4321]: https://github.com/Ogeon/palette/issues/4321
