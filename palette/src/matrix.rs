@@ -152,6 +152,25 @@ where
     ]
 }
 
+/// Maps a matrix from one item type to another.
+///
+/// This turned out to be easier for the compiler to optimize than `matrix.map(f)`.
+#[inline(always)]
+pub fn matrix_map<T, U>(matrix: Mat3<T>, mut f: impl FnMut(T) -> U) -> Mat3<U> {
+    let [m1, m2, m3, m4, m5, m6, m7, m8, m9] = matrix;
+    [
+        f(m1),
+        f(m2),
+        f(m3),
+        f(m4),
+        f(m5),
+        f(m6),
+        f(m7),
+        f(m8),
+        f(m9),
+    ]
+}
+
 /// Generates the Srgb to Xyz transformation matrix for a given white point.
 #[inline]
 pub fn rgb_to_xyz_matrix<S, T>() -> Mat3<T>

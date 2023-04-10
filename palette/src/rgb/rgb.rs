@@ -29,7 +29,7 @@ use crate::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    matrix::{matrix_inverse, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
+    matrix::{matrix_inverse, matrix_map, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
         self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
@@ -251,6 +251,7 @@ impl<S: RgbStandard, T> Rgb<S, T> {
     ///
     /// See the transfer function types in the [`encoding`](crate::encoding)
     /// module for details and performance characteristics.
+    #[inline(always)]
     pub fn into_linear<U>(self) -> Rgb<Linear<S::Space>, U>
     where
         S::TransferFn: IntoLinear<U, T>,
@@ -276,6 +277,7 @@ impl<S: RgbStandard, T> Rgb<S, T> {
     ///
     /// See the transfer function types in the [`encoding`](crate::encoding)
     /// module for details and performance characteristics.
+    #[inline(always)]
     pub fn from_linear<U>(color: Rgb<Linear<S::Space>, U>) -> Self
     where
         S::TransferFn: FromLinear<U, T>,
@@ -589,12 +591,19 @@ where
     <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
     <S::Space as RgbSpace>::WhitePoint: WhitePoint<T::Scalar>,
     T: Arithmetics + FromScalar,
-    T::Scalar:
-        Recip + IsValidDivisor<Mask = bool> + Arithmetics + Clone + FromScalar<Scalar = T::Scalar>,
+    T::Scalar: Real
+        + Recip
+        + IsValidDivisor<Mask = bool>
+        + Arithmetics
+        + Clone
+        + FromScalar<Scalar = T::Scalar>,
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
-        let transform_matrix = matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>());
+        let transform_matrix = S::Space::xyz_to_rgb_matrix().map_or_else(
+            || matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>()),
+            |matrix| matrix_map(matrix, T::Scalar::from_f64),
+        );
         Self::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
     }
 }

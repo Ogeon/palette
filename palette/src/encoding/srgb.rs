@@ -7,7 +7,7 @@ use crate::{
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
-    Yxy,
+    Mat3, Yxy,
 };
 
 use lookup_tables::*;
@@ -59,6 +59,28 @@ impl<T: Real> Primaries<T> for Srgb {
 impl RgbSpace for Srgb {
     type Primaries = Srgb;
     type WhitePoint = D65;
+
+    #[rustfmt::skip]
+    #[inline(always)]
+    fn rgb_to_xyz_matrix() -> Option<Mat3<f64>> {
+        // Matrix from http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+        Some([
+            0.4124564, 0.3575761, 0.1804375,
+            0.2126729, 0.7151522, 0.0721750,
+            0.0193339, 0.1191920, 0.9503041,
+        ])
+    }
+
+    #[rustfmt::skip]
+    #[inline(always)]
+    fn xyz_to_rgb_matrix() -> Option<Mat3<f64>> {
+        // Matrix from http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+        Some([
+             3.2404542, -1.5371385, -0.4985314,
+            -0.9692660,  1.8760108,  0.0415560,
+             0.0556434, -0.2040259,  1.0572252,
+        ])
+    }
 }
 
 impl RgbStandard for Srgb {
@@ -130,7 +152,25 @@ impl FromLinear<f64, u8> for Srgb {
 
 #[cfg(test)]
 mod test {
-    use crate::encoding::{FromLinear, IntoLinear, Srgb};
+    use crate::{
+        encoding::{FromLinear, IntoLinear, Srgb},
+        matrix::{matrix_inverse, rgb_to_xyz_matrix},
+        rgb::RgbSpace,
+    };
+
+    #[test]
+    fn rgb_to_xyz() {
+        let dynamic = rgb_to_xyz_matrix::<Srgb, f64>();
+        let constant = Srgb::rgb_to_xyz_matrix().unwrap();
+        assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+    }
+
+    #[test]
+    fn xyz_to_rgb() {
+        let dynamic = matrix_inverse(rgb_to_xyz_matrix::<Srgb, f64>());
+        let constant = Srgb::xyz_to_rgb_matrix().unwrap();
+        assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+    }
 
     #[test]
     fn u8_to_f32_to_u8() {
