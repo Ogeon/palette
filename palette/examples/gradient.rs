@@ -25,7 +25,8 @@ fn main() {
         .build()
         .unwrap();
 
-    // Currently necessary while hues don't implement multiplication.
+    // Necessary since Lch doesn't implement `Merge` automatically, but also to
+    // get the correct circular blending.
     #[derive(Clone, Copy, Debug)]
     struct Adapter<T>(T);
 
