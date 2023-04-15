@@ -38,6 +38,10 @@ std = ["approx?/std"]
 [lib]
 bench = false
 
+[[example]]
+name = "issue_283"
+path = "regression_tests/issue_283.rs"
+
 [dependencies]
 palette_derive = { version = "0.7.0", path = "../palette_derive" }
 fast-srgb8 = "1.0.0"
@@ -76,6 +80,7 @@ serde = "1"
 serde_derive = "1"
 serde_json = "1"
 enterpolation = "0.2.0"
+scad = "1.2.2" # For regression testing #283
 
 [dev-dependencies.clap]
 version = "3.2.23"
