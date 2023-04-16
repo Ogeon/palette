@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.7.1 - 2023-04-16
+
+* [#313][313]: Improve serializing. Closes [#130][130].
+* [#312][312]: Remove  `impl<C> $op_trait<PreAlpha<C>> for {f32,f64}` `impl`s to work around issue #283. Closes [#283][283].
+
 ## Version 0.7.0 - 2023-04-10
 
 * [#308][308]: Allow RGB/XYZ conversion matrices to be pre-defined.
@@ -242,6 +247,8 @@ The first published version.
 [302]: https://github.com/Ogeon/palette/pull/302
 [307]: https://github.com/Ogeon/palette/pull/307
 [308]: https://github.com/Ogeon/palette/pull/308
+[312]: https://github.com/Ogeon/palette/pull/312
+[313]: https://github.com/Ogeon/palette/pull/313
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -281,6 +288,7 @@ The first published version.
 [116]: https://github.com/Ogeon/palette/issues/116
 [125]: https://github.com/Ogeon/palette/issues/125
 [126]: https://github.com/Ogeon/palette/issues/126
+[130]: https://github.com/Ogeon/palette/issues/130
 [134]: https://github.com/Ogeon/palette/issues/134
 [143]: https://github.com/Ogeon/palette/issues/143
 [144]: https://github.com/Ogeon/palette/issues/144
@@ -299,6 +307,7 @@ The first published version.
 [222]: https://github.com/Ogeon/palette/issues/222
 [243]: https://github.com/Ogeon/palette/issues/243
 [245]: https://github.com/Ogeon/palette/issues/245
+[283]: https://github.com/Ogeon/palette/issues/283
 [289]: https://github.com/Ogeon/palette/issues/289
 [1234]: https://github.com/Ogeon/palette/issues/1234
 [4321]: https://github.com/Ogeon/palette/issues/4321

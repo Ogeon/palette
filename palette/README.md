@@ -23,14 +23,14 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette = "0.7.0"
+palette = "0.7.1"
 ```
 
 or these lines if you want to opt out of `std`:
 
 ```toml
 [dependencies.palette]
-version = "0.7.0"
+version = "0.7.1"
 default-features = false
 features = ["libm"] # Uses libm instead of std for floating point math
 ```
