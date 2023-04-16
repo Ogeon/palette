@@ -448,7 +448,7 @@ pub mod named;
 mod random_sampling;
 
 #[cfg(feature = "serializing")]
-mod serde;
+pub mod serde;
 
 mod alpha;
 pub mod angle;
