@@ -296,20 +296,22 @@ macro_rules! impl_scalar_binop {
                 }
             }
 
-            impl<C> $op_trait<PreAlpha<C>> for $ty
-            where
-                C: Premultiply<Scalar = $ty>,
-                $ty: $op_trait<$ty, Output = $ty> + $op_trait<C, Output = C>,
-            {
-                type Output = PreAlpha<C>;
-
-                fn $op_trait_fn(self, color: PreAlpha<C>) -> Self::Output {
-                    PreAlpha {
-                        color: $op_trait::<C>::$op_trait_fn(self, color.color),
-                        alpha: $op_trait::<$ty>::$op_trait_fn(self, color.alpha),
-                    }
-                }
-            }
+            // // Disabled as work-around for https://github.com/Ogeon/palette/issues/283
+            // // Blocked by https://github.com/rust-lang/rust/issues/80542
+            // impl<C> $op_trait<PreAlpha<C>> for $ty
+            // where
+            //     C: Premultiply<Scalar = $ty>,
+            //     $ty: $op_trait<$ty, Output = $ty> + $op_trait<C, Output = C>,
+            // {
+            //     type Output = PreAlpha<C>;
+            //
+            //     fn $op_trait_fn(self, color: PreAlpha<C>) -> Self::Output {
+            //         PreAlpha {
+            //             color: $op_trait::<C>::$op_trait_fn(self, color.color),
+            //             alpha: $op_trait::<$ty>::$op_trait_fn(self, color.alpha),
+            //         }
+            //     }
+            // }
 
             impl<C> $op_assign_trait<$ty> for PreAlpha<C>
             where
