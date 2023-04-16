@@ -36,11 +36,9 @@ use super::Premultiply;
 /// component to be clamped to [0.0, 1.0], and fully transparent colors will
 /// become black.
 #[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct PreAlpha<C: Premultiply> {
     /// The premultiplied color components (`original.color * original.alpha`).
-    #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -345,6 +343,48 @@ impl<C: Premultiply> DerefMut for PreAlpha<C> {
     }
 }
 
+#[cfg(feature = "serializing")]
+impl<C> serde::Serialize for PreAlpha<C>
+where
+    C: Premultiply + serde::Serialize,
+    C::Scalar: serde::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.color.serialize(crate::serde::AlphaSerializer {
+            inner: serializer,
+            alpha: &self.alpha,
+        })
+    }
+}
+
+#[cfg(feature = "serializing")]
+impl<'de, C> serde::Deserialize<'de> for PreAlpha<C>
+where
+    C: Premultiply + serde::Deserialize<'de>,
+    C::Scalar: serde::Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let mut alpha: Option<C::Scalar> = None;
+
+        let color = C::deserialize(crate::serde::AlphaDeserializer {
+            inner: deserializer,
+            alpha: &mut alpha,
+        })?;
+
+        if let Some(alpha) = alpha {
+            Ok(Self { color, alpha })
+        } else {
+            Err(serde::de::Error::missing_field("alpha"))
+        }
+    }
+}
+
 #[cfg(feature = "bytemuck")]
 unsafe impl<C> bytemuck::Zeroable for PreAlpha<C>
 where
@@ -378,25 +418,43 @@ mod test {
             alpha: 0.5,
         };
 
-        let serialized = ::serde_json::to_string(&color).unwrap();
+        assert_eq!(
+            serde_json::to_string(&color).unwrap(),
+            r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
+        );
 
         assert_eq!(
-            serialized,
-            r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
+            ron::to_string(&color).unwrap(),
+            r#"(red:0.3,green:0.8,blue:0.1,alpha:0.5)"#
         );
     }
 
     #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
-        let expected = PreAlpha {
+        let color = PreAlpha {
             color: LinSrgb::new(0.3, 0.8, 0.1),
             alpha: 0.5,
         };
 
-        let deserialized: PreAlpha<_> =
-            ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+        assert_eq!(
+            serde_json::from_str::<PreAlpha<LinSrgb>>(
+                r#"{"alpha":0.5,"red":0.3,"green":0.8,"blue":0.1}"#
+            )
+            .unwrap(),
+            color
+        );
 
-        assert_eq!(deserialized, expected);
+        assert_eq!(
+            ron::from_str::<PreAlpha<LinSrgb>>(r#"(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#)
+                .unwrap(),
+            color
+        );
+
+        assert_eq!(
+            ron::from_str::<PreAlpha<LinSrgb>>(r#"Rgb(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#)
+                .unwrap(),
+            color
+        );
     }
 }

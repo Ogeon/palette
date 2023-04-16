@@ -247,7 +247,7 @@ extern crate phf;
 
 #[cfg(feature = "serializing")]
 #[macro_use]
-extern crate serde;
+extern crate serde as _;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
@@ -446,6 +446,9 @@ pub mod named;
 
 #[cfg(feature = "random")]
 mod random_sampling;
+
+#[cfg(feature = "serializing")]
+mod serde;
 
 mod alpha;
 pub mod angle;
