@@ -6,6 +6,7 @@ exclude = [
     "scripts/*",
     "examples/*",
     "tests/*",
+    "regression_tests/*",
     "benches/*",
     "res/*",
     ".travis.yml",
