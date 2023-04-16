@@ -115,3 +115,6 @@ harness = false
 path = "benches/matrix.rs"
 name = "matrix"
 harness = false
+
+[package.metadata.docs.rs]
+all-features = true
