@@ -400,6 +400,8 @@
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
@@ -698,22 +700,24 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_trait</span>&lt;PreAlpha&lt;C&gt;&gt; <span class="kw">for </span><span class="macro-nonterminal">$ty
-            </span><span class="kw">where
-                </span>C: Premultiply&lt;Scalar = <span class="macro-nonterminal">$ty</span>&gt;,
-                <span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$op_trait</span>&lt;<span class="macro-nonterminal">$ty</span>, Output = <span class="macro-nonterminal">$ty</span>&gt; + <span class="macro-nonterminal">$op_trait</span>&lt;C, Output = C&gt;,
-            {
-                <span class="kw">type </span>Output = PreAlpha&lt;C&gt;;
+            <span class="comment">// // Disabled as work-around for https://github.com/Ogeon/palette/issues/283
+            // // Blocked by https://github.com/rust-lang/rust/issues/80542
+            // impl&lt;C&gt; $op_trait&lt;PreAlpha&lt;C&gt;&gt; for $ty
+            // where
+            //     C: Premultiply&lt;Scalar = $ty&gt;,
+            //     $ty: $op_trait&lt;$ty, Output = $ty&gt; + $op_trait&lt;C, Output = C&gt;,
+            // {
+            //     type Output = PreAlpha&lt;C&gt;;
+            //
+            //     fn $op_trait_fn(self, color: PreAlpha&lt;C&gt;) -&gt; Self::Output {
+            //         PreAlpha {
+            //             color: $op_trait::&lt;C&gt;::$op_trait_fn(self, color.color),
+            //             alpha: $op_trait::&lt;$ty&gt;::$op_trait_fn(self, color.alpha),
+            //         }
+            //     }
+            // }
 
-                <span class="kw">fn </span><span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color: PreAlpha&lt;C&gt;) -&gt; <span class="self">Self</span>::Output {
-                    PreAlpha {
-                        color: <span class="macro-nonterminal">$op_trait</span>::&lt;C&gt;::<span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color.color),
-                        alpha: <span class="macro-nonterminal">$op_trait</span>::&lt;<span class="macro-nonterminal">$ty</span>&gt;::<span class="macro-nonterminal">$op_trait_fn</span>(<span class="self">self</span>, color.alpha),
-                    }
-                }
-            }
-
-            <span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_assign_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
+            </span><span class="kw">impl</span>&lt;C&gt; <span class="macro-nonterminal">$op_assign_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; <span class="kw">for </span>PreAlpha&lt;C&gt;
             <span class="kw">where
                 </span>C: <span class="macro-nonterminal">$op_assign_trait</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; + Premultiply&lt;Scalar = <span class="macro-nonterminal">$ty</span>&gt;,
             {
