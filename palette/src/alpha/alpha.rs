@@ -30,11 +30,9 @@ use crate::{
 
 /// An alpha component wrapper for colors.
 #[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[repr(C)]
 pub struct Alpha<C, T> {
     /// The color.
-    #[cfg_attr(feature = "serializing", serde(flatten))]
     pub color: C,
 
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
@@ -658,6 +656,48 @@ where
     }
 }
 
+#[cfg(feature = "serializing")]
+impl<C, T> serde::Serialize for Alpha<C, T>
+where
+    C: serde::Serialize,
+    T: serde::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.color.serialize(crate::serde::AlphaSerializer {
+            inner: serializer,
+            alpha: &self.alpha,
+        })
+    }
+}
+
+#[cfg(feature = "serializing")]
+impl<'de, C, T> serde::Deserialize<'de> for Alpha<C, T>
+where
+    C: serde::Deserialize<'de>,
+    T: serde::Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let mut alpha: Option<T> = None;
+
+        let color = C::deserialize(crate::serde::AlphaDeserializer {
+            inner: deserializer,
+            alpha: &mut alpha,
+        })?;
+
+        if let Some(alpha) = alpha {
+            Ok(Self { color, alpha })
+        } else {
+            Err(serde::de::Error::missing_field("alpha"))
+        }
+    }
+}
+
 #[cfg(feature = "random")]
 impl<C, T> Distribution<Alpha<C, T>> for Standard
 where
@@ -865,21 +905,109 @@ mod test {
     #[cfg(feature = "serializing")]
     #[test]
     fn serialize() {
-        let serialized = ::serde_json::to_string(&Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5)).unwrap();
+        let color = Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5);
 
         assert_eq!(
-            serialized,
+            serde_json::to_string(&color).unwrap(),
             r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
+        );
+
+        assert_eq!(
+            ron::to_string(&color).unwrap(),
+            r#"(red:0.3,green:0.8,blue:0.1,alpha:0.5)"#
         );
     }
 
     #[cfg(feature = "serializing")]
     #[test]
     fn deserialize() {
-        let deserialized: Rgba<Srgb> =
-            ::serde_json::from_str(r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#).unwrap();
+        let color = Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5);
 
-        assert_eq!(deserialized, Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5));
+        assert_eq!(
+            serde_json::from_str::<Rgba<Srgb>>(r#"{"alpha":0.5,"red":0.3,"green":0.8,"blue":0.1}"#)
+                .unwrap(),
+            color
+        );
+
+        assert_eq!(
+            ron::from_str::<Rgba<Srgb>>(r#"(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#).unwrap(),
+            color
+        );
+
+        assert_eq!(
+            ron::from_str::<Rgba<Srgb>>(r#"Rgb(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#).unwrap(),
+            color
+        );
+    }
+
+    #[cfg(feature = "serializing")]
+    #[test]
+    fn serde_round_trips() {
+        let color = Rgba::<Srgb>::new(0.3, 0.8, 0.1, 0.5);
+
+        assert_eq!(
+            serde_json::from_str::<Rgba<Srgb>>(&serde_json::to_string(&color).unwrap()).unwrap(),
+            color
+        );
+
+        assert_eq!(
+            ron::from_str::<Rgba<Srgb>>(&ron::to_string(&color).unwrap()).unwrap(),
+            color
+        );
+    }
+
+    #[cfg(feature = "serializing")]
+    #[test]
+    fn serde_various_types() {
+        macro_rules! test_roundtrip {
+            ($value:expr $(, $ron_name:expr)?) => {
+                let value = super::Alpha {
+                    color: $value,
+                    alpha: 0.5,
+                };
+                assert_eq!(
+                    serde_json::from_str::<super::Alpha<_, f32>>(
+                        &serde_json::to_string(&value).expect("json serialization")
+                    )
+                    .expect("json deserialization"),
+                    value
+                );
+
+                let ron_string = ron::to_string(&value).expect("ron serialization");
+                assert_eq!(
+                    ron::from_str::<super::Alpha<_, f32>>(&ron_string)
+                        .expect("ron deserialization"),
+                    value
+                );
+                $(
+                    assert_eq!(
+                        ron::from_str::<super::Alpha<_, f32>>(&format!("{}{ron_string}", $ron_name))
+                            .expect("ron deserialization"),
+                        value
+                    );
+                )?
+            };
+        }
+
+        #[derive(Serialize, Deserialize, PartialEq, Debug)]
+        struct Empty;
+        #[derive(Serialize, Deserialize, PartialEq, Debug)]
+        struct UnitTuple();
+        #[derive(Serialize, Deserialize, PartialEq, Debug)]
+        struct Newtype(f32);
+        #[derive(Serialize, Deserialize, PartialEq, Debug)]
+        struct Tuple(f32, f32);
+        #[derive(Serialize, Deserialize, PartialEq, Debug)]
+        struct Struct {
+            value: f32,
+        }
+
+        test_roundtrip!(());
+        test_roundtrip!(Empty, "Empty");
+        test_roundtrip!(UnitTuple(), "UnitTuple");
+        test_roundtrip!(Newtype(0.1), "Newtype");
+        test_roundtrip!(Tuple(0.1, 0.2), "Tuple");
+        test_roundtrip!(Struct { value: 0.1 }, "Struct");
     }
 
     #[cfg(feature = "random")]
