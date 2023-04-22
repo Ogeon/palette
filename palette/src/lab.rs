@@ -292,6 +292,7 @@ where
 impl_mix!(Lab<Wp>);
 impl_lighten!(Lab<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {a, b} phantom: white_point);
 impl_premultiply!(Lab<Wp> {l, a, b} phantom: white_point);
+impl_euclidean_distance!(Lab<Wp> {l, a, b});
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where

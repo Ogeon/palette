@@ -425,6 +425,7 @@ impl_lighten! {
     where Wp: WhitePoint<T>
 }
 impl_premultiply!(Xyz<Wp> {x, y, z} phantom: white_point);
+impl_euclidean_distance!(Xyz<Wp> {x, y, z});
 
 impl<Wp, T> StimulusColor for Xyz<Wp, T> where T: Stimulus {}
 

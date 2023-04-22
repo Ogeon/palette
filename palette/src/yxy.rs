@@ -304,6 +304,7 @@ where
 impl_mix!(Yxy<Wp>);
 impl_lighten!(Yxy<Wp> increase {luma => [Self::min_luma(), Self::max_luma()]} other {x, y} phantom: white_point where T: One);
 impl_premultiply!(Yxy<Wp> {x, y, luma} phantom: white_point);
+impl_euclidean_distance!(Yxy<Wp> {x, y, luma});
 
 impl<Wp, T> HasBoolMask for Yxy<Wp, T>
 where

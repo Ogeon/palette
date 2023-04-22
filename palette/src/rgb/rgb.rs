@@ -836,6 +836,7 @@ where
 }
 
 impl_premultiply!(Rgb<S> {red, green, blue} phantom: standard);
+impl_euclidean_distance!(Rgb<S> {red, green, blue});
 
 impl<S, T> StimulusColor for Rgb<S, T> where T: Stimulus {}
 

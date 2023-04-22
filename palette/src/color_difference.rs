@@ -1,3 +1,5 @@
+//! Algorithms for calculating the difference between colors.
+
 use core::ops::{BitAnd, BitOr};
 
 use crate::{
@@ -19,7 +21,7 @@ pub trait ColorDifference {
 }
 
 /// Container of components necessary to calculate CIEDE color difference
-pub struct LabColorDiff<T> {
+pub(crate) struct LabColorDiff<T> {
     /// Lab color lightness
     pub l: T,
     /// Lab color a* value
@@ -67,7 +69,7 @@ where
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
 #[rustfmt::skip]
-pub fn get_ciede_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
+pub(crate) fn get_ciede_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
 where
     T: Real
         + RealAngle
@@ -166,4 +168,34 @@ where
         + (delta_big_h_prime.clone() / (k_h.clone() * &s_h)) * (delta_big_h_prime.clone() / (k_h.clone() * &s_h))
         + (r_t * delta_c_prime * delta_big_h_prime) / (k_c * s_c * k_h * s_h))
         .sqrt()
+}
+
+/// Calculate the distance between two colors as if they were coordinates in
+/// Euclidean space.
+///
+/// Euclidean distance is not always a good measurement of visual color
+/// difference, depending on the color space. Some spaces, like
+/// [`Lab`][crate::Lab] and [`Oklab`][crate::Oklab], will give a fairly uniform
+/// result, while other spaces, such as [`Rgb`][crate::rgb::Rgb], will give much
+/// less uniform results. Despite that, it's still appropriate for some
+/// applications.
+pub trait EuclideanDistance: Sized {
+    /// The type for the distance value.
+    type Scalar;
+
+    /// Calculate Euclidean the distance from `self` to `other`.
+    #[must_use]
+    fn distance(self, other: Self) -> Self::Scalar
+    where
+        Self::Scalar: Sqrt,
+    {
+        self.distance_squared(other).sqrt()
+    }
+
+    /// Calculate the squared Euclidean distance from `self` to `other`.
+    ///
+    /// This is typically a faster option than [`Self::distance`] for some
+    /// cases, such as when comparing two distances.
+    #[must_use]
+    fn distance_squared(self, other: Self) -> Self::Scalar;
 }

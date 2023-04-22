@@ -643,6 +643,7 @@ where
 impl_mix!(Luma<S>);
 impl_lighten!(Luma<S> increase {luma => [Self::min_luma(), Self::max_luma()]} other {} phantom: standard where T: Stimulus);
 impl_premultiply!(Luma<S> {luma} phantom: standard);
+impl_euclidean_distance!(Luma<S> {luma});
 
 impl<S, T> StimulusColor for Luma<S, T> where T: Stimulus {}
 

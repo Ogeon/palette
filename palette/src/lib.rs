@@ -456,7 +456,7 @@ pub mod blend;
 pub mod bool_mask;
 pub mod cast;
 pub mod chromatic_adaptation;
-mod color_difference;
+pub mod color_difference;
 pub mod convert;
 pub mod encoding;
 mod hsl;
