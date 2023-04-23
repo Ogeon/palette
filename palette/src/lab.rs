@@ -19,11 +19,11 @@ use crate::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign,
-    color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
+    color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
     contrast_ratio,
     convert::FromColorUnclamped,
     num::{
-        self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, IntoScalarArray, IsValidDivisor,
+        self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
         MinMax, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
     },
     stimulus::Stimulus,
@@ -305,7 +305,8 @@ where
     }
 }
 
-impl<Wp, T> ColorDifference for Lab<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::ColorDifference for Lab<Wp, T>
 where
     T: Real
         + RealAngle
@@ -326,7 +327,32 @@ where
 
     #[inline]
     fn get_color_difference(self, other: Lab<Wp, T>) -> Self::Scalar {
-        get_ciede_difference(self.into(), other.into())
+        get_ciede2000_difference(self.into(), other.into())
+    }
+}
+
+impl<Wp, T> Ciede2000 for Lab<Wp, T>
+where
+    T: Real
+        + RealAngle
+        + One
+        + Zero
+        + Powi
+        + Exp
+        + Trigonometry
+        + Abs
+        + Sqrt
+        + Arithmetics
+        + PartialCmp
+        + Hypot
+        + Clone,
+    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn difference(self, other: Self) -> Self::Scalar {
+        get_ciede2000_difference(self.into(), other.into())
     }
 }
 

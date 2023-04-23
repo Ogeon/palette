@@ -11,6 +11,10 @@ use crate::{
 };
 
 /// A trait for calculating the color difference between two colors.
+#[deprecated(
+    since = "0.7.2",
+    note = "replaced by `palette::color_difference::Ciede2000`"
+)]
 pub trait ColorDifference {
     /// The type of the calculated color difference.
     type Scalar;
@@ -18,6 +22,25 @@ pub trait ColorDifference {
     /// Return the difference or distance between two colors.
     #[must_use]
     fn get_color_difference(self, other: Self) -> Self::Scalar;
+}
+
+/// Calculate the CIEDE2000 color difference between two colors.
+///
+/// CIEDE2000 is a formula by the CIE that calculates a distance metric, ΔE\*
+/// (also known as Delta E), as an estimate of perceived color distance or
+/// difference.
+///
+/// There is a "just noticeable difference" between two colors when the ΔE\*
+/// (Delta E) is roughly greater than 1. Thus, the color difference is more
+/// suited for calculating small distances between colors as opposed to large
+/// differences.
+#[doc(alias = "ColorDifference")]
+pub trait Ciede2000 {
+    /// The type for the ΔE\* (Delta E).
+    type Scalar;
+
+    /// Calculate the CIEDE2000 ΔE\* (Delta E) color difference between `self` and `other`.
+    fn difference(self, other: Self) -> Self::Scalar;
 }
 
 /// Container of components necessary to calculate CIEDE color difference
@@ -69,7 +92,7 @@ where
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
 #[rustfmt::skip]
-pub(crate) fn get_ciede_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
+pub(crate) fn get_ciede2000_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
 where
     T: Real
         + RealAngle
