@@ -24,6 +24,7 @@ where
     }
 }
 
+/// Sample Oklch colors uniformly.
 pub struct UniformOklch<T>
 where
     T: SampleUniform,

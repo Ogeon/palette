@@ -1,3 +1,5 @@
+//! Types for the HSL color space.
+
 use core::{
     any::TypeId,
     marker::PhantomData,
@@ -24,6 +26,7 @@ use crate::{
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
+    hues::RgbHueIter,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
         PartialCmp, Real, Zero,
@@ -275,6 +278,9 @@ impl<S, T, A> Alpha<Hsl<S, T>, A> {
         Self::new(hue, saturation, lightness, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Hsl<S>, [saturation, lightness], standard);
+impl_struct_of_arrays_methods_hue!(Hsl<S>, [saturation, lightness], standard);
 
 impl<S1, S2, T> FromColorUnclamped<Hsl<S1, T>> for Hsl<S2, T>
 where
@@ -628,6 +634,7 @@ impl_color_sub!(Hsl<S, T>, [hue, saturation, lightness], standard);
 
 impl_array_casts!(Hsl<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsl<S>, [saturation, lightness], standard);
+impl_struct_of_array_traits_hue!(Hsl<S>, RgbHueIter, [saturation, lightness], standard);
 
 impl_eq_hue!(Hsl<S>, RgbHue, [hue, saturation, lightness]);
 
@@ -661,6 +668,7 @@ where
     }
 }
 
+/// Sample HSL colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformHsl<S, T>
 where
@@ -833,6 +841,24 @@ mod test {
         assert_relative_eq!(Hsl::<Srgb>::min_lightness(), 0.0);
         assert_relative_eq!(Hsl::<Srgb>::max_saturation(), 1.0);
         assert_relative_eq!(Hsl::<Srgb>::max_lightness(), 1.0);
+    }
+
+    struct_of_arrays_tests!(
+        Hsl<Srgb>,
+        Hsl::new(0.1f32, 0.2, 0.3),
+        Hsl::new(0.2, 0.3, 0.4),
+        Hsl::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{encoding::Srgb, hsl::Hsla};
+
+        struct_of_arrays_tests!(
+            Hsla<Srgb>,
+            Hsla::new(0.1f32, 0.2, 0.3, 0.4),
+            Hsla::new(0.2, 0.3, 0.4, 0.5),
+            Hsla::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

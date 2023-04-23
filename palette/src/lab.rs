@@ -1,3 +1,5 @@
+//! Types for the CIE L\*a\*b\* (CIELAB) color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
@@ -173,6 +175,9 @@ impl<Wp, T, A> Alpha<Lab<Wp, T>, A> {
         Self::new(l, a, b, alpha)
     }
 }
+
+impl_reference_component_methods!(Lab<Wp>, [l, a, b], white_point);
+impl_struct_of_arrays_methods!(Lab<Wp>, [l, a, b], white_point);
 
 impl<Wp, T> FromColorUnclamped<Lab<Wp, T>> for Lab<Wp, T> {
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
@@ -379,6 +384,7 @@ impl_color_div!(Lab<Wp, T>, [l, a, b], white_point);
 
 impl_array_casts!(Lab<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Lab<Wp>, [l, a, b], white_point);
+impl_struct_of_array_traits!(Lab<Wp>, [l, a, b], white_point);
 
 impl_eq!(Lab<Wp>, [l, a, b]);
 
@@ -416,6 +422,7 @@ where
     }
 }
 
+/// Sample CIE L\*a\*b\* (CIELAB) colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformLab<Wp, T>
 where
@@ -544,6 +551,24 @@ mod test {
         assert_relative_eq!(Lab::<D65, f32>::max_l(), 100.0);
         assert_relative_eq!(Lab::<D65, f32>::max_a(), 127.0);
         assert_relative_eq!(Lab::<D65, f32>::max_b(), 127.0);
+    }
+
+    struct_of_arrays_tests!(
+        Lab<D65>,
+        Lab::new(0.1f32, 0.2, 0.3),
+        Lab::new(0.2, 0.3, 0.4),
+        Lab::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{lab::Laba, white_point::D65};
+
+        struct_of_arrays_tests!(
+            Laba<D65>,
+            Laba::new(0.1f32, 0.2, 0.3, 0.4),
+            Laba::new(0.2, 0.3, 0.4, 0.5),
+            Laba::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

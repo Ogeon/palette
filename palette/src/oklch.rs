@@ -1,3 +1,5 @@
+//! Types for the Oklch color space.
+
 pub use alpha::Oklcha;
 
 use crate::{
@@ -7,6 +9,11 @@ use crate::{
     white_point::D65,
     GetHue, Oklab, OklabHue,
 };
+
+pub use self::properties::Iter;
+
+#[cfg(feature = "random")]
+pub use self::random::UniformOklch;
 
 mod alpha;
 mod properties;
@@ -94,6 +101,9 @@ where
         T::zero()
     }
 }
+
+impl_reference_component_methods_hue!(Oklch, [l, chroma]);
+impl_struct_of_arrays_methods_hue!(Oklch, [l, chroma]);
 
 impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T> {
     fn from_color_unclamped(color: Oklch<T>) -> Self {
@@ -191,6 +201,24 @@ mod test {
             ::serde_json::from_str(r#"{"l":0.3,"chroma":0.8,"hue":0.1}"#).unwrap();
 
         assert_eq!(deserialized, Oklch::new(0.3, 0.8, 0.1));
+    }
+
+    struct_of_arrays_tests!(
+        Oklch,
+        Oklch::new(0.1f32, 0.2, 0.3),
+        Oklch::new(0.2, 0.3, 0.4),
+        Oklch::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::oklch::Oklcha;
+
+        struct_of_arrays_tests!(
+            Oklcha,
+            Oklcha::new(0.1f32, 0.2, 0.3, 0.4),
+            Oklcha::new(0.2, 0.3, 0.4, 0.5),
+            Oklcha::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "random")]

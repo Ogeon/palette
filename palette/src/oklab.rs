@@ -1,3 +1,5 @@
+//! Types for the Oklab color space.
+
 use core::{any::TypeId, fmt::Debug, ops::Mul};
 
 pub use alpha::Oklaba;
@@ -14,6 +16,11 @@ use crate::{
     white_point::D65,
     LinSrgb, Mat3, Okhsl, Okhsv, Oklch, Xyz,
 };
+
+pub use self::properties::Iter;
+
+#[cfg(feature = "random")]
+pub use self::random::UniformOklab;
 
 mod alpha;
 mod properties;
@@ -232,6 +239,9 @@ where
         T::one()
     }
 }
+
+impl_reference_component_methods!(Oklab, [l, a, b]);
+impl_struct_of_arrays_methods!(Oklab, [l, a, b]);
 
 impl<T> Oklab<T>
 where
@@ -666,6 +676,24 @@ mod test {
     fn check_min_max_components() {
         assert_eq!(Oklab::<f32>::min_l(), 0.0);
         assert_eq!(Oklab::<f32>::max_l(), 1.0);
+    }
+
+    struct_of_arrays_tests!(
+        Oklab,
+        Oklab::new(0.1f32, 0.2, 0.3),
+        Oklab::new(0.2, 0.3, 0.4),
+        Oklab::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::oklab::Oklaba;
+
+        struct_of_arrays_tests!(
+            Oklaba,
+            Oklaba::new(0.1f32, 0.2, 0.3, 0.4),
+            Oklaba::new(0.2, 0.3, 0.4, 0.5),
+            Oklaba::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

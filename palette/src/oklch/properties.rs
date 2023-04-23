@@ -7,6 +7,7 @@ use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
     clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio,
+    hues::OklabHueIter,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
@@ -116,6 +117,7 @@ impl_color_sub!(Oklch<T>, [l, chroma, hue]);
 
 impl_array_casts!(Oklch<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Oklch, [l, chroma]);
+impl_struct_of_array_traits_hue!(Oklch, OklabHueIter, [l, chroma]);
 
 impl_eq_hue!(Oklch, OklabHue, [l, chroma, hue]);
 

@@ -26,6 +26,7 @@ where
     }
 }
 
+/// Sample Okhsl colors uniformly.
 pub struct UniformOkhsl<T>
 where
     T: SampleUniform,

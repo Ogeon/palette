@@ -21,6 +21,7 @@ where {
     }
 }
 
+/// Sample Oklab colors uniformly.
 pub struct UniformOklab<T>
 where
     T: SampleUniform,

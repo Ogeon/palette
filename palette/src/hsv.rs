@@ -1,3 +1,5 @@
+//! Types for the HSV color space.
+
 use core::{
     any::TypeId,
     marker::PhantomData,
@@ -24,6 +26,7 @@ use crate::{
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
+    hues::RgbHueIter,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
         PartialCmp, Real, Zero,
@@ -278,6 +281,9 @@ impl<S, T, A> Alpha<Hsv<S, T>, A> {
         Self::new(hue, saturation, value, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Hsv<S>, [saturation, value], standard);
+impl_struct_of_arrays_methods_hue!(Hsv<S>, [saturation, value], standard);
 
 impl<S1, S2, T> FromColorUnclamped<Hsv<S1, T>> for Hsv<S2, T>
 where
@@ -634,6 +640,7 @@ impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
 
 impl_array_casts!(Hsv<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsv<S>, [saturation, value], standard);
+impl_struct_of_array_traits_hue!(Hsv<S>, RgbHueIter, [saturation, value], standard);
 
 impl_eq_hue!(Hsv<S>, RgbHue, [hue, saturation, value]);
 
@@ -666,6 +673,7 @@ where
     }
 }
 
+/// Sample HSV colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformHsv<S, T>
 where
@@ -832,6 +840,24 @@ mod test {
         assert_relative_eq!(Hsv::<Srgb>::min_value(), 0.0,);
         assert_relative_eq!(Hsv::<Srgb>::max_saturation(), 1.0,);
         assert_relative_eq!(Hsv::<Srgb>::max_value(), 1.0,);
+    }
+
+    struct_of_arrays_tests!(
+        Hsv<Srgb>,
+        Hsv::new(0.1f32, 0.2, 0.3),
+        Hsv::new(0.2, 0.3, 0.4),
+        Hsv::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{encoding::Srgb, hsv::Hsva};
+
+        struct_of_arrays_tests!(
+            Hsva<Srgb>,
+            Hsva::new(0.1f32, 0.2, 0.3, 0.4),
+            Hsva::new(0.2, 0.3, 0.4, 0.5),
+            Hsva::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

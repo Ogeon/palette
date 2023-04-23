@@ -3,7 +3,7 @@ use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use crate::white_point::D65;
+use crate::{hues::OklabHueIter, white_point::D65};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
@@ -135,6 +135,7 @@ impl_color_sub!(Okhsl<T>, [hue, saturation, lightness]);
 
 impl_array_casts!(Okhsl<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhsl, [saturation, lightness]);
+impl_struct_of_array_traits_hue!(Okhsl, OklabHueIter, [saturation, lightness]);
 
 impl_eq_hue!(Okhsl, OklabHue, [hue, saturation, lightness]);
 

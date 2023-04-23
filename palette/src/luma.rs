@@ -1,4 +1,4 @@
-//! Luminance types.
+//! Types for luma and luminance (grayscale) values.
 
 pub mod channels;
 mod luma;
@@ -6,7 +6,7 @@ mod luma;
 use crate::encoding::{Gamma, Linear, Srgb};
 use crate::white_point::D65;
 
-pub use self::luma::{Luma, Lumaa};
+pub use self::luma::{Iter, Luma, Lumaa};
 
 /// sRGB encoded luminance.
 pub type SrgbLuma<T = f32> = Luma<Srgb, T>;

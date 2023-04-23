@@ -1,3 +1,5 @@
+//! Types for the CIE L\*C\*uv h°uv color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Mul, Sub, SubAssign},
@@ -22,6 +24,7 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
+    hues::LuvHueIter,
     luv_bounds::LuvBounds,
     num::{
         self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Powi,
@@ -173,6 +176,9 @@ impl<Wp, T, A> Alpha<Lchuv<Wp, T>, A> {
         Self::new(l, chroma, hue, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Lchuv<Wp>, [l, chroma], white_point);
+impl_struct_of_arrays_methods_hue!(Lchuv<Wp>, [l, chroma], white_point);
 
 impl<Wp, T> FromColorUnclamped<Lchuv<Wp, T>> for Lchuv<Wp, T> {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
@@ -354,6 +360,7 @@ impl_color_sub!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lchuv<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Lchuv<Wp>, [l, chroma], white_point);
+impl_struct_of_array_traits_hue!(Lchuv<Wp>, LuvHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lchuv<Wp>, LuvHue, [l, chroma, hue]);
 
@@ -390,6 +397,7 @@ where
     }
 }
 
+/// Sample CIE L\*C\*uv h°uv colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformLchuv<Wp, T>
 where
@@ -523,6 +531,24 @@ mod test {
         assert_relative_eq!(Lchuv::<D65, f32>::max_l(), 100.0);
         assert_relative_eq!(Lchuv::<D65, f32>::min_chroma(), 0.0);
         assert_relative_eq!(Lchuv::<D65, f32>::max_chroma(), 180.0);
+    }
+
+    struct_of_arrays_tests!(
+        Lchuv<D65>,
+        Lchuv::new(0.1f32, 0.2, 0.3),
+        Lchuv::new(0.2, 0.3, 0.4),
+        Lchuv::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{lchuv::Lchuva, white_point::D65};
+
+        struct_of_arrays_tests!(
+            Lchuva<D65>,
+            Lchuva::new(0.1f32, 0.2, 0.3, 0.4),
+            Lchuva::new(0.2, 0.3, 0.4, 0.5),
+            Lchuva::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

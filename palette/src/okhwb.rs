@@ -1,3 +1,5 @@
+//! Types for the Okhwb color space.
+
 use core::fmt::Debug;
 
 pub use alpha::Okhwba;
@@ -10,6 +12,11 @@ use crate::{
     white_point::D65,
     HasBoolMask, Okhsv, OklabHue,
 };
+
+pub use self::properties::Iter;
+
+#[cfg(feature = "random")]
+pub use self::random::UniformOkhwb;
 
 mod alpha;
 mod properties;
@@ -118,6 +125,9 @@ where
         T::max_intensity()
     }
 }
+
+impl_reference_component_methods_hue!(Okhwb, [whiteness, blackness]);
+impl_struct_of_arrays_methods_hue!(Okhwb, [whiteness, blackness]);
 
 impl<T> FromColorUnclamped<Okhsv<T>> for Okhwb<T>
 where
@@ -263,5 +273,23 @@ mod tests {
                 color
             );
         }
+    }
+
+    struct_of_arrays_tests!(
+        Okhwb,
+        Okhwb::new(0.1f32, 0.2, 0.3),
+        Okhwb::new(0.2, 0.3, 0.4),
+        Okhwb::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::okhwb::Okhwba;
+
+        struct_of_arrays_tests!(
+            Okhwba,
+            Okhwba::new(0.1f32, 0.2, 0.3, 0.4),
+            Okhwba::new(0.2, 0.3, 0.4, 0.5),
+            Okhwba::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 }

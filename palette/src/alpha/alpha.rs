@@ -1,5 +1,6 @@
 use core::{
     fmt,
+    iter::FromIterator,
     ops::{
         Add, AddAssign, BitAnd, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Sub, SubAssign,
     },
@@ -38,6 +39,24 @@ pub struct Alpha<C, T> {
     /// The transparency component. 0.0 is fully transparent and 1.0 is fully
     /// opaque.
     pub alpha: T,
+}
+
+impl<C, A> Alpha<C, A> {
+    /// Return an iterator over the colors in the wrapped collections.
+    pub fn iter<'a>(&'a self) -> <&'a Self as IntoIterator>::IntoIter
+    where
+        &'a Self: IntoIterator,
+    {
+        self.into_iter()
+    }
+
+    /// Return an iterator that allows modifying the colors in the wrapped collections.
+    pub fn iter_mut<'a>(&'a mut self) -> <&'a mut Self as IntoIterator>::IntoIter
+    where
+        &'a mut Self: IntoIterator,
+    {
+        self.into_iter()
+    }
 }
 
 impl<C: Premultiply> Alpha<C, C::Scalar> {
@@ -716,6 +735,172 @@ where
     }
 }
 
+impl<Tc, Ta, C, A> Extend<Alpha<Tc, Ta>> for Alpha<C, A>
+where
+    C: Extend<Tc>,
+    A: Extend<Ta>,
+{
+    fn extend<T: IntoIterator<Item = Alpha<Tc, Ta>>>(&mut self, iter: T) {
+        for color in iter {
+            self.color.extend(core::iter::once(color.color));
+            self.alpha.extend(core::iter::once(color.alpha));
+        }
+    }
+}
+
+impl<Tc, Ta, C, A> FromIterator<Alpha<Tc, Ta>> for Alpha<C, A>
+where
+    C: Extend<Tc> + FromIterator<Tc>,
+    A: Extend<Ta> + Default,
+{
+    fn from_iter<T: IntoIterator<Item = Alpha<Tc, Ta>>>(iter: T) -> Self {
+        let mut result = Self {
+            color: C::from_iter(None), // Default is currently a used for black, meaning it's not always what we want here.
+            alpha: A::default(),
+        };
+
+        for color in iter {
+            result.color.extend(core::iter::once(color.color));
+            result.alpha.extend(core::iter::once(color.alpha));
+        }
+
+        result
+    }
+}
+
+impl<C, A> IntoIterator for Alpha<C, A>
+where
+    C: IntoIterator,
+    A: IntoIterator,
+{
+    type Item = Alpha<C::Item, A::Item>;
+
+    type IntoIter = Iter<C::IntoIter, A::IntoIter>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Iter {
+            color: self.color.into_iter(),
+            alpha: self.alpha.into_iter(),
+        }
+    }
+}
+
+impl<'a, C, A> IntoIterator for &'a Alpha<C, A>
+where
+    &'a C: IntoIterator,
+    &'a A: IntoIterator,
+{
+    type Item = Alpha<<&'a C as IntoIterator>::Item, <&'a A as IntoIterator>::Item>;
+
+    type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter, <&'a A as IntoIterator>::IntoIter>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Iter {
+            color: (&self.color).into_iter(),
+            alpha: (&self.alpha).into_iter(),
+        }
+    }
+}
+
+impl<'a, C, A> IntoIterator for &'a mut Alpha<C, A>
+where
+    &'a mut C: IntoIterator,
+    &'a mut A: IntoIterator,
+{
+    type Item = Alpha<<&'a mut C as IntoIterator>::Item, <&'a mut A as IntoIterator>::Item>;
+
+    type IntoIter =
+        Iter<<&'a mut C as IntoIterator>::IntoIter, <&'a mut A as IntoIterator>::IntoIter>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Iter {
+            color: (&mut self.color).into_iter(),
+            alpha: (&mut self.alpha).into_iter(),
+        }
+    }
+}
+
+/// An iterator for transparent colors.
+pub struct Iter<C, A> {
+    pub(crate) color: C,
+    pub(crate) alpha: A,
+}
+
+impl<C, A> Iterator for Iter<C, A>
+where
+    C: Iterator,
+    A: Iterator,
+{
+    type Item = Alpha<C::Item, A::Item>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let color = self.color.next();
+        let alpha = self.alpha.next();
+
+        if let (Some(color), Some(alpha)) = (color, alpha) {
+            Some(Alpha { color, alpha })
+        } else {
+            None
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let hint = self.color.size_hint();
+        debug_assert_eq!(
+            self.alpha.size_hint(),
+            hint,
+            "the color and alpha iterators have different size hints"
+        );
+
+        hint
+    }
+
+    fn count(self) -> usize {
+        let count = self.color.count();
+        debug_assert_eq!(
+            self.alpha.count(),
+            count,
+            "the color and alpha iterators have different counts"
+        );
+
+        count
+    }
+}
+
+impl<C, A> DoubleEndedIterator for Iter<C, A>
+where
+    C: DoubleEndedIterator,
+    A: DoubleEndedIterator,
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let color = self.color.next_back();
+        let alpha = self.alpha.next_back();
+
+        if let (Some(color), Some(alpha)) = (color, alpha) {
+            Some(Alpha { color, alpha })
+        } else {
+            None
+        }
+    }
+}
+
+impl<C, A> ExactSizeIterator for Iter<C, A>
+where
+    C: ExactSizeIterator,
+    A: ExactSizeIterator,
+{
+    fn len(&self) -> usize {
+        let len = self.color.len();
+        debug_assert_eq!(
+            self.alpha.len(),
+            len,
+            "the color and alpha iterators have different lengths"
+        );
+
+        len
+    }
+}
+
 #[cfg(feature = "serializing")]
 impl<C, T> serde::Serialize for Alpha<C, T>
 where
@@ -771,6 +956,7 @@ where
     }
 }
 
+/// Sample transparent colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformAlpha<C, T>
 where

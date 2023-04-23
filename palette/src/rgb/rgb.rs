@@ -560,6 +560,9 @@ impl<S: RgbSpace, T, A> Alpha<Rgb<Linear<S>, T>, A> {
     }
 }
 
+impl_reference_component_methods!(Rgb<S>, [red, green, blue], standard);
+impl_struct_of_arrays_methods!(Rgb<S>, [red, green, blue], standard);
+
 impl<S1, S2, T> FromColorUnclamped<Rgb<S2, T>> for Rgb<S1, T>
 where
     S1: RgbStandard + 'static,
@@ -887,6 +890,7 @@ impl<S, T, A> From<Alpha<Rgb<S, T>, A>> for (T, T, T, A) {
 
 impl_array_casts!(Rgb<S, T>, [T; 3]);
 impl_simd_array_conversion!(Rgb<S>, [red, green, blue], standard);
+impl_struct_of_array_traits!(Rgb<S>, [red, green, blue], standard);
 
 impl_eq!(Rgb<S>, [red, green, blue]);
 
@@ -1383,6 +1387,24 @@ mod test {
         assert_relative_eq!(Rgb::<Srgb, f32>::max_red(), 1.0);
         assert_relative_eq!(Rgb::<Srgb, f32>::max_green(), 1.0);
         assert_relative_eq!(Rgb::<Srgb, f32>::max_blue(), 1.0);
+    }
+
+    struct_of_arrays_tests!(
+        Rgb<Srgb>,
+        Rgb::new(0.1f32, 0.2, 0.3),
+        Rgb::new(0.2, 0.3, 0.4),
+        Rgb::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{encoding::Srgb, rgb::Rgba};
+
+        struct_of_arrays_tests!(
+            Rgba<Srgb>,
+            Rgba::new(0.1f32, 0.2, 0.3, 0.4),
+            Rgba::new(0.2, 0.3, 0.4, 0.5),
+            Rgba::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "random")]
