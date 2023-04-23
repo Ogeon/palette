@@ -276,6 +276,7 @@ pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
 pub use xyz::{Xyz, Xyza};
 pub use yxy::{Yxy, Yxya};
 
+#[allow(deprecated)]
 pub use color_difference::ColorDifference;
 pub use convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
 pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
@@ -456,7 +457,7 @@ pub mod blend;
 pub mod bool_mask;
 pub mod cast;
 pub mod chromatic_adaptation;
-mod color_difference;
+pub mod color_difference;
 pub mod convert;
 pub mod encoding;
 mod hsl;

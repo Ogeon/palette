@@ -3,6 +3,13 @@ pub use self::{arithmetics::*, casting::*, mix::*};
 #[cfg(feature = "random")]
 pub use self::random::*;
 
+// From https://stackoverflow.com/questions/60187436/rust-macro-repetition-with-plus
+macro_rules! strip_plus {
+    (+ $($rest: tt)*) => {
+        $($rest)*
+    }
+}
+
 #[macro_use]
 mod arithmetics;
 #[macro_use]
@@ -23,6 +30,8 @@ mod simd;
 mod clamp;
 #[macro_use]
 mod convert;
+#[macro_use]
+mod color_difference;
 
 #[cfg(feature = "random")]
 #[macro_use]

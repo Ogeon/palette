@@ -1,3 +1,5 @@
+//! Algorithms for calculating the difference between colors.
+
 use core::ops::{BitAnd, BitOr};
 
 use crate::{
@@ -9,6 +11,10 @@ use crate::{
 };
 
 /// A trait for calculating the color difference between two colors.
+#[deprecated(
+    since = "0.7.2",
+    note = "replaced by `palette::color_difference::Ciede2000`"
+)]
 pub trait ColorDifference {
     /// The type of the calculated color difference.
     type Scalar;
@@ -18,8 +24,27 @@ pub trait ColorDifference {
     fn get_color_difference(self, other: Self) -> Self::Scalar;
 }
 
+/// Calculate the CIEDE2000 color difference between two colors.
+///
+/// CIEDE2000 is a formula by the CIE that calculates a distance metric, ΔE\*
+/// (also known as Delta E), as an estimate of perceived color distance or
+/// difference.
+///
+/// There is a "just noticeable difference" between two colors when the ΔE\*
+/// (Delta E) is roughly greater than 1. Thus, the color difference is more
+/// suited for calculating small distances between colors as opposed to large
+/// differences.
+#[doc(alias = "ColorDifference")]
+pub trait Ciede2000 {
+    /// The type for the ΔE\* (Delta E).
+    type Scalar;
+
+    /// Calculate the CIEDE2000 ΔE\* (Delta E) color difference between `self` and `other`.
+    fn difference(self, other: Self) -> Self::Scalar;
+}
+
 /// Container of components necessary to calculate CIEDE color difference
-pub struct LabColorDiff<T> {
+pub(crate) struct LabColorDiff<T> {
     /// Lab color lightness
     pub l: T,
     /// Lab color a* value
@@ -67,7 +92,7 @@ where
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
 #[rustfmt::skip]
-pub fn get_ciede_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
+pub(crate) fn get_ciede2000_difference<T>(this: LabColorDiff<T>, other: LabColorDiff<T>) -> T
 where
     T: Real
         + RealAngle
@@ -166,4 +191,34 @@ where
         + (delta_big_h_prime.clone() / (k_h.clone() * &s_h)) * (delta_big_h_prime.clone() / (k_h.clone() * &s_h))
         + (r_t * delta_c_prime * delta_big_h_prime) / (k_c * s_c * k_h * s_h))
         .sqrt()
+}
+
+/// Calculate the distance between two colors as if they were coordinates in
+/// Euclidean space.
+///
+/// Euclidean distance is not always a good measurement of visual color
+/// difference, depending on the color space. Some spaces, like
+/// [`Lab`][crate::Lab] and [`Oklab`][crate::Oklab], will give a fairly uniform
+/// result, while other spaces, such as [`Rgb`][crate::rgb::Rgb], will give much
+/// less uniform results. Despite that, it's still appropriate for some
+/// applications.
+pub trait EuclideanDistance: Sized {
+    /// The type for the distance value.
+    type Scalar;
+
+    /// Calculate Euclidean the distance from `self` to `other`.
+    #[must_use]
+    fn distance(self, other: Self) -> Self::Scalar
+    where
+        Self::Scalar: Sqrt,
+    {
+        self.distance_squared(other).sqrt()
+    }
+
+    /// Calculate the squared Euclidean distance from `self` to `other`.
+    ///
+    /// This is typically a faster option than [`Self::distance`] for some
+    /// cases, such as when comparing two distances.
+    #[must_use]
+    fn distance_squared(self, other: Self) -> Self::Scalar;
 }

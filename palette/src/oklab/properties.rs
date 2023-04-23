@@ -1,12 +1,7 @@
-use core::ops::BitOr;
-
 use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
-use crate::color_difference::{get_ciede_difference, LabColorDiff};
-use crate::num::{Abs, Exp, Powi, Sqrt};
 
 use crate::{
     angle::RealAngle,
@@ -19,8 +14,8 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, ColorDifference, FromColor, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, OklabHue, RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, OklabHue, RelativeContrast, Xyz,
 };
 
 use super::Oklab;
@@ -58,6 +53,7 @@ where
 impl_mix!(Oklab);
 impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b} where T:  One);
 impl_premultiply!(Oklab { l, a, b });
+impl_euclidean_distance!(Oklab { l, a, b });
 
 impl<T> GetHue for Oklab<T>
 where
@@ -67,31 +63,6 @@ where
 
     fn get_hue(&self) -> OklabHue<T> {
         OklabHue::from_cartesian(self.a.clone(), self.b.clone())
-    }
-}
-
-impl<T> ColorDifference for Oklab<T>
-where
-    T: Real
-        + RealAngle
-        + One
-        + Zero
-        + Powi
-        + Exp
-        + Trigonometry
-        + Abs
-        + Sqrt
-        + Arithmetics
-        + PartialCmp
-        + Clone,
-    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>,
-    Self: Into<LabColorDiff<T>>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn get_color_difference(self, other: Oklab<T>) -> Self::Scalar {
-        get_ciede_difference(self.into(), other.into())
     }
 }
 

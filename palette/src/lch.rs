@@ -18,9 +18,9 @@ use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, clamp_min, clamp_min_assign,
-    color_difference::{get_ciede_difference, ColorDifference, LabColorDiff},
+    color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
     contrast_ratio,
-    convert::FromColorUnclamped,
+    convert::{FromColorUnclamped, IntoColorUnclamped},
     num::{
         self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, MinMax, One,
         PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
@@ -325,7 +325,8 @@ where
 }
 
 /// CIEDE2000 distance metric for color difference.
-impl<Wp, T> ColorDifference for Lch<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::ColorDifference for Lch<Wp, T>
 where
     T: Real
         + RealAngle
@@ -346,7 +347,32 @@ where
 
     #[inline]
     fn get_color_difference(self, other: Lch<Wp, T>) -> Self::Scalar {
-        get_ciede_difference(self.into(), other.into())
+        get_ciede2000_difference(self.into(), other.into())
+    }
+}
+
+impl<Wp, T> Ciede2000 for Lch<Wp, T>
+where
+    T: Real
+        + RealAngle
+        + One
+        + Zero
+        + Powi
+        + Exp
+        + Trigonometry
+        + Abs
+        + Sqrt
+        + Arithmetics
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T> + BitAnd<Output = T::Mask> + BitOr<Output = T::Mask>,
+    Self: IntoColorUnclamped<Lab<Wp, T>>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn difference(self, other: Self) -> Self::Scalar {
+        get_ciede2000_difference(self.into(), other.into())
     }
 }
 
