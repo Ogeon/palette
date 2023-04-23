@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":["Ciede2000","ColorDifference","EuclideanDistance"]};
