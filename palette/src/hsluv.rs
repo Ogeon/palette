@@ -43,7 +43,7 @@ pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
 /// The HSLuv color space can be seen as a cylindrical version of
 /// [CIELUV](crate::luv::Luv), similar to
 /// [LCHuv](crate::lchuv::Lchuv), with the additional benefit of
-/// streching the chroma values to a uniform saturation range [0.0,
+/// stretching the chroma values to a uniform saturation range [0.0,
 /// 100.0]. This makes HSLuv much more convenient for generating
 /// colors than Lchuv, as the set of valid saturation values is
 /// independent of lightness and hue.

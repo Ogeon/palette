@@ -114,7 +114,7 @@ use crate::ArrayExt;
 ///   [Infallible](std::convert::Infallible)).
 /// * The type must allow any values in the array items (eg: either no
 ///   requirements or some ability to recover from invalid values).
-/// * The type must be homogenous (eg: all fields have the same type, or are
+/// * The type must be homogeneous (eg: all fields have the same type, or are
 ///   wrappers that implement `ArrayCast` with the same field type, or are zero
 ///   sized).
 /// * The length of `Array` must be the sum of the number of color component
