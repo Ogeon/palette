@@ -347,6 +347,24 @@ macro_rules! make_hues {
             }
         }
 
+        impl<T: $crate::num::SaturatingAdd<Output=T>> $crate::num::SaturatingAdd<$name<T>> for $name<T> {
+            type Output = $name<T>;
+
+            #[inline]
+            fn saturating_add(self, other: $name<T>) -> $name<T> {
+                $name(self.0.saturating_add(other.0))
+            }
+        }
+
+        impl<T: $crate::num::SaturatingAdd<Output=T>> $crate::num::SaturatingAdd<T> for $name<T> {
+            type Output = $name<T>;
+
+            #[inline]
+            fn saturating_add(self, other: T) -> $name<T> {
+                $name(self.0.saturating_add(other))
+            }
+        }
+
         impl<T: Sub<Output=T>> Sub<$name<T>> for $name<T> {
             type Output = $name<T>;
 
@@ -408,6 +426,24 @@ macro_rules! make_hues {
             #[inline]
             fn sub_assign(&mut self, other: $name<f64>){
                 *self -= other.0;
+            }
+        }
+
+        impl<T: $crate::num::SaturatingSub<Output=T>> $crate::num::SaturatingSub<$name<T>> for $name<T> {
+            type Output = $name<T>;
+
+            #[inline]
+            fn saturating_sub(self, other: $name<T>) -> $name<T> {
+                $name(self.0.saturating_sub(other.0))
+            }
+        }
+
+        impl<T: $crate::num::SaturatingSub<Output=T>> $crate::num::SaturatingSub<T> for $name<T> {
+            type Output = $name<T>;
+
+            #[inline]
+            fn saturating_sub(self, other: T) -> $name<T> {
+                $name(self.0.saturating_sub(other))
             }
         }
 

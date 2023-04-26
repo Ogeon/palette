@@ -22,7 +22,7 @@ use crate::{
     cast::ArrayCast,
     clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    num::{self, Arithmetics, One, PartialCmp, Zero},
+    num::{self, Arithmetics, One, PartialCmp, SaturatingAdd, SaturatingSub, Zero},
     stimulus::Stimulus,
     ArrayExt, Clamp, ClampAssign, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
     NextArray, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
@@ -455,6 +455,36 @@ where
     }
 }
 
+impl<C, T> SaturatingAdd for Alpha<C, T>
+where
+    C: SaturatingAdd,
+    T: SaturatingAdd,
+{
+    type Output = Alpha<C::Output, <T as SaturatingAdd>::Output>;
+
+    fn saturating_add(self, other: Alpha<C, T>) -> Self::Output {
+        Alpha {
+            color: self.color.saturating_add(other.color),
+            alpha: self.alpha.saturating_add(other.alpha),
+        }
+    }
+}
+
+impl<T, C> SaturatingAdd<T> for Alpha<C, T>
+where
+    T: SaturatingAdd + Clone,
+    C: SaturatingAdd<T>,
+{
+    type Output = Alpha<C::Output, <T as SaturatingAdd>::Output>;
+
+    fn saturating_add(self, c: T) -> Self::Output {
+        Alpha {
+            color: self.color.saturating_add(c.clone()),
+            alpha: self.alpha.saturating_add(c),
+        }
+    }
+}
+
 impl<C, T> Sub for Alpha<C, T>
 where
     C: Sub,
@@ -504,6 +534,36 @@ where
     fn sub_assign(&mut self, c: T) {
         self.color -= c.clone();
         self.alpha -= c;
+    }
+}
+
+impl<C, T> SaturatingSub for Alpha<C, T>
+where
+    C: SaturatingSub,
+    T: SaturatingSub,
+{
+    type Output = Alpha<C::Output, <T as SaturatingSub>::Output>;
+
+    fn saturating_sub(self, other: Alpha<C, T>) -> Self::Output {
+        Alpha {
+            color: self.color.saturating_sub(other.color),
+            alpha: self.alpha.saturating_sub(other.alpha),
+        }
+    }
+}
+
+impl<T, C> SaturatingSub<T> for Alpha<C, T>
+where
+    T: SaturatingSub + Clone,
+    C: SaturatingSub<T>,
+{
+    type Output = Alpha<C::Output, <T as SaturatingSub>::Output>;
+
+    fn saturating_sub(self, c: T) -> Self::Output {
+        Alpha {
+            color: self.color.saturating_sub(c.clone()),
+            alpha: self.alpha.saturating_sub(c),
+        }
     }
 }
 
