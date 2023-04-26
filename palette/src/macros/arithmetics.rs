@@ -39,10 +39,38 @@ macro_rules! impl_color_add {
 
         impl<$phantom_ty, $component_ty> AddAssign<$component_ty> for $self_ty<$phantom_ty, $component_ty>
         where
-            T:  AddAssign + Clone
+            T: AddAssign + Clone
         {
             fn add_assign(&mut self, c: $component_ty) {
                 $( self.$element += c.clone(); )+
+            }
+        }
+
+        impl<$phantom_ty, $component_ty> $crate::num::SaturatingAdd<Self> for $self_ty<$phantom_ty, $component_ty>
+        where
+            T: $crate::num::SaturatingAdd<Output=$component_ty>
+        {
+            type Output = Self;
+
+            fn saturating_add(self, other: Self) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_add(other.$element), )+
+                    $phantom: PhantomData,
+                }
+            }
+        }
+
+        impl<$phantom_ty, $component_ty> $crate::num::SaturatingAdd<$component_ty> for $self_ty<$phantom_ty, $component_ty>
+        where
+            T: $crate::num::SaturatingAdd<Output=$component_ty> + Clone
+        {
+            type Output = Self;
+
+            fn saturating_add(self, c: $component_ty) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_add(c.clone()), )+
+                    $phantom: PhantomData,
+                }
             }
         }
     };
@@ -84,10 +112,36 @@ macro_rules! impl_color_add {
 
         impl<$component_ty> AddAssign<$component_ty> for $self_ty<$component_ty>
         where
-            T:  AddAssign + Clone
+            T: AddAssign + Clone
         {
             fn add_assign(&mut self, c: $component_ty) {
                 $( self.$element += c.clone(); )+
+            }
+        }
+
+        impl<$component_ty> $crate::num::SaturatingAdd<Self> for $self_ty<$component_ty>
+        where
+            T: $crate::num::SaturatingAdd<Output=T>
+        {
+            type Output = Self;
+
+            fn saturating_add(self, other: Self) -> Self {
+                $self_ty {
+                    $( $element: self.$element.saturating_add(other.$element), )+
+                }
+            }
+        }
+
+        impl<$component_ty> $crate::num::SaturatingAdd<$component_ty> for $self_ty<$component_ty>
+        where
+            T: $crate::num::SaturatingAdd<Output=T> + Clone
+        {
+            type Output = Self;
+
+            fn saturating_add(self, c: $component_ty) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_add(c.clone()), )+
+                }
             }
         }
     };
@@ -143,6 +197,34 @@ macro_rules! impl_color_sub {
                 $( self.$element -= c.clone(); )+
             }
         }
+
+        impl<$phantom_ty, $component_ty> $crate::num::SaturatingSub<Self> for $self_ty<$phantom_ty, $component_ty>
+        where
+            T: $crate::num::SaturatingSub<Output=$component_ty>
+        {
+            type Output = Self;
+
+            fn saturating_sub(self, other: Self) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_sub(other.$element), )+
+                    $phantom: PhantomData,
+                }
+            }
+        }
+
+        impl<$phantom_ty, $component_ty> $crate::num::SaturatingSub<$component_ty> for $self_ty<$phantom_ty, $component_ty>
+        where
+            T: $crate::num::SaturatingSub<Output=$component_ty> + Clone
+        {
+            type Output = Self;
+
+            fn saturating_sub(self, c: $component_ty) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_sub(c.clone()), )+
+                    $phantom: PhantomData,
+                }
+            }
+        }
     };
 
     ($self_ty: ident < $component_ty: ident > , [$($element: ident),+]) => {
@@ -187,6 +269,32 @@ macro_rules! impl_color_sub {
         {
             fn sub_assign(&mut self, c: $component_ty) {
                 $( self.$element -= c.clone(); )+
+            }
+        }
+
+        impl<$component_ty> $crate::num::SaturatingSub<Self> for $self_ty<$component_ty>
+        where
+            T: $crate::num::SaturatingSub<Output=T>
+        {
+            type Output = Self;
+
+            fn saturating_sub(self, other: Self) -> Self {
+                $self_ty {
+                    $( $element: self.$element.saturating_sub(other.$element), )+
+                }
+            }
+        }
+
+        impl<$component_ty> $crate::num::SaturatingSub<$component_ty> for $self_ty<$component_ty>
+        where
+            T: $crate::num::SaturatingSub<Output=T> + Clone
+        {
+            type Output = Self;
+
+            fn saturating_sub(self, c: $component_ty) -> Self::Output {
+                $self_ty {
+                    $( $element: self.$element.saturating_sub(c.clone()), )+
+                }
             }
         }
     };

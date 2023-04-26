@@ -286,6 +286,26 @@ pub trait MulSub {
     fn mul_sub(self, m: Self, s: Self) -> Self;
 }
 
+/// Saturating addition operation.
+pub trait SaturatingAdd<Rhs = Self> {
+    /// The resulting type.
+    type Output;
+
+    /// Returns the sum of `self` and `other`, but saturates instead of overflowing.
+    #[must_use]
+    fn saturating_add(self, other: Rhs) -> Self::Output;
+}
+
+/// Saturating subtraction operation.
+pub trait SaturatingSub<Rhs = Self> {
+    /// The resulting type.
+    type Output;
+
+    /// Returns the difference of `self` and `other`, but saturates instead of overflowing.
+    #[must_use]
+    fn saturating_sub(self, other: Rhs) -> Self::Output;
+}
+
 macro_rules! impl_uint {
     ($($ty: ident),+) => {
         $(
@@ -407,6 +427,22 @@ macro_rules! impl_uint {
                 #[inline]
                 fn mul_sub(self, m: Self, s: Self) -> Self {
                     (self * m) - s
+                }
+            }
+
+            impl SaturatingAdd for $ty {
+                type Output = $ty;
+                #[inline]
+                fn saturating_add(self, other: Self) -> Self{
+                    <$ty>::saturating_add(self, other)
+                }
+            }
+
+            impl SaturatingSub for $ty {
+                type Output = $ty;
+                #[inline]
+                fn saturating_sub(self, other: Self) -> Self{
+                    <$ty>::saturating_sub(self, other)
                 }
             }
         )+
