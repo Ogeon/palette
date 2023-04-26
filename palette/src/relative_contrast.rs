@@ -41,7 +41,7 @@ use crate::{
 /// contrast is calculated by `(L1 + 0.05) / (L2 + 0.05)`, where `L1` is the
 /// luminance of the brighter color and `L2` is the luminance of the darker
 /// color both in sRGB linear space. A higher contrast ratio is generally
-/// desireable.
+/// desirable.
 ///
 /// For more details, visit the following links:
 ///
