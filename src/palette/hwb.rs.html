@@ -891,7 +891,35 @@
 <a href="#891" id="891">891</a>
 <a href="#892" id="892">892</a>
 <a href="#893" id="893">893</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the HWB color space.
+
+</span><span class="kw">use </span>core::{
     any::TypeId,
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
@@ -914,6 +942,7 @@
     clamp, clamp_min, clamp_min_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
+    hues::RgbHueIter,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
@@ -1188,6 +1217,9 @@
         <span class="self">Self</span>::new(hue, whiteness, blackness, alpha)
     }
 }
+
+<span class="macro">impl_reference_component_methods_hue!</span>(Hwb&lt;S&gt;, [whiteness, blackness], standard);
+<span class="macro">impl_struct_of_arrays_methods_hue!</span>(Hwb&lt;S&gt;, [whiteness, blackness], standard);
 
 <span class="kw">impl</span>&lt;S1, S2, T&gt; FromColorUnclamped&lt;Hwb&lt;S1, T&gt;&gt; <span class="kw">for </span>Hwb&lt;S2, T&gt;
 <span class="kw">where
@@ -1469,6 +1501,7 @@
 
 <span class="macro">impl_array_casts!</span>(Hwb&lt;S, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Hwb&lt;S&gt;, [whiteness, blackness], standard);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Hwb&lt;S&gt;, RgbHueIter, [whiteness, blackness], standard);
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
 </span><span class="kw">impl</span>&lt;S, T&gt; AbsDiffEq <span class="kw">for </span>Hwb&lt;S, T&gt;
@@ -1590,7 +1623,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="doccomment">/// Sample HWB colors uniformly.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub struct </span>UniformHwb&lt;S, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -1754,6 +1788,24 @@
         <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::min_blackness(), <span class="number">0.0</span>,);
         <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::max_whiteness(), <span class="number">1.0</span>,);
         <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::max_blackness(), <span class="number">1.0</span>,);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Hwb&lt;Srgb&gt;,
+        Hwb::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Hwb::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Hwb::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{encoding::Srgb, hwb::Hwba};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Hwba&lt;Srgb&gt;,
+            Hwba::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Hwba::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Hwba::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

@@ -1396,6 +1396,28 @@
 <a href="#1396" id="1396">1396</a>
 <a href="#1397" id="1397">1397</a>
 <a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     fmt,
@@ -1958,6 +1980,9 @@
     }
 }
 
+<span class="macro">impl_reference_component_methods!</span>(Rgb&lt;S&gt;, [red, green, blue], standard);
+<span class="macro">impl_struct_of_arrays_methods!</span>(Rgb&lt;S&gt;, [red, green, blue], standard);
+
 <span class="kw">impl</span>&lt;S1, S2, T&gt; FromColorUnclamped&lt;Rgb&lt;S2, T&gt;&gt; <span class="kw">for </span>Rgb&lt;S1, T&gt;
 <span class="kw">where
     </span>S1: RgbStandard + <span class="lifetime">&#39;static</span>,
@@ -2285,6 +2310,7 @@
 
 <span class="macro">impl_array_casts!</span>(Rgb&lt;S, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion!</span>(Rgb&lt;S&gt;, [red, green, blue], standard);
+<span class="macro">impl_struct_of_array_traits!</span>(Rgb&lt;S&gt;, [red, green, blue], standard);
 
 <span class="macro">impl_eq!</span>(Rgb&lt;S&gt;, [red, green, blue]);
 
@@ -2781,6 +2807,24 @@
         <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_red(), <span class="number">1.0</span>);
         <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_green(), <span class="number">1.0</span>);
         <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_blue(), <span class="number">1.0</span>);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Rgb&lt;Srgb&gt;,
+        Rgb::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Rgb::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Rgb::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{encoding::Srgb, rgb::Rgba};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Rgba&lt;Srgb&gt;,
+            Rgba::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Rgba::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Rgba::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]

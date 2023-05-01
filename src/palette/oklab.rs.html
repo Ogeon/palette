@@ -695,7 +695,37 @@
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
 <a href="#697" id="697">697</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{any::TypeId, fmt::Debug, ops::Mul};
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the Oklab color space.
+
+</span><span class="kw">use </span>core::{any::TypeId, fmt::Debug, ops::Mul};
 
 <span class="kw">pub use </span>alpha::Oklaba;
 
@@ -711,6 +741,11 @@
     white_point::D65,
     LinSrgb, Mat3, Okhsl, Okhsv, Oklch, Xyz,
 };
+
+<span class="kw">pub use </span><span class="self">self</span>::properties::Iter;
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::random::UniformOklab;
 
 <span class="kw">mod </span>alpha;
 <span class="kw">mod </span>properties;
@@ -929,6 +964,9 @@
         T::one()
     }
 }
+
+<span class="macro">impl_reference_component_methods!</span>(Oklab, [l, a, b]);
+<span class="macro">impl_struct_of_arrays_methods!</span>(Oklab, [l, a, b]);
 
 <span class="kw">impl</span>&lt;T&gt; Oklab&lt;T&gt;
 <span class="kw">where
@@ -1363,6 +1401,24 @@
     </span><span class="kw">fn </span>check_min_max_components() {
         <span class="macro">assert_eq!</span>(Oklab::&lt;f32&gt;::min_l(), <span class="number">0.0</span>);
         <span class="macro">assert_eq!</span>(Oklab::&lt;f32&gt;::max_l(), <span class="number">1.0</span>);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Oklab,
+        Oklab::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Oklab::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Oklab::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use </span><span class="kw">crate</span>::oklab::Oklaba;
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Oklaba,
+            Oklaba::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Oklaba::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Oklaba::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

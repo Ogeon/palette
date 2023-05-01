@@ -204,7 +204,37 @@
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
-</pre><pre class="rust"><code><span class="kw">pub use </span>alpha::Oklcha;
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the Oklch color space.
+
+</span><span class="kw">pub use </span>alpha::Oklcha;
 
 <span class="kw">use crate</span>::{
     bool_mask::HasBoolMask,
@@ -213,6 +243,11 @@
     white_point::D65,
     GetHue, Oklab, OklabHue,
 };
+
+<span class="kw">pub use </span><span class="self">self</span>::properties::Iter;
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::random::UniformOklch;
 
 <span class="kw">mod </span>alpha;
 <span class="kw">mod </span>properties;
@@ -300,6 +335,9 @@
         T::zero()
     }
 }
+
+<span class="macro">impl_reference_component_methods_hue!</span>(Oklch, [l, chroma]);
+<span class="macro">impl_struct_of_arrays_methods_hue!</span>(Oklch, [l, chroma]);
 
 <span class="kw">impl</span>&lt;T&gt; FromColorUnclamped&lt;Oklch&lt;T&gt;&gt; <span class="kw">for </span>Oklch&lt;T&gt; {
     <span class="kw">fn </span>from_color_unclamped(color: Oklch&lt;T&gt;) -&gt; <span class="self">Self </span>{
@@ -397,6 +435,24 @@
             ::serde_json::from_str(<span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;chroma&quot;:0.8,&quot;hue&quot;:0.1}&quot;#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Oklch::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Oklch,
+        Oklch::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Oklch::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Oklch::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use </span><span class="kw">crate</span>::oklch::Oklcha;
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Oklcha,
+            Oklcha::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Oklcha::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Oklcha::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]

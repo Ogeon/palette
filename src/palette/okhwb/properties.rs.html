@@ -240,12 +240,19 @@
 <a href="#240" id="240">240</a>
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign};
 
-<span class="kw">use </span><span class="kw">crate</span>::angle::{RealAngle, SignedAngle};
 <span class="kw">use </span><span class="kw">crate</span>::stimulus::Stimulus;
 <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 <span class="kw">use </span><span class="kw">crate</span>::HasBoolMask;
+<span class="kw">use crate</span>::{
+    angle::{RealAngle, SignedAngle},
+    hues::OklabHueIter,
+};
 <span class="kw">use crate</span>::{
     bool_mask::{LazySelect, Select},
     clamp, clamp_min, clamp_min_assign, contrast_ratio, ClampAssign, FromColor, GetHue,
@@ -463,6 +470,7 @@
 
 <span class="macro">impl_array_casts!</span>(Okhwb&lt;T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Okhwb, [whiteness, blackness]);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Okhwb, OklabHueIter, [whiteness, blackness]);
 
 <span class="kw">impl</span>&lt;T&gt; RelativeContrast <span class="kw">for </span>Okhwb&lt;T&gt;
 <span class="kw">where

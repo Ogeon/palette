@@ -862,7 +862,35 @@
 <a href="#862" id="862">862</a>
 <a href="#863" id="863">863</a>
 <a href="#864" id="864">864</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the HSV color space.
+
+</span><span class="kw">use </span>core::{
     any::TypeId,
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
@@ -888,6 +916,7 @@
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
+    hues::RgbHueIter,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
         PartialCmp, Real, Zero,
@@ -1142,6 +1171,9 @@
         <span class="self">Self</span>::new(hue, saturation, value, alpha)
     }
 }
+
+<span class="macro">impl_reference_component_methods_hue!</span>(Hsv&lt;S&gt;, [saturation, value], standard);
+<span class="macro">impl_struct_of_arrays_methods_hue!</span>(Hsv&lt;S&gt;, [saturation, value], standard);
 
 <span class="kw">impl</span>&lt;S1, S2, T&gt; FromColorUnclamped&lt;Hsv&lt;S1, T&gt;&gt; <span class="kw">for </span>Hsv&lt;S2, T&gt;
 <span class="kw">where
@@ -1498,6 +1530,7 @@
 
 <span class="macro">impl_array_casts!</span>(Hsv&lt;S, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Hsv&lt;S&gt;, [saturation, value], standard);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Hsv&lt;S&gt;, RgbHueIter, [saturation, value], standard);
 
 <span class="macro">impl_eq_hue!</span>(Hsv&lt;S&gt;, RgbHue, [hue, saturation, value]);
 
@@ -1530,7 +1563,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="doccomment">/// Sample HSV colors uniformly.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub struct </span>UniformHsv&lt;S, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -1696,6 +1730,24 @@
         <span class="macro">assert_relative_eq!</span>(Hsv::&lt;Srgb&gt;::min_value(), <span class="number">0.0</span>,);
         <span class="macro">assert_relative_eq!</span>(Hsv::&lt;Srgb&gt;::max_saturation(), <span class="number">1.0</span>,);
         <span class="macro">assert_relative_eq!</span>(Hsv::&lt;Srgb&gt;::max_value(), <span class="number">1.0</span>,);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Hsv&lt;Srgb&gt;,
+        Hsv::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Hsv::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Hsv::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{encoding::Srgb, hsv::Hsva};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Hsva&lt;Srgb&gt;,
+            Hsva::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Hsva::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Hsva::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

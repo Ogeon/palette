@@ -135,6 +135,8 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
@@ -144,6 +146,7 @@
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
     clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio,
+    hues::OklabHueIter,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
@@ -253,6 +256,7 @@
 
 <span class="macro">impl_array_casts!</span>(Oklch&lt;T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Oklch, [l, chroma]);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Oklch, OklabHueIter, [l, chroma]);
 
 <span class="macro">impl_eq_hue!</span>(Oklch, OklabHue, [l, chroma, hue]);
 

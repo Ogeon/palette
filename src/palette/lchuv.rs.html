@@ -553,7 +553,35 @@
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*C\*uv h°uv color space.
+
+</span><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Mul, Sub, SubAssign},
 };
@@ -577,6 +605,7 @@
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
+    hues::LuvHueIter,
     luv_bounds::LuvBounds,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Powi,
@@ -728,6 +757,9 @@
         <span class="self">Self</span>::new(l, chroma, hue, alpha)
     }
 }
+
+<span class="macro">impl_reference_component_methods_hue!</span>(Lchuv&lt;Wp&gt;, [l, chroma], white_point);
+<span class="macro">impl_struct_of_arrays_methods_hue!</span>(Lchuv&lt;Wp&gt;, [l, chroma], white_point);
 
 <span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Lchuv&lt;Wp, T&gt;&gt; <span class="kw">for </span>Lchuv&lt;Wp, T&gt; {
     <span class="kw">fn </span>from_color_unclamped(color: Lchuv&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
@@ -909,6 +941,7 @@
 
 <span class="macro">impl_array_casts!</span>(Lchuv&lt;Wp, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Lchuv&lt;Wp&gt;, [l, chroma], white_point);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Lchuv&lt;Wp&gt;, LuvHueIter, [l, chroma], white_point);
 
 <span class="macro">impl_eq_hue!</span>(Lchuv&lt;Wp&gt;, LuvHue, [l, chroma, hue]);
 
@@ -945,7 +978,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="doccomment">/// Sample CIE L\*C\*uv h°uv colors uniformly.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub struct </span>UniformLchuv&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -1078,6 +1112,24 @@
         <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
         <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::min_chroma(), <span class="number">0.0</span>);
         <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_chroma(), <span class="number">180.0</span>);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Lchuv&lt;D65&gt;,
+        Lchuv::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Lchuv::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Lchuv::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{lchuv::Lchuva, white_point::D65};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Lchuva&lt;D65&gt;,
+            Lchuva::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Lchuva::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Lchuva::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

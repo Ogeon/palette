@@ -154,12 +154,13 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
 </span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-<span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
+<span class="kw">use crate</span>::{hues::OklabHueIter, white_point::D65};
 
 <span class="kw">use crate</span>::{
     angle::{RealAngle, SignedAngle},
@@ -291,6 +292,7 @@
 
 <span class="macro">impl_array_casts!</span>(Okhsl&lt;T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion_hue!</span>(Okhsl, [saturation, lightness]);
+<span class="macro">impl_struct_of_array_traits_hue!</span>(Okhsl, OklabHueIter, [saturation, lightness]);
 
 <span class="macro">impl_eq_hue!</span>(Okhsl, OklabHue, [hue, saturation, lightness]);
 

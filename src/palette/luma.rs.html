@@ -44,7 +44,7 @@
 <a href="#44" id="44">44</a>
 <a href="#45" id="45">45</a>
 <a href="#46" id="46">46</a>
-</pre><pre class="rust"><code><span class="doccomment">//! Luminance types.
+</pre><pre class="rust"><code><span class="doccomment">//! Types for luma and luminance (grayscale) values.
 
 </span><span class="kw">pub mod </span>channels;
 <span class="kw">mod </span>luma;
@@ -52,7 +52,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::encoding::{Gamma, Linear, Srgb};
 <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 
-<span class="kw">pub use </span><span class="self">self</span>::luma::{Luma, Lumaa};
+<span class="kw">pub use </span><span class="self">self</span>::luma::{Iter, Luma, Lumaa};
 
 <span class="doccomment">/// sRGB encoded luminance.
 </span><span class="kw">pub type </span>SrgbLuma&lt;T = f32&gt; = Luma&lt;Srgb, T&gt;;

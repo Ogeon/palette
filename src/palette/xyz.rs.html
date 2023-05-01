@@ -657,7 +657,34 @@
 <a href="#657" id="657">657</a>
 <a href="#658" id="658">658</a>
 <a href="#659" id="659">659</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 XYZ color space.
+
+</span><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
@@ -858,6 +885,9 @@
         Alpha::&lt;Xyz&lt;NewWp, T&gt;, A&gt;::new(<span class="self">self</span>.color.x, <span class="self">self</span>.color.y, <span class="self">self</span>.color.z, <span class="self">self</span>.alpha)
     }
 }
+
+<span class="macro">impl_reference_component_methods!</span>(Xyz&lt;Wp&gt;, [x, y, z], white_point);
+<span class="macro">impl_struct_of_arrays_methods!</span>(Xyz&lt;Wp&gt;, [x, y, z], white_point);
 
 <span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Xyz&lt;Wp, T&gt;&gt; <span class="kw">for </span>Xyz&lt;Wp, T&gt; {
     <span class="kw">fn </span>from_color_unclamped(color: Xyz&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
@@ -1111,6 +1141,7 @@
 
 <span class="macro">impl_array_casts!</span>(Xyz&lt;Wp, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion!</span>(Xyz&lt;Wp&gt;, [x, y, z], white_point);
+<span class="macro">impl_struct_of_array_traits!</span>(Xyz&lt;Wp&gt;, [x, y, z], white_point);
 
 <span class="macro">impl_eq!</span>(Xyz&lt;Wp&gt;, [x, y, z]);
 
@@ -1145,7 +1176,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="doccomment">/// Sample CIE 1931 XYZ colors uniformly.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub struct </span>UniformXyz&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -1287,6 +1319,24 @@
         <span class="macro">assert_relative_eq!</span>(Xyz::&lt;D65, f64&gt;::max_x(), X_N);
         <span class="macro">assert_relative_eq!</span>(Xyz::&lt;D65, f64&gt;::max_y(), Y_N);
         <span class="macro">assert_relative_eq!</span>(Xyz::&lt;D65, f64&gt;::max_z(), Z_N);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Xyz&lt;D65&gt;,
+        Xyz::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Xyz::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Xyz::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{white_point::D65, xyz::Xyza};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Xyza&lt;D65&gt;,
+            Xyza::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Xyza::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Xyza::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

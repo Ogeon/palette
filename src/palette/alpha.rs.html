@@ -174,14 +174,24 @@
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
-</pre><pre class="rust"><code><span class="attr">#[doc(hidden)]
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types related to transparent colors.
+
+</span><span class="attr">#[doc(hidden)]
 </span><span class="kw">pub use </span>palette_derive::WithAlpha;
 
 <span class="kw">use crate</span>::{num::Zero, stimulus::Stimulus};
 
 <span class="kw">pub use </span><span class="self">self</span>::alpha::<span class="kw-2">*</span>;
 
-<span class="kw">mod </span>alpha;
+<span class="attr">#[doc(no_inline)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::blend::PreAlpha; <span class="comment">// Cross-link for visibility.
+
+</span><span class="kw">mod </span>alpha;
 
 <span class="doccomment">/// A trait for color types that can have or be given transparency (alpha channel).
 ///

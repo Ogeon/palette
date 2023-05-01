@@ -533,7 +533,34 @@
 <a href="#533" id="533">533</a>
 <a href="#534" id="534">534</a>
 <a href="#535" id="535">535</a>
-</pre><pre class="rust"><code><span class="kw">use </span>core::{
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 Yxy (xyY) color space.
+
+</span><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
@@ -570,7 +597,7 @@
 /// in `Alpha`](crate::Alpha#Yxya).
 </span><span class="kw">pub type </span>Yxya&lt;Wp = D65, T = f32&gt; = Alpha&lt;Yxy&lt;Wp, T&gt;, T&gt;;
 
-<span class="doccomment">/// The CIE 1931 Yxy (xyY)  color space.
+<span class="doccomment">/// The CIE 1931 Yxy (xyY) color space.
 ///
 /// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
 /// color space. It is widely used to define colors. The chromaticity diagrams
@@ -730,6 +757,9 @@
     }
 }
 
+<span class="macro">impl_reference_component_methods!</span>(Yxy&lt;Wp&gt;, [x, y, luma], white_point);
+<span class="macro">impl_struct_of_arrays_methods!</span>(Yxy&lt;Wp&gt;, [x, y, luma], white_point);
+
 <span class="kw">impl</span>&lt;Wp, T&gt; From&lt;(T, T, T)&gt; <span class="kw">for </span>Yxy&lt;Wp, T&gt; {
     <span class="kw">fn </span>from(components: (T, T, T)) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from_components(components)
@@ -873,6 +903,7 @@
 
 <span class="macro">impl_array_casts!</span>(Yxy&lt;Wp, T&gt;, [T; <span class="number">3</span>]);
 <span class="macro">impl_simd_array_conversion!</span>(Yxy&lt;Wp&gt;, [x, y, luma], white_point);
+<span class="macro">impl_struct_of_array_traits!</span>(Yxy&lt;Wp&gt;, [x, y, luma], white_point);
 
 <span class="macro">impl_eq!</span>(Yxy&lt;Wp&gt;, [y, x, luma]);
 
@@ -904,7 +935,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="doccomment">/// Sample CIE 1931 Yxy (xyY) colors uniformly.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">pub struct </span>UniformYxy&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -1039,6 +1071,24 @@
         <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_x(), <span class="number">1.0</span>);
         <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_y(), <span class="number">1.0</span>);
         <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_luma(), <span class="number">1.0</span>);
+    }
+
+    <span class="macro">struct_of_arrays_tests!</span>(
+        Yxy&lt;D65&gt;,
+        Yxy::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
+        Yxy::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        Yxy::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+    );
+
+    <span class="kw">mod </span>alpha {
+        <span class="kw">use crate</span>::{white_point::D65, yxy::Yxya};
+
+        <span class="macro">struct_of_arrays_tests!</span>(
+            Yxya&lt;D65&gt;,
+            Yxya::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+            Yxya::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+            Yxya::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
+        );
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
