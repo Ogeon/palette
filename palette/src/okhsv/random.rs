@@ -23,6 +23,7 @@ where
     }
 }
 
+/// Sample Okhsv colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformOkhsv<T>
 where

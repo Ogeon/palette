@@ -1,9 +1,12 @@
 use core::ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign};
 
-use crate::angle::{RealAngle, SignedAngle};
 use crate::stimulus::Stimulus;
 use crate::white_point::D65;
 use crate::HasBoolMask;
+use crate::{
+    angle::{RealAngle, SignedAngle},
+    hues::OklabHueIter,
+};
 use crate::{
     bool_mask::{LazySelect, Select},
     clamp, clamp_min, clamp_min_assign, contrast_ratio, ClampAssign, FromColor, GetHue,
@@ -221,6 +224,7 @@ impl_color_sub!(Okhwb<T>, [hue, whiteness, blackness]);
 
 impl_array_casts!(Okhwb<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhwb, [whiteness, blackness]);
+impl_struct_of_array_traits_hue!(Okhwb, OklabHueIter, [whiteness, blackness]);
 
 impl<T> RelativeContrast for Okhwb<T>
 where

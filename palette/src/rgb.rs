@@ -1,4 +1,4 @@
-//! RGB types, spaces and standards.
+//! Types for the RGB color space, including spaces and standards.
 //!
 //! # Linear And Non-linear RGB
 //!
@@ -67,7 +67,7 @@ use crate::{
     Mat3, Yxy,
 };
 
-pub use self::rgb::{FromHexError, Rgb, Rgba};
+pub use self::rgb::{FromHexError, Iter, Rgb, Rgba};
 
 pub mod channels;
 mod rgb;

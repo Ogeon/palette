@@ -1,3 +1,5 @@
+//! Types for the HSLuv color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
@@ -23,6 +25,7 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, contrast_ratio,
     convert::FromColorUnclamped,
+    hues::LuvHueIter,
     luv_bounds::LuvBounds,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Powi, Real,
@@ -179,6 +182,9 @@ impl<Wp, T, A> Alpha<Hsluv<Wp, T>, A> {
         Self::new(hue, saturation, l, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Hsluv<Wp>, [saturation, l], white_point);
+impl_struct_of_arrays_methods_hue!(Hsluv<Wp>, [saturation, l], white_point);
 
 impl<Wp, T> FromColorUnclamped<Hsluv<Wp, T>> for Hsluv<Wp, T> {
     fn from_color_unclamped(hsluv: Hsluv<Wp, T>) -> Self {
@@ -353,6 +359,7 @@ impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
 
 impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsluv<Wp>, [saturation, l], white_point);
+impl_struct_of_array_traits_hue!(Hsluv<Wp>, LuvHueIter, [saturation, l], white_point);
 
 impl_eq_hue!(Hsluv<Wp>, LuvHue, [hue, saturation, l]);
 
@@ -385,6 +392,7 @@ where
     }
 }
 
+/// Sample HSLuv colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformHsluv<Wp, T>
 where
@@ -555,6 +563,24 @@ mod test {
         assert_relative_eq!(Hsluv::<D65>::min_l(), 0.0);
         assert_relative_eq!(Hsluv::<D65>::max_saturation(), 100.0);
         assert_relative_eq!(Hsluv::<D65>::max_l(), 100.0);
+    }
+
+    struct_of_arrays_tests!(
+        Hsluv<D65>,
+        Hsluv::new(0.1f32, 0.2, 0.3),
+        Hsluv::new(0.2, 0.3, 0.4),
+        Hsluv::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{hsluv::Hsluva, white_point::D65};
+
+        struct_of_arrays_tests!(
+            Hsluva<D65>,
+            Hsluva::new(0.1f32, 0.2, 0.3, 0.4),
+            Hsluva::new(0.2, 0.3, 0.4, 0.5),
+            Hsluva::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

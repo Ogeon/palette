@@ -1,3 +1,5 @@
+//! Types for the Okhsv color space.
+
 use core::fmt::Debug;
 
 pub use alpha::Okhsva;
@@ -16,6 +18,8 @@ use crate::{
     white_point::D65,
     GetHue, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
 };
+
+pub use self::properties::Iter;
 
 mod alpha;
 mod properties;
@@ -125,6 +129,9 @@ where
         T::max_intensity()
     }
 }
+
+impl_reference_component_methods_hue!(Okhsv, [saturation, value]);
+impl_struct_of_arrays_methods_hue!(Okhsv, [saturation, value]);
 
 impl<T> Okhsv<T> {
     /// Create an `Okhsv` color.
@@ -534,5 +541,23 @@ mod tests {
                 linsrgb
             );
         }
+    }
+
+    struct_of_arrays_tests!(
+        Okhsv,
+        Okhsv::new(0.1f32, 0.2, 0.3),
+        Okhsv::new(0.2, 0.3, 0.4),
+        Okhsv::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::okhsv::Okhsva;
+
+        struct_of_arrays_tests!(
+            Okhsva,
+            Okhsva::new(0.1f32, 0.2, 0.3, 0.4),
+            Okhsva::new(0.2, 0.3, 0.4, 0.5),
+            Okhsva::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 }

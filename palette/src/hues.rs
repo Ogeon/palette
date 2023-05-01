@@ -1,3 +1,5 @@
+//! Hues and hue related types.
+
 #[cfg(any(feature = "approx", feature = "random"))]
 use core::ops::Mul;
 
@@ -30,7 +32,7 @@ use crate::{
 };
 
 macro_rules! make_hues {
-    ($($(#[$doc:meta])+ struct $name:ident;)+) => ($(
+    ($($(#[$doc:meta])+ struct $name:ident; $iter_name:ident)+) => ($(
         $(#[$doc])+
         ///
         /// The hue is a circular type, where `0` and `360` is the same, and
@@ -156,6 +158,125 @@ macro_rules! make_hues {
             pub fn into_cartesian(self) -> (T, T) {
                 let (b, a) = self.into_raw_radians().sin_cos();
                 (a, b) // Note the swapped order compared to above
+            }
+        }
+
+        impl<T> $name<&T> {
+            /// Get an owned, copied version of this hue.
+            #[inline(always)]
+            pub fn copied(&self) -> $name<T>
+            where
+                T: Copy,
+            {
+                $name(*self.0)
+            }
+
+            /// Get an owned, cloned version of this hue.
+            #[inline(always)]
+            pub fn cloned(&self) -> $name<T>
+            where
+                T: Clone,
+            {
+                $name(self.0.clone())
+            }
+        }
+
+        impl<T> $name<&mut T> {
+            /// Update this hue with a new value.
+            #[inline(always)]
+            pub fn set(&mut self, value: $name<T>) {
+                *self.0 = value.0;
+            }
+
+            /// Borrow this hue's value as shared references.
+            #[inline(always)]
+            pub fn as_ref(&self) -> $name<&T> {
+                $name(&*self.0)
+            }
+
+            /// Get an owned, copied version of this hue.
+            #[inline(always)]
+            pub fn copied(&self) -> $name<T>
+            where
+                T: Copy,
+            {
+                $name(*self.0)
+            }
+
+            /// Get an owned, cloned version of this hue.
+            #[inline(always)]
+            pub fn cloned(&self) -> $name<T>
+            where
+                T: Clone,
+            {
+                $name(self.0.clone())
+            }
+        }
+
+        impl<C> $name<C> {
+            /// Return an iterator over the hues in the wrapped collection.
+            #[inline(always)]
+            pub fn iter<'a>(&'a self) -> <&'a Self as IntoIterator>::IntoIter where &'a Self: IntoIterator {
+                self.into_iter()
+            }
+
+            /// Return an iterator that allows modifying the hues in the wrapped collection.
+            #[inline(always)]
+            pub fn iter_mut<'a>(&'a mut self) -> <&'a mut Self as IntoIterator>::IntoIter where &'a mut Self: IntoIterator {
+                self.into_iter()
+            }
+
+            /// Get a hue, or slice of hues, with references to the values at `index`. See [`slice::get`] for details.
+            #[inline(always)]
+            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$name<&<I as core::slice::SliceIndex<[T]>>::Output>>
+            where
+                T: 'a,
+                C: AsRef<[T]>,
+                I: core::slice::SliceIndex<[T]> + Clone,
+            {
+                self.0.as_ref().get(index).map($name)
+            }
+
+            /// Get a hue, or slice of hues, that allows modifying the values at `index`. See [`slice::get_mut`] for details.
+            #[inline(always)]
+            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$name<&mut <I as core::slice::SliceIndex<[T]>>::Output>>
+            where
+                T: 'a,
+                C: AsMut<[T]>,
+                I: core::slice::SliceIndex<[T]> + Clone,
+            {
+                self.0.as_mut().get_mut(index).map($name)
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<T> $name<Vec<T>> {
+            /// Create a struct with a vector with a minimum capacity. See [`Vec::with_capacity`] for details.
+            pub fn with_capacity(capacity: usize) -> Self {
+                Self(Vec::with_capacity(capacity))
+            }
+
+            /// Push an additional hue onto the hue vector. See [`Vec::push`] for details.
+            pub fn push(&mut self, value: $name<T>) {
+                self.0.push(value.0);
+            }
+
+            /// Pop a hue from the hue vector. See [`Vec::pop`] for details.
+            pub fn pop(&mut self) -> Option<$name<T>> {
+                self.0.pop().map($name)
+            }
+
+            /// Clear the hue vector. See [`Vec::clear`] for details.
+            pub fn clear(&mut self) {
+                self.0.clear();
+            }
+
+            /// Return an iterator that moves hues out of the specified range.
+            pub fn drain<R>(&mut self, range: R) -> $iter_name<std::vec::Drain<T>>
+            where
+                R: core::ops::RangeBounds<usize> + Clone,
+            {
+                $iter_name(self.0.drain(range))
             }
         }
 
@@ -447,12 +568,95 @@ macro_rules! make_hues {
             }
         }
 
+        impl<C, T> Extend<T> for $name<C> where C: Extend<T> {
+            #[inline(always)]
+            fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+                self.0.extend(iter);
+            }
+        }
+
+        impl<C> IntoIterator for $name<C> where C: IntoIterator {
+            type Item = $name<C::Item>;
+            type IntoIter = $iter_name<C::IntoIter>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(self.0.into_iter())
+            }
+        }
+
+        impl<'a, C> IntoIterator for &'a $name<C> where &'a C: IntoIterator {
+            type Item = $name<<&'a C as IntoIterator>::Item>;
+            type IntoIter = $iter_name<<&'a C as IntoIterator>::IntoIter>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(self.0.into_iter())
+            }
+        }
+
+        impl<'a, C> IntoIterator for &'a mut $name<C> where &'a mut C: IntoIterator {
+            type Item = $name<<&'a mut C as IntoIterator>::Item>;
+            type IntoIter = $iter_name<<&'a mut C as IntoIterator>::IntoIter>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(self.0.into_iter())
+            }
+        }
+
+        #[doc = concat!("Iterator over [`", stringify!($name), "`] values.")]
+        pub struct $iter_name<I>(I);
+
+        impl<I> Iterator for $iter_name<I>
+        where
+            I: Iterator,
+        {
+            type Item = $name<I::Item>;
+
+            #[inline(always)]
+            fn next(&mut self) -> Option<Self::Item> {
+                self.0.next().map($name)
+            }
+
+            #[inline(always)]
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                self.0.size_hint()
+            }
+
+            #[inline(always)]
+            fn count(self) -> usize {
+                self.0.count()
+            }
+        }
+
+        impl<I> DoubleEndedIterator for $iter_name<I>
+        where
+            I: DoubleEndedIterator,
+        {
+            #[inline(always)]
+            fn next_back(&mut self) -> Option<Self::Item> {
+                self.0.next_back().map($name)
+            }
+        }
+
+        impl<I> ExactSizeIterator for $iter_name<I>
+        where
+            I: ExactSizeIterator,
+        {
+            #[inline(always)]
+            fn len(&self) -> usize {
+                self.0.len()
+            }
+        }
+
         #[cfg(feature = "random")]
         impl<T> Distribution<$name<T>> for Standard
         where
             T: RealAngle + FullRotation + Mul<Output = T>,
             Standard: Distribution<T>,
         {
+            #[inline(always)]
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $name<T> {
                 $name::from_degrees(rng.gen() * T::full_rotation())
             }
@@ -471,25 +675,26 @@ make_hues! {
     /// It's measured in degrees and it's based on the four physiological
     /// elementary colors _red_, _yellow_, _green_ and _blue_. This makes it
     /// different from the hue of RGB based color spaces.
-    struct LabHue;
+    struct LabHue; LabHueIter
 
     /// A hue type for the CIE L\*u\*v\* family of color spaces.
-    struct LuvHue;
+    struct LuvHue; LuvHueIter
 
     /// A hue type for the RGB family of color spaces.
     ///
     /// It's measured in degrees and uses the three additive primaries _red_,
     /// _green_ and _blue_.
-    struct RgbHue;
+    struct RgbHue; RgbHueIter
 
     /// A hue type for the Oklab color space.
     ///
     /// It's measured in degrees.
-    struct OklabHue;
+    struct OklabHue; OklabHueIter
 }
 
 macro_rules! impl_uniform {
     (  $uni_ty: ident , $base_ty: ident) => {
+        #[doc = concat!("Sample [`", stringify!($base_ty), "`] uniformly.")]
         #[cfg(feature = "random")]
         pub struct $uni_ty<T>
         where

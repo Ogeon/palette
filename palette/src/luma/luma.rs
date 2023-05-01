@@ -547,6 +547,9 @@ impl<Wp, T, A> Alpha<Luma<Linear<Wp>, T>, A> {
     }
 }
 
+impl_reference_component_methods!(Luma<S>, [luma], standard);
+impl_struct_of_arrays_methods!(Luma<S>, [luma], standard);
+
 impl<S1, S2, T> FromColorUnclamped<Luma<S2, T>> for Luma<S1, T>
 where
     S1: LumaStandard + 'static,
@@ -823,6 +826,7 @@ impl<S> From<Lumaa<S, u8>> for u16 {
 }
 
 impl_simd_array_conversion!(Luma<S>, [luma], standard);
+impl_struct_of_array_traits!(Luma<S>, [luma], standard);
 
 #[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Luma<S, T>
@@ -1063,6 +1067,24 @@ mod test {
     fn check_min_max_components() {
         assert_relative_eq!(Luma::<Srgb, f32>::min_luma(), 0.0);
         assert_relative_eq!(Luma::<Srgb, f32>::max_luma(), 1.0);
+    }
+
+    struct_of_arrays_tests!(
+        Luma<Srgb>,
+        Luma::new(0.1f32),
+        Luma::new(0.2),
+        Luma::new(0.3)
+    );
+
+    mod alpha {
+        use crate::{encoding::Srgb, luma::Lumaa};
+
+        struct_of_arrays_tests!(
+            Lumaa<Srgb>,
+            Lumaa::new(0.1f32, 0.4),
+            Lumaa::new(0.2, 0.5),
+            Lumaa::new(0.3, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

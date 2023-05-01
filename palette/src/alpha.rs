@@ -1,9 +1,14 @@
+//! Types related to transparent colors.
+
 #[doc(hidden)]
 pub use palette_derive::WithAlpha;
 
 use crate::{num::Zero, stimulus::Stimulus};
 
 pub use self::alpha::*;
+
+#[doc(no_inline)]
+pub use crate::blend::PreAlpha; // Cross-link for visibility.
 
 mod alpha;
 

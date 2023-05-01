@@ -1,3 +1,5 @@
+//! Types for the CIE 1931 Yxy (xyY) color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
@@ -35,7 +37,7 @@ use crate::{
 /// in `Alpha`](crate::Alpha#Yxya).
 pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 
-/// The CIE 1931 Yxy (xyY)  color space.
+/// The CIE 1931 Yxy (xyY) color space.
 ///
 /// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
 /// color space. It is widely used to define colors. The chromaticity diagrams
@@ -195,6 +197,9 @@ impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
     }
 }
 
+impl_reference_component_methods!(Yxy<Wp>, [x, y, luma], white_point);
+impl_struct_of_arrays_methods!(Yxy<Wp>, [x, y, luma], white_point);
+
 impl<Wp, T> From<(T, T, T)> for Yxy<Wp, T> {
     fn from(components: (T, T, T)) -> Self {
         Self::from_components(components)
@@ -338,6 +343,7 @@ impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
 
 impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Yxy<Wp>, [x, y, luma], white_point);
+impl_struct_of_array_traits!(Yxy<Wp>, [x, y, luma], white_point);
 
 impl_eq!(Yxy<Wp>, [y, x, luma]);
 
@@ -369,6 +375,7 @@ where
     }
 }
 
+/// Sample CIE 1931 Yxy (xyY) colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformYxy<Wp, T>
 where
@@ -504,6 +511,24 @@ mod test {
         assert_relative_eq!(Yxy::<D65>::max_x(), 1.0);
         assert_relative_eq!(Yxy::<D65>::max_y(), 1.0);
         assert_relative_eq!(Yxy::<D65>::max_luma(), 1.0);
+    }
+
+    struct_of_arrays_tests!(
+        Yxy<D65>,
+        Yxy::new(0.1f32, 0.2, 0.3),
+        Yxy::new(0.2, 0.3, 0.4),
+        Yxy::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{white_point::D65, yxy::Yxya};
+
+        struct_of_arrays_tests!(
+            Yxya<D65>,
+            Yxya::new(0.1f32, 0.2, 0.3, 0.4),
+            Yxya::new(0.2, 0.3, 0.4, 0.5),
+            Yxya::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

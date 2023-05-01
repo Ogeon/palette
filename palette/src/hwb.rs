@@ -1,3 +1,5 @@
+//! Types for the HWB color space.
+
 use core::{
     any::TypeId,
     marker::PhantomData,
@@ -21,6 +23,7 @@ use crate::{
     clamp, clamp_min, clamp_min_assign, contrast_ratio,
     convert::FromColorUnclamped,
     encoding::Srgb,
+    hues::RgbHueIter,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
@@ -295,6 +298,9 @@ impl<S, T, A> Alpha<Hwb<S, T>, A> {
         Self::new(hue, whiteness, blackness, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Hwb<S>, [whiteness, blackness], standard);
+impl_struct_of_arrays_methods_hue!(Hwb<S>, [whiteness, blackness], standard);
 
 impl<S1, S2, T> FromColorUnclamped<Hwb<S1, T>> for Hwb<S2, T>
 where
@@ -576,6 +582,7 @@ impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 
 impl_array_casts!(Hwb<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
+impl_struct_of_array_traits_hue!(Hwb<S>, RgbHueIter, [whiteness, blackness], standard);
 
 #[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Hwb<S, T>
@@ -697,6 +704,7 @@ where
     }
 }
 
+/// Sample HWB colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformHwb<S, T>
 where
@@ -861,6 +869,24 @@ mod test {
         assert_relative_eq!(Hwb::<Srgb>::min_blackness(), 0.0,);
         assert_relative_eq!(Hwb::<Srgb>::max_whiteness(), 1.0,);
         assert_relative_eq!(Hwb::<Srgb>::max_blackness(), 1.0,);
+    }
+
+    struct_of_arrays_tests!(
+        Hwb<Srgb>,
+        Hwb::new(0.1f32, 0.2, 0.3),
+        Hwb::new(0.2, 0.3, 0.4),
+        Hwb::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{encoding::Srgb, hwb::Hwba};
+
+        struct_of_arrays_tests!(
+            Hwba<Srgb>,
+            Hwba::new(0.1f32, 0.2, 0.3, 0.4),
+            Hwba::new(0.2, 0.3, 0.4, 0.5),
+            Hwba::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

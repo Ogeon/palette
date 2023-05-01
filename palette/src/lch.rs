@@ -1,3 +1,5 @@
+//! Types for the CIE L\*C\*h° color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, BitOr, Sub, SubAssign},
@@ -21,6 +23,7 @@ use crate::{
     color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
     contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    hues::LabHueIter,
     num::{
         self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, MinMax, One,
         PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
@@ -178,6 +181,9 @@ impl<Wp, T, A> Alpha<Lch<Wp, T>, A> {
         Self::new(l, chroma, hue, alpha)
     }
 }
+
+impl_reference_component_methods_hue!(Lch<Wp>, [l, chroma], white_point);
+impl_struct_of_arrays_methods_hue!(Lch<Wp>, [l, chroma], white_point);
 
 impl<Wp, T> FromColorUnclamped<Lch<Wp, T>> for Lch<Wp, T> {
     fn from_color_unclamped(color: Lch<Wp, T>) -> Self {
@@ -398,6 +404,7 @@ impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lch<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Lch<Wp>, [l, chroma], white_point);
+impl_struct_of_array_traits_hue!(Lch<Wp>, LabHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
 
@@ -434,6 +441,7 @@ where
     }
 }
 
+/// Sample CIE L\*C\*h° colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformLch<Wp, T>
 where
@@ -551,6 +559,24 @@ mod test {
         assert_relative_eq!(Lch::<D65, f32>::min_chroma(), 0.0);
         assert_relative_eq!(Lch::<D65, f32>::max_chroma(), 128.0);
         assert_relative_eq!(Lch::<D65, f32>::max_extended_chroma(), 181.01933598375618);
+    }
+
+    struct_of_arrays_tests!(
+        Lch<D65>,
+        Lch::new(0.1f32, 0.2, 0.3),
+        Lch::new(0.2, 0.3, 0.4),
+        Lch::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{lch::Lcha, white_point::D65};
+
+        struct_of_arrays_tests!(
+            Lcha<D65>,
+            Lcha::new(0.1f32, 0.2, 0.3, 0.4),
+            Lcha::new(0.2, 0.3, 0.4, 0.5),
+            Lcha::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

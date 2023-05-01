@@ -256,30 +256,50 @@ use core::ops::{BitAndAssign, Neg};
 use bool_mask::{BoolMask, HasBoolMask};
 use luma::Luma;
 
+#[doc(inline)]
 pub use alpha::{Alpha, WithAlpha};
 
+#[doc(inline)]
 pub use hsl::{Hsl, Hsla};
+#[doc(inline)]
 pub use hsluv::{Hsluv, Hsluva};
+#[doc(inline)]
 pub use hsv::{Hsv, Hsva};
+#[doc(inline)]
 pub use hwb::{Hwb, Hwba};
+#[doc(inline)]
 pub use lab::{Lab, Laba};
+#[doc(inline)]
 pub use lch::{Lch, Lcha};
+#[doc(inline)]
 pub use lchuv::{Lchuv, Lchuva};
+#[doc(inline)]
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
+#[doc(inline)]
 pub use luv::{Luv, Luva};
+#[doc(inline)]
 pub use okhsl::{Okhsl, Okhsla};
+#[doc(inline)]
 pub use okhsv::{Okhsv, Okhsva};
+#[doc(inline)]
 pub use okhwb::{Okhwb, Okhwba};
+#[doc(inline)]
 pub use oklab::{Oklab, Oklaba};
+#[doc(inline)]
 pub use oklch::{Oklch, Oklcha};
+#[doc(inline)]
 pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
+#[doc(inline)]
 pub use xyz::{Xyz, Xyza};
+#[doc(inline)]
 pub use yxy::{Yxy, Yxya};
+
+#[doc(inline)]
+pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 
 #[allow(deprecated)]
 pub use color_difference::ColorDifference;
 pub use convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
-pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 pub use matrix::Mat3;
 pub use relative_contrast::{contrast_ratio, RelativeContrast};
 
@@ -451,7 +471,7 @@ mod random_sampling;
 #[cfg(feature = "serializing")]
 pub mod serde;
 
-mod alpha;
+pub mod alpha;
 pub mod angle;
 pub mod blend;
 pub mod bool_mask;
@@ -460,30 +480,30 @@ pub mod chromatic_adaptation;
 pub mod color_difference;
 pub mod convert;
 pub mod encoding;
-mod hsl;
-mod hsluv;
-mod hsv;
-mod hues;
-mod hwb;
-mod lab;
-mod lch;
-mod lchuv;
+pub mod hsl;
+pub mod hsluv;
+pub mod hsv;
+pub mod hues;
+pub mod hwb;
+pub mod lab;
+pub mod lch;
+pub mod lchuv;
 pub mod luma;
-mod luv;
+pub mod luv;
 mod luv_bounds;
 pub mod num;
 mod ok_utils;
-mod okhsl;
-mod okhsv;
-mod okhwb;
-mod oklab;
-mod oklch;
+pub mod okhsl;
+pub mod okhsv;
+pub mod okhwb;
+pub mod oklab;
+pub mod oklch;
 mod relative_contrast;
 pub mod rgb;
 pub mod stimulus;
 pub mod white_point;
-mod xyz;
-mod yxy;
+pub mod xyz;
+pub mod yxy;
 
 #[cfg(test)]
 #[cfg(feature = "approx")]

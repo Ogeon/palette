@@ -1,3 +1,5 @@
+//! Types for the CIE 1931 XYZ color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
@@ -199,6 +201,9 @@ impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
         Alpha::<Xyz<NewWp, T>, A>::new(self.color.x, self.color.y, self.color.z, self.alpha)
     }
 }
+
+impl_reference_component_methods!(Xyz<Wp>, [x, y, z], white_point);
+impl_struct_of_arrays_methods!(Xyz<Wp>, [x, y, z], white_point);
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
@@ -452,6 +457,7 @@ impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
 
 impl_array_casts!(Xyz<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Xyz<Wp>, [x, y, z], white_point);
+impl_struct_of_array_traits!(Xyz<Wp>, [x, y, z], white_point);
 
 impl_eq!(Xyz<Wp>, [x, y, z]);
 
@@ -486,6 +492,7 @@ where
     }
 }
 
+/// Sample CIE 1931 XYZ colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformXyz<Wp, T>
 where
@@ -628,6 +635,24 @@ mod test {
         assert_relative_eq!(Xyz::<D65, f64>::max_x(), X_N);
         assert_relative_eq!(Xyz::<D65, f64>::max_y(), Y_N);
         assert_relative_eq!(Xyz::<D65, f64>::max_z(), Z_N);
+    }
+
+    struct_of_arrays_tests!(
+        Xyz<D65>,
+        Xyz::new(0.1f32, 0.2, 0.3),
+        Xyz::new(0.2, 0.3, 0.4),
+        Xyz::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{white_point::D65, xyz::Xyza};
+
+        struct_of_arrays_tests!(
+            Xyza<D65>,
+            Xyza::new(0.1f32, 0.2, 0.3, 0.4),
+            Xyza::new(0.2, 0.3, 0.4, 0.5),
+            Xyza::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

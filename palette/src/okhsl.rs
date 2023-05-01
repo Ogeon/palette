@@ -1,3 +1,5 @@
+//! Types for the Okhsl color space.
+
 pub use alpha::Okhsla;
 
 use crate::{
@@ -9,6 +11,11 @@ use crate::{
     white_point::D65,
     GetHue, HasBoolMask, LinSrgb, Oklab, OklabHue,
 };
+
+pub use self::properties::Iter;
+
+#[cfg(feature = "random")]
+pub use self::random::UniformOkhsl;
 
 mod alpha;
 mod properties;
@@ -145,6 +152,9 @@ where
         T::max_intensity()
     }
 }
+
+impl_reference_component_methods_hue!(Okhsl, [saturation, lightness]);
+impl_struct_of_arrays_methods_hue!(Okhsl, [saturation, lightness]);
 
 /// # See
 /// See [`srgb_to_okhsl`](https://bottosson.github.io/posts/colorpicker/#hsl-2)
@@ -378,5 +388,23 @@ mod tests {
         let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
         let hex_str = format!("{:x}", rgb8);
         assert_eq!(hex_str, "aa5a74");
+    }
+
+    struct_of_arrays_tests!(
+        Okhsl,
+        Okhsl::new(0.1f32, 0.2, 0.3),
+        Okhsl::new(0.2, 0.3, 0.4),
+        Okhsl::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::okhsl::Okhsla;
+
+        struct_of_arrays_tests!(
+            Okhsla,
+            Okhsla::new(0.1f32, 0.2, 0.3, 0.4),
+            Okhsla::new(0.2, 0.3, 0.4, 0.5),
+            Okhsla::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 }

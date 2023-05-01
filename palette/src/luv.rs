@@ -1,3 +1,5 @@
+//! Types for the CIE L\*u\*v\* (CIELUV) color space.
+
 use core::{
     marker::PhantomData,
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
@@ -169,6 +171,9 @@ impl<Wp, T, A> Alpha<Luv<Wp, T>, A> {
     }
 }
 
+impl_reference_component_methods!(Luv<Wp>, [l, u, v], white_point);
+impl_struct_of_arrays_methods!(Luv<Wp>, [l, u, v], white_point);
+
 impl<Wp, T> FromColorUnclamped<Luv<Wp, T>> for Luv<Wp, T> {
     fn from_color_unclamped(color: Luv<Wp, T>) -> Self {
         color
@@ -335,6 +340,7 @@ impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
 
 impl_array_casts!(Luv<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Luv<Wp>, [l, u, v], white_point);
+impl_struct_of_array_traits!(Luv<Wp>, [l, u, v], white_point);
 
 impl_eq!(Luv<Wp>, [l, u, v]);
 
@@ -372,6 +378,7 @@ where
     }
 }
 
+/// Sample CIE L\*u\*v\* (CIELUV) colors uniformly.
 #[cfg(feature = "random")]
 pub struct UniformLuv<Wp, T>
 where
@@ -516,6 +523,24 @@ mod test {
         assert_relative_eq!(Luv::<D65, f32>::max_l(), 100.0);
         assert_relative_eq!(Luv::<D65, f32>::max_u(), 176.0);
         assert_relative_eq!(Luv::<D65, f32>::max_v(), 108.0);
+    }
+
+    struct_of_arrays_tests!(
+        Luv<D65>,
+        Luv::new(0.1f32, 0.2, 0.3),
+        Luv::new(0.2, 0.3, 0.4),
+        Luv::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::{luv::Luva, white_point::D65};
+
+        struct_of_arrays_tests!(
+            Luva<D65>,
+            Luva::new(0.1f32, 0.2, 0.3, 0.4),
+            Luva::new(0.2, 0.3, 0.4, 0.5),
+            Luva::new(0.3, 0.4, 0.5, 0.6)
+        );
     }
 
     #[cfg(feature = "serializing")]

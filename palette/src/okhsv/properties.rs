@@ -3,10 +3,10 @@ use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
-use crate::angle::SignedAngle;
 use crate::num::{
     self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
 };
+use crate::{angle::SignedAngle, hues::OklabHueIter};
 
 use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, IsWithinBounds, OklabHue};
 use crate::{
@@ -125,5 +125,6 @@ impl_color_sub!(Okhsv<T>, [hue, saturation, value]);
 
 impl_array_casts!(Okhsv<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhsv, [saturation, value]);
+impl_struct_of_array_traits_hue!(Okhsv, OklabHueIter, [saturation, value]);
 
 impl_eq_hue!(Okhsv, OklabHue, [hue, saturation, value]);
