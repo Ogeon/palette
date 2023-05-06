@@ -54,6 +54,11 @@ impl_mix!(Oklab);
 impl_lighten!(Oklab increase {l => [Self::min_l(), Self::max_l()]} other {a, b} where T:  One);
 impl_premultiply!(Oklab { l, a, b });
 impl_euclidean_distance!(Oklab { l, a, b });
+impl_hyab!(Oklab {
+    lightness: l,
+    chroma1: a,
+    chroma2: b
+});
 
 impl<T> GetHue for Oklab<T>
 where
