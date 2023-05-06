@@ -570,6 +570,7 @@
 <a href="#570" id="570">570</a>
 <a href="#571" id="571">571</a>
 <a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*u\*v\* (CIELUV) color space.
 
 </span><span class="kw">use </span>core::{
@@ -592,7 +593,7 @@
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::FromColorUnclamped,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
@@ -601,7 +602,7 @@
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
-    LuvHue, Mix, MixAssign, RelativeContrast, Xyz,
+    LuvHue, Mix, MixAssign, Xyz,
 };
 
 <span class="doccomment">/// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -916,7 +917,8 @@
 
 <span class="macro">impl_eq!</span>(Luv&lt;Wp&gt;, [l, u, v]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Luv&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Luv&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -930,7 +932,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

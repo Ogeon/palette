@@ -622,7 +622,6 @@
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
-    contrast_ratio,
     convert::FromColorUnclamped,
     num::{
         <span class="self">self</span>, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
@@ -631,7 +630,7 @@
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, LabHue, Lch, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast, Xyz,
+    LightenAssign, Mix, MixAssign, Xyz,
 };
 
 <span class="doccomment">/// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -988,7 +987,8 @@
 
 <span class="macro">impl_eq!</span>(Lab&lt;Wp&gt;, [l, a, b]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Lab&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Lab&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -1001,7 +1001,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

@@ -1418,6 +1418,21 @@
 <a href="#1418" id="1418">1418</a>
 <a href="#1419" id="1419">1419</a>
 <a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     fmt,
@@ -1445,7 +1460,8 @@
     blend::{PreAlpha, Premultiply},
     bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
+    color_difference::Wcag21RelativeContrast,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
@@ -1458,8 +1474,8 @@
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
-    Mix, MixAssign, Oklab, RelativeContrast, RgbHue, Xyz, Yxy,
+    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Lighten,
+    LightenAssign, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
 };
 
 <span class="kw">use </span><span class="kw">super</span>::Primaries;
@@ -2487,7 +2503,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S, T&gt; RelativeContrast <span class="kw">for </span>Rgb&lt;S, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;S, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Rgb&lt;S, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -2501,7 +2518,20 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
+    }
+}
+
+<span class="kw">impl</span>&lt;S, T&gt; Wcag21RelativeContrast <span class="kw">for </span>Rgb&lt;S, T&gt;
+<span class="kw">where
+    </span><span class="self">Self</span>: IntoColor&lt;Luma&lt;Linear&lt;D65&gt;, T&gt;&gt;,
+    S: RgbStandard&lt;Space = <span class="kw">crate</span>::encoding::srgb::Srgb&gt;,
+    T: Real + Add&lt;T, Output = T&gt; + Div&lt;T, Output = T&gt; + PartialCmp + MinMax,
+{
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="kw">fn </span>relative_luminance(<span class="self">self</span>) -&gt; Luma&lt;Linear&lt;D65&gt;, <span class="self">Self</span>::Scalar&gt; {
+        <span class="self">self</span>.into_color()
     }
 }
 

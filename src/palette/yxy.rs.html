@@ -579,7 +579,7 @@
 <span class="kw">use crate</span>::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
@@ -589,8 +589,7 @@
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign,
-    RelativeContrast, Xyz,
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign, Xyz,
 };
 
 <span class="doccomment">/// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -907,7 +906,8 @@
 
 <span class="macro">impl_eq!</span>(Yxy&lt;Wp&gt;, [y, x, luma]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Yxy&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Yxy&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -916,7 +916,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>get_contrast_ratio(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; T {
-        contrast_ratio(<span class="self">self</span>.luma, other.luma)
+        <span class="kw">crate</span>::contrast_ratio(<span class="self">self</span>.luma, other.luma)
     }
 }
 

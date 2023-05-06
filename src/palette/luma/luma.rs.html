@@ -1112,6 +1112,22 @@
 <a href="#1112" id="1112">1112</a>
 <a href="#1113" id="1113">1113</a>
 <a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     convert::TryInto,
@@ -1135,7 +1151,8 @@
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
+    color_difference::Wcag21RelativeContrast,
     convert::FromColorUnclamped,
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
@@ -1144,8 +1161,9 @@
         PartialCmp, Real, Zero,
     },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    RelativeContrast, Xyz, Yxy,
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    Xyz, Yxy,
 };
 
 <span class="doccomment">/// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -2011,7 +2029,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S, T&gt; RelativeContrast <span class="kw">for </span>Luma&lt;S, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;S, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Luma&lt;S, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -2025,7 +2044,20 @@
         <span class="kw">let </span>luma1 = <span class="self">self</span>.into_linear();
         <span class="kw">let </span>luma2 = other.into_linear();
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        <span class="kw">crate</span>::contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+<span class="kw">impl</span>&lt;S, T&gt; Wcag21RelativeContrast <span class="kw">for </span>Luma&lt;S, T&gt;
+<span class="kw">where
+    </span><span class="self">Self</span>: IntoColor&lt;Luma&lt;Linear&lt;D65&gt;, T&gt;&gt;,
+    S: LumaStandard&lt;WhitePoint = D65&gt;,
+    T: Real + Add&lt;T, Output = T&gt; + Div&lt;T, Output = T&gt; + PartialCmp + MinMax,
+{
+    <span class="kw">type </span>Scalar = T;
+
+    <span class="kw">fn </span>relative_luminance(<span class="self">self</span>) -&gt; Luma&lt;Linear&lt;D65&gt;, <span class="self">Self</span>::Scalar&gt; {
+        <span class="self">self</span>.into_color()
     }
 }
 

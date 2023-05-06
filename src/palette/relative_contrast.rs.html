@@ -162,6 +162,15 @@
 <a href="#162" id="162">162</a>
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     bool_mask::{HasBoolMask, LazySelect},
     num::{Arithmetics, PartialCmp, Real},
@@ -215,6 +224,10 @@
 ///
 /// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
 </span><span class="attr">#[doc(alias = <span class="string">&quot;wcag&quot;</span>)]
+#[deprecated(
+    since = <span class="string">&quot;0.7.2&quot;</span>,
+    note = <span class="string">&quot;replaced by `palette::color_difference::Wcag21RelativeContrast`&quot;
+</span>)]
 </span><span class="kw">pub trait </span>RelativeContrast: Sized {
     <span class="doccomment">/// The type of the contrast ratio.
     </span><span class="kw">type </span>Scalar: Real + PartialCmp;
@@ -269,6 +282,10 @@
 
 <span class="doccomment">/// Calculate the ratio between two `luma` values.
 </span><span class="attr">#[inline]
+#[deprecated(
+    since = <span class="string">&quot;0.7.2&quot;</span>,
+    note = <span class="string">&quot;replaced by `LinLuma::relative_contrast`, via `Wcag21RelativeContrast`&quot;
+</span>)]
 </span><span class="kw">pub fn </span>contrast_ratio&lt;T&gt;(luma1: T, luma2: T) -&gt; T
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
@@ -281,6 +298,7 @@
 }
 
 <span class="attr">#[cfg(test)]
+#[allow(deprecated)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>core::str::FromStr;
 

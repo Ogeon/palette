@@ -1558,6 +1558,7 @@
 <a href="#1558" id="1558">1558</a>
 <a href="#1559" id="1559">1559</a>
 <a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
@@ -1861,7 +1862,8 @@
 </span><span class="kw">pub use </span>color_difference::ColorDifference;
 <span class="kw">pub use </span>convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
 <span class="kw">pub use </span>matrix::Mat3;
-<span class="kw">pub use </span>relative_contrast::{contrast_ratio, RelativeContrast};
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">pub use </span>relative_contrast::{contrast_ratio, RelativeContrast};
 
 <span class="comment">//Helper macro for checking ranges and clamping.
 </span><span class="attr">#[cfg(test)]

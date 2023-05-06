@@ -630,7 +630,6 @@
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, clamp_min, clamp_min_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
-    contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
     num::{
@@ -639,8 +638,8 @@
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
+    WithHue, Xyz,
 };
 
 <span class="doccomment">/// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -1017,7 +1016,8 @@
 
 <span class="macro">impl_eq_hue!</span>(Lch&lt;Wp&gt;, LabHue, [l, chroma, hue]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Lch&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Lch&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -1030,7 +1030,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

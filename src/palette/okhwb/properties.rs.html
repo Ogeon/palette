@@ -255,9 +255,8 @@
 };
 <span class="kw">use crate</span>::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, contrast_ratio, ClampAssign, FromColor, GetHue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, OklabHue, RelativeContrast, SetHue,
-    ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 <span class="kw">use crate</span>::{
     num::{
@@ -472,7 +471,8 @@
 <span class="macro">impl_simd_array_conversion_hue!</span>(Okhwb, [whiteness, blackness]);
 <span class="macro">impl_struct_of_array_traits_hue!</span>(Okhwb, OklabHueIter, [whiteness, blackness]);
 
-<span class="kw">impl</span>&lt;T&gt; RelativeContrast <span class="kw">for </span>Okhwb&lt;T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Okhwb&lt;T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -485,7 +485,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

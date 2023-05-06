@@ -137,6 +137,7 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
@@ -145,14 +146,14 @@
 <span class="kw">use crate</span>::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio,
+    clamp, clamp_assign, clamp_min, clamp_min_assign,
     hues::OklabHueIter,
     num::{
         <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, RelativeContrast, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 <span class="kw">use </span><span class="kw">super</span>::Oklch;
@@ -260,7 +261,8 @@
 
 <span class="macro">impl_eq_hue!</span>(Oklch, OklabHue, [l, chroma, hue]);
 
-<span class="kw">impl</span>&lt;T&gt; RelativeContrast <span class="kw">for </span>Oklch&lt;T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Oklch&lt;T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -273,7 +275,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 </code></pre></div>

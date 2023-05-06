@@ -579,6 +579,7 @@
 <a href="#579" id="579">579</a>
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*C\*uv h°uv color space.
 
 </span><span class="kw">use </span>core::{
@@ -603,7 +604,7 @@
 <span class="kw">use crate</span>::{
     angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
@@ -613,8 +614,8 @@
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
-    Luv, LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
+    WithHue, Xyz,
 };
 
 <span class="doccomment">/// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -945,7 +946,8 @@
 
 <span class="macro">impl_eq_hue!</span>(Lchuv&lt;Wp&gt;, LuvHue, [l, chroma, hue]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Lchuv&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Lchuv&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -958,7 +960,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

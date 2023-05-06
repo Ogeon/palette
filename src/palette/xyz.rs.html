@@ -682,6 +682,7 @@
 <a href="#682" id="682">682</a>
 <a href="#683" id="683">683</a>
 <a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 XYZ color space.
 
 </span><span class="kw">use </span>core::{
@@ -703,7 +704,7 @@
 <span class="kw">use crate</span>::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
@@ -717,7 +718,7 @@
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
-    MixAssign, Oklab, RelativeContrast, Yxy,
+    MixAssign, Oklab, Yxy,
 };
 
 <span class="doccomment">/// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -1145,7 +1146,8 @@
 
 <span class="macro">impl_eq!</span>(Xyz&lt;Wp&gt;, [x, y, z]);
 
-<span class="kw">impl</span>&lt;Wp, T&gt; RelativeContrast <span class="kw">for </span>Xyz&lt;Wp, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;Wp, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Xyz&lt;Wp, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -1154,7 +1156,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>get_contrast_ratio(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; T {
-        contrast_ratio(<span class="self">self</span>.y, other.y)
+        <span class="kw">crate</span>::contrast_ratio(<span class="self">self</span>.y, other.y)
     }
 }
 

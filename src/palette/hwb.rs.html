@@ -917,6 +917,7 @@
 <a href="#917" id="917">917</a>
 <a href="#918" id="918">918</a>
 <a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the HWB color space.
 
 </span><span class="kw">use </span>core::{
@@ -939,7 +940,7 @@
 <span class="kw">use crate</span>::{
     angle::{FromAngle, RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, contrast_ratio,
+    clamp, clamp_min, clamp_min_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
@@ -949,7 +950,7 @@
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    MixAssign, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 <span class="doccomment">/// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -1594,7 +1595,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S, T&gt; RelativeContrast <span class="kw">for </span>Hwb&lt;S, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;S, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Hwb&lt;S, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -1608,7 +1610,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

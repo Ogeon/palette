@@ -951,7 +951,7 @@
 <span class="kw">use crate</span>::{
     angle::{FromAngle, RealAngle, SignedAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
@@ -962,8 +962,7 @@
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    MixAssign, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 <span class="doccomment">/// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -1566,7 +1565,8 @@
 
 <span class="macro">impl_eq_hue!</span>(Hsl&lt;S&gt;, RgbHue, [hue, saturation, lightness]);
 
-<span class="kw">impl</span>&lt;S, T&gt; RelativeContrast <span class="kw">for </span>Hsl&lt;S, T&gt;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">impl</span>&lt;S, T&gt; <span class="kw">crate</span>::RelativeContrast <span class="kw">for </span>Hsl&lt;S, T&gt;
 <span class="kw">where
     </span>T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect&lt;T&gt;,
@@ -1580,7 +1580,7 @@
         <span class="kw">let </span>xyz1 = Xyz::from_color(<span class="self">self</span>);
         <span class="kw">let </span>xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        <span class="kw">crate</span>::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
