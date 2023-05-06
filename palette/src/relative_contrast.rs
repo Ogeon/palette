@@ -51,6 +51,10 @@ use crate::{
 ///
 /// [Success Criterion 1.4.11 Non-text Contrast (Level AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
 #[doc(alias = "wcag")]
+#[deprecated(
+    since = "0.7.2",
+    note = "replaced by `palette::color_difference::Wcag21RelativeContrast`"
+)]
 pub trait RelativeContrast: Sized {
     /// The type of the contrast ratio.
     type Scalar: Real + PartialCmp;
@@ -105,6 +109,10 @@ pub trait RelativeContrast: Sized {
 
 /// Calculate the ratio between two `luma` values.
 #[inline]
+#[deprecated(
+    since = "0.7.2",
+    note = "replaced by `LinLuma::relative_contrast`, via `Wcag21RelativeContrast`"
+)]
 pub fn contrast_ratio<T>(luma1: T, luma2: T) -> T
 where
     T: Real + Arithmetics + PartialCmp,
@@ -117,6 +125,7 @@ where
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod test {
     use core::str::FromStr;
 

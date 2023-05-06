@@ -9,9 +9,8 @@ use crate::{
 };
 use crate::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, contrast_ratio, ClampAssign, FromColor, GetHue,
-    IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign, OklabHue, RelativeContrast, SetHue,
-    ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 use crate::{
     num::{
@@ -226,7 +225,8 @@ impl_array_casts!(Okhwb<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhwb, [whiteness, blackness]);
 impl_struct_of_array_traits_hue!(Okhwb, OklabHueIter, [whiteness, blackness]);
 
-impl<T> RelativeContrast for Okhwb<T>
+#[allow(deprecated)]
+impl<T> crate::RelativeContrast for Okhwb<T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -239,7 +239,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

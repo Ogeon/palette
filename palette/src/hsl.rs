@@ -23,7 +23,7 @@ use crate::num::{Cbrt, Powi, Sqrt};
 use crate::{
     angle::{FromAngle, RealAngle, SignedAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
@@ -34,8 +34,7 @@ use crate::{
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RelativeContrast, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    MixAssign, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -638,7 +637,8 @@ impl_struct_of_array_traits_hue!(Hsl<S>, RgbHueIter, [saturation, lightness], st
 
 impl_eq_hue!(Hsl<S>, RgbHue, [hue, saturation, lightness]);
 
-impl<S, T> RelativeContrast for Hsl<S, T>
+#[allow(deprecated)]
+impl<S, T> crate::RelativeContrast for Hsl<S, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -652,7 +652,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

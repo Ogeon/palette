@@ -8,14 +8,13 @@ use crate::{hues::OklabHueIter, white_point::D65};
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
     stimulus::Stimulus,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    MixAssign, OklabHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 use super::Okhsl;
@@ -139,7 +138,8 @@ impl_struct_of_array_traits_hue!(Okhsl, OklabHueIter, [saturation, lightness]);
 
 impl_eq_hue!(Okhsl, OklabHue, [hue, saturation, lightness]);
 
-impl<T> RelativeContrast for Okhsl<T>
+#[allow(deprecated)]
+impl<T> crate::RelativeContrast for Okhsl<T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -152,6 +152,6 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }

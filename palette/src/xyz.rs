@@ -19,7 +19,7 @@ use rand::{
 use crate::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
@@ -33,7 +33,7 @@ use crate::{
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
     Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
-    MixAssign, Oklab, RelativeContrast, Yxy,
+    MixAssign, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -461,7 +461,8 @@ impl_struct_of_array_traits!(Xyz<Wp>, [x, y, z], white_point);
 
 impl_eq!(Xyz<Wp>, [x, y, z]);
 
-impl<Wp, T> RelativeContrast for Xyz<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::RelativeContrast for Xyz<Wp, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -470,7 +471,7 @@ where
 
     #[inline]
     fn get_contrast_ratio(self, other: Self) -> T {
-        contrast_ratio(self.y, other.y)
+        crate::contrast_ratio(self.y, other.y)
     }
 }
 

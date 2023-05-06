@@ -20,7 +20,7 @@ use rand::{
 use crate::{
     angle::{FromAngle, RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, contrast_ratio,
+    clamp, clamp_min, clamp_min_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
@@ -30,7 +30,7 @@ use crate::{
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RelativeContrast, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    MixAssign, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -675,7 +675,8 @@ where
     }
 }
 
-impl<S, T> RelativeContrast for Hwb<S, T>
+#[allow(deprecated)]
+impl<S, T> crate::RelativeContrast for Hwb<S, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -689,7 +690,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

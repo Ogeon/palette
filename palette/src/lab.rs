@@ -22,7 +22,6 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
-    contrast_ratio,
     convert::FromColorUnclamped,
     num::{
         self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
@@ -31,7 +30,7 @@ use crate::{
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, LabHue, Lch, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast, Xyz,
+    LightenAssign, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -388,7 +387,8 @@ impl_struct_of_array_traits!(Lab<Wp>, [l, a, b], white_point);
 
 impl_eq!(Lab<Wp>, [l, a, b]);
 
-impl<Wp, T> RelativeContrast for Lab<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::RelativeContrast for Lab<Wp, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -401,7 +401,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

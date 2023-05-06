@@ -25,7 +25,8 @@ use crate::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
+    color_difference::Wcag21RelativeContrast,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
@@ -38,8 +39,8 @@ use crate::{
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IsWithinBounds, Lighten, LightenAssign, Luma,
-    Mix, MixAssign, Oklab, RelativeContrast, RgbHue, Xyz, Yxy,
+    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Lighten,
+    LightenAssign, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;
@@ -1067,7 +1068,8 @@ impl<S> From<Rgba<S, u8>> for u32 {
     }
 }
 
-impl<S, T> RelativeContrast for Rgb<S, T>
+#[allow(deprecated)]
+impl<S, T> crate::RelativeContrast for Rgb<S, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -1081,7 +1083,20 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
+    }
+}
+
+impl<S, T> Wcag21RelativeContrast for Rgb<S, T>
+where
+    Self: IntoColor<Luma<Linear<D65>, T>>,
+    S: RgbStandard<Space = crate::encoding::srgb::Srgb>,
+    T: Real + Add<T, Output = T> + Div<T, Output = T> + PartialCmp + MinMax,
+{
+    type Scalar = T;
+
+    fn relative_luminance(self) -> Luma<Linear<D65>, Self::Scalar> {
+        self.into_color()
     }
 }
 

@@ -1,13 +1,16 @@
 //! Algorithms for calculating the difference between colors.
 
-use core::ops::{BitAnd, BitOr};
+use core::ops::{Add, BitAnd, BitOr, Div};
 
 use crate::{
     angle::RealAngle,
-    bool_mask::LazySelect,
+    bool_mask::{HasBoolMask, LazySelect},
     convert::IntoColorUnclamped,
-    num::{Abs, Arithmetics, Exp, Hypot, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero},
-    Lab, Lch,
+    num::{
+        Abs, Arithmetics, Exp, Hypot, MinMax, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
+    },
+    white_point::D65,
+    Lab, Lch, LinLuma,
 };
 
 /// A trait for calculating the color difference between two colors.
@@ -221,4 +224,209 @@ pub trait EuclideanDistance: Sized {
     /// cases, such as when comparing two distances.
     #[must_use]
     fn distance_squared(self, other: Self) -> Self::Scalar;
+}
+
+/// Calculate and check the WCAG 2.1 relative contrast and relative luminance.
+///
+/// W3C's Web Content Accessibility Guidelines (WCAG) 2.1 suggest a method to
+/// calculate accessible contrast ratios of text and background colors for those
+/// with low vision or color vision deficiencies, and for contrast of colors
+/// used in user interface graphics objects.
+///
+/// These criteria come with a couple of caveats:
+/// * sRGB is assumed as the presentation color space, which is why it's only
+///   implemented for a limited set of [`Rgb`][crate::rgb::Rgb] and
+///   [`Luma`][crate::Luma] spaces.
+/// * The contrast ratio is not considered entirely consistent with the
+///   perceived contrast. WCAG 3.x is supposed to provide a better measurement.
+///
+/// Because of the inconsistency with perceived contrast, these methods are more
+/// suitable as hints and for mechanical verification of standards compliance,
+/// than for accurate analysis. Remember to not only rely on the numbers, but to
+/// also test your interfaces with actual people in actual situations for the
+/// best results.
+///
+/// The following example checks the contrast ratio of two colors in sRGB
+/// format:
+///
+/// ```rust
+/// use std::str::FromStr;
+/// use palette::{Srgb, color_difference::Wcag21RelativeContrast};
+/// # fn main() -> Result<(), palette::rgb::FromHexError> {
+///
+/// // the rustdoc "DARK" theme background and text colors
+/// let background: Srgb<f32> = Srgb::from(0x353535).into_format();
+/// let foreground = Srgb::from_str("#ddd")?.into_format();
+///
+/// assert!(background.has_enhanced_contrast_text(foreground));
+/// # Ok(())
+/// # }
+/// ```
+pub trait Wcag21RelativeContrast: Sized {
+    /// The scalar type used for luminance and contrast.
+    type Scalar: Real
+        + Add<Self::Scalar, Output = Self::Scalar>
+        + Div<Self::Scalar, Output = Self::Scalar>
+        + PartialCmp
+        + MinMax;
+
+    /// Returns the WCAG 2.1 [relative
+    /// luminance](https://www.w3.org/TR/WCAG21/#dfn-relative-luminance) of
+    /// `self`.
+    ///
+    /// The relative luminance is a value between 0 and 1, where 0 is the
+    /// darkest black and 1 is the lightest white. This is the same as clamped
+    /// [`LinLuma`], meaning that the typical implementation of this method
+    /// would be `self.into_color()`.
+    #[must_use]
+    fn relative_luminance(self) -> LinLuma<D65, Self::Scalar>;
+
+    /// Returns the WCAG 2.1 relative luminance contrast between `self` and
+    /// `other`.
+    ///
+    /// A return value of, for example, 4 represents a contrast ratio of 4:1
+    /// between the lightest and darkest of the two colors. The range is from
+    /// 1:1 to 21:1, and a higher contrast ratio is generally desirable.
+    ///
+    /// This method is independent of the order of the colors, so
+    /// `a.relative_contrast(b)` and `b.relative_contrast(a)` would return the
+    /// same value.
+    #[must_use]
+    #[inline]
+    fn relative_contrast(self, other: Self) -> Self::Scalar {
+        let (min_luma, max_luma) = self
+            .relative_luminance()
+            .luma
+            .min_max(other.relative_luminance().luma);
+
+        (Self::Scalar::from_f64(0.05) + max_luma) / (Self::Scalar::from_f64(0.05) + min_luma)
+    }
+
+    /// Verify the contrast between two colors satisfies SC 1.4.3. Contrast is
+    /// at least 4.5:1 (Level AA).
+    ///
+    /// This applies for meaningful text, such as body text. Font sizes of 18
+    /// points or lager, or 14 points when bold, are considered large and can be
+    /// checked with
+    /// [`has_min_contrast_large_text`][Wcag21RelativeContrast::has_min_contrast_large_text]
+    /// instead.
+    ///
+    /// [Success Criterion 1.4.3 Contrast (Minimum) (Level
+    /// AA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum)
+    #[must_use]
+    #[inline]
+    fn has_min_contrast_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.relative_contrast(other)
+            .gt_eq(&Self::Scalar::from_f64(4.5))
+    }
+
+    /// Verify the contrast between two colors satisfies SC 1.4.3 for large
+    /// text. Contrast is at least 3:1 (Level AA).
+    ///
+    /// This applies for meaningful large text, such as headings. Font sizes of
+    /// 18 points or lager, or 14 points when bold, are considered large.
+    ///
+    /// [Success Criterion 1.4.3 Contrast (Minimum) (Level
+    /// AA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum)
+    #[must_use]
+    #[inline]
+    fn has_min_contrast_large_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.relative_contrast(other)
+            .gt_eq(&Self::Scalar::from_f64(3.0))
+    }
+
+    /// Verify the contrast between two colors satisfies SC 1.4.6. Contrast is
+    /// at least 7:1 (Level AAA).
+    ///
+    /// This applies for meaningful text, such as body text. Font sizes of 18
+    /// points or lager, or 14 points when bold, are considered large and can be
+    /// checked with
+    /// [`has_enhanced_contrast_large_text`][Wcag21RelativeContrast::has_enhanced_contrast_large_text]
+    /// instead.
+    ///
+    /// [Success Criterion 1.4.6 Contrast (Enhanced) (Level
+    /// AAA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced)
+    #[must_use]
+    #[inline]
+    fn has_enhanced_contrast_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.relative_contrast(other)
+            .gt_eq(&Self::Scalar::from_f64(7.0))
+    }
+
+    /// Verify the contrast between two colors satisfies SC 1.4.6 for large
+    /// text. Contrast is at least 4.5:1 (Level AAA).
+    ///
+    /// This applies for meaningful large text, such as headings. Font sizes of
+    /// 18 points or lager, or 14 points when bold, are considered large.
+    ///
+    /// [Success Criterion 1.4.6 Contrast (Enhanced) (Level
+    /// AAA)](https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced)
+    #[must_use]
+    #[inline]
+    fn has_enhanced_contrast_large_text(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.relative_contrast(other)
+            .gt_eq(&Self::Scalar::from_f64(4.5))
+    }
+
+    /// Verify the contrast between two colors satisfies SC 1.4.11 for graphical
+    /// objects. Contrast is at least 3:1 (Level AA).
+    ///
+    /// This applies for any graphical object that aren't text, such as
+    /// meaningful images and interactive user interface elements.
+    ///
+    /// [Success Criterion 1.4.11 Non-text Contrast (Level
+    /// AA)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
+    #[must_use]
+    #[inline]
+    fn has_min_contrast_graphics(self, other: Self) -> <Self::Scalar as HasBoolMask>::Mask {
+        self.relative_contrast(other)
+            .gt_eq(&Self::Scalar::from_f64(3.0))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use core::str::FromStr;
+
+    use super::Wcag21RelativeContrast;
+    use crate::Srgb;
+
+    #[test]
+    fn relative_contrast() {
+        let white = Srgb::new(1.0f32, 1.0, 1.0);
+        let black = Srgb::new(0.0, 0.0, 0.0);
+
+        assert_relative_eq!(white.relative_contrast(white), 1.0);
+        assert_relative_eq!(white.relative_contrast(black), 21.0);
+        assert_relative_eq!(
+            white.relative_contrast(black),
+            black.relative_contrast(white)
+        );
+
+        let c1 = Srgb::from_str("#600").unwrap().into_format();
+
+        assert_relative_eq!(c1.relative_contrast(white), 13.41, epsilon = 0.01);
+        assert_relative_eq!(c1.relative_contrast(black), 1.56, epsilon = 0.01);
+
+        assert!(c1.has_min_contrast_text(white));
+        assert!(c1.has_min_contrast_large_text(white));
+        assert!(c1.has_enhanced_contrast_text(white));
+        assert!(c1.has_enhanced_contrast_large_text(white));
+        assert!(c1.has_min_contrast_graphics(white));
+        assert!(c1.has_min_contrast_text(black) == false);
+        assert!(c1.has_min_contrast_large_text(black) == false);
+        assert!(c1.has_enhanced_contrast_text(black) == false);
+        assert!(c1.has_enhanced_contrast_large_text(black) == false);
+        assert!(c1.has_min_contrast_graphics(black) == false);
+
+        let c1 = Srgb::from_str("#066").unwrap().into_format();
+
+        assert_relative_eq!(c1.relative_contrast(white), 6.79, epsilon = 0.01);
+        assert_relative_eq!(c1.relative_contrast(black), 3.09, epsilon = 0.01);
+
+        let c1 = Srgb::from_str("#9f9").unwrap().into_format();
+
+        assert_relative_eq!(c1.relative_contrast(white), 1.22, epsilon = 0.01);
+        assert_relative_eq!(c1.relative_contrast(black), 17.11, epsilon = 0.01);
+    }
 }
