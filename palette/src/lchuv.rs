@@ -22,7 +22,7 @@ use crate::num::Sqrt;
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
@@ -32,8 +32,8 @@ use crate::{
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
-    Luv, LuvHue, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
+    WithHue, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -364,7 +364,8 @@ impl_struct_of_array_traits_hue!(Lchuv<Wp>, LuvHueIter, [l, chroma], white_point
 
 impl_eq_hue!(Lchuv<Wp>, LuvHue, [l, chroma, hue]);
 
-impl<Wp, T> RelativeContrast for Lchuv<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::RelativeContrast for Lchuv<Wp, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -377,7 +378,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 

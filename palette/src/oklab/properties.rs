@@ -7,7 +7,7 @@ use crate::{
     angle::RealAngle,
     blend::{PreAlpha, Premultiply},
     bool_mask::LazySelect,
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
         PartialCmp, Real, Trigonometry, Zero,
@@ -15,7 +15,7 @@ use crate::{
     stimulus::Stimulus,
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, RelativeContrast, Xyz,
+    MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklab;
@@ -77,7 +77,8 @@ impl_struct_of_array_traits!(Oklab, [l, a, b]);
 
 impl_eq!(Oklab, [l, a, b]);
 
-impl<T> RelativeContrast for Oklab<T>
+#[allow(deprecated)]
+impl<T> crate::RelativeContrast for Oklab<T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -90,6 +91,6 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }

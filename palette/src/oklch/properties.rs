@@ -6,14 +6,14 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign, clamp_min, clamp_min_assign, contrast_ratio,
+    clamp, clamp_assign, clamp_min, clamp_min_assign,
     hues::OklabHueIter,
     num::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, RelativeContrast, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
 };
 
 use super::Oklch;
@@ -121,7 +121,8 @@ impl_struct_of_array_traits_hue!(Oklch, OklabHueIter, [l, chroma]);
 
 impl_eq_hue!(Oklch, OklabHue, [l, chroma, hue]);
 
-impl<T> RelativeContrast for Oklch<T>
+#[allow(deprecated)]
+impl<T> crate::RelativeContrast for Oklch<T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -134,6 +135,6 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }

@@ -21,7 +21,8 @@ use crate::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
-    clamp, clamp_assign, contrast_ratio,
+    clamp, clamp_assign,
+    color_difference::Wcag21RelativeContrast,
     convert::FromColorUnclamped,
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
@@ -30,8 +31,9 @@ use crate::{
         PartialCmp, Real, Zero,
     },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    RelativeContrast, Xyz, Yxy,
+    white_point::D65,
+    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -897,7 +899,8 @@ where
     }
 }
 
-impl<S, T> RelativeContrast for Luma<S, T>
+#[allow(deprecated)]
+impl<S, T> crate::RelativeContrast for Luma<S, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -911,7 +914,20 @@ where
         let luma1 = self.into_linear();
         let luma2 = other.into_linear();
 
-        contrast_ratio(luma1.luma, luma2.luma)
+        crate::contrast_ratio(luma1.luma, luma2.luma)
+    }
+}
+
+impl<S, T> Wcag21RelativeContrast for Luma<S, T>
+where
+    Self: IntoColor<Luma<Linear<D65>, T>>,
+    S: LumaStandard<WhitePoint = D65>,
+    T: Real + Add<T, Output = T> + Div<T, Output = T> + PartialCmp + MinMax,
+{
+    type Scalar = T;
+
+    fn relative_luminance(self) -> Luma<Linear<D65>, Self::Scalar> {
+        self.into_color()
     }
 }
 

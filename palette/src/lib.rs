@@ -301,6 +301,7 @@ pub use hues::{LabHue, LuvHue, OklabHue, RgbHue};
 pub use color_difference::ColorDifference;
 pub use convert::{FromColor, FromColorMut, FromColorMutGuard, IntoColor, IntoColorMut};
 pub use matrix::Mat3;
+#[allow(deprecated)]
 pub use relative_contrast::{contrast_ratio, RelativeContrast};
 
 //Helper macro for checking ranges and clamping.

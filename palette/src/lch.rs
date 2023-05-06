@@ -21,7 +21,6 @@ use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, clamp_min, clamp_min_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
-    contrast_ratio,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
     num::{
@@ -30,8 +29,8 @@ use crate::{
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
-    LightenAssign, Mix, MixAssign, RelativeContrast, Saturate, SaturateAssign, SetHue, ShiftHue,
-    ShiftHueAssign, WithHue, Xyz,
+    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
+    WithHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -408,7 +407,8 @@ impl_struct_of_array_traits_hue!(Lch<Wp>, LabHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
 
-impl<Wp, T> RelativeContrast for Lch<Wp, T>
+#[allow(deprecated)]
+impl<Wp, T> crate::RelativeContrast for Lch<Wp, T>
 where
     T: Real + Arithmetics + PartialCmp,
     T::Mask: LazySelect<T>,
@@ -421,7 +421,7 @@ where
         let xyz1 = Xyz::from_color(self);
         let xyz2 = Xyz::from_color(other);
 
-        contrast_ratio(xyz1.y, xyz2.y)
+        crate::contrast_ratio(xyz1.y, xyz2.y)
     }
 }
 
