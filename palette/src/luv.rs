@@ -305,6 +305,7 @@ impl_mix!(Luv<Wp>);
 impl_lighten!(Luv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {u, v} phantom: white_point);
 impl_premultiply!(Luv<Wp> {l, u, v} phantom: white_point);
 impl_euclidean_distance!(Luv<Wp> {l, u, v});
+impl_hyab!(Luv<Wp> {lightness: l, chroma1: u, chroma2: v});
 
 impl<Wp, T> GetHue for Luv<Wp, T>
 where

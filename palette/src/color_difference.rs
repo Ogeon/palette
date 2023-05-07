@@ -1,4 +1,27 @@
 //! Algorithms for calculating the difference between colors.
+//!
+//! ## Selecting an algorithm
+//!
+//! Different distance/difference algorithms and formulae are good for different
+//! situations. Some are faster but less accurate and some may only be suitable
+//! for certain color spaces. This table may help navigating the options a bit
+//! by summarizing the difference between the traits in this module.
+//!
+//! **Disclaimer:** _This is not an actual benchmark! It's always best to test and
+//! evaluate the differences in an actual application, when possible._
+//!
+//! Property explanations:
+//! - **Complexity:** Low complexity options are generally faster than high
+//!   complexity options.
+//! - **Accuracy:** How the numerical difference compares to the perceived
+//!   difference. May differ with the color space.
+//!
+//! | Trait | Complexity | Accuracy | Notes |
+//! |-------|------------|----------|-------|
+//! | [`Ciede2000`] | High | High for small differences, lower for large differences | The de-facto standard, but requires complex calculations to compensate for increased errors in certain areas of the CIE L\*a\*b\* (CIELAB) space.
+//! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a "quick and dirty" check.
+//! | [`HyAb`] | Low | High accuracy for medium to large differences. Less accurate than CIEDE2000 for small differences, but still performs well and is much less computationally expensive. | Similar to Euclidean distance, but separates lightness and chroma more. Limited to Cartesian spaces with a lightness axis and a chroma plane.
+//! | [`Wcag21RelativeContrast`] | Low | Low and only compares lightness | Meant for checking contrasts in computer graphics (such as between text and background colors), assuming sRGB. Mostly useful as a hint or for checking WCAG 2.1 compliance, considering the criticism it has received.
 
 use core::ops::{Add, BitAnd, BitOr, Div};
 
@@ -384,12 +407,39 @@ pub trait Wcag21RelativeContrast: Sized {
     }
 }
 
+/// Calculate a combination of Euclidean and Manhattan/City-block distance
+/// between two colors.
+///
+/// The HyAB distance was suggested as an alternative to CIEDE2000 for large
+/// color differences in [Distance metrics for very large color
+/// differences](http://markfairchild.org/PDFs/PAP40.pdf) (in [Color Res Appl.
+/// 2019;1–16](https://doi.org/10.1002/col.22451)) by Saeedeh Abasi, Mohammad
+/// Amani Tehran and Mark D. Fairchild. It's originally meant for [CIE L\*a\*b\*
+/// (CIELAB)][crate::Lab], but this trait is also implemented for other color
+/// spaces that have similar semantics, although **without the same quality
+/// guarantees**.
+///
+/// The hybrid distance is the sum of the absolute lightness difference and the
+/// distance on the chroma plane. This makes the lightness and chroma
+/// differences more independent from each other, which is meant to correspond
+/// more to how humans perceive the two qualities.
+pub trait HyAb {
+    /// The type for the distance value.
+    type Scalar;
+
+    /// Calculate the hybrid distance between `self` and `other`.
+    ///
+    /// This returns the sum of the absolute lightness difference and the
+    /// distance on the chroma plane.
+    fn hybrid_distance(self, other: Self) -> Self::Scalar;
+}
+
 #[cfg(test)]
 mod test {
     use core::str::FromStr;
 
-    use super::Wcag21RelativeContrast;
-    use crate::Srgb;
+    use super::{HyAb, Wcag21RelativeContrast};
+    use crate::{FromColor, Lab, Srgb};
 
     #[test]
     fn relative_contrast() {
@@ -428,5 +478,17 @@ mod test {
 
         assert_relative_eq!(c1.relative_contrast(white), 1.22, epsilon = 0.01);
         assert_relative_eq!(c1.relative_contrast(black), 17.11, epsilon = 0.01);
+    }
+
+    #[test]
+    fn hyab() {
+        // From https://github.com/Evercoder/culori/blob/cd1fe08a12fa9ddfcf6b2e82914733d23ac117d0/test/difference.test.js#L186
+        let red = Lab::<_, f64>::from_color(Srgb::from(0xff0000).into_linear());
+        let green = Lab::<_, f64>::from_color(Srgb::from(0x008000).into_linear());
+        assert_relative_eq!(
+            red.hybrid_distance(green),
+            139.93576718451553,
+            epsilon = 0.000001
+        );
     }
 }
