@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["Ciede2000","ColorDifference","EuclideanDistance","Wcag21RelativeContrast"]};
+window.SIDEBAR_ITEMS = {"trait":["Ciede2000","ColorDifference","EuclideanDistance","HyAb","Wcag21RelativeContrast"]};

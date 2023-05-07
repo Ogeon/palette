@@ -571,6 +571,7 @@
 <a href="#571" id="571">571</a>
 <a href="#572" id="572">572</a>
 <a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*u\*v\* (CIELUV) color space.
 
 </span><span class="kw">use </span>core::{
@@ -878,6 +879,7 @@
 <span class="macro">impl_lighten!</span>(Luv&lt;Wp&gt; increase {l =&gt; [<span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()]} other {u, v} phantom: white_point);
 <span class="macro">impl_premultiply!</span>(Luv&lt;Wp&gt; {l, u, v} phantom: white_point);
 <span class="macro">impl_euclidean_distance!</span>(Luv&lt;Wp&gt; {l, u, v});
+<span class="macro">impl_hyab!</span>(Luv&lt;Wp&gt; {lightness: l, chroma1: u, chroma2: v});
 
 <span class="kw">impl</span>&lt;Wp, T&gt; GetHue <span class="kw">for </span>Luv&lt;Wp, T&gt;
 <span class="kw">where

@@ -94,6 +94,11 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
 </pre><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
@@ -150,6 +155,11 @@
 <span class="macro">impl_lighten!</span>(Oklab increase {l =&gt; [<span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()]} other {a, b} <span class="kw">where </span>T:  One);
 <span class="macro">impl_premultiply!</span>(Oklab { l, a, b });
 <span class="macro">impl_euclidean_distance!</span>(Oklab { l, a, b });
+<span class="macro">impl_hyab!</span>(Oklab {
+    lightness: l,
+    chroma1: a,
+    chroma2: b
+});
 
 <span class="kw">impl</span>&lt;T&gt; GetHue <span class="kw">for </span>Oklab&lt;T&gt;
 <span class="kw">where

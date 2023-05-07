@@ -598,6 +598,7 @@
 <a href="#598" id="598">598</a>
 <a href="#599" id="599">599</a>
 <a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*a\*b\* (CIELAB) color space.
 
 </span><span class="kw">use </span>core::{
@@ -897,6 +898,7 @@
 <span class="macro">impl_lighten!</span>(Lab&lt;Wp&gt; increase {l =&gt; [<span class="self">Self</span>::min_l(), <span class="self">Self</span>::max_l()]} other {a, b} phantom: white_point);
 <span class="macro">impl_premultiply!</span>(Lab&lt;Wp&gt; {l, a, b} phantom: white_point);
 <span class="macro">impl_euclidean_distance!</span>(Lab&lt;Wp&gt; {l, a, b});
+<span class="macro">impl_hyab!</span>(Lab&lt;Wp&gt; {lightness: l, chroma1: a, chroma2: b});
 
 <span class="kw">impl</span>&lt;Wp, T&gt; GetHue <span class="kw">for </span>Lab&lt;Wp, T&gt;
 <span class="kw">where

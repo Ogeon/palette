@@ -430,7 +430,92 @@
 <a href="#430" id="430">430</a>
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Algorithms for calculating the difference between colors.
+//!
+//! ## Selecting an algorithm
+//!
+//! Different distance/difference algorithms and formulae are good for different
+//! situations. Some are faster but less accurate and some may only be suitable
+//! for certain color spaces. This table may help navigating the options a bit
+//! by summarizing the difference between the traits in this module.
+//!
+//! **Disclaimer:** _This is not an actual benchmark! It&#39;s always best to test and
+//! evaluate the differences in an actual application, when possible._
+//!
+//! Property explanations:
+//! - **Complexity:** Low complexity options are generally faster than high
+//!   complexity options.
+//! - **Accuracy:** How the numerical difference compares to the perceived
+//!   difference. May differ with the color space.
+//!
+//! | Trait | Complexity | Accuracy | Notes |
+//! |-------|------------|----------|-------|
+//! | [`Ciede2000`] | High | High for small differences, lower for large differences | The de-facto standard, but requires complex calculations to compensate for increased errors in certain areas of the CIE L\*a\*b\* (CIELAB) space.
+//! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a &quot;quick and dirty&quot; check.
+//! | [`HyAb`] | Low | High accuracy for medium to large differences. Less accurate than CIEDE2000 for small differences, but still performs well and is much less computationally expensive. | Similar to Euclidean distance, but separates lightness and chroma more. Limited to Cartesian spaces with a lightness axis and a chroma plane.
+//! | [`Wcag21RelativeContrast`] | Low | Low and only compares lightness | Meant for checking contrasts in computer graphics (such as between text and background colors), assuming sRGB. Mostly useful as a hint or for checking WCAG 2.1 compliance, considering the criticism it has received.
 
 </span><span class="kw">use </span>core::ops::{Add, BitAnd, BitOr, Div};
 
@@ -816,12 +901,39 @@
     }
 }
 
+<span class="doccomment">/// Calculate a combination of Euclidean and Manhattan/City-block distance
+/// between two colors.
+///
+/// The HyAB distance was suggested as an alternative to CIEDE2000 for large
+/// color differences in [Distance metrics for very large color
+/// differences](http://markfairchild.org/PDFs/PAP40.pdf) (in [Color Res Appl.
+/// 2019;1–16](https://doi.org/10.1002/col.22451)) by Saeedeh Abasi, Mohammad
+/// Amani Tehran and Mark D. Fairchild. It&#39;s originally meant for [CIE L\*a\*b\*
+/// (CIELAB)][crate::Lab], but this trait is also implemented for other color
+/// spaces that have similar semantics, although **without the same quality
+/// guarantees**.
+///
+/// The hybrid distance is the sum of the absolute lightness difference and the
+/// distance on the chroma plane. This makes the lightness and chroma
+/// differences more independent from each other, which is meant to correspond
+/// more to how humans perceive the two qualities.
+</span><span class="kw">pub trait </span>HyAb {
+    <span class="doccomment">/// The type for the distance value.
+    </span><span class="kw">type </span>Scalar;
+
+    <span class="doccomment">/// Calculate the hybrid distance between `self` and `other`.
+    ///
+    /// This returns the sum of the absolute lightness difference and the
+    /// distance on the chroma plane.
+    </span><span class="kw">fn </span>hybrid_distance(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
+}
+
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>core::str::FromStr;
 
-    <span class="kw">use </span><span class="kw">super</span>::Wcag21RelativeContrast;
-    <span class="kw">use </span><span class="kw">crate</span>::Srgb;
+    <span class="kw">use super</span>::{HyAb, Wcag21RelativeContrast};
+    <span class="kw">use crate</span>::{FromColor, Lab, Srgb};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>relative_contrast() {
@@ -860,6 +972,18 @@
 
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(white), <span class="number">1.22</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(black), <span class="number">17.11</span>, epsilon = <span class="number">0.01</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>hyab() {
+        <span class="comment">// From https://github.com/Evercoder/culori/blob/cd1fe08a12fa9ddfcf6b2e82914733d23ac117d0/test/difference.test.js#L186
+        </span><span class="kw">let </span>red = Lab::&lt;<span class="kw">_</span>, f64&gt;::from_color(Srgb::from(<span class="number">0xff0000</span>).into_linear());
+        <span class="kw">let </span>green = Lab::&lt;<span class="kw">_</span>, f64&gt;::from_color(Srgb::from(<span class="number">0x008000</span>).into_linear());
+        <span class="macro">assert_relative_eq!</span>(
+            red.hybrid_distance(green),
+            <span class="number">139.93576718451553</span>,
+            epsilon = <span class="number">0.000001
+        </span>);
     }
 }
 </code></pre></div>
