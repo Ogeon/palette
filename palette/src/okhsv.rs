@@ -408,8 +408,7 @@ mod tests {
         let rgb: Srgb = Rgb::<encoding::Srgb, _>::from_str(red_hex)
             .unwrap()
             .into_format();
-        let oklab = Oklab::from_color_unclamped(rgb);
-        let okhsv = Okhsv::from_color_unclamped(oklab);
+        let okhsv = Okhsv::from_color_unclamped(rgb);
         assert_relative_eq!(okhsv.saturation, 1.0, epsilon = 1e-3);
         assert_relative_eq!(okhsv.value, 1.0, epsilon = 1e-3);
         assert_relative_eq!(
@@ -423,11 +422,17 @@ mod tests {
     #[test]
     fn test_okhsv_to_srgb() {
         let okhsv = Okhsv::new(0.0_f32, 0.5, 0.5);
-        let oklab = Oklab::from_color_unclamped(okhsv);
-        let rgb = Srgb::from_color_unclamped(oklab);
+        let rgb = Srgb::from_color_unclamped(okhsv);
         let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
         let hex_str = format!("{:x}", rgb8);
         assert_eq!(hex_str, "7a4355");
+    }
+
+    #[test]
+    fn test_okhsv_to_srgb_saturated_black() {
+        let okhsv = Okhsv::new(0.0_f32, 1.0, 0.0);
+        let rgb = Srgb::from_color_unclamped(okhsv);
+        assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
     }
 
     #[test]

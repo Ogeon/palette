@@ -447,16 +447,17 @@ where
     Oklab<T>: IntoColorUnclamped<LinSrgb<T>>,
 {
     fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
+        if hsv.value == T::zero() {
+            // pure black
+            return Self {
+                l: T::zero(),
+                a: T::zero(),
+                b: T::zero(),
+            };
+        }
+
         if hsv.saturation == T::zero() {
             // totally desaturated color -- the triangle is just the 0-chroma-line
-            if hsv.value == T::zero() {
-                // pure black
-                return Self {
-                    l: T::zero(),
-                    a: T::zero(),
-                    b: T::zero(),
-                };
-            }
             let l = toe_inv(hsv.value);
             return Self {
                 l,
