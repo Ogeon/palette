@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 0.7.2 - 2023-05-21
+
+* [#332][332]: Fix NaN values from `Okhsv` when `saturation` is > 0 and `value` == 0. Closes [#330][330].
+* [#328][328]: Add the HyAB color difference metric. Closes [#318][318].
+* [#326][326]: Add a `Wcag21RelativeContrast` trait and deprecate `RelativeContrast`.
+* [#320][320]: Implement struct-of-arrays (SoA) utilities. Closes [#305][305].
+* [#323][323]: Add saturating_add and saturating_sub for integer based colors. Closes [#322][322].
+* [#321][321]: Spelling fixes.
+* [#316][316]: Add `EuclideanDistance` and `Ciede2000` traits, deprecate `ColorDifference`. Closes [#288][288].
+
 ## Version 0.7.1 - 2023-04-16
 
 * [#313][313]: Improve serializing. Closes [#130][130].
@@ -249,6 +259,13 @@ The first published version.
 [308]: https://github.com/Ogeon/palette/pull/308
 [312]: https://github.com/Ogeon/palette/pull/312
 [313]: https://github.com/Ogeon/palette/pull/313
+[316]: https://github.com/Ogeon/palette/pull/316
+[320]: https://github.com/Ogeon/palette/pull/320
+[321]: https://github.com/Ogeon/palette/pull/321
+[323]: https://github.com/Ogeon/palette/pull/323
+[326]: https://github.com/Ogeon/palette/pull/326
+[328]: https://github.com/Ogeon/palette/pull/328
+[332]: https://github.com/Ogeon/palette/pull/332
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -308,6 +325,11 @@ The first published version.
 [243]: https://github.com/Ogeon/palette/issues/243
 [245]: https://github.com/Ogeon/palette/issues/245
 [283]: https://github.com/Ogeon/palette/issues/283
+[288]: https://github.com/Ogeon/palette/issues/288
 [289]: https://github.com/Ogeon/palette/issues/289
+[305]: https://github.com/Ogeon/palette/issues/305
+[318]: https://github.com/Ogeon/palette/issues/318
+[322]: https://github.com/Ogeon/palette/issues/322
+[330]: https://github.com/Ogeon/palette/issues/330
 [1234]: https://github.com/Ogeon/palette/issues/1234
 [4321]: https://github.com/Ogeon/palette/issues/4321
