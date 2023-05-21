@@ -383,11 +383,17 @@ mod tests {
     #[test]
     fn test_okhsl_to_srgb() {
         let okhsl = Okhsl::new(0.0_f32, 0.5, 0.5);
-        let oklab = Oklab::from_color_unclamped(okhsl);
-        let rgb = Srgb::from_color_unclamped(oklab);
+        let rgb = Srgb::from_color_unclamped(okhsl);
         let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
         let hex_str = format!("{:x}", rgb8);
         assert_eq!(hex_str, "aa5a74");
+    }
+
+    #[test]
+    fn test_okhsl_to_srgb_saturated_black() {
+        let okhsl = Okhsl::new(0.0_f32, 1.0, 0.0);
+        let rgb = Srgb::from_color_unclamped(okhsl);
+        assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
     }
 
     struct_of_arrays_tests!(
