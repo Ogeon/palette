@@ -561,6 +561,11 @@
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the Okhsv color space.
 
 </span><span class="kw">use </span>core::fmt::Debug;
@@ -971,8 +976,7 @@
         <span class="kw">let </span>rgb: Srgb = Rgb::&lt;encoding::Srgb, <span class="kw">_</span>&gt;::from_str(red_hex)
             .unwrap()
             .into_format();
-        <span class="kw">let </span>oklab = Oklab::from_color_unclamped(rgb);
-        <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(oklab);
+        <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(rgb);
         <span class="macro">assert_relative_eq!</span>(okhsv.saturation, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
         <span class="macro">assert_relative_eq!</span>(okhsv.value, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
         <span class="macro">assert_relative_eq!</span>(
@@ -986,11 +990,17 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_okhsv_to_srgb() {
         <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">0.5</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>oklab = Oklab::from_color_unclamped(okhsv);
-        <span class="kw">let </span>rgb = Srgb::from_color_unclamped(oklab);
+        <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
         <span class="kw">let </span>rgb8: Rgb&lt;encoding::Srgb, u8&gt; = rgb.into_format();
         <span class="kw">let </span>hex_str = <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, rgb8);
         <span class="macro">assert_eq!</span>(hex_str, <span class="string">&quot;7a4355&quot;</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_okhsv_to_srgb_saturated_black() {
+        <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">1.0</span>, <span class="number">0.0</span>);
+        <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
+        <span class="macro">assert_relative_eq!</span>(rgb, Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
     }
 
     <span class="attr">#[test]

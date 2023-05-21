@@ -723,6 +723,7 @@
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
 <a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Types for the Oklab color space.
 
 </span><span class="kw">use </span>core::{any::TypeId, fmt::Debug, ops::Mul};
@@ -1172,17 +1173,18 @@
     Oklab&lt;T&gt;: IntoColorUnclamped&lt;LinSrgb&lt;T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(hsv: Okhsv&lt;T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>hsv.value == T::zero() {
+            <span class="comment">// pure black
+            </span><span class="kw">return </span><span class="self">Self </span>{
+                l: T::zero(),
+                a: T::zero(),
+                b: T::zero(),
+            };
+        }
+
         <span class="kw">if </span>hsv.saturation == T::zero() {
             <span class="comment">// totally desaturated color -- the triangle is just the 0-chroma-line
-            </span><span class="kw">if </span>hsv.value == T::zero() {
-                <span class="comment">// pure black
-                </span><span class="kw">return </span><span class="self">Self </span>{
-                    l: T::zero(),
-                    a: T::zero(),
-                    b: T::zero(),
-                };
-            }
-            <span class="kw">let </span>l = toe_inv(hsv.value);
+            </span><span class="kw">let </span>l = toe_inv(hsv.value);
             <span class="kw">return </span><span class="self">Self </span>{
                 l,
                 a: T::zero(),
