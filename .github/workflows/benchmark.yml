@@ -1,18 +1,17 @@
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - '**.rs'
 name: Benchmark pull requests
 jobs:
   runBenchmark:
     name: Run benchmark
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions-rs/toolchain@v1.0.7
-        with:
-          toolchain: stable
-          override: true
-          profile: minimal
+      - uses: dtolnay/rust-toolchain@stable
       - uses: boa-dev/criterion-compare-action@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
