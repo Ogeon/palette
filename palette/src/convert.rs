@@ -138,7 +138,7 @@
 //! #[macro_use]
 //! extern crate approx;
 //!
-//! use palette::cast::{self, ArrayCast};
+//! use palette::cast::{ComponentsInto, ArrayCast};
 //! use palette::rgb::{Rgb, RgbSpace, RgbStandard};
 //! use palette::encoding::Linear;
 //! use palette::white_point::D65;
@@ -199,8 +199,8 @@
 //!         0.5,
 //!         0.25,
 //!     ];
-//!     let hsv: Hsv<_, f64> = cast::from_component_slice::<Bgr<_>>(&buffer)[1]
-//!         .into_color();
+//!     let buffer: &[Bgr<_>] = (&buffer).components_into();
+//!     let hsv: Hsv<_, f64> = buffer[1].into_color();
 //!
 //!     assert_relative_eq!(hsv, Hsv::new(90.0, 1.0, 0.5));
 //! }

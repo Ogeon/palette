@@ -1,14 +1,29 @@
 //! Traits and functions for casting colors to and from other data types.
 //!
-//! The functions in this module casts without changing the underlying data. See
-//! the [`convert`](crate::convert) module for how to convert between color
-//! spaces.
+//! The functions and traits in this module cast without changing the underlying
+//! data. See the [`convert`](crate::convert) module for how to convert between
+//! color spaces.
+//!
+//! # Traits or Functions?
+//!
+//! This module provides both a set of traits ([`FromComponents`],
+//! [`IntoUints`], etc.) and a set of functions ([`from_component_slice`],
+//! [`into_uint_array`], etc.) that effectively implement the same
+//! functionality. The traits are all implemented using the functions, so they
+//! can be seen as bits of more implicit syntax sugar for the more explicit
+//! functions.
+//!
+//! A general recommendation is to use the traits, since they provide mostly
+//! better ergonomics.
 //!
 //! # Arrays and Slices
 //!
 //! Types that implement [`ArrayCast`] can be cast to and from arrays and slices
 //! with little to no overhead. This makes it easy to work with image buffers
 //! and types from other crates without having to copy the data first.
+//!
+//! Casting can be either be done with the free functions in this module, or
+//! using the helper traits.
 //!
 //! ## Casting Arrays
 //!
@@ -18,12 +33,13 @@
 //! same after casting.
 //!
 //! ```
-//! use palette::{cast, Srgb, IntoColor};
+//! use palette::{cast::{self, ArraysInto}, Srgb, IntoColor};
 //!
-//! let color = cast::from_array::<Srgb<u8>>([23u8, 198, 76]).into_linear();
+//! let color = cast::from_array::<Srgb<u8>>([23, 198, 76]).into_linear();
+//! // Note: `Srgb::<u8>::from([23, 198, 76])` works too.
 //!
-//! let buffer = &mut [[64u8, 139, 10], [93, 18, 214]];
-//! let color_buffer = cast::from_array_slice_mut::<Srgb<u8>>(buffer);
+//! let buffer = &mut [[64, 139, 10], [93, 18, 214]];
+//! let color_buffer: &mut [Srgb<u8>] = buffer.arrays_into();
 //!
 //! for destination in color_buffer {
 //!     let linear_dst = destination.into_linear::<f32>();
@@ -36,7 +52,7 @@
 //! ```compile_fail
 //! use palette::{cast, Srgb};
 //!
-//! let color = cast::from_array::<Srgb<u8>>([23u8, 198]); // Too few components.
+//! let color = cast::from_array::<Srgb<u8>>([23, 198]); // Too few components.
 //! ```
 //!
 //! ## Casting Component Buffers
@@ -52,34 +68,35 @@
 //! or multiplying the length.
 //!
 //! ```
-//! use palette::{cast, Srgb};
+//! use palette::{cast::{self, TryFromComponents}, Srgb};
 //!
-//! let correct_buffer = &[64u8, 139, 10, 93, 18, 214];
-//! assert!(cast::try_from_component_slice::<Srgb<u8>>(correct_buffer).is_ok());
+//! let correct_buffer = &[64, 139, 10, 93, 18, 214];
+//! assert!(<&[Srgb<u8>]>::try_from_components(correct_buffer).is_ok());
 //!
-//! let incorrect_buffer = &[64u8, 139, 10, 93, 18, 214, 198, 76];
-//! assert!(cast::try_from_component_slice::<Srgb<u8>>(incorrect_buffer).is_err());
+//! let incorrect_buffer = &[64, 139, 10, 93, 18, 214, 198, 76];
+//! assert!(<&[Srgb<u8>]>::try_from_components(incorrect_buffer).is_err());
 //! ```
 //!
 //! An alternative, for when the length can be trusted to be correct, is to use
-//! the `from_component_*` functions that panic on error.
+//! the `ComponentsInto::components_into` and `FromComponents::from_components`
+//! methods, or the `from_component_*` functions, that panic on error.
 //!
 //! This works:
 //!
 //! ```
-//! use palette::{cast, Srgb};
+//! use palette::{cast::ComponentsInto, Srgb};
 //!
-//! let correct_buffer = &[64u8, 139, 10, 93, 18, 214];
-//! let color_buffer = cast::from_component_slice::<Srgb<u8>>(correct_buffer);
+//! let correct_buffer = &[64, 139, 10, 93, 18, 214];
+//! let color_buffer: &[Srgb<u8>] = correct_buffer.components_into();
 //! ```
 //!
 //! But this panics:
 //!
 //! ```should_panic
-//! use palette::{cast, Srgb};
+//! use palette::{cast::ComponentsInto, Srgb};
 //!
-//! let incorrect_buffer = &[64u8, 139, 10, 93, 18, 214, 198, 76];
-//! let color_buffer = cast::from_component_slice::<Srgb<u8>>(incorrect_buffer);
+//! let incorrect_buffer = &[64, 139, 10, 93, 18, 214, 198, 76];
+//! let color_buffer: &[Srgb<u8>] = incorrect_buffer.components_into();
 //! ```
 //!
 //! ## Casting Single Colors
@@ -111,10 +128,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed<rgb::channels::Argb, P = u32>`.
-//! use palette::{rgb::PackedArgb, cast, Srgba};
+//! use palette::{rgb::PackedArgb, cast::ComponentsInto, Srgba};
 //!
 //! let components = &[1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];
-//! let colors = cast::from_component_slice::<PackedArgb<_>>(components);
+//! let colors: &[PackedArgb<_>] = components.components_into();
 //!
 //! // Notice how the alpha values have moved from the beginning to the end:
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0.8, 0.2, 0.3, 1.0));
@@ -135,10 +152,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed<rgb::channels::Argb, P = u32>`.
-//! use palette::{rgb::PackedArgb, cast, Srgba};
+//! use palette::{rgb::PackedArgb, cast::UintsInto, Srgba};
 //!
 //! let raw = &[0xFF7F0080u32, 0xFF60BBCC];
-//! let colors = cast::from_uint_slice::<PackedArgb>(raw);
+//! let colors: &[PackedArgb] = raw.uints_into();
 //!
 //! assert_eq!(colors.len(), 2);
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0x7F, 0x00, 0x80, 0xFF));
@@ -146,7 +163,9 @@
 //! ```
 
 mod array;
+mod array_traits;
 mod packed;
 mod uint;
+mod uint_traits;
 
-pub use self::{array::*, packed::*, uint::*};
+pub use self::{array::*, array_traits::*, packed::*, uint::*, uint_traits::*};

@@ -384,6 +384,208 @@ where
     unsafe { &mut *value.cast::<T>() }
 }
 
+/// Cast from an array of colors to an array of arrays.
+///
+/// ```
+/// use palette::{cast, Srgb};
+///
+/// let colors = [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)];
+/// assert_eq!(cast::into_array_array(colors), [[64, 139, 10], [93, 18, 214]])
+/// ```
+#[inline]
+pub fn into_array_array<T, const N: usize>(values: [T; N]) -> [T::Array; N]
+where
+    T: ArrayCast,
+{
+    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
+    assert_eq!(
+        core::mem::align_of::<T::Array>(),
+        core::mem::align_of::<T>()
+    );
+
+    // Safety: The requirements of implementing `ArrayCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
+    // The length and memory layout of the array is the same because the size is
+    // the same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
+/// Cast from an array of colors to an array of color components.
+///
+/// ## Panics
+///
+/// It's unfortunately not able to infer the length of the component array,
+/// until generic const expressions are stabilized. In the meantime, it's going
+/// to panic if `M` isn't `N * T::Array::LENGTH`. A future version will remove
+/// the `M` parameter and make the mismatch a compiler error.
+///
+/// No `try_*` alternative is provided, since the array size can't be changed
+/// during runtime.
+///
+/// ## Examples
+///
+/// ```
+/// use palette::{cast, Srgb};
+///
+/// let colors = [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)];
+/// assert_eq!(cast::into_component_array(colors), [64, 139, 10, 93, 18, 214])
+/// ```
+///
+/// It panics when the array lengths don't match up:
+///
+/// ```should_panic
+/// use palette::{cast, Srgb};
+///
+/// let colors = [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)];
+/// assert_eq!(cast::into_component_array(colors), [64, 139, 10]) // Too short
+/// ```
+#[inline]
+pub fn into_component_array<T, const N: usize, const M: usize>(
+    values: [T; N],
+) -> [<T::Array as ArrayExt>::Item; M]
+where
+    T: ArrayCast,
+{
+    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
+    assert_eq!(
+        core::mem::align_of::<T::Array>(),
+        core::mem::align_of::<T>()
+    );
+
+    // This check can be replaced with `[<T::Array as ArrayExt>::Item; N *
+    // T::Array::LENGTH]` when generic const expressions are stabilized.
+    assert_eq!(
+        N * T::Array::LENGTH,
+        M,
+        "expected the output array to have length {}, but its length is {}",
+        N * T::Array::LENGTH,
+        M
+    );
+    assert_eq!(
+        core::mem::size_of::<[T; N]>(),
+        core::mem::size_of::<[<T::Array as ArrayExt>::Item; M]>()
+    );
+    assert_eq!(
+        core::mem::align_of::<[T; N]>(),
+        core::mem::align_of::<[<T::Array as ArrayExt>::Item; M]>()
+    );
+
+    // Safety: The requirements of implementing `ArrayCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
+    // The sizes and memory layout of the arrays are also asserted to be the
+    // same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
+/// Cast from an array of arrays to an array of colors.
+///
+/// ```
+/// use palette::{cast, Srgb};
+///
+/// let arrays = [[64, 139, 10], [93, 18, 214]];
+/// assert_eq!(
+///     cast::from_array_array::<Srgb<u8>, 2>(arrays),
+///     [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]
+/// )
+/// ```
+#[inline]
+pub fn from_array_array<T, const N: usize>(values: [T::Array; N]) -> [T; N]
+where
+    T: ArrayCast,
+{
+    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
+    assert_eq!(
+        core::mem::align_of::<T::Array>(),
+        core::mem::align_of::<T>()
+    );
+
+    // Safety: The requirements of implementing `ArrayCast`, as well as the size
+    // and alignment asserts, ensures that reading `T::Array` as `T` is safe.
+    // The length and memory layout of the array is the same because the size is
+    // the same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
+/// Cast from an array of color components to an array of colors.
+///
+/// ## Panics
+///
+/// The cast will panic if the length of the input array is not a multiple of
+/// the color's array length. This is unfortunately unavoidable until generic
+/// const expressions are stabilized.
+///
+/// No `try_*` alternative is provided, since the array size can't be changed
+/// during runtime.
+///
+/// ## Examples
+///
+/// ```
+/// use palette::{cast, Srgb};
+///
+/// let components = [64, 139, 10, 93, 18, 214];
+/// assert_eq!(
+///     cast::from_component_array::<Srgb<u8>, 6, 2>(components),
+///     [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]
+/// );
+/// ```
+///
+/// This panics:
+///
+/// ```should_panic
+/// use palette::{cast, Srgb};
+///
+/// let components = [64, 139, 10, 93, 18]; // Not a multiple of 3
+/// assert_eq!(
+///     cast::from_component_array::<Srgb<u8>, 5, 2>(components),
+///     [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]
+/// );
+/// ```
+#[inline]
+pub fn from_component_array<T, const N: usize, const M: usize>(
+    values: [<T::Array as ArrayExt>::Item; N],
+) -> [T; M]
+where
+    T: ArrayCast,
+{
+    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
+    assert_eq!(
+        core::mem::align_of::<T::Array>(),
+        core::mem::align_of::<T>()
+    );
+
+    // These checks can be replaced with `[<T::Array as ArrayExt>::Item; N /
+    // T::Array::LENGTH]` and a compile time check for `values.len() %
+    // T::Array::LENGTH == 0` when generic const expressions are stabilized.
+    assert_eq!(
+        N % T::Array::LENGTH,
+        0,
+        "expected the array length ({}) to be divisible by {}",
+        N,
+        T::Array::LENGTH
+    );
+    assert_eq!(
+        N / T::Array::LENGTH,
+        M,
+        "expected the output array to have length {}, but its length is {}",
+        N / T::Array::LENGTH,
+        M
+    );
+    assert_eq!(
+        core::mem::size_of::<[<T::Array as ArrayExt>::Item; N]>(),
+        core::mem::size_of::<[T; M]>()
+    );
+    assert_eq!(
+        core::mem::align_of::<[<T::Array as ArrayExt>::Item; N]>(),
+        core::mem::align_of::<[T; M]>()
+    );
+
+    // Safety: The requirements of implementing `ArrayCast`, as well as the size
+    // and alignment asserts, ensures that reading `T` as `T::Array` is safe.
+    // The sizes and memory layout of the arrays are also asserted to be the
+    // same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
 /// Cast from a slice of colors to a slice of arrays.
 ///
 /// ```
@@ -528,7 +730,7 @@ where
 /// ```
 /// use palette::{cast, Srgb};
 ///
-/// let components = &[64, 139, 10, 93, 18, 214, 0, 123]; // Not a multiple of 3
+/// let components = &[64, 139, 10, 93, 18]; // Not a multiple of 3
 /// assert!(cast::try_from_component_slice::<Srgb<u8>>(components).is_err());
 /// ```
 #[inline]
@@ -706,7 +908,7 @@ where
 /// ```
 /// use palette::{cast, Srgb};
 ///
-/// let components = &mut [64, 139, 10, 93, 18, 214, 0, 123]; // Not a multiple of 3
+/// let components = &mut [64, 139, 10, 93, 18]; // Not a multiple of 3
 /// assert!(cast::try_from_component_slice_mut::<Srgb<u8>>(components).is_err());
 /// ```
 #[inline]
@@ -948,13 +1150,13 @@ where
 /// use palette::{cast, Srgb};
 ///
 /// // Not a multiple of 3:
-/// let components = vec![64, 139, 10, 93, 18, 214, 0, 123].into_boxed_slice();
+/// let components = vec![64, 139, 10, 93, 18].into_boxed_slice();
 ///
 /// if let Err(error) = cast::try_from_component_slice_box::<Srgb<u8>>(components) {
 ///     // We get the original values back on error:
 ///     assert_eq!(
 ///         error.values,
-///         vec![64, 139, 10, 93, 18, 214, 0, 123].into_boxed_slice()
+///         vec![64, 139, 10, 93, 18].into_boxed_slice()
 ///     );
 /// } else {
 ///     unreachable!();
@@ -1148,11 +1350,11 @@ where
 /// use palette::{cast, Srgb};
 ///
 /// // Not a multiple of 3:
-/// let components = vec![64, 139, 10, 93, 18, 214, 0, 123];
+/// let components = vec![64, 139, 10, 93, 18];
 ///
 /// if let Err(error) = cast::try_from_component_vec::<Srgb<u8>>(components) {
 ///     // We get the original values back on error:
-///     assert_eq!(error.values, vec![64, 139, 10, 93, 18, 214, 0, 123]);
+///     assert_eq!(error.values, vec![64, 139, 10, 93, 18]);
 /// } else {
 ///     unreachable!();
 /// }

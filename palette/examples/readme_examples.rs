@@ -26,13 +26,13 @@ fn converting() {
 }
 
 fn pixels_and_buffers() {
-    use palette::{cast, Srgb};
+    use palette::{cast::ComponentsInto, Srgb};
 
     // The input to this function could be data from an image file or
     // maybe a texture in a game.
     fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
         // Convert `my_rgb_image` into `&mut [Srgb<u8>]` without copying.
-        let my_rgb_image: &mut [Srgb<u8>] = cast::from_component_slice_mut(my_rgb_image);
+        let my_rgb_image: &mut [Srgb<u8>] = my_rgb_image.components_into();
 
         for color in my_rgb_image {
             std::mem::swap(&mut color.red, &mut color.blue);
@@ -91,13 +91,13 @@ fn color_operations_1() {
 }
 
 fn color_operations_2() {
-    use palette::{blend::Compose, cast, Srgb, WithAlpha};
+    use palette::{blend::Compose, cast::ComponentsInto, Srgb, WithAlpha};
 
     // The input to this function could be data from image files.
     fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
         // Convert the images into `&mut [Srgb<u8>]` and `&[Srgb<u8>]` without copying.
-        let image1: &mut [Srgb<u8>] = cast::from_component_slice_mut(image1);
-        let image2: &[Srgb<u8>] = cast::from_component_slice(image2);
+        let image1: &mut [Srgb<u8>] = image1.components_into();
+        let image2: &[Srgb<u8>] = image2.components_into();
 
         for (color1, color2) in image1.iter_mut().zip(image2) {
             // Convert the colors to linear floating point format and give them transparency values.
