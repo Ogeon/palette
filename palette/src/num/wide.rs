@@ -298,6 +298,13 @@ macro_rules! impl_wide_float {
                     $ty::mul_sub(self, m, s)
                 }
             }
+
+            impl Signum for $ty {
+                #[inline]
+                fn signum(self) -> Self {
+                    $ty::copysign(self, Self::from(1.0))
+                }
+            }
         )+
     };
 }
