@@ -490,10 +490,12 @@ where
     {
         // We need the field count here to get the last tuple field. No field
         // count implies that we definitely expected a struct or a map.
-        let field_count = self.field_count.ok_or(serde::de::Error::invalid_type(
-            serde::de::Unexpected::Unsigned(v),
-            &"map key or struct field",
-        ))?;
+        let field_count = self.field_count.ok_or_else(|| {
+            serde::de::Error::invalid_type(
+                serde::de::Unexpected::Unsigned(v),
+                &"map key or struct field",
+            )
+        })?;
 
         // Assume that it's the alpha value if it's after the expected number of
         // fields. Otherwise, pass on to the wrapped type's deserializer.

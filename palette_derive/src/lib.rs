@@ -33,33 +33,10 @@ macro_rules! syn_try {
 
 mod alpha;
 mod cast;
+mod color_types;
 mod convert;
 mod meta;
 mod util;
-
-const COLOR_TYPES: &[&str] = &[
-    "Rgb", "Luma", "Hsl", "Hsluv", "Hsv", "Hwb", "Lab", "Lch", "Lchuv", "Luv", "Oklab", "Oklch",
-    "Okhwb", "Okhsl", "Okhsv", "Xyz", "Yxy",
-];
-
-const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
-    ("Rgb", "Xyz"),
-    ("Luma", "Xyz"),
-    ("Hsl", "Rgb"),
-    ("Hsluv", "Lchuv"),
-    ("Hsv", "Rgb"),
-    ("Hwb", "Hsv"),
-    ("Lab", "Xyz"),
-    ("Lch", "Lab"),
-    ("Lchuv", "Luv"),
-    ("Luv", "Xyz"),
-    ("Oklab", "Xyz"),
-    ("Oklch", "Oklab"),
-    ("Okhsl", "Oklab"),
-    ("Okhsv", "Oklab"),
-    ("Okhwb", "Okhsv"),
-    ("Yxy", "Xyz"),
-];
 
 #[proc_macro_derive(WithAlpha, attributes(palette))]
 pub fn derive_with_alpha(tokens: TokenStream) -> TokenStream {

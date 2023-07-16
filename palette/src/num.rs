@@ -306,6 +306,22 @@ pub trait SaturatingSub<Rhs = Self> {
     fn saturating_sub(self, other: Rhs) -> Self::Output;
 }
 
+/// Trait for getting a number that represents the sign of `self`.
+pub trait Signum {
+    /// Returns a number that represents the sign of `self`. For floating point:
+    ///
+    /// * `1.0` if the number is positive, `+0.0` or `INFINITY`
+    /// * `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
+    /// * NaN if the number is NaN
+    fn signum(self) -> Self;
+}
+
+/// Trait for getting the natural logarithm of `self`.
+pub trait Ln {
+    /// Returns the natural logarithm of `self`.
+    fn ln(self) -> Self;
+}
+
 macro_rules! impl_uint {
     ($($ty: ident),+) => {
         $(
@@ -703,6 +719,22 @@ macro_rules! impl_float {
                 #[inline]
                 fn mul_sub(self, m: Self, s: Self) -> Self {
                     (self * m) - s
+                }
+            }
+
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
+            impl Signum for $ty {
+                #[inline]
+                fn signum(self) -> Self {
+                    $ty::signum(self)
+                }
+            }
+
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
+            impl Ln for $ty {
+                #[inline]
+                fn ln(self) -> Self {
+                    $ty::ln(self)
                 }
             }
         )+

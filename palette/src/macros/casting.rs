@@ -1,28 +1,28 @@
 #[cfg(test)]
 macro_rules! raw_pixel_conversion_tests {
-    ($name: ident <$($ty_param: path),+> : $($component: ident),+) => {
+    ($name: ident <$($ty_param: path),*> : $($component: ident),+) => {
         #[test]
         fn convert_from_f32_array() {
-            raw_pixel_conversion_tests!(@float_array_test f32, $name<$($ty_param),+>: $($component),+);
+            raw_pixel_conversion_tests!(@float_array_test f32, $name<$($ty_param),*>: $($component),+);
         }
 
         #[test]
         fn convert_from_f64_array() {
-            raw_pixel_conversion_tests!(@float_array_test f64, $name<$($ty_param),+>: $($component),+);
+            raw_pixel_conversion_tests!(@float_array_test f64, $name<$($ty_param),*>: $($component),+);
         }
 
         #[test]
         fn convert_from_f32_slice() {
-            raw_pixel_conversion_tests!(@float_slice_test f32, $name<$($ty_param),+>: $($component),+);
+            raw_pixel_conversion_tests!(@float_slice_test f32, $name<$($ty_param),*>: $($component),+);
         }
 
         #[test]
         fn convert_from_f64_slice() {
-            raw_pixel_conversion_tests!(@float_slice_test f64, $name<$($ty_param),+>: $($component),+);
+            raw_pixel_conversion_tests!(@float_slice_test f64, $name<$($ty_param),*>: $($component),+);
         }
     };
 
-    (@float_array_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
+    (@float_array_test $float: ty, $name: ident <$($ty_param: path),*> : $($component: ident),+) => {
         use crate::cast::ArrayCast;
         use crate::Alpha;
 
@@ -33,21 +33,21 @@ macro_rules! raw_pixel_conversion_tests {
         )+
         let alpha = counter + 0.1;
 
-        let raw: <$name<$($ty_param,)+ $float> as ArrayCast>::Array = [$($component),+];
-        let raw_plus_1: <Alpha<$name<$($ty_param,)+ $float>, $float> as ArrayCast>::Array = [
+        let raw: <$name<$($ty_param,)* $float> as ArrayCast>::Array = [$($component),+];
+        let raw_plus_1: <Alpha<$name<$($ty_param,)* $float>, $float> as ArrayCast>::Array = [
             $($component,)+
             alpha
         ];
-        let color: $name<$($ty_param,)+ $float> = crate::cast::from_array(raw);
+        let color: $name<$($ty_param,)* $float> = crate::cast::from_array(raw);
 
-        let color_alpha: Alpha<$name<$($ty_param,)+ $float>, $float> = crate::cast::from_array(raw_plus_1);
+        let color_alpha: Alpha<$name<$($ty_param,)* $float>, $float> = crate::cast::from_array(raw_plus_1);
 
         assert_eq!(color, $name::new($($component),+));
 
-        assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha, Alpha::<$name<$($ty_param,)* $float>, $float>::new($($component,)+ alpha));
     };
 
-    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+> : $($component: ident),+) => {
+    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),*> : $($component: ident),+) => {
         use core::convert::{TryInto, TryFrom};
         use crate::Alpha;
 
@@ -68,39 +68,39 @@ macro_rules! raw_pixel_conversion_tests {
             alpha,
             extra
         ];
-        let color: &$name<$($ty_param,)+ $float> = raw.try_into().unwrap();
-        assert!(<&$name<$($ty_param,)+ $float>>::try_from(raw_plus_1).is_err());
+        let color: &$name<$($ty_param,)* $float> = raw.try_into().unwrap();
+        assert!(<&$name<$($ty_param,)* $float>>::try_from(raw_plus_1).is_err());
 
-        let color_alpha: &Alpha<$name<$($ty_param,)+ $float>, $float> = raw_plus_1.try_into().unwrap();
-        assert!(<&Alpha<$name<$($ty_param,)+ $float>, $float>>::try_from(raw_plus_2).is_err());
+        let color_alpha: &Alpha<$name<$($ty_param,)* $float>, $float> = raw_plus_1.try_into().unwrap();
+        assert!(<&Alpha<$name<$($ty_param,)* $float>, $float>>::try_from(raw_plus_2).is_err());
 
         assert_eq!(color, &$name::new($($component),+));
 
-        assert_eq!(color_alpha, &Alpha::<$name<$($ty_param,)+ $float>, $float>::new($($component,)+ alpha));
+        assert_eq!(color_alpha, &Alpha::<$name<$($ty_param,)* $float>, $float>::new($($component,)+ alpha));
     };
 }
 
 #[cfg(test)]
 macro_rules! raw_pixel_conversion_fail_tests {
-    ($name: ident <$($ty_param: path),+> : $($component: ident),+) => {
+    ($name: ident <$($ty_param: path),*> : $($component: ident),+) => {
         #[test]
         #[should_panic(expected = "TryFromSliceError")]
         fn convert_from_short_f32_slice() {
-            raw_pixel_conversion_fail_tests!(@float_slice_test f32, $name<$($ty_param),+>);
+            raw_pixel_conversion_fail_tests!(@float_slice_test f32, $name<$($ty_param),*>);
         }
 
         #[test]
         #[should_panic(expected = "TryFromSliceError")]
         fn convert_from_short_f64_slice() {
-            raw_pixel_conversion_fail_tests!(@float_slice_test f64, $name<$($ty_param),+>);
+            raw_pixel_conversion_fail_tests!(@float_slice_test f64, $name<$($ty_param),*>);
         }
     };
 
-    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),+>) => {
+    (@float_slice_test $float: ty, $name: ident <$($ty_param: path),*>) => {
         use core::convert::TryInto;
 
         let raw: &[$float] = &[0.1];
-        let _: &$name<$($ty_param,)+ $float> = raw.try_into().unwrap();
+        let _: &$name<$($ty_param,)* $float> = raw.try_into().unwrap();
     };
 }
 

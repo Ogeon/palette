@@ -185,7 +185,7 @@ impl IntoStimulus<f32> for u8 {
     fn into_stimulus(self) -> f32 {
         let comp_u = u32::from(self) + C23;
         let comp_f = f32::from_bits(comp_u) - f32::from_bits(C23);
-        let max_u = u32::from(core::u8::MAX) + C23;
+        let max_u = u32::from(u8::MAX) + C23;
         let max_f = (f32::from_bits(max_u) - f32::from_bits(C23)).recip();
         comp_f * max_f
     }
@@ -197,7 +197,7 @@ impl IntoStimulus<f64> for u8 {
     fn into_stimulus(self) -> f64 {
         let comp_u = u64::from(self) + C52;
         let comp_f = f64::from_bits(comp_u) - f64::from_bits(C52);
-        let max_u = u64::from(core::u8::MAX) + C52;
+        let max_u = u64::from(u8::MAX) + C52;
         let max_f = (f64::from_bits(max_u) - f64::from_bits(C52)).recip();
         comp_f * max_f
     }
@@ -354,7 +354,7 @@ mod test {
     #[test]
     fn uint_to_float() {
         fn into_stimulus_old(n: u8) -> f32 {
-            let max = core::u8::MAX as f32;
+            let max = u8::MAX as f32;
             n as f32 / max
         }
 
@@ -367,7 +367,7 @@ mod test {
     #[test]
     fn uint_to_double() {
         fn into_stimulus_old(n: u8) -> f64 {
-            let max = core::u8::MAX as f64;
+            let max = u8::MAX as f64;
             n as f64 / max
         }
 

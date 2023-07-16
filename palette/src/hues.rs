@@ -799,6 +799,11 @@ make_hues! {
     ///
     /// It's measured in degrees.
     struct OklabHue; OklabHueIter
+
+    /// A hue type for the CAM16 color appearance model.
+    ///
+    /// It's measured in degrees.
+    struct Cam16Hue; Cam16HueIter
 }
 
 macro_rules! impl_uniform {
@@ -894,6 +899,7 @@ impl_uniform!(UniformLabHue, LabHue);
 impl_uniform!(UniformRgbHue, RgbHue);
 impl_uniform!(UniformLuvHue, LuvHue);
 impl_uniform!(UniformOklabHue, OklabHue);
+impl_uniform!(UniformCam16Hue, Cam16Hue);
 
 #[cfg(test)]
 mod test {

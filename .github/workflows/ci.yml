@@ -31,6 +31,8 @@ jobs:
         run: cargo clippy -v -p palette --no-default-features --features "std find-crate"
       - name: Default check
         run: cargo clippy -v -p palette
+      - name: Check all features
+        run: cargo clippy -v -p palette --all-features
       - name: Test all features
         run: cargo test -v -p palette --all-features
       - name: Test each feature
@@ -80,7 +82,7 @@ jobs:
         with:
           targets: thumbv6m-none-eabi
       - name: "Build with #[no_std]"
-        run: cargo build -v -p no_std_test --features nightly --target thumbv6m-none-eabi
+        run: cargo build -v -p no_std_test --all-features --target thumbv6m-none-eabi
   miri:
     name: Miri tests
     runs-on: ubuntu-latest

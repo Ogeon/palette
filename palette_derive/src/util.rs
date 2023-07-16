@@ -29,14 +29,6 @@ pub fn path_type(path: &[&str], internal: bool) -> Type {
     }
 }
 
-pub fn color_path(color: &str, internal: bool) -> TokenStream {
-    match color {
-        "Luma" => path(["luma", "Luma"], internal),
-        "Rgb" => path(["rgb", "Rgb"], internal),
-        _ => path([color], internal),
-    }
-}
-
 #[cfg(feature = "find-crate")]
 fn find_crate_name() -> Ident {
     use find_crate::Error;

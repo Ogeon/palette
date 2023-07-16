@@ -1,6 +1,6 @@
 use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
 use palette::{
-    color_difference::{Ciede2000, DeltaE},
+    color_difference::{Ciede2000, DeltaE, ImprovedDeltaE},
     convert::FromColorUnclamped,
 };
 use palette::{Lab, Lch, Xyz, Yxy};
@@ -159,6 +159,16 @@ fn cie_delta_e(c: &mut Criterion) {
                     black_box(
                         Lab::from_color_unclamped(lhs).delta_e(Lab::from_color_unclamped(rhs)),
                     );
+                }
+            }
+        })
+    });
+
+    group.bench_with_input("Lab improved delta E", &lab, |b, lab| {
+        b.iter(|| {
+            for &lhs in lab {
+                for &rhs in lab.iter().rev() {
+                    black_box(lhs.improved_delta_e(rhs));
                 }
             }
         })
