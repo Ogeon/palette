@@ -494,6 +494,7 @@ mod tests {
     use crate::{encoding, Oklab, OklabHue, Srgb};
     use core::str::FromStr;
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn test_roundtrip_toe_is_original() {
         let n = 500;
@@ -518,6 +519,7 @@ mod tests {
         assert!(relative_eq!(toe(grey50oklab.l), 0.5, epsilon = 1e-3));
     }
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn print_min_max_srgb_chroma_of_all_hues() {
         struct HueLc<T: Real> {

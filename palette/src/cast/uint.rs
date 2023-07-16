@@ -193,6 +193,56 @@ where
     unsafe { &mut *value.cast::<T>() }
 }
 
+/// Cast from an array of colors to an array of unsigned integers.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: [PackedArgb; 2] = [
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::into_uint_array(colors), [0xFF17C64C, 0xFF5D12D6])
+/// ```
+#[inline]
+pub fn into_uint_array<T, const N: usize>(values: [T; N]) -> [T::Uint; N]
+where
+    T: UintCast,
+{
+    assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
+    assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
+
+    // Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures transmuting `T` into `T::Uint` is safe.
+    // The length is the same because the size is the same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
+/// Cast from an array of unsigned integers to an array of colors.
+///
+/// ```
+/// use palette::{cast, rgb::PackedArgb, Srgba};
+///
+/// let colors: [PackedArgb; 2] = [
+///     Srgba::new(0x17, 0xC6, 0x4C, 0xFF).into(),
+///     Srgba::new(0x5D, 0x12, 0xD6, 0xFF).into()
+/// ];
+/// assert_eq!(cast::from_uint_array::<PackedArgb, 2>([0xFF17C64C, 0xFF5D12D6]), colors)
+/// ```
+#[inline]
+pub fn from_uint_array<T, const N: usize>(values: [T::Uint; N]) -> [T; N]
+where
+    T: UintCast,
+{
+    assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
+    assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
+
+    // Safety: The requirements of implementing `UintCast`, as well as the size
+    // and alignment asserts, ensures transmuting `T::Uint` into `T` is safe.
+    // The length is the same because the size is the same.
+    unsafe { transmute_copy(&ManuallyDrop::new(values)) }
+}
+
 /// Cast from a slice of colors to a slice of unsigned integers.
 ///
 /// ```

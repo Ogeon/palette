@@ -1,11 +1,11 @@
-use palette::{cast, color_difference::EuclideanDistance, IntoColor, Oklab, Srgb};
+use palette::{cast::ComponentsInto, color_difference::EuclideanDistance, IntoColor, Oklab, Srgb};
 
 fn main() {
     let image = image::open("example-data/input/fruits.png")
         .expect("could not open 'example-data/input/fruits.png'")
         .to_rgb8();
 
-    let image = cast::from_component_slice::<Srgb<u8>>(image.as_raw());
+    let image: &[Srgb<u8>] = image.as_raw().components_into();
 
     // Convert and collect the colors in a struct-of-arrays (SoA) format, where
     // each component is a Vec of all the pixels' component values.

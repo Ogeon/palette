@@ -180,6 +180,7 @@ mod tests {
 
     test_convert_into_from_xyz!(Okhwb);
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn test_roundtrip_okhwb_oklab_is_original() {
         let colors = [

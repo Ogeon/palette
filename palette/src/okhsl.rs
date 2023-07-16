@@ -251,6 +251,7 @@ mod tests {
 
     test_convert_into_from_xyz!(Okhsl);
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn test_roundtrip_okhsl_oklab_is_original() {
         let colors = [

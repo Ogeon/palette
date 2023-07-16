@@ -122,12 +122,12 @@
 //!
 //! ```rust
 //! use image::RgbImage;
-//! use palette::{Srgb, Oklab, cast, Lighten, IntoColor, FromColor};
+//! use palette::{Srgb, Oklab, cast::FromComponents, Lighten, IntoColor, FromColor};
 //!
 //! fn lighten(image: &mut RgbImage, amount: f32) {
 //!     // RgbImage can be dereferenced as [u8], allowing us to cast it as a
 //!     // component slice to sRGB with u8 components.
-//!     for pixel in cast::from_component_slice_mut::<Srgb<u8>>(image) {
+//!     for pixel in <&mut [Srgb<u8>]>::from_components(&mut **image) {
 //!         // Converting to linear sRGB with f32 components, and then to Oklab.
 //!         let color: Oklab = pixel.into_linear::<f32>().into_color();
 //!
@@ -186,12 +186,12 @@
 //! to Palette colors:
 //!
 //! ```rust
-//! # let mut image_buffer: Vec<u8> = vec![];
-//! use palette::{Srgb, cast};
+//! # let mut image_buffer: &mut Vec<u8> = &mut vec![];
+//! use palette::{Srgb, cast::ComponentsInto};
 //!
 //! // This works for any color type (even non-RGB) that can have the
 //! // buffer element type as component.
-//! let color_buffer: &mut [Srgb<u8>] = cast::from_component_slice_mut(&mut image_buffer);
+//! let color_buffer: &mut [Srgb<u8>] = image_buffer.components_into();
 //! ```
 //!
 //! * If you are getting your colors from the GPU, in a game or other graphical

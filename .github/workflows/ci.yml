@@ -21,42 +21,37 @@ jobs:
     env:
       RUSTFLAGS: -D warnings
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: actions-rs/toolchain@v1.0.7
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-          override: true
-          target: thumbv6m-none-eabi
-          profile: minimal
+          targets: thumbv6m-none-eabi
       - name: Minimal check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: -v -p palette --no-default-features --features std
+        run: cargo check -v -p palette --no-default-features --features std
       - name: find-crate check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: -v -p palette --no-default-features --features "std find-crate"
+        run: cargo check -v -p palette --no-default-features --features "std find-crate"
       - name: Default check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: -v --workspace --exclude no_std_test
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -v
+        run: cargo check -v --workspace --exclude no_std_test
+      - run: cargo test -v
       - name: Test features
         shell: bash
         working-directory: palette
         run: bash ../scripts/test_features.sh
       - name: "Test #[no_std]"
         if: ${{ runner.os == 'Linux' && matrix.toolchain == 'nightly' }}
-        uses: actions-rs/cargo@v1
+        run: cargo build -v --package no_std_test --features nightly --target thumbv6m-none-eabi
+  miri:
+    name: Miri tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          command: build
-          args: -v --package no_std_test --features nightly --target thumbv6m-none-eabi
+          components: miri
+      - name: Unit tests
+        run: cargo miri test --lib --features "bytemuck" -- -Z unstable-options --report-time
+      - name: Documentation tests
+        run: cargo miri test --doc --features "bytemuck" -- -Z unstable-options --report-time
 
   # Refs: https://github.com/rust-lang/crater/blob/9ab6f9697c901c4a44025cf0a39b73ad5b37d198/.github/workflows/bors.yml#L125-L149
   #
@@ -67,6 +62,7 @@ jobs:
     if: success()
     needs:
       - compile_and_test
+      - miri
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success

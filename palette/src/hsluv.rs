@@ -490,6 +490,7 @@ mod test {
 
     test_convert_into_from_xyz!(Hsluv);
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn lchuv_round_trip() {
         for hue in (0..=20).map(|x| x as f64 * 18.0) {

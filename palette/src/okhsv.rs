@@ -302,6 +302,7 @@ mod tests {
 
     test_convert_into_from_xyz!(Okhsv);
 
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn test_roundtrip_okhsv_oklab_is_original() {
         let colors = [
