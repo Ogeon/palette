@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast.rs`."><title>cast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/cast.rs`."><title>cast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0 (8ede3aae2 2023-07-12)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -150,17 +150,51 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits and functions for casting colors to and from other data types.
 //!
-//! The functions in this module casts without changing the underlying data. See
-//! the [`convert`](crate::convert) module for how to convert between color
-//! spaces.
+//! The functions and traits in this module cast without changing the underlying
+//! data. See the [`convert`](crate::convert) module for how to convert between
+//! color spaces.
+//!
+//! # Traits or Functions?
+//!
+//! This module provides both a set of traits ([`FromComponents`],
+//! [`IntoUints`], etc.) and a set of functions ([`from_component_slice`],
+//! [`into_uint_array`], etc.) that effectively implement the same
+//! functionality. The traits are all implemented using the functions, so they
+//! can be seen as bits of more implicit syntax sugar for the more explicit
+//! functions.
+//!
+//! A general recommendation is to use the traits, since they provide mostly
+//! better ergonomics.
 //!
 //! # Arrays and Slices
 //!
 //! Types that implement [`ArrayCast`] can be cast to and from arrays and slices
 //! with little to no overhead. This makes it easy to work with image buffers
 //! and types from other crates without having to copy the data first.
+//!
+//! Casting can be either be done with the free functions in this module, or
+//! using the helper traits.
 //!
 //! ## Casting Arrays
 //!
@@ -170,12 +204,13 @@
 //! same after casting.
 //!
 //! ```
-//! use palette::{cast, Srgb, IntoColor};
+//! use palette::{cast::{self, ArraysInto}, Srgb, IntoColor};
 //!
-//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198, 76]).into_linear();
+//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23, 198, 76]).into_linear();
+//! // Note: `Srgb::&lt;u8&gt;::from([23, 198, 76])` works too.
 //!
-//! let buffer = &amp;mut [[64u8, 139, 10], [93, 18, 214]];
-//! let color_buffer = cast::from_array_slice_mut::&lt;Srgb&lt;u8&gt;&gt;(buffer);
+//! let buffer = &amp;mut [[64, 139, 10], [93, 18, 214]];
+//! let color_buffer: &amp;mut [Srgb&lt;u8&gt;] = buffer.arrays_into();
 //!
 //! for destination in color_buffer {
 //!     let linear_dst = destination.into_linear::&lt;f32&gt;();
@@ -188,7 +223,7 @@
 //! ```compile_fail
 //! use palette::{cast, Srgb};
 //!
-//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23u8, 198]); // Too few components.
+//! let color = cast::from_array::&lt;Srgb&lt;u8&gt;&gt;([23, 198]); // Too few components.
 //! ```
 //!
 //! ## Casting Component Buffers
@@ -204,34 +239,35 @@
 //! or multiplying the length.
 //!
 //! ```
-//! use palette::{cast, Srgb};
+//! use palette::{cast::{self, TryFromComponents}, Srgb};
 //!
-//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];
-//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer).is_ok());
+//! let correct_buffer = &amp;[64, 139, 10, 93, 18, 214];
+//! assert!(&lt;&amp;[Srgb&lt;u8&gt;]&gt;::try_from_components(correct_buffer).is_ok());
 //!
-//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];
-//! assert!(cast::try_from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer).is_err());
+//! let incorrect_buffer = &amp;[64, 139, 10, 93, 18, 214, 198, 76];
+//! assert!(&lt;&amp;[Srgb&lt;u8&gt;]&gt;::try_from_components(incorrect_buffer).is_err());
 //! ```
 //!
 //! An alternative, for when the length can be trusted to be correct, is to use
-//! the `from_component_*` functions that panic on error.
+//! the `ComponentsInto::components_into` and `FromComponents::from_components`
+//! methods, or the `from_component_*` functions, that panic on error.
 //!
 //! This works:
 //!
 //! ```
-//! use palette::{cast, Srgb};
+//! use palette::{cast::ComponentsInto, Srgb};
 //!
-//! let correct_buffer = &amp;[64u8, 139, 10, 93, 18, 214];
-//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(correct_buffer);
+//! let correct_buffer = &amp;[64, 139, 10, 93, 18, 214];
+//! let color_buffer: &amp;[Srgb&lt;u8&gt;] = correct_buffer.components_into();
 //! ```
 //!
 //! But this panics:
 //!
 //! ```should_panic
-//! use palette::{cast, Srgb};
+//! use palette::{cast::ComponentsInto, Srgb};
 //!
-//! let incorrect_buffer = &amp;[64u8, 139, 10, 93, 18, 214, 198, 76];
-//! let color_buffer = cast::from_component_slice::&lt;Srgb&lt;u8&gt;&gt;(incorrect_buffer);
+//! let incorrect_buffer = &amp;[64, 139, 10, 93, 18, 214, 198, 76];
+//! let color_buffer: &amp;[Srgb&lt;u8&gt;] = incorrect_buffer.components_into();
 //! ```
 //!
 //! ## Casting Single Colors
@@ -263,10 +299,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.
-//! use palette::{rgb::PackedArgb, cast, Srgba};
+//! use palette::{rgb::PackedArgb, cast::ComponentsInto, Srgba};
 //!
 //! let components = &amp;[1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];
-//! let colors = cast::from_component_slice::&lt;PackedArgb&lt;_&gt;&gt;(components);
+//! let colors: &amp;[PackedArgb&lt;_&gt;] = components.components_into();
 //!
 //! // Notice how the alpha values have moved from the beginning to the end:
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0.8, 0.2, 0.3, 1.0));
@@ -287,10 +323,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed&lt;rgb::channels::Argb, P = u32&gt;`.
-//! use palette::{rgb::PackedArgb, cast, Srgba};
+//! use palette::{rgb::PackedArgb, cast::UintsInto, Srgba};
 //!
 //! let raw = &amp;[0xFF7F0080u32, 0xFF60BBCC];
-//! let colors = cast::from_uint_slice::&lt;PackedArgb&gt;(raw);
+//! let colors: &amp;[PackedArgb] = raw.uints_into();
 //!
 //! assert_eq!(colors.len(), 2);
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0x7F, 0x00, 0x80, 0xFF));
@@ -298,8 +334,10 @@
 //! ```
 
 </span><span class="kw">mod </span>array;
+<span class="kw">mod </span>array_traits;
 <span class="kw">mod </span>packed;
 <span class="kw">mod </span>uint;
+<span class="kw">mod </span>uint_traits;
 
-<span class="kw">pub use </span><span class="self">self</span>::{array::<span class="kw-2">*</span>, packed::<span class="kw-2">*</span>, uint::<span class="kw-2">*</span>};
+<span class="kw">pub use </span><span class="self">self</span>::{array::<span class="kw-2">*</span>, array_traits::<span class="kw-2">*</span>, packed::<span class="kw-2">*</span>, uint::<span class="kw-2">*</span>, uint_traits::<span class="kw-2">*</span>};
 </code></pre></div></section></main></body></html>
