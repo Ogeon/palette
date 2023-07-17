@@ -3,7 +3,8 @@
         "random",
         "serializing",
         "bytemuck",
-        "wide"
+        "wide",
+        "cam16"
     ],
     "rust-analyzer.imports.granularity.enforce": true,
     "rust-analyzer.imports.granularity.group": "crate",

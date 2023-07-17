@@ -35,7 +35,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma, Cam16)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32> {
@@ -315,6 +315,19 @@ where
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
+    }
+}
+
+#[cfg(feature = "cam16")]
+impl<Wp, T> FromColorUnclamped<crate::cam16::Cam16<Wp, T>> for Xyz<Wp, T>
+where
+    Xyz<Wp, T>: crate::cam16::FromCam16<Wp, T>,
+    T: Real,
+{
+    fn from_color_unclamped(val: crate::cam16::Cam16<Wp, T>) -> Self {
+        use crate::cam16::FromCam16;
+
+        Self::from_cam16(val.into(), crate::cam16::Parameters::default())
     }
 }
 

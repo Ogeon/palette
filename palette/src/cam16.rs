@@ -1,7 +1,9 @@
+//! Types for the CIE CAM16 color appearance model.
+
 use core::{fmt::Debug, marker::PhantomData};
 
 use crate::{
-    angle::RealAngle,
+    angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::Cam16Hue,
@@ -9,7 +11,7 @@ use crate::{
         Abs, Arithmetics, Clamp, Exp, One, PartialCmp, Powf, Real, Signum, Sqrt, Trigonometry, Zero,
     },
     white_point::{self, WhitePoint, D65},
-    FromColor, Xyz,
+    FromColor, WithAlpha, Xyz,
 };
 
 #[cfg(feature = "approx")]
@@ -17,21 +19,43 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 mod math;
 
-#[derive(Debug)]
+/// The CIE CAM16 color appearance model.
+#[derive(Debug, WithAlpha, FromColorUnclamped)]
+#[palette(
+    palette_internal,
+    white_point = "Wp",
+    component = "T",
+    skip_derives(Xyz, Cam16)
+)]
 pub struct Cam16<Wp, T> {
+    /// The luminance (J) of the color.
     #[doc(alias = "J")]
     pub luminance: T,
+
+    /// The chroma (C) of the color.
     #[doc(alias = "C")]
     pub chroma: T,
+
+    /// The hue (h) of the color.
     #[doc(alias = "h")]
     pub hue: Cam16Hue<T>,
+
+    /// The brightness (Q) of the color.
     #[doc(alias = "Q")]
     pub brightness: T,
+
+    /// The colorfulness (M) of the color.
     #[doc(alias = "M")]
     pub colorfulness: T,
+
+    /// The saturation (s) of the color.
     #[doc(alias = "s")]
     pub saturation: T,
 
+    /// The reference white point, usually inherited from the source/target
+    /// color space.
+    ///
+    /// See also [`Parameters::white_point`] for how it's used in conversion.
     pub white_point: PhantomData<Wp>,
 }
 
@@ -84,7 +108,147 @@ impl_eq_hue!(
     [luminance, chroma, brightness, colorfulness, saturation]
 );
 
+impl<Wp, T> FromColorUnclamped<Cam16<Wp, T>> for Cam16<Wp, T> {
+    fn from_color_unclamped(val: Cam16<Wp, T>) -> Self {
+        val
+    }
+}
+
+impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Cam16<Wp, T>
+where
+    Xyz<Wp, T>: IntoCam16<Wp, T>,
+    T: Real,
+{
+    fn from_color_unclamped(val: Xyz<Wp, T>) -> Self {
+        val.into_cam16(Parameters::default())
+    }
+}
+
+// We don't implement `Clamp` for `Cam16`, that's required for the blanket
+// implementation, so we need to add our own `FromColor` implementation here.
+impl<C, Wp, T> FromColor<C> for Cam16<Wp, T>
+where
+    Self: FromColorUnclamped<C>,
+{
+    fn from_color(val: C) -> Self {
+        Self::from_color_unclamped(val)
+    }
+}
+
+/// A partial version of [`Cam16`] with only one of each kind of parameter.
+///
+/// This is enough information for converting CAM16 to other color spaces.
+#[derive(Debug)]
+pub struct PartialCam16<Wp, T> {
+    /// The hue (h) of the color.
+    pub hue: Cam16Hue<T>,
+
+    /// The chroma (C), colorfulness (M), or saturation (s) of the color.
+    pub saturation: SaturationType<T>,
+
+    /// The lightness (J) or brightness (Q) of the color.
+    pub lightness: LightnessType<T>,
+
+    /// The reference white point, usually inherited from the source/target
+    /// color space.
+    ///
+    /// See also [`Parameters::white_point`] for how it's used in conversion.
+    pub white_point: PhantomData<Wp>,
+}
+
+impl<Wp, T> PartialCam16<Wp, T> {
+    fn with_white_point<Wp2>(self) -> PartialCam16<Wp2, T> {
+        let PartialCam16 {
+            hue,
+            saturation,
+            lightness,
+            white_point: _,
+        } = self;
+
+        PartialCam16 {
+            hue,
+            saturation,
+            lightness,
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Clone for PartialCam16<Wp, T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            hue: self.hue.clone(),
+            saturation: self.saturation.clone(),
+            lightness: self.lightness.clone(),
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Copy for PartialCam16<Wp, T> where T: Copy {}
+
+impl<Wp, T> From<Cam16<Wp, T>> for PartialCam16<Wp, T> {
+    fn from(value: Cam16<Wp, T>) -> Self {
+        let Cam16 {
+            luminance,
+            chroma,
+            hue,
+            white_point,
+            ..
+        } = value;
+
+        PartialCam16 {
+            hue,
+            saturation: SaturationType::Chroma(chroma),
+            lightness: LightnessType::Luminance(luminance),
+            white_point,
+        }
+    }
+}
+
+/// One of the saturation metrics of CAM16.
+///
+/// Combined with the hue and one of [`LightnessType`], it can describe a
+/// complete color as [`PartialCam16`].
+#[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
+pub enum SaturationType<T> {
+    /// The chroma (C) of the color.
+    #[doc(alias = "C")]
+    Chroma(T),
+
+    /// The colorfulness (M) of the color.
+    #[doc(alias = "M")]
+    Colorfulness(T),
+
+    /// The saturation (s) of the color.
+    #[doc(alias = "s")]
+    Saturation(T),
+}
+
+/// One of the lightness metrics of CAM16.
+///
+/// Combined with the hue and one of [`SaturationType`], it can describe a
+/// complete color as [`PartialCam16`].
+#[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
+pub enum LightnessType<T> {
+    /// The luminance (J) of the color.
+    #[doc(alias = "J")]
+    Luminance(T),
+
+    /// The brightness (Q) of the color.
+    #[doc(alias = "Q")]
+    Brightness(T),
+}
+
+/// Converts a color to CAM16, using a set of parameters.
 pub trait IntoCam16<Wp, T> {
+    /// Convert `self` into CAM16, with `parameters` that describe the viewing
+    /// conditions.
     fn into_cam16(self, parameters: Parameters<Wp, T>) -> Cam16<Wp, T>;
 }
 
@@ -118,32 +282,75 @@ where
     }
 }
 
-impl<C, Wp, T> FromColorUnclamped<C> for Cam16<Wp, T>
+/// Converts CAM16 to a color, using a set of parameters.
+pub trait FromCam16<Wp, T> {
+    /// Convert `cam16` into `Self`, with `parameters` that describe the viewing
+    /// conditions.
+    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: Parameters<Wp, T>) -> Self;
+}
+
+impl<C, Wp, T> FromCam16<Wp, T> for C
 where
-    C: IntoCam16<Wp, T>,
-    T: Real,
+    T: Real
+        + One
+        + Zero
+        + Clamp
+        + Sqrt
+        + Powf
+        + Exp
+        + Abs
+        + Signum
+        + Arithmetics
+        + Trigonometry
+        + RealAngle
+        + SignedAngle
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T> + LazySelect<Xyz<white_point::Any, T>>,
+    Xyz<Wp, T>: IntoColorUnclamped<C>,
+    Wp: WhitePoint<T>,
 {
-    fn from_color_unclamped(val: C) -> Self {
-        val.into_cam16(Parameters::default())
+    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: Parameters<Wp, T>) -> Self {
+        math::cam16_to_xyz(cam16.with_white_point(), parameters.into_any_white_point())
+            .with_white_point()
+            .into_color_unclamped()
     }
 }
 
-impl<C, Wp, T> FromColor<C> for Cam16<Wp, T>
-where
-    C: IntoCam16<Wp, T>,
-    T: Real,
-{
-    fn from_color(val: C) -> Self {
-        Self::from_color_unclamped(val)
-    }
-}
-
+/// Parameters for CAM16.
+///
+/// These parameters describe the viewing conditions for a more accurate color
+/// appearance metric. The default values are used in [`FromColor`],
+/// [`IntoColor`][crate::IntoColor], etc.
+///
+/// See also Moroney (2000) [Usage Guidelines for CIECAM97s][moroney_2000] for more
+/// information and advice on how to customize these parameters.
+///
+/// [moroney_2000]: https://www.imaging.org/common/uploaded%20files/pdfs/Papers/2000/PICS-0-81/1611.pdf
 #[non_exhaustive]
 pub struct Parameters<Wp, T> {
+    /// The reference white point. Defaults to `Wp` when it implements
+    /// [`WhitePoint`], or [`D65`] when `Wp` is [`white_point::Any`]. It can
+    /// also be set to a custom value if `Wp` results in the wrong white point.
     pub white_point: WhitePointParameter<Wp, T>,
+
+    /// The average luminance of the environment (*L<sub>A</sub>*) in
+    /// *cd/m<sup>2</sup>* (nits). Under a “gray world” assumption this is 20%
+    /// of the luminance of a white reference. Defaults to `40`.
     pub adapting_luminance: T,
+
+    /// The relative luminance of the nearby background (*Y<sub>b</sub>*), out
+    /// to 10°, on a scale of 0 to 100. Defaults to `20` (medium gray).
     pub background_luminance: T,
+
+    /// A description of the peripheral area, with a value from `0` to `2`. Any
+    /// value outside that range will be clamped to `0` or `2`. It has presets
+    /// for "dark", "dim" and "average". Defaults to "average" (`2`).
     pub surround: Surround<T>,
+
+    /// Set to `true` to assume that the observer's eyes have fully adapted to
+    /// the illuminant. The degree of discounting will be set based on the other
+    /// parameters. Defaults to `false`.
     pub discounting: bool,
 }
 
@@ -182,16 +389,27 @@ where
             adapting_luminance: T::from_f64(40.0),
             background_luminance: T::from_f64(20.0),
             surround: Surround::Average,
-            discounting: Default::default(),
+            discounting: false,
         }
     }
 }
 
+/// A description of the peripheral area.
 #[non_exhaustive]
 pub enum Surround<T> {
+    /// Represents a dark room, such as a movie theatre. Corresponds to a
+    /// surround value of `0`.
     Dark,
+
+    /// Represents a dimly lit room with a bright TV or monitor. Corresponds to
+    /// a surround value of `1`.
     Dim,
+
+    /// Represents a surface color. Corresponds to a surround value of `2`.
     Average,
+
+    /// Any custom value from `0` to `2`. Any value outside that range will be
+    /// clamped to either `0` or `2`.
     Custom(T),
 }
 
@@ -209,9 +427,16 @@ impl<T> Surround<T> {
     }
 }
 
+/// A parameter value for the reference white point.
 #[non_exhaustive]
 pub enum WhitePointParameter<Wp, T> {
+    /// Represents the value of `Wp`.
     Default,
+
+    /// Represents any custom white point. The `Wp` parameter isn't used in this
+    /// case, but still included for Rust to accept an empty `Default`. See
+    /// [`Xyz::with_white_point`] for how to change the reference white point of
+    /// an `Xyz` value without changing its numerical value.
     Custom(Xyz<Wp, T>),
 }
 
@@ -243,7 +468,42 @@ where
 mod test {
     use crate::{convert::IntoColor, Srgb};
 
-    use super::Cam16;
+    use super::{Cam16, FromCam16, LightnessType, PartialCam16, SaturationType};
+
+    macro_rules! assert_cam16_to_rgb {
+        ($cam16:expr, $rgb:expr, $($params:tt)*) => {
+            let cam16 = $cam16;
+
+            let rgb: Srgb<f64> = cam16.into_color();
+            assert_relative_eq!(rgb, $rgb, $($params)*);
+
+            let saturations = [
+                SaturationType::Chroma(cam16.chroma),
+                SaturationType::Colorfulness(cam16.colorfulness),
+                SaturationType::Saturation(cam16.saturation),
+            ];
+            let lightnesses = [
+                LightnessType::Luminance(cam16.luminance),
+                LightnessType::Brightness(cam16.brightness),
+            ];
+
+            for saturation in saturations {
+                for lightness in lightnesses {
+                    let partial = PartialCam16 {
+                        hue: cam16.hue,
+                        saturation,
+                        lightness,
+                        white_point: cam16.white_point,
+                    };
+                    assert_relative_eq!(
+                        Srgb::<f64>::from_cam16(dbg!(partial), Default::default()),
+                        $rgb,
+                        $($params)*
+                    );
+                }
+            }
+        };
+    }
 
     #[test]
     fn example_blue() {
@@ -263,6 +523,143 @@ mod test {
                 white_point: core::marker::PhantomData
             },
             epsilon = 0.01
+        );
+
+        assert_cam16_to_rgb!(
+            cam16,
+            Srgb::from(0x5588cc).into_format(),
+            epsilon = 0.0000001
+        );
+    }
+
+    #[test]
+    fn black() {
+        // Checks against the output from https://observablehq.com/@jrus/cam16
+        let mut cam16: Cam16<_, f64> = Srgb::from(0x000000).into_linear().into_color();
+        cam16.hue = cam16.hue.into_positive_degrees().into();
+
+        assert_relative_eq!(
+            cam16,
+            Cam16 {
+                luminance: 0.0,
+                chroma: 0.0,
+                hue: 0.0.into(),
+                brightness: 0.0,
+                colorfulness: 0.0,
+                saturation: 0.0,
+                white_point: core::marker::PhantomData
+            },
+            epsilon = 0.01
+        );
+
+        assert_cam16_to_rgb!(
+            cam16,
+            Srgb::from(0x000000).into_format(),
+            epsilon = 0.0000001
+        );
+    }
+
+    #[test]
+    fn white() {
+        // Checks against the output from https://observablehq.com/@jrus/cam16
+        let mut cam16: Cam16<_, f64> = Srgb::from(0xffffff).into_linear().into_color();
+        cam16.hue = cam16.hue.into_positive_degrees().into();
+
+        assert_relative_eq!(
+            cam16,
+            Cam16 {
+                luminance: 99.99955537650459,
+                chroma: 2.1815254387079435,
+                hue: 209.49854407518228.into(),
+                brightness: 197.03120459014184,
+                colorfulness: 1.9077118865271965,
+                saturation: 9.839859256901553,
+                white_point: core::marker::PhantomData
+            },
+            epsilon = 0.1
+        );
+
+        assert_cam16_to_rgb!(
+            cam16,
+            Srgb::from(0xffffff).into_format(),
+            epsilon = 0.0000001
+        );
+    }
+
+    #[test]
+    fn red() {
+        // Checks against the output from https://observablehq.com/@jrus/cam16
+        let mut cam16: Cam16<_, f64> = Srgb::from(0xff0000).into_linear().into_color();
+        cam16.hue = cam16.hue.into_positive_degrees().into();
+
+        assert_relative_eq!(
+            cam16,
+            Cam16 {
+                luminance: 46.23623443823762,
+                chroma: 113.27879472174797,
+                hue: 27.412485587695937.into(),
+                brightness: 133.9760614641257,
+                colorfulness: 99.06063864657237,
+                saturation: 85.98782392745971,
+                white_point: core::marker::PhantomData
+            },
+            epsilon = 0.01
+        );
+
+        assert_cam16_to_rgb!(cam16, Srgb::from(0xff0000).into_format(), epsilon = 0.00001);
+    }
+
+    #[test]
+    fn green() {
+        // Checks against the output from https://observablehq.com/@jrus/cam16
+        let mut cam16: Cam16<_, f64> = Srgb::from(0x00ff00).into_linear().into_color();
+        cam16.hue = cam16.hue.into_positive_degrees().into();
+
+        assert_relative_eq!(
+            cam16,
+            Cam16 {
+                luminance: 79.23121430933533,
+                chroma: 107.77869525794452,
+                hue: 141.93451307926003.into(),
+                brightness: 175.38164288466993,
+                colorfulness: 94.25088262080988,
+                saturation: 73.30787758114869,
+                white_point: core::marker::PhantomData
+            },
+            epsilon = 0.01
+        );
+
+        assert_cam16_to_rgb!(
+            cam16,
+            Srgb::from(0x00ff00).into_format(),
+            epsilon = 0.000001
+        );
+    }
+
+    #[test]
+    fn blue() {
+        // Checks against the output from https://observablehq.com/@jrus/cam16
+        let mut cam16: Cam16<_, f64> = Srgb::from(0x0000ff).into_linear().into_color();
+        cam16.hue = cam16.hue.into_positive_degrees().into();
+
+        assert_relative_eq!(
+            cam16,
+            Cam16 {
+                luminance: 25.22701796474445,
+                chroma: 86.59618504567312,
+                hue: 282.81848901862566.into(),
+                brightness: 98.96210767195342,
+                colorfulness: 75.72708922311855,
+                saturation: 87.47645277637828,
+                white_point: core::marker::PhantomData
+            },
+            epsilon = 0.01
+        );
+
+        assert_cam16_to_rgb!(
+            cam16,
+            Srgb::from(0x0000ff).into_format(),
+            epsilon = 0.000001
         );
     }
 }

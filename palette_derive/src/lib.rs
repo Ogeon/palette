@@ -38,8 +38,31 @@ mod meta;
 mod util;
 
 const COLOR_TYPES: &[&str] = &[
+    "Rgb",
+    "Luma",
+    "Hsl",
+    "Hsluv",
+    "Hsv",
+    "Hwb",
+    "Lab",
+    "Lch",
+    "Lchuv",
+    "Luv",
+    "Oklab",
+    "Oklch",
+    "Okhwb",
+    "Okhsl",
+    "Okhsv",
+    "Xyz",
+    "Yxy",
+    #[cfg(feature = "cam16")]
+    "Cam16",
+];
+
+// Should contain all of `COLOR_TYPES`, including feature gated colors.
+const ALLOWED_COLOR_TYPES: &[&str] = &[
     "Rgb", "Luma", "Hsl", "Hsluv", "Hsv", "Hwb", "Lab", "Lch", "Lchuv", "Luv", "Oklab", "Oklch",
-    "Okhwb", "Okhsl", "Okhsv", "Xyz", "Yxy",
+    "Okhwb", "Okhsl", "Okhsv", "Xyz", "Yxy", "Cam16",
 ];
 
 const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
@@ -59,6 +82,8 @@ const PREFERRED_CONVERSION_SOURCE: &[(&str, &str)] = &[
     ("Okhsv", "Oklab"),
     ("Okhwb", "Okhsv"),
     ("Yxy", "Xyz"),
+    #[cfg(feature = "cam16")]
+    ("Cam16", "Xyz"),
 ];
 
 #[proc_macro_derive(WithAlpha, attributes(palette))]

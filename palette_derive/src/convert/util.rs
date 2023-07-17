@@ -4,8 +4,7 @@ use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{parse_quote, GenericParam, Generics, Ident, Result, Type};
 
-use crate::util;
-use crate::{COLOR_TYPES, PREFERRED_CONVERSION_SOURCE};
+use crate::{util, ALLOWED_COLOR_TYPES, PREFERRED_CONVERSION_SOURCE};
 
 pub fn white_point_type(
     white_point: Option<&Type>,
@@ -127,7 +126,7 @@ pub fn find_nearest_color<'a>(color: &'a str, skip: &HashSet<String>) -> Result<
     // Make sure there is at least one valid color in the skip list
     assert!(!skip.is_empty());
     for skipped_color in skip {
-        if !COLOR_TYPES
+        if !ALLOWED_COLOR_TYPES
             .iter()
             .any(|valid_color| skipped_color == valid_color)
         {

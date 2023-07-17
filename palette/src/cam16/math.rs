@@ -1,7 +1,7 @@
 use core::{marker::PhantomData, ops::Mul};
 
 use crate::{
-    angle::RealAngle,
+    angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
     clamp,
     hues::Cam16Hue,
@@ -12,7 +12,7 @@ use crate::{
     xyz::Xyz,
 };
 
-use super::{Cam16, Parameters};
+use super::{Cam16, Parameters, PartialCam16};
 
 // This module is originally based on https://observablehq.com/@jrus/cam16
 
@@ -79,6 +79,106 @@ where
 
         white_point: PhantomData,
     }
+}
+
+#[inline]
+pub(crate) fn cam16_to_xyz<T>(
+    cam16: PartialCam16<white_point::Any, T>,
+    parameters: Parameters<white_point::Any, T>,
+) -> Xyz<white_point::Any, T>
+where
+    T: Real
+        + One
+        + Zero
+        + Clamp
+        + Sqrt
+        + Powf
+        + Exp
+        + Abs
+        + Signum
+        + Arithmetics
+        + Trigonometry
+        + RealAngle
+        + SignedAngle
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T> + LazySelect<Xyz<white_point::Any, T>>,
+{
+    let lightness = match &cam16.lightness {
+        crate::cam16::LightnessType::Luminance(luminance) => luminance.clone(),
+        crate::cam16::LightnessType::Brightness(brightness) => brightness.clone(),
+    };
+
+    lazy_select! {
+        if lightness.eq(&T::zero()) => Xyz { x: T::zero(), y: T::zero(), z: T::zero(), white_point: PhantomData },
+        else => non_black_cam16_to_xyz(cam16, parameters)
+    }
+}
+
+// Assumes that lightness has been checked to be non-zero in `cam16_to_xyz`.
+fn non_black_cam16_to_xyz<T>(
+    cam16: PartialCam16<white_point::Any, T>,
+    parameters: Parameters<white_point::Any, T>,
+) -> Xyz<white_point::Any, T>
+where
+    T: Real
+        + One
+        + Zero
+        + Clamp
+        + Sqrt
+        + Powf
+        + Exp
+        + Abs
+        + Signum
+        + Arithmetics
+        + Trigonometry
+        + RealAngle
+        + SignedAngle
+        + PartialCmp
+        + Clone,
+    T::Mask: LazySelect<T>,
+{
+    let parameters = prepare_parameters(parameters);
+
+    let h_rad = cam16.hue.into_radians();
+    let (sin_h, cos_h) = h_rad.clone().sin_cos();
+    let j_root = match cam16.lightness {
+        super::LightnessType::Luminance(j) => j.sqrt() * T::from_f64(0.1),
+        super::LightnessType::Brightness(q) => {
+            T::from_f64(0.25) * &parameters.c * q
+                / ((T::from_f64(4.0) + &parameters.a_w) * &parameters.f_l_4)
+        }
+    };
+    let alpha = match cam16.saturation {
+        super::SaturationType::Chroma(c) => c / &j_root,
+        super::SaturationType::Colorfulness(m) => (m / parameters.f_l_4) / &j_root,
+        super::SaturationType::Saturation(s) => {
+            T::from_f64(0.0004) * &s * s * (T::from_f64(4.0) + &parameters.a_w) / &parameters.c
+        }
+    };
+    let t = (alpha
+        * (T::from_f64(1.64) - T::from_f64(0.29).powf(parameters.n)).powf(T::from_f64(-0.73)))
+    .powf(T::from_f64(10.0) / T::from_f64(9.0));
+    let e_t = T::from_f64(0.25) * ((h_rad + T::from_f64(2.0)).cos() + T::from_f64(3.8));
+    let capital_a = parameters.a_w * j_root.powf(T::from_f64(2.0) / parameters.c / parameters.z);
+    let p_1 = T::from_f64(5e4) / T::from_f64(13.0) * parameters.n_c * parameters.n_cb * e_t;
+    let p_2 = capital_a / parameters.n_bb;
+    let r = T::from_f64(23.0) * (T::from_f64(0.305) + &p_2) * &t
+        / (T::from_f64(23.0) * p_1
+            + t * (T::from_f64(11.0) * &cos_h + T::from_f64(108.0) * &sin_h));
+    let a = cos_h * &r;
+    let b = sin_h * r;
+    let denom = T::one() / T::from_f64(1403.0);
+    let rgb_c = [
+        (T::from_f64(460.0) * &p_2 + T::from_f64(451.0) * &a + T::from_f64(288.0) * &b) * &denom,
+        (T::from_f64(460.0) * &p_2 - T::from_f64(891.0) * &a - T::from_f64(261.0) * &b) * &denom,
+        (T::from_f64(460.0) * p_2 - T::from_f64(220.0) * a - T::from_f64(6300.0) * b) * &denom,
+    ];
+
+    let unadapt = parameters.unadapt;
+    let rgb_c = map3(rgb_c, |component| unadapt.run(component));
+
+    m16_inv(mul3(rgb_c, parameters.d_rgb_inv)) / T::from_f64(100.0)
 }
 
 fn prepare_parameters<T>(parameters: Parameters<white_point::Any, T>) -> DependentParameters<T>
@@ -159,17 +259,10 @@ where
 
     let adapt = Adapt { f_l: f_l.clone() };
 
-    let unadapt = {
-        let f_l = f_l.clone();
-        let exponent = T::one() / T::from_f64(0.42);
-        let constant = T::from_f64(100.0) / f_l * T::from_f64(27.13).powf(exponent.clone());
-
-        move |component: T| {
-            let c_abs = component.clone().abs();
-            component.signum()
-                * constant
-                * (c_abs.clone() / (T::from_f64(400.0) - c_abs)).powf(exponent)
-        }
+    let exponent = T::one() / T::from_f64(0.42);
+    let unadapt = Unadapt {
+        constant: T::from_f64(100.0) / f_l * T::from_f64(27.13).powf(exponent.clone()),
+        exponent,
     };
 
     let [rgb_aw1, rgb_aw2, rgb_aw3] = map3(rgb_cw, |component| adapt.run(component));
@@ -177,6 +270,7 @@ where
 
     DependentParameters {
         d_rgb,
+        d_rgb_inv,
         n,
         n_bb,
         n_c,
@@ -186,11 +280,13 @@ where
         z,
         f_l_4,
         adapt,
+        unadapt,
     }
 }
 
 struct DependentParameters<T> {
     d_rgb: [T; 3],
+    d_rgb_inv: [T; 3],
     n: T,
     n_bb: T,
     n_c: T,
@@ -200,6 +296,7 @@ struct DependentParameters<T> {
     z: T,
     f_l_4: T,
     adapt: Adapt<T>,
+    unadapt: Unadapt<T>,
 }
 
 struct Adapt<T> {
@@ -214,6 +311,23 @@ impl<T> Adapt<T> {
         let x = (self.f_l.clone() * component.clone().abs() * T::from_f64(0.01))
             .powf(T::from_f64(0.42));
         component.signum() * T::from_f64(400.0) * &x / (x + T::from_f64(27.13))
+    }
+}
+
+struct Unadapt<T> {
+    constant: T,
+    exponent: T,
+}
+
+impl<T> Unadapt<T> {
+    fn run(&self, component: T) -> T
+    where
+        T: Real + Abs + Signum + Powf + Arithmetics + Clone,
+    {
+        let c_abs = component.clone().abs();
+        component.signum()
+            * &self.constant
+            * (c_abs.clone() / (T::from_f64(400.0) - c_abs)).powf(self.exponent.clone())
     }
 }
 
@@ -238,6 +352,23 @@ where
     ];
 
     rgb
+}
+
+fn m16_inv<T>(rgb: [T; 3]) -> Xyz<white_point::Any, T>
+where
+    T: Real + Arithmetics,
+{
+    let [r, g, b] = rgb;
+
+    #[rustfmt::skip]
+    let xyz = Xyz {
+        x: T::from_f64( 1.862067855087233e+0) * &r - T::from_f64(1.011254630531685e+0) * &g + T::from_f64(1.491867754444518e-1) * &b,
+        y: T::from_f64( 3.875265432361372e-1) * &r + T::from_f64(6.214474419314753e-1) * &g - T::from_f64(8.973985167612518e-3) * &b,
+        z: T::from_f64(-1.584149884933386e-2) *  r - T::from_f64(3.412293802851557e-2) *  g + T::from_f64(1.049964436877850e+0) *  b,
+        white_point: PhantomData
+    };
+
+    xyz
 }
 
 fn map3<T>(array: [T; 3], mut map: impl FnMut(T) -> T) -> [T; 3] {
