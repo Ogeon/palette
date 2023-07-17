@@ -716,6 +716,7 @@ macro_rules! impl_float {
                 }
             }
 
+            #[cfg(feature = "std")]
             impl Signum for $ty {
                 #[inline]
                 fn signum(self) -> Self {

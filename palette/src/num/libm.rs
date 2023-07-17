@@ -253,3 +253,25 @@ impl MulAdd for f64 {
         ::libm::fma(self, m, a)
     }
 }
+
+impl Signum for f32 {
+    #[inline]
+    fn signum(self) -> Self {
+        if self.is_nan() {
+            Self::NAN
+        } else {
+            ::libm::copysignf(1.0, self)
+        }
+    }
+}
+
+impl Signum for f64 {
+    #[inline]
+    fn signum(self) -> Self {
+        if self.is_nan() {
+            Self::NAN
+        } else {
+            ::libm::copysign(1.0, self)
+        }
+    }
+}

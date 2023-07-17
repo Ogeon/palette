@@ -302,7 +302,7 @@ macro_rules! impl_wide_float {
             impl Signum for $ty {
                 #[inline]
                 fn signum(self) -> Self {
-                    $ty::copysign(self, Self::from(1.0))
+                    self.is_nan().blend(Self::from($scalar::NAN), $ty::copysign(Self::from(1.0), self))
                 }
             }
         )+
