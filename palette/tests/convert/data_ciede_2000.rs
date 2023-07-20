@@ -5,7 +5,7 @@ Tests Lab color differences with expected delta E*
 
 Note: Test uses `f64` because `f32` failed Travis CI builds on Linux for Lch on
         case 13 or 14 which is noted in the paper as testing accuracy of hue
-        angle and atan calcuation (calculated: 4.7460666, expected: 4.8045).
+        angle and atan calculation (calculated: 4.7460666, expected: 4.8045).
         MacOS and Windows passed the tests so be wary when using f32 on Linux.
 */
 
