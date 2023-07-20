@@ -86,9 +86,9 @@
             <span class="attr">#[inline]
             </span><span class="kw">fn </span>distance_squared(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar {
                 <span class="kw">let </span>difference = <span class="self">self </span>- other;
-                <span class="kw">let </span>differece_squared = difference.clone() * difference;
+                <span class="kw">let </span>difference_squared = difference.clone() * difference;
 
-                <span class="macro">strip_plus!</span>($(+ differece_squared.<span class="macro-nonterminal">$component</span>)+)
+                <span class="macro">strip_plus!</span>($(+ difference_squared.<span class="macro-nonterminal">$component</span>)+)
             }
         }
     };
