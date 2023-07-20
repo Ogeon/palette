@@ -232,7 +232,7 @@ pub trait EuclideanDistance: Sized {
     /// The type for the distance value.
     type Scalar;
 
-    /// Calculate Euclidean the distance from `self` to `other`.
+    /// Calculate the Euclidean distance from `self` to `other`.
     #[must_use]
     fn distance(self, other: Self) -> Self::Scalar
     where

@@ -22,9 +22,9 @@ macro_rules! impl_euclidean_distance {
             #[inline]
             fn distance_squared(self, other: Self) -> Self::Scalar {
                 let difference = self - other;
-                let differece_squared = difference.clone() * difference;
+                let difference_squared = difference.clone() * difference;
 
-                strip_plus!($(+ differece_squared.$component)+)
+                strip_plus!($(+ difference_squared.$component)+)
             }
         }
     };
