@@ -4,7 +4,7 @@ use core::{fmt::Debug, marker::PhantomData};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
-    bool_mask::{HasBoolMask, LazySelect},
+    bool_mask::LazySelect,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::Cam16Hue,
     num::{
@@ -23,11 +23,19 @@ mod math;
 /// The CIE CAM16 color appearance model.
 ///
 /// It's a set of six technically defined attributes that describe the
-/// appearance of a color in an environment, and it's a successor of
-/// [CIECAM02](https://en.wikipedia.org/wiki/CIECAM02). Not all attributes are
-/// needed to be known to convert _from_ CAM16, since they are correlated and
-/// derived from each other. This library provides a separate [`PartialCam16`]
-/// to make it easier to specify a minimum attribute set.
+/// appearance of a color under certain viewing conditions, and it's a successor
+/// of [CIECAM02](https://en.wikipedia.org/wiki/CIECAM02). The viewing
+/// conditions are defined using [`Parameters`] and two set of `Cam16`
+/// attributes are only really comparable if they were calculated from the same
+/// set of viewing condition parameters. The implementations of
+/// [`FromColor`][crate::FromColor], [`IntoColor`][crate::IntoColor], etc. use
+/// `Parameters::default()` as their viewing conditions. See [`FromCam16`] and
+/// [`IntoCam16`] for options with more control over the parameters.
+///
+/// Not all attributes are needed to be known to convert _from_ CAM16, since
+/// they are correlated and derived from each other. This library provides a
+/// separate [`PartialCam16`] to make it easier to specify a minimum attribute
+/// set.
 #[derive(Debug, WithAlpha, FromColorUnclamped)]
 #[palette(
     palette_internal,
@@ -155,14 +163,14 @@ impl<Wp, T> FromColorUnclamped<Cam16<Wp, T>> for Cam16<Wp, T> {
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Cam16<Wp, T>
 where
     Xyz<Wp, T>: IntoCam16<Wp, T>,
-    T: Real,
+    BakedParameters<Wp, T>: Default,
 {
     fn from_color_unclamped(val: Xyz<Wp, T>) -> Self {
-        val.into_cam16(Parameters::default())
+        val.into_cam16(BakedParameters::default())
     }
 }
 
-/// A partial version of [`Cam16`] with only one of each kind of parameter.
+/// A partial version of [`Cam16`] with only one of each kind of attribute.
 ///
 /// This is enough information for converting CAM16 to other color spaces.
 #[derive(Debug)]
@@ -335,34 +343,18 @@ pub enum LuminanceType<T> {
 pub trait IntoCam16<Wp, T> {
     /// Convert `self` into CAM16, with `parameters` that describe the viewing
     /// conditions.
-    fn into_cam16(self, parameters: Parameters<Wp, T>) -> Cam16<Wp, T>;
+    fn into_cam16(self, parameters: BakedParameters<Wp, T>) -> Cam16<Wp, T>;
 }
 
 impl<C, Wp, T> IntoCam16<Wp, T> for C
 where
     C: IntoColorUnclamped<Xyz<Wp, T>>,
-    T: Real
-        + One
-        + Zero
-        + Clamp
-        + PartialCmp
-        + Arithmetics
-        + Powf
-        + Sqrt
-        + Exp
-        + Abs
-        + Signum
-        + Trigonometry
-        + RealAngle
-        + HasBoolMask
-        + Clone,
-    T::Mask: LazySelect<T>,
-    Wp: WhitePoint<T>,
+    T: Real + Arithmetics + Powf + Sqrt + Abs + Signum + Trigonometry + RealAngle + Clone,
 {
-    fn into_cam16(self, parameters: Parameters<Wp, T>) -> Cam16<Wp, T> {
+    fn into_cam16(self, parameters: BakedParameters<Wp, T>) -> Cam16<Wp, T> {
         math::xyz_to_cam16(
             self.into_color_unclamped().with_white_point(),
-            parameters.into_any_white_point(),
+            parameters.inner,
         )
         .with_white_point()
     }
@@ -372,7 +364,7 @@ where
 pub trait FromCam16<Wp, T> {
     /// Convert `cam16` into `Self`, with `parameters` that describe the viewing
     /// conditions.
-    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: Parameters<Wp, T>) -> Self;
+    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: BakedParameters<Wp, T>) -> Self;
 }
 
 impl<C, Wp, T> FromCam16<Wp, T> for C
@@ -380,10 +372,8 @@ where
     T: Real
         + One
         + Zero
-        + Clamp
         + Sqrt
         + Powf
-        + Exp
         + Abs
         + Signum
         + Arithmetics
@@ -392,27 +382,32 @@ where
         + SignedAngle
         + PartialCmp
         + Clone,
-    T::Mask: LazySelect<T> + LazySelect<Xyz<white_point::Any, T>>,
+    T::Mask: LazySelect<Xyz<white_point::Any, T>>,
     Xyz<Wp, T>: IntoColorUnclamped<C>,
-    Wp: WhitePoint<T>,
 {
-    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: Parameters<Wp, T>) -> Self {
-        math::cam16_to_xyz(cam16.with_white_point(), parameters.into_any_white_point())
+    fn from_cam16(cam16: PartialCam16<Wp, T>, parameters: BakedParameters<Wp, T>) -> Self {
+        math::cam16_to_xyz(cam16.with_white_point(), parameters.inner)
             .with_white_point()
             .into_color_unclamped()
     }
 }
 
-/// Parameters for CAM16.
+/// Parameters for CAM16 that describe the viewing conditions.
 ///
 /// These parameters describe the viewing conditions for a more accurate color
-/// appearance metric. The default values are used in [`FromColor`],
+/// appearance metric. The CAM16 attributes and derived values are only really
+/// comparable if they were calculated with the same parameters. The parameters
+/// are, however, too dynamic to all be part of the type parameters of
+/// [`Cam16`].
+///
+/// The default values are used in [`FromColor`][crate::FromColor],
 /// [`IntoColor`][crate::IntoColor], etc.
 ///
-/// See also Moroney (2000) [Usage Guidelines for CIECAM97s][moroney_2000] for more
-/// information and advice on how to customize these parameters.
+/// See also Moroney (2000) [Usage Guidelines for CIECAM97s][moroney_2000] for
+/// more information and advice on how to customize these parameters.
 ///
-/// [moroney_2000]: https://www.imaging.org/common/uploaded%20files/pdfs/Papers/2000/PICS-0-81/1611.pdf
+/// [moroney_2000]:
+///     https://www.imaging.org/common/uploaded%20files/pdfs/Papers/2000/PICS-0-81/1611.pdf
 #[non_exhaustive]
 pub struct Parameters<Wp, T> {
     /// The reference white point. Defaults to `Wp` when it implements
@@ -455,6 +450,135 @@ where
     }
 }
 
+impl<T> Parameters<white_point::Any, T> {
+    /// Pre-calculate parameters with no statically known reference white point.
+    ///
+    /// The default white point in this case is [`D65`], unless specified in
+    /// `Self::white_point`.
+    pub fn any_into(self) -> BakedParameters<white_point::Any, T>
+    where
+        T: Real
+            + One
+            + Zero
+            + Clamp
+            + PartialCmp
+            + Arithmetics
+            + Powf
+            + Sqrt
+            + Exp
+            + Abs
+            + Signum
+            + Clone,
+        T::Mask: LazySelect<T>,
+    {
+        BakedParameters::any_from(self)
+    }
+}
+
+impl<Wp, T> Clone for Parameters<Wp, T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            white_point: self.white_point.clone(),
+            adapting_luminance: self.adapting_luminance.clone(),
+            background_luminance: self.background_luminance.clone(),
+            surround: self.surround.clone(),
+            discounting: self.discounting.clone(),
+        }
+    }
+}
+
+impl<Wp, T> Copy for Parameters<Wp, T> where T: Copy {}
+
+/// Pre-calculated variables for CAM16, that only depend on the viewing
+/// conditions.
+///
+/// Derived from [`Parameters`], the `BakedParameters` can be used in
+/// [`FromCam16`] and [`IntoCam16`] to reduce the amount of repeated work
+/// required for converting multiple colors.
+pub struct BakedParameters<Wp, T> {
+    inner: math::DependentParameters<T>,
+    white_point: PhantomData<Wp>,
+}
+
+impl<T> BakedParameters<white_point::Any, T> {
+    /// Pre-calculate parameters with no statically known reference white point.
+    ///
+    /// The default white point in this case is [`D65`], unless specified in
+    /// `Parameters::white_point`.
+    pub fn any_from(parameters: Parameters<white_point::Any, T>) -> Self
+    where
+        T: Real
+            + One
+            + Zero
+            + Clamp
+            + PartialCmp
+            + Arithmetics
+            + Powf
+            + Sqrt
+            + Exp
+            + Abs
+            + Signum
+            + Clone,
+        T::Mask: LazySelect<T>,
+    {
+        Self {
+            inner: math::prepare_parameters(parameters),
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Clone for BakedParameters<Wp, T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Copy for BakedParameters<Wp, T> where T: Copy {}
+
+impl<Wp, T> From<Parameters<Wp, T>> for BakedParameters<Wp, T>
+where
+    Wp: WhitePoint<T>,
+    T: Real
+        + One
+        + Zero
+        + Clamp
+        + PartialCmp
+        + Arithmetics
+        + Powf
+        + Sqrt
+        + Exp
+        + Abs
+        + Signum
+        + Clone,
+    T::Mask: LazySelect<T>,
+{
+    fn from(value: Parameters<Wp, T>) -> Self {
+        Self {
+            inner: math::prepare_parameters(value.into_any_white_point()),
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> Default for BakedParameters<Wp, T>
+where
+    Parameters<Wp, T>: Default + Into<BakedParameters<Wp, T>>,
+{
+    fn default() -> Self {
+        Parameters::default().into()
+    }
+}
+
 impl<Wp, T> Parameters<Wp, T>
 where
     T: Real,
@@ -481,6 +605,7 @@ where
 }
 
 /// A description of the peripheral area.
+#[derive(Clone, Copy)]
 #[non_exhaustive]
 pub enum Surround<T> {
     /// Represents a dark room, such as a movie theatre. Corresponds to a
@@ -549,6 +674,20 @@ where
         }
     }
 }
+
+impl<Wp, T> Clone for WhitePointParameter<Wp, T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        match self {
+            Self::Default => Self::Default,
+            Self::Custom(white_point) => Self::Custom(white_point.clone()),
+        }
+    }
+}
+
+impl<Wp, T> Copy for WhitePointParameter<Wp, T> where T: Copy {}
 
 #[cfg(test)]
 mod test {

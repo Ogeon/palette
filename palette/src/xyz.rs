@@ -322,12 +322,12 @@ where
 impl<Wp, T> FromColorUnclamped<crate::cam16::Cam16<Wp, T>> for Xyz<Wp, T>
 where
     Xyz<Wp, T>: crate::cam16::FromCam16<Wp, T>,
-    T: Real,
+    crate::cam16::BakedParameters<Wp, T>: Default,
 {
     fn from_color_unclamped(val: crate::cam16::Cam16<Wp, T>) -> Self {
         use crate::cam16::FromCam16;
 
-        Self::from_cam16(val.into(), crate::cam16::Parameters::default())
+        Self::from_cam16(val.into(), crate::cam16::BakedParameters::default())
     }
 }
 

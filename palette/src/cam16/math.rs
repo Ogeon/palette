@@ -2,7 +2,7 @@ use core::{marker::PhantomData, ops::Mul};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
-    bool_mask::{HasBoolMask, LazySelect},
+    bool_mask::LazySelect,
     cam16::LuminanceType,
     clamp,
     hues::Cam16Hue,
@@ -19,29 +19,13 @@ use super::{Cam16, ChromaticityType, Parameters, PartialCam16};
 
 pub(crate) fn xyz_to_cam16<T>(
     xyz: Xyz<white_point::Any, T>,
-    parameters: Parameters<white_point::Any, T>,
+    parameters: DependentParameters<T>,
 ) -> Cam16<white_point::Any, T>
 where
-    T: Real
-        + One
-        + Zero
-        + Clamp
-        + PartialCmp
-        + Arithmetics
-        + Powf
-        + Sqrt
-        + Exp
-        + Abs
-        + Signum
-        + Trigonometry
-        + RealAngle
-        + HasBoolMask
-        + Clone,
-    T::Mask: LazySelect<T>,
+    T: Real + Arithmetics + Powf + Sqrt + Abs + Signum + Trigonometry + RealAngle + Clone,
 {
     let xyz = xyz.with_white_point() * T::from_f64(100.0); // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
 
-    let parameters = prepare_parameters(parameters);
     let [r_a, g_a, b_a] = map3(mul3(m16(xyz), parameters.d_rgb.clone()), |component| {
         parameters.adapt.run(component)
     });
@@ -85,16 +69,14 @@ where
 #[inline]
 pub(crate) fn cam16_to_xyz<T>(
     cam16: PartialCam16<white_point::Any, T>,
-    parameters: Parameters<white_point::Any, T>,
+    parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
     T: Real
         + One
         + Zero
-        + Clamp
         + Sqrt
         + Powf
-        + Exp
         + Abs
         + Signum
         + Arithmetics
@@ -103,7 +85,7 @@ where
         + SignedAngle
         + PartialCmp
         + Clone,
-    T::Mask: LazySelect<T> + LazySelect<Xyz<white_point::Any, T>>,
+    T::Mask: LazySelect<Xyz<white_point::Any, T>>,
 {
     // Weird naming, but we just want to know if it's black or not here.
     let is_black = match &cam16.luminance {
@@ -120,28 +102,21 @@ where
 // Assumes that lightness has been checked to be non-zero in `cam16_to_xyz`.
 fn non_black_cam16_to_xyz<T>(
     cam16: PartialCam16<white_point::Any, T>,
-    parameters: Parameters<white_point::Any, T>,
+    parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
     T: Real
         + One
-        + Zero
-        + Clamp
         + Sqrt
         + Powf
-        + Exp
         + Abs
         + Signum
         + Arithmetics
         + Trigonometry
         + RealAngle
         + SignedAngle
-        + PartialCmp
         + Clone,
-    T::Mask: LazySelect<T>,
 {
-    let parameters = prepare_parameters(parameters);
-
     let h_rad = cam16.hue.into_radians();
     let (sin_h, cos_h) = h_rad.clone().sin_cos();
     let j_root = match cam16.luminance {
@@ -180,10 +155,12 @@ where
     let unadapt = parameters.unadapt;
     let rgb_c = map3(rgb_c, |component| unadapt.run(component));
 
-    m16_inv(mul3(rgb_c, parameters.d_rgb_inv)) / T::from_f64(100.0)
+    m16_inv(mul3(rgb_c, parameters.d_rgb_inv)) / T::from_f64(100.0) // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
 }
 
-fn prepare_parameters<T>(parameters: Parameters<white_point::Any, T>) -> DependentParameters<T>
+pub(crate) fn prepare_parameters<T>(
+    parameters: Parameters<white_point::Any, T>,
+) -> DependentParameters<T>
 where
     T: Real
         + One
@@ -196,7 +173,6 @@ where
         + Exp
         + Abs
         + Signum
-        + HasBoolMask
         + Clone,
     T::Mask: LazySelect<T>,
 {
@@ -286,7 +262,8 @@ where
     }
 }
 
-struct DependentParameters<T> {
+#[derive(Clone, Copy)]
+pub(crate) struct DependentParameters<T> {
     d_rgb: [T; 3],
     d_rgb_inv: [T; 3],
     n: T,
@@ -301,6 +278,7 @@ struct DependentParameters<T> {
     unadapt: Unadapt<T>,
 }
 
+#[derive(Clone, Copy)]
 struct Adapt<T> {
     f_l: T,
 }
@@ -316,6 +294,7 @@ impl<T> Adapt<T> {
     }
 }
 
+#[derive(Clone, Copy)]
 struct Unadapt<T> {
     constant: T,
     exponent: T,
