@@ -8,10 +8,11 @@ use crate::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::Cam16Hue,
     num::{
-        Abs, Arithmetics, Clamp, Exp, One, PartialCmp, Powf, Real, Signum, Sqrt, Trigonometry, Zero,
+        Abs, Arithmetics, Clamp, ClampAssign, Exp, One, PartialCmp, Powf, Real, Signum, Sqrt,
+        Trigonometry, Zero,
     },
     white_point::{self, WhitePoint, D65},
-    FromColor, WithAlpha, Xyz,
+    WithAlpha, Xyz,
 };
 
 #[cfg(feature = "approx")]
@@ -102,6 +103,36 @@ where
 
 impl<Wp, T> Copy for Cam16<Wp, T> where T: Copy {}
 
+impl<Wp, T> crate::Clamp for Cam16<Wp, T>
+where
+    T: Clamp + Zero,
+{
+    fn clamp(self) -> Self {
+        Self {
+            luminance: self.luminance.clamp_min(T::zero()),
+            chroma: self.chroma.clamp_min(T::zero()),
+            hue: self.hue,
+            brightness: self.brightness.clamp_min(T::zero()),
+            colorfulness: self.colorfulness.clamp_min(T::zero()),
+            saturation: self.saturation.clamp_min(T::zero()),
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> crate::ClampAssign for Cam16<Wp, T>
+where
+    T: ClampAssign + Zero,
+{
+    fn clamp_assign(&mut self) {
+        self.luminance.clamp_min_assign(T::zero());
+        self.chroma.clamp_min_assign(T::zero());
+        self.brightness.clamp_min_assign(T::zero());
+        self.colorfulness.clamp_min_assign(T::zero());
+        self.saturation.clamp_min_assign(T::zero());
+    }
+}
+
 impl_eq_hue!(
     Cam16<Wp>,
     Cam16Hue,
@@ -121,17 +152,6 @@ where
 {
     fn from_color_unclamped(val: Xyz<Wp, T>) -> Self {
         val.into_cam16(Parameters::default())
-    }
-}
-
-// We don't implement `Clamp` for `Cam16`, that's required for the blanket
-// implementation, so we need to add our own `FromColor` implementation here.
-impl<C, Wp, T> FromColor<C> for Cam16<Wp, T>
-where
-    Self: FromColorUnclamped<C>,
-{
-    fn from_color(val: C) -> Self {
-        Self::from_color_unclamped(val)
     }
 }
 
@@ -189,6 +209,54 @@ where
 }
 
 impl<Wp, T> Copy for PartialCam16<Wp, T> where T: Copy {}
+
+impl<Wp, T> crate::Clamp for PartialCam16<Wp, T>
+where
+    T: Clamp + Zero,
+{
+    fn clamp(self) -> Self {
+        Self {
+            hue: self.hue,
+            saturation: match self.saturation {
+                SaturationType::Chroma(chroma) => {
+                    SaturationType::Chroma(chroma.clamp_min(T::zero()))
+                }
+                SaturationType::Colorfulness(colorfulness) => {
+                    SaturationType::Colorfulness(colorfulness.clamp_min(T::zero()))
+                }
+                SaturationType::Saturation(saturation) => {
+                    SaturationType::Saturation(saturation.clamp_min(T::zero()))
+                }
+            },
+            lightness: match self.lightness {
+                LightnessType::Luminance(luminance) => {
+                    LightnessType::Luminance(luminance.clamp_min(T::zero()))
+                }
+                LightnessType::Brightness(brightness) => {
+                    LightnessType::Brightness(brightness.clamp_min(T::zero()))
+                }
+            },
+            white_point: PhantomData,
+        }
+    }
+}
+
+impl<Wp, T> crate::ClampAssign for PartialCam16<Wp, T>
+where
+    T: ClampAssign + Zero,
+{
+    fn clamp_assign(&mut self) {
+        match &mut self.saturation {
+            SaturationType::Chroma(chroma) => chroma.clamp_min_assign(T::zero()),
+            SaturationType::Colorfulness(colorfulness) => colorfulness.clamp_min_assign(T::zero()),
+            SaturationType::Saturation(saturation) => saturation.clamp_min_assign(T::zero()),
+        }
+        match &mut self.lightness {
+            LightnessType::Luminance(luminance) => luminance.clamp_min_assign(T::zero()),
+            LightnessType::Brightness(brightness) => brightness.clamp_min_assign(T::zero()),
+        }
+    }
+}
 
 impl<Wp, T> From<Cam16<Wp, T>> for PartialCam16<Wp, T> {
     fn from(value: Cam16<Wp, T>) -> Self {
