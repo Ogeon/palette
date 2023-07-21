@@ -21,6 +21,13 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 mod math;
 
 /// The CIE CAM16 color appearance model.
+///
+/// It's a set of six technically defined attributes that describe the
+/// appearance of a color in an environment, and it's a successor of
+/// [CIECAM02](https://en.wikipedia.org/wiki/CIECAM02). Not all attributes are
+/// needed to be known to convert _from_ CAM16, since they are correlated and
+/// derived from each other. This library provides a separate [`PartialCam16`]
+/// to make it easier to specify a minimum attribute set.
 #[derive(Debug, WithAlpha, FromColorUnclamped)]
 #[palette(
     palette_internal,
@@ -29,27 +36,27 @@ mod math;
     skip_derives(Xyz, Cam16)
 )]
 pub struct Cam16<Wp, T> {
-    /// The luminance (J) of the color.
+    /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J) of the color.
     #[doc(alias = "J")]
-    pub luminance: T,
+    pub lightness: T,
 
-    /// The chroma (C) of the color.
+    /// The [chroma](https://en.wikipedia.org/wiki/Colorfulness#Chroma) (C) of the color.
     #[doc(alias = "C")]
     pub chroma: T,
 
-    /// The hue (h) of the color.
+    /// The [hue](https://en.wikipedia.org/wiki/Hue) (h) of the color.
     #[doc(alias = "h")]
     pub hue: Cam16Hue<T>,
 
-    /// The brightness (Q) of the color.
+    /// The [brightness](https://en.wikipedia.org/wiki/Brightness) (Q) of the color.
     #[doc(alias = "Q")]
     pub brightness: T,
 
-    /// The colorfulness (M) of the color.
+    /// The [colorfulness](https://en.wikipedia.org/wiki/Colorfulness) (M) of the color.
     #[doc(alias = "M")]
     pub colorfulness: T,
 
-    /// The saturation (s) of the color.
+    /// The [saturation](https://en.wikipedia.org/wiki/Colorfulness#Saturation) (s) of the color.
     #[doc(alias = "s")]
     pub saturation: T,
 
@@ -63,7 +70,7 @@ pub struct Cam16<Wp, T> {
 impl<Wp, T> Cam16<Wp, T> {
     fn with_white_point<Wp2>(self) -> Cam16<Wp2, T> {
         let Cam16 {
-            luminance,
+            lightness,
             chroma,
             hue,
             brightness,
@@ -73,7 +80,7 @@ impl<Wp, T> Cam16<Wp, T> {
         } = self;
 
         Cam16 {
-            luminance,
+            lightness,
             chroma,
             hue,
             brightness,
@@ -90,7 +97,7 @@ where
 {
     fn clone(&self) -> Self {
         Self {
-            luminance: self.luminance.clone(),
+            lightness: self.lightness.clone(),
             chroma: self.chroma.clone(),
             hue: self.hue.clone(),
             brightness: self.brightness.clone(),
@@ -109,7 +116,7 @@ where
 {
     fn clamp(self) -> Self {
         Self {
-            luminance: self.luminance.clamp_min(T::zero()),
+            lightness: self.lightness.clamp_min(T::zero()),
             chroma: self.chroma.clamp_min(T::zero()),
             hue: self.hue,
             brightness: self.brightness.clamp_min(T::zero()),
@@ -125,7 +132,7 @@ where
     T: ClampAssign + Zero,
 {
     fn clamp_assign(&mut self) {
-        self.luminance.clamp_min_assign(T::zero());
+        self.lightness.clamp_min_assign(T::zero());
         self.chroma.clamp_min_assign(T::zero());
         self.brightness.clamp_min_assign(T::zero());
         self.colorfulness.clamp_min_assign(T::zero());
@@ -136,7 +143,7 @@ where
 impl_eq_hue!(
     Cam16<Wp>,
     Cam16Hue,
-    [luminance, chroma, brightness, colorfulness, saturation]
+    [lightness, chroma, brightness, colorfulness, saturation]
 );
 
 impl<Wp, T> FromColorUnclamped<Cam16<Wp, T>> for Cam16<Wp, T> {
@@ -160,14 +167,18 @@ where
 /// This is enough information for converting CAM16 to other color spaces.
 #[derive(Debug)]
 pub struct PartialCam16<Wp, T> {
-    /// The hue (h) of the color.
+    /// The [hue](https://en.wikipedia.org/wiki/Hue) (h) of the color.
     pub hue: Cam16Hue<T>,
 
-    /// The chroma (C), colorfulness (M), or saturation (s) of the color.
-    pub saturation: SaturationType<T>,
+    /// The [chroma](https://en.wikipedia.org/wiki/Colorfulness#Chroma),
+    /// [colorfulness](https://en.wikipedia.org/wiki/Colorfulness) (M), or
+    /// [saturation](https://en.wikipedia.org/wiki/Colorfulness#Saturation) (s)
+    /// of the color.
+    pub chromaticity: ChromaticityType<T>,
 
-    /// The lightness (J) or brightness (Q) of the color.
-    pub lightness: LightnessType<T>,
+    /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J) or
+    /// [brightness](https://en.wikipedia.org/wiki/Brightness) (Q) of the color.
+    pub luminance: LuminanceType<T>,
 
     /// The reference white point, usually inherited from the source/target
     /// color space.
@@ -180,15 +191,15 @@ impl<Wp, T> PartialCam16<Wp, T> {
     fn with_white_point<Wp2>(self) -> PartialCam16<Wp2, T> {
         let PartialCam16 {
             hue,
-            saturation,
-            lightness,
+            chromaticity,
+            luminance,
             white_point: _,
         } = self;
 
         PartialCam16 {
             hue,
-            saturation,
-            lightness,
+            chromaticity,
+            luminance,
             white_point: PhantomData,
         }
     }
@@ -201,8 +212,8 @@ where
     fn clone(&self) -> Self {
         Self {
             hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
+            chromaticity: self.chromaticity.clone(),
+            luminance: self.luminance.clone(),
             white_point: PhantomData,
         }
     }
@@ -217,23 +228,23 @@ where
     fn clamp(self) -> Self {
         Self {
             hue: self.hue,
-            saturation: match self.saturation {
-                SaturationType::Chroma(chroma) => {
-                    SaturationType::Chroma(chroma.clamp_min(T::zero()))
+            chromaticity: match self.chromaticity {
+                ChromaticityType::Chroma(chroma) => {
+                    ChromaticityType::Chroma(chroma.clamp_min(T::zero()))
                 }
-                SaturationType::Colorfulness(colorfulness) => {
-                    SaturationType::Colorfulness(colorfulness.clamp_min(T::zero()))
+                ChromaticityType::Colorfulness(colorfulness) => {
+                    ChromaticityType::Colorfulness(colorfulness.clamp_min(T::zero()))
                 }
-                SaturationType::Saturation(saturation) => {
-                    SaturationType::Saturation(saturation.clamp_min(T::zero()))
+                ChromaticityType::Saturation(saturation) => {
+                    ChromaticityType::Saturation(saturation.clamp_min(T::zero()))
                 }
             },
-            lightness: match self.lightness {
-                LightnessType::Luminance(luminance) => {
-                    LightnessType::Luminance(luminance.clamp_min(T::zero()))
+            luminance: match self.luminance {
+                LuminanceType::Lightness(lightness) => {
+                    LuminanceType::Lightness(lightness.clamp_min(T::zero()))
                 }
-                LightnessType::Brightness(brightness) => {
-                    LightnessType::Brightness(brightness.clamp_min(T::zero()))
+                LuminanceType::Brightness(brightness) => {
+                    LuminanceType::Brightness(brightness.clamp_min(T::zero()))
                 }
             },
             white_point: PhantomData,
@@ -246,14 +257,16 @@ where
     T: ClampAssign + Zero,
 {
     fn clamp_assign(&mut self) {
-        match &mut self.saturation {
-            SaturationType::Chroma(chroma) => chroma.clamp_min_assign(T::zero()),
-            SaturationType::Colorfulness(colorfulness) => colorfulness.clamp_min_assign(T::zero()),
-            SaturationType::Saturation(saturation) => saturation.clamp_min_assign(T::zero()),
+        match &mut self.chromaticity {
+            ChromaticityType::Chroma(chroma) => chroma.clamp_min_assign(T::zero()),
+            ChromaticityType::Colorfulness(colorfulness) => {
+                colorfulness.clamp_min_assign(T::zero())
+            }
+            ChromaticityType::Saturation(saturation) => saturation.clamp_min_assign(T::zero()),
         }
-        match &mut self.lightness {
-            LightnessType::Luminance(luminance) => luminance.clamp_min_assign(T::zero()),
-            LightnessType::Brightness(brightness) => brightness.clamp_min_assign(T::zero()),
+        match &mut self.luminance {
+            LuminanceType::Lightness(lightness) => lightness.clamp_min_assign(T::zero()),
+            LuminanceType::Brightness(brightness) => brightness.clamp_min_assign(T::zero()),
         }
     }
 }
@@ -261,7 +274,7 @@ where
 impl<Wp, T> From<Cam16<Wp, T>> for PartialCam16<Wp, T> {
     fn from(value: Cam16<Wp, T>) -> Self {
         let Cam16 {
-            luminance,
+            lightness,
             chroma,
             hue,
             white_point,
@@ -270,45 +283,50 @@ impl<Wp, T> From<Cam16<Wp, T>> for PartialCam16<Wp, T> {
 
         PartialCam16 {
             hue,
-            saturation: SaturationType::Chroma(chroma),
-            lightness: LightnessType::Luminance(luminance),
+            chromaticity: ChromaticityType::Chroma(chroma),
+            luminance: LuminanceType::Lightness(lightness),
             white_point,
         }
     }
 }
 
-/// One of the saturation metrics of CAM16.
+/// One of the apparent chromatic intensity metrics of CAM16.
 ///
-/// Combined with the hue and one of [`LightnessType`], it can describe a
+/// Combined with the hue and one of [`LuminanceType`], it can describe a
 /// complete color as [`PartialCam16`].
 #[derive(Clone, Copy, Debug)]
 #[non_exhaustive]
-pub enum SaturationType<T> {
-    /// The chroma (C) of the color.
+pub enum ChromaticityType<T> {
+    /// The [chroma](https://en.wikipedia.org/wiki/Colorfulness#Chroma) of the
+    /// color.
     #[doc(alias = "C")]
     Chroma(T),
 
-    /// The colorfulness (M) of the color.
+    /// The [colorfulness](https://en.wikipedia.org/wiki/Colorfulness) (M) of
+    /// the color.
     #[doc(alias = "M")]
     Colorfulness(T),
 
-    /// The saturation (s) of the color.
+    /// The [saturation](https://en.wikipedia.org/wiki/Colorfulness#Saturation)
+    /// (s) of the color.
     #[doc(alias = "s")]
     Saturation(T),
 }
 
-/// One of the lightness metrics of CAM16.
+/// One of the apparent luminance metrics of CAM16.
 ///
-/// Combined with the hue and one of [`SaturationType`], it can describe a
+/// Combined with the hue and one of [`ChromaticityType`], it can describe a
 /// complete color as [`PartialCam16`].
 #[derive(Clone, Copy, Debug)]
 #[non_exhaustive]
-pub enum LightnessType<T> {
-    /// The luminance (J) of the color.
+pub enum LuminanceType<T> {
+    /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J) of the
+    /// color.
     #[doc(alias = "J")]
-    Luminance(T),
+    Lightness(T),
 
-    /// The brightness (Q) of the color.
+    /// The [brightness](https://en.wikipedia.org/wiki/Brightness) (Q) of the
+    /// color.
     #[doc(alias = "Q")]
     Brightness(T),
 }
@@ -536,7 +554,7 @@ where
 mod test {
     use crate::{convert::IntoColor, Srgb};
 
-    use super::{Cam16, FromCam16, LightnessType, PartialCam16, SaturationType};
+    use super::{Cam16, ChromaticityType, FromCam16, LuminanceType, PartialCam16};
 
     macro_rules! assert_cam16_to_rgb {
         ($cam16:expr, $rgb:expr, $($params:tt)*) => {
@@ -545,22 +563,22 @@ mod test {
             let rgb: Srgb<f64> = cam16.into_color();
             assert_relative_eq!(rgb, $rgb, $($params)*);
 
-            let saturations = [
-                SaturationType::Chroma(cam16.chroma),
-                SaturationType::Colorfulness(cam16.colorfulness),
-                SaturationType::Saturation(cam16.saturation),
+            let chromaticities = [
+                ChromaticityType::Chroma(cam16.chroma),
+                ChromaticityType::Colorfulness(cam16.colorfulness),
+                ChromaticityType::Saturation(cam16.saturation),
             ];
-            let lightnesses = [
-                LightnessType::Luminance(cam16.luminance),
-                LightnessType::Brightness(cam16.brightness),
+            let luminances = [
+                LuminanceType::Lightness(cam16.lightness),
+                LuminanceType::Brightness(cam16.brightness),
             ];
 
-            for saturation in saturations {
-                for lightness in lightnesses {
+            for chromaticity in chromaticities {
+                for luminance in luminances {
                     let partial = PartialCam16 {
                         hue: cam16.hue,
-                        saturation,
-                        lightness,
+                        chromaticity,
+                        luminance,
                         white_point: cam16.white_point,
                     };
                     assert_relative_eq!(
@@ -582,7 +600,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 45.544264720360346,
+                lightness: 45.544264720360346,
                 chroma: 45.07001048293764,
                 hue: 259.225345298129.into(),
                 brightness: 132.96974182692045,
@@ -609,7 +627,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 0.0,
+                lightness: 0.0,
                 chroma: 0.0,
                 hue: 0.0.into(),
                 brightness: 0.0,
@@ -636,7 +654,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 99.99955537650459,
+                lightness: 99.99955537650459,
                 chroma: 2.1815254387079435,
                 hue: 209.49854407518228.into(),
                 brightness: 197.03120459014184,
@@ -663,7 +681,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 46.23623443823762,
+                lightness: 46.23623443823762,
                 chroma: 113.27879472174797,
                 hue: 27.412485587695937.into(),
                 brightness: 133.9760614641257,
@@ -686,7 +704,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 79.23121430933533,
+                lightness: 79.23121430933533,
                 chroma: 107.77869525794452,
                 hue: 141.93451307926003.into(),
                 brightness: 175.38164288466993,
@@ -713,7 +731,7 @@ mod test {
         assert_relative_eq!(
             cam16,
             Cam16 {
-                luminance: 25.22701796474445,
+                lightness: 25.22701796474445,
                 chroma: 86.59618504567312,
                 hue: 282.81848901862566.into(),
                 brightness: 98.96210767195342,

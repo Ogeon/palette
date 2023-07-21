@@ -3,6 +3,7 @@ use core::{marker::PhantomData, ops::Mul};
 use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
+    cam16::LuminanceType,
     clamp,
     hues::Cam16Hue,
     num::{
@@ -12,7 +13,7 @@ use crate::{
     xyz::Xyz,
 };
 
-use super::{Cam16, Parameters, PartialCam16};
+use super::{Cam16, ChromaticityType, Parameters, PartialCam16};
 
 // This module is originally based on https://observablehq.com/@jrus/cam16
 
@@ -70,7 +71,7 @@ where
     let s = T::from_f64(50.0) * (parameters.c * alpha / (parameters.a_w + T::from_f64(4.0))).sqrt(); // saturation
 
     Cam16 {
-        luminance: j,
+        lightness: j,
         chroma: c,
         hue: h,
         brightness: q,
@@ -104,13 +105,14 @@ where
         + Clone,
     T::Mask: LazySelect<T> + LazySelect<Xyz<white_point::Any, T>>,
 {
-    let lightness = match &cam16.lightness {
-        crate::cam16::LightnessType::Luminance(luminance) => luminance.clone(),
-        crate::cam16::LightnessType::Brightness(brightness) => brightness.clone(),
+    // Weird naming, but we just want to know if it's black or not here.
+    let is_black = match &cam16.luminance {
+        LuminanceType::Lightness(lightness) => lightness.eq(&T::zero()),
+        LuminanceType::Brightness(brightness) => brightness.eq(&T::zero()),
     };
 
     lazy_select! {
-        if lightness.eq(&T::zero()) => Xyz { x: T::zero(), y: T::zero(), z: T::zero(), white_point: PhantomData },
+        if is_black => Xyz { x: T::zero(), y: T::zero(), z: T::zero(), white_point: PhantomData },
         else => non_black_cam16_to_xyz(cam16, parameters)
     }
 }
@@ -142,17 +144,17 @@ where
 
     let h_rad = cam16.hue.into_radians();
     let (sin_h, cos_h) = h_rad.clone().sin_cos();
-    let j_root = match cam16.lightness {
-        super::LightnessType::Luminance(j) => j.sqrt() * T::from_f64(0.1),
-        super::LightnessType::Brightness(q) => {
+    let j_root = match cam16.luminance {
+        LuminanceType::Lightness(j) => j.sqrt() * T::from_f64(0.1),
+        LuminanceType::Brightness(q) => {
             T::from_f64(0.25) * &parameters.c * q
                 / ((T::from_f64(4.0) + &parameters.a_w) * &parameters.f_l_4)
         }
     };
-    let alpha = match cam16.saturation {
-        super::SaturationType::Chroma(c) => c / &j_root,
-        super::SaturationType::Colorfulness(m) => (m / parameters.f_l_4) / &j_root,
-        super::SaturationType::Saturation(s) => {
+    let alpha = match cam16.chromaticity {
+        ChromaticityType::Chroma(c) => c / &j_root,
+        ChromaticityType::Colorfulness(m) => (m / parameters.f_l_4) / &j_root,
+        ChromaticityType::Saturation(s) => {
             T::from_f64(0.0004) * &s * s * (T::from_f64(4.0) + &parameters.a_w) / &parameters.c
         }
     };
