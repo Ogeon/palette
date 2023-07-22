@@ -177,7 +177,7 @@ where
     T::Mask: LazySelect<T>,
 {
     // Compute dependent parameters.
-    let xyz_w = parameters.white_point.any_into_xyz() * T::from_f64(100.0); // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
+    let xyz_w = parameters.white_point.into_xyz() * T::from_f64(100.0); // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
     let l_a = parameters.adapting_luminance;
     let y_b = parameters.background_luminance;
     let y_w = xyz_w.y.clone();
