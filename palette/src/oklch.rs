@@ -160,9 +160,81 @@ unsafe impl<T> bytemuck::Pod for Oklch<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
-    use crate::Oklch;
+    use crate::convert::FromColorUnclamped;
+    use crate::rgb::Rgb;
+    use crate::visual::{VisualColor, VisuallyEqual};
+    use crate::{encoding, LinSrgb, Oklab, Oklch};
 
     test_convert_into_from_xyz!(Oklch);
+
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    fn test_roundtrip_oklch_oklab_is_original() {
+        let colors = [
+            (
+                "red",
+                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
+            ),
+            (
+                "green",
+                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
+            ),
+            (
+                "cyan",
+                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
+            ),
+            (
+                "magenta",
+                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
+            ),
+            (
+                "black",
+                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
+            ),
+            (
+                "grey",
+                Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
+            ),
+            (
+                "yellow",
+                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
+            ),
+            (
+                "blue",
+                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
+            ),
+            (
+                "white",
+                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
+            ),
+        ];
+
+        const EPSILON: f64 = 1e-14;
+
+        for (name, color) in colors {
+            let rgb: Rgb<encoding::Srgb, u8> =
+                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
+            println!(
+                "\n\
+            roundtrip of {} (#{:x} / {:?})\n\
+            =================================================",
+                name, rgb, color
+            );
+
+            println!("Color is white: {}", color.is_white(EPSILON));
+
+            let oklch = Oklch::from_color_unclamped(color);
+            println!("Oklch: {:?}", oklch);
+            let roundtrip_color = Oklab::from_color_unclamped(oklch);
+            assert!(
+                Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                "'{}' failed.\n{:?}\n!=\n{:?}",
+                name,
+                roundtrip_color,
+                color
+            );
+        }
+    }
 
     #[test]
     fn ranges() {

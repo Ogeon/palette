@@ -357,13 +357,13 @@ where
     T: RealAngle + Zero + MinMax + Trigonometry + Mul<Output = T> + Clone,
 {
     fn from_color_unclamped(color: Oklch<T>) -> Self {
-        let (sin_hue, cos_hue) = color.hue.into_cartesian();
+        let (a, b) = color.hue.into_cartesian();
         let chroma = color.chroma.max(T::zero());
 
         Oklab {
             l: color.l,
-            a: cos_hue * chroma.clone(),
-            b: sin_hue * chroma,
+            a: a * chroma.clone(),
+            b: b * chroma,
         }
     }
 }
