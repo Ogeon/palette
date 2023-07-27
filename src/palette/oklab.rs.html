@@ -1083,13 +1083,13 @@
     </span>T: RealAngle + Zero + MinMax + Trigonometry + Mul&lt;Output = T&gt; + Clone,
 {
     <span class="kw">fn </span>from_color_unclamped(color: Oklch&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(sin_hue, cos_hue) = color.hue.into_cartesian();
+        <span class="kw">let </span>(a, b) = color.hue.into_cartesian();
         <span class="kw">let </span>chroma = color.chroma.max(T::zero());
 
         Oklab {
             l: color.l,
-            a: cos_hue * chroma.clone(),
-            b: sin_hue * chroma,
+            a: a * chroma.clone(),
+            b: b * chroma,
         }
     }
 }
