@@ -4,7 +4,7 @@ use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{parse_quote, GenericParam, Generics, Ident, Result, Type};
 
-use crate::{util, ALLOWED_COLOR_TYPES, PREFERRED_CONVERSION_SOURCE};
+use crate::{meta::TypeItemAttributes, util, PREFERRED_CONVERSION_SOURCE};
 
 pub fn white_point_type(
     white_point: Option<&Type>,
@@ -49,8 +49,7 @@ pub fn get_convert_color_type(
     color: &str,
     white_point: &Type,
     component: &Type,
-    rgb_standard: Option<&Type>,
-    luma_standard: Option<&Type>,
+    meta: &TypeItemAttributes,
     generics: &mut Generics,
     internal: bool,
 ) -> (Type, UsedInput) {
@@ -60,7 +59,7 @@ pub fn get_convert_color_type(
         "Luma" => {
             let luma_standard_path = util::path(["luma", "LumaStandard"], internal);
 
-            if let Some(luma_standard) = luma_standard {
+            if let Some(luma_standard) = &meta.luma_standard {
                 (
                     parse_quote!(#color_path<#luma_standard, #component>),
                     UsedInput::default(),
@@ -84,7 +83,7 @@ pub fn get_convert_color_type(
             let rgb_standard_path = util::path(["rgb", "RgbStandard"], internal);
             let rgb_space_path = util::path(["rgb", "RgbSpace"], internal);
 
-            if let Some(rgb_standard) = rgb_standard {
+            if let Some(rgb_standard) = &meta.rgb_standard {
                 (
                     parse_quote!(#color_path<#rgb_standard, #component>),
                     UsedInput::default(),
@@ -111,6 +110,44 @@ pub fn get_convert_color_type(
         "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
             (parse_quote!(#color_path<#component>), UsedInput::default())
         }
+        "PartialCam16" => {
+            let cam_chromaticity_path = util::path(&["cam16", "Cam16Chromaticity"], internal);
+            let cam_luminance_path = util::path(&["cam16", "Cam16Luminance"], internal);
+
+            let chromaticity = if let Some(chromaticity) = &meta.cam16_chromaticity {
+                chromaticity.clone()
+            } else {
+                generics.params.push(GenericParam::Type(
+                    Ident::new("_C", Span::call_site()).into(),
+                ));
+                let where_clause = generics.make_where_clause();
+                where_clause
+                    .predicates
+                    .push(parse_quote!(_C: #cam_chromaticity_path<#component>));
+
+                parse_quote!(_C)
+            };
+
+            let luminance = if let Some(luminance) = &meta.cam16_luminance {
+                luminance.clone()
+            } else {
+                generics.params.push(GenericParam::Type(
+                    Ident::new("_L", Span::call_site()).into(),
+                ));
+
+                let where_clause = generics.make_where_clause();
+                where_clause
+                    .predicates
+                    .push(parse_quote!(_L: #cam_luminance_path<#component>));
+
+                parse_quote!(_L)
+            };
+
+            (
+                parse_quote!(#color_path<#white_point, #component, #luminance, #chromaticity>),
+                UsedInput { white_point: true },
+            )
+        }
         _ => (
             parse_quote!(#color_path<#white_point, #component>),
             UsedInput { white_point: true },
@@ -125,17 +162,6 @@ pub fn find_nearest_color<'a>(color: &'a str, skip: &HashSet<String>) -> Result<
 
     // Make sure there is at least one valid color in the skip list
     assert!(!skip.is_empty());
-    for skipped_color in skip {
-        if !ALLOWED_COLOR_TYPES
-            .iter()
-            .any(|valid_color| skipped_color == valid_color)
-        {
-            return Err(::syn::parse::Error::new(
-                color.span(),
-                format!("`{}` is not a valid color type", skipped_color),
-            ));
-        }
-    }
 
     while let Some((color, distance)) = stack.pop() {
         if skip.contains(color) {

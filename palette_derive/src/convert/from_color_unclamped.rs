@@ -25,10 +25,10 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         ..
     } = syn::parse(item).map_err(|error| vec![error])?;
 
-    let mut item_meta: TypeItemAttributes = parse_namespaced_attributes(attrs)?;
+    let (mut item_meta, item_errors) = parse_namespaced_attributes::<TypeItemAttributes>(attrs);
 
-    let fields_meta: FieldAttributes = if let syn::Data::Struct(struct_data) = data {
-        parse_field_attributes(struct_data.fields)?
+    let (fields_meta, field_errors) = if let syn::Data::Struct(struct_data) = data {
+        parse_field_attributes::<FieldAttributes>(struct_data.fields)
     } else {
         return Err(vec![syn::Error::new(
             Span::call_site(),
@@ -78,9 +78,20 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         ));
     }
 
-    Ok(TokenStream::from(quote! {
+    let item_errors = item_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+    let field_errors = field_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+
+    Ok(quote! {
+        #(#item_errors)*
+        #(#field_errors)*
+
         #(#implementations)*
-    }))
+    }
+    .into())
 }
 
 fn prepare_from_impl(
@@ -105,8 +116,7 @@ fn prepare_from_impl(
             color_name,
             white_point,
             component,
-            meta.rgb_standard.as_ref(),
-            meta.luma_standard.as_ref(),
+            &meta,
             &mut generics,
             meta.internal,
         );
@@ -114,6 +124,22 @@ fn prepare_from_impl(
         let nearest_color_path = util::color_path(nearest_color_name, meta.internal);
         let target_color_rgb_standard = match color_name {
             "Rgb" | "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
+            _ => None,
+        };
+        let target_color_cam16_chromaticity = match color_name {
+            "PartialCam16" => Some(parse_quote!(_C)),
+            "Cam16UcsJmh" | "Cam16UcsJab" => {
+                let path = util::path(&["cam16", "Colorfulness"], meta.internal);
+                Some(parse_quote!(#path<#component>))
+            }
+            _ => None,
+        };
+        let target_color_cam16_luminance = match color_name {
+            "PartialCam16" => Some(parse_quote!(_L)),
+            "Cam16UcsJmh" | "Cam16UcsJab" => {
+                let path = util::path(&["cam16", "Lightness"], meta.internal);
+                Some(parse_quote!(#path<#component>))
+            }
             _ => None,
         };
 
@@ -145,6 +171,37 @@ fn prepare_from_impl(
             }
             "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
                 parse_quote!(#nearest_color_path::<#component>)
+            }
+            "PartialCam16" => {
+                let cam16_chromaticity = meta.cam16_chromaticity
+                    .clone()
+                    .or(target_color_cam16_chromaticity)
+                    .ok_or_else(
+                        || syn::parse::Error::new(
+                            Span::call_site(),
+                            format!(
+                                "could not determine which CAM16 chromaticity to use when converting to and from `{}` via `{}`",
+                                color_name,
+                                nearest_color_name
+                            ),
+                        )
+                    )?;
+                let cam16_luminance = meta.cam16_luminance
+                    .clone()
+                    .or(target_color_cam16_luminance)
+                    .ok_or_else(
+                        || syn::parse::Error::new(
+                            Span::call_site(),
+                            format!(
+                                "could not determine which CAM16 luminance to use when converting to and from `{}` via `{}`",
+                                color_name,
+                                nearest_color_name
+                            ),
+                        )
+                    )?;
+
+                used_input.white_point = true;
+                parse_quote!(#nearest_color_path::<#white_point, #component, #cam16_luminance, #cam16_chromaticity>)
             }
             _ => {
                 used_input.white_point = true;

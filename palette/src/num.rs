@@ -316,6 +316,12 @@ pub trait Signum {
     fn signum(self) -> Self;
 }
 
+/// Trait for getting the natural logarithm of `self`.
+pub trait Ln {
+    /// Returns the natural logarithm of `self`.
+    fn ln(self) -> Self;
+}
+
 macro_rules! impl_uint {
     ($($ty: ident),+) => {
         $(
@@ -721,6 +727,14 @@ macro_rules! impl_float {
                 #[inline]
                 fn signum(self) -> Self {
                     $ty::signum(self)
+                }
+            }
+
+            #[cfg(feature = "std")]
+            impl Ln for $ty {
+                #[inline]
+                fn ln(self) -> Self {
+                    $ty::ln(self)
                 }
             }
         )+

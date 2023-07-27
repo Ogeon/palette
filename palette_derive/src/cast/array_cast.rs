@@ -19,22 +19,22 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     } = syn::parse(tokens).map_err(|error| vec![error])?;
 
     let allowed_repr = is_allowed_repr(&attrs)?;
-    let item_meta: TypeItemAttributes = meta::parse_namespaced_attributes(attrs)?;
+    let (item_meta, item_errors) = meta::parse_namespaced_attributes::<TypeItemAttributes>(attrs);
 
     let mut number_of_channels = 0usize;
     let mut field_type: Option<Type> = None;
 
-    let (all_fields, fields_meta) = match data {
+    let (all_fields, fields_meta, field_errors) = match data {
         Data::Struct(struct_item) => {
-            let fields_meta: FieldAttributes =
-                meta::parse_field_attributes(struct_item.fields.clone())?;
+            let (fields_meta, field_errors) =
+                meta::parse_field_attributes::<FieldAttributes>(struct_item.fields.clone());
             let all_fields = match struct_item.fields {
                 Fields::Named(fields) => fields.named,
                 Fields::Unnamed(fields) => fields.unnamed,
                 Fields::Unit => Default::default(),
             };
 
-            (all_fields, fields_meta)
+            (all_fields, fields_meta, field_errors)
         }
         Data::Enum(_) => {
             return Err(vec![syn::Error::new(
@@ -120,7 +120,21 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     };
 
     implementation.extend(errors.iter().map(syn::Error::to_compile_error));
-    Ok(implementation.into())
+
+    let item_errors = item_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+    let field_errors = field_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+
+    Ok(quote! {
+        #(#item_errors)*
+        #(#field_errors)*
+
+        #implementation
+    }
+    .into())
 }
 
 fn is_allowed_repr(attributes: &[Attribute]) -> std::result::Result<bool, Vec<syn::Error>> {

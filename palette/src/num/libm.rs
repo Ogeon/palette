@@ -275,3 +275,17 @@ impl Signum for f64 {
         }
     }
 }
+
+impl Ln for f32 {
+    #[inline]
+    fn ln(self) -> Self {
+        ::libm::logf(self)
+    }
+}
+
+impl Ln for f64 {
+    #[inline]
+    fn ln(self) -> Self {
+        ::libm::log(self)
+    }
+}

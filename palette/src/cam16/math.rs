@@ -1,4 +1,7 @@
-use core::{marker::PhantomData, ops::Mul};
+use core::{
+    marker::PhantomData,
+    ops::{Div, Mul},
+};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
@@ -13,7 +16,7 @@ use crate::{
     xyz::Xyz,
 };
 
-use super::{Cam16, ChromaticityType, Parameters, PartialCam16};
+use super::{Cam16, ChromaticityType, DynPartialCam16, Parameters};
 
 // This module is originally based on https://observablehq.com/@jrus/cam16
 
@@ -37,11 +40,15 @@ where
     let capital_a = parameters.n_bb * (T::from_f64(2.0) * &r_a + &g_a + T::from_f64(0.05) * &b_a);
     let j_root =
         (capital_a / &parameters.a_w).powf(T::from_f64(0.5) * &parameters.c * parameters.z);
-    let j = T::from_f64(100.0) * &j_root * &j_root; // lightness
-    let q = T::from_f64(4.0) / &parameters.c // brightness
-        * &j_root
-        * (T::from_f64(4.0) + &parameters.a_w)
-        * &parameters.f_l_4;
+
+    let j = calculate_lightness(j_root.clone()); // lightness
+    let q = calculate_brightness(
+        j_root.clone(),
+        parameters.c.clone(),
+        parameters.a_w.clone(),
+        parameters.f_l_4.clone(),
+    ); // brightness
+
     let t = T::from_f64(5e4) / T::from_f64(13.0)
         * parameters.n_c
         * parameters.n_cb
@@ -50,9 +57,10 @@ where
         / (r_a + g_a + T::from_f64(1.05) * b_a + T::from_f64(0.305));
     let alpha = t.powf(T::from_f64(0.9))
         * (T::from_f64(1.64) - T::from_f64(0.29).powf(parameters.n)).powf(T::from_f64(0.73));
-    let c = j_root * &alpha; // chroma
-    let m = parameters.f_l_4 * &c; // colorfulness
-    let s = T::from_f64(50.0) * (parameters.c * alpha / (parameters.a_w + T::from_f64(4.0))).sqrt(); // saturation
+
+    let c = calculate_chroma(j_root, alpha.clone()); // chroma
+    let m = calculate_colorfulness(parameters.f_l_4, c.clone()); // colorfulness
+    let s = calculate_saturation(parameters.c, parameters.a_w, alpha); // saturation
 
     Cam16 {
         lightness: j,
@@ -66,9 +74,47 @@ where
     }
 }
 
+fn calculate_lightness<T>(j_root: T) -> T
+where
+    T: Real + Arithmetics,
+{
+    T::from_f64(100.0) * &j_root * j_root
+}
+
+fn calculate_brightness<T>(j_root: T, param_c: T, param_a_w: T, param_f_l_4: T) -> T
+where
+    T: Real + Arithmetics,
+{
+    T::from_f64(4.0) / param_c * j_root * (T::from_f64(4.0) + param_a_w) * param_f_l_4
+}
+
+#[inline]
+pub(super) fn calculate_chroma<T>(j_root: T, alpha: T) -> T
+where
+    T: Mul<T, Output = T>,
+{
+    j_root * alpha
+}
+
+#[inline]
+pub(super) fn calculate_colorfulness<T>(param_f_l_4: T, chroma: T) -> T
+where
+    T: Mul<T, Output = T>,
+{
+    param_f_l_4 * chroma
+}
+
+#[inline]
+pub(super) fn calculate_saturation<T>(param_c: T, param_a_w: T, alpha: T) -> T
+where
+    T: Real + Arithmetics + Sqrt,
+{
+    T::from_f64(50.0) * (param_c * alpha / (param_a_w + T::from_f64(4.0))).sqrt()
+}
+
 #[inline]
 pub(crate) fn cam16_to_xyz<T>(
-    cam16: PartialCam16<white_point::Any, T>,
+    cam16: DynPartialCam16<white_point::Any, T>,
     parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
@@ -101,7 +147,7 @@ where
 
 // Assumes that lightness has been checked to be non-zero in `cam16_to_xyz`.
 fn non_black_cam16_to_xyz<T>(
-    cam16: PartialCam16<white_point::Any, T>,
+    cam16: DynPartialCam16<white_point::Any, T>,
     parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
@@ -120,17 +166,19 @@ where
     let h_rad = cam16.hue.into_radians();
     let (sin_h, cos_h) = h_rad.clone().sin_cos();
     let j_root = match cam16.luminance {
-        LuminanceType::Lightness(j) => j.sqrt() * T::from_f64(0.1),
-        LuminanceType::Brightness(q) => {
-            T::from_f64(0.25) * &parameters.c * q
-                / ((T::from_f64(4.0) + &parameters.a_w) * &parameters.f_l_4)
-        }
+        LuminanceType::Lightness(j) => lightness_to_j_root(j),
+        LuminanceType::Brightness(q) => brightness_to_j_root(
+            q,
+            parameters.c.clone(),
+            parameters.a_w.clone(),
+            parameters.f_l_4.clone(),
+        ),
     };
     let alpha = match cam16.chromaticity {
         ChromaticityType::Chroma(c) => c / &j_root,
-        ChromaticityType::Colorfulness(m) => (m / parameters.f_l_4) / &j_root,
+        ChromaticityType::Colorfulness(m) => colorfulness_to_chroma(m, parameters.f_l_4) / &j_root,
         ChromaticityType::Saturation(s) => {
-            T::from_f64(0.0004) * &s * s * (T::from_f64(4.0) + &parameters.a_w) / &parameters.c
+            saturation_to_alpha(s, parameters.c.clone(), parameters.a_w.clone())
         }
     };
     let t = (alpha
@@ -158,7 +206,7 @@ where
     m16_inv(mul3(rgb_c, parameters.d_rgb_inv)) / T::from_f64(100.0) // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
 }
 
-pub(crate) fn prepare_parameters<T>(
+pub(super) fn prepare_parameters<T>(
     parameters: Parameters<white_point::Any, T>,
 ) -> DependentParameters<T>
 where
@@ -262,6 +310,96 @@ where
     }
 }
 
+#[inline]
+pub(super) fn lightness_to_brightness<T>(
+    lightness: T,
+    param_c: T,
+    param_a_w: T,
+    param_f_l_4: T,
+) -> T
+where
+    T: Real + Arithmetics + Sqrt,
+{
+    let j_root = lightness_to_j_root(lightness);
+    calculate_brightness(j_root, param_c, param_a_w, param_f_l_4)
+}
+
+#[inline]
+pub(super) fn brightness_to_lightness<T>(
+    brightness: T,
+    param_c: T,
+    param_a_w: T,
+    param_f_l_4: T,
+) -> T
+where
+    T: Real + Arithmetics,
+{
+    let j_root = brightness_to_j_root(brightness, param_c, param_a_w, param_f_l_4);
+    calculate_lightness(j_root)
+}
+
+#[inline]
+pub(super) fn chroma_to_colorfulness<T>(chroma: T, param_f_l_4: T) -> T
+where
+    T: Mul<T, Output = T>,
+{
+    param_f_l_4 * chroma
+}
+
+#[inline]
+pub(super) fn chroma_to_saturation<T>(chroma: T, lightness: T, param_c: T, param_a_w: T) -> T
+where
+    T: Real + Arithmetics + Sqrt + Clone,
+{
+    let j_root = lightness_to_j_root(lightness);
+    let alpha = chroma.clone() / &j_root;
+
+    calculate_saturation(param_c, param_a_w, alpha)
+}
+
+#[inline]
+pub(super) fn colorfulness_to_chroma<T>(colorfulness: T, param_f_l_4: T) -> T
+where
+    T: Div<T, Output = T>,
+{
+    colorfulness / param_f_l_4
+}
+
+#[inline]
+pub(super) fn saturation_to_chroma<T>(saturation: T, lightness: T, param_c: T, param_a_w: T) -> T
+where
+    T: Real + Arithmetics + Sqrt,
+{
+    let j_root = lightness_to_j_root(lightness);
+    let alpha = saturation_to_alpha(saturation, param_c, param_a_w);
+
+    calculate_chroma(j_root, alpha)
+}
+
+#[inline]
+fn lightness_to_j_root<T>(lightness: T) -> T
+where
+    T: Real + Mul<T, Output = T> + Sqrt,
+{
+    lightness.sqrt() * T::from_f64(0.1)
+}
+
+#[inline]
+fn brightness_to_j_root<T>(brightness: T, param_c: T, param_a_w: T, param_f_l_4: T) -> T
+where
+    T: Real + Arithmetics,
+{
+    T::from_f64(0.25) * param_c * brightness / ((T::from_f64(4.0) + param_a_w) * param_f_l_4)
+}
+
+#[inline]
+fn saturation_to_alpha<T>(saturation: T, param_c: T, param_a_w: T) -> T
+where
+    T: Real + Arithmetics,
+{
+    T::from_f64(0.0004) * &saturation * saturation * (T::from_f64(4.0) + param_a_w) / param_c
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct DependentParameters<T> {
     d_rgb: [T; 3],
@@ -270,10 +408,10 @@ pub(crate) struct DependentParameters<T> {
     n_bb: T,
     n_c: T,
     n_cb: T,
-    a_w: T,
-    c: T,
+    pub(super) a_w: T,
+    pub(super) c: T,
     z: T,
-    f_l_4: T,
+    pub(super) f_l_4: T,
     adapt: Adapt<T>,
     unadapt: Unadapt<T>,
 }

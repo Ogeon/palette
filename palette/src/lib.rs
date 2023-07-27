@@ -281,9 +281,6 @@ use luma::Luma;
 pub use alpha::{Alpha, WithAlpha};
 
 #[doc(inline)]
-#[cfg(feature = "cam16")]
-pub use cam16::Cam16;
-#[doc(inline)]
 pub use hsl::{Hsl, Hsla};
 #[doc(inline)]
 pub use hsluv::{Hsluv, Hsluva};

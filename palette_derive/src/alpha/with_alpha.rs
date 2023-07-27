@@ -22,10 +22,10 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
     } = syn::parse(item).map_err(|error| vec![error])?;
     let generics = original_generics;
 
-    let item_meta: TypeItemAttributes = parse_namespaced_attributes(attrs)?;
+    let (item_meta, item_errors) = parse_namespaced_attributes::<TypeItemAttributes>(attrs);
 
-    let fields_meta: FieldAttributes = if let syn::Data::Struct(struct_data) = data {
-        parse_field_attributes(struct_data.fields)?
+    let (fields_meta, field_errors) = if let syn::Data::Struct(struct_data) = data {
+        parse_field_attributes::<FieldAttributes>(struct_data.fields)
     } else {
         return Err(vec![syn::Error::new(
             Span::call_site(),
@@ -39,7 +39,20 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         implement_for_external_alpha(&ident, &generics, &item_meta)
     };
 
-    Ok(implementation.into())
+    let item_errors = item_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+    let field_errors = field_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
+
+    Ok(quote! {
+        #(#item_errors)*
+        #(#field_errors)*
+
+        #implementation
+    }
+    .into())
 }
 
 fn implement_for_internal_alpha(

@@ -305,6 +305,13 @@ macro_rules! impl_wide_float {
                     self.is_nan().blend(Self::from($scalar::NAN), $ty::copysign(Self::from(1.0), self))
                 }
             }
+
+            impl Ln for $ty {
+                #[inline]
+                fn ln(self) -> Self {
+                    self.ln()
+                }
+            }
         )+
     };
 }
