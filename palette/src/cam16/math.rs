@@ -18,12 +18,13 @@ use crate::{
 
 use super::{Cam16, ChromaticityType, DynPartialCam16, Parameters};
 
-// This module is originally based on https://observablehq.com/@jrus/cam16
+// This module is originally based on https://observablehq.com/@jrus/cam16.
+// https://rawpedia.rawtherapee.com/CIECAM02 is also informative.
 
 pub(crate) fn xyz_to_cam16<T>(
     xyz: Xyz<white_point::Any, T>,
     parameters: DependentParameters<T>,
-) -> Cam16<white_point::Any, T>
+) -> Cam16<T>
 where
     T: Real + Arithmetics + Powf + Sqrt + Abs + Signum + Trigonometry + RealAngle + Clone,
 {
@@ -69,8 +70,6 @@ where
         brightness: q,
         colorfulness: m,
         saturation: s,
-
-        white_point: PhantomData,
     }
 }
 
@@ -114,7 +113,7 @@ where
 
 #[inline]
 pub(crate) fn cam16_to_xyz<T>(
-    cam16: DynPartialCam16<white_point::Any, T>,
+    cam16: DynPartialCam16<T>,
     parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
@@ -147,7 +146,7 @@ where
 
 // Assumes that lightness has been checked to be non-zero in `cam16_to_xyz`.
 fn non_black_cam16_to_xyz<T>(
-    cam16: DynPartialCam16<white_point::Any, T>,
+    cam16: DynPartialCam16<T>,
     parameters: DependentParameters<T>,
 ) -> Xyz<white_point::Any, T>
 where
@@ -207,7 +206,7 @@ where
 }
 
 pub(super) fn prepare_parameters<T>(
-    parameters: Parameters<white_point::Any, T>,
+    parameters: Parameters<Xyz<white_point::Any, T>, T>,
 ) -> DependentParameters<T>
 where
     T: Real
@@ -225,7 +224,7 @@ where
     T::Mask: LazySelect<T>,
 {
     // Compute dependent parameters.
-    let xyz_w = parameters.white_point.into_xyz() * T::from_f64(100.0); // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
+    let xyz_w = parameters.white_point * T::from_f64(100.0); // The reference uses 0.0 to 100.0 instead of 0.0 to 1.0.
     let l_a = parameters.adapting_luminance;
     let y_b = parameters.background_luminance;
     let y_w = xyz_w.y.clone();

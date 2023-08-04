@@ -23,12 +23,13 @@ use crate::{
 ///
 /// [moroney_2000]:
 ///     https://www.imaging.org/common/uploaded%20files/pdfs/Papers/2000/PICS-0-81/1611.pdf
+#[derive(Clone, Copy)]
 #[non_exhaustive]
-pub struct Parameters<Wp, T> {
+pub struct Parameters<WpParam, T> {
     /// The reference white point. Defaults to `Wp` when it implements
     /// [`WhitePoint`], or [`D65`] when `Wp` is [`white_point::Any`]. It can
     /// also be set to a custom value if `Wp` results in the wrong white point.
-    pub white_point: WhitePointParameter<Wp, T>,
+    pub white_point: WpParam,
 
     /// The average luminance of the environment (*L<sub>A</sub>*) in
     /// *cd/m<sup>2</sup>* (nits). Under a “gray world” assumption this is 20%
@@ -50,13 +51,13 @@ pub struct Parameters<Wp, T> {
     pub discounting: bool,
 }
 
-impl<Wp, T> Parameters<Wp, T>
+impl<WpParam, T> Parameters<WpParam, T>
 where
-    Wp: WhitePoint<T>,
+    WpParam: WhitePointParameter<T>,
 {
-    fn into_any_white_point(self) -> Parameters<white_point::Any, T> {
+    fn into_any_white_point(self) -> Parameters<Xyz<white_point::Any, T>, T> {
         Parameters {
-            white_point: self.white_point.into_any_white_point(),
+            white_point: self.white_point.into_xyz(),
             adapting_luminance: self.adapting_luminance,
             background_luminance: self.background_luminance,
             surround: self.surround,
@@ -65,88 +66,18 @@ where
     }
 }
 
-impl<T> Parameters<white_point::Any, T> {
-    /// Pre-calculate parameters with no statically known reference white point.
-    ///
-    /// The default white point in this case is [`D65`], unless specified in
-    /// `Self::white_point`.
-    pub fn any_into(self) -> BakedParameters<white_point::Any, T>
-    where
-        T: Real
-            + One
-            + Zero
-            + Clamp
-            + PartialCmp
-            + Arithmetics
-            + Powf
-            + Sqrt
-            + Exp
-            + Abs
-            + Signum
-            + Clone,
-        T::Mask: LazySelect<T>,
-    {
-        BakedParameters::any_from(self)
-    }
-}
-
-impl<Wp, T> Clone for Parameters<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        Self {
-            white_point: self.white_point.clone(),
-            adapting_luminance: self.adapting_luminance.clone(),
-            background_luminance: self.background_luminance.clone(),
-            surround: self.surround.clone(),
-            discounting: self.discounting.clone(),
-        }
-    }
-}
-
-impl<Wp, T> Copy for Parameters<Wp, T> where T: Copy {}
-
 /// Pre-calculated variables for CAM16, that only depend on the viewing
 /// conditions.
 ///
 /// Derived from [`Parameters`], the `BakedParameters` can be used in
 /// [`FromCam16`][super::FromCam16] and [`IntoCam16`][super::IntoCam16] to
 /// reduce the amount of repeated work required for converting multiple colors.
-pub struct BakedParameters<Wp, T> {
+pub struct BakedParameters<WpParam, T> {
     pub(super) inner: super::math::DependentParameters<T>,
-    white_point: PhantomData<Wp>,
+    white_point: PhantomData<WpParam>,
 }
 
-impl<T> BakedParameters<white_point::Any, T> {
-    /// Pre-calculate parameters with no statically known reference white point.
-    ///
-    /// The default white point in this case is [`D65`], unless specified in
-    /// `Parameters::white_point`.
-    pub fn any_from(parameters: Parameters<white_point::Any, T>) -> Self
-    where
-        T: Real
-            + One
-            + Zero
-            + Clamp
-            + PartialCmp
-            + Arithmetics
-            + Powf
-            + Sqrt
-            + Exp
-            + Abs
-            + Signum
-            + Clone,
-        T::Mask: LazySelect<T>,
-    {
-        Self {
-            inner: super::math::prepare_parameters(parameters),
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T> Clone for BakedParameters<Wp, T>
+impl<WpParam, T> Clone for BakedParameters<WpParam, T>
 where
     T: Clone,
 {
@@ -158,11 +89,11 @@ where
     }
 }
 
-impl<Wp, T> Copy for BakedParameters<Wp, T> where T: Copy {}
+impl<WpParam, T> Copy for BakedParameters<WpParam, T> where T: Copy {}
 
-impl<Wp, T> From<Parameters<Wp, T>> for BakedParameters<Wp, T>
+impl<WpParam, T> From<Parameters<WpParam, T>> for BakedParameters<WpParam, T>
 where
-    Wp: WhitePoint<T>,
+    WpParam: WhitePointParameter<T>,
     T: Real
         + One
         + Zero
@@ -177,7 +108,7 @@ where
         + Clone,
     T::Mask: LazySelect<T>,
 {
-    fn from(value: Parameters<Wp, T>) -> Self {
+    fn from(value: Parameters<WpParam, T>) -> Self {
         Self {
             inner: super::math::prepare_parameters(value.into_any_white_point()),
             white_point: PhantomData,
@@ -185,37 +116,62 @@ where
     }
 }
 
-impl<Wp, T> Default for BakedParameters<Wp, T>
+impl<WpParam, T> Default for BakedParameters<WpParam, T>
 where
-    Parameters<Wp, T>: Default + Into<BakedParameters<Wp, T>>,
+    Parameters<WpParam, T>: Default + Into<BakedParameters<WpParam, T>>,
 {
     fn default() -> Self {
         Parameters::default().into()
     }
 }
 
-impl<Wp, T> Parameters<Wp, T>
+impl<Wp, T> Parameters<StaticWp<Wp>, T>
 where
     T: Real,
 {
-    /// Create a new set of default parameters.
+    /// Create a new set of default parameters with a static white point.
     pub fn new() -> Self {
-        Self::default()
-    }
-}
-
-impl<Wp, T> Default for Parameters<Wp, T>
-where
-    T: Real,
-{
-    fn default() -> Self {
         Self {
-            white_point: WhitePointParameter::Default,
+            white_point: StaticWp(PhantomData),
             adapting_luminance: T::from_f64(40.0),
             background_luminance: T::from_f64(20.0),
             surround: Surround::Average,
             discounting: false,
         }
+    }
+}
+
+impl<T> Parameters<Xyz<white_point::Any, T>, T>
+where
+    T: Real,
+{
+    /// Create a new set of default parameters with a dynamic white point.
+    pub fn new(white_point: Xyz<white_point::Any, T>) -> Self {
+        Self {
+            white_point,
+            adapting_luminance: T::from_f64(40.0),
+            background_luminance: T::from_f64(20.0),
+            surround: Surround::Average,
+            discounting: false,
+        }
+    }
+}
+
+impl<Wp, T> Default for Parameters<StaticWp<Wp>, T>
+where
+    T: Real,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T> Default for Parameters<Xyz<white_point::Any, T>, T>
+where
+    T: Real,
+{
+    fn default() -> Self {
+        Self::new(D65::get_xyz())
     }
 }
 
@@ -253,53 +209,36 @@ impl<T> Surround<T> {
     }
 }
 
-/// A parameter value for the reference white point.
-#[non_exhaustive]
-pub enum WhitePointParameter<Wp, T> {
-    /// Represents the value of `Wp`.
-    Default,
+/// A trait for types that can be used as white point parameters in
+/// [`Parameters`].
+pub trait WhitePointParameter<T> {
+    /// The static representation of this white point, or [`white_point::Any`]
+    /// if it's dynamic.
+    type StaticWp;
 
-    /// Represents any custom white point. The `Wp` parameter isn't used in this
-    /// case, but still included for Rust to accept an empty `Default`. See
-    /// [`Xyz::with_white_point`] for how to change the reference white point of
-    /// an `Xyz` value without changing its numerical value.
-    Custom(Xyz<Wp, T>),
+    /// Returns the XYZ value for this white point.
+    fn into_xyz(self) -> Xyz<white_point::Any, T>;
 }
 
-impl<Wp, T> WhitePointParameter<Wp, T>
+impl<T> WhitePointParameter<T> for Xyz<white_point::Any, T> {
+    type StaticWp = white_point::Any;
+
+    fn into_xyz(self) -> Xyz<white_point::Any, T> {
+        self
+    }
+}
+
+/// Represents a static white point in [`Parameters`], as opposed to a dynamic
+/// [`Xyz`] value.
+pub struct StaticWp<Wp>(PhantomData<Wp>);
+
+impl<T, Wp> WhitePointParameter<T> for StaticWp<Wp>
 where
     Wp: WhitePoint<T>,
 {
-    fn into_any_white_point(self) -> WhitePointParameter<white_point::Any, T> {
-        match self {
-            WhitePointParameter::Default => WhitePointParameter::Custom(Wp::get_xyz()),
-            WhitePointParameter::Custom(xyz) => WhitePointParameter::Custom(xyz.with_white_point()),
-        }
+    type StaticWp = Wp;
+
+    fn into_xyz(self) -> Xyz<white_point::Any, T> {
+        Wp::get_xyz()
     }
 }
-
-impl<T> WhitePointParameter<white_point::Any, T>
-where
-    T: Real,
-{
-    pub(crate) fn into_xyz(self) -> Xyz<white_point::Any, T> {
-        match self {
-            WhitePointParameter::Default => D65::get_xyz(),
-            WhitePointParameter::Custom(xyz) => xyz,
-        }
-    }
-}
-
-impl<Wp, T> Clone for WhitePointParameter<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        match self {
-            Self::Default => Self::Default,
-            Self::Custom(white_point) => Self::Custom(white_point.clone()),
-        }
-    }
-}
-
-impl<Wp, T> Copy for WhitePointParameter<Wp, T> where T: Copy {}

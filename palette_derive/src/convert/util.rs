@@ -11,16 +11,16 @@ pub fn white_point_type(
     rgb_standard: Option<&Type>,
     luma_standard: Option<&Type>,
     internal: bool,
-) -> (Type, Option<WhitePointSource>) {
+) -> Option<(Type, WhitePointSource)> {
     white_point
-        .map(|white_point| (white_point.clone(), Some(WhitePointSource::WhitePoint)))
+        .map(|white_point| (white_point.clone(), WhitePointSource::WhitePoint))
         .or_else(|| {
             rgb_standard.map(|rgb_standard| {
                 let rgb_standard_path = util::path(["rgb", "RgbStandard"], internal);
                 let rgb_space_path = util::path(["rgb", "RgbSpace"], internal);
                 (
                     parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
-                    Some(WhitePointSource::RgbStandard),
+                    WhitePointSource::RgbStandard,
                 )
             })
         })
@@ -29,15 +29,9 @@ pub fn white_point_type(
                 let luma_standard_path = util::path(["luma", "LumaStandard"], internal);
                 (
                     parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
-                    Some(WhitePointSource::LumaStandard),
+                    WhitePointSource::LumaStandard,
                 )
             })
-        })
-        .unwrap_or_else(|| {
-            (
-                util::path_type(&["white_point", "D65"], internal),
-                None,
-            )
         })
 }
 
@@ -75,7 +69,9 @@ pub fn get_convert_color_type(
                     .push(parse_quote!(_S: #luma_standard_path<WhitePoint = #white_point>));
                 (
                     parse_quote!(#color_path<_S, #component>),
-                    UsedInput { white_point: true },
+                    UsedInput {
+                        white_point: WhitePointUsed::BY_TARGET,
+                    },
                 )
             }
         }
@@ -103,11 +99,16 @@ pub fn get_convert_color_type(
 
                 (
                     parse_quote!(#color_path<_S, #component>),
-                    UsedInput { white_point: true },
+                    UsedInput {
+                        white_point: WhitePointUsed::BY_TARGET,
+                    },
                 )
             }
         }
         "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
+            (parse_quote!(#color_path<#component>), UsedInput::default())
+        }
+        "Cam16" | "Cam16UcsJmh" | "Cam16UcsJab" => {
             (parse_quote!(#color_path<#component>), UsedInput::default())
         }
         "PartialCam16" => {
@@ -144,13 +145,15 @@ pub fn get_convert_color_type(
             };
 
             (
-                parse_quote!(#color_path<#white_point, #component, #luminance, #chromaticity>),
-                UsedInput { white_point: true },
+                parse_quote!(#color_path<#component, #luminance, #chromaticity>),
+                UsedInput::default(),
             )
         }
         _ => (
             parse_quote!(#color_path<#white_point, #component>),
-            UsedInput { white_point: true },
+            UsedInput {
+                white_point: WhitePointUsed::BY_TARGET,
+            },
         ),
     }
 }
@@ -217,9 +220,36 @@ pub enum WhitePointSource {
     WhitePoint,
     RgbStandard,
     LumaStandard,
+    ConcreteType,
+    GeneratedGeneric,
 }
 
 #[derive(Debug, Default)]
 pub struct UsedInput {
-    pub white_point: bool,
+    pub white_point: WhitePointUsed,
+}
+
+#[derive(Debug, Default)]
+pub struct WhitePointUsed {
+    used_by_target: bool,
+    used_by_nearest: bool,
+}
+
+impl WhitePointUsed {
+    const BY_TARGET: Self = WhitePointUsed {
+        used_by_target: true,
+        used_by_nearest: false,
+    };
+
+    pub(crate) fn used_by_nearest(&mut self) {
+        self.used_by_nearest = true;
+    }
+
+    pub(crate) fn is_used(&self) -> bool {
+        self.used_by_target || self.used_by_nearest
+    }
+
+    pub(crate) fn is_unconstrained(&self) -> bool {
+        !self.used_by_target && self.used_by_nearest
+    }
 }

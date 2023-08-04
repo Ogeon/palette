@@ -320,12 +320,13 @@ where
 }
 
 #[cfg(feature = "cam16")]
-impl<Wp, T> FromColorUnclamped<crate::cam16::Cam16<Wp, T>> for Xyz<Wp, T>
+impl<Wp, T> FromColorUnclamped<crate::cam16::Cam16<T>> for Xyz<Wp, T>
 where
-    Xyz<Wp, T>: crate::cam16::FromCam16<Wp, T>,
-    crate::cam16::BakedParameters<Wp, T>: Default,
+    Wp: WhitePoint<T>,
+    Xyz<Wp, T>: crate::cam16::FromCam16<crate::cam16::StaticWp<Wp>, T>,
+    crate::cam16::BakedParameters<crate::cam16::StaticWp<Wp>, T>: Default,
 {
-    fn from_color_unclamped(val: crate::cam16::Cam16<Wp, T>) -> Self {
+    fn from_color_unclamped(val: crate::cam16::Cam16<T>) -> Self {
         use crate::cam16::FromCam16;
 
         Self::from_cam16(val, crate::cam16::BakedParameters::default())
@@ -333,14 +334,15 @@ where
 }
 
 #[cfg(feature = "cam16")]
-impl<Wp, T, L, C> FromColorUnclamped<crate::cam16::PartialCam16<Wp, T, L, C>> for Xyz<Wp, T>
+impl<Wp, T, L, C> FromColorUnclamped<crate::cam16::PartialCam16<T, L, C>> for Xyz<Wp, T>
 where
+    Wp: WhitePoint<T>,
     L: crate::cam16::Cam16Luminance<T>,
     C: crate::cam16::Cam16Chromaticity<T>,
-    Xyz<Wp, T>: crate::cam16::FromCam16<Wp, T>,
-    crate::cam16::BakedParameters<Wp, T>: Default,
+    Xyz<Wp, T>: crate::cam16::FromCam16<crate::cam16::StaticWp<Wp>, T>,
+    crate::cam16::BakedParameters<crate::cam16::StaticWp<Wp>, T>: Default,
 {
-    fn from_color_unclamped(val: crate::cam16::PartialCam16<Wp, T, L, C>) -> Self {
+    fn from_color_unclamped(val: crate::cam16::PartialCam16<T, L, C>) -> Self {
         use crate::cam16::FromCam16;
 
         Self::from_partial_cam16(val, crate::cam16::BakedParameters::default())

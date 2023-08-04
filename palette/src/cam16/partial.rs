@@ -1,5 +1,3 @@
-use core::marker::PhantomData;
-
 use crate::{
     bool_mask::{LazySelect, Select},
     convert::{FromColorUnclamped, IntoColorUnclamped},
@@ -10,30 +8,30 @@ use crate::{
 
 use super::{
     math::{self, DependentParameters},
-    BakedParameters, Cam16, Cam16UcsJmh, FromCam16, IntoCam16,
+    BakedParameters, Cam16, Cam16UcsJmh, FromCam16, IntoCam16, WhitePointParameter,
 };
 
 /// An alias for [`PartialCam16`], where the chromaticity and luminance
 /// attributes are decided during runtime.
-pub type DynPartialCam16<Wp, T> = PartialCam16<Wp, T, LuminanceType<T>, ChromaticityType<T>>;
+pub type DynPartialCam16<T> = PartialCam16<T, LuminanceType<T>, ChromaticityType<T>>;
 
 /// An alias for [`PartialCam16`], with lightness and chroma.
-pub type PartialCam16Jch<Wp, T> = PartialCam16<Wp, T, Lightness<T>, Chroma<T>>;
+pub type PartialCam16Jch<T> = PartialCam16<T, Lightness<T>, Chroma<T>>;
 
 /// An alias for [`PartialCam16`], with lightness and colorfulness.
-pub type PartialCam16Jmh<Wp, T> = PartialCam16<Wp, T, Lightness<T>, Colorfulness<T>>;
+pub type PartialCam16Jmh<T> = PartialCam16<T, Lightness<T>, Colorfulness<T>>;
 
 /// An alias for [`PartialCam16`], with lightness and saturation.
-pub type PartialCam16Jsh<Wp, T> = PartialCam16<Wp, T, Lightness<T>, Saturation<T>>;
+pub type PartialCam16Jsh<T> = PartialCam16<T, Lightness<T>, Saturation<T>>;
 
 /// An alias for [`PartialCam16`], with brightness and chroma.
-pub type PartialCam16Qch<Wp, T> = PartialCam16<Wp, T, Brightness<T>, Chroma<T>>;
+pub type PartialCam16Qch<T> = PartialCam16<T, Brightness<T>, Chroma<T>>;
 
 /// An alias for [`PartialCam16`], with brightness and colorfulness.
-pub type PartialCam16Qmh<Wp, T> = PartialCam16<Wp, T, Brightness<T>, Colorfulness<T>>;
+pub type PartialCam16Qmh<T> = PartialCam16<T, Brightness<T>, Colorfulness<T>>;
 
 /// An alias for [`PartialCam16`], with brightness and saturation.
-pub type PartialCam16Qsh<Wp, T> = PartialCam16<Wp, T, Brightness<T>, Saturation<T>>;
+pub type PartialCam16Qsh<T> = PartialCam16<T, Brightness<T>, Saturation<T>>;
 
 /// A partial version of [`Cam16`] with only one of each kind of attribute.
 ///
@@ -48,14 +46,13 @@ pub type PartialCam16Qsh<Wp, T> = PartialCam16<Wp, T, Brightness<T>, Saturation<
 /// * [`PartialCam16Qsh`]: brightness and saturation.
 ///
 /// This is enough information for converting CAM16 to other color spaces.
-#[derive(Debug, WithAlpha, FromColorUnclamped)]
+#[derive(Clone, Copy, Debug, WithAlpha, FromColorUnclamped)]
 #[palette(
     palette_internal,
-    white_point = "Wp",
     component = "T",
     skip_derives(Xyz, Cam16, PartialCam16, Cam16UcsJmh)
 )]
-pub struct PartialCam16<Wp, T, L, C> {
+pub struct PartialCam16<T, L, C> {
     /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J) or
     /// [brightness](https://en.wikipedia.org/wiki/Brightness) (Q) of the color.
     pub luminance: L,
@@ -68,119 +65,60 @@ pub struct PartialCam16<Wp, T, L, C> {
 
     /// The [hue](https://en.wikipedia.org/wiki/Hue) (h) of the color.
     pub hue: Cam16Hue<T>,
-
-    /// The reference white point, usually inherited from the source/target
-    /// color space.
-    ///
-    /// See also [`Parameters::white_point`][super::Parameters::white_point] for how it's used in conversion.
-    pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T, L, C> PartialCam16<Wp, T, L, C> {
-    pub(super) fn with_white_point<NewWp>(self) -> PartialCam16<NewWp, T, L, C> {
-        let PartialCam16 {
-            hue,
-            chromaticity,
-            luminance,
-            white_point: _,
-        } = self;
-
-        PartialCam16 {
-            hue,
-            chromaticity,
-            luminance,
-            white_point: PhantomData,
-        }
-    }
-}
-
-impl<Wp, T, L, C> PartialCam16<Wp, T, L, C>
+impl<T, L, C> PartialCam16<T, L, C>
 where
     L: Cam16Luminance<T>,
     C: Cam16Chromaticity<T>,
 {
     /// Turn the chromaticity and luminance into dynamically decided attributes.
-    pub fn into_dynamic(self) -> DynPartialCam16<Wp, T> {
+    pub fn into_dynamic(self) -> DynPartialCam16<T> {
         let PartialCam16 {
             hue,
             chromaticity,
             luminance,
-            white_point,
         } = self;
 
         PartialCam16 {
             hue,
             chromaticity: chromaticity.into_dynamic(),
             luminance: luminance.into_dynamic(),
-            white_point,
         }
     }
 }
 
-impl<Wp, T, L, C> Clone for PartialCam16<Wp, T, L, C>
-where
-    T: Clone,
-    C: Clone,
-    L: Clone,
-{
-    fn clone(&self) -> Self {
-        Self {
-            hue: self.hue.clone(),
-            chromaticity: self.chromaticity.clone(),
-            luminance: self.luminance.clone(),
-            white_point: PhantomData,
-        }
+impl<T, L, C> FromColorUnclamped<PartialCam16<T, L, C>> for PartialCam16<T, L, C> {
+    fn from_color_unclamped(val: PartialCam16<T, L, C>) -> Self {
+        val
     }
 }
 
-impl<Wp, T, L, C> Copy for PartialCam16<Wp, T, L, C>
-where
-    T: Copy,
-    C: Copy,
-    L: Copy,
-{
-}
-
-impl<Wp, T, L, C> FromColorUnclamped<Cam16<Wp, T>> for PartialCam16<Wp, T, L, C>
+impl<T, L, C> FromColorUnclamped<Cam16<T>> for PartialCam16<T, L, C>
 where
     L: Cam16Luminance<T>,
     C: Cam16Chromaticity<T>,
 {
-    fn from_color_unclamped(val: Cam16<Wp, T>) -> Self {
-        let Cam16 {
-            lightness,
-            chroma,
-            hue,
-            brightness,
-            colorfulness,
-            saturation,
-            white_point,
-        } = val;
-
-        PartialCam16 {
-            hue,
-            chromaticity: C::from_cam16(chroma, colorfulness, saturation),
-            luminance: L::from_cam16(lightness, brightness),
-            white_point,
-        }
+    fn from_color_unclamped(val: Cam16<T>) -> Self {
+        Self::from(val)
     }
 }
 
-impl<Wp, T, L, C> FromColorUnclamped<Xyz<Wp, T>> for PartialCam16<Wp, T, L, C>
+impl<Wp, T, L, C> FromColorUnclamped<Xyz<Wp, T>> for PartialCam16<T, L, C>
 where
-    Self: FromColorUnclamped<Cam16<Wp, T>>,
-    Cam16<Wp, T>: FromColorUnclamped<Xyz<Wp, T>>,
+    Self: FromColorUnclamped<Cam16<T>>,
+    Cam16<T>: FromColorUnclamped<Xyz<Wp, T>>,
 {
     fn from_color_unclamped(val: Xyz<Wp, T>) -> Self {
         Cam16::from_color_unclamped(val).into_color_unclamped()
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Cam16UcsJmh<Wp, T>> for PartialCam16Jmh<Wp, T>
+impl<T> FromColorUnclamped<Cam16UcsJmh<T>> for PartialCam16Jmh<T>
 where
     T: Real + One + Exp + Arithmetics + Clone,
 {
-    fn from_color_unclamped(val: Cam16UcsJmh<Wp, T>) -> Self {
+    fn from_color_unclamped(val: Cam16UcsJmh<T>) -> Self {
         let colorfulness =
             ((val.colorfulness * T::from_f64(0.0228)).exp() - T::one()) / T::from_f64(0.0228);
         let lightness =
@@ -190,34 +128,34 @@ where
             hue: val.hue,
             chromaticity: Colorfulness(colorfulness),
             luminance: Lightness(lightness),
-            white_point: PhantomData,
         }
     }
 }
 
-impl<Wp, T> FromColorUnclamped<Cam16UcsJmh<Wp, T>> for DynPartialCam16<Wp, T>
+impl<T> FromColorUnclamped<Cam16UcsJmh<T>> for DynPartialCam16<T>
 where
-    PartialCam16Jmh<Wp, T>: FromColorUnclamped<Cam16UcsJmh<Wp, T>>,
+    PartialCam16Jmh<T>: FromColorUnclamped<Cam16UcsJmh<T>>,
 {
-    fn from_color_unclamped(val: Cam16UcsJmh<Wp, T>) -> Self {
+    fn from_color_unclamped(val: Cam16UcsJmh<T>) -> Self {
         PartialCam16Jmh::from_color_unclamped(val).into_dynamic()
     }
 }
 
-impl<Wp, T, Ls, Cs> FromCam16<Wp, T> for PartialCam16<Wp, T, Ls, Cs>
+impl<WpParam, T, Ls, Cs> FromCam16<WpParam, T> for PartialCam16<T, Ls, Cs>
 where
+    WpParam: WhitePointParameter<T>,
     T: Real + Zero + Arithmetics + Sqrt + PartialCmp + Clone,
     T::Mask: LazySelect<T> + Clone,
     Ls: Cam16Luminance<T>,
     Cs: Cam16Chromaticity<T>,
 {
-    fn from_cam16(cam16: Cam16<Wp, T>, _parameters: BakedParameters<Wp, T>) -> Self {
+    fn from_cam16(cam16: Cam16<T>, _parameters: BakedParameters<WpParam, T>) -> Self {
         cam16.into()
     }
 
     fn from_partial_cam16<L, C>(
-        cam16: PartialCam16<Wp, T, L, C>,
-        parameters: BakedParameters<Wp, T>,
+        cam16: PartialCam16<T, L, C>,
+        parameters: BakedParameters<WpParam, T>,
     ) -> Self
     where
         L: Cam16Luminance<T>,
@@ -227,19 +165,19 @@ where
     }
 }
 
-impl<Wp, T, L, C> IntoCam16<Wp, T> for PartialCam16<Wp, T, L, C>
+impl<WpParam, T, L, C> IntoCam16<WpParam, T> for PartialCam16<T, L, C>
 where
+    WpParam: WhitePointParameter<T>,
     T: Real + Zero + Arithmetics + Sqrt + PartialCmp + Clone,
     T::Mask: LazySelect<T> + Clone,
     L: Cam16Luminance<T>,
     C: Cam16Chromaticity<T>,
 {
-    fn into_cam16(self, parameters: BakedParameters<Wp, T>) -> Cam16<Wp, T> {
+    fn into_cam16(self, parameters: BakedParameters<WpParam, T>) -> Cam16<T> {
         let PartialCam16 {
             hue,
             chromaticity,
             luminance,
-            white_point,
         } = self.into_dynamic();
 
         let (lightness, brightness) = luminance.into_cam16(parameters.clone());
@@ -253,12 +191,11 @@ where
             brightness,
             colorfulness,
             saturation,
-            white_point,
         }
     }
 }
 
-impl<Wp, T, L, C> crate::Clamp for PartialCam16<Wp, T, L, C>
+impl<T, L, C> crate::Clamp for PartialCam16<T, L, C>
 where
     C: crate::Clamp,
     L: crate::Clamp,
@@ -268,12 +205,11 @@ where
             hue: self.hue,
             chromaticity: self.chromaticity.clamp(),
             luminance: self.luminance.clamp(),
-            white_point: PhantomData,
         }
     }
 }
 
-impl<Wp, T, L, C> crate::ClampAssign for PartialCam16<Wp, T, L, C>
+impl<T, L, C> crate::ClampAssign for PartialCam16<T, L, C>
 where
     T: ClampAssign + Zero,
     C: crate::ClampAssign,
@@ -285,13 +221,26 @@ where
     }
 }
 
-impl<Wp, T, L, C> From<Cam16<Wp, T>> for PartialCam16<Wp, T, L, C>
+impl<T, L, C> From<Cam16<T>> for PartialCam16<T, L, C>
 where
     L: Cam16Luminance<T>,
     C: Cam16Chromaticity<T>,
 {
-    fn from(value: Cam16<Wp, T>) -> Self {
-        value.into_color_unclamped()
+    fn from(value: Cam16<T>) -> Self {
+        let Cam16 {
+            lightness,
+            chroma,
+            hue,
+            brightness,
+            colorfulness,
+            saturation,
+        } = value;
+
+        PartialCam16 {
+            hue,
+            chromaticity: C::from_cam16(chroma, colorfulness, saturation),
+            luminance: L::from_cam16(lightness, brightness),
+        }
     }
 }
 
@@ -718,8 +667,9 @@ mod test {
         PartialCam16Qsh,
     };
     use crate::{
-        cam16::Cam16,
-        convert::{FromColorUnclamped, IntoColorUnclamped},
+        cam16::{BakedParameters, Cam16, IntoCam16, StaticWp},
+        convert::IntoColorUnclamped,
+        white_point::D65,
         Srgb,
     };
 
@@ -727,33 +677,33 @@ mod test {
         ($cam16: expr) => {assert_partial_to_full!($cam16,)};
         ($cam16: expr, $($params:tt)*) => {
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Jch::from($cam16)),
+                PartialCam16Jch::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Jmh::from($cam16)),
+                PartialCam16Jmh::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Jsh::from($cam16)),
+                PartialCam16Jsh::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
 
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Qch::from($cam16)),
+                PartialCam16Qch::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Qmh::from($cam16)),
+                PartialCam16Qmh::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
             assert_relative_eq!(
-                Cam16::from_color_unclamped(PartialCam16Qsh::from($cam16)),
+                PartialCam16Qsh::from($cam16).into_cam16(BakedParameters::<StaticWp<D65>, _>::default()),
                 $cam16,
                 $($params)*
             );
@@ -763,42 +713,42 @@ mod test {
     #[test]
     fn example_blue() {
         // Uses the example color from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0x5588cc).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0x5588cc).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16);
     }
 
     #[test]
     fn black() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0x000000).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0x000000).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16);
     }
 
     #[test]
     fn white() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0xffffff).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0xffffff).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16, epsilon = 0.000000000000001);
     }
 
     #[test]
     fn red() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0xff0000).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0xff0000).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16, epsilon = 0.0000000000001);
     }
 
     #[test]
     fn green() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0x00ff00).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0x00ff00).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16, epsilon = 0.0000000000001);
     }
 
     #[test]
     fn blue() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let cam16: Cam16<_, f64> = Srgb::from(0x0000ff).into_linear().into_color_unclamped();
+        let cam16: Cam16<f64> = Srgb::from(0x0000ff).into_linear().into_color_unclamped();
         assert_partial_to_full!(cam16);
     }
 }

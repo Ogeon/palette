@@ -1,18 +1,15 @@
-use core::marker::PhantomData;
-
 use crate::{angle::RealAngle, convert::FromColorUnclamped, num::Trigonometry};
 
 use super::Cam16UcsJmh;
 
 /// The Cartesian form of CAM16-UCS, or J'a'b'.
-#[derive(Debug, WithAlpha, FromColorUnclamped)]
+#[derive(Clone, Copy, Debug, WithAlpha, FromColorUnclamped)]
 #[palette(
     palette_internal,
-    white_point = "Wp",
     component = "T",
     skip_derives(Cam16UcsJmh, Cam16UcsJab)
 )]
-pub struct Cam16UcsJab<Wp, T> {
+pub struct Cam16UcsJab<T> {
     /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J') of the color.
     pub lightness: T,
 
@@ -21,27 +18,25 @@ pub struct Cam16UcsJab<Wp, T> {
 
     /// The yellowness/blueness (b') of the color.
     pub b: T,
-
-    /// The reference white point, usually inherited from the source/target
-    /// color space.
-    ///
-    /// See also [`Parameters::white_point`][super::Parameters::white_point] for
-    /// how it's used in conversion.
-    pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> FromColorUnclamped<Cam16UcsJmh<Wp, T>> for Cam16UcsJab<Wp, T>
+impl<T> FromColorUnclamped<Cam16UcsJab<T>> for Cam16UcsJab<T> {
+    fn from_color_unclamped(val: Cam16UcsJab<T>) -> Self {
+        val
+    }
+}
+
+impl<T> FromColorUnclamped<Cam16UcsJmh<T>> for Cam16UcsJab<T>
 where
     T: RealAngle + Trigonometry,
 {
-    fn from_color_unclamped(val: Cam16UcsJmh<Wp, T>) -> Self {
+    fn from_color_unclamped(val: Cam16UcsJmh<T>) -> Self {
         let (a, b) = val.hue.into_cartesian();
 
         Self {
             lightness: val.lightness,
             a,
             b,
-            white_point: PhantomData,
         }
     }
 }

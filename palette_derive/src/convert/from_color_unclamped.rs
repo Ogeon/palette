@@ -37,7 +37,7 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
     };
 
     let component = component_type(item_meta.component.clone());
-    let (white_point, white_point_source) = white_point_type(
+    let white_point = white_point_type(
         item_meta.white_point.as_ref(),
         item_meta.rgb_standard.as_ref(),
         item_meta.luma_standard.as_ref(),
@@ -51,15 +51,13 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         item_meta.skip_derives.insert("Xyz".into());
     }
 
-    let all_from_impl_params = prepare_from_impl(
+    let (all_from_impl_params, impl_params_errors) = prepare_from_impl(
         &item_meta.skip_derives,
         &component,
-        &white_point,
+        white_point,
         &item_meta,
         &generics,
-        white_point_source,
-    )
-    .map_err(|error| vec![error])?;
+    );
 
     let mut implementations =
         generate_from_implementations(&ident, &generics, &item_meta, &all_from_impl_params);
@@ -84,10 +82,14 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
     let field_errors = field_errors
         .into_iter()
         .map(|error| error.into_compile_error());
+    let impl_params_errors = impl_params_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
 
     Ok(quote! {
         #(#item_errors)*
         #(#field_errors)*
+        #(#impl_params_errors)*
 
         #(#implementations)*
     }
@@ -97,55 +99,115 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
 fn prepare_from_impl(
     skip: &HashSet<String>,
     component: &Type,
-    white_point: &Type,
+    white_point: Option<(Type, WhitePointSource)>,
     meta: &TypeItemAttributes,
     generics: &Generics,
-    white_point_source: Option<WhitePointSource>,
-) -> Result<Vec<FromImplParameters>> {
+) -> (Vec<FromImplParameters>, Vec<syn::Error>) {
     let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
-    let linear_path = util::path(["encoding", "Linear"], meta.internal);
 
     let mut parameters = Vec::new();
+    let mut errors = Vec::new();
 
     for &color_name in included_colors {
-        let nearest_color_name = find_nearest_color(color_name, skip)?;
-
-        let mut generics = generics.clone();
-
-        let (color_ty, mut used_input) = get_convert_color_type(
+        let impl_params = prepare_from_impl_for_pair(
             color_name,
-            white_point,
+            skip,
             component,
-            &meta,
-            &mut generics,
-            meta.internal,
+            white_point.clone(),
+            meta,
+            generics.clone(),
         );
 
-        let nearest_color_path = util::color_path(nearest_color_name, meta.internal);
-        let target_color_rgb_standard = match color_name {
-            "Rgb" | "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
-            _ => None,
-        };
-        let target_color_cam16_chromaticity = match color_name {
-            "PartialCam16" => Some(parse_quote!(_C)),
-            "Cam16UcsJmh" | "Cam16UcsJab" => {
-                let path = util::path(&["cam16", "Colorfulness"], meta.internal);
-                Some(parse_quote!(#path<#component>))
-            }
-            _ => None,
-        };
-        let target_color_cam16_luminance = match color_name {
-            "PartialCam16" => Some(parse_quote!(_L)),
-            "Cam16UcsJmh" | "Cam16UcsJab" => {
-                let path = util::path(&["cam16", "Lightness"], meta.internal);
-                Some(parse_quote!(#path<#component>))
-            }
-            _ => None,
-        };
+        match impl_params {
+            Ok(Some(impl_params)) => parameters.push(impl_params),
+            Ok(None) => {}
+            Err(error) => errors.push(error),
+        }
+    }
 
-        let nearest_color_ty: Type = match nearest_color_name {
-            "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
-                let rgb_standard = meta.rgb_standard
+    (parameters, errors)
+}
+
+fn prepare_from_impl_for_pair(
+    color_name: &str,
+    skip: &HashSet<String>,
+    component: &Type,
+    white_point: Option<(Type, WhitePointSource)>,
+    meta: &TypeItemAttributes,
+    mut generics: Generics,
+) -> Result<Option<FromImplParameters>> {
+    let linear_path = util::path(&["encoding", "Linear"], meta.internal);
+    let nearest_color_name = find_nearest_color(color_name, skip)?;
+
+    // Figures out which white point the target type prefers, unless it's specified in `white_point`.
+    let (white_point, white_point_source) = if let Some((white_point, source)) = white_point {
+        (white_point, source)
+    } else {
+        match color_name {
+            "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => (
+                util::path_type(&["white_point", "D65"], meta.internal),
+                WhitePointSource::ConcreteType,
+            ),
+            "Cam16" | "Cam16UcsJmh" | "Cam16UcsJab" | "PartialCam16" => {
+                // These color types perform white balance when converting, so
+                // they don't require any specific white point. Source types
+                // that don't specify a white point will cause the type
+                // parameter to be unconstrained. Those implementations will be
+                // skipped further down.
+                (parse_quote!(_Wp), WhitePointSource::GeneratedGeneric)
+            }
+            _ => {
+                if meta.internal {
+                    (parse_quote!(_Wp), WhitePointSource::GeneratedGeneric)
+                } else {
+                    // This replicates the old behavior, but should be dropped
+                    // in a future version. The default should then be a
+                    // generated `_Wp` type parameter, like above.
+                    (
+                        util::path_type(&["white_point", "D65"], meta.internal),
+                        WhitePointSource::ConcreteType,
+                    )
+                }
+            }
+        }
+    };
+
+    let (color_ty, mut used_input) = get_convert_color_type(
+        color_name,
+        &white_point,
+        component,
+        &meta,
+        &mut generics,
+        meta.internal,
+    );
+
+    // Figures out the remaining preferred meta types. Failing to figure out
+    // what they are is currently a hard error.
+    let nearest_color_path = util::color_path(nearest_color_name, meta.internal);
+    let target_color_rgb_standard = match color_name {
+        "Rgb" | "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
+        _ => None,
+    };
+    let target_color_cam16_chromaticity = match color_name {
+        "PartialCam16" => Some(parse_quote!(_C)),
+        "Cam16UcsJmh" | "Cam16UcsJab" => {
+            let path = util::path(&["cam16", "Colorfulness"], meta.internal);
+            Some(parse_quote!(#path<#component>))
+        }
+        _ => None,
+    };
+    let target_color_cam16_luminance = match color_name {
+        "PartialCam16" => Some(parse_quote!(_L)),
+        "Cam16UcsJmh" | "Cam16UcsJab" => {
+            let path = util::path(&["cam16", "Lightness"], meta.internal);
+            Some(parse_quote!(#path<#component>))
+        }
+        _ => None,
+    };
+
+    let nearest_color_ty: Type = match nearest_color_name {
+        "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
+            let rgb_standard = meta.rgb_standard
                     .clone()
                     .or(target_color_rgb_standard)
                     .ok_or_else(|| {
@@ -159,21 +221,24 @@ fn prepare_from_impl(
                         )
                     })?;
 
-                parse_quote!(#nearest_color_path::<#rgb_standard, #component>)
+            parse_quote!(#nearest_color_path::<#rgb_standard, #component>)
+        }
+        "Luma" => {
+            if let Some(luma_standard) = meta.luma_standard.as_ref() {
+                parse_quote!(#nearest_color_path::<#luma_standard, #component>)
+            } else {
+                used_input.white_point.used_by_nearest();
+                parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>)
             }
-            "Luma" => {
-                if let Some(luma_standard) = meta.luma_standard.as_ref() {
-                    parse_quote!(#nearest_color_path::<#luma_standard, #component>)
-                } else {
-                    used_input.white_point = true;
-                    parse_quote!(#nearest_color_path::<#linear_path<#white_point>, #component>)
-                }
-            }
-            "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
-                parse_quote!(#nearest_color_path::<#component>)
-            }
-            "PartialCam16" => {
-                let cam16_chromaticity = meta.cam16_chromaticity
+        }
+        "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => {
+            parse_quote!(#nearest_color_path::<#component>)
+        }
+        "Cam16" | "Cam16UcsJmh" | "Cam16UcsJab" => {
+            parse_quote!(#nearest_color_path::<#component>)
+        }
+        "PartialCam16" => {
+            let cam16_chromaticity = meta.cam16_chromaticity
                     .clone()
                     .or(target_color_cam16_chromaticity)
                     .ok_or_else(
@@ -186,7 +251,7 @@ fn prepare_from_impl(
                             ),
                         )
                     )?;
-                let cam16_luminance = meta.cam16_luminance
+            let cam16_luminance = meta.cam16_luminance
                     .clone()
                     .or(target_color_cam16_luminance)
                     .ok_or_else(
@@ -200,52 +265,60 @@ fn prepare_from_impl(
                         )
                     )?;
 
-                used_input.white_point = true;
-                parse_quote!(#nearest_color_path::<#white_point, #component, #cam16_luminance, #cam16_chromaticity>)
-            }
-            _ => {
-                used_input.white_point = true;
-                parse_quote!(#nearest_color_path::<#white_point, #component>)
-            }
-        };
-
-        if used_input.white_point {
-            match white_point_source {
-                Some(WhitePointSource::WhitePoint) => {
-                    let white_point_path = util::path(["white_point", "WhitePoint"], meta.internal);
-                    generics
-                        .make_where_clause()
-                        .predicates
-                        .push(parse_quote!(#white_point: #white_point_path<#component>))
-                }
-                Some(WhitePointSource::RgbStandard) => {
-                    let rgb_standard_path = util::path(["rgb", "RgbStandard"], meta.internal);
-                    let rgb_standard = meta.rgb_standard.as_ref();
-                    generics
-                        .make_where_clause()
-                        .predicates
-                        .push(parse_quote!(#rgb_standard: #rgb_standard_path));
-                }
-                Some(WhitePointSource::LumaStandard) => {
-                    let luma_standard_path = util::path(["luma", "LumaStandard"], meta.internal);
-                    let luma_standard = meta.luma_standard.as_ref();
-                    generics
-                        .make_where_clause()
-                        .predicates
-                        .push(parse_quote!(#luma_standard: #luma_standard_path));
-                }
-                None => {}
-            }
+            parse_quote!(#nearest_color_path::<#component, #cam16_luminance, #cam16_chromaticity>)
         }
+        _ => {
+            used_input.white_point.used_by_nearest();
+            parse_quote!(#nearest_color_path::<#white_point, #component>)
+        }
+    };
 
-        parameters.push(FromImplParameters {
-            generics,
-            color_ty,
-            nearest_color_ty,
-        });
+    // Skip implementing the trait where it wouldn't be able to constrain
+    // the white point. This is only happening when certain optional
+    // features, such as "cam16", are enabled.
+    if used_input.white_point.is_unconstrained()
+        && matches!(white_point_source, WhitePointSource::GeneratedGeneric)
+    {
+        return Ok(None);
     }
 
-    Ok(parameters)
+    if used_input.white_point.is_used() {
+        match white_point_source {
+            WhitePointSource::WhitePoint => {
+                let white_point_path = util::path(["white_point", "WhitePoint"], meta.internal);
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(parse_quote!(#white_point: #white_point_path<#component>))
+            }
+            WhitePointSource::RgbStandard => {
+                let rgb_standard_path = util::path(["rgb", "RgbStandard"], meta.internal);
+                let rgb_standard = meta.rgb_standard.as_ref();
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(parse_quote!(#rgb_standard: #rgb_standard_path));
+            }
+            WhitePointSource::LumaStandard => {
+                let luma_standard_path = util::path(["luma", "LumaStandard"], meta.internal);
+                let luma_standard = meta.luma_standard.as_ref();
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(parse_quote!(#luma_standard: #luma_standard_path));
+            }
+            WhitePointSource::ConcreteType => {}
+            WhitePointSource::GeneratedGeneric => {
+                generics.params.push(parse_quote!(_Wp));
+            }
+        }
+    }
+
+    Ok(Some(FromImplParameters {
+        generics,
+        color_ty,
+        nearest_color_ty,
+    }))
 }
 
 struct FromImplParameters {
