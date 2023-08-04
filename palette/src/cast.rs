@@ -163,9 +163,13 @@
 //! ```
 
 mod array;
-mod array_traits;
+mod from_into_arrays_traits;
+mod from_into_components_traits;
+mod from_into_uints_traits;
 mod packed;
 mod uint;
-mod uint_traits;
 
-pub use self::{array::*, array_traits::*, packed::*, uint::*, uint_traits::*};
+pub use self::{
+    array::*, from_into_arrays_traits::*, from_into_components_traits::*,
+    from_into_uints_traits::*, packed::*, uint::*,
+};
