@@ -186,12 +186,12 @@
 //! to Palette colors:
 //!
 //! ```rust
-//! # let mut image_buffer: &mut Vec<u8> = &mut vec![];
-//! use palette::{Srgb, cast::ComponentsInto};
+//! # let mut image_buffer: Vec<u8> = vec![];
+//! use palette::{Srgb, cast::ComponentsAsMut};
 //!
-//! // This works for any color type (even non-RGB) that can have the
+//! // This works for any color type (not only RGB) that can have the
 //! // buffer element type as component.
-//! let color_buffer: &mut [Srgb<u8>] = image_buffer.components_into();
+//! let color_buffer: &mut [Srgb<u8>] = image_buffer.components_as_mut();
 //! ```
 //!
 //! * If you are getting your colors from the GPU, in a game or other graphical

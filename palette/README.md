@@ -92,13 +92,13 @@ A longer and more advanced example that shows how to implement the conversion tr
 When working with image or pixel buffers, or any color type that can be converted to a slice of components (ex. `&[u8]`), the `cast` module provides traits and functions for turning them into slices of Palette colors without cloning the whole buffer:
 
 ```rust
-use palette::{cast::ComponentsInto, Srgb};
+use palette::{cast::ComponentsAsMut, Srgb};
 
 // The input to this function could be data from an image file or
 // maybe a texture in a game.
 fn swap_red_and_blue(my_rgb_image: &mut [u8]) {
     // Convert `my_rgb_image` into `&mut [Srgb<u8>]` without copying.
-    let my_rgb_image: &mut [Srgb<u8>] = my_rgb_image.components_into();
+    let my_rgb_image: &mut [Srgb<u8>] = my_rgb_image.components_as_mut();
 
     for color in my_rgb_image {
         std::mem::swap(&mut color.red, &mut color.blue);
@@ -152,13 +152,17 @@ This image shows the transition from the color to `new_color` in HSL and HSV:
 In addition to the operator traits, the SVG blend and composition functions have also been implemented.
 
 ```rust
-use palette::{blend::Compose, cast::ComponentsInto, Srgb, WithAlpha};
+use palette::{
+    blend::Compose,
+    cast::{ComponentsAs, ComponentsAsMut},
+    Srgb, WithAlpha,
+};
 
 // The input to this function could be data from image files.
 fn alpha_blend_images(image1: &mut [u8], image2: &[u8]) {
     // Convert the images into `&mut [Srgb<u8>]` and `&[Srgb<u8>]` without copying.
-    let image1: &mut [Srgb<u8>] = image1.components_into();
-    let image2: &[Srgb<u8>] = image2.components_into();
+    let image1: &mut [Srgb<u8>] = image1.components_as_mut();
+    let image2: &[Srgb<u8>] = image2.components_as();
 
     for (color1, color2) in image1.iter_mut().zip(image2) {
         // Convert the colors to linear floating point format and give them transparency values.

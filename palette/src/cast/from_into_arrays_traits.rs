@@ -62,8 +62,7 @@ use super::{from_array_slice_box, from_array_vec, into_array_slice_box, into_arr
 /// );
 /// ```
 pub trait FromArrays<A> {
-    /// Cast a collection of arrays into an collection of colors of type
-    /// `Self::Color`.
+    /// Cast a collection of arrays into an collection of colors.
     fn from_arrays(arrays: A) -> Self;
 }
 
@@ -323,7 +322,7 @@ where
 /// assert_eq!(colors, [Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]);
 /// ```
 pub trait ArraysInto<C> {
-    /// Cast this collection of arrays into a collection of colors of type `C`.
+    /// Cast this collection of arrays into a collection of colors.
     fn arrays_into(self) -> C;
 }
 

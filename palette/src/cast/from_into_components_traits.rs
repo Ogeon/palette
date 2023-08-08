@@ -87,11 +87,11 @@ pub trait TryFromComponents<C>: Sized {
     type Error;
 
     /// Try to cast a collection of color components into an collection of
-    /// colors of type `Self::Color`.
+    /// colors.
     ///
     /// Return an error if the conversion can't be done, such as when the number
     /// of items in `components` isn't a multiple of the number of components in
-    /// `Self::Color`.
+    /// the color type.
     fn try_from_components(components: C) -> Result<Self, Self::Error>;
 }
 
@@ -245,13 +245,12 @@ where
 /// <&[Srgb<u8>]>::from_components(components);
 /// ```
 pub trait FromComponents<C> {
-    /// Cast a collection of color components into an collection of colors of
-    /// type `Self::Color`.
+    /// Cast a collection of color components into an collection of colors.
     ///
     /// ## Panics
     /// If the conversion can't be done, such as when the number of items in
-    /// `components` isn't a multiple of the number of components in
-    /// `Self::Color`.
+    /// `components` isn't a multiple of the number of components in the color
+    /// type.
     fn from_components(components: C) -> Self;
 }
 
@@ -408,8 +407,7 @@ where
 /// assert_eq!(<&mut [_]>::components_from(&mut vec), [64, 139, 10, 93, 18, 214]);
 /// ```
 pub trait ComponentsFrom<C> {
-    /// Cast a collection of colors of type `C` into a collection of color
-    /// components.
+    /// Cast a collection of colors into a collection of color components.
     fn components_from(colors: C) -> Self;
 }
 
@@ -498,10 +496,11 @@ pub trait TryComponentsInto<C>: Sized {
     type Error;
 
     /// Try to cast this collection of color components into a collection of
-    /// colors of type `C`.
+    /// colors.
     ///
     /// Return an error if the conversion can't be done, such as when the number
-    /// of items in `self` isn't a multiple of the number of components in `C`.
+    /// of items in `self` isn't a multiple of the number of components in the
+    /// color type.
     fn try_components_into(self) -> Result<C, Self::Error>;
 }
 
@@ -563,12 +562,11 @@ pub trait TryComponentsInto<C>: Sized {
 /// let colors: &[Srgb<u8>] = components.components_into();
 /// ```
 pub trait ComponentsInto<C> {
-    /// Cast this collection of color components into a collection of colors of
-    /// type `C`.
+    /// Cast this collection of color components into a collection of colors.
     ///
     /// ## Panics
     /// If the conversion can't be done, such as when the number of items in
-    /// `self` isn't a multiple of the number of components in `C`.
+    /// `self` isn't a multiple of the number of components in the color type.
     fn components_into(self) -> C;
 }
 

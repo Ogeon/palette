@@ -33,13 +33,13 @@
 //! same after casting.
 //!
 //! ```
-//! use palette::{cast::{self, ArraysInto}, Srgb, IntoColor};
+//! use palette::{cast::{self, ArraysAsMut}, Srgb, IntoColor};
 //!
 //! let color = cast::from_array::<Srgb<u8>>([23, 198, 76]).into_linear();
 //! // Note: `Srgb::<u8>::from([23, 198, 76])` works too.
 //!
-//! let buffer = &mut [[64, 139, 10], [93, 18, 214]];
-//! let color_buffer: &mut [Srgb<u8>] = buffer.arrays_into();
+//! let mut buffer = [[64, 139, 10], [93, 18, 214]];
+//! let color_buffer: &mut [Srgb<u8>] = buffer.arrays_as_mut();
 //!
 //! for destination in color_buffer {
 //!     let linear_dst = destination.into_linear::<f32>();
@@ -47,7 +47,7 @@
 //! }
 //! ```
 //!
-//! Trying to cast an array of the wrong size will not compile:
+//! Trying to cast a single array of the wrong size will not compile:
 //!
 //! ```compile_fail
 //! use palette::{cast, Srgb};
@@ -68,35 +68,37 @@
 //! or multiplying the length.
 //!
 //! ```
-//! use palette::{cast::{self, TryFromComponents}, Srgb};
+//! use palette::{cast::{self, TryComponentsAs}, Srgb};
 //!
-//! let correct_buffer = &[64, 139, 10, 93, 18, 214];
-//! assert!(<&[Srgb<u8>]>::try_from_components(correct_buffer).is_ok());
+//! let correct_buffer = [64, 139, 10, 93, 18, 214];
+//! let should_be_ok: Result<&[Srgb<u8>], _> = correct_buffer.try_components_as();
+//! assert!(should_be_ok.is_ok());
 //!
-//! let incorrect_buffer = &[64, 139, 10, 93, 18, 214, 198, 76];
-//! assert!(<&[Srgb<u8>]>::try_from_components(incorrect_buffer).is_err());
+//! let incorrect_buffer = [64, 139, 10, 93, 18, 214, 198, 76];
+//! let should_be_err: Result<&[Srgb<u8>], _> = incorrect_buffer.try_components_as();
+//! assert!(should_be_err.is_err());
 //! ```
 //!
 //! An alternative, for when the length can be trusted to be correct, is to use
-//! the `ComponentsInto::components_into` and `FromComponents::from_components`
-//! methods, or the `from_component_*` functions, that panic on error.
+//! methods without the `try_*` prefix, such as `ComponentsAs::components_as`,
+//! or the `from_component_*` functions, that panic on error.
 //!
 //! This works:
 //!
 //! ```
-//! use palette::{cast::ComponentsInto, Srgb};
+//! use palette::{cast::ComponentsAs, Srgb};
 //!
-//! let correct_buffer = &[64, 139, 10, 93, 18, 214];
-//! let color_buffer: &[Srgb<u8>] = correct_buffer.components_into();
+//! let correct_buffer = [64, 139, 10, 93, 18, 214];
+//! let color_buffer: &[Srgb<u8>] = correct_buffer.components_as();
 //! ```
 //!
 //! But this panics:
 //!
 //! ```should_panic
-//! use palette::{cast::ComponentsInto, Srgb};
+//! use palette::{cast::ComponentsAs, Srgb};
 //!
-//! let incorrect_buffer = &[64, 139, 10, 93, 18, 214, 198, 76];
-//! let color_buffer: &[Srgb<u8>] = incorrect_buffer.components_into();
+//! let incorrect_buffer = [64, 139, 10, 93, 18, 214, 198, 76];
+//! let color_buffer: &[Srgb<u8>] = incorrect_buffer.components_as();
 //! ```
 //!
 //! ## Casting Single Colors
@@ -128,10 +130,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed<rgb::channels::Argb, P = u32>`.
-//! use palette::{rgb::PackedArgb, cast::ComponentsInto, Srgba};
+//! use palette::{rgb::PackedArgb, cast::ComponentsAs, Srgba};
 //!
-//! let components = &[1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];
-//! let colors: &[PackedArgb<_>] = components.components_into();
+//! let components = [1.0f32, 0.8, 0.2, 0.3, 1.0, 0.5, 0.7, 0.6];
+//! let colors: &[PackedArgb<_>] = components.components_as();
 //!
 //! // Notice how the alpha values have moved from the beginning to the end:
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0.8, 0.2, 0.3, 1.0));
@@ -152,10 +154,10 @@
 //!
 //! ```
 //! // `PackedArgb` is an alias for `Packed<rgb::channels::Argb, P = u32>`.
-//! use palette::{rgb::PackedArgb, cast::UintsInto, Srgba};
+//! use palette::{rgb::PackedArgb, cast::UintsAs, Srgba};
 //!
-//! let raw = &[0xFF7F0080u32, 0xFF60BBCC];
-//! let colors: &[PackedArgb] = raw.uints_into();
+//! let raw = [0xFF7F0080u32, 0xFF60BBCC];
+//! let colors: &[PackedArgb] = raw.uints_as();
 //!
 //! assert_eq!(colors.len(), 2);
 //! assert_eq!(Srgba::from(colors[0]), Srgba::new(0x7F, 0x00, 0x80, 0xFF));
@@ -163,6 +165,9 @@
 //! ```
 
 mod array;
+mod as_arrays_traits;
+mod as_components_traits;
+mod as_uints_traits;
 mod from_into_arrays_traits;
 mod from_into_components_traits;
 mod from_into_uints_traits;
@@ -170,6 +175,7 @@ mod packed;
 mod uint;
 
 pub use self::{
-    array::*, from_into_arrays_traits::*, from_into_components_traits::*,
-    from_into_uints_traits::*, packed::*, uint::*,
+    array::*, as_arrays_traits::*, as_components_traits::*, as_uints_traits::*,
+    from_into_arrays_traits::*, from_into_components_traits::*, from_into_uints_traits::*,
+    packed::*, uint::*,
 };
