@@ -12,10 +12,10 @@ use super::ArrayCast;
 ///
 /// ```
 /// // `PackedArgb` is an alias for `Packed<rgb::channels::Argb, P = u32>`.
-/// use palette::{rgb::PackedArgb, cast::UintsInto};
+/// use palette::{rgb::PackedArgb, cast::UintsAs};
 ///
-/// let raw = &[0x7F0080u32, 0x60BBCC];
-/// let colors: &[PackedArgb] = raw.uints_into();
+/// let raw = [0x7F0080u32, 0x60BBCC];
+/// let colors: &[PackedArgb] = raw.uints_as();
 ///
 /// assert_eq!(colors.len(), 2);
 /// assert_eq!(colors[0].color, 0x7F0080);

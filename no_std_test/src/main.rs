@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "nightly", feature(lang_items, start))]
+#![cfg_attr(feature = "nightly", feature(start))]
 #![no_std]
 
 #[cfg(feature = "nightly")]
@@ -13,10 +13,6 @@ fn start(_argc: isize, _argv: *const *const u8) -> isize {
 
     0
 }
-
-#[cfg(feature = "nightly")]
-#[lang = "eh_personality"]
-extern "C" fn eh_personality() {}
 
 #[cfg(feature = "nightly")]
 #[panic_handler]
