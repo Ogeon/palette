@@ -2,7 +2,7 @@
 
 A color management and conversion library that focuses on maintaining correctness, flexibility and ease of use. It makes use of the type system to prevent mistakes, support a wide range of color spaces (including user defined variants) and offer different ways of integrating with other libraries.
 
-[The announcement post for 0.7.2](https://ogeon.github.io/2023/05/21/palette-0.7.2.html).
+[The announcement post for 0.7.3](https://ogeon.github.io/2023/08/10/palette-0.7.3.html).
 
 ## Feature Summary
 
