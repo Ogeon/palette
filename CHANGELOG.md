@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.7.3 - 2023-08-10
+
+* [#345][345]: Add `ArraysAs`, `AsArrays`, and corresponding traits for components and uints.
+* [#344][344]: Fix Oklab from Oklch hue conversion. Closes [#1234][1234], [#4321][4321].
+* [#343][343]: Spelling fixes.
+* [#338][338]: Add traits for casting collections of colors to and from other data types.
+
 ## Version 0.7.2 - 2023-05-21
 
 * [#332][332]: Fix NaN values from `Okhsv` when `saturation` is > 0 and `value` == 0. Closes [#330][330].
@@ -266,6 +273,10 @@ The first published version.
 [326]: https://github.com/Ogeon/palette/pull/326
 [328]: https://github.com/Ogeon/palette/pull/328
 [332]: https://github.com/Ogeon/palette/pull/332
+[338]: https://github.com/Ogeon/palette/pull/338
+[343]: https://github.com/Ogeon/palette/pull/343
+[344]: https://github.com/Ogeon/palette/pull/344
+[345]: https://github.com/Ogeon/palette/pull/345
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
