@@ -936,6 +936,8 @@ pub enum FromHexError {
     ParseIntError(ParseIntError),
     /// The hex value was not in a valid 3 or 6 character format.
     HexFormatError(&'static str),
+    /// The hex value was not in a valid 8 character format.
+    RgbaHexFormatError(&'static str),
 }
 
 impl From<ParseIntError> for FromHexError {
@@ -946,9 +948,13 @@ impl From<ParseIntError> for FromHexError {
 
 impl From<&'static str> for FromHexError {
     fn from(err: &'static str) -> FromHexError {
-        FromHexError::HexFormatError(err)
+        match err {
+            err if err.contains("rgba") => FromHexError::RgbaHexFormatError(err),
+            _ => FromHexError::HexFormatError(err),
+        }
     }
 }
+
 impl core::fmt::Display for FromHexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self {
@@ -958,6 +964,9 @@ impl core::fmt::Display for FromHexError {
                 "{}, please use format '#fff', 'fff', '#ffffff' or 'ffffff'.",
                 s
             ),
+            FromHexError::RgbaHexFormatError(s) => {
+                write!(f, "{}, please use format '#ffffffff' or 'ffffffff'.", s)
+            }
         }
     }
 }
@@ -967,6 +976,7 @@ impl std::error::Error for FromHexError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match &*self {
             FromHexError::HexFormatError(_s) => None,
+            FromHexError::RgbaHexFormatError(_s) => None,
             FromHexError::ParseIntError(e) => Some(e),
         }
     }
@@ -995,6 +1005,27 @@ impl<S> FromStr for Rgb<S, u8> {
                 Ok(col)
             }
             _ => Err("invalid hex code format".into()),
+        }
+    }
+}
+
+impl<S> FromStr for Rgba<S, u8> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code of format '#ff00bbff' (with or without the leading '#') into a
+    /// [`Rgba<S, u8>`] instance.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            8 => {
+                let red = u8::from_str_radix(&hex_code[..2], 16)?;
+                let green = u8::from_str_radix(&hex_code[2..4], 16)?;
+                let blue = u8::from_str_radix(&hex_code[4..6], 16)?;
+                let alpha = u8::from_str_radix(&hex_code[6..8], 16)?;
+                let col: Rgba<S, u8> = Rgba::new(red, green, blue, alpha);
+                Ok(col)
+            }
+            _ => Err("invalid rgba hex code format".into()),
         }
     }
 }
@@ -1392,6 +1423,26 @@ mod test {
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(240, 52, 230));
         let c = Rgb::<Srgb, u8>::from_str("abc");
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(170, 187, 204));
+        let c = Rgba::<Srgb, u8>::from_str("#ffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, u8>::new(255, 255, 255, 255));
+        let c = Rgba::<Srgb, u8>::from_str("#gggggggg");
+        assert!(c.is_err());
+        assert_eq!(
+            format!("{}", c.err().unwrap()),
+            "invalid digit found in string"
+        );
+        let c = Rgba::<Srgb, u8>::from_str("#fff");
+        assert_eq!(
+            format!("{}", c.err().unwrap()),
+            "invalid rgba hex code format, \
+             please use format \'#ffffffff\' or \'ffffffff\'."
+        );
+        let c = Rgba::<Srgb, u8>::from_str("#ffffff");
+        assert_eq!(
+            format!("{}", c.err().unwrap()),
+            "invalid rgba hex code format, \
+             please use format \'#ffffffff\' or \'ffffffff\'."
+        );
     }
 
     #[test]
