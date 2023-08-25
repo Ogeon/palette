@@ -946,6 +946,14 @@ impl From<ParseIntError> for FromHexError {
     }
 }
 
+impl From<&'static str> for FromHexError {
+    fn from(err: &'static str) -> FromHexError {
+        match err {
+            err if err.contains("rgba") => FromHexError::RgbaHexFormatError(err),
+            _ => FromHexError::HexFormatError(err),
+        }
+    }
+}
 impl core::fmt::Display for FromHexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self {
