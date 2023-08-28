@@ -44,7 +44,7 @@
 //! source color will use the memory space of the destination color. The
 //! requirement for this is that the source and destination color types have the
 //! same memory layout. That is, the same component types and the same number of
-//! components. This is verifies by the [`ArrayCast`](crate::cast::ArrayCast)
+//! components. This is verified by the [`ArrayCast`](crate::cast::ArrayCast)
 //! trait.
 //!
 //! In-place conversion is done with the [`FromColorMut`] and [`IntoColorMut`]
@@ -72,7 +72,7 @@
 //! # Deriving
 //!
 //! `FromColorUnclamped` can be derived in a mostly automatic way. The other
-//! traits are blanked implemented based on it. The default minimum requirement
+//! traits are blanket implemented based on it. The default minimum requirement
 //! is to implement `FromColorUnclamped<Xyz>`, but it can also be customized to
 //! make use of generics and have other manual implementations.
 //!

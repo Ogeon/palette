@@ -39,7 +39,7 @@ use crate::{
 ///
 /// # Creating Transparent Values
 ///
-/// The color types in Palette has a transparent type alias, such as
+/// The color types in Palette have transparent type aliases, such as
 /// [`Srgba`](crate::Srgba) for [`Srgb`][crate::Srgb] or [`Hsla`](crate::Hsla)
 /// for [`Hsl`](crate::Hsl). These aliases implement `new` and other useful
 /// methods. Here's the same example as for [`Rgb`](crate::rgb::Rgb), but with
@@ -54,7 +54,7 @@ use crate::{
 /// // `new` is also `const`:
 /// const RGBA_U8: Srgba<u8> = Srgba::new(171, 193, 35, 128);
 ///
-/// // Conversion methods from the color type is usually available for transparent
+/// // Conversion methods from the color type are usually available for transparent
 /// // values too. For example `into_format` for changing the number format:
 /// let rgb_u8_from_f32 = Srgba::new(0.3f32, 0.8, 0.1, 0.5).into_format::<u8, u8>();
 ///

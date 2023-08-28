@@ -75,7 +75,7 @@ mod rgb;
 /// Non-linear sRGB, the most common RGB input/output format.
 ///
 /// If you are looking for "just RGB", this is probably it. This type alias
-/// helps locking the more generic [`Rgb`] type to the sRGB format.
+/// helps by locking the more generic [`Rgb`] type to the sRGB format.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
 pub type Srgb<T = f32> = Rgb<encoding::Srgb, T>;
