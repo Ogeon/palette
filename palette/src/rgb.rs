@@ -72,21 +72,64 @@ pub use self::rgb::{FromHexError, Iter, Rgb, Rgba};
 pub mod channels;
 mod rgb;
 
-/// Non-linear sRGB.
+/// Non-linear sRGB, the most common RGB input/output format.
+///
+/// If you are looking for "just RGB", this is probably it. This type alias
+/// helps locking the more generic [`Rgb`] type to the sRGB format.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 pub type Srgb<T = f32> = Rgb<encoding::Srgb, T>;
+
 /// Non-linear sRGB with an alpha component.
+///
+/// This is a transparent version of [`Srgb`], which is commonly used as the
+/// input or output format. If you are looking for "just RGBA", this is probably
+/// it.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 pub type Srgba<T = f32> = Rgba<encoding::Srgb, T>;
 
 /// Linear sRGB.
+///
+/// You probably want [`Srgb`] if you are looking for an input or output format
+/// (or "just RGB"). This is the linear version of sRGB, which is what you would
+/// usually convert to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 #[doc(alias = "linear")]
 pub type LinSrgb<T = f32> = Rgb<Linear<encoding::Srgb>, T>;
+
 /// Linear sRGB with an alpha component.
+///
+/// You probably want [`Srgba`] if you are looking for an input or output format
+/// (or "just RGB"). This is the linear version of sRGBA, which is what you
+/// would usually convert to before working with the color.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 #[doc(alias = "linear")]
 pub type LinSrgba<T = f32> = Rgba<Linear<encoding::Srgb>, T>;
 
 /// Gamma 2.2 encoded sRGB.
+///
+/// This is similar to [`Srgb`], but uses the exponent function as an
+/// approximation. It's a common trick to speed up conversion when accuracy can
+/// be sacrificed. It's still faster to use `Srgb` when also converting to and
+/// from `u8` at the same time.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
+
 /// Gamma 2.2 encoded sRGB with an alpha component.
+///
+/// This is similar to [`Srgba`], but uses the exponent function as an
+/// approximation. It's a common trick to speed up conversion when accuracy can
+/// be sacrificed. It's still faster to use `Srgba` when also converting to and
+/// from `u8` at the same time.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
 /// An RGB space and a transfer function.
