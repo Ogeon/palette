@@ -20,18 +20,24 @@
 //! ```
 //!
 //! Most of the color space types can be converted directly to each other, with
-//! these traits, with some exceptions:
+//! these traits. If you look at the implemented traits for any color type, you
+//! will see a substantial list of `FromColorUnclamped` implementations. There
+//! are, however, exceptions and restrictions in some cases:
 //!
-//! * It's not always possible to change the component type. This helps type
-//!   inference and opens up for optimizations where it can be selectively
-//!   allowed.
-//! * It's not always possible to change meta types, such as converting
-//!   `Hsl<Srgb, T>` to `Hsl<Linear<Srgb>>, T>` without converting to `Rgb<Srgb,
-//!   T>`, then `Rgb<Linear<Srgb>, T>` first. This improves type inference.
-//! * Some colors have specific requirements, such as [`Oklab`](crate::Oklab),
-//!   that requires the white point to be [`D65`](crate::white_point::D65). This
-//!   is because there's more than one way to change the white point and the
-//!   library can't know which is the best for the situation.
+//! * **It's not always possible to change the component type while
+//!   converting.** This can only be enabled in specific cases, to allow type
+//!   inference to work. The input and output component types need to be the
+//!   same in the general case.
+//! * **It's not always possible to change meta types while converting.** Meta
+//!   types are the additional input types on colors, such as white point or RGB
+//!   standard. Similar to component types, these are generally restricted to
+//!   help type inference.
+//! * **Some color spaces want specific component types.** For example,
+//!   [`Xyz`](crate::Xyz) and many other color spaces require real-ish numbers
+//!   (`f32`, `f64`, etc.).
+//! * **Some color spaces want specific meta types.** For example,
+//!   [`Oklab`](crate::Oklab) requires the white point to be
+//!   [`D65`](crate::white_point::D65).
 //!
 //! These limitations are usually the reason for why the compiler gives an error
 //! when calling `into_color`, `from_color`, or the corresponding unclamped
@@ -41,7 +47,7 @@
 //! # In-place Conversion
 //!
 //! It's possible for some color spaces to be converted in-place, meaning the
-//! source color will use the memory space of the destination color. The
+//! destination color will use the memory space of the source color. The
 //! requirement for this is that the source and destination color types have the
 //! same memory layout. That is, the same component types and the same number of
 //! components. This is verified by the [`ArrayCast`](crate::cast::ArrayCast)
@@ -62,10 +68,11 @@
 //!     let hsl_colors = <[Hsl]>::from_color_mut(&mut rgb_colors);
 //!
 //!     // The converted colors can be converted again, without keeping the previous guard around.
-//!     // This makes conversion back to RGB more efficient, by skipping the HSL step on the way back.
 //!     let hwb_colors = hsl_colors.then_into_color_mut::<[Hwb]>();
 //!
 //!     // The colors are automatically converted back to RGB at the end of the scope.
+//!     // The use of `then_into_color_mut` above makes this conversion a single HWB -> RGB step,
+//!     // instead of HWB -> HSL -> RGB, since it consumed the HSL guard.
 //! }
 //! ```
 //!
