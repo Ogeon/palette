@@ -29,15 +29,111 @@ use crate::{
     NextArray, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithAlpha, WithHue,
 };
 
-/// An alpha component wrapper for colors.
+/// An alpha component wrapper for colors, for adding transparency.
+///
+/// Instead of having separate types for "RGB with alpha", "HSV with alpha", and
+/// so on, Palette uses this wrapper type to attach the alpha component. The
+/// memory representation is the same as if `alpha` was the last member/property
+/// of `color`, which is just as space efficient. The perk of having a wrapper
+/// is that the alpha can easily be added to or separated form any color.
+///
+/// # Creating Transparent Values
+///
+/// The color types in Palette have transparent type aliases, such as
+/// [`Srgba`](crate::Srgba) for [`Srgb`][crate::Srgb] or [`Hsla`](crate::Hsla)
+/// for [`Hsl`](crate::Hsl). These aliases implement `new` and other useful
+/// methods. Here's the same example as for [`Rgb`](crate::rgb::Rgb), but with
+/// transparency:
+///
+/// ```
+/// use palette::Srgba;
+///
+/// let rgba_u8 = Srgba::new(171u8, 193, 35, 128);
+/// let rgab_f32 = Srgba::new(0.3f32, 0.8, 0.1, 0.5);
+///
+/// // `new` is also `const`:
+/// const RGBA_U8: Srgba<u8> = Srgba::new(171, 193, 35, 128);
+///
+/// // Conversion methods from the color type are usually available for transparent
+/// // values too. For example `into_format` for changing the number format:
+/// let rgb_u8_from_f32 = Srgba::new(0.3f32, 0.8, 0.1, 0.5).into_format::<u8, u8>();
+///
+/// // Hexadecimal is also supported for RGBA, with or without the #:
+/// let rgb_from_hex1: Srgba<u8> = "#f034e65a".parse().unwrap();
+/// let rgb_from_hex2: Srgba<u8> = "f034e65a".parse().unwrap();
+/// assert_eq!(rgb_from_hex1, rgb_from_hex2);
+///
+/// // This includes the shorthand format:
+/// let rgb_from_short_hex: Srgba<u8> = "f3ea".parse().unwrap();
+/// let rgb_from_long_hex: Srgba<u8> = "ff33eeaa".parse().unwrap();
+/// assert_eq!(rgb_from_short_hex, rgb_from_long_hex);
+///
+/// // It's also possible to convert from (and to) arrays, tuples and `u32` values:
+/// let rgb_from_array = Srgba::from([171u8, 193, 35, 128]);
+/// let rgb_from_tuple = Srgba::from((171u8, 193, 35, 128));
+/// let rgb_from_u32 = Srgba::from(0x607F005A);
+/// ```
+///
+/// Opaque values can be made transparent using the [`WithAlpha`] trait, in
+/// addition to simply wrapping them in `Alpha`. [`WithAlpha`] is also useful in
+/// generic code, since it's implemented for both opaque and transparent types.
+///
+/// ```
+/// use palette::{WithAlpha, Srgb};
+///
+/// let rgb = Srgb::new(171u8, 193, 35);
+/// let rgba = rgb.with_alpha(128u8);
+/// assert_eq!(rgba.alpha, 128);
+/// ```
+///
+/// You may have noticed the `u8` in `rgb.with_alpha(128u8)`. That's because
+/// `Alpha` allows the transparency component to have a different type than the
+/// color components. It would be just as valid to write
+/// `rgb.with_alpha(0.5f32)`, for example.
+///
+/// # Accessing Color Components
+///
+/// To help with the nesting, `Alpha` implements [`Deref`] and [`DerefMut`].
+/// This use of the traits is a bit unconventional, since `Alpha` isn't a smart
+/// pointer. It turned out to be a quite successful experiment that stuck
+/// around.
+///
+/// ```
+/// use palette::Srgba;
+///
+/// let rgba = Srgba::new(171u8, 193, 35, 128);
+/// let red = rgba.red; // Accesses `rgba.color.red`.
+/// let alpha = rgba.alpha; // Accesses `rgba.alpha`.
+/// let rgb = rgba.color; // Accesses `rgba.color`;
+/// ```
+///
+/// The main drawback is in generic code:
+///
+/// ```compile_fail
+/// use palette::Srgba;
+///
+/// fn get_red<T>(rgba: Srgba<T>) -> T {
+///     rgba.red // Error: cannot move out of dereference of `Alpha<Rgb<_, T>, T>`
+/// }
+/// ```
+///
+/// `red` has to be accessed through `color`:
+///
+/// ```
+/// use palette::Srgba;
+///
+/// fn get_red<T>(rgba: Srgba<T>) -> T {
+///     rgba.color.red
+/// }
+/// ```
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
 pub struct Alpha<C, T> {
     /// The color.
     pub color: C,
 
-    /// The transparency component. 0.0 is fully transparent and 1.0 is fully
-    /// opaque.
+    /// The transparency component. 0.0 (or 0u8) is fully transparent and 1.0
+    /// (or 255u8) is fully opaque.
     pub alpha: T,
 }
 

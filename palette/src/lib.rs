@@ -2,6 +2,27 @@
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
 //!
+//! # Where Do I Start?
+//!
+//! The sections below give an overview of how the types in this library work,
+//! including color conversion. If you want to get your hands dirty, you'll
+//! probably want to start with [`Srgb`] or [`Srgba`]. They are aliases for the
+//! more generic [`Rgb`](rgb::Rgb) type and represent sRGB(A), the most common
+//! RGB format in images and tools. Their documentation has more details and
+//! examples.
+//!
+//! The documentation for each module and type goes deeper into their concepts.
+//! Here are a few you may want to read:
+//!
+//! * [`Rgb`](rgb::Rgb) - For getting started with RGB values.
+//! * [`Alpha`] - For more details on transparency.
+//! * [`convert`] - Describes the conversion traits and how to use and implement
+//!   them.
+//! * [`cast`] - Describes how to cast color types to and from other data
+//!   formats, such as arrays and unsigned integers.
+//! * [`color_difference`] - Describes different ways of measuring the
+//!   difference between colors.
+//!
 //! # Type Safety for Colors
 //!
 //! Digital colors are not "just RGB", and not even RGB is "just RGB". There are

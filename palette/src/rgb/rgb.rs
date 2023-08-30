@@ -56,10 +56,129 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// light, where gray scale colors are created when these three channels are
 /// equal in strength.
 ///
-/// Many conversions and operations on this color space requires that it's
-/// linear, meaning that gamma correction is required when converting to and
-/// from a displayable RGB, such as sRGB. See the [`encoding`](crate::encoding)
-/// module for encoding formats.
+/// # Creating a Value
+///
+/// RGB comes in different shapes and formats. You will probably want to start
+/// with either the [`Srgb`](crate::Srgb) or [`Srgba`](crate::Srgba) alias,
+/// which represents the common sRGB format that most images and tools use.
+/// Then, depending on your input, you can either just call [`new`](Rgb::new) or
+/// convert from another data format.
+///
+/// ```
+/// use palette::Srgb;
+///
+/// let rgb_u8 = Srgb::new(171u8, 193, 35);
+/// let rgb_f32 = Srgb::new(0.3f32, 0.8, 0.1);
+///
+/// // `new` is also `const`:
+/// const RGB_U8: Srgb<u8> = Srgb::new(171, 193, 35);
+///
+/// // Converting from one number format to another is as simple as this:
+/// let rgb_u8_from_f32 = Srgb::new(0.3f32, 0.8, 0.1).into_format::<u8>();
+///
+/// // Hexadecimal is also supported, with or without the #:
+/// let rgb_from_hex1: Srgb<u8> = "#f034e6".parse().unwrap();
+/// let rgb_from_hex2: Srgb<u8> = "f034e6".parse().unwrap();
+/// assert_eq!(rgb_from_hex1, rgb_from_hex2);
+///
+/// // This includes the shorthand format:
+/// let rgb_from_short_hex: Srgb<u8> = "f3e".parse().unwrap();
+/// let rgb_from_long_hex: Srgb<u8> = "ff33ee".parse().unwrap();
+/// assert_eq!(rgb_from_short_hex, rgb_from_long_hex);
+///
+/// // It's also possible to convert from (and to) arrays, tuples and `u32` values:
+/// let rgb_from_array = Srgb::from([171u8, 193, 35]);
+/// let rgb_from_tuple = Srgb::from((171u8, 193, 35));
+/// let rgb_from_u32 = Srgb::from(0x607F00);
+/// ```
+///
+/// # Linear, sRGB and Gamma Correction
+///
+/// Many conversions and operations on RGB require that it's linear, meaning
+/// that gamma correction is required when converting to and from displayable
+/// RGB, such as sRGB. It's common to store and send RGB values where the
+/// numbers are on a non-linear scale. In a non-linear format, a value of, for
+/// example, 0.5 would not represent a light intensity of 50%, which makes some
+/// operations (such as blurring) give incorrect results.
+///
+/// You will probably encounter or use [`LinSrgb`](crate::LinSrgb) or
+/// [`LinSrgba`](crate::LinSrgba) at some point. These are aliases for linear
+/// sRGB and would usually be obtained by converting an [`Srgb`] value with
+/// [`into_linear`](Rgb::into_linear).
+///
+/// ```no_run
+/// use palette::{LinSrgb, Srgb};
+///
+/// // This function uses linear sRGB for something. But how do we interface with it?
+/// fn uses_linear_srgb(input: LinSrgb<f32>) -> LinSrgb<f32> { todo!() }
+///
+/// // Linear sRGB will usually be created from non-linear sRGB:
+/// let output = uses_linear_srgb(Srgb::new(0.3, 0.8, 0.1).into_linear());
+///
+/// // It's also possible to convert directly from u8 to f32 for sRGB.
+/// // This is much faster than using `into_format` first:
+/// let output = uses_linear_srgb(Srgb::new(171u8, 193, 35).into_linear());
+///
+/// // Converting the output back to `Srgb<u8>` (or `Srgb<f32>`) is just as simple:
+/// let output_u8 = Srgb::<u8>::from_linear(output);
+/// // ..or:
+/// let output_u8: Srgb<u8> = output.into_encoding();
+/// ```
+///
+/// It's of course also possible to create a linear value from constants, but
+/// it's not necessarily as intuitive. It's best to avoid storing them as
+/// `LinSrgb<u8>` (or `LinRgb<_, u8>`) values, to avoid banding among dark
+/// colors.
+///
+/// See the [`encoding`](crate::encoding) module for built-in encoding formats.
+///
+/// # Storage Formats and Pixel Buffers
+///
+/// It's common to read and write RGB values as bytes, hexadecimal strings, or
+/// sometimes `u32` values. A single RGB value can be converted to all of these
+/// formats and more.
+///
+/// ```no_run
+/// use palette::{Srgb, LinSrgb};
+///
+/// let source: LinSrgb<f32> = todo!();
+///
+/// let u8_array: [u8; 3] = Srgb::from_linear(source).into();
+/// let hex_string1 = format!("#{:x}", Srgb::<u8>::from_linear(source)); // The # is optional.
+/// let u32_value: u32 = Srgb::from_linear(source).into();
+/// ```
+///
+/// It's also possible to control the component order.
+/// [`PackedArgb`](crate::rgb::PackedArgb) is one of a few aliases for
+/// [`Packed`], which represents a color that has been "packed" into a specific
+/// data format. This can be a `u32` or `[u8; 4]`, for example. This is helpful
+/// for reading and writing colors with a different order than the default RGBA.
+///
+/// ```no_run
+/// use palette::{rgb::PackedArgb, Srgba, LinSrgba};
+///
+/// let source: LinSrgba<f32> = todo!();
+///
+/// let u8_array: [u8; 4] = PackedArgb::from(Srgba::from_linear(source)).into();
+/// let u32_value: u32 = PackedArgb::from(Srgba::from_linear(source)).into();
+/// ```
+///
+/// If you need to work with colors in a byte buffer, such as `[u8]`, `Vec<u8>`
+/// or the `image` crate, there's a quick way to borrow that buffer as a slice
+/// of RGB(A) colors. The [`cast`](crate::cast) module has a number of traits
+/// and functions for casting values without copying them.
+///
+/// ```no_run
+/// use image::RgbImage;
+/// use palette::{cast::ComponentsAsMut, Srgb};
+///
+/// let mut image: RgbImage = todo!();
+/// let pixels: &mut [Srgb<u8>] = image.components_as_mut();
+///
+/// for pixel in pixels {
+///     std::mem::swap(&mut pixel.red, &mut pixel.blue);
+/// }
+/// ```
 #[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -70,16 +189,16 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 )]
 #[repr(C)]
 pub struct Rgb<S = Srgb, T = f32> {
-    /// The amount of red light, where 0.0 is no red light and 1.0f (or 255u8)
-    /// is the highest displayable amount.
+    /// The amount of red light, where 0.0 is no red light and 1.0 (or 255u8) is
+    /// the highest displayable amount.
     pub red: T,
 
-    /// The amount of green light, where 0.0 is no green light and 1.0f (or
+    /// The amount of green light, where 0.0 is no green light and 1.0 (or
     /// 255u8) is the highest displayable amount.
     pub green: T,
 
-    /// The amount of blue light, where 0.0 is no blue light and 1.0f (or
-    /// 255u8) is the highest displayable amount.
+    /// The amount of blue light, where 0.0 is no blue light and 1.0 (or 255u8)
+    /// is the highest displayable amount.
     pub blue: T,
 
     /// The kind of RGB standard. sRGB is the default.
@@ -103,6 +222,21 @@ impl<S, T: Clone> Clone for Rgb<S, T> {
 
 impl<S, T> Rgb<S, T> {
     /// Create an RGB color.
+    ///
+    /// It's possible to create a color in one number format and convert it to
+    /// another format with either [`into_format`](Rgb::into_format) or
+    /// [`into_linear`](Rgb::into_linear).
+    ///
+    /// ```
+    /// use palette::{Srgb, LinSrgb};
+    ///
+    /// // Changes only the number format:
+    /// let rgb_f32: Srgb<f32> =  Srgb::new(171u8, 193, 35).into_format();
+    ///
+    /// // Changes the number format and converts to linear in one go.
+    /// // This is faster than `.into_format().into_linear()`:
+    /// let linear: LinSrgb<f32> = Srgb::new(171u8, 193, 35).into_linear();
+    /// ```
     pub const fn new(red: T, green: T, blue: T) -> Rgb<S, T> {
         Rgb {
             red,
@@ -112,7 +246,17 @@ impl<S, T> Rgb<S, T> {
         }
     }
 
-    /// Convert into another component type.
+    /// Convert the RGB components into another number type.
+    ///
+    /// ```
+    /// use palette::Srgb;
+    ///
+    /// let rgb_u8: Srgb<u8> = Srgb::new(0.3, 0.7, 0.2).into_format();
+    /// ```
+    ///
+    /// See also [`into_linear`](Rgb::into_linear) and
+    /// [`into_encoding`](Rgb::into_encoding) for a faster option if you need to
+    /// change between linear and non-linear encoding at the same time.
     pub fn into_format<U>(self) -> Rgb<S, U>
     where
         U: FromStimulus<T>,
@@ -125,7 +269,17 @@ impl<S, T> Rgb<S, T> {
         }
     }
 
-    /// Convert from another component type.
+    /// Convert the RGB components from another number type.
+    ///
+    /// ```
+    /// use palette::Srgb;
+    ///
+    /// let rgb_u8 = Srgb::<u8>::from_format(Srgb::new(0.3, 0.7, 0.2));
+    /// ```
+    ///
+    /// See also [`from_linear`](Rgb::from_linear) and
+    /// [`from_encoding`](Rgb::from_encoding) for a faster option if you need to
+    /// change between linear and non-linear encoding at the same time.
     pub fn from_format<U>(color: Rgb<S, U>) -> Self
     where
         T: FromStimulus<U>,
@@ -366,7 +520,16 @@ impl<S, T, A> Alpha<Rgb<S, T>, A> {
         }
     }
 
-    /// Convert into another component type.
+    /// Convert the RGBA components into other number types.
+    ///
+    /// ```
+    /// use palette::Srgba;
+    ///
+    /// let rgba_u8: Srgba<u8> = Srgba::new(0.3, 0.7, 0.2, 0.5).into_format();
+    /// ```
+    ///
+    /// See also `into_linear` and `into_encoding` for a faster option if you
+    /// need to change between linear and non-linear encoding at the same time.
     pub fn into_format<U, B>(self) -> Alpha<Rgb<S, U>, B>
     where
         U: FromStimulus<T>,
@@ -378,7 +541,16 @@ impl<S, T, A> Alpha<Rgb<S, T>, A> {
         }
     }
 
-    /// Convert from another component type.
+    /// Convert the RGBA components from other number types.
+    ///
+    /// ```
+    /// use palette::Srgba;
+    ///
+    /// let rgba_u8 = Srgba::<u8>::from_format(Srgba::new(0.3, 0.7, 0.2, 0.5));
+    /// ```
+    ///
+    /// See also `from_linear` and `from_encoding` for a faster option if you
+    /// need to change between linear and non-linear encoding at the same time.
     pub fn from_format<U, B>(color: Alpha<Rgb<S, U>, B>) -> Self
     where
         T: FromStimulus<U>,

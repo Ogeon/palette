@@ -1,18 +1,97 @@
 //! Traits for converting between color spaces.
 //!
+//! Each color space type, such as [`Rgb`](crate::rgb::Rgb) and
+//! [`Hsl`](crate::Hsl), implement a number of conversion traits:
+//!
+//! * [`FromColor`] - Similar to [`From`], converts from another color space.
+//! * [`IntoColor`] - Similar to [`Into`], converts into another color space.
+//! * [`FromColorUnclamped`] - The same as [`FromColor`], but the resulting
+//!   values may be outside the typical bounds.
+//! * [`IntoColorUnclamped`] - The same as [`IntoColor`], but the resulting
+//!   values may be outside the typical bounds.
+//!
+//! ```
+//! use palette::{FromColor, IntoColor, Srgb, Hsl};
+//!
+//! let rgb = Srgb::new(0.3f32, 0.8, 0.1);
+//!
+//! let hsl1: Hsl = rgb.into_color();
+//! let hsl2 = Hsl::from_color(rgb);
+//! ```
+//!
+//! Most of the color space types can be converted directly to each other, with
+//! these traits. If you look at the implemented traits for any color type, you
+//! will see a substantial list of `FromColorUnclamped` implementations. There
+//! are, however, exceptions and restrictions in some cases:
+//!
+//! * **It's not always possible to change the component type while
+//!   converting.** This can only be enabled in specific cases, to allow type
+//!   inference to work. The input and output component types need to be the
+//!   same in the general case.
+//! * **It's not always possible to change meta types while converting.** Meta
+//!   types are the additional input types on colors, such as white point or RGB
+//!   standard. Similar to component types, these are generally restricted to
+//!   help type inference.
+//! * **Some color spaces want specific component types.** For example,
+//!   [`Xyz`](crate::Xyz) and many other color spaces require real-ish numbers
+//!   (`f32`, `f64`, etc.).
+//! * **Some color spaces want specific meta types.** For example,
+//!   [`Oklab`](crate::Oklab) requires the white point to be
+//!   [`D65`](crate::white_point::D65).
+//!
+//! These limitations are usually the reason for why the compiler gives an error
+//! when calling `into_color`, `from_color`, or the corresponding unclamped
+//! methods. They are possible to work around by splitting the conversion into
+//! multiple steps.
+//!
+//! # In-place Conversion
+//!
+//! It's possible for some color spaces to be converted in-place, meaning the
+//! destination color will use the memory space of the source color. The
+//! requirement for this is that the source and destination color types have the
+//! same memory layout. That is, the same component types and the same number of
+//! components. This is verified by the [`ArrayCast`](crate::cast::ArrayCast)
+//! trait.
+//!
+//! In-place conversion is done with the [`FromColorMut`] and [`IntoColorMut`]
+//! traits, as well as their unclamped counterparts, [`FromColorUnclampedMut`]
+//! and [`IntoColorUnclampedMut`]. They work for both single colors and slices
+//! of colors.
+//!
+//! ```
+//! use palette::{convert::FromColorMut, Srgb, Hsl, Hwb};
+//!
+//! let mut rgb_colors: Vec<Srgb<f32>> = vec![/* ... */];
+//!
+//! {
+//!     // Creates a scope guard that prevents `rgb_colors` from being modified as RGB.
+//!     let hsl_colors = <[Hsl]>::from_color_mut(&mut rgb_colors);
+//!
+//!     // The converted colors can be converted again, without keeping the previous guard around.
+//!     let hwb_colors = hsl_colors.then_into_color_mut::<[Hwb]>();
+//!
+//!     // The colors are automatically converted back to RGB at the end of the scope.
+//!     // The use of `then_into_color_mut` above makes this conversion a single HWB -> RGB step,
+//!     // instead of HWB -> HSL -> RGB, since it consumed the HSL guard.
+//! }
+//! ```
+//!
 //! # Deriving
 //!
-//! `FromColorUnclamped` can be derived in a mostly automatic way.
-//! The default minimum requirement is to implement `FromColorUnclamped<Xyz>`, but it can
-//! also be customized to make use of generics and have other manual implementations.
+//! `FromColorUnclamped` can be derived in a mostly automatic way. The other
+//! traits are blanket implemented based on it. The default minimum requirement
+//! is to implement `FromColorUnclamped<Xyz>`, but it can also be customized to
+//! make use of generics and have other manual implementations.
 //!
-//! It is also recommended to derive or implement [`WithAlpha`](crate::WithAlpha),
-//! to be able to convert between all `Alpha` wrapped color types.
+//! It is also recommended to derive or implement
+//! [`WithAlpha`](crate::WithAlpha), to be able to convert between all `Alpha`
+//! wrapped color types.
 //!
 //! ## Configuration Attributes
 //!
-//! The derives can be configured using one or more `#[palette(...)]` attributes.
-//! They can be attached to either the item itself, or to the fields.
+//! The derives can be configured using one or more `#[palette(...)]`
+//! attributes. They can be attached to either the item itself, or to the
+//! fields.
 //!
 //! ```
 //! # use palette::rgb::{RgbStandard, RgbSpace};
@@ -55,25 +134,25 @@
 //!
 //! ### Item Attributes
 //!
-//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for these colors.
-//! They are instead to be implemented manually, and serve as the basis for the automatic
-//! implementations.
+//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for
+//! these colors. They are instead to be implemented manually, and serve as the
+//! basis for the automatic implementations.
 //!
-//! * `white_point = "some::white_point::Type"`: Sets the white
-//! point type that should be used when deriving. The default is `D65`, but it
-//! may be any other type, including type parameters.
+//! * `white_point = "some::white_point::Type"`: Sets the white point type that
+//! should be used when deriving. The default is `D65`, but it may be any other
+//! type, including type parameters.
 //!
-//! * `component = "some::component::Type"`: Sets the color
-//! component type that should be used when deriving. The default is `f32`, but
-//! it may be any other type, including type parameters.
+//! * `component = "some::component::Type"`: Sets the color component type that
+//! should be used when deriving. The default is `f32`, but it may be any other
+//! type, including type parameters.
 //!
-//! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard
-//! type that should be used when deriving. The default is to either use `Srgb`
-//! or a best effort to convert between standards, but sometimes it has to be set
-//! to a specific type. This also accepts type parameters.
+//! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard type
+//! that should be used when deriving. The default is to either use `Srgb` or a
+//! best effort to convert between standards, but sometimes it has to be set to
+//! a specific type. This also accepts type parameters.
 //!
-//! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard
-//! type that should be used when deriving, similar to `rgb_standard`.
+//! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard type
+//! that should be used when deriving, similar to `rgb_standard`.
 //!
 //! ### Field Attributes
 //!
@@ -217,11 +296,11 @@
 //! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 //!
 //! /// CSS style sRGB.
+//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! #[palette(
 //!     skip_derives(Rgb),
 //!     rgb_standard = "palette::encoding::Srgb"
 //! )]
-//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! struct CssRgb {
 //!     red: u8,
 //!     green: u8,
