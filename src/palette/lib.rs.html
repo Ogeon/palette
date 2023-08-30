@@ -1559,9 +1559,51 @@
 <a href="#1559" id="1559">1559</a>
 <a href="#1560" id="1560">1560</a>
 <a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
+<a href="#1563" id="1563">1563</a>
+<a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
+//!
+//! # Where Do I Start?
+//!
+//! The sections below give an overview of how the types in this library work,
+//! including color conversion. If you want to get your hands dirty, you&#39;ll
+//! probably want to start with [`Srgb`] or [`Srgba`]. They are aliases for the
+//! more generic [`Rgb`](rgb::Rgb) type and represent sRGB(A), the most common
+//! RGB format in images and tools. Their documentation has more details and
+//! examples.
+//!
+//! The documentation for each module and type goes deeper into their concepts.
+//! Here are a few you may want to read:
+//!
+//! * [`Rgb`](rgb::Rgb) - For getting started with RGB values.
+//! * [`Alpha`] - For more details on transparency.
+//! * [`convert`] - Describes the conversion traits and how to use and implement
+//!   them.
+//! * [`cast`] - Describes how to cast color types to and from other data
+//!   formats, such as arrays and unsigned integers.
+//! * [`color_difference`] - Describes different ways of measuring the
+//!   difference between colors.
 //!
 //! # Type Safety for Colors
 //!

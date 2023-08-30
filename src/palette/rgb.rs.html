@@ -234,6 +234,49 @@
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the RGB color space, including spaces and standards.
 //!
 //! # Linear And Non-linear RGB
@@ -308,21 +351,64 @@
 <span class="kw">pub mod </span>channels;
 <span class="kw">mod </span>rgb;
 
-<span class="doccomment">/// Non-linear sRGB.
+<span class="doccomment">/// Non-linear sRGB, the most common RGB input/output format.
+///
+/// If you are looking for &quot;just RGB&quot;, this is probably it. This type alias
+/// helps by locking the more generic [`Rgb`] type to the sRGB format.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 </span><span class="kw">pub type </span>Srgb&lt;T = f32&gt; = Rgb&lt;encoding::Srgb, T&gt;;
+
 <span class="doccomment">/// Non-linear sRGB with an alpha component.
+///
+/// This is a transparent version of [`Srgb`], which is commonly used as the
+/// input or output format. If you are looking for &quot;just RGBA&quot;, this is probably
+/// it.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 </span><span class="kw">pub type </span>Srgba&lt;T = f32&gt; = Rgba&lt;encoding::Srgb, T&gt;;
 
 <span class="doccomment">/// Linear sRGB.
+///
+/// You probably want [`Srgb`] if you are looking for an input or output format
+/// (or &quot;just RGB&quot;). This is the linear version of sRGB, which is what you would
+/// usually convert to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 </span><span class="attr">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
 </span><span class="kw">pub type </span>LinSrgb&lt;T = f32&gt; = Rgb&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
+
 <span class="doccomment">/// Linear sRGB with an alpha component.
+///
+/// You probably want [`Srgba`] if you are looking for an input or output format
+/// (or &quot;just RGB&quot;). This is the linear version of sRGBA, which is what you
+/// would usually convert to before working with the color.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 </span><span class="attr">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
 </span><span class="kw">pub type </span>LinSrgba&lt;T = f32&gt; = Rgba&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
 
 <span class="doccomment">/// Gamma 2.2 encoded sRGB.
+///
+/// This is similar to [`Srgb`], but uses the exponent function as an
+/// approximation. It&#39;s a common trick to speed up conversion when accuracy can
+/// be sacrificed. It&#39;s still faster to use `Srgb` when also converting to and
+/// from `u8` at the same time.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
 </span><span class="kw">pub type </span>GammaSrgb&lt;T = f32&gt; = Rgb&lt;Gamma&lt;encoding::Srgb&gt;, T&gt;;
+
 <span class="doccomment">/// Gamma 2.2 encoded sRGB with an alpha component.
+///
+/// This is similar to [`Srgba`], but uses the exponent function as an
+/// approximation. It&#39;s a common trick to speed up conversion when accuracy can
+/// be sacrificed. It&#39;s still faster to use `Srgba` when also converting to and
+/// from `u8` at the same time.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
 </span><span class="kw">pub type </span>GammaSrgba&lt;T = f32&gt; = Rgba&lt;Gamma&lt;encoding::Srgb&gt;, T&gt;;
 
 <span class="doccomment">/// An RGB space and a transfer function.

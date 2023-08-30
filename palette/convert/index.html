@@ -1,13 +1,84 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Traits for converting between color spaces."><title>palette::convert - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9bb858ba049f1f21.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0 (5680fa18f 2023-08-23)" data-channel="1.72.0" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2 class="location"><a href="#">Module convert</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#derives">Derive Macros</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../index.html">palette</a>::<wbr><a class="mod" href="#">convert</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/palette/convert.rs.html#1-726">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Traits for converting between color spaces.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Traits for converting between color spaces."><title>palette::convert - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9bb858ba049f1f21.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0 (5680fa18f 2023-08-23)" data-channel="1.72.0" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../../palette/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2 class="location"><a href="#">Module convert</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#derives">Derive Macros</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../index.html">palette</a>::<wbr><a class="mod" href="#">convert</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/palette/convert.rs.html#1-805">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Traits for converting between color spaces.</p>
+<p>Each color space type, such as <a href="../rgb/struct.Rgb.html" title="struct palette::rgb::Rgb"><code>Rgb</code></a> and
+<a href="../struct.Hsl.html" title="struct palette::Hsl"><code>Hsl</code></a>, implement a number of conversion traits:</p>
+<ul>
+<li><a href="trait.FromColor.html" title="trait palette::convert::FromColor"><code>FromColor</code></a> - Similar to <a href="https://doc.rust-lang.org/1.72.0/core/convert/trait.From.html" title="trait core::convert::From"><code>From</code></a>, converts from another color space.</li>
+<li><a href="trait.IntoColor.html" title="trait palette::convert::IntoColor"><code>IntoColor</code></a> - Similar to <a href="https://doc.rust-lang.org/1.72.0/core/convert/trait.Into.html" title="trait core::convert::Into"><code>Into</code></a>, converts into another color space.</li>
+<li><a href="trait.FromColorUnclamped.html" title="trait palette::convert::FromColorUnclamped"><code>FromColorUnclamped</code></a> - The same as <a href="trait.FromColor.html" title="trait palette::convert::FromColor"><code>FromColor</code></a>, but the resulting
+values may be outside the typical bounds.</li>
+<li><a href="trait.IntoColorUnclamped.html" title="trait palette::convert::IntoColorUnclamped"><code>IntoColorUnclamped</code></a> - The same as <a href="trait.IntoColor.html" title="trait palette::convert::IntoColor"><code>IntoColor</code></a>, but the resulting
+values may be outside the typical bounds.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>palette::{FromColor, IntoColor, Srgb, Hsl};
+
+<span class="kw">let </span>rgb = Srgb::new(<span class="number">0.3f32</span>, <span class="number">0.8</span>, <span class="number">0.1</span>);
+
+<span class="kw">let </span>hsl1: Hsl = rgb.into_color();
+<span class="kw">let </span>hsl2 = Hsl::from_color(rgb);</code></pre></div>
+<p>Most of the color space types can be converted directly to each other, with
+these traits. If you look at the implemented traits for any color type, you
+will see a substantial list of <code>FromColorUnclamped</code> implementations. There
+are, however, exceptions and restrictions in some cases:</p>
+<ul>
+<li><strong>It’s not always possible to change the component type while
+converting.</strong> This can only be enabled in specific cases, to allow type
+inference to work. The input and output component types need to be the
+same in the general case.</li>
+<li><strong>It’s not always possible to change meta types while converting.</strong> Meta
+types are the additional input types on colors, such as white point or RGB
+standard. Similar to component types, these are generally restricted to
+help type inference.</li>
+<li><strong>Some color spaces want specific component types.</strong> For example,
+<a href="../struct.Xyz.html" title="struct palette::Xyz"><code>Xyz</code></a> and many other color spaces require real-ish numbers
+(<code>f32</code>, <code>f64</code>, etc.).</li>
+<li><strong>Some color spaces want specific meta types.</strong> For example,
+<a href="../struct.Oklab.html" title="struct palette::Oklab"><code>Oklab</code></a> requires the white point to be
+<a href="../white_point/struct.D65.html" title="struct palette::white_point::D65"><code>D65</code></a>.</li>
+</ul>
+<p>These limitations are usually the reason for why the compiler gives an error
+when calling <code>into_color</code>, <code>from_color</code>, or the corresponding unclamped
+methods. They are possible to work around by splitting the conversion into
+multiple steps.</p>
+<h2 id="in-place-conversion"><a href="#in-place-conversion">In-place Conversion</a></h2>
+<p>It’s possible for some color spaces to be converted in-place, meaning the
+destination color will use the memory space of the source color. The
+requirement for this is that the source and destination color types have the
+same memory layout. That is, the same component types and the same number of
+components. This is verified by the <a href="../cast/trait.ArrayCast.html" title="trait palette::cast::ArrayCast"><code>ArrayCast</code></a>
+trait.</p>
+<p>In-place conversion is done with the <a href="trait.FromColorMut.html" title="trait palette::convert::FromColorMut"><code>FromColorMut</code></a> and <a href="trait.IntoColorMut.html" title="trait palette::convert::IntoColorMut"><code>IntoColorMut</code></a>
+traits, as well as their unclamped counterparts, <a href="trait.FromColorUnclampedMut.html" title="trait palette::convert::FromColorUnclampedMut"><code>FromColorUnclampedMut</code></a>
+and <a href="trait.IntoColorUnclampedMut.html" title="trait palette::convert::IntoColorUnclampedMut"><code>IntoColorUnclampedMut</code></a>. They work for both single colors and slices
+of colors.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>palette::{convert::FromColorMut, Srgb, Hsl, Hwb};
+
+<span class="kw">let </span><span class="kw-2">mut </span>rgb_colors: Vec&lt;Srgb&lt;f32&gt;&gt; = <span class="macro">vec!</span>[<span class="comment">/* ... */</span>];
+
+{
+    <span class="comment">// Creates a scope guard that prevents `rgb_colors` from being modified as RGB.
+    </span><span class="kw">let </span>hsl_colors = &lt;[Hsl]&gt;::from_color_mut(<span class="kw-2">&amp;mut </span>rgb_colors);
+
+    <span class="comment">// The converted colors can be converted again, without keeping the previous guard around.
+    </span><span class="kw">let </span>hwb_colors = hsl_colors.then_into_color_mut::&lt;[Hwb]&gt;();
+
+    <span class="comment">// The colors are automatically converted back to RGB at the end of the scope.
+    // The use of `then_into_color_mut` above makes this conversion a single HWB -&gt; RGB step,
+    // instead of HWB -&gt; HSL -&gt; RGB, since it consumed the HSL guard.
+</span>}</code></pre></div>
 <h2 id="deriving"><a href="#deriving">Deriving</a></h2>
-<p><code>FromColorUnclamped</code> can be derived in a mostly automatic way.
-The default minimum requirement is to implement <code>FromColorUnclamped&lt;Xyz&gt;</code>, but it can
-also be customized to make use of generics and have other manual implementations.</p>
-<p>It is also recommended to derive or implement <a href="../trait.WithAlpha.html" title="trait palette::WithAlpha"><code>WithAlpha</code></a>,
-to be able to convert between all <code>Alpha</code> wrapped color types.</p>
+<p><code>FromColorUnclamped</code> can be derived in a mostly automatic way. The other
+traits are blanket implemented based on it. The default minimum requirement
+is to implement <code>FromColorUnclamped&lt;Xyz&gt;</code>, but it can also be customized to
+make use of generics and have other manual implementations.</p>
+<p>It is also recommended to derive or implement
+<a href="../trait.WithAlpha.html" title="trait palette::WithAlpha"><code>WithAlpha</code></a>, to be able to convert between all <code>Alpha</code>
+wrapped color types.</p>
 <h3 id="configuration-attributes"><a href="#configuration-attributes">Configuration Attributes</a></h3>
-<p>The derives can be configured using one or more <code>#[palette(...)]</code> attributes.
-They can be attached to either the item itself, or to the fields.</p>
+<p>The derives can be configured using one or more <code>#[palette(...)]</code>
+attributes. They can be attached to either the item itself, or to the
+fields.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(FromColorUnclamped)]
 #[palette(
@@ -25,29 +96,29 @@ They can be attached to either the item itself, or to the fields.</p>
 <h4 id="item-attributes"><a href="#item-attributes">Item Attributes</a></h4>
 <ul>
 <li>
-<p><code>skip_derives(Luma, Rgb)</code>: No conversion derives will be implemented for these colors.
-They are instead to be implemented manually, and serve as the basis for the automatic
-implementations.</p>
+<p><code>skip_derives(Luma, Rgb)</code>: No conversion derives will be implemented for
+these colors. They are instead to be implemented manually, and serve as the
+basis for the automatic implementations.</p>
 </li>
 <li>
-<p><code>white_point = &quot;some::white_point::Type&quot;</code>: Sets the white
-point type that should be used when deriving. The default is <code>D65</code>, but it
-may be any other type, including type parameters.</p>
+<p><code>white_point = &quot;some::white_point::Type&quot;</code>: Sets the white point type that
+should be used when deriving. The default is <code>D65</code>, but it may be any other
+type, including type parameters.</p>
 </li>
 <li>
-<p><code>component = &quot;some::component::Type&quot;</code>: Sets the color
-component type that should be used when deriving. The default is <code>f32</code>, but
-it may be any other type, including type parameters.</p>
+<p><code>component = &quot;some::component::Type&quot;</code>: Sets the color component type that
+should be used when deriving. The default is <code>f32</code>, but it may be any other
+type, including type parameters.</p>
 </li>
 <li>
-<p><code>rgb_standard = &quot;some::rgb_standard::Type&quot;</code>: Sets the RGB standard
-type that should be used when deriving. The default is to either use <code>Srgb</code>
-or a best effort to convert between standards, but sometimes it has to be set
-to a specific type. This also accepts type parameters.</p>
+<p><code>rgb_standard = &quot;some::rgb_standard::Type&quot;</code>: Sets the RGB standard type
+that should be used when deriving. The default is to either use <code>Srgb</code> or a
+best effort to convert between standards, but sometimes it has to be set to
+a specific type. This also accepts type parameters.</p>
 </li>
 <li>
-<p><code>luma_standard = &quot;some::rgb_standard::Type&quot;</code>: Sets the Luma standard
-type that should be used when deriving, similar to <code>rgb_standard</code>.</p>
+<p><code>luma_standard = &quot;some::rgb_standard::Type&quot;</code>: Sets the Luma standard type
+that should be used when deriving, similar to <code>rgb_standard</code>.</p>
 </li>
 </ul>
 <h4 id="field-attributes"><a href="#field-attributes">Field Attributes</a></h4>
@@ -184,11 +255,11 @@ type that should be used when deriving, similar to <code>rgb_standard</code>.</p
 <span class="kw">use </span>palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 
 <span class="doccomment">/// CSS style sRGB.
-</span><span class="attr">#[palette(
+</span><span class="attr">#[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
+#[palette(
     skip_derives(Rgb),
     rgb_standard = <span class="string">&quot;palette::encoding::Srgb&quot;
 </span>)]
-#[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 </span><span class="kw">struct </span>CssRgb {
     red: u8,
     green: u8,

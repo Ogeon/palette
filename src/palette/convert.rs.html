@@ -724,21 +724,179 @@
 <a href="#724" id="724">724</a>
 <a href="#725" id="725">725</a>
 <a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits for converting between color spaces.
+//!
+//! Each color space type, such as [`Rgb`](crate::rgb::Rgb) and
+//! [`Hsl`](crate::Hsl), implement a number of conversion traits:
+//!
+//! * [`FromColor`] - Similar to [`From`], converts from another color space.
+//! * [`IntoColor`] - Similar to [`Into`], converts into another color space.
+//! * [`FromColorUnclamped`] - The same as [`FromColor`], but the resulting
+//!   values may be outside the typical bounds.
+//! * [`IntoColorUnclamped`] - The same as [`IntoColor`], but the resulting
+//!   values may be outside the typical bounds.
+//!
+//! ```
+//! use palette::{FromColor, IntoColor, Srgb, Hsl};
+//!
+//! let rgb = Srgb::new(0.3f32, 0.8, 0.1);
+//!
+//! let hsl1: Hsl = rgb.into_color();
+//! let hsl2 = Hsl::from_color(rgb);
+//! ```
+//!
+//! Most of the color space types can be converted directly to each other, with
+//! these traits. If you look at the implemented traits for any color type, you
+//! will see a substantial list of `FromColorUnclamped` implementations. There
+//! are, however, exceptions and restrictions in some cases:
+//!
+//! * **It&#39;s not always possible to change the component type while
+//!   converting.** This can only be enabled in specific cases, to allow type
+//!   inference to work. The input and output component types need to be the
+//!   same in the general case.
+//! * **It&#39;s not always possible to change meta types while converting.** Meta
+//!   types are the additional input types on colors, such as white point or RGB
+//!   standard. Similar to component types, these are generally restricted to
+//!   help type inference.
+//! * **Some color spaces want specific component types.** For example,
+//!   [`Xyz`](crate::Xyz) and many other color spaces require real-ish numbers
+//!   (`f32`, `f64`, etc.).
+//! * **Some color spaces want specific meta types.** For example,
+//!   [`Oklab`](crate::Oklab) requires the white point to be
+//!   [`D65`](crate::white_point::D65).
+//!
+//! These limitations are usually the reason for why the compiler gives an error
+//! when calling `into_color`, `from_color`, or the corresponding unclamped
+//! methods. They are possible to work around by splitting the conversion into
+//! multiple steps.
+//!
+//! # In-place Conversion
+//!
+//! It&#39;s possible for some color spaces to be converted in-place, meaning the
+//! destination color will use the memory space of the source color. The
+//! requirement for this is that the source and destination color types have the
+//! same memory layout. That is, the same component types and the same number of
+//! components. This is verified by the [`ArrayCast`](crate::cast::ArrayCast)
+//! trait.
+//!
+//! In-place conversion is done with the [`FromColorMut`] and [`IntoColorMut`]
+//! traits, as well as their unclamped counterparts, [`FromColorUnclampedMut`]
+//! and [`IntoColorUnclampedMut`]. They work for both single colors and slices
+//! of colors.
+//!
+//! ```
+//! use palette::{convert::FromColorMut, Srgb, Hsl, Hwb};
+//!
+//! let mut rgb_colors: Vec&lt;Srgb&lt;f32&gt;&gt; = vec![/* ... */];
+//!
+//! {
+//!     // Creates a scope guard that prevents `rgb_colors` from being modified as RGB.
+//!     let hsl_colors = &lt;[Hsl]&gt;::from_color_mut(&amp;mut rgb_colors);
+//!
+//!     // The converted colors can be converted again, without keeping the previous guard around.
+//!     let hwb_colors = hsl_colors.then_into_color_mut::&lt;[Hwb]&gt;();
+//!
+//!     // The colors are automatically converted back to RGB at the end of the scope.
+//!     // The use of `then_into_color_mut` above makes this conversion a single HWB -&gt; RGB step,
+//!     // instead of HWB -&gt; HSL -&gt; RGB, since it consumed the HSL guard.
+//! }
+//! ```
 //!
 //! # Deriving
 //!
-//! `FromColorUnclamped` can be derived in a mostly automatic way.
-//! The default minimum requirement is to implement `FromColorUnclamped&lt;Xyz&gt;`, but it can
-//! also be customized to make use of generics and have other manual implementations.
+//! `FromColorUnclamped` can be derived in a mostly automatic way. The other
+//! traits are blanket implemented based on it. The default minimum requirement
+//! is to implement `FromColorUnclamped&lt;Xyz&gt;`, but it can also be customized to
+//! make use of generics and have other manual implementations.
 //!
-//! It is also recommended to derive or implement [`WithAlpha`](crate::WithAlpha),
-//! to be able to convert between all `Alpha` wrapped color types.
+//! It is also recommended to derive or implement
+//! [`WithAlpha`](crate::WithAlpha), to be able to convert between all `Alpha`
+//! wrapped color types.
 //!
 //! ## Configuration Attributes
 //!
-//! The derives can be configured using one or more `#[palette(...)]` attributes.
-//! They can be attached to either the item itself, or to the fields.
+//! The derives can be configured using one or more `#[palette(...)]`
+//! attributes. They can be attached to either the item itself, or to the
+//! fields.
 //!
 //! ```
 //! # use palette::rgb::{RgbStandard, RgbSpace};
@@ -781,25 +939,25 @@
 //!
 //! ### Item Attributes
 //!
-//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for these colors.
-//! They are instead to be implemented manually, and serve as the basis for the automatic
-//! implementations.
+//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for
+//! these colors. They are instead to be implemented manually, and serve as the
+//! basis for the automatic implementations.
 //!
-//! * `white_point = &quot;some::white_point::Type&quot;`: Sets the white
-//! point type that should be used when deriving. The default is `D65`, but it
-//! may be any other type, including type parameters.
+//! * `white_point = &quot;some::white_point::Type&quot;`: Sets the white point type that
+//! should be used when deriving. The default is `D65`, but it may be any other
+//! type, including type parameters.
 //!
-//! * `component = &quot;some::component::Type&quot;`: Sets the color
-//! component type that should be used when deriving. The default is `f32`, but
-//! it may be any other type, including type parameters.
+//! * `component = &quot;some::component::Type&quot;`: Sets the color component type that
+//! should be used when deriving. The default is `f32`, but it may be any other
+//! type, including type parameters.
 //!
-//! * `rgb_standard = &quot;some::rgb_standard::Type&quot;`: Sets the RGB standard
-//! type that should be used when deriving. The default is to either use `Srgb`
-//! or a best effort to convert between standards, but sometimes it has to be set
-//! to a specific type. This also accepts type parameters.
+//! * `rgb_standard = &quot;some::rgb_standard::Type&quot;`: Sets the RGB standard type
+//! that should be used when deriving. The default is to either use `Srgb` or a
+//! best effort to convert between standards, but sometimes it has to be set to
+//! a specific type. This also accepts type parameters.
 //!
-//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard
-//! type that should be used when deriving, similar to `rgb_standard`.
+//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard type
+//! that should be used when deriving, similar to `rgb_standard`.
 //!
 //! ### Field Attributes
 //!
@@ -943,11 +1101,11 @@
 //! use palette::convert::{FromColorUnclamped, IntoColorUnclamped};
 //!
 //! /// CSS style sRGB.
+//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! #[palette(
 //!     skip_derives(Rgb),
 //!     rgb_standard = &quot;palette::encoding::Srgb&quot;
 //! )]
-//! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! struct CssRgb {
 //!     red: u8,
 //!     green: u8,
