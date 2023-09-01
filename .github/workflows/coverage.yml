@@ -1,0 +1,32 @@
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.rs'
+  push:
+    branches:
+      - master
+    paths:
+      - '**.rs'
+
+name: Test coverage
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Collect code coverage
+        run: cargo +nightly llvm-cov --all-features --workspace --exclude no_std_test --codecov --doctests --output-path codecov.json
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: codecov.json
