@@ -957,19 +957,19 @@
         // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
         // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
         // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+        </span><span class="attr">#[allow(clippy::excessive_precision)]
+        </span><span class="kw">let </span>expected_hue = OklabHue::new(<span class="number">264.0520206380550121</span>);
+        <span class="kw">let </span>expected_saturation = <span class="number">0.9999910912349018</span>;
+        <span class="kw">let </span>expected_value = <span class="number">0.9999999646150918</span>;
 
-        // compare to the reference implementation values
-        </span><span class="macro">assert_abs_diff_eq!</span>(
-            okhsv_blue_64.hue,
-            OklabHue::new(<span class="number">264.0520206380550121</span>),
-            epsilon = <span class="number">1e-12
-        </span>);
+        <span class="comment">// compare to the reference implementation values
+        </span><span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.hue, expected_hue, epsilon = <span class="number">1e-12</span>);
         <span class="macro">assert_abs_diff_eq!</span>(
             okhsv_blue_64.saturation,
-            <span class="number">0.9999910912349018</span>,
+            expected_saturation,
             epsilon = <span class="number">1e-12
         </span>);
-        <span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.value, <span class="number">0.9999999646150918</span>, epsilon = <span class="number">1e-12</span>);
+        <span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.value, expected_value, epsilon = <span class="number">1e-12</span>);
     }
 
     <span class="attr">#[test]

@@ -492,6 +492,7 @@
 <a href="#492" id="492">492</a>
 <a href="#493" id="493">493</a>
 <a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Algorithms for calculating the difference between colors.
 //!
 //! ## Selecting an algorithm
@@ -957,11 +958,12 @@
         <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(white));
         <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(white));
         <span class="macro">assert!</span>(c1.has_min_contrast_graphics(white));
-        <span class="macro">assert!</span>(c1.has_min_contrast_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_min_contrast_large_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_min_contrast_graphics(black) == <span class="bool-val">false</span>);
+
+        <span class="macro">assert!</span>(!c1.has_min_contrast_text(black));
+        <span class="macro">assert!</span>(!c1.has_min_contrast_large_text(black));
+        <span class="macro">assert!</span>(!c1.has_enhanced_contrast_text(black));
+        <span class="macro">assert!</span>(!c1.has_enhanced_contrast_large_text(black));
+        <span class="macro">assert!</span>(!c1.has_min_contrast_graphics(black));
 
         <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#066&quot;</span>).unwrap().into_format();
 

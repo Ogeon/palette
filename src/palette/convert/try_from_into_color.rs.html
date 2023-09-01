@@ -116,8 +116,6 @@
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::fmt;
 
 <span class="kw">use </span><span class="kw">crate</span>::IsWithinBounds;
@@ -184,7 +182,6 @@
     ///     }
     /// };
     /// ```
-    </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>try_from_color(t: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, OutOfBounds&lt;<span class="self">Self</span>&gt;&gt;;
 }
 
@@ -225,7 +222,6 @@
     ///     }
     /// };
     /// ```
-    </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>try_into_color(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, OutOfBounds&lt;T&gt;&gt;;
 }
 

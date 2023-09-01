@@ -1283,7 +1283,7 @@
             // branch we should be in. This makes the sum of all three combine as
             // expected.
             </span><span class="kw">let </span>red_m = <span class="macro">lazy_select! </span>{
-               <span class="kw">if </span>x.clone() =&gt; y.clone().select(red.clone(), -red),
+               <span class="kw">if </span>x =&gt; y.clone().select(red.clone(), -red),
                <span class="kw">else </span>=&gt; T::zero(),
             };
             <span class="kw">let </span>green_m = <span class="macro">lazy_select! </span>{

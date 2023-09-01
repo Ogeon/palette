@@ -44,10 +44,12 @@
 <a href="#44" id="44">44</a>
 <a href="#45" id="45">45</a>
 <a href="#46" id="46">46</a>
+<a href="#47" id="47">47</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for luma and luminance (grayscale) values.
 
 </span><span class="kw">pub mod </span>channels;
-<span class="kw">mod </span>luma;
+<span class="attr">#[allow(clippy::module_inception)]
+</span><span class="kw">mod </span>luma;
 
 <span class="kw">use </span><span class="kw">crate</span>::encoding::{Gamma, Linear, Srgb};
 <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;

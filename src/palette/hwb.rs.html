@@ -1580,8 +1580,8 @@
 
     <span class="attr">#[rustfmt::skip]
     </span><span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
-        <span class="kw">let </span>equal_shade = <span class="self">self</span>.whiteness.ulps_eq(<span class="kw-2">&amp;</span>other.whiteness, epsilon.clone(), max_ulps.clone())
-            &amp;&amp; <span class="self">self</span>.blackness.ulps_eq(<span class="kw-2">&amp;</span>other.blackness, epsilon.clone(), max_ulps.clone());
+        <span class="kw">let </span>equal_shade = <span class="self">self</span>.whiteness.ulps_eq(<span class="kw-2">&amp;</span>other.whiteness, epsilon.clone(), max_ulps)
+            &amp;&amp; <span class="self">self</span>.blackness.ulps_eq(<span class="kw-2">&amp;</span>other.blackness, epsilon.clone(), max_ulps);
 
         <span class="comment">// The hue doesn&#39;t matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.

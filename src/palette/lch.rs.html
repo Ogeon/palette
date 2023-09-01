@@ -1163,11 +1163,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f32&gt;::min_chroma(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f32&gt;::max_chroma(), <span class="number">128.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f32&gt;::max_extended_chroma(), <span class="number">181.01933598375618</span>);
+        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f64&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f64&gt;::max_l(), <span class="number">100.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f64&gt;::min_chroma(), <span class="number">0.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f64&gt;::max_chroma(), <span class="number">128.0</span>);
+        <span class="macro">assert_relative_eq!</span>(Lch::&lt;D65, f64&gt;::max_extended_chroma(), <span class="number">181.01933598375618</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(

@@ -171,6 +171,7 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     bool_mask::{HasBoolMask, LazySelect},
     num::{Arithmetics, PartialCmp, Real},
@@ -327,11 +328,12 @@
         <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(white));
         <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(white));
         <span class="macro">assert!</span>(c1.has_min_contrast_graphics(white));
-        <span class="macro">assert!</span>(c1.has_min_contrast_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_min_contrast_large_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_enhanced_contrast_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_enhanced_contrast_large_text(black) == <span class="bool-val">false</span>);
-        <span class="macro">assert!</span>(c1.has_min_contrast_graphics(black) == <span class="bool-val">false</span>);
+
+        <span class="macro">assert!</span>(!c1.has_min_contrast_text(black));
+        <span class="macro">assert!</span>(!c1.has_min_contrast_large_text(black));
+        <span class="macro">assert!</span>(!c1.has_enhanced_contrast_text(black));
+        <span class="macro">assert!</span>(!c1.has_enhanced_contrast_large_text(black));
+        <span class="macro">assert!</span>(!c1.has_min_contrast_graphics(black));
 
         <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#066&quot;</span>).unwrap().into_format();
 

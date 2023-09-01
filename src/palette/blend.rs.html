@@ -116,6 +116,7 @@
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Color blending and blending equations.
 //!
 //! Palette offers both OpenGL style blending equations, as well as most of the
@@ -168,7 +169,8 @@
     pre_alpha::PreAlpha,
 };
 
-<span class="kw">mod </span>blend;
+<span class="attr">#[allow(clippy::module_inception)]
+</span><span class="kw">mod </span>blend;
 <span class="kw">mod </span>blend_with;
 <span class="kw">mod </span>compose;
 <span class="kw">mod </span>equations;

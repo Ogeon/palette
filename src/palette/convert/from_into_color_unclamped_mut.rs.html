@@ -359,6 +359,7 @@
 <a href="#359" id="359">359</a>
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::{
     marker::PhantomData,
     ops::{Deref, DerefMut},
@@ -562,7 +563,8 @@
     ///
     /// This reuses the memory space, and the returned scope guard will restore
     /// the converted colors to their original type when it&#39;s dropped.
-    </span><span class="attr">#[must_use]
+    </span><span class="attr">#[allow(clippy::wrong_self_convention)]
+    #[must_use]
     </span><span class="kw">fn </span>into_color_unclamped_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FromColorUnclampedMutGuard&lt;T, <span class="self">Self</span>&gt;;
 }
 
