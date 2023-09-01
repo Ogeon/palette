@@ -397,7 +397,7 @@ where
             // branch we should be in. This makes the sum of all three combine as
             // expected.
             let red_m = lazy_select! {
-               if x.clone() => y.clone().select(red.clone(), -red),
+               if x => y.clone().select(red.clone(), -red),
                else => T::zero(),
             };
             let green_m = lazy_select! {

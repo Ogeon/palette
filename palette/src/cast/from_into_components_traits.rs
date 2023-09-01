@@ -581,7 +581,7 @@ where
     }
 }
 
-impl<'a, T, C> TryComponentsInto<C> for T
+impl<T, C> TryComponentsInto<C> for T
 where
     C: TryFromComponents<T>,
 {

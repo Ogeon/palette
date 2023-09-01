@@ -1,6 +1,7 @@
 //! Types for luma and luminance (grayscale) values.
 
 pub mod channels;
+#[allow(clippy::module_inception)]
 mod luma;
 
 use crate::encoding::{Gamma, Linear, Srgb};

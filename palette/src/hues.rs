@@ -287,31 +287,38 @@ macro_rules! make_hues {
             }
         }
 
-        impl Into<f64> for $name<f64> {
+        impl From<$name<f64>> for f64 {
             #[inline]
-            fn into(self) -> f64 {
-                self.0.normalize_signed_angle()
+            fn from(hue: $name<f64>) -> f64 {
+                hue.0.normalize_signed_angle()
             }
         }
 
-        impl Into<f32> for $name<f32> {
+        impl From<$name<f32>> for f64 {
             #[inline]
-            fn into(self) -> f32 {
-                self.0.normalize_signed_angle()
+            fn from(hue: $name<f32>) -> f64 {
+                hue.0.normalize_signed_angle() as f64
             }
         }
 
-        impl Into<f32> for $name<f64> {
+        impl From<$name<f32>> for f32 {
             #[inline]
-            fn into(self) -> f32 {
-                self.0.normalize_signed_angle() as f32
+            fn from(hue: $name<f32>) -> f32 {
+                hue.0.normalize_signed_angle()
             }
         }
 
-        impl Into<u8> for $name<u8> {
+        impl From<$name<f64>> for f32 {
             #[inline]
-            fn into(self) -> u8 {
-                self.0
+            fn from(hue: $name<f64>) -> f32 {
+                hue.0.normalize_signed_angle() as f32
+            }
+        }
+
+        impl From<$name<u8>> for u8 {
+            #[inline]
+            fn from(hue: $name<u8>) -> u8 {
+                hue.0
             }
         }
 
@@ -893,7 +900,7 @@ mod test {
             assert!(degs > -180.0 && degs <= 180.0);
 
             let pos_degs = hue.into_positive_degrees();
-            assert!(pos_degs >= 0.0 && pos_degs < 360.0);
+            assert!((0.0..360.0).contains(&pos_degs));
 
             assert_relative_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
         }

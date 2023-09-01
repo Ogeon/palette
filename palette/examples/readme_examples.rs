@@ -177,7 +177,7 @@ fn display_colors(filename: &str, displays: &[DisplayType]) {
 
     let mut image = RgbImage::new(WIDTH, displays.len() as u32 * row_height);
 
-    for (i, display) in displays.into_iter().enumerate() {
+    for (i, display) in displays.iter().enumerate() {
         let image = image.sub_image(0, i as u32 * row_height, WIDTH, row_height);
         match *display {
             DisplayType::Discrete(colors) => {

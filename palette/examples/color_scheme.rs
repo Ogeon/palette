@@ -155,9 +155,9 @@ fn blit_shades(color: LinSrgb<f32>, mut canvas: SubImage<&mut RgbImage>) {
     let primary = Srgb::from_linear(color).into();
 
     //Generate one lighter and two darker versions of the color
-    let light = Srgb::from_linear(color.lighten(0.1).into()).into();
-    let dark1 = Srgb::from_linear(color.darken(0.1).into()).into();
-    let dark2 = Srgb::from_linear(color.darken(0.2).into()).into();
+    let light = Srgb::from_linear(color.lighten(0.1)).into();
+    let dark1 = Srgb::from_linear(color.darken(0.1)).into();
+    let dark2 = Srgb::from_linear(color.darken(0.2)).into();
 
     for x in 0..width {
         for y in 0..height {

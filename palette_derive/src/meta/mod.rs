@@ -178,10 +178,8 @@ pub enum IdentOrIndex {
 impl PartialEq for IdentOrIndex {
     fn eq(&self, other: &IdentOrIndex) -> bool {
         match (self, other) {
-            (&IdentOrIndex::Index(ref this), &IdentOrIndex::Index(ref other)) => {
-                this.index == other.index
-            }
-            (&IdentOrIndex::Ident(ref this), &IdentOrIndex::Ident(ref other)) => this == other,
+            (IdentOrIndex::Index(this), IdentOrIndex::Index(other)) => this.index == other.index,
+            (IdentOrIndex::Ident(this), IdentOrIndex::Ident(other)) => this == other,
             _ => false,
         }
     }

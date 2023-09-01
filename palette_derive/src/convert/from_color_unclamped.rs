@@ -19,12 +19,11 @@ use super::util::{component_type, find_nearest_color, get_convert_color_type, wh
 pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn::parse::Error>> {
     let DeriveInput {
         ident,
-        generics: original_generics,
+        generics,
         data,
         attrs,
         ..
     } = syn::parse(item).map_err(|error| vec![error])?;
-    let generics = original_generics.clone();
 
     let mut item_meta: TypeItemAttributes = parse_namespaced_attributes(attrs)?;
 
@@ -93,7 +92,7 @@ fn prepare_from_impl(
     white_point_source: Option<WhitePointSource>,
 ) -> Result<Vec<FromImplParameters>> {
     let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
-    let linear_path = util::path(&["encoding", "Linear"], meta.internal);
+    let linear_path = util::path(["encoding", "Linear"], meta.internal);
 
     let mut parameters = Vec::new();
 
@@ -156,15 +155,14 @@ fn prepare_from_impl(
         if used_input.white_point {
             match white_point_source {
                 Some(WhitePointSource::WhitePoint) => {
-                    let white_point_path =
-                        util::path(&["white_point", "WhitePoint"], meta.internal);
+                    let white_point_path = util::path(["white_point", "WhitePoint"], meta.internal);
                     generics
                         .make_where_clause()
                         .predicates
                         .push(parse_quote!(#white_point: #white_point_path<#component>))
                 }
                 Some(WhitePointSource::RgbStandard) => {
-                    let rgb_standard_path = util::path(&["rgb", "RgbStandard"], meta.internal);
+                    let rgb_standard_path = util::path(["rgb", "RgbStandard"], meta.internal);
                     let rgb_standard = meta.rgb_standard.as_ref();
                     generics
                         .make_where_clause()
@@ -172,7 +170,7 @@ fn prepare_from_impl(
                         .push(parse_quote!(#rgb_standard: #rgb_standard_path));
                 }
                 Some(WhitePointSource::LumaStandard) => {
-                    let luma_standard_path = util::path(&["luma", "LumaStandard"], meta.internal);
+                    let luma_standard_path = util::path(["luma", "LumaStandard"], meta.internal);
                     let luma_standard = meta.luma_standard.as_ref();
                     generics
                         .make_where_clause()
@@ -205,8 +203,8 @@ fn generate_from_implementations(
     meta: &TypeItemAttributes,
     all_parameters: &[FromImplParameters],
 ) -> Vec<TokenStream2> {
-    let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
-    let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
+    let from_trait_path = util::path(["convert", "FromColorUnclamped"], meta.internal);
+    let into_trait_path = util::path(["convert", "IntoColorUnclamped"], meta.internal);
 
     let (_, type_generics, _) = generics.split_for_impl();
 
@@ -282,9 +280,9 @@ fn generate_from_alpha_implementation(
     generics: &Generics,
     meta: &TypeItemAttributes,
 ) -> TokenStream2 {
-    let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
-    let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
-    let alpha_path = util::path(&["Alpha"], meta.internal);
+    let from_trait_path = util::path(["convert", "FromColorUnclamped"], meta.internal);
+    let into_trait_path = util::path(["convert", "IntoColorUnclamped"], meta.internal);
+    let alpha_path = util::path(["Alpha"], meta.internal);
 
     let mut impl_generics = generics.clone();
     impl_generics.params.push(parse_quote!(_C));
@@ -316,9 +314,9 @@ fn generate_from_alpha_implementation_with_internal(
     alpha_property: &IdentOrIndex,
     alpha_type: &Type,
 ) -> TokenStream2 {
-    let from_trait_path = util::path(&["convert", "FromColorUnclamped"], meta.internal);
-    let into_trait_path = util::path(&["convert", "IntoColorUnclamped"], meta.internal);
-    let alpha_path = util::path(&["Alpha"], meta.internal);
+    let from_trait_path = util::path(["convert", "FromColorUnclamped"], meta.internal);
+    let into_trait_path = util::path(["convert", "IntoColorUnclamped"], meta.internal);
+    let alpha_path = util::path(["Alpha"], meta.internal);
 
     let (_, type_generics, _) = generics.split_for_impl();
     let mut impl_generics = generics.clone();

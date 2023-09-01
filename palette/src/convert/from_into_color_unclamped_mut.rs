@@ -201,6 +201,7 @@ where
     ///
     /// This reuses the memory space, and the returned scope guard will restore
     /// the converted colors to their original type when it's dropped.
+    #[allow(clippy::wrong_self_convention)]
     #[must_use]
     fn into_color_unclamped_mut(&mut self) -> FromColorUnclampedMutGuard<T, Self>;
 }

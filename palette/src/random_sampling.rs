@@ -67,6 +67,7 @@ pub(crate) mod test_utils {
     }
 
     fn approximate_gamma(z: f64) -> f64 {
+        #[allow(clippy::excessive_precision)]
         const RECIP_E: f64 = 0.36787944117144232159552377016147; // RECIP_E = (E^-1) = (1.0 / E)
         const TWOPI: f64 = core::f64::consts::TAU;
 

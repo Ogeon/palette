@@ -186,6 +186,7 @@ mod test {
     }
 
     #[cfg(feature = "random")]
+    #[allow(clippy::excessive_precision)]
     #[test]
     fn hsl_sampling() {
         // Sanity check that sampling and inverting from sample are equivalent
@@ -216,6 +217,7 @@ mod test {
     }
 
     #[cfg(feature = "random")]
+    #[allow(clippy::excessive_precision)]
     #[test]
     fn hsluv_sampling() {
         // Sanity check that sampling and inverting from sample are equivalent

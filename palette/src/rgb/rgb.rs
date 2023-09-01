@@ -1126,7 +1126,7 @@ impl From<&'static str> for FromHexError {
 
 impl core::fmt::Display for FromHexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &*self {
+        match self {
             FromHexError::ParseIntError(e) => write!(f, "{}", e),
             FromHexError::HexFormatError(s) => write!(
                 f,
@@ -1145,7 +1145,7 @@ impl core::fmt::Display for FromHexError {
 #[cfg(feature = "std")]
 impl std::error::Error for FromHexError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match &*self {
+        match self {
             FromHexError::HexFormatError(_s) => None,
             FromHexError::RgbaHexFormatError(_s) => None,
             FromHexError::ParseIntError(e) => Some(e),

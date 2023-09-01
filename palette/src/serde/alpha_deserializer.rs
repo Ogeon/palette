@@ -352,7 +352,7 @@ where
     where
         T: serde::de::SeqAccess<'de>,
     {
-        let color = if self.field_count == None {
+        let color = if self.field_count.is_none() {
             self.inner.visit_unit()?
         } else {
             self.inner.visit_seq(&mut seq)?

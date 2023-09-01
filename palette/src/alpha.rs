@@ -10,6 +10,7 @@ pub use self::alpha::*;
 #[doc(no_inline)]
 pub use crate::blend::PreAlpha; // Cross-link for visibility.
 
+#[allow(clippy::module_inception)]
 mod alpha;
 
 /// A trait for color types that can have or be given transparency (alpha channel).

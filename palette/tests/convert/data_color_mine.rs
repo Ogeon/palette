@@ -1,7 +1,6 @@
 /*
 List of color from www.colormine.org
 */
-use csv;
 
 use approx::assert_relative_eq;
 use lazy_static::lazy_static;
@@ -273,23 +272,23 @@ where
     }
 }
 
-impl<F, S> Into<[ColorMine<F>; 2]> for ColorMine<S>
+impl<F, S> From<ColorMine<S>> for [ColorMine<F>; 2]
 where
     S: IntoScalarArray<2, Scalar = F>,
     F: Real + Zero + One + Default,
     D65: WhitePoint<F>,
     Yxy<D65, F>: FromColorUnclamped<Xyz<D65, F>>,
 {
-    fn into(self) -> [ColorMine<F>; 2] {
-        let [xyz0, xyz1]: [Xyz<_, F>; 2] = self.xyz.into();
-        let [yxy0, yxy1]: [Yxy<_, F>; 2] = self.yxy.into();
-        let [lab0, lab1]: [Lab<_, F>; 2] = self.lab.into();
-        let [lch0, lch1]: [Lch<_, F>; 2] = self.lch.into();
-        let [linear_rgb0, linear_rgb1]: [LinSrgb<F>; 2] = self.linear_rgb.into();
-        let [rgb0, rgb1]: [Srgb<F>; 2] = self.rgb.into();
-        let [hsl0, hsl1]: [Hsl<_, F>; 2] = self.hsl.into();
-        let [hsv0, hsv1]: [Hsv<_, F>; 2] = self.hsv.into();
-        let [hwb0, hwb1]: [Hwb<_, F>; 2] = self.hwb.into();
+    fn from(color_data: ColorMine<S>) -> Self {
+        let [xyz0, xyz1]: [Xyz<_, F>; 2] = color_data.xyz.into();
+        let [yxy0, yxy1]: [Yxy<_, F>; 2] = color_data.yxy.into();
+        let [lab0, lab1]: [Lab<_, F>; 2] = color_data.lab.into();
+        let [lch0, lch1]: [Lch<_, F>; 2] = color_data.lch.into();
+        let [linear_rgb0, linear_rgb1]: [LinSrgb<F>; 2] = color_data.linear_rgb.into();
+        let [rgb0, rgb1]: [Srgb<F>; 2] = color_data.rgb.into();
+        let [hsl0, hsl1]: [Hsl<_, F>; 2] = color_data.hsl.into();
+        let [hsv0, hsv1]: [Hsv<_, F>; 2] = color_data.hsv.into();
+        let [hwb0, hwb1]: [Hwb<_, F>; 2] = color_data.hwb.into();
 
         [
             ColorMine {

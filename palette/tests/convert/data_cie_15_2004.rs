@@ -7,7 +7,6 @@ Tests XYZ and YXY conversion
 */
 
 use approx::assert_relative_eq;
-use csv;
 use serde_derive::Deserialize;
 
 use palette::{convert::IntoColorUnclamped, num::IntoScalarArray, white_point::D65, Xyz, Yxy};
@@ -57,15 +56,15 @@ macro_rules! impl_from_color_pointer {
 impl_from_color_pointer!(Xyz);
 impl_from_color_pointer!(Yxy);
 
-impl<V> Into<[Cie2004<V::Scalar>; 4]> for Cie2004<V>
+impl<V> From<Cie2004<V>> for [Cie2004<V::Scalar>; 4]
 where
     V: IntoScalarArray<4>,
     Xyz<D65, V>: Into<[Xyz<D65, V::Scalar>; 4]>,
     Yxy<D65, V>: Into<[Yxy<D65, V::Scalar>; 4]>,
 {
-    fn into(self) -> [Cie2004<V::Scalar>; 4] {
-        let [xyz0, xyz1, xyz2, xyz3]: [_; 4] = self.xyz.into();
-        let [yxy0, yxy1, yxy2, yxy3]: [_; 4] = self.yxy.into();
+    fn from(color_data: Cie2004<V>) -> Self {
+        let [xyz0, xyz1, xyz2, xyz3]: [_; 4] = color_data.xyz.into();
+        let [yxy0, yxy1, yxy2, yxy3]: [_; 4] = color_data.yxy.into();
 
         [
             Cie2004 {

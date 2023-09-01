@@ -45,7 +45,7 @@ fn main() {
                 &mut image,
                 x,
                 y,
-                0 * ALPHA_STEPS + alpha_step,
+                alpha_step,
                 tile_width,
                 tile_height,
                 foreground,
@@ -56,7 +56,7 @@ fn main() {
                 &mut image,
                 x,
                 y,
-                1 * ALPHA_STEPS + alpha_step,
+                ALPHA_STEPS + alpha_step,
                 tile_width,
                 tile_height,
                 Xyza::from_color(foreground),
@@ -72,6 +72,7 @@ fn main() {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_composed_pixels<C>(
     image: &mut image::RgbaImage,
     x: u32,
@@ -106,11 +107,9 @@ fn draw_composed_pixels<C>(
     }
 }
 
-fn compose<C>(
-    fg: Alpha<C, f32>,
-    bg: Alpha<C, f32>,
-    function: fn(Alpha<C, f32>, Alpha<C, f32>) -> Alpha<C, f32>,
-) -> image::Rgba<u8>
+type ComposeFn<C> = fn(Alpha<C, f32>, Alpha<C, f32>) -> Alpha<C, f32>;
+
+fn compose<C>(fg: Alpha<C, f32>, bg: Alpha<C, f32>, function: ComposeFn<C>) -> image::Rgba<u8>
 where
     Alpha<C, f32>: Blend + IntoColor<LinSrgba>,
 {

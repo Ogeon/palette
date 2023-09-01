@@ -22,12 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@1.60.0
+        with:
+          components: clippy
       - name: Minimal check
-        run: cargo check -v -p palette --no-default-features --features std
+        run: cargo clippy -v -p palette --no-default-features --features std
       - name: find-crate check
-        run: cargo check -v -p palette --no-default-features --features "std find-crate"
+        run: cargo clippy -v -p palette --no-default-features --features "std find-crate"
       - name: Default check
-        run: cargo check -v --workspace --exclude no_std_test
+        run: cargo clippy -v --workspace --exclude no_std_test
       - name: Test all features
         run: cargo test -v -p palette --all-features
       - name: Test each feature
@@ -47,8 +49,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+          components: clippy
       - name: Check all features
-        run: cargo check -v -p palette --all-features
+        run: cargo clippy -v -p palette --all-features
   no_std:
     name: "Test #[no_std]"
     runs-on: ubuntu-latest

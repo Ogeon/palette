@@ -9,8 +9,6 @@ Note: Test uses `f64` because `f32` failed Travis CI builds on Linux for Lch on
         MacOS and Windows passed the tests so be wary when using f32 on Linux.
 */
 
-use csv;
-
 use approx::assert_relative_eq;
 use serde_derive::Deserialize;
 

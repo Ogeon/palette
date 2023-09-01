@@ -196,19 +196,17 @@
 //!     }
 //! }
 //!
-//! fn main() {
-//!     // Start with an Xyz100 color.
-//!     let xyz = Xyz100 {
-//!         x: 59,
-//!         y: 75,
-//!         z: 42,
-//!     };
+//! // Start with an Xyz100 color.
+//! let xyz = Xyz100 {
+//!     x: 59,
+//!     y: 75,
+//!     z: 42,
+//! };
 //!
-//!     // Convert the color to sRGB.
-//!     let rgb: Srgb = xyz.into_color();
+//! // Convert the color to sRGB.
+//! let rgb: Srgb = xyz.into_color();
 //!
-//!     assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
-//! }
+//! assert_eq!(rgb.into_format(), Srgb::new(196u8, 238, 154));
 //! ```
 //!
 //! With generic components:

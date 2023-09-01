@@ -200,6 +200,7 @@ where
     ///
     /// This reuses the memory space, and the returned scope guard will restore
     /// the converted colors to their original type when it's dropped.
+    #[allow(clippy::wrong_self_convention)]
     #[must_use]
     fn into_color_mut(&mut self) -> FromColorMutGuard<T, Self>;
 }
@@ -308,7 +309,7 @@ where
             .and_then(|mut guard| guard.current.take());
 
         if let Some(restored) = restored {
-            return restored;
+            restored
         } else {
             unreachable!()
         }
