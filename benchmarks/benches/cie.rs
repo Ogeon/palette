@@ -2,7 +2,7 @@ use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Crit
 use palette::convert::FromColorUnclamped;
 use palette::{Lab, Lch, Xyz, Yxy};
 
-#[path = "../tests/convert/data_color_mine.rs"]
+#[path = "../../palette/tests/convert/data_color_mine.rs"]
 #[allow(dead_code)]
 mod data_color_mine;
 use data_color_mine::{load_data, ColorMine};
@@ -26,7 +26,7 @@ fn cie_conversion(c: &mut Criterion) {
         0,
         "number of colors must be a multiple of 8 for a fair comparison with SIMD"
     );
-    #[cfg(feature = "wide")]
+
     let wide_colormine: Vec<_> = colormine
         .chunks_exact(8)
         .map(|chunk| {
@@ -80,7 +80,6 @@ fn cie_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
         "linsrgb to xyz - wide f32x8",
         &wide_colormine,
