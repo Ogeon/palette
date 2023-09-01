@@ -112,8 +112,8 @@ pub fn get_convert_color_type(
             (parse_quote!(#color_path<#component>), UsedInput::default())
         }
         "PartialCam16" => {
-            let cam_chromaticity_path = util::path(&["cam16", "Cam16Chromaticity"], internal);
-            let cam_luminance_path = util::path(&["cam16", "Cam16Luminance"], internal);
+            let cam_chromaticity_path = util::path(["cam16", "Cam16Chromaticity"], internal);
+            let cam_luminance_path = util::path(["cam16", "Cam16Luminance"], internal);
 
             let chromaticity = if let Some(chromaticity) = &meta.cam16_chromaticity {
                 chromaticity.clone()

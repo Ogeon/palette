@@ -136,7 +136,7 @@ fn prepare_from_impl_for_pair(
     meta: &TypeItemAttributes,
     mut generics: Generics,
 ) -> Result<Option<FromImplParameters>> {
-    let linear_path = util::path(&["encoding", "Linear"], meta.internal);
+    let linear_path = util::path(["encoding", "Linear"], meta.internal);
     let nearest_color_name = find_nearest_color(color_name, skip)?;
 
     // Figures out which white point the target type prefers, unless it's specified in `white_point`.
@@ -176,7 +176,7 @@ fn prepare_from_impl_for_pair(
         color_name,
         &white_point,
         component,
-        &meta,
+        meta,
         &mut generics,
         meta.internal,
     );
@@ -191,7 +191,7 @@ fn prepare_from_impl_for_pair(
     let target_color_cam16_chromaticity = match color_name {
         "PartialCam16" => Some(parse_quote!(_C)),
         "Cam16UcsJmh" | "Cam16UcsJab" => {
-            let path = util::path(&["cam16", "Colorfulness"], meta.internal);
+            let path = util::path(["cam16", "Colorfulness"], meta.internal);
             Some(parse_quote!(#path<#component>))
         }
         _ => None,
@@ -199,7 +199,7 @@ fn prepare_from_impl_for_pair(
     let target_color_cam16_luminance = match color_name {
         "PartialCam16" => Some(parse_quote!(_L)),
         "Cam16UcsJmh" | "Cam16UcsJab" => {
-            let path = util::path(&["cam16", "Lightness"], meta.internal);
+            let path = util::path(["cam16", "Lightness"], meta.internal);
             Some(parse_quote!(#path<#component>))
         }
         _ => None,

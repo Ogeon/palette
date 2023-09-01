@@ -351,7 +351,7 @@ where
     T: Real + Arithmetics + Sqrt + Clone,
 {
     let j_root = lightness_to_j_root(lightness);
-    let alpha = chroma.clone() / &j_root;
+    let alpha = chroma / &j_root;
 
     calculate_saturation(param_c, param_a_w, alpha)
 }
@@ -479,6 +479,7 @@ where
     let [r, g, b] = rgb;
 
     #[rustfmt::skip]
+    #[allow(clippy::excessive_precision)] // Clippy didn't like the e+0
     let xyz = Xyz {
         x: T::from_f64( 1.862067855087233e+0) * &r - T::from_f64(1.011254630531685e+0) * &g + T::from_f64(1.491867754444518e-1) * &b,
         y: T::from_f64( 3.875265432361372e-1) * &r + T::from_f64(6.214474419314753e-1) * &g - T::from_f64(8.973985167612518e-3) * &b,
