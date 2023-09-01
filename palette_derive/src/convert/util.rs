@@ -17,8 +17,8 @@ pub fn white_point_type(
         .map(|white_point| (white_point.clone(), Some(WhitePointSource::WhitePoint)))
         .or_else(|| {
             rgb_standard.map(|rgb_standard| {
-                let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
-                let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
+                let rgb_standard_path = util::path(["rgb", "RgbStandard"], internal);
+                let rgb_space_path = util::path(["rgb", "RgbSpace"], internal);
                 (
                     parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
                     Some(WhitePointSource::RgbStandard),
@@ -27,7 +27,7 @@ pub fn white_point_type(
         })
         .or_else(|| {
             luma_standard.map(|luma_standard| {
-                let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
+                let luma_standard_path = util::path(["luma", "LumaStandard"], internal);
                 (
                     parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
                     Some(WhitePointSource::LumaStandard),
@@ -59,7 +59,7 @@ pub fn get_convert_color_type(
 
     match color {
         "Luma" => {
-            let luma_standard_path = util::path(&["luma", "LumaStandard"], internal);
+            let luma_standard_path = util::path(["luma", "LumaStandard"], internal);
 
             if let Some(luma_standard) = luma_standard {
                 (
@@ -82,8 +82,8 @@ pub fn get_convert_color_type(
             }
         }
         "Rgb" | "Hsl" | "Hsv" | "Hwb" => {
-            let rgb_standard_path = util::path(&["rgb", "RgbStandard"], internal);
-            let rgb_space_path = util::path(&["rgb", "RgbSpace"], internal);
+            let rgb_standard_path = util::path(["rgb", "RgbStandard"], internal);
+            let rgb_space_path = util::path(["rgb", "RgbSpace"], internal);
 
             if let Some(rgb_standard) = rgb_standard {
                 (

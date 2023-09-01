@@ -70,6 +70,7 @@ use crate::{
 pub use self::rgb::{FromHexError, Iter, Rgb, Rgba};
 
 pub mod channels;
+#[allow(clippy::module_inception)]
 mod rgb;
 
 /// Non-linear sRGB, the most common RGB input/output format.

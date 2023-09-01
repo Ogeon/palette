@@ -36,7 +36,7 @@ fn matrix(c: &mut Criterion) {
         b.iter(|| matrix_inverse(*inverse))
     });
     group.bench_function("rgb_to_xyz_matrix", |b| {
-        b.iter(|| rgb_to_xyz_matrix::<encoding::Srgb, f32>())
+        b.iter(rgb_to_xyz_matrix::<encoding::Srgb, f32>)
     });
 }
 

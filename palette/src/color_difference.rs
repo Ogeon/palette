@@ -463,11 +463,12 @@ mod test {
         assert!(c1.has_enhanced_contrast_text(white));
         assert!(c1.has_enhanced_contrast_large_text(white));
         assert!(c1.has_min_contrast_graphics(white));
-        assert!(c1.has_min_contrast_text(black) == false);
-        assert!(c1.has_min_contrast_large_text(black) == false);
-        assert!(c1.has_enhanced_contrast_text(black) == false);
-        assert!(c1.has_enhanced_contrast_large_text(black) == false);
-        assert!(c1.has_min_contrast_graphics(black) == false);
+
+        assert!(!c1.has_min_contrast_text(black));
+        assert!(!c1.has_min_contrast_large_text(black));
+        assert!(!c1.has_enhanced_contrast_text(black));
+        assert!(!c1.has_enhanced_contrast_large_text(black));
+        assert!(!c1.has_min_contrast_graphics(black));
 
         let c1 = Srgb::from_str("#066").unwrap().into_format();
 

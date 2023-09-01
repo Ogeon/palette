@@ -64,7 +64,6 @@ pub trait TryFromColor<T>: Sized {
     ///     }
     /// };
     /// ```
-    #[must_use]
     fn try_from_color(t: T) -> Result<Self, OutOfBounds<Self>>;
 }
 
@@ -105,7 +104,6 @@ pub trait TryIntoColor<T>: Sized {
     ///     }
     /// };
     /// ```
-    #[must_use]
     fn try_into_color(self) -> Result<T, OutOfBounds<T>>;
 }
 

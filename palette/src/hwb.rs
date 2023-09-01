@@ -660,8 +660,8 @@ where
 
     #[rustfmt::skip]
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon.clone(), max_ulps.clone())
-            && self.blackness.ulps_eq(&other.blackness, epsilon.clone(), max_ulps.clone());
+        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon.clone(), max_ulps)
+            && self.blackness.ulps_eq(&other.blackness, epsilon.clone(), max_ulps);
 
         // The hue doesn't matter that much when the color is gray, and may fluctuate
         // due to precision errors. This is a blunt tool, but works for now.

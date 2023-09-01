@@ -109,8 +109,8 @@ where
                 .apply_to(source.clone(), destination.clone());
 
             (
-                alpha_src_param.mul_constant(source.alpha.clone()),
-                alpha_dst_param.mul_constant(destination.alpha.clone()),
+                alpha_src_param.mul_constant(source.alpha),
+                alpha_dst_param.mul_constant(destination.alpha),
             )
         };
 

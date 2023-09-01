@@ -554,11 +554,11 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Lch::<D65, f32>::min_l(), 0.0);
-        assert_relative_eq!(Lch::<D65, f32>::max_l(), 100.0);
-        assert_relative_eq!(Lch::<D65, f32>::min_chroma(), 0.0);
-        assert_relative_eq!(Lch::<D65, f32>::max_chroma(), 128.0);
-        assert_relative_eq!(Lch::<D65, f32>::max_extended_chroma(), 181.01933598375618);
+        assert_relative_eq!(Lch::<D65, f64>::min_l(), 0.0);
+        assert_relative_eq!(Lch::<D65, f64>::max_l(), 100.0);
+        assert_relative_eq!(Lch::<D65, f64>::min_chroma(), 0.0);
+        assert_relative_eq!(Lch::<D65, f64>::max_chroma(), 128.0);
+        assert_relative_eq!(Lch::<D65, f64>::max_extended_chroma(), 181.01933598375618);
     }
 
     struct_of_arrays_tests!(

@@ -11,13 +11,37 @@ on:
 name: Continuous integration
 
 jobs:
-  compile_and_test:
-    name: Compile and test
+  compile_and_test_msrv:
+    name: Compile and test MSRV
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        toolchain: [1.60.0, stable, beta, nightly]
     runs-on: ${{ matrix.os }}
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.60.0
+        with:
+          components: clippy
+      - name: Minimal check
+        run: cargo clippy -v -p palette --no-default-features --features std
+      - name: find-crate check
+        run: cargo clippy -v -p palette --no-default-features --features "std find-crate"
+      - name: Default check
+        run: cargo clippy -v --workspace --exclude no_std_test
+      - name: Test all features
+        run: cargo test -v -p palette --all-features
+      - name: Test each feature
+        shell: bash
+        working-directory: palette
+        run: bash ../scripts/test_features.sh
+  check_stable_beta_nightly:
+    name: Quick check
+    strategy:
+      matrix:
+        toolchain: [beta, stable, nightly]
+    runs-on: ubuntu-latest
     env:
       RUSTFLAGS: -D warnings
     steps:
@@ -25,20 +49,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+          components: clippy
+      - name: Check all features
+        run: cargo clippy -v -p palette --all-features
+  no_std:
+    name: "Test #[no_std]"
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
           targets: thumbv6m-none-eabi
-      - name: Minimal check
-        run: cargo check -v -p palette --no-default-features --features std
-      - name: find-crate check
-        run: cargo check -v -p palette --no-default-features --features "std find-crate"
-      - name: Default check
-        run: cargo check -v --workspace --exclude no_std_test
-      - run: cargo test -v
-      - name: Test features
-        shell: bash
-        working-directory: palette
-        run: bash ../scripts/test_features.sh
-      - name: "Test #[no_std]"
-        if: ${{ runner.os == 'Linux' && matrix.toolchain == 'nightly' }}
+      - name: "Build with #[no_std]"
         run: cargo build -v --package no_std_test --features nightly --target thumbv6m-none-eabi
   miri:
     name: Miri tests
@@ -61,7 +85,9 @@ jobs:
     name: ci
     if: success()
     needs:
-      - compile_and_test
+      - compile_and_test_msrv
+      - check_stable_beta_nightly
+      - no_std
       - miri
     runs-on: ubuntu-latest
     steps:

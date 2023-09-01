@@ -388,19 +388,19 @@ mod tests {
         // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
         // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
         // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+        #[allow(clippy::excessive_precision)]
+        let expected_hue = OklabHue::new(264.0520206380550121);
+        let expected_saturation = 0.9999910912349018;
+        let expected_value = 0.9999999646150918;
 
         // compare to the reference implementation values
-        assert_abs_diff_eq!(
-            okhsv_blue_64.hue,
-            OklabHue::new(264.0520206380550121),
-            epsilon = 1e-12
-        );
+        assert_abs_diff_eq!(okhsv_blue_64.hue, expected_hue, epsilon = 1e-12);
         assert_abs_diff_eq!(
             okhsv_blue_64.saturation,
-            0.9999910912349018,
+            expected_saturation,
             epsilon = 1e-12
         );
-        assert_abs_diff_eq!(okhsv_blue_64.value, 0.9999999646150918, epsilon = 1e-12);
+        assert_abs_diff_eq!(okhsv_blue_64.value, expected_value, epsilon = 1e-12);
     }
 
     #[test]

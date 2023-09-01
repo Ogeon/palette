@@ -355,8 +355,7 @@ mod test {
     fn uint_to_float() {
         fn into_stimulus_old(n: u8) -> f32 {
             let max = core::u8::MAX as f32;
-            let scaled = n as f32 / max;
-            scaled as f32
+            n as f32 / max
         }
 
         for n in (0..=255).step_by(5) {
@@ -368,8 +367,7 @@ mod test {
     fn uint_to_double() {
         fn into_stimulus_old(n: u8) -> f64 {
             let max = core::u8::MAX as f64;
-            let scaled = n as f64 / max;
-            scaled as f64
+            n as f64 / max
         }
 
         for n in (0..=255).step_by(5) {

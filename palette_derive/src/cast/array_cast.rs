@@ -62,7 +62,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
                 field.ty,
             )
         })
-        .filter(|&(ref field, _)| !fields_meta.zero_size_fields.contains(field));
+        .filter(|(field, _)| !fields_meta.zero_size_fields.contains(field));
 
     let mut errors = Vec::new();
 
@@ -99,7 +99,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         ));
     }
 
-    let array_cast_trait_path = util::path(&["cast", "ArrayCast"], item_meta.internal);
+    let array_cast_trait_path = util::path(["cast", "ArrayCast"], item_meta.internal);
 
     let mut implementation = if let Some(field_type) = field_type {
         let (impl_generics, type_generics, where_clause) = generics.split_for_impl();

@@ -228,10 +228,10 @@ where
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
-        let transform_matrix = S::Space::rgb_to_xyz_matrix().map_or_else(
-            || rgb_to_xyz_matrix::<S::Space, T::Scalar>(),
-            |matrix| matrix_map(matrix, T::Scalar::from_f64),
-        );
+        let transform_matrix = S::Space::rgb_to_xyz_matrix()
+            .map_or_else(rgb_to_xyz_matrix::<S::Space, T::Scalar>, |matrix| {
+                matrix_map(matrix, T::Scalar::from_f64)
+            });
         multiply_rgb_to_xyz(transform_matrix, color.into_linear())
     }
 }

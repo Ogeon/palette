@@ -56,7 +56,7 @@ fn main() {
                 &mut image,
                 x,
                 y,
-                0 * ALPHA_STEPS + alpha_step,
+                alpha_step,
                 tile_width,
                 tile_height,
                 foreground.into(),
@@ -67,7 +67,7 @@ fn main() {
                 &mut image,
                 x,
                 y,
-                1 * ALPHA_STEPS + alpha_step,
+                ALPHA_STEPS + alpha_step,
                 tile_width,
                 tile_height,
                 Xyza::from_color(foreground).into(),
@@ -127,6 +127,7 @@ fn main() {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_composed_pixels<C>(
     image: &mut image::RgbaImage,
     x: u32,

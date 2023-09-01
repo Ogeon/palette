@@ -50,6 +50,7 @@ pub use self::{
     pre_alpha::PreAlpha,
 };
 
+#[allow(clippy::module_inception)]
 mod blend;
 mod blend_with;
 mod compose;

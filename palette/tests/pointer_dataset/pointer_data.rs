@@ -12,7 +12,6 @@ Note: The xyz and yxy conversions do not use the updated conversion formula. So 
 */
 
 use approx::assert_relative_eq;
-use csv;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
@@ -90,15 +89,15 @@ macro_rules! impl_from_color_pointer {
 impl_from_color_pointer!(Lch);
 impl_from_color_pointer!(Lab);
 
-impl<V> Into<[PointerData<V::Scalar>; 2]> for PointerData<V>
+impl<V> From<PointerData<V>> for [PointerData<V::Scalar>; 2]
 where
     V: IntoScalarArray<2>,
     Lch<PointerWP, V>: Into<[Lch<PointerWP, V::Scalar>; 2]>,
     Lab<PointerWP, V>: Into<[Lab<PointerWP, V::Scalar>; 2]>,
 {
-    fn into(self) -> [PointerData<V::Scalar>; 2] {
-        let [lch0, lch1]: [_; 2] = self.lch.into();
-        let [lab0, lab1]: [_; 2] = self.lab.into();
+    fn from(color_data: PointerData<V>) -> Self {
+        let [lch0, lch1]: [_; 2] = color_data.lch.into();
+        let [lab0, lab1]: [_; 2] = color_data.lab.into();
 
         [
             PointerData {

@@ -55,17 +55,17 @@ impl_from_color!(Yxy);
 impl_from_color!(Xyz);
 impl_from_color!(Lab);
 
-impl<V> Into<[ColorCheckerData<V::Scalar>; 2]> for ColorCheckerData<V>
+impl<V> From<ColorCheckerData<V>> for [ColorCheckerData<V::Scalar>; 2]
 where
     V: IntoScalarArray<2>,
     Xyz<D50, V>: Into<[Xyz<D50, V::Scalar>; 2]>,
     Yxy<D50, V>: Into<[Yxy<D50, V::Scalar>; 2]>,
     Lab<D50, V>: Into<[Lab<D50, V::Scalar>; 2]>,
 {
-    fn into(self) -> [ColorCheckerData<V::Scalar>; 2] {
-        let [xyz0, xyz1]: [_; 2] = self.xyz.into();
-        let [yxy0, yxy1]: [_; 2] = self.yxy.into();
-        let [lab0, lab1]: [_; 2] = self.lab.into();
+    fn from(color_data: ColorCheckerData<V>) -> Self {
+        let [xyz0, xyz1]: [_; 2] = color_data.xyz.into();
+        let [yxy0, yxy1]: [_; 2] = color_data.yxy.into();
+        let [lab0, lab1]: [_; 2] = color_data.lab.into();
 
         [
             ColorCheckerData {
