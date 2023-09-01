@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
 use palette::convert::FromColorUnclamped;
 use palette::encoding;
 use palette::{Hsl, Hsv, Hwb, IntoColor, LinSrgb, Srgb};
@@ -10,7 +10,7 @@ type LinHsv = Hsv<encoding::Linear<encoding::Srgb>>;
 type LinHsl = Hsl<encoding::Linear<encoding::Srgb>>;
 type LinHwb = Hwb<encoding::Linear<encoding::Srgb>>;
 
-#[path = "../tests/convert/data_color_mine.rs"]
+#[path = "../../palette/tests/convert/data_color_mine.rs"]
 #[allow(dead_code)]
 mod data_color_mine;
 use data_color_mine::{load_data, ColorMine};
@@ -46,7 +46,7 @@ fn rgb_conversion(c: &mut Criterion) {
         0,
         "number of colors must be a multiple of 8 for a fair comparison with SIMD"
     );
-    #[cfg(feature = "wide")]
+
     let wide_colormine: Vec<_> = colormine
         .chunks_exact(8)
         .map(|chunk| {
@@ -80,9 +80,8 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to linsrgb - wide::f32x8",
+        "rgb to linsrgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -99,9 +98,8 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to hsl - wide::f32x8",
+        "rgb to hsl - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -125,9 +123,8 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to hsv - wide::f32x8",
+        "rgb to hsv - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -165,9 +162,8 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
-        "xyz to linsrgb - wide::f32x8",
+        "xyz to linsrgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -240,9 +236,8 @@ fn rgb_conversion(c: &mut Criterion) {
             }
         })
     });
-    #[cfg(feature = "wide")]
     group.bench_with_input(
-        "linsrgb to rgb - wide::f32x8",
+        "linsrgb to rgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {

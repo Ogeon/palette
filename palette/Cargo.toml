@@ -90,10 +90,6 @@ version = "3.2.25"
 default-features = false
 features = ["std"] # Required since 3.2.25
 
-[dev-dependencies.criterion]
-version = "0.4.0"
-default-features = false
-
 [dev-dependencies.image]
 version = "0.23.14"
 default-features = false
@@ -103,21 +99,6 @@ features = ["png"]
 version = "4"
 default-features = false
 features = ["rand-traits"]
-
-[[bench]]
-path = "benches/cie.rs"
-name = "cie_conversion"
-harness = false
-
-[[bench]]
-path = "benches/rgb.rs"
-name = "rgb_conversion"
-harness = false
-
-[[bench]]
-path = "benches/matrix.rs"
-name = "matrix"
-harness = false
 
 [package.metadata.docs.rs]
 all-features = true

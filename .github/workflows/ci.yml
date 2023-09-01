@@ -29,7 +29,7 @@ jobs:
       - name: find-crate check
         run: cargo clippy -v -p palette --no-default-features --features "std find-crate"
       - name: Default check
-        run: cargo clippy -v --workspace --exclude no_std_test
+        run: cargo clippy -v -p palette
       - name: Test all features
         run: cargo test -v -p palette --all-features
       - name: Test each feature
@@ -63,7 +63,7 @@ jobs:
         with:
           targets: thumbv6m-none-eabi
       - name: "Build with #[no_std]"
-        run: cargo build -v --package no_std_test --features nightly --target thumbv6m-none-eabi
+        run: cargo build -v -p no_std_test --features nightly --target thumbv6m-none-eabi
   miri:
     name: Miri tests
     runs-on: ubuntu-latest
@@ -73,9 +73,9 @@ jobs:
         with:
           components: miri
       - name: Unit tests
-        run: cargo miri test --lib --features "bytemuck" -- -Z unstable-options --report-time
+        run: cargo miri test -p palette --lib --features "bytemuck" -- -Z unstable-options --report-time
       - name: Documentation tests
-        run: cargo miri test --doc --features "bytemuck" -- -Z unstable-options --report-time
+        run: cargo miri test -p palette --doc --features "bytemuck" -- -Z unstable-options --report-time
 
   # Refs: https://github.com/rust-lang/crater/blob/9ab6f9697c901c4a44025cf0a39b73ad5b37d198/.github/workflows/bors.yml#L125-L149
   #
