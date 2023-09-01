@@ -82,7 +82,7 @@ fn cie_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "linsrgb to xyz - wide::f32x8",
+        "linsrgb to xyz - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {

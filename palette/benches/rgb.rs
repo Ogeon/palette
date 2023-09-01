@@ -82,7 +82,7 @@ fn rgb_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to linsrgb - wide::f32x8",
+        "rgb to linsrgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -101,7 +101,7 @@ fn rgb_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to hsl - wide::f32x8",
+        "rgb to hsl - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -127,7 +127,7 @@ fn rgb_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "rgb to hsv - wide::f32x8",
+        "rgb to hsv - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -167,7 +167,7 @@ fn rgb_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "xyz to linsrgb - wide::f32x8",
+        "xyz to linsrgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
@@ -242,7 +242,7 @@ fn rgb_conversion(c: &mut Criterion) {
     });
     #[cfg(feature = "wide")]
     group.bench_with_input(
-        "linsrgb to rgb - wide::f32x8",
+        "linsrgb to rgb - wide f32x8",
         &wide_colormine,
         |b, wide_colormine| {
             b.iter(|| {
