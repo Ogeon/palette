@@ -2,13 +2,13 @@
 //!
 //! ## Selecting an algorithm
 //!
-//! Different distance/difference algorithms and formulae are good for different
+//! Different distance/difference algorithms and formulas are good for different
 //! situations. Some are faster but less accurate and some may only be suitable
 //! for certain color spaces. This table may help navigating the options a bit
 //! by summarizing the difference between the traits in this module.
 //!
-//! **Disclaimer:** _This is not an actual benchmark! It's always best to test and
-//! evaluate the differences in an actual application, when possible._
+//! **Disclaimer:** _This is not an actual benchmark! It's always best to test
+//! and evaluate the differences in an actual application, when possible._
 //!
 //! Property explanations:
 //! - **Complexity:** Low complexity options are generally faster than high
@@ -19,18 +19,22 @@
 //! | Trait | Complexity | Accuracy | Notes |
 //! |-------|------------|----------|-------|
 //! | [`Ciede2000`] | High | High for small differences, lower for large differences | The de-facto standard, but requires complex calculations to compensate for increased errors in certain areas of the CIE L\*a\*b\* (CIELAB) space.
+//! | [`ImprovedCiede2000`] | High | High for small differences, lower for large differences | A general improvement of [`Ciede2000`], using a formula by Huang et al.
+//! | [`DeltaE`] | Usually low | Medium to high | The formula differs between color spaces and may not always be the best. Other formulas, such as [`Ciede2000`], may be preferred for some spaces.
+//! | [`ImprovedDeltaE`] | Usually low | Medium to high | A general improvement of [`DeltaE`], using a formula by Huang et al.
 //! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a "quick and dirty" check.
 //! | [`HyAb`] | Low | High accuracy for medium to large differences. Less accurate than CIEDE2000 for small differences, but still performs well and is much less computationally expensive. | Similar to Euclidean distance, but separates lightness and chroma more. Limited to Cartesian spaces with a lightness axis and a chroma plane.
 //! | [`Wcag21RelativeContrast`] | Low | Low and only compares lightness | Meant for checking contrasts in computer graphics (such as between text and background colors), assuming sRGB. Mostly useful as a hint or for checking WCAG 2.1 compliance, considering the criticism it has received.
 
-use core::ops::{Add, BitAnd, BitOr, Div};
+use core::ops::{Add, BitAnd, BitOr, Div, Mul};
 
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
     convert::IntoColorUnclamped,
     num::{
-        Abs, Arithmetics, Exp, Hypot, MinMax, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
+        Abs, Arithmetics, Exp, Hypot, MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt,
+        Trigonometry, Zero,
     },
     white_point::D65,
     Lab, Lch, LinLuma,
@@ -50,23 +54,51 @@ pub trait ColorDifference {
     fn get_color_difference(self, other: Self) -> Self::Scalar;
 }
 
-/// Calculate the CIEDE2000 color difference between two colors.
+/// Calculate the CIEDE2000 Δ*E\** (Delta E) color difference between two
+/// colors.
 ///
-/// CIEDE2000 is a formula by the CIE that calculates a distance metric, ΔE\*
+/// CIEDE2000 is a formula by the CIE that calculates a distance metric, Δ*E\**
 /// (also known as Delta E), as an estimate of perceived color distance or
-/// difference.
+/// difference. CIEDE2000 is an improvement over Δ*E* (see [`DeltaE`]) for CIE
+/// L\*a\*b\* and CIE L\*C\*h° (see [`Lab`] and [`Lch`]).
 ///
-/// There is a "just noticeable difference" between two colors when the ΔE\*
-/// (Delta E) is roughly greater than 1. Thus, the color difference is more
-/// suited for calculating small distances between colors as opposed to large
-/// differences.
+/// There is a "just noticeable difference" between two colors when the Δ*E\**
+/// is roughly greater than 1. Thus, the color difference is more suited for
+/// calculating small distances between colors as opposed to large differences.
 #[doc(alias = "ColorDifference")]
 pub trait Ciede2000 {
-    /// The type for the ΔE\* (Delta E).
+    /// The type for the Δ*E\** (Delta E).
     type Scalar;
 
-    /// Calculate the CIEDE2000 ΔE\* (Delta E) color difference between `self` and `other`.
+    /// Calculate the CIEDE2000 Δ*E\** (Delta E) color difference between `self` and `other`.
+    #[must_use]
     fn difference(self, other: Self) -> Self::Scalar;
+}
+
+/// Calculate the CIEDE2000 Δ*E'* (improved IEDE2000 Δ*E\**) color difference.
+///
+/// The "improved CIEDE2000" uses the output of [`Ciede2000`] and enhances it
+/// according to *Power functions improving the performance of color-difference
+/// formulas* by Huang et al.
+pub trait ImprovedCiede2000: Ciede2000 {
+    /// Calculate the CIEDE2000 Δ*E'* (improved IEDE2000 Δ*E\**) color
+    /// difference between `self` and `other`.
+    #[must_use]
+    fn improved_difference(self, other: Self) -> Self::Scalar;
+}
+
+impl<C> ImprovedCiede2000 for C
+where
+    C: Ciede2000,
+    C::Scalar: Real + Mul<C::Scalar, Output = C::Scalar> + Powf,
+{
+    #[inline]
+    fn improved_difference(self, other: Self) -> Self::Scalar {
+        // Coefficients from "Power functions improving the performance of
+        // color-difference formulas" by Huang et al.
+        // https://opg.optica.org/oe/fulltext.cfm?uri=oe-23-1-597&id=307643
+        C::Scalar::from_f64(1.43) * self.difference(other).powf(C::Scalar::from_f64(0.7))
+    }
 }
 
 /// Container of components necessary to calculate CIEDE color difference
@@ -431,7 +463,37 @@ pub trait HyAb {
     ///
     /// This returns the sum of the absolute lightness difference and the
     /// distance on the chroma plane.
+    #[must_use]
     fn hybrid_distance(self, other: Self) -> Self::Scalar;
+}
+
+/// Calculate the Δ*E* color difference between two colors.
+///
+/// This represents the original Δ*E* formula for a color space. It's often a
+/// Euclidean distance for perceptually uniform color spaces and may not always
+/// be the best option. See the [`color_difference`](self) module for more
+/// details and options.
+pub trait DeltaE {
+    /// The type for the distance value.
+    type Scalar;
+
+    /// Calculate the Δ*E* color difference metric for `self` and `other`,
+    /// according to the color space's specification.
+    #[must_use]
+    fn delta_e(self, other: Self) -> Self::Scalar;
+}
+
+/// Calculate the Δ*E'* (improved Δ*E*) color difference between two colors.
+///
+/// The Δ*E'* uses the output of [`DeltaE`] and enhances it according to *Power
+/// functions improving the performance of color-difference formulas* by Huang
+/// et al. Only spaces with specified coefficients implement this trait.
+pub trait ImprovedDeltaE: DeltaE {
+    /// Calculate the Δ*E'* (improved Δ*E*) color difference metric for `self`
+    /// and `other`, according to the color space's specification and later
+    /// improvements by Huang et al.
+    #[must_use]
+    fn improved_delta_e(self, other: Self) -> Self::Scalar;
 }
 
 #[cfg(test)]
