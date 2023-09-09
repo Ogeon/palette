@@ -2,7 +2,7 @@ use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Crit
 use palette::convert::FromColorUnclamped;
 use palette::{Lab, Lch, Xyz, Yxy};
 
-#[path = "../../palette/tests/convert/data_color_mine.rs"]
+#[path = "../../integration_tests/tests/convert/data_color_mine.rs"]
 #[allow(dead_code)]
 mod data_color_mine;
 use data_color_mine::{load_data, ColorMine};

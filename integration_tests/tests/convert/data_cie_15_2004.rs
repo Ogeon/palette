@@ -117,7 +117,6 @@ pub fn run_tests() {
     }
 }
 
-#[cfg(feature = "wide")]
 pub mod wide_f32x4 {
     use super::*;
 

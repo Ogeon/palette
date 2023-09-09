@@ -50,7 +50,6 @@ pub fn color_mine_from_hwb() {
     data_color_mine::run_from_hwb_tests();
 }
 
-#[cfg(feature = "wide")]
 pub mod wide {
     #[test]
     pub fn xyz_yxy_conversion() {

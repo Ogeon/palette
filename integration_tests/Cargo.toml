@@ -1,27 +1,16 @@
 [package]
-name = "benchmarks"
+name = "integration_tests"
 version = "0.0.0"
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = []
-description = "Benchmark crate for palette."
+description = "Integration test crate for palette."
 repository = "https://github.com/Ogeon/palette"
 license = "MIT OR Apache-2.0"
 edition = "2018"
 
-[[bench]]
-path = "benches/cie.rs"
-name = "cie_conversion"
-harness = false
-
-[[bench]]
-path = "benches/rgb.rs"
-name = "rgb_conversion"
-harness = false
-
-[[bench]]
-path = "benches/matrix.rs"
-name = "matrix"
-harness = false
+[[example]]
+name = "issue_283"
+path = "regression_tests/issue_283.rs"
 
 [features]
 # Avoids getting these features included in other packages in the same workspace.
@@ -29,11 +18,14 @@ all_features = ["palette/default", "palette/wide"]
 
 [dev-dependencies]
 approx = { version = "0.5", default-features = false }
-codspeed-criterion-compat = "2.1.0"
-criterion = { version = "0.5.1", default-features = false }
 csv = "1"
 lazy_static = "1"
-palette = { path = "../palette", default-features = false }
+palette = { path = "../palette" }
+scad = "1.2.2" # For regression testing #283
 serde = "1"
 serde_derive = "1"
-wide = "0.7.3"
+serde_json = "1"
+
+[dev-dependencies.wide]
+version = "0.7.3"
+default-features = false

@@ -9,7 +9,6 @@ pub fn from_lch() {
     pointer_data::run_from_lch_tests();
 }
 
-#[cfg(feature = "wide")]
 mod wide {
     #[test]
     pub fn from_lab() {

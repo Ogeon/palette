@@ -4,6 +4,7 @@ members = [
     "palette_derive",
 
     # Test crates
+    "integration_tests",
     "no_std_test",
     "benchmarks"
 ]
