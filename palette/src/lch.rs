@@ -20,7 +20,7 @@ use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign, clamp_min, clamp_min_assign,
-    color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
+    color_difference::{get_ciede2000_difference, Ciede2000, DeltaE, ImprovedDeltaE, LabColorDiff},
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
     num::{
@@ -329,6 +329,31 @@ where
     }
 }
 
+impl<Wp, T> DeltaE for Lch<Wp, T>
+where
+    Lab<Wp, T>: FromColorUnclamped<Self> + DeltaE<Scalar = T>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn delta_e(self, other: Self) -> Self::Scalar {
+        // The definitions of delta E for Lch and Lab are equivalent. Converting
+        // to Lab is the fastest way, so far.
+        Lab::from_color_unclamped(self).delta_e(other.into_color_unclamped())
+    }
+}
+
+impl<Wp, T> ImprovedDeltaE for Lch<Wp, T>
+where
+    Lab<Wp, T>: FromColorUnclamped<Self> + ImprovedDeltaE<Scalar = T>,
+{
+    #[inline]
+    fn improved_delta_e(self, other: Self) -> Self::Scalar {
+        // The definitions of delta E for Lch and Lab are equivalent.
+        Lab::from_color_unclamped(self).improved_delta_e(other.into_color_unclamped())
+    }
+}
+
 /// CIEDE2000 distance metric for color difference.
 #[allow(deprecated)]
 impl<Wp, T> crate::ColorDifference for Lch<Wp, T>
@@ -528,8 +553,12 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Lch<Wp, T> where T: bytemuck::Pod 
 
 #[cfg(test)]
 mod test {
-    use crate::white_point::D65;
-    use crate::Lch;
+    use crate::{
+        color_difference::{DeltaE, ImprovedDeltaE},
+        convert::IntoColorUnclamped,
+        white_point::D65,
+        Lab, Lch,
+    };
 
     test_convert_into_from_xyz!(Lch);
 
@@ -559,6 +588,78 @@ mod test {
         assert_relative_eq!(Lch::<D65, f64>::min_chroma(), 0.0);
         assert_relative_eq!(Lch::<D65, f64>::max_chroma(), 128.0);
         assert_relative_eq!(Lch::<D65, f64>::max_extended_chroma(), 181.01933598375618);
+    }
+
+    #[test]
+    fn delta_e_large_hue_diff() {
+        let lhs1 = Lch::<D65, f64>::new(50.0, 64.0, -730.0);
+        let rhs1 = Lch::new(50.0, 64.0, 730.0);
+
+        let lhs2 = Lch::<D65, f64>::new(50.0, 64.0, -10.0);
+        let rhs2 = Lch::new(50.0, 64.0, 10.0);
+
+        assert_relative_eq!(
+            lhs1.delta_e(rhs1),
+            lhs2.delta_e(rhs2),
+            epsilon = 0.0000000000001
+        );
+    }
+
+    // Lab and Lch have the same delta E.
+    #[test]
+    fn lab_delta_e_equality() {
+        let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
+
+        for l_step in 0i8..5 {
+            for a_step in -2i8..3 {
+                for b_step in -2i8..3 {
+                    lab_colors.push(Lab::new(
+                        l_step as f64 * 25.0,
+                        a_step as f64 * 60.0,
+                        b_step as f64 * 60.0,
+                    ))
+                }
+            }
+        }
+
+        let lch_colors: Vec<Lch<_, _>> = lab_colors.clone().into_color_unclamped();
+
+        for (&lhs_lab, &lhs_lch) in lab_colors.iter().zip(&lch_colors) {
+            for (&rhs_lab, &rhs_lch) in lab_colors.iter().zip(&lch_colors) {
+                let delta_e_lab = lhs_lab.delta_e(rhs_lab);
+                let delta_e_lch = lhs_lch.delta_e(rhs_lch);
+                assert_relative_eq!(delta_e_lab, delta_e_lch, epsilon = 0.0000000000001);
+            }
+        }
+    }
+
+    // Lab and Lch have the same delta E, so should also have the same improved
+    // delta E.
+    #[test]
+    fn lab_improved_delta_e_equality() {
+        let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
+
+        for l_step in 0i8..5 {
+            for a_step in -2i8..3 {
+                for b_step in -2i8..3 {
+                    lab_colors.push(Lab::new(
+                        l_step as f64 * 25.0,
+                        a_step as f64 * 60.0,
+                        b_step as f64 * 60.0,
+                    ))
+                }
+            }
+        }
+
+        let lch_colors: Vec<Lch<_, _>> = lab_colors.clone().into_color_unclamped();
+
+        for (&lhs_lab, &lhs_lch) in lab_colors.iter().zip(&lch_colors) {
+            for (&rhs_lab, &rhs_lch) in lab_colors.iter().zip(&lch_colors) {
+                let delta_e_lab = lhs_lab.improved_delta_e(rhs_lab);
+                let delta_e_lch = lhs_lch.improved_delta_e(rhs_lch);
+                assert_relative_eq!(delta_e_lab, delta_e_lch, epsilon = 0.0000000000001);
+            }
+        }
     }
 
     struct_of_arrays_tests!(

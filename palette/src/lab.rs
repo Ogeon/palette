@@ -21,11 +21,14 @@ use crate::{
     blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     clamp, clamp_assign,
-    color_difference::{get_ciede2000_difference, Ciede2000, LabColorDiff},
+    color_difference::{
+        get_ciede2000_difference, Ciede2000, DeltaE, EuclideanDistance, ImprovedDeltaE,
+        LabColorDiff,
+    },
     convert::FromColorUnclamped,
     num::{
         self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
-        MinMax, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
+        MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt, Trigonometry, Zero,
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
@@ -307,6 +310,33 @@ where
 
     fn get_hue(&self) -> LabHue<T> {
         LabHue::from_cartesian(self.a.clone(), self.b.clone())
+    }
+}
+
+impl<Wp, T> DeltaE for Lab<Wp, T>
+where
+    Self: EuclideanDistance<Scalar = T>,
+    T: Sqrt,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn delta_e(self, other: Self) -> Self::Scalar {
+        self.distance(other)
+    }
+}
+
+impl<Wp, T> ImprovedDeltaE for Lab<Wp, T>
+where
+    Self: DeltaE<Scalar = T>,
+    T: Real + Mul<T, Output = T> + Powf + Sqrt,
+{
+    #[inline]
+    fn improved_delta_e(self, other: Self) -> Self::Scalar {
+        // Coefficients from "Power functions improving the performance of
+        // color-difference formulas" by Huang et al.
+        // https://opg.optica.org/oe/fulltext.cfm?uri=oe-23-1-597&id=307643
+        T::from_f64(1.26) * self.delta_e(other).powf(T::from_f64(0.55))
     }
 }
 

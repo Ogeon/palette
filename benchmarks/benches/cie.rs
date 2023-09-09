@@ -1,5 +1,8 @@
 use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
-use palette::convert::FromColorUnclamped;
+use palette::{
+    color_difference::{Ciede2000, DeltaE},
+    convert::FromColorUnclamped,
+};
 use palette::{Lab, Lch, Xyz, Yxy};
 
 #[path = "../../integration_tests/tests/convert/data_color_mine.rs"]
@@ -116,5 +119,71 @@ fn cie_conversion(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, cie_conversion);
+fn cie_delta_e(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Cie delta E");
+    let colormine: Vec<ColorMine<f32>> = load_data();
+
+    let lab: Vec<Lab> = colormine
+        .iter()
+        .map(|x| Lab::from_color_unclamped(x.xyz))
+        .collect();
+    let lch: Vec<Lch> = colormine
+        .iter()
+        .map(|x| Lch::from_color_unclamped(x.xyz))
+        .collect();
+
+    group.bench_with_input("Lab delta E", &lab, |b, lab| {
+        b.iter(|| {
+            for &lhs in lab {
+                for &rhs in lab.iter().rev() {
+                    black_box(lhs.delta_e(rhs));
+                }
+            }
+        })
+    });
+
+    group.bench_with_input("Lch delta E", &lch, |b, lch| {
+        b.iter(|| {
+            for &lhs in lch {
+                for &rhs in lch.iter().rev() {
+                    black_box(lhs.delta_e(rhs));
+                }
+            }
+        })
+    });
+
+    group.bench_with_input("Lch delta E via Lab", &lch, |b, lch| {
+        b.iter(|| {
+            for &lhs in lch {
+                for &rhs in lch.iter().rev() {
+                    black_box(
+                        Lab::from_color_unclamped(lhs).delta_e(Lab::from_color_unclamped(rhs)),
+                    );
+                }
+            }
+        })
+    });
+
+    group.bench_with_input("Lab CIEDE2000", &lab, |b, lab| {
+        b.iter(|| {
+            for &lhs in lab {
+                for &rhs in lab.iter().rev() {
+                    black_box(lhs.difference(rhs));
+                }
+            }
+        })
+    });
+
+    group.bench_with_input("Lch CIEDE2000", &lch, |b, lch| {
+        b.iter(|| {
+            for &lhs in lch {
+                for &rhs in lch.iter().rev() {
+                    black_box(lhs.difference(rhs));
+                }
+            }
+        })
+    });
+}
+
+criterion_group!(benches, cie_conversion, cie_delta_e);
 criterion_main!(benches);
