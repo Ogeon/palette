@@ -416,7 +416,6 @@ pub fn run_from_lch_tests() {
     }
 }
 
-#[cfg(feature = "wide")]
 pub mod wide_f64x2 {
     use super::*;
 

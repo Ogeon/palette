@@ -30,7 +30,6 @@ pub fn color_checker_from_lab() {
     color_checker::run_from_lab_tests();
 }
 
-#[cfg(feature = "wide")]
 pub mod wide {
     #[test]
     pub fn babel_from_yxy() {
