@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -30,7 +30,7 @@ use crate::{
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
+    Alpha, Clamp, ClampAssign, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in

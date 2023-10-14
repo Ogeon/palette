@@ -3,7 +3,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, DivAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -27,8 +27,7 @@ use crate::{
     },
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsv, Lighten, LightenAssign, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -325,19 +324,7 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
     }
 }
 
-impl<S, T> IsWithinBounds for Hwb<S, T>
-where
-    T: Stimulus + PartialCmp + Add<Output = T> + HasBoolMask + Clone,
-    T::Mask: BitAnd<Output = T::Mask>,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> T::Mask {
-        self.blackness.gt_eq(&Self::min_blackness()) & self.blackness.lt_eq(&Self::max_blackness()) &
-        self.whiteness.gt_eq(&Self::min_whiteness()) & self.whiteness.lt_eq(&Self::max_blackness()) &
-        (self.whiteness.clone() + self.blackness.clone()).lt_eq(&T::max_intensity())
-    }
-}
+impl_is_within_bounds_hwb!(Hwb<S> where T: Stimulus);
 
 impl<S, T> Clamp for Hwb<S, T>
 where

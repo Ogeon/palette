@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -26,8 +26,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, LuvHue, Mix, MixAssign,
-    Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Lchuv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`

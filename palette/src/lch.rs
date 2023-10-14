@@ -26,7 +26,7 @@ use crate::{
         Powi, Real, Sqrt, Trigonometry, Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Mix, MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Lab, LabHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -209,17 +209,12 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Lch<Wp, T>
-where
-    T: Zero + Real + PartialCmp + HasBoolMask,
-    T::Mask: BitAnd<Output = T::Mask>,
-{
-    #[inline]
-    fn is_within_bounds(&self) -> T::Mask {
-        self.l.gt_eq(&Self::min_l())
-            & self.l.lt_eq(&Self::max_l())
-            & self.chroma.gt_eq(&Self::min_chroma())
+impl_is_within_bounds! {
+    Lch<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), None]
     }
+    where T: Real + Zero
 }
 
 impl<Wp, T> Clamp for Lch<Wp, T>

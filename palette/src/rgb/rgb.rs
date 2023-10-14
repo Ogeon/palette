@@ -4,7 +4,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
     num::ParseIntError,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
     str::FromStr,
 };
 
@@ -37,8 +37,8 @@ use crate::{
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Luma, Mix,
-    MixAssign, Oklab, RgbHue, Xyz, Yxy,
+    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Mix, MixAssign, Oklab,
+    RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;

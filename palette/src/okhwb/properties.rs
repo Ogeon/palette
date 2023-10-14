@@ -1,16 +1,15 @@
-use core::ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, DivAssign, Sub, SubAssign};
 
 use crate::stimulus::Stimulus;
 use crate::white_point::D65;
-use crate::HasBoolMask;
 use crate::{
     angle::{RealAngle, SignedAngle},
     hues::OklabHueIter,
 };
 use crate::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, OklabHue, Xyz,
+    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, Lighten, LightenAssign, Mix,
+    MixAssign, OklabHue, Xyz,
 };
 use crate::{
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
@@ -19,19 +18,7 @@ use crate::{
 
 use super::Okhwb;
 
-impl<T> IsWithinBounds for Okhwb<T>
-where
-    T: Real + Stimulus + PartialCmp + Add<Output = T> + HasBoolMask + Clone,
-    T::Mask: BitAnd<Output = T::Mask>,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> T::Mask {
-        self.blackness.gt_eq(&Self::min_blackness()) & self.blackness.lt_eq(&Self::max_blackness()) &
-            self.whiteness.gt_eq(&Self::min_whiteness()) & self.whiteness.lt_eq(&Self::max_blackness()) &
-            (self.whiteness.clone() + self.blackness.clone()).lt_eq(&T::max_intensity())
-    }
-}
+impl_is_within_bounds_hwb!(Okhwb where T: Stimulus);
 
 impl<T> Clamp for Okhwb<T>
 where

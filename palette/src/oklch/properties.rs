@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
     angle::{RealAngle, SignedAngle},
@@ -7,7 +7,7 @@ use crate::{
     hues::OklabHueIter,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklch;
@@ -15,7 +15,7 @@ use super::Oklch;
 impl_is_within_bounds! {
     Oklch {
         l => [Self::min_l(), Self::max_l()],
-        chroma => [Self::min_chroma(),None]
+        chroma => [Self::min_chroma(), None]
     }
     where T: Zero + One
 }

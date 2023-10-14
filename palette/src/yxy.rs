@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -27,7 +27,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Luma, Mix, MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, Luma, Mix, MixAssign, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation

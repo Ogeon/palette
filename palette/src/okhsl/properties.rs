@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{hues::OklabHueIter, white_point::D65};
 
@@ -8,7 +8,7 @@ use crate::{
     clamp, clamp_assign,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     stimulus::Stimulus,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Okhsl;

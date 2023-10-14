@@ -3,7 +3,7 @@ use core::{
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -30,7 +30,7 @@ use crate::{
     },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Mix, MixAssign, Xyz, Yxy,
+    Alpha, Clamp, ClampAssign, IntoColor, Mix, MixAssign, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation

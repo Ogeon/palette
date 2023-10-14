@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::{
     angle::RealAngle,
@@ -11,7 +11,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklab;

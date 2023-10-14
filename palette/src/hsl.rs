@@ -3,7 +3,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Not, Sub, SubAssign},
+    ops::{Add, AddAssign, Not, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -31,7 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsv, IsWithinBounds, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsv, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in

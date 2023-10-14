@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Mul, Sub, SubAssign},
+    ops::{Add, AddAssign, Mul, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -29,8 +29,7 @@ use crate::{
         Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Luv, LuvHue, Mix,
-    MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, Luv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in

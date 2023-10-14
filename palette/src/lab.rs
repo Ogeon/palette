@@ -30,7 +30,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, LabHue, Lch, Mix, MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, LabHue, Lch, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`

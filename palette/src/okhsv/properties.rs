@@ -1,11 +1,9 @@
-use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
-use crate::num::{
-    self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero,
-};
+use crate::num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, Real, Zero};
 use crate::{angle::SignedAngle, hues::OklabHueIter};
 
-use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, IsWithinBounds, OklabHue};
+use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, OklabHue};
 use crate::{clamp, stimulus::Stimulus, Clamp, ClampAssign, Mix, MixAssign};
 
 use super::Okhsv;

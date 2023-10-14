@@ -3,7 +3,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -31,7 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, IsWithinBounds, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in

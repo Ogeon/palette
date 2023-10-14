@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -26,7 +26,7 @@ use crate::{
     luv_bounds::LuvBounds,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lchuv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Lchuv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
