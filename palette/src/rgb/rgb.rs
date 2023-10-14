@@ -37,8 +37,8 @@ use crate::{
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Lighten,
-    LightenAssign, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
+    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Luma, Mix,
+    MixAssign, Oklab, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;

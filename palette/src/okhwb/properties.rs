@@ -13,9 +13,7 @@ use crate::{
     LightenAssign, Mix, MixAssign, OklabHue, Xyz,
 };
 use crate::{
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
-    },
+    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     Alpha, Clamp,
 };
 
@@ -75,89 +73,7 @@ impl_mix_hue!(Okhwb {
     whiteness,
     blackness
 });
-
-impl<T> Lighten for Okhwb<T>
-where
-    T: Stimulus + Real + Zero + MinMax + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference_whiteness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
-            else => self.whiteness.clone(),
-        };
-        let delta_whiteness = difference_whiteness.max(T::zero()) * &factor;
-
-        let difference_blackness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
-            else => Self::max_blackness() - &self.blackness,
-        };
-        let delta_blackness = difference_blackness.max(T::zero()) * factor;
-
-        Okhwb {
-            hue: self.hue,
-            whiteness: (self.whiteness + delta_whiteness).max(Self::min_whiteness()),
-            blackness: (self.blackness - delta_blackness).max(Self::min_blackness()),
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Okhwb {
-            hue: self.hue,
-            whiteness: (self.whiteness + Self::max_whiteness() * &amount)
-                .max(Self::min_whiteness()),
-            blackness: (self.blackness - Self::max_blackness() * amount).max(Self::min_blackness()),
-        }
-    }
-}
-
-impl<T> LightenAssign for Okhwb<T>
-where
-    T: Stimulus
-        + Real
-        + Zero
-        + MinMax
-        + num::ClampAssign
-        + AddAssign
-        + SubAssign
-        + Arithmetics
-        + PartialCmp
-        + Clone,
-    T::Mask: LazySelect<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference_whiteness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
-            else => self.whiteness.clone(),
-        };
-        self.whiteness += difference_whiteness.max(T::zero()) * &factor;
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-
-        let difference_blackness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
-            else => Self::max_blackness() - &self.blackness,
-        };
-        self.blackness -= difference_blackness.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.whiteness += Self::max_whiteness() * &amount;
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-
-        self.blackness -= Self::max_blackness() * amount;
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-    }
-}
-
+impl_lighten_hwb!(Okhwb where T: Stimulus);
 impl_hue_ops!(Okhwb, OklabHue);
 
 impl_color_add!(Okhwb<T>, [hue, whiteness, blackness]);

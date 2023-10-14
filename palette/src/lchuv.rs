@@ -25,12 +25,12 @@ use crate::{
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
     num::{
-        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Powi,
-        Real, Zero,
+        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, One, PartialCmp, Powi, Real,
+        Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
-    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Luv, LuvHue, Mix,
+    MixAssign, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in

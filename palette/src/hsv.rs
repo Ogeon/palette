@@ -31,8 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, IsWithinBounds, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in

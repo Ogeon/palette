@@ -30,8 +30,7 @@ use crate::{
     },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    Xyz, Yxy,
+    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Mix, MixAssign, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation

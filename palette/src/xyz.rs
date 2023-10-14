@@ -23,15 +23,14 @@ use crate::{
     luma::LumaStandard,
     matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
     num::{
-        self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax,
-        One, PartialCmp, Powi, Real, Recip, Zero,
+        self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, One,
+        PartialCmp, Powi, Real, Recip, Zero,
     },
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
-    MixAssign, Oklab, Yxy,
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in

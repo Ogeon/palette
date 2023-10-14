@@ -24,13 +24,9 @@ use crate::{
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Powi, Real,
-        Zero,
-    },
+    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lchuv, Lighten, LightenAssign, LuvHue,
-    Mix, MixAssign, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lchuv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in

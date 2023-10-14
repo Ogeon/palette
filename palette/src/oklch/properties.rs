@@ -5,12 +5,9 @@ use crate::{
     bool_mask::LazySelect,
     clamp, clamp_assign, clamp_min, clamp_min_assign,
     hues::OklabHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
-    },
+    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    OklabHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklch;

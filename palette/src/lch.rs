@@ -22,12 +22,11 @@ use crate::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
     num::{
-        self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, MinMax, One,
-        PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
+        self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, One, PartialCmp,
+        Powi, Real, Sqrt, Trigonometry, Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
-    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in

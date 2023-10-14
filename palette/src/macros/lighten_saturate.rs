@@ -8,10 +8,16 @@ macro_rules! _impl_increase_value_trait {
         $(phantom: $phantom: ident)?
         $(where $($where: tt)+)?
     ) => {
-        impl<$($ty_param,)* T> $trait for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::$trait for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + MinMax + num::Clamp + Arithmetics + PartialCmp + Clone,
-            T::Mask: LazySelect<T>,
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::MinMax
+                + crate::num::Clamp
+                + crate::num::Arithmetics
+                + crate::num::PartialCmp
+                + Clone,
+            T::Mask: crate::bool_mask::LazySelect<T>,
             $($($where)+)?
         {
             type Scalar = T;
@@ -44,10 +50,17 @@ macro_rules! _impl_increase_value_trait {
             }
         }
 
-        impl<$($ty_param,)* T> $assign_trait for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::$assign_trait for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + MinMax + num::ClampAssign + AddAssign + Arithmetics + PartialCmp + Clone,
-            T::Mask: LazySelect<T>,
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::MinMax
+                + crate::num::ClampAssign
+                + core::ops::AddAssign
+                + crate::num::Arithmetics
+                + crate::num::PartialCmp
+                + Clone,
+            T::Mask: crate::bool_mask::LazySelect<T>,
             $($($where)+)?
         {
             type Scalar = T;
@@ -100,5 +113,110 @@ macro_rules! impl_saturate {
             SaturateAssign::{saturate_assign, saturate_fixed_assign},
             $($input)+
         );
+    };
+}
+
+macro_rules! impl_lighten_hwb {
+    (
+        $ty: ident
+        $(phantom: $phantom: ident)?
+        $(where $($where: tt)+)?
+    ) => {
+        impl_lighten_hwb!($ty<> $(phantom: $phantom)? $(where $($where)+ )?);
+    };
+    (
+        $ty: ident <$($ty_param: ident),*>
+        $(phantom: $phantom: ident)?
+        $(where $($where: tt)+)?
+    ) => {
+        impl<$($ty_param,)* T> Lighten for $ty<$($ty_param,)* T>
+        where
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::MinMax
+                + crate::num::Arithmetics
+                + crate::num::PartialCmp
+                + Clone,
+            T::Mask: LazySelect<T>,
+            $($($where)+)?
+        {
+            type Scalar = T;
+
+            #[inline]
+            fn lighten(self, factor: T) -> Self {
+                let difference_whiteness = lazy_select! {
+                    if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
+                    else => self.whiteness.clone(),
+                };
+                let delta_whiteness = difference_whiteness.max(T::zero()) * &factor;
+
+                let difference_blackness = lazy_select! {
+                    if factor.gt_eq(&T::zero()) => self.blackness.clone(),
+                    else => Self::max_blackness() - &self.blackness,
+                };
+                let delta_blackness = difference_blackness.max(T::zero()) * factor;
+
+                Self {
+                    hue: self.hue,
+                    whiteness: (self.whiteness + delta_whiteness).max(Self::min_whiteness()),
+                    blackness: (self.blackness - delta_blackness).max(Self::min_blackness()),
+                    $($phantom: PhantomData,)?
+                }
+            }
+
+            #[inline]
+            fn lighten_fixed(self, amount: T) -> Self {
+                Self {
+                    hue: self.hue,
+                    whiteness: (self.whiteness + Self::max_whiteness() * &amount)
+                        .max(Self::min_whiteness()),
+                    blackness: (self.blackness - Self::max_blackness() * amount).max(Self::min_blackness()),
+                    $($phantom: PhantomData,)?
+                }
+            }
+        }
+
+        impl<$($ty_param,)* T> LightenAssign for $ty<$($ty_param,)* T>
+        where
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::MinMax
+                + crate::num::ClampAssign
+                + core::ops::AddAssign
+                + core::ops::SubAssign
+                + crate::num::Arithmetics
+                + crate::num::PartialCmp
+                + Clone,
+            T::Mask: LazySelect<T>,
+            $($($where)+)?
+        {
+            type Scalar = T;
+
+            #[inline]
+            fn lighten_assign(&mut self, factor: T) {
+                let difference_whiteness = lazy_select! {
+                    if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
+                    else => self.whiteness.clone(),
+                };
+                self.whiteness += difference_whiteness.max(T::zero()) * &factor;
+                clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+
+                let difference_blackness = lazy_select! {
+                    if factor.gt_eq(&T::zero()) => self.blackness.clone(),
+                    else => Self::max_blackness() - &self.blackness,
+                };
+                self.blackness -= difference_blackness.max(T::zero()) * factor;
+                clamp_min_assign(&mut self.blackness, Self::min_blackness());
+            }
+
+            #[inline]
+            fn lighten_fixed_assign(&mut self, amount: T) {
+                self.whiteness += Self::max_whiteness() * &amount;
+                clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+
+                self.blackness -= Self::max_blackness() * amount;
+                clamp_min_assign(&mut self.blackness, Self::min_blackness());
+            }
+        }
     };
 }

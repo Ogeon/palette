@@ -22,12 +22,12 @@ use crate::{
     encoding::IntoLinear,
     luma::LumaStandard,
     num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, One, PartialCmp, Real,
+        Zero,
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign, Xyz,
+    Alpha, Clamp, ClampAssign, IsWithinBounds, Luma, Mix, MixAssign, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation

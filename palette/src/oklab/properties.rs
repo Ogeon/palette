@@ -6,13 +6,12 @@ use crate::{
     bool_mask::LazySelect,
     clamp, clamp_assign,
     num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Trigonometry, Zero,
+        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, One, PartialCmp, Real,
+        Trigonometry, Zero,
     },
     stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklab;

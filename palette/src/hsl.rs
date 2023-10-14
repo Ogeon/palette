@@ -31,8 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsv, IsWithinBounds, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in

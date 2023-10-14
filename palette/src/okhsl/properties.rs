@@ -6,12 +6,9 @@ use crate::{
     angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
     clamp, clamp_assign,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
-    },
+    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     stimulus::Stimulus,
-    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    OklabHue, Saturate, SaturateAssign, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Okhsl;
