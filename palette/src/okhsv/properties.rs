@@ -7,9 +7,8 @@ use crate::{angle::SignedAngle, hues::OklabHueIter};
 
 use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, IsWithinBounds, OklabHue};
 use crate::{
-    bool_mask::LazySelect, clamp, stimulus::Stimulus, Clamp, ClampAssign, GetHue, Lighten,
-    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue,
+    bool_mask::LazySelect, clamp, stimulus::Stimulus, Clamp, ClampAssign, Lighten, LightenAssign,
+    Mix, MixAssign, Saturate, SaturateAssign,
 };
 
 use super::Okhsv;
@@ -58,64 +57,7 @@ where
 impl_mix_hue!(Okhsv { saturation, value });
 impl_lighten!(Okhsv increase {value => [Self::min_value(), Self::max_value()]} other {hue, saturation}  where T: Real+Stimulus);
 impl_saturate!(Okhsv increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, value}  where T:Real+ Stimulus);
-
-impl<T> GetHue for Okhsv<T>
-where
-    T: Clone,
-{
-    type Hue = OklabHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> OklabHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<T, H> WithHue<H> for Okhsv<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<T, H> SetHue<H> for Okhsv<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<T> ShiftHue for Okhsv<T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<T> ShiftHueAssign for Okhsv<T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Okhsv, OklabHue);
 
 impl_color_add!(Okhsv<T>, [hue, saturation, value]);
 impl_color_sub!(Okhsv<T>, [hue, saturation, value]);

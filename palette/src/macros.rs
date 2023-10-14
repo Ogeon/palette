@@ -38,6 +38,8 @@ mod struct_of_arrays;
 mod reference_component;
 #[macro_use]
 mod copy_clone;
+#[macro_use]
+mod hue;
 
 #[cfg(feature = "random")]
 #[macro_use]

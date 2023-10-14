@@ -31,9 +31,8 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign,
-    Mix, MixAssign, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue,
-    Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, RgbHue, Saturate, SaturateAssign, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
@@ -541,64 +540,7 @@ where
 impl_mix_hue!(Hsv<S> {saturation, value} phantom: standard);
 impl_lighten!(Hsv<S> increase {value => [Self::min_value(), Self::max_value()]} other {hue, saturation} phantom: standard where T: Stimulus);
 impl_saturate!(Hsv<S> increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, value} phantom: standard where T: Stimulus);
-
-impl<S, T> GetHue for Hsv<S, T>
-where
-    T: Clone,
-{
-    type Hue = RgbHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> RgbHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<S, T, H> WithHue<H> for Hsv<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<S, T, H> SetHue<H> for Hsv<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<S, T> ShiftHue for Hsv<S, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<S, T> ShiftHueAssign for Hsv<S, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Hsv<S>, RgbHue);
 
 impl<S, T> HasBoolMask for Hsv<S, T>
 where

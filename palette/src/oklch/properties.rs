@@ -9,8 +9,8 @@ use crate::{
         self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
+    OklabHue, Xyz,
 };
 
 use super::Oklch;
@@ -50,64 +50,7 @@ where
 
 impl_mix_hue!(Oklch { l, chroma });
 impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: Zero + One);
-
-impl<T> GetHue for Oklch<T>
-where
-    T: Clone,
-{
-    type Hue = OklabHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> OklabHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<T, H> WithHue<H> for Oklch<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<T, H> SetHue<H> for Oklch<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<T> ShiftHue for Oklch<T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<T> ShiftHueAssign for Oklch<T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Oklch, OklabHue);
 
 impl_color_add!(Oklch<T>, [l, chroma, hue]);
 impl_color_sub!(Oklch<T>, [l, chroma, hue]);

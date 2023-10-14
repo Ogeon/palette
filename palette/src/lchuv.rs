@@ -30,8 +30,7 @@ use crate::{
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
-    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -261,64 +260,7 @@ where
 impl_mix_hue!(Lchuv<Wp> {l, chroma} phantom: white_point);
 impl_lighten!(Lchuv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} phantom: white_point);
 impl_saturate!(Lchuv<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} phantom: white_point);
-
-impl<Wp, T> GetHue for Lchuv<Wp, T>
-where
-    T: Clone,
-{
-    type Hue = LuvHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> LuvHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<Wp, T, H> WithHue<H> for Lchuv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<Wp, T, H> SetHue<H> for Lchuv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<Wp, T> ShiftHue for Lchuv<Wp, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<Wp, T> ShiftHueAssign for Lchuv<Wp, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Lchuv<Wp>, LuvHue);
 
 impl<Wp, T> HasBoolMask for Lchuv<Wp, T>
 where

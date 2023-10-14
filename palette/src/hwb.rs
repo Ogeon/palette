@@ -27,8 +27,8 @@ use crate::{
     },
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    Alpha, Clamp, ClampAssign, FromColor, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
+    MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -461,63 +461,7 @@ where
     }
 }
 
-impl<S, T> GetHue for Hwb<S, T>
-where
-    T: Clone,
-{
-    type Hue = RgbHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> RgbHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<S, T, H> WithHue<H> for Hwb<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<S, T, H> SetHue<H> for Hwb<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<S, T> ShiftHue for Hwb<S, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<S, T> ShiftHueAssign for Hwb<S, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Hwb<S>, RgbHue);
 
 impl<S, T> HasBoolMask for Hwb<S, T>
 where

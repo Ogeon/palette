@@ -27,8 +27,7 @@ use crate::{
     },
     white_point::D65,
     Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
-    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -252,64 +251,7 @@ where
 impl_mix_hue!(Lch<Wp> {l, chroma} phantom: white_point);
 impl_lighten!(Lch<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} phantom: white_point);
 impl_saturate!(Lch<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} phantom: white_point);
-
-impl<Wp, T> GetHue for Lch<Wp, T>
-where
-    T: Clone,
-{
-    type Hue = LabHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> LabHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<Wp, T, H> WithHue<H> for Lch<Wp, T>
-where
-    H: Into<LabHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<Wp, T, H> SetHue<H> for Lch<Wp, T>
-where
-    H: Into<LabHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<Wp, T> ShiftHue for Lch<Wp, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<Wp, T> ShiftHueAssign for Lch<Wp, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Lch<Wp>, LabHue);
 
 impl<Wp, T> DeltaE for Lch<Wp, T>
 where

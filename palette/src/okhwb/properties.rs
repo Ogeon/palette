@@ -9,8 +9,8 @@ use crate::{
 };
 use crate::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten,
-    LightenAssign, Mix, MixAssign, OklabHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, IsWithinBounds, Lighten,
+    LightenAssign, Mix, MixAssign, OklabHue, Xyz,
 };
 use crate::{
     num::{
@@ -158,63 +158,7 @@ where
     }
 }
 
-impl<T> GetHue for Okhwb<T>
-where
-    T: Clone,
-{
-    type Hue = OklabHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> OklabHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<T, H> WithHue<H> for Okhwb<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<T, H> SetHue<H> for Okhwb<T>
-where
-    H: Into<OklabHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<T> ShiftHue for Okhwb<T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<T> ShiftHueAssign for Okhwb<T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Okhwb, OklabHue);
 
 impl_color_add!(Okhwb<T>, [hue, whiteness, blackness]);
 impl_color_sub!(Okhwb<T>, [hue, whiteness, blackness]);
