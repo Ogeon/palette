@@ -6,8 +6,6 @@ use core::{
     ops::{Add, AddAssign, BitAnd, Not, Sub, SubAssign},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{

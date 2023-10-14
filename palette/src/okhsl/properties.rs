@@ -1,8 +1,5 @@
 use core::ops::{Add, AddAssign, BitAnd, Sub, SubAssign};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
 use crate::{hues::OklabHueIter, white_point::D65};
 
 use crate::{

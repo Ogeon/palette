@@ -6,8 +6,6 @@ use core::{
     ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -191,25 +189,6 @@ where
     pub fn max_blackness() -> T {
         T::max_intensity()
     }
-}
-
-impl<S, T> PartialEq for Hwb<S, T>
-where
-    T: PartialEq,
-    RgbHue<T>: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue
-            && self.whiteness == other.whiteness
-            && self.blackness == other.blackness
-    }
-}
-
-impl<S, T> Eq for Hwb<S, T>
-where
-    T: Eq,
-    RgbHue<T>: Eq,
-{
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
@@ -569,97 +548,7 @@ impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
 impl_struct_of_array_traits_hue!(Hwb<S>, RgbHueIter, [whiteness, blackness], standard);
 
 impl_copy_clone!(Hwb<S>, [hue, whiteness, blackness], standard);
-
-#[cfg(feature = "approx")]
-impl<S, T> AbsDiffEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + AbsDiffEq + Clone,
-    RgbHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    #[rustfmt::skip]
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        let equal_shade = self.whiteness.abs_diff_eq(&other.whiteness, epsilon.clone())
-            && self.blackness.abs_diff_eq(&other.blackness, epsilon.clone());
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.abs_diff_eq(&other.hue, epsilon) && equal_shade
-        }
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> RelativeEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + RelativeEq + Clone,
-    RgbHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    fn default_max_relative() -> Self::Epsilon {
-        T::default_max_relative()
-    }
-
-    #[rustfmt::skip]
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        let equal_shade = self.whiteness.relative_eq(&other.whiteness, epsilon.clone(), max_relative.clone())
-            && self.blackness.relative_eq(&other.blackness, epsilon.clone(), max_relative.clone());
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.relative_eq(&other.hue, epsilon, max_relative) && equal_shade
-        }
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> UlpsEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + UlpsEq + Clone,
-    RgbHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    #[rustfmt::skip]
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon.clone(), max_ulps)
-            && self.blackness.ulps_eq(&other.blackness, epsilon.clone(), max_ulps);
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.ulps_eq(&other.hue, epsilon, max_ulps) && equal_shade
-        }
-    }
-}
+impl_eq_hue!(Hwb<S>, RgbHue, [hue, whiteness, blackness]);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hwb<S, T>

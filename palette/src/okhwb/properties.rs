@@ -20,8 +20,6 @@ use crate::{
 };
 
 use super::Okhwb;
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 impl<T> IsWithinBounds for Okhwb<T>
 where

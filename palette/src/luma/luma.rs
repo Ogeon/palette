@@ -6,8 +6,6 @@ use core::{
     ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -283,17 +281,6 @@ impl<Wp, T> Luma<Linear<Wp>, T> {
         color.into_linear()
     }
 }
-
-impl<S, T> PartialEq for Luma<S, T>
-where
-    T: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.luma == other.luma
-    }
-}
-
-impl<S, T> Eq for Luma<S, T> where T: Eq {}
 
 // Safety:
 //
@@ -820,55 +807,7 @@ impl_simd_array_conversion!(Luma<S>, [luma], standard);
 impl_struct_of_array_traits!(Luma<S>, [luma], standard);
 
 impl_copy_clone!(Luma<S>, [luma], standard);
-
-#[cfg(feature = "approx")]
-impl<S, T> AbsDiffEq for Luma<S, T>
-where
-    T: AbsDiffEq,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.luma.abs_diff_eq(&other.luma, epsilon)
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> RelativeEq for Luma<S, T>
-where
-    T: RelativeEq,
-{
-    fn default_max_relative() -> Self::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        self.luma.relative_eq(&other.luma, epsilon, max_relative)
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> UlpsEq for Luma<S, T>
-where
-    T: UlpsEq,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.luma.ulps_eq(&other.luma, epsilon, max_ulps)
-    }
-}
+impl_eq!(Luma<S>, [luma]);
 
 impl<S, T> fmt::LowerHex for Luma<S, T>
 where
