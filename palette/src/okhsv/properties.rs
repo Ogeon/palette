@@ -4,7 +4,7 @@ use crate::num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, Real,
 use crate::{angle::SignedAngle, hues::OklabHueIter};
 
 use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, OklabHue};
-use crate::{clamp, stimulus::Stimulus, Clamp, ClampAssign, Mix, MixAssign};
+use crate::{clamp, stimulus::Stimulus, Mix, MixAssign};
 
 use super::Okhsv;
 
@@ -16,37 +16,13 @@ impl_is_within_bounds! {
     where T: Real+Arithmetics+Stimulus
 }
 
-impl<T> Clamp for Okhsv<T>
-where
-    T: Real + Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.value, Self::min_value(), Self::max_value()),
-        )
+impl_clamp! {
+    Okhsv {
+        saturation => [Self::min_saturation(), Self::max_saturation()+ T::from_f64(ok_utils::MAX_SRGB_SATURATION_INACCURACY)],
+        value => [Self::min_value(), Self::max_value()+ T::from_f64(ok_utils::MAX_SRGB_SATURATION_INACCURACY)]
     }
-}
-
-impl<T> ClampAssign for Okhsv<T>
-where
-    T: Real + Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(&mut self.value, Self::min_value(), Self::max_value());
-    }
+    other {hue}
+    where T: Real+Arithmetics+Stimulus
 }
 
 impl_mix_hue!(Okhsv { saturation, value });

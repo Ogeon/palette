@@ -29,7 +29,7 @@ use crate::{
         Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, Luv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Hsluv, Luv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -230,30 +230,13 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lchuv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
-            self.hue,
-        )
+impl_clamp! {
+    Lchuv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), Self::max_chroma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lchuv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.chroma, Self::min_chroma(), Self::max_chroma());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Lchuv<Wp> {l, chroma} phantom: white_point);

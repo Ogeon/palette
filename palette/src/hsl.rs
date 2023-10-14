@@ -31,7 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsv, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsv, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -491,42 +491,13 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Hsl<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.lightness, Self::min_lightness(), Self::max_lightness()),
-        )
+impl_clamp! {
+    Hsl<S> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        lightness => [Self::min_lightness(), Self::max_lightness()]
     }
-}
-
-impl<S, T> ClampAssign for Hsl<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(
-            &mut self.lightness,
-            Self::min_lightness(),
-            Self::max_lightness(),
-        );
-    }
+    other {hue, standard}
+    where T: Stimulus
 }
 
 impl_mix_hue!(Hsl<S> {saturation, lightness} phantom: standard);

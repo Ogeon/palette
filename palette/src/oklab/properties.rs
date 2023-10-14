@@ -11,7 +11,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, FromColor, GetHue, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklab;
@@ -22,28 +22,12 @@ impl_is_within_bounds! {
     }
     where T: Zero + One
 }
-
-impl<T> Clamp for Oklab<T>
-where
-    T: num::Clamp + Zero + One,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        // lightness is limited and thus can be clamped.
-        let l = clamp(self.l, Self::min_l(), Self::max_l());
-        // a and b are unlimited
-        Self::new(l, self.a, self.b)
+impl_clamp! {
+    Oklab {
+        l => [Self::min_l(), Self::max_l()]
     }
-}
-
-impl<T> ClampAssign for Oklab<T>
-where
-    T: num::ClampAssign + Zero + One,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-    }
+    other {a, b}
+    where T: Zero + One
 }
 
 impl_mix!(Oklab);

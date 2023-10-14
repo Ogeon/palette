@@ -30,7 +30,7 @@ use crate::{
     },
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, IntoColor, Mix, MixAssign, Xyz, Yxy,
+    Alpha, IntoColor, Mix, MixAssign, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -599,25 +599,12 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Luma<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(clamp(self.luma, Self::min_luma(), Self::max_luma()))
+impl_clamp! {
+    Luma<S> {
+        luma => [Self::min_luma(), Self::max_luma()]
     }
-}
-
-impl<S, T> ClampAssign for Luma<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
-    }
+    other {standard}
+    where T: Stimulus
 }
 
 impl_mix!(Luma<S>);

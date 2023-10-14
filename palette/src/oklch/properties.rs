@@ -7,7 +7,7 @@ use crate::{
     hues::OklabHueIter,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, FromColor, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Oklch;
@@ -19,30 +19,13 @@ impl_is_within_bounds! {
     }
     where T: Zero + One
 }
-
-impl<T> Clamp for Oklch<T>
-where
-    T: num::Clamp + Zero + One,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp_min(self.chroma, Self::min_chroma()),
-            self.hue,
-        )
+impl_clamp! {
+    Oklch {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma()]
     }
-}
-
-impl<T> ClampAssign for Oklch<T>
-where
-    T: num::ClampAssign + Zero + One,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
+    other {hue}
+    where T: Zero + One
 }
 
 impl_mix_hue!(Oklch { l, chroma });

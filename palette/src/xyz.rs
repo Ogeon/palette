@@ -30,7 +30,7 @@ use crate::{
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
+    Alpha, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -369,33 +369,16 @@ impl_is_within_bounds! {
         T: Zero,
         Wp: WhitePoint<T>
 }
-
-impl<Wp, T> Clamp for Xyz<Wp, T>
-where
-    T: Zero + num::Clamp,
-    Wp: WhitePoint<T>,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.x, Self::min_x(), Self::max_x()),
-            clamp(self.y, Self::min_y(), Self::max_y()),
-            clamp(self.z, Self::min_z(), Self::max_z()),
-        )
+impl_clamp! {
+    Xyz<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        z => [Self::min_z(), Self::max_z()]
     }
-}
-
-impl<Wp, T> ClampAssign for Xyz<Wp, T>
-where
-    T: Zero + num::ClampAssign,
-    Wp: WhitePoint<T>,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
-        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
-        clamp_assign(&mut self.z, Self::min_z(), Self::max_z());
-    }
+    other {white_point}
+    where
+        T: Zero,
+        Wp: WhitePoint<T>
 }
 
 impl_mix!(Xyz<Wp>);

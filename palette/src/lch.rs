@@ -26,7 +26,7 @@ use crate::{
         Powi, Real, Sqrt, Trigonometry, Zero,
     },
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Lab, LabHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Lab, LabHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -216,30 +216,13 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lch<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp_min(self.chroma, Self::min_chroma()),
-            self.hue,
-        )
+impl_clamp! {
+    Lch<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lch<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Lch<Wp> {l, chroma} phantom: white_point);

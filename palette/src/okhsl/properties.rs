@@ -8,7 +8,7 @@ use crate::{
     clamp, clamp_assign,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
     stimulus::Stimulus,
-    Alpha, Clamp, ClampAssign, FromColor, Mix, MixAssign, OklabHue, Xyz,
+    Alpha, FromColor, Mix, MixAssign, OklabHue, Xyz,
 };
 
 use super::Okhsl;
@@ -20,42 +20,13 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<T> Clamp for Okhsl<T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.lightness, Self::min_lightness(), Self::max_lightness()),
-        )
+impl_clamp! {
+    Okhsl {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        lightness => [Self::min_lightness(), Self::max_lightness()]
     }
-}
-
-impl<T> ClampAssign for Okhsl<T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(
-            &mut self.lightness,
-            Self::min_lightness(),
-            Self::max_lightness(),
-        );
-    }
+    other {hue}
+    where T: Stimulus
 }
 
 impl_mix_hue!(Okhsl {

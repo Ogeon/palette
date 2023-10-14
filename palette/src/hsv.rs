@@ -31,7 +31,7 @@ use crate::{
     },
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsl, Hwb, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsl, Hwb, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
@@ -502,38 +502,13 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Hsv<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.value, Self::min_value(), Self::max_value()),
-        )
+impl_clamp! {
+    Hsv<S> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        value => [Self::min_value(), Self::max_value()]
     }
-}
-
-impl<S, T> ClampAssign for Hsv<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(&mut self.value, Self::min_value(), Self::max_value());
-    }
+    other {hue, standard}
+    where T: Stimulus
 }
 
 impl_mix_hue!(Hsv<S> {saturation, value} phantom: standard);

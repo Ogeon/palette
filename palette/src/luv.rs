@@ -26,7 +26,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Lchuv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Lchuv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -255,31 +255,14 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Luv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.u, Self::min_u(), Self::max_u()),
-            clamp(self.v, Self::min_v(), Self::max_v()),
-        )
+impl_clamp! {
+    Luv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        u => [Self::min_u(), Self::max_u()],
+        v => [Self::min_v(), Self::max_v()]
     }
-}
-
-impl<Wp, T> ClampAssign for Luv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.u, Self::min_u(), Self::max_u());
-        clamp_assign(&mut self.v, Self::min_v(), Self::max_v());
-    }
+    other {white_point}
+    where T: Real + Zero
 }
 
 impl_mix!(Luv<Wp>);

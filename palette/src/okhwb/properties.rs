@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, DivAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::stimulus::Stimulus;
 use crate::white_point::D65;
@@ -8,53 +8,18 @@ use crate::{
 };
 use crate::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, ClampAssign, FromColor, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, Xyz,
+    clamp, clamp_min, clamp_min_assign, FromColor, Lighten, LightenAssign, Mix, MixAssign,
+    OklabHue, Xyz,
 };
 use crate::{
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
-    Alpha, Clamp,
+    Alpha,
 };
 
 use super::Okhwb;
 
 impl_is_within_bounds_hwb!(Okhwb where T: Stimulus);
-
-impl<T> Clamp for Okhwb<T>
-where
-    T: Real + Stimulus + One + num::Clamp + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        let mut whiteness = clamp_min(self.whiteness.clone(), Self::min_whiteness());
-        let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
-
-        let sum = self.blackness + self.whiteness;
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        whiteness /= divisor.clone();
-        blackness /= divisor;
-
-        Self::new(self.hue, whiteness, blackness)
-    }
-}
-
-impl<T> ClampAssign for Okhwb<T>
-where
-    T: Real + Stimulus + One + num::ClampAssign + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-
-        let sum = self.blackness.clone() + self.whiteness.clone();
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        self.whiteness /= divisor.clone();
-        self.blackness /= divisor;
-    }
-}
+impl_clamp_hwb!(Okhwb where T: Stimulus);
 
 impl_mix_hue!(Okhwb {
     whiteness,

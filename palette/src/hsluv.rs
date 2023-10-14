@@ -26,7 +26,7 @@ use crate::{
     luv_bounds::LuvBounds,
     num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, Lchuv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, Lchuv, LuvHue, Mix, MixAssign, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
@@ -217,38 +217,13 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Hsluv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.l, Self::min_l(), Self::max_l()),
-        )
+impl_clamp! {
+    Hsluv<Wp> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        l => [Self::min_l(), Self::max_l()]
     }
-}
-
-impl<Wp, T> ClampAssign for Hsluv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Hsluv<Wp> {saturation, l} phantom: white_point);

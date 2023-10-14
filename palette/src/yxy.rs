@@ -27,7 +27,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, Luma, Mix, MixAssign, Xyz,
+    Alpha, Luma, Mix, MixAssign, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -260,31 +260,14 @@ impl_is_within_bounds! {
     }
     where T: Zero + One
 }
-
-impl<Wp, T> Clamp for Yxy<Wp, T>
-where
-    T: Zero + One + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.x, Self::min_x(), Self::max_x()),
-            clamp(self.y, Self::min_y(), Self::max_y()),
-            clamp(self.luma, Self::min_luma(), Self::max_luma()),
-        )
+impl_clamp! {
+    Yxy<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        luma => [Self::min_luma(), Self::max_luma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Yxy<Wp, T>
-where
-    T: Zero + One + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
-        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
-        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
-    }
+    other {white_point}
+    where T: Zero + One
 }
 
 impl_mix!(Yxy<Wp>);

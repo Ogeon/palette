@@ -3,7 +3,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, DivAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "random")]
@@ -27,7 +27,7 @@ use crate::{
     },
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, Hsv, Lighten, LightenAssign, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsv, Lighten, LightenAssign, Mix, MixAssign, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -325,42 +325,7 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
 }
 
 impl_is_within_bounds_hwb!(Hwb<S> where T: Stimulus);
-
-impl<S, T> Clamp for Hwb<S, T>
-where
-    T: Stimulus + One + num::Clamp + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        let mut whiteness = clamp_min(self.whiteness.clone(), Self::min_whiteness());
-        let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
-
-        let sum = self.blackness + self.whiteness;
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        whiteness /= divisor.clone();
-        blackness /= divisor;
-
-        Self::new(self.hue, whiteness, blackness)
-    }
-}
-
-impl<S, T> ClampAssign for Hwb<S, T>
-where
-    T: Stimulus + One + num::ClampAssign + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-
-        let sum = self.blackness.clone() + self.whiteness.clone();
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        self.whiteness /= divisor.clone();
-        self.blackness /= divisor;
-    }
-}
+impl_clamp_hwb!(Hwb<S> phantom: standard where T: Stimulus);
 
 impl_mix_hue!(Hwb<S> {whiteness, blackness} phantom: standard);
 impl_lighten_hwb!(Hwb<S> phantom: standard where T: Stimulus);

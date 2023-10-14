@@ -37,8 +37,7 @@ use crate::{
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Mix, MixAssign, Oklab,
-    RgbHue, Xyz, Yxy,
+    FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;
@@ -940,31 +939,14 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Rgb<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.red, Self::min_red(), Self::max_red()),
-            clamp(self.green, Self::min_green(), Self::max_green()),
-            clamp(self.blue, Self::min_blue(), Self::max_blue()),
-        )
+impl_clamp! {
+    Rgb<S> {
+        red => [Self::min_red(), Self::max_red()],
+        green => [Self::min_green(), Self::max_green()],
+        blue => [Self::min_blue(), Self::max_blue()]
     }
-}
-
-impl<S, T> ClampAssign for Rgb<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.red, Self::min_red(), Self::max_red());
-        clamp_assign(&mut self.green, Self::min_green(), Self::max_green());
-        clamp_assign(&mut self.blue, Self::min_blue(), Self::max_blue());
-    }
+    other {standard}
+    where T: Stimulus
 }
 
 impl_mix!(Rgb<S>);

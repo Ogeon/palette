@@ -30,7 +30,7 @@ use crate::{
     },
     stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, LabHue, Lch, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, LabHue, Lch, Mix, MixAssign, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -250,31 +250,14 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lab<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.a, Self::min_a(), Self::max_a()),
-            clamp(self.b, Self::min_b(), Self::max_b()),
-        )
+impl_clamp! {
+    Lab<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        a => [Self::min_a(), Self::max_a()],
+        b => [Self::min_b(), Self::max_b()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lab<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.a, Self::min_a(), Self::max_a());
-        clamp_assign(&mut self.b, Self::min_b(), Self::max_b());
-    }
+    other {white_point}
+    where T: Real + Zero
 }
 
 impl_mix!(Lab<Wp>);
