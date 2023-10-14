@@ -79,22 +79,6 @@ pub struct Lchuv<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Lchuv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lchuv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lchuv<Wp, T> {
     /// Create a CIE L\*C\*uv h°uv color.
     pub fn new<H: Into<LuvHue<T>>>(l: T, chroma: T, hue: H) -> Self {
@@ -363,6 +347,7 @@ impl_simd_array_conversion_hue!(Lchuv<Wp>, [l, chroma], white_point);
 impl_struct_of_array_traits_hue!(Lchuv<Wp>, LuvHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lchuv<Wp>, LuvHue, [l, chroma, hue]);
+impl_copy_clone!(Lchuv<Wp>, [l, chroma, hue], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lchuv<Wp, T>

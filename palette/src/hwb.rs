@@ -95,22 +95,6 @@ pub struct Hwb<S = Srgb, T = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S, T> Copy for Hwb<S, T> where T: Copy {}
-
-impl<S, T> Clone for Hwb<S, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hwb<S, T> {
-        Hwb {
-            hue: self.hue.clone(),
-            whiteness: self.whiteness.clone(),
-            blackness: self.blackness.clone(),
-            standard: PhantomData,
-        }
-    }
-}
-
 impl<T> Hwb<Srgb, T> {
     /// Create an sRGB HWB color. This method can be used instead of `Hwb::new`
     /// to help type inference.
@@ -583,6 +567,8 @@ impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
 impl_array_casts!(Hwb<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
 impl_struct_of_array_traits_hue!(Hwb<S>, RgbHueIter, [whiteness, blackness], standard);
+
+impl_copy_clone!(Hwb<S>, [hue, whiteness, blackness], standard);
 
 #[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Hwb<S, T>

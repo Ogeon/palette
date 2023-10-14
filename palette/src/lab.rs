@@ -84,22 +84,6 @@ pub struct Lab<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Lab<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lab<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lab<Wp, T> {
-        Lab {
-            l: self.l.clone(),
-            a: self.a.clone(),
-            b: self.b.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lab<Wp, T> {
     /// Create a CIE L\*a\*b\* color.
     pub const fn new(l: T, a: T, b: T) -> Lab<Wp, T> {
@@ -417,6 +401,7 @@ impl_simd_array_conversion!(Lab<Wp>, [l, a, b], white_point);
 impl_struct_of_array_traits!(Lab<Wp>, [l, a, b], white_point);
 
 impl_eq!(Lab<Wp>, [l, a, b]);
+impl_copy_clone!(Lab<Wp>, [l, a, b], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lab<Wp, T>

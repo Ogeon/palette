@@ -68,17 +68,6 @@ pub struct Luma<S = Srgb, T = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S, T: Copy> Copy for Luma<S, T> {}
-
-impl<S, T: Clone> Clone for Luma<S, T> {
-    fn clone(&self) -> Luma<S, T> {
-        Luma {
-            luma: self.luma.clone(),
-            standard: PhantomData,
-        }
-    }
-}
-
 impl<S, T> Luma<S, T> {
     /// Create a luminance color.
     pub const fn new(luma: T) -> Luma<S, T> {
@@ -829,6 +818,8 @@ impl<S> From<Lumaa<S, u8>> for u16 {
 
 impl_simd_array_conversion!(Luma<S>, [luma], standard);
 impl_struct_of_array_traits!(Luma<S>, [luma], standard);
+
+impl_copy_clone!(Luma<S>, [luma], standard);
 
 #[cfg(feature = "approx")]
 impl<S, T> AbsDiffEq for Luma<S, T>

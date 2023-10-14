@@ -79,22 +79,6 @@ pub struct Xyz<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Xyz<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Xyz<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Xyz<Wp, T> {
-        Xyz {
-            x: self.x.clone(),
-            y: self.y.clone(),
-            z: self.z.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Xyz<Wp, T> {
     /// Create a CIE XYZ color.
     pub const fn new(x: T, y: T, z: T) -> Xyz<Wp, T> {
@@ -459,6 +443,7 @@ impl_array_casts!(Xyz<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Xyz<Wp>, [x, y, z], white_point);
 impl_struct_of_array_traits!(Xyz<Wp>, [x, y, z], white_point);
 
+impl_copy_clone!(Xyz<Wp>, [x, y, z], white_point);
 impl_eq!(Xyz<Wp>, [x, y, z]);
 
 #[allow(deprecated)]

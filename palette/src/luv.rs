@@ -77,22 +77,6 @@ pub struct Luv<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Luv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Luv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Luv<Wp, T> {
-        Luv {
-            l: self.l.clone(),
-            u: self.u.clone(),
-            v: self.v.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Luv<Wp, T> {
     /// Create a CIE L\*u\*v\* color.
     pub const fn new(l: T, u: T, v: T) -> Self {
@@ -344,6 +328,7 @@ impl_simd_array_conversion!(Luv<Wp>, [l, u, v], white_point);
 impl_struct_of_array_traits!(Luv<Wp>, [l, u, v], white_point);
 
 impl_eq!(Luv<Wp>, [l, u, v]);
+impl_copy_clone!(Luv<Wp>, [l, u, v], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Luv<Wp, T>

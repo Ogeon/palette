@@ -96,19 +96,6 @@ pub struct Hsl<S = Srgb, T = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S, T: Copy> Copy for Hsl<S, T> {}
-
-impl<S, T: Clone> Clone for Hsl<S, T> {
-    fn clone(&self) -> Hsl<S, T> {
-        Hsl {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
-    }
-}
-
 impl<T> Hsl<Srgb, T> {
     /// Create an sRGB HSL color. This method can be used instead of `Hsl::new`
     /// to help type inference.
@@ -636,6 +623,7 @@ impl_simd_array_conversion_hue!(Hsl<S>, [saturation, lightness], standard);
 impl_struct_of_array_traits_hue!(Hsl<S>, RgbHueIter, [saturation, lightness], standard);
 
 impl_eq_hue!(Hsl<S>, RgbHue, [hue, saturation, lightness]);
+impl_copy_clone!(Hsl<S>, [hue, saturation, lightness], standard);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hsl<S, T>

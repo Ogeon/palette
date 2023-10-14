@@ -75,22 +75,6 @@ pub struct Lch<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Lch<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lch<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lch<Wp, T> {
-        Lch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Lch<Wp, T> {
     /// Create a CIE L\*C\*h° color.
     pub fn new<H: Into<LabHue<T>>>(l: T, chroma: T, hue: H) -> Self {
@@ -431,6 +415,7 @@ impl_simd_array_conversion_hue!(Lch<Wp>, [l, chroma], white_point);
 impl_struct_of_array_traits_hue!(Lch<Wp>, LabHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
+impl_copy_clone!(Lch<Wp>, [l, chroma, hue], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lch<Wp, T>

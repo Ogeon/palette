@@ -81,22 +81,6 @@ pub struct Hsluv<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Hsluv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Hsluv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hsluv<Wp, T> {
-        Hsluv {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            l: self.l.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Hsluv<Wp, T> {
     /// Create an HSLuv color.
     pub fn new<H: Into<LuvHue<T>>>(hue: H, saturation: T, l: T) -> Self {
@@ -362,6 +346,7 @@ impl_simd_array_conversion_hue!(Hsluv<Wp>, [saturation, l], white_point);
 impl_struct_of_array_traits_hue!(Hsluv<Wp>, LuvHueIter, [saturation, l], white_point);
 
 impl_eq_hue!(Hsluv<Wp>, LuvHue, [hue, saturation, l]);
+impl_copy_clone!(Hsluv<Wp>, [hue, saturation, l], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Hsluv<Wp, T>

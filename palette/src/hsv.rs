@@ -96,22 +96,6 @@ pub struct Hsv<S = Srgb, T = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S, T> Copy for Hsv<S, T> where T: Copy {}
-
-impl<S, T> Clone for Hsv<S, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hsv<S, T> {
-        Hsv {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            value: self.value.clone(),
-            standard: PhantomData,
-        }
-    }
-}
-
 impl<T> Hsv<Srgb, T> {
     /// Create an sRGB HSV color. This method can be used instead of `Hsv::new`
     /// to help type inference.
@@ -643,6 +627,7 @@ impl_simd_array_conversion_hue!(Hsv<S>, [saturation, value], standard);
 impl_struct_of_array_traits_hue!(Hsv<S>, RgbHueIter, [saturation, value], standard);
 
 impl_eq_hue!(Hsv<S>, RgbHue, [hue, saturation, value]);
+impl_copy_clone!(Hsv<S>, [hue, saturation, value], standard);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hsv<S, T>

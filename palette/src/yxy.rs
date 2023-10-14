@@ -74,22 +74,6 @@ pub struct Yxy<Wp = D65, T = f32> {
     pub white_point: PhantomData<Wp>,
 }
 
-impl<Wp, T> Copy for Yxy<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Yxy<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Yxy<Wp, T> {
-        Yxy {
-            x: self.x.clone(),
-            y: self.y.clone(),
-            luma: self.luma.clone(),
-            white_point: PhantomData,
-        }
-    }
-}
-
 impl<Wp, T> Yxy<Wp, T> {
     /// Create a CIE Yxy color.
     pub const fn new(x: T, y: T, luma: T) -> Yxy<Wp, T> {
@@ -344,7 +328,8 @@ impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Yxy<Wp>, [x, y, luma], white_point);
 impl_struct_of_array_traits!(Yxy<Wp>, [x, y, luma], white_point);
 
-impl_eq!(Yxy<Wp>, [y, x, luma]);
+impl_eq!(Yxy<Wp>, [x, y, luma]);
+impl_copy_clone!(Yxy<Wp>, [x, y, luma], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Yxy<Wp, T>

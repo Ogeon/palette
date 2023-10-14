@@ -207,19 +207,6 @@ pub struct Rgb<S = Srgb, T = f32> {
     pub standard: PhantomData<S>,
 }
 
-impl<S, T: Copy> Copy for Rgb<S, T> {}
-
-impl<S, T: Clone> Clone for Rgb<S, T> {
-    fn clone(&self) -> Rgb<S, T> {
-        Rgb {
-            red: self.red.clone(),
-            green: self.green.clone(),
-            blue: self.blue.clone(),
-            standard: PhantomData,
-        }
-    }
-}
-
 impl<S, T> Rgb<S, T> {
     /// Create an RGB color.
     ///
@@ -1066,6 +1053,7 @@ impl_simd_array_conversion!(Rgb<S>, [red, green, blue], standard);
 impl_struct_of_array_traits!(Rgb<S>, [red, green, blue], standard);
 
 impl_eq!(Rgb<S>, [red, green, blue]);
+impl_copy_clone!(Rgb<S>, [red, green, blue], standard);
 
 impl<S, T> fmt::LowerHex for Rgb<S, T>
 where
