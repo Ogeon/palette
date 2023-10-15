@@ -2,8 +2,11 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, Mul, Neg, Sub},
+    ops::{Add, Mul, Neg},
 };
+
+#[cfg(feature = "random")]
+use core::ops::Sub;
 
 #[cfg(feature = "random")]
 use rand::{

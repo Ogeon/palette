@@ -11,13 +11,16 @@ use rand::{
     Rng,
 };
 
+#[cfg(feature = "random")]
+use crate::num::MinMax;
+
 use crate::{
     angle::FromAngle,
     bool_mask::{HasBoolMask, LazySelect, Select},
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{Arithmetics, MinMax, One, PartialCmp, Real},
+    num::{Arithmetics, One, PartialCmp, Real},
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
     Alpha, FromColor, Hsv, RgbHue, Xyz,

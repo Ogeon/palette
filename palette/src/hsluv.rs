@@ -12,7 +12,7 @@ use rand::{
 };
 
 #[cfg(feature = "random")]
-use crate::num::{Cbrt, Sqrt};
+use crate::num::{Cbrt, One, Sqrt};
 
 use crate::{
     angle::RealAngle,
@@ -20,7 +20,7 @@ use crate::{
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{Arithmetics, One, PartialCmp, Powi, Real, Zero},
+    num::{Arithmetics, PartialCmp, Powi, Real, Zero},
     white_point::D65,
     Alpha, FromColor, Lchuv, LuvHue, Xyz,
 };
