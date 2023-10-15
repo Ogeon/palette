@@ -3,7 +3,7 @@ use core::{
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, Mul},
+    ops::{Add, Div},
 };
 
 #[cfg(feature = "random")]
@@ -16,21 +16,16 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
-    clamp, clamp_assign,
     color_difference::Wcag21RelativeContrast,
     convert::FromColorUnclamped,
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, MinMax, PartialCmp, Real},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, IntoColor, Mix, MixAssign, Xyz, Yxy,
+    Alpha, IntoColor, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation

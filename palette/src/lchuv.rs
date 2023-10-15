@@ -1,9 +1,6 @@
 //! Types for the CIE L\*C\*uv h°uv color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{AddAssign, Mul},
-};
+use core::{marker::PhantomData, ops::Mul};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -18,18 +15,14 @@ use rand::{
 use crate::num::Sqrt;
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{
-        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, One, PartialCmp, Powi, Real,
-        Zero,
-    },
+    num::{Arithmetics, Hypot, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, FromColor, GetHue, Hsluv, Luv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Hsluv, Luv, LuvHue, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in

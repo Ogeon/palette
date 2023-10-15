@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{AddAssign, BitAnd, BitOr},
+    ops::{BitAnd, BitOr},
 };
 
 #[cfg(feature = "random")]
@@ -15,18 +15,14 @@ use rand::{
 };
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, clamp_min, clamp_min_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, DeltaE, ImprovedDeltaE, LabColorDiff},
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
-    num::{
-        self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, One, PartialCmp,
-        Powi, Real, Sqrt, Trigonometry, Zero,
-    },
+    num::{Abs, Arithmetics, Exp, Hypot, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero},
     white_point::D65,
-    Alpha, FromColor, GetHue, Lab, LabHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Lab, LabHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in

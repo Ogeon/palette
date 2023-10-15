@@ -1,9 +1,6 @@
 //! Types for the CIE 1931 XYZ color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{AddAssign, Div, Mul},
-};
+use core::{marker::PhantomData, ops::Mul};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -15,22 +12,17 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
     matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
-    num::{
-        self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, One,
-        PartialCmp, Powi, Real, Recip, Zero,
-    },
+    num::{Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powi, Real, Recip, Zero},
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Lab, Luma, Luv, Mix, MixAssign, Oklab, Yxy,
+    Alpha, Lab, Luma, Luv, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in

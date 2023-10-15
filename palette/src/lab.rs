@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Div, Mul, Neg, Sub},
+    ops::{Add, BitAnd, BitOr, Mul, Neg, Sub},
 };
 
 #[cfg(feature = "random")]
@@ -16,21 +16,18 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     color_difference::{
         get_ciede2000_difference, Ciede2000, DeltaE, EuclideanDistance, ImprovedDeltaE,
         LabColorDiff,
     },
     convert::FromColorUnclamped,
     num::{
-        self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
-        MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt, Trigonometry, Zero,
+        Abs, Arithmetics, Cbrt, Exp, Hypot, MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt,
+        Trigonometry, Zero,
     },
-    stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, FromColor, GetHue, LabHue, Lch, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, LabHue, Lch, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`

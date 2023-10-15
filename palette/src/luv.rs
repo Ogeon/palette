@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, Mul, Neg, Sub},
+    ops::{Add, Mul, Neg, Sub},
 };
 
 #[cfg(feature = "random")]
@@ -16,17 +16,11 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Powf, Powi, Real, Recip, Trigonometry, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, MinMax, PartialCmp, Powf, Powi, Real, Recip, Trigonometry, Zero},
     white_point::{WhitePoint, D65},
-    Alpha, FromColor, GetHue, Lchuv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Lchuv, LuvHue, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`

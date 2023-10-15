@@ -35,7 +35,7 @@ macro_rules! _impl_increase_value_trait {
 
                 $ty {
                     $($other_component: self.$other_component,)*
-                    $($component: clamp(self.$component + $component, $get_min, $get_max),)+
+                    $($component: crate::clamp(self.$component + $component, $get_min, $get_max),)+
                     $($phantom: PhantomData,)?
                 }
             }
@@ -44,7 +44,7 @@ macro_rules! _impl_increase_value_trait {
             fn $method_fixed(self, amount: T) -> Self {
                 $ty {
                     $($other_component: self.$other_component,)*
-                    $($component: clamp(self.$component + $get_max * &amount, $get_min, $get_max),)+
+                    $($component: crate::clamp(self.$component + $get_max * &amount, $get_min, $get_max),)+
                     $($phantom: PhantomData,)?
                 }
             }
@@ -74,7 +74,7 @@ macro_rules! _impl_increase_value_trait {
                     };
 
                     self.$component += difference.max(T::zero()) * &factor;
-                    clamp_assign(&mut self.$component, $get_min, $get_max);
+                    crate::clamp_assign(&mut self.$component, $get_min, $get_max);
                 )+
             }
 
@@ -82,7 +82,7 @@ macro_rules! _impl_increase_value_trait {
             fn $assign_method_fixed(&mut self, amount: T) {
                 $(
                     self.$component += $get_max * &amount;
-                    clamp_assign(&mut self.$component, $get_min, $get_max);
+                    crate::clamp_assign(&mut self.$component, $get_min, $get_max);
                 )+
             }
         }
@@ -129,7 +129,7 @@ macro_rules! impl_lighten_hwb {
         $(phantom: $phantom: ident)?
         $(where $($where: tt)+)?
     ) => {
-        impl<$($ty_param,)* T> Lighten for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::Lighten for $ty<$($ty_param,)* T>
         where
             T: crate::num::Real
                 + crate::num::Zero
@@ -176,7 +176,7 @@ macro_rules! impl_lighten_hwb {
             }
         }
 
-        impl<$($ty_param,)* T> LightenAssign for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::LightenAssign for $ty<$($ty_param,)* T>
         where
             T: crate::num::Real
                 + crate::num::Zero
@@ -199,23 +199,23 @@ macro_rules! impl_lighten_hwb {
                     else => self.whiteness.clone(),
                 };
                 self.whiteness += difference_whiteness.max(T::zero()) * &factor;
-                clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+                crate::clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
 
                 let difference_blackness = lazy_select! {
                     if factor.gt_eq(&T::zero()) => self.blackness.clone(),
                     else => Self::max_blackness() - &self.blackness,
                 };
                 self.blackness -= difference_blackness.max(T::zero()) * factor;
-                clamp_min_assign(&mut self.blackness, Self::min_blackness());
+                crate::clamp_min_assign(&mut self.blackness, Self::min_blackness());
             }
 
             #[inline]
             fn lighten_fixed_assign(&mut self, amount: T) {
                 self.whiteness += Self::max_whiteness() * &amount;
-                clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+                crate::clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
 
                 self.blackness -= Self::max_blackness() * amount;
-                clamp_min_assign(&mut self.blackness, Self::min_blackness());
+                crate::clamp_min_assign(&mut self.blackness, Self::min_blackness());
             }
         }
     };

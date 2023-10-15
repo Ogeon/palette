@@ -3,30 +3,41 @@ macro_rules! impl_mix {
         impl_mix!($ty<> $(where $($where)+)?);
     };
     ($ty: ident <$($ty_param: ident),*> $(where $($where: tt)+)?) => {
-        impl<$($ty_param,)* T> Mix for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::Mix for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + One + Arithmetics + num::Clamp + Clone,
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::One
+                + crate::num::Arithmetics
+                + crate::num::Clamp
+                + Clone,
             $($($where)+)?
         {
             type Scalar = T;
 
             #[inline]
             fn mix(self, other: Self, factor: T) -> Self {
-                let factor = clamp(factor, T::zero(), T::one());
+                let factor = crate::clamp(factor, T::zero(), T::one());
                 self.clone() + (other - self) * factor
             }
         }
 
-        impl<$($ty_param,)* T> MixAssign for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::MixAssign for $ty<$($ty_param,)* T>
         where
-            T: Real + Zero + One + AddAssign + Arithmetics + num::Clamp + Clone,
+            T: crate::num::Real
+                + crate::num::Zero
+                + crate::num::One
+                + core::ops::AddAssign
+                + crate::num::Arithmetics
+                + crate::num::Clamp
+                + Clone,
             $($($where)+)?
         {
             type Scalar = T;
 
             #[inline]
             fn mix_assign(&mut self, other: Self, factor: T) {
-                let factor = clamp(factor, T::zero(), T::one());
+                let factor = crate::clamp(factor, T::zero(), T::one());
                 *self += (other - self.clone()) * factor;
             }
         }
@@ -38,15 +49,21 @@ macro_rules! impl_mix_hue {
         impl_mix_hue!($ty<> {$($other_field),*} $(phantom: $phantom)?);
     };
     ($ty: ident <$($ty_param: ident),*> {$($other_field: ident),*} $(phantom: $phantom: ident)?) => {
-        impl<$($ty_param,)* T> Mix for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::Mix for $ty<$($ty_param,)* T>
         where
-            T: RealAngle + SignedAngle + Zero + One + num::Clamp + Arithmetics + Clone,
+            T: crate::angle::RealAngle
+                + crate::angle::SignedAngle
+                + crate::num::Zero
+                + crate::num::One
+                + crate::num::Clamp
+                + crate::num::Arithmetics
+                + Clone,
         {
             type Scalar = T;
 
             #[inline]
             fn mix(self, other: Self, factor: T) -> Self {
-                let factor = clamp(factor, T::zero(), T::one());
+                let factor = crate::clamp(factor, T::zero(), T::one());
                 let hue = (other.hue - self.hue.clone()).into_degrees();
                 $(
                     let $other_field = other.$other_field - &self.$other_field;
@@ -62,15 +79,22 @@ macro_rules! impl_mix_hue {
             }
         }
 
-        impl<$($ty_param,)* T> MixAssign for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> crate::MixAssign for $ty<$($ty_param,)* T>
         where
-            T: RealAngle + SignedAngle + Zero + One + num::Clamp + AddAssign + Arithmetics + Clone,
+            T: crate::angle::RealAngle
+                + crate::angle::SignedAngle
+                + crate::num::Zero
+                + crate::num::One
+                + crate::num::Clamp
+                + core::ops::AddAssign
+                + crate::num::Arithmetics
+                + Clone,
         {
             type Scalar = T;
 
             #[inline]
             fn mix_assign(&mut self, other: Self, factor: T) {
-                let factor = clamp(factor, T::zero(), T::one());
+                let factor = crate::clamp(factor, T::zero(), T::one());
                 let hue = (other.hue - self.hue.clone()).into_degrees();
                 $(
                     let $other_field = other.$other_field - &self.$other_field;

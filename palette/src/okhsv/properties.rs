@@ -1,10 +1,8 @@
-use core::ops::AddAssign;
+use crate::hues::OklabHueIter;
+use crate::num::{Arithmetics, Real};
 
-use crate::num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, Real, Zero};
-use crate::{angle::SignedAngle, hues::OklabHueIter};
-
-use crate::{angle::RealAngle, clamp_assign, ok_utils, Alpha, OklabHue};
-use crate::{clamp, stimulus::Stimulus, Mix, MixAssign};
+use crate::stimulus::Stimulus;
+use crate::{ok_utils, OklabHue};
 
 use super::Okhsv;
 

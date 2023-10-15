@@ -1,9 +1,6 @@
 //! Types for the CIE 1931 Yxy (xyY) color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{AddAssign, Div, Mul},
-};
+use core::marker::PhantomData;
 
 #[cfg(feature = "random")]
 use rand::{
@@ -15,19 +12,13 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, One, PartialCmp, Real,
-        Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, IsValidDivisor, One, PartialCmp, Real, Zero},
     white_point::{WhitePoint, D65},
-    Alpha, Luma, Mix, MixAssign, Xyz,
+    Alpha, Luma, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation

@@ -1,6 +1,6 @@
 //! Types for the HSLuv color space.
 
-use core::{marker::PhantomData, ops::AddAssign};
+use core::marker::PhantomData;
 
 #[cfg(feature = "random")]
 use rand::{
@@ -15,15 +15,14 @@ use rand::{
 use crate::num::{Cbrt, Sqrt};
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Powi, Real, Zero},
+    num::{Arithmetics, One, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, FromColor, Lchuv, LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, Lchuv, LuvHue, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in

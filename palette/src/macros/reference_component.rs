@@ -12,7 +12,7 @@ macro_rules! impl_reference_component_methods {
             {
                 $self_ty {
                     $($element: *self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -24,7 +24,7 @@ macro_rules! impl_reference_component_methods {
             {
                 $self_ty {
                     $($element: self.$element.clone(),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }
@@ -41,7 +41,7 @@ macro_rules! impl_reference_component_methods {
             pub fn as_refs(&self) -> $self_ty<$($phantom_ty,)? &T> {
                 $self_ty {
                     $($element: &*self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -53,7 +53,7 @@ macro_rules! impl_reference_component_methods {
             {
                 $self_ty {
                     $($element: *self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -65,7 +65,7 @@ macro_rules! impl_reference_component_methods {
             {
                 $self_ty {
                     $($element: self.$element.clone(),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }
@@ -144,7 +144,7 @@ macro_rules! impl_reference_component_methods_hue {
                 $self_ty {
                     hue: self.hue.copied(),
                     $($element: *self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -157,7 +157,7 @@ macro_rules! impl_reference_component_methods_hue {
                 $self_ty {
                     hue: self.hue.cloned(),
                     $($element: self.$element.clone(),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }
@@ -176,7 +176,7 @@ macro_rules! impl_reference_component_methods_hue {
                 $self_ty {
                     hue: self.hue.as_ref(),
                     $($element: &*self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -189,7 +189,7 @@ macro_rules! impl_reference_component_methods_hue {
                 $self_ty {
                     hue: self.hue.copied(),
                     $($element: *self.$element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -202,7 +202,7 @@ macro_rules! impl_reference_component_methods_hue {
                 $self_ty {
                     hue: self.hue.cloned(),
                     $($element: self.$element.clone(),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }

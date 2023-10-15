@@ -1,6 +1,6 @@
 //! Types for the HSV color space.
 
-use core::{any::TypeId, marker::PhantomData, ops::AddAssign};
+use core::{any::TypeId, marker::PhantomData};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -15,19 +15,15 @@ use rand::{
 use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, IsValidDivisor, MinMax, One, PartialCmp, Real, Zero},
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, FromColor, Hsl, Hwb, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsl, Hwb, RgbHue, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in

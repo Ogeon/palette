@@ -1,14 +1,10 @@
-use core::ops::AddAssign;
-
 use crate::{hues::OklabHueIter, white_point::D65};
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign,
-    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
+    num::{Arithmetics, PartialCmp, Real},
     stimulus::Stimulus,
-    Alpha, FromColor, Mix, MixAssign, OklabHue, Xyz,
+    FromColor, OklabHue, Xyz,
 };
 
 use super::Okhsl;

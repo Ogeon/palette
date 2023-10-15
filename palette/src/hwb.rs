@@ -1,6 +1,6 @@
 //! Types for the HWB color space.
 
-use core::{any::TypeId, marker::PhantomData, ops::AddAssign};
+use core::{any::TypeId, marker::PhantomData};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -12,18 +12,15 @@ use rand::{
 };
 
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::FromAngle,
     bool_mask::{HasBoolMask, LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, MinMax, One, PartialCmp, Real},
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, FromColor, Hsv, Lighten, LightenAssign, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsv, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in

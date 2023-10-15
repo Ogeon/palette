@@ -1,17 +1,11 @@
-use core::ops::{Add, AddAssign, Div, Mul, Neg};
+use core::ops::{Add, Neg};
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::LazySelect,
-    clamp, clamp_assign,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, One, PartialCmp, Real,
-        Trigonometry, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, One, PartialCmp, Real, Trigonometry, Zero},
     white_point::D65,
-    Alpha, FromColor, GetHue, Mix, MixAssign, OklabHue, Xyz,
+    FromColor, GetHue, OklabHue, Xyz,
 };
 
 use super::Oklab;

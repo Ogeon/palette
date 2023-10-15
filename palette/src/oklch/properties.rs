@@ -1,13 +1,9 @@
-use core::ops::AddAssign;
-
 use crate::{
-    angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
-    clamp, clamp_assign, clamp_min, clamp_min_assign,
     hues::OklabHueIter,
-    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
+    num::{Arithmetics, One, PartialCmp, Real, Zero},
     white_point::D65,
-    Alpha, FromColor, Mix, MixAssign, OklabHue, Xyz,
+    FromColor, OklabHue, Xyz,
 };
 
 use super::Oklch;

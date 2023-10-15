@@ -1,10 +1,6 @@
 //! Types for the HSL color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{AddAssign, Not},
-};
+use core::{any::TypeId, marker::PhantomData, ops::Not};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -19,19 +15,15 @@ use rand::{
 use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, IsValidDivisor, MinMax, One, PartialCmp, Real, Zero},
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, FromColor, Hsv, Mix, MixAssign, RgbHue, Xyz,
+    Alpha, FromColor, Hsv, RgbHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in

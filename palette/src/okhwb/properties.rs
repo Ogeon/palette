@@ -1,19 +1,10 @@
-use core::ops::AddAssign;
-
+use crate::hues::OklabHueIter;
+use crate::num::{Arithmetics, PartialCmp, Real};
 use crate::stimulus::Stimulus;
 use crate::white_point::D65;
 use crate::{
-    angle::{RealAngle, SignedAngle},
-    hues::OklabHueIter,
-};
-use crate::{
     bool_mask::{LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign, FromColor, Lighten, LightenAssign, Mix, MixAssign,
-    OklabHue, Xyz,
-};
-use crate::{
-    num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, PartialCmp, Real, Zero},
-    Alpha,
+    FromColor, OklabHue, Xyz,
 };
 
 use super::Okhwb;

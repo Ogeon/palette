@@ -59,16 +59,16 @@ macro_rules! impl_is_within_bounds_hwb {
 
 macro_rules! _clamp_value {
     ($value: expr, $min: expr) => {
-        clamp_min($value, $min)
+        crate::clamp_min($value, $min)
     };
     ($value: expr, $min: expr, $max: expr) => {
-        clamp($value, $min, $max)
+        crate::clamp($value, $min, $max)
     };
     (@assign $value: expr, $min: expr) => {
-        clamp_min_assign($value, $min)
+        crate::clamp_min_assign($value, $min)
     };
     (@assign $value: expr, $min: expr, $max: expr) => {
-        clamp_assign($value, $min, $max)
+        crate::clamp_assign($value, $min, $max)
     };
 }
 
@@ -142,8 +142,8 @@ macro_rules! impl_clamp_hwb {
         {
             #[inline]
             fn clamp(self) -> Self {
-                let mut whiteness = clamp_min(self.whiteness.clone(), Self::min_whiteness());
-                let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
+                let mut whiteness = crate::clamp_min(self.whiteness.clone(), Self::min_whiteness());
+                let mut blackness = crate::clamp_min(self.blackness.clone(), Self::min_blackness());
 
                 let sum = self.blackness + self.whiteness;
                 let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
@@ -167,8 +167,8 @@ macro_rules! impl_clamp_hwb {
         {
             #[inline]
             fn clamp_assign(&mut self) {
-                clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-                clamp_min_assign(&mut self.blackness, Self::min_blackness());
+                crate::clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
+                crate::clamp_min_assign(&mut self.blackness, Self::min_blackness());
 
                 let sum = self.blackness.clone() + self.whiteness.clone();
                 let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());

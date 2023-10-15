@@ -4,7 +4,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
     num::ParseIntError,
-    ops::{Add, AddAssign, Div, Mul},
+    ops::{Add, Div},
     str::FromStr,
 };
 
@@ -20,24 +20,22 @@ use rand::{
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
-    blend::{PreAlpha, Premultiply},
     bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
-    clamp, clamp_assign,
     color_difference::Wcag21RelativeContrast,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, matrix_map, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
-        self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
-        MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
+        Abs, Arithmetics, FromScalar, IsValidDivisor, MinMax, One, PartialCmp, Real, Recip, Round,
+        Trigonometry, Zero,
     },
     oklab::oklab_to_linear_srgb,
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
+    FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Oklab, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;
