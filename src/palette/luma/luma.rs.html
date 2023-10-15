@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/luma/luma.rs`."><title>luma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9bb858ba049f1f21.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0 (5680fa18f 2023-08-23)" data-channel="1.72.0" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../../static.files/source-script-106908c7a7964ba4.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/luma/luma.rs`."><title>luma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../palette/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1039,105 +1039,14 @@
 <a href="#1039" id="1039">1039</a>
 <a href="#1040" id="1040">1040</a>
 <a href="#1041" id="1041">1041</a>
-<a href="#1042" id="1042">1042</a>
-<a href="#1043" id="1043">1043</a>
-<a href="#1044" id="1044">1044</a>
-<a href="#1045" id="1045">1045</a>
-<a href="#1046" id="1046">1046</a>
-<a href="#1047" id="1047">1047</a>
-<a href="#1048" id="1048">1048</a>
-<a href="#1049" id="1049">1049</a>
-<a href="#1050" id="1050">1050</a>
-<a href="#1051" id="1051">1051</a>
-<a href="#1052" id="1052">1052</a>
-<a href="#1053" id="1053">1053</a>
-<a href="#1054" id="1054">1054</a>
-<a href="#1055" id="1055">1055</a>
-<a href="#1056" id="1056">1056</a>
-<a href="#1057" id="1057">1057</a>
-<a href="#1058" id="1058">1058</a>
-<a href="#1059" id="1059">1059</a>
-<a href="#1060" id="1060">1060</a>
-<a href="#1061" id="1061">1061</a>
-<a href="#1062" id="1062">1062</a>
-<a href="#1063" id="1063">1063</a>
-<a href="#1064" id="1064">1064</a>
-<a href="#1065" id="1065">1065</a>
-<a href="#1066" id="1066">1066</a>
-<a href="#1067" id="1067">1067</a>
-<a href="#1068" id="1068">1068</a>
-<a href="#1069" id="1069">1069</a>
-<a href="#1070" id="1070">1070</a>
-<a href="#1071" id="1071">1071</a>
-<a href="#1072" id="1072">1072</a>
-<a href="#1073" id="1073">1073</a>
-<a href="#1074" id="1074">1074</a>
-<a href="#1075" id="1075">1075</a>
-<a href="#1076" id="1076">1076</a>
-<a href="#1077" id="1077">1077</a>
-<a href="#1078" id="1078">1078</a>
-<a href="#1079" id="1079">1079</a>
-<a href="#1080" id="1080">1080</a>
-<a href="#1081" id="1081">1081</a>
-<a href="#1082" id="1082">1082</a>
-<a href="#1083" id="1083">1083</a>
-<a href="#1084" id="1084">1084</a>
-<a href="#1085" id="1085">1085</a>
-<a href="#1086" id="1086">1086</a>
-<a href="#1087" id="1087">1087</a>
-<a href="#1088" id="1088">1088</a>
-<a href="#1089" id="1089">1089</a>
-<a href="#1090" id="1090">1090</a>
-<a href="#1091" id="1091">1091</a>
-<a href="#1092" id="1092">1092</a>
-<a href="#1093" id="1093">1093</a>
-<a href="#1094" id="1094">1094</a>
-<a href="#1095" id="1095">1095</a>
-<a href="#1096" id="1096">1096</a>
-<a href="#1097" id="1097">1097</a>
-<a href="#1098" id="1098">1098</a>
-<a href="#1099" id="1099">1099</a>
-<a href="#1100" id="1100">1100</a>
-<a href="#1101" id="1101">1101</a>
-<a href="#1102" id="1102">1102</a>
-<a href="#1103" id="1103">1103</a>
-<a href="#1104" id="1104">1104</a>
-<a href="#1105" id="1105">1105</a>
-<a href="#1106" id="1106">1106</a>
-<a href="#1107" id="1107">1107</a>
-<a href="#1108" id="1108">1108</a>
-<a href="#1109" id="1109">1109</a>
-<a href="#1110" id="1110">1110</a>
-<a href="#1111" id="1111">1111</a>
-<a href="#1112" id="1112">1112</a>
-<a href="#1113" id="1113">1113</a>
-<a href="#1114" id="1114">1114</a>
-<a href="#1115" id="1115">1115</a>
-<a href="#1116" id="1116">1116</a>
-<a href="#1117" id="1117">1117</a>
-<a href="#1118" id="1118">1118</a>
-<a href="#1119" id="1119">1119</a>
-<a href="#1120" id="1120">1120</a>
-<a href="#1121" id="1121">1121</a>
-<a href="#1122" id="1122">1122</a>
-<a href="#1123" id="1123">1123</a>
-<a href="#1124" id="1124">1124</a>
-<a href="#1125" id="1125">1125</a>
-<a href="#1126" id="1126">1126</a>
-<a href="#1127" id="1127">1127</a>
-<a href="#1128" id="1128">1128</a>
-<a href="#1129" id="1129">1129</a>
-<a href="#1130" id="1130">1130</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, Div},
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
-</span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
 <span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
 </span><span class="kw">use </span>rand::{
     distributions::{
@@ -1148,22 +1057,16 @@
 };
 
 <span class="kw">use crate</span>::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
-    clamp, clamp_assign,
     color_difference::Wcag21RelativeContrast,
     convert::FromColorUnclamped,
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    num::{
-        <span class="self">self</span>, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, MinMax, PartialCmp, Real},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    Xyz, Yxy,
+    Alpha, IntoColor, Xyz, Yxy,
 };
 
 <span class="doccomment">/// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -1196,17 +1099,6 @@
     </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
     #[palette(unsafe_zero_sized)]
     </span><span class="kw">pub </span>standard: PhantomData&lt;S&gt;,
-}
-
-<span class="kw">impl</span>&lt;S, T: Copy&gt; Copy <span class="kw">for </span>Luma&lt;S, T&gt; {}
-
-<span class="kw">impl</span>&lt;S, T: Clone&gt; Clone <span class="kw">for </span>Luma&lt;S, T&gt; {
-    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Luma&lt;S, T&gt; {
-        Luma {
-            luma: <span class="self">self</span>.luma.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 <span class="kw">impl</span>&lt;S, T&gt; Luma&lt;S, T&gt; {
@@ -1424,17 +1316,6 @@
         color.into_linear()
     }
 }
-
-<span class="kw">impl</span>&lt;S, T&gt; PartialEq <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: PartialEq,
-{
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
-        <span class="self">self</span>.luma == other.luma
-    }
-}
-
-<span class="kw">impl</span>&lt;S, T&gt; Eq <span class="kw">for </span>Luma&lt;S, T&gt; <span class="kw">where </span>T: Eq {}
 
 <span class="comment">// Safety:
 //
@@ -1754,25 +1635,12 @@
     }
     <span class="kw">where </span>T: Stimulus
 }
-
-<span class="kw">impl</span>&lt;S, T&gt; Clamp <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: Stimulus + num::Clamp,
-{
-    <span class="attr">#[inline]
-    </span><span class="kw">fn </span>clamp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::new(clamp(<span class="self">self</span>.luma, <span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma()))
+<span class="macro">impl_clamp! </span>{
+    Luma&lt;S&gt; {
+        luma =&gt; [<span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma()]
     }
-}
-
-<span class="kw">impl</span>&lt;S, T&gt; ClampAssign <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: Stimulus + num::ClampAssign,
-{
-    <span class="attr">#[inline]
-    </span><span class="kw">fn </span>clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        clamp_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>.luma, <span class="self">Self</span>::min_luma(), <span class="self">Self</span>::max_luma());
-    }
+    other {standard}
+    <span class="kw">where </span>T: Stimulus
 }
 
 <span class="macro">impl_mix!</span>(Luma&lt;S&gt;);
@@ -1798,10 +1666,10 @@
     }
 }
 
-<span class="macro">impl_color_add!</span>(Luma&lt;S, T&gt;, [luma], standard);
-<span class="macro">impl_color_sub!</span>(Luma&lt;S, T&gt;, [luma], standard);
-<span class="macro">impl_color_mul!</span>(Luma&lt;S, T&gt;, [luma], standard);
-<span class="macro">impl_color_div!</span>(Luma&lt;S, T&gt;, [luma], standard);
+<span class="macro">impl_color_add!</span>(Luma&lt;S&gt;, [luma], standard);
+<span class="macro">impl_color_sub!</span>(Luma&lt;S&gt;, [luma], standard);
+<span class="macro">impl_color_mul!</span>(Luma&lt;S&gt;, [luma], standard);
+<span class="macro">impl_color_div!</span>(Luma&lt;S&gt;, [luma], standard);
 
 <span class="macro">impl_array_casts!</span>(Luma&lt;S, T&gt;, [T; <span class="number">1</span>]);
 
@@ -1960,54 +1828,8 @@
 <span class="macro">impl_simd_array_conversion!</span>(Luma&lt;S&gt;, [luma], standard);
 <span class="macro">impl_struct_of_array_traits!</span>(Luma&lt;S&gt;, [luma], standard);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; AbsDiffEq <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: AbsDiffEq,
-{
-    <span class="kw">type </span>Epsilon = T::Epsilon;
-
-    <span class="kw">fn </span>default_epsilon() -&gt; <span class="self">Self</span>::Epsilon {
-        T::default_epsilon()
-    }
-
-    <span class="kw">fn </span>abs_diff_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: <span class="self">Self</span>::Epsilon) -&gt; bool {
-        <span class="self">self</span>.luma.abs_diff_eq(<span class="kw-2">&amp;</span>other.luma, epsilon)
-    }
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; RelativeEq <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: RelativeEq,
-{
-    <span class="kw">fn </span>default_max_relative() -&gt; <span class="self">Self</span>::Epsilon {
-        T::default_max_relative()
-    }
-
-    <span class="kw">fn </span>relative_eq(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        other: <span class="kw-2">&amp;</span><span class="self">Self</span>,
-        epsilon: <span class="self">Self</span>::Epsilon,
-        max_relative: <span class="self">Self</span>::Epsilon,
-    ) -&gt; bool {
-        <span class="self">self</span>.luma.relative_eq(<span class="kw-2">&amp;</span>other.luma, epsilon, max_relative)
-    }
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; UlpsEq <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: UlpsEq,
-{
-    <span class="kw">fn </span>default_max_ulps() -&gt; u32 {
-        T::default_max_ulps()
-    }
-
-    <span class="kw">fn </span>ulps_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>, epsilon: <span class="self">Self</span>::Epsilon, max_ulps: u32) -&gt; bool {
-        <span class="self">self</span>.luma.ulps_eq(<span class="kw-2">&amp;</span>other.luma, epsilon, max_ulps)
-    }
-}
+<span class="macro">impl_copy_clone!</span>(Luma&lt;S&gt;, [luma], standard);
+<span class="macro">impl_eq!</span>(Luma&lt;S&gt;, [luma]);
 
 <span class="kw">impl</span>&lt;S, T&gt; fmt::LowerHex <span class="kw">for </span>Luma&lt;S, T&gt;
 <span class="kw">where
