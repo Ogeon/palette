@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, Mul, Neg};
 
 use crate::{
     angle::RealAngle,
@@ -51,10 +51,10 @@ where
     }
 }
 
-impl_color_add!(Oklab<T>, [l, a, b]);
-impl_color_sub!(Oklab<T>, [l, a, b]);
-impl_color_mul!(Oklab<T>, [l, a, b]);
-impl_color_div!(Oklab<T>, [l, a, b]);
+impl_color_add!(Oklab, [l, a, b]);
+impl_color_sub!(Oklab, [l, a, b]);
+impl_color_mul!(Oklab, [l, a, b]);
+impl_color_div!(Oklab, [l, a, b]);
 
 impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);

@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Sub, SubAssign},
+    ops::{AddAssign, BitAnd, BitOr},
 };
 
 #[cfg(feature = "random")]
@@ -324,8 +324,8 @@ where
     }
 }
 
-impl_color_add!(Lch<Wp, T>, [l, chroma, hue], white_point);
-impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
+impl_color_add!(Lch<Wp>, [l, chroma, hue], white_point);
+impl_color_sub!(Lch<Wp>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lch<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Lch<Wp>, [l, chroma], white_point);

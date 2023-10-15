@@ -3,7 +3,7 @@ use core::{
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, Mul},
 };
 
 #[cfg(feature = "random")]
@@ -630,10 +630,10 @@ where
     }
 }
 
-impl_color_add!(Luma<S, T>, [luma], standard);
-impl_color_sub!(Luma<S, T>, [luma], standard);
-impl_color_mul!(Luma<S, T>, [luma], standard);
-impl_color_div!(Luma<S, T>, [luma], standard);
+impl_color_add!(Luma<S>, [luma], standard);
+impl_color_sub!(Luma<S>, [luma], standard);
+impl_color_mul!(Luma<S>, [luma], standard);
+impl_color_div!(Luma<S>, [luma], standard);
 
 impl_array_casts!(Luma<S, T>, [T; 1]);
 

@@ -1,9 +1,6 @@
 //! Types for the HSLuv color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
-};
+use core::{marker::PhantomData, ops::AddAssign};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -248,8 +245,8 @@ where
     }
 }
 
-impl_color_add!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
-impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
+impl_color_add!(Hsluv<Wp>, [hue, saturation, l], white_point);
+impl_color_sub!(Hsluv<Wp>, [hue, saturation, l], white_point);
 
 impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsluv<Wp>, [saturation, l], white_point);

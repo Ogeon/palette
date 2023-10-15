@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::AddAssign;
 
 use crate::{
     angle::{RealAngle, SignedAngle},
@@ -32,8 +32,8 @@ impl_mix_hue!(Oklch { l, chroma });
 impl_lighten!(Oklch increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} where T: Zero + One);
 impl_hue_ops!(Oklch, OklabHue);
 
-impl_color_add!(Oklch<T>, [l, chroma, hue]);
-impl_color_sub!(Oklch<T>, [l, chroma, hue]);
+impl_color_add!(Oklch, [l, chroma, hue]);
+impl_color_sub!(Oklch, [l, chroma, hue]);
 
 impl_array_casts!(Oklch<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Oklch, [l, chroma]);

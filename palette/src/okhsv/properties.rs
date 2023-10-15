@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::AddAssign;
 
 use crate::num::{self, Arithmetics, FromScalarArray, IntoScalarArray, One, Real, Zero};
 use crate::{angle::SignedAngle, hues::OklabHueIter};
@@ -30,8 +30,8 @@ impl_lighten!(Okhsv increase {value => [Self::min_value(), Self::max_value()]} o
 impl_saturate!(Okhsv increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, value}  where T:Real+ Stimulus);
 impl_hue_ops!(Okhsv, OklabHue);
 
-impl_color_add!(Okhsv<T>, [hue, saturation, value]);
-impl_color_sub!(Okhsv<T>, [hue, saturation, value]);
+impl_color_add!(Okhsv, [hue, saturation, value]);
+impl_color_sub!(Okhsv, [hue, saturation, value]);
 
 impl_array_casts!(Okhsv<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhsv, [saturation, value]);

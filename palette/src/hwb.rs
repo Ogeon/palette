@@ -1,10 +1,6 @@
 //! Types for the HWB color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
-};
+use core::{any::TypeId, marker::PhantomData, ops::AddAssign};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -352,8 +348,8 @@ where
     }
 }
 
-impl_color_add!(Hwb<S, T>, [hue, whiteness, blackness], standard);
-impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
+impl_color_add!(Hwb<S>, [hue, whiteness, blackness], standard);
+impl_color_sub!(Hwb<S>, [hue, whiteness, blackness], standard);
 
 impl_array_casts!(Hwb<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);

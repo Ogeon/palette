@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::AddAssign;
 
 use crate::{hues::OklabHueIter, white_point::D65};
 
@@ -37,8 +37,8 @@ impl_lighten!(Okhsl increase {lightness => [Self::min_lightness(), Self::max_lig
 impl_saturate!(Okhsl increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, lightness}  where T: Stimulus);
 impl_hue_ops!(Okhsl, OklabHue);
 
-impl_color_add!(Okhsl<T>, [hue, saturation, lightness]);
-impl_color_sub!(Okhsl<T>, [hue, saturation, lightness]);
+impl_color_add!(Okhsl, [hue, saturation, lightness]);
+impl_color_sub!(Okhsl, [hue, saturation, lightness]);
 
 impl_array_casts!(Okhsl<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhsl, [saturation, lightness]);

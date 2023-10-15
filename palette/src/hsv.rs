@@ -1,10 +1,6 @@
 //! Types for the HSV color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{Add, AddAssign, Sub, SubAssign},
-};
+use core::{any::TypeId, marker::PhantomData, ops::AddAssign};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -533,8 +529,8 @@ where
     }
 }
 
-impl_color_add!(Hsv<S, T>, [hue, saturation, value], standard);
-impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
+impl_color_add!(Hsv<S>, [hue, saturation, value], standard);
+impl_color_sub!(Hsv<S>, [hue, saturation, value], standard);
 
 impl_array_casts!(Hsv<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsv<S>, [saturation, value], standard);

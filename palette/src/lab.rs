@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, BitAnd, BitOr, Div, Mul, Neg, Sub},
 };
 
 #[cfg(feature = "random")]
@@ -371,10 +371,10 @@ where
     }
 }
 
-impl_color_add!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_sub!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_mul!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_div!(Lab<Wp, T>, [l, a, b], white_point);
+impl_color_add!(Lab<Wp>, [l, a, b], white_point);
+impl_color_sub!(Lab<Wp>, [l, a, b], white_point);
+impl_color_mul!(Lab<Wp>, [l, a, b], white_point);
+impl_color_div!(Lab<Wp>, [l, a, b], white_point);
 
 impl_array_casts!(Lab<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Lab<Wp>, [l, a, b], white_point);

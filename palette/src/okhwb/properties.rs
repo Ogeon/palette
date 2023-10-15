@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::AddAssign;
 
 use crate::stimulus::Stimulus;
 use crate::white_point::D65;
@@ -28,8 +28,8 @@ impl_mix_hue!(Okhwb {
 impl_lighten_hwb!(Okhwb where T: Stimulus);
 impl_hue_ops!(Okhwb, OklabHue);
 
-impl_color_add!(Okhwb<T>, [hue, whiteness, blackness]);
-impl_color_sub!(Okhwb<T>, [hue, whiteness, blackness]);
+impl_color_add!(Okhwb, [hue, whiteness, blackness]);
+impl_color_sub!(Okhwb, [hue, whiteness, blackness]);
 
 impl_array_casts!(Okhwb<T>, [T; 3]);
 impl_simd_array_conversion_hue!(Okhwb, [whiteness, blackness]);

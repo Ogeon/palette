@@ -4,7 +4,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
     num::ParseIntError,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, Mul},
     str::FromStr,
 };
 
@@ -999,10 +999,10 @@ where
     }
 }
 
-impl_color_add!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_sub!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_mul!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_div!(Rgb<S, T>, [red, green, blue], standard);
+impl_color_add!(Rgb<S>, [red, green, blue], standard);
+impl_color_sub!(Rgb<S>, [red, green, blue], standard);
+impl_color_mul!(Rgb<S>, [red, green, blue], standard);
+impl_color_div!(Rgb<S>, [red, green, blue], standard);
 
 impl<S, T> From<(T, T, T)> for Rgb<S, T> {
     fn from(components: (T, T, T)) -> Self {

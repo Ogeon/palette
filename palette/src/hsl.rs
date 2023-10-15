@@ -3,7 +3,7 @@
 use core::{
     any::TypeId,
     marker::PhantomData,
-    ops::{Add, AddAssign, Not, Sub, SubAssign},
+    ops::{AddAssign, Not},
 };
 
 #[cfg(feature = "random")]
@@ -526,8 +526,8 @@ where
     }
 }
 
-impl_color_add!(Hsl<S, T>, [hue, saturation, lightness], standard);
-impl_color_sub!(Hsl<S, T>, [hue, saturation, lightness], standard);
+impl_color_add!(Hsl<S>, [hue, saturation, lightness], standard);
+impl_color_sub!(Hsl<S>, [hue, saturation, lightness], standard);
 
 impl_array_casts!(Hsl<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsl<S>, [saturation, lightness], standard);

@@ -2,7 +2,7 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{AddAssign, Div, Mul},
 };
 
 #[cfg(feature = "random")]
@@ -300,10 +300,10 @@ where
     }
 }
 
-impl_color_add!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_sub!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_mul!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
+impl_color_add!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_sub!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_mul!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_div!(Yxy<Wp>, [x, y, luma], white_point);
 
 impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Yxy<Wp>, [x, y, luma], white_point);
