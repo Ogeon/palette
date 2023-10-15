@@ -1,13 +1,7 @@
 //! Types for the HSV color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
-};
+use core::{any::TypeId, marker::PhantomData};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -21,21 +15,15 @@ use rand::{
 use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, IsValidDivisor, MinMax, One, PartialCmp, Real, Zero},
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsl, Hwb, IsWithinBounds, Lighten, LightenAssign,
-    Mix, MixAssign, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue,
-    Xyz,
+    Alpha, FromColor, Hsl, Hwb, RgbHue, Xyz,
 };
 
 /// Linear HSV with an alpha component. See the [`Hsva` implementation in
@@ -94,22 +82,6 @@ pub struct Hsv<S = Srgb, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
-}
-
-impl<S, T> Copy for Hsv<S, T> where T: Copy {}
-
-impl<S, T> Clone for Hsv<S, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hsv<S, T> {
-        Hsv {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            value: self.value.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 impl<T> Hsv<Srgb, T> {
@@ -522,101 +494,19 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Hsv<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.value, Self::min_value(), Self::max_value()),
-        )
+impl_clamp! {
+    Hsv<S> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        value => [Self::min_value(), Self::max_value()]
     }
-}
-
-impl<S, T> ClampAssign for Hsv<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(&mut self.value, Self::min_value(), Self::max_value());
-    }
+    other {hue, standard}
+    where T: Stimulus
 }
 
 impl_mix_hue!(Hsv<S> {saturation, value} phantom: standard);
 impl_lighten!(Hsv<S> increase {value => [Self::min_value(), Self::max_value()]} other {hue, saturation} phantom: standard where T: Stimulus);
 impl_saturate!(Hsv<S> increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, value} phantom: standard where T: Stimulus);
-
-impl<S, T> GetHue for Hsv<S, T>
-where
-    T: Clone,
-{
-    type Hue = RgbHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> RgbHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<S, T, H> WithHue<H> for Hsv<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<S, T, H> SetHue<H> for Hsv<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<S, T> ShiftHue for Hsv<S, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<S, T> ShiftHueAssign for Hsv<S, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Hsv<S>, RgbHue);
 
 impl<S, T> HasBoolMask for Hsv<S, T>
 where
@@ -635,14 +525,15 @@ where
     }
 }
 
-impl_color_add!(Hsv<S, T>, [hue, saturation, value], standard);
-impl_color_sub!(Hsv<S, T>, [hue, saturation, value], standard);
+impl_color_add!(Hsv<S>, [hue, saturation, value], standard);
+impl_color_sub!(Hsv<S>, [hue, saturation, value], standard);
 
 impl_array_casts!(Hsv<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsv<S>, [saturation, value], standard);
 impl_struct_of_array_traits_hue!(Hsv<S>, RgbHueIter, [saturation, value], standard);
 
 impl_eq_hue!(Hsv<S>, RgbHue, [hue, saturation, value]);
+impl_copy_clone!(Hsv<S>, [hue, saturation, value], standard);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hsv<S, T>

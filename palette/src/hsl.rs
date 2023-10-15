@@ -1,13 +1,7 @@
 //! Types for the HSL color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Not, Sub, SubAssign},
-};
+use core::{any::TypeId, marker::PhantomData, ops::Not};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -21,20 +15,15 @@ use rand::{
 use crate::num::{Cbrt, Powi, Sqrt};
 
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, IsValidDivisor, MinMax, One, PartialCmp, Real, Zero},
     rgb::{Rgb, RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    Alpha, FromColor, Hsv, RgbHue, Xyz,
 };
 
 /// Linear HSL with an alpha component. See the [`Hsla` implementation in
@@ -94,19 +83,6 @@ pub struct Hsl<S = Srgb, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
-}
-
-impl<S, T: Copy> Copy for Hsl<S, T> {}
-
-impl<S, T: Clone> Clone for Hsl<S, T> {
-    fn clone(&self) -> Hsl<S, T> {
-        Hsl {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            lightness: self.lightness.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 impl<T> Hsl<Srgb, T> {
@@ -507,105 +483,19 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Hsl<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.lightness, Self::min_lightness(), Self::max_lightness()),
-        )
+impl_clamp! {
+    Hsl<S> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        lightness => [Self::min_lightness(), Self::max_lightness()]
     }
-}
-
-impl<S, T> ClampAssign for Hsl<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(
-            &mut self.lightness,
-            Self::min_lightness(),
-            Self::max_lightness(),
-        );
-    }
+    other {hue, standard}
+    where T: Stimulus
 }
 
 impl_mix_hue!(Hsl<S> {saturation, lightness} phantom: standard);
 impl_lighten!(Hsl<S> increase {lightness => [Self::min_lightness(), Self::max_lightness()]} other {hue, saturation} phantom: standard where T: Stimulus);
 impl_saturate!(Hsl<S> increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, lightness} phantom: standard where T: Stimulus);
-
-impl<S, T> GetHue for Hsl<S, T>
-where
-    T: Clone,
-{
-    type Hue = RgbHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> RgbHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<S, T, H> WithHue<H> for Hsl<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<S, T, H> SetHue<H> for Hsl<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<S, T> ShiftHue for Hsl<S, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<S, T> ShiftHueAssign for Hsl<S, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Hsl<S>, RgbHue);
 
 impl<S, T> HasBoolMask for Hsl<S, T>
 where
@@ -628,14 +518,15 @@ where
     }
 }
 
-impl_color_add!(Hsl<S, T>, [hue, saturation, lightness], standard);
-impl_color_sub!(Hsl<S, T>, [hue, saturation, lightness], standard);
+impl_color_add!(Hsl<S>, [hue, saturation, lightness], standard);
+impl_color_sub!(Hsl<S>, [hue, saturation, lightness], standard);
 
 impl_array_casts!(Hsl<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsl<S>, [saturation, lightness], standard);
 impl_struct_of_array_traits_hue!(Hsl<S>, RgbHueIter, [saturation, lightness], standard);
 
 impl_eq_hue!(Hsl<S>, RgbHue, [hue, saturation, lightness]);
+impl_copy_clone!(Hsl<S>, [hue, saturation, lightness], standard);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hsl<S, T>

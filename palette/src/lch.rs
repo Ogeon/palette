@@ -2,11 +2,9 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Sub, SubAssign},
+    ops::{BitAnd, BitOr},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -17,20 +15,14 @@ use rand::{
 };
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign, clamp_min, clamp_min_assign,
     color_difference::{get_ciede2000_difference, Ciede2000, DeltaE, ImprovedDeltaE, LabColorDiff},
     convert::{FromColorUnclamped, IntoColorUnclamped},
     hues::LabHueIter,
-    num::{
-        self, Abs, Arithmetics, Exp, FromScalarArray, Hypot, IntoScalarArray, MinMax, One,
-        PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero,
-    },
+    num::{Abs, Arithmetics, Exp, Hypot, One, PartialCmp, Powi, Real, Sqrt, Trigonometry, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lab, LabHue, Lighten,
-    LightenAssign, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    Alpha, FromColor, GetHue, Lab, LabHue, Xyz,
 };
 
 /// CIE L\*C\*h° with an alpha component. See the [`Lcha` implementation in
@@ -73,22 +65,6 @@ pub struct Lch<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Lch<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lch<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lch<Wp, T> {
-        Lch {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Lch<Wp, T> {
@@ -229,105 +205,26 @@ impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
     }
 }
 
-impl<Wp, T> IsWithinBounds for Lch<Wp, T>
-where
-    T: Zero + Real + PartialCmp + HasBoolMask,
-    T::Mask: BitAnd<Output = T::Mask>,
-{
-    #[inline]
-    fn is_within_bounds(&self) -> T::Mask {
-        self.l.gt_eq(&Self::min_l())
-            & self.l.lt_eq(&Self::max_l())
-            & self.chroma.gt_eq(&Self::min_chroma())
+impl_is_within_bounds! {
+    Lch<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), None]
     }
+    where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lch<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp_min(self.chroma, Self::min_chroma()),
-            self.hue,
-        )
+impl_clamp! {
+    Lch<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lch<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_min_assign(&mut self.chroma, Self::min_chroma());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Lch<Wp> {l, chroma} phantom: white_point);
 impl_lighten!(Lch<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} phantom: white_point);
 impl_saturate!(Lch<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} phantom: white_point);
-
-impl<Wp, T> GetHue for Lch<Wp, T>
-where
-    T: Clone,
-{
-    type Hue = LabHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> LabHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<Wp, T, H> WithHue<H> for Lch<Wp, T>
-where
-    H: Into<LabHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<Wp, T, H> SetHue<H> for Lch<Wp, T>
-where
-    H: Into<LabHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<Wp, T> ShiftHue for Lch<Wp, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<Wp, T> ShiftHueAssign for Lch<Wp, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Lch<Wp>, LabHue);
 
 impl<Wp, T> DeltaE for Lch<Wp, T>
 where
@@ -423,14 +320,15 @@ where
     }
 }
 
-impl_color_add!(Lch<Wp, T>, [l, chroma, hue], white_point);
-impl_color_sub!(Lch<Wp, T>, [l, chroma, hue], white_point);
+impl_color_add!(Lch<Wp>, [l, chroma, hue], white_point);
+impl_color_sub!(Lch<Wp>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lch<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Lch<Wp>, [l, chroma], white_point);
 impl_struct_of_array_traits_hue!(Lch<Wp>, LabHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lch<Wp>, LabHue, [l, chroma, hue]);
+impl_copy_clone!(Lch<Wp>, [l, chroma, hue], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lch<Wp, T>

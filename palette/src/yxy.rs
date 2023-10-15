@@ -1,12 +1,7 @@
 //! Types for the CIE 1931 Yxy (xyY) color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
-};
+use core::marker::PhantomData;
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -17,19 +12,13 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, IsValidDivisor, One, PartialCmp, Real, Zero},
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lighten, LightenAssign, Luma, Mix, MixAssign, Xyz,
+    Alpha, Luma, Xyz,
 };
 
 /// CIE 1931 Yxy (xyY) with an alpha component. See the [`Yxya` implementation
@@ -72,22 +61,6 @@ pub struct Yxy<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Yxy<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Yxy<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Yxy<Wp, T> {
-        Yxy {
-            x: self.x.clone(),
-            y: self.y.clone(),
-            luma: self.luma.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Yxy<Wp, T> {
@@ -278,31 +251,14 @@ impl_is_within_bounds! {
     }
     where T: Zero + One
 }
-
-impl<Wp, T> Clamp for Yxy<Wp, T>
-where
-    T: Zero + One + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.x, Self::min_x(), Self::max_x()),
-            clamp(self.y, Self::min_y(), Self::max_y()),
-            clamp(self.luma, Self::min_luma(), Self::max_luma()),
-        )
+impl_clamp! {
+    Yxy<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        luma => [Self::min_luma(), Self::max_luma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Yxy<Wp, T>
-where
-    T: Zero + One + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
-        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
-        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
-    }
+    other {white_point}
+    where T: Zero + One
 }
 
 impl_mix!(Yxy<Wp>);
@@ -335,16 +291,17 @@ where
     }
 }
 
-impl_color_add!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_sub!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_mul!(Yxy<Wp, T>, [x, y, luma], white_point);
-impl_color_div!(Yxy<Wp, T>, [x, y, luma], white_point);
+impl_color_add!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_sub!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_mul!(Yxy<Wp>, [x, y, luma], white_point);
+impl_color_div!(Yxy<Wp>, [x, y, luma], white_point);
 
 impl_array_casts!(Yxy<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Yxy<Wp>, [x, y, luma], white_point);
 impl_struct_of_array_traits!(Yxy<Wp>, [x, y, luma], white_point);
 
-impl_eq!(Yxy<Wp>, [y, x, luma]);
+impl_eq!(Yxy<Wp>, [x, y, luma]);
+impl_copy_clone!(Yxy<Wp>, [x, y, luma], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Yxy<Wp, T>

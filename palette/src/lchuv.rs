@@ -1,12 +1,7 @@
 //! Types for the CIE L\*C\*uv h°uv color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Mul, Sub, SubAssign},
-};
+use core::{marker::PhantomData, ops::Mul};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -20,20 +15,14 @@ use rand::{
 use crate::num::Sqrt;
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{
-        self, Arithmetics, FromScalarArray, Hypot, IntoScalarArray, MinMax, One, PartialCmp, Powi,
-        Real, Zero,
-    },
+    num::{Arithmetics, Hypot, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsluv, IsWithinBounds, Lighten, LightenAssign,
-    Luv, LuvHue, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign,
-    WithHue, Xyz,
+    Alpha, FromColor, GetHue, Hsluv, Luv, LuvHue, Xyz,
 };
 
 /// CIE L\*C\*uv h°uv with an alpha component. See the [`Lchuva` implementation in
@@ -77,22 +66,6 @@ pub struct Lchuv<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Lchuv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lchuv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: self.l.clone(),
-            chroma: self.chroma.clone(),
-            hue: self.hue.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Lchuv<Wp, T> {
@@ -250,93 +223,19 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lchuv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.chroma, Self::min_chroma(), Self::max_chroma()),
-            self.hue,
-        )
+impl_clamp! {
+    Lchuv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        chroma => [Self::min_chroma(), Self::max_chroma()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lchuv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.chroma, Self::min_chroma(), Self::max_chroma());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Lchuv<Wp> {l, chroma} phantom: white_point);
 impl_lighten!(Lchuv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, chroma} phantom: white_point);
 impl_saturate!(Lchuv<Wp> increase {chroma => [Self::min_chroma(), Self::max_chroma()]} other {hue, l} phantom: white_point);
-
-impl<Wp, T> GetHue for Lchuv<Wp, T>
-where
-    T: Clone,
-{
-    type Hue = LuvHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> LuvHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<Wp, T, H> WithHue<H> for Lchuv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<Wp, T, H> SetHue<H> for Lchuv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<Wp, T> ShiftHue for Lchuv<Wp, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<Wp, T> ShiftHueAssign for Lchuv<Wp, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Lchuv<Wp>, LuvHue);
 
 impl<Wp, T> HasBoolMask for Lchuv<Wp, T>
 where
@@ -355,14 +254,15 @@ where
     }
 }
 
-impl_color_add!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
-impl_color_sub!(Lchuv<Wp, T>, [l, chroma, hue], white_point);
+impl_color_add!(Lchuv<Wp>, [l, chroma, hue], white_point);
+impl_color_sub!(Lchuv<Wp>, [l, chroma, hue], white_point);
 
 impl_array_casts!(Lchuv<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Lchuv<Wp>, [l, chroma], white_point);
 impl_struct_of_array_traits_hue!(Lchuv<Wp>, LuvHueIter, [l, chroma], white_point);
 
 impl_eq_hue!(Lchuv<Wp>, LuvHue, [l, chroma, hue]);
+impl_copy_clone!(Lchuv<Wp>, [l, chroma, hue], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lchuv<Wp, T>

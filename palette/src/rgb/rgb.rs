@@ -4,12 +4,10 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
     num::ParseIntError,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, Div},
     str::FromStr,
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -22,25 +20,22 @@ use rand::{
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
-    blend::{PreAlpha, Premultiply},
     bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
-    clamp, clamp_assign,
     color_difference::Wcag21RelativeContrast,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
     matrix::{matrix_inverse, matrix_map, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
     num::{
-        self, Abs, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor,
-        MinMax, One, PartialCmp, Real, Recip, Round, Trigonometry, Zero,
+        Abs, Arithmetics, FromScalar, IsValidDivisor, MinMax, One, PartialCmp, Real, Recip, Round,
+        Trigonometry, Zero,
     },
     oklab::oklab_to_linear_srgb,
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Clamp, ClampAssign, FromColor, GetHue, Hsl, Hsv, IntoColor, IsWithinBounds, Lighten,
-    LightenAssign, Luma, Mix, MixAssign, Oklab, RgbHue, Xyz, Yxy,
+    FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Oklab, RgbHue, Xyz, Yxy,
 };
 
 use super::Primaries;
@@ -205,19 +200,6 @@ pub struct Rgb<S = Srgb, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
-}
-
-impl<S, T: Copy> Copy for Rgb<S, T> {}
-
-impl<S, T: Clone> Clone for Rgb<S, T> {
-    fn clone(&self) -> Rgb<S, T> {
-        Rgb {
-            red: self.red.clone(),
-            green: self.green.clone(),
-            blue: self.blue.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 impl<S, T> Rgb<S, T> {
@@ -955,31 +937,14 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Rgb<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.red, Self::min_red(), Self::max_red()),
-            clamp(self.green, Self::min_green(), Self::max_green()),
-            clamp(self.blue, Self::min_blue(), Self::max_blue()),
-        )
+impl_clamp! {
+    Rgb<S> {
+        red => [Self::min_red(), Self::max_red()],
+        green => [Self::min_green(), Self::max_green()],
+        blue => [Self::min_blue(), Self::max_blue()]
     }
-}
-
-impl<S, T> ClampAssign for Rgb<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.red, Self::min_red(), Self::max_red());
-        clamp_assign(&mut self.green, Self::min_green(), Self::max_green());
-        clamp_assign(&mut self.blue, Self::min_blue(), Self::max_blue());
-    }
+    other {standard}
+    where T: Stimulus
 }
 
 impl_mix!(Rgb<S>);
@@ -1032,10 +997,10 @@ where
     }
 }
 
-impl_color_add!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_sub!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_mul!(Rgb<S, T>, [red, green, blue], standard);
-impl_color_div!(Rgb<S, T>, [red, green, blue], standard);
+impl_color_add!(Rgb<S>, [red, green, blue], standard);
+impl_color_sub!(Rgb<S>, [red, green, blue], standard);
+impl_color_mul!(Rgb<S>, [red, green, blue], standard);
+impl_color_div!(Rgb<S>, [red, green, blue], standard);
 
 impl<S, T> From<(T, T, T)> for Rgb<S, T> {
     fn from(components: (T, T, T)) -> Self {
@@ -1066,6 +1031,7 @@ impl_simd_array_conversion!(Rgb<S>, [red, green, blue], standard);
 impl_struct_of_array_traits!(Rgb<S>, [red, green, blue], standard);
 
 impl_eq!(Rgb<S>, [red, green, blue]);
+impl_copy_clone!(Rgb<S>, [red, green, blue], standard);
 
 impl<S, T> fmt::LowerHex for Rgb<S, T>
 where

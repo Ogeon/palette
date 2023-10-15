@@ -14,7 +14,7 @@ macro_rules! impl_euclidean_distance {
     ) => {
         impl<$($ty_param,)* T> crate::color_difference::EuclideanDistance for $ty<$($ty_param,)* T>
         where
-            T: self::num::Real + core::ops::Sub<T, Output=T> + core::ops::Add<T, Output=T> + core::ops::Mul<T, Output=T> + Clone,
+            T: crate::num::Real + core::ops::Sub<T, Output=T> + core::ops::Add<T, Output=T> + core::ops::Mul<T, Output=T> + Clone,
             $($($where)+)?
         {
             type Scalar = T;
@@ -46,7 +46,7 @@ macro_rules! impl_hyab {
     ) => {
         impl<$($ty_param,)* T> crate::color_difference::HyAb for $ty<$($ty_param,)* T>
         where
-            T: self::num::Real + self::num::Abs + self::num::Sqrt + core::ops::Sub<T, Output=T> + core::ops::Add<T, Output=T> + core::ops::Mul<T, Output=T> + Clone,
+            T: crate::num::Real + crate::num::Abs + crate::num::Sqrt + core::ops::Sub<T, Output=T> + core::ops::Add<T, Output=T> + core::ops::Mul<T, Output=T> + Clone,
             $($($where)+)?
         {
             type Scalar = T;

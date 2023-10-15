@@ -2,11 +2,12 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, BitOr, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{Add, BitAnd, BitOr, Mul, Neg},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use core::ops::Sub;
+
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -18,22 +19,18 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     color_difference::{
         get_ciede2000_difference, Ciede2000, DeltaE, EuclideanDistance, ImprovedDeltaE,
         LabColorDiff,
     },
     convert::FromColorUnclamped,
     num::{
-        self, Abs, Arithmetics, Cbrt, Exp, FromScalarArray, Hypot, IntoScalarArray, IsValidDivisor,
-        MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt, Trigonometry, Zero,
+        Abs, Arithmetics, Cbrt, Exp, Hypot, MinMax, One, PartialCmp, Powf, Powi, Real, Sqrt,
+        Trigonometry, Zero,
     },
-    stimulus::Stimulus,
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, LabHue, Lch, Lighten,
-    LightenAssign, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, LabHue, Lch, Xyz,
 };
 
 /// CIE L\*a\*b\* (CIELAB) with an alpha component. See the [`Laba`
@@ -82,22 +79,6 @@ pub struct Lab<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Lab<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Lab<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Lab<Wp, T> {
-        Lab {
-            l: self.l.clone(),
-            a: self.a.clone(),
-            b: self.b.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Lab<Wp, T> {
@@ -269,31 +250,14 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Lab<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.a, Self::min_a(), Self::max_a()),
-            clamp(self.b, Self::min_b(), Self::max_b()),
-        )
+impl_clamp! {
+    Lab<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        a => [Self::min_a(), Self::max_a()],
+        b => [Self::min_b(), Self::max_b()]
     }
-}
-
-impl<Wp, T> ClampAssign for Lab<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.a, Self::min_a(), Self::max_a());
-        clamp_assign(&mut self.b, Self::min_b(), Self::max_b());
-    }
+    other {white_point}
+    where T: Real + Zero
 }
 
 impl_mix!(Lab<Wp>);
@@ -407,16 +371,17 @@ where
     }
 }
 
-impl_color_add!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_sub!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_mul!(Lab<Wp, T>, [l, a, b], white_point);
-impl_color_div!(Lab<Wp, T>, [l, a, b], white_point);
+impl_color_add!(Lab<Wp>, [l, a, b], white_point);
+impl_color_sub!(Lab<Wp>, [l, a, b], white_point);
+impl_color_mul!(Lab<Wp>, [l, a, b], white_point);
+impl_color_div!(Lab<Wp>, [l, a, b], white_point);
 
 impl_array_casts!(Lab<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Lab<Wp>, [l, a, b], white_point);
 impl_struct_of_array_traits!(Lab<Wp>, [l, a, b], white_point);
 
 impl_eq!(Lab<Wp>, [l, a, b]);
+impl_copy_clone!(Lab<Wp>, [l, a, b], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Lab<Wp, T>

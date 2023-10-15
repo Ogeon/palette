@@ -1,21 +1,11 @@
-use core::ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
-
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use core::ops::{Add, Neg};
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::LazySelect,
-    clamp, clamp_assign,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Trigonometry, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, One, PartialCmp, Real, Trigonometry, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, OklabHue, Xyz,
+    FromColor, GetHue, OklabHue, Xyz,
 };
 
 use super::Oklab;
@@ -26,28 +16,12 @@ impl_is_within_bounds! {
     }
     where T: Zero + One
 }
-
-impl<T> Clamp for Oklab<T>
-where
-    T: num::Clamp + Zero + One,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        // lightness is limited and thus can be clamped.
-        let l = clamp(self.l, Self::min_l(), Self::max_l());
-        // a and b are unlimited
-        Self::new(l, self.a, self.b)
+impl_clamp! {
+    Oklab {
+        l => [Self::min_l(), Self::max_l()]
     }
-}
-
-impl<T> ClampAssign for Oklab<T>
-where
-    T: num::ClampAssign + Zero + One,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-    }
+    other {a, b}
+    where T: Zero + One
 }
 
 impl_mix!(Oklab);
@@ -71,10 +45,10 @@ where
     }
 }
 
-impl_color_add!(Oklab<T>, [l, a, b]);
-impl_color_sub!(Oklab<T>, [l, a, b]);
-impl_color_mul!(Oklab<T>, [l, a, b]);
-impl_color_div!(Oklab<T>, [l, a, b]);
+impl_color_add!(Oklab, [l, a, b]);
+impl_color_sub!(Oklab, [l, a, b]);
+impl_color_mul!(Oklab, [l, a, b]);
+impl_color_div!(Oklab, [l, a, b]);
 
 impl_array_casts!(Oklab<T>, [T; 3]);
 impl_simd_array_conversion!(Oklab, [l, a, b]);

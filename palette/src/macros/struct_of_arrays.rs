@@ -38,7 +38,7 @@ macro_rules! impl_struct_of_array_traits {
             fn from_iter<I: IntoIterator<Item = $self_ty<$($phantom_ty,)? T>>>(iter: I) -> Self {
                 let mut result = Self {
                     $($element: C::default(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 };
                 result.extend(iter);
 
@@ -58,7 +58,7 @@ macro_rules! impl_struct_of_array_traits {
             fn into_iter(self) -> Self::IntoIter {
                 Iter {
                     $($element: self.$element.into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -75,7 +75,7 @@ macro_rules! impl_struct_of_array_traits {
             fn into_iter(self) -> Self::IntoIter {
                 Iter {
                     $($element: (&self.$element).into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -92,7 +92,7 @@ macro_rules! impl_struct_of_array_traits {
             fn into_iter(self) -> Self::IntoIter {
                 Iter {
                     $($element: (&mut self.$element).into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -100,7 +100,7 @@ macro_rules! impl_struct_of_array_traits {
         #[doc = concat!("An iterator for [`", stringify!($self_ty), "`] values.")]
         pub struct Iter<I $(,$phantom_ty)?> {
             $(pub(crate) $element: I,)+
-            $(pub(crate) $phantom: PhantomData<$phantom_ty>)?
+            $(pub(crate) $phantom: core::marker::PhantomData<$phantom_ty>)?
         }
 
         impl<I $(,$phantom_ty)?> Iterator for Iter<I $(,$phantom_ty)?>
@@ -116,7 +116,7 @@ macro_rules! impl_struct_of_array_traits {
                 if let ($(Some($element),)+) = ($($element,)+) {
                     Some($self_ty {
                         $($element,)+
-                        $($phantom: PhantomData,)?
+                        $($phantom: core::marker::PhantomData,)?
                     })
                 } else {
                     None
@@ -151,7 +151,7 @@ macro_rules! impl_struct_of_array_traits {
                 if let ($(Some($element),)+) = ($($element,)+) {
                     Some($self_ty {
                         $($element,)+
-                        $($phantom: PhantomData,)?
+                        $($phantom: core::marker::PhantomData,)?
                     })
                 } else {
                     None
@@ -204,7 +204,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 let mut result = Self {
                     hue: C::default().into(),
                     $($element: C::default(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 };
                 result.extend(iter);
 
@@ -225,7 +225,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 Iter {
                     hue: self.hue.into_iter(),
                     $($element: self.$element.into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -243,7 +243,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 Iter {
                     hue: (&self.hue).into_iter(),
                     $($element: (&self.$element).into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -261,7 +261,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 Iter {
                     hue: (&mut self.hue).into_iter(),
                     $($element: (&mut self.$element).into_iter(),)+
-                    $($phantom: PhantomData)?
+                    $($phantom: core::marker::PhantomData)?
                 }
             }
         }
@@ -270,7 +270,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         pub struct Iter<I $(,$phantom_ty)?> {
             pub(crate) hue: $hue_iter_ty<I>,
             $(pub(crate) $element: I,)+
-            $(pub(crate) $phantom: PhantomData<$phantom_ty>)?
+            $(pub(crate) $phantom: core::marker::PhantomData<$phantom_ty>)?
         }
 
         impl<I $(,$phantom_ty)?> Iterator for Iter<I $(,$phantom_ty)?>
@@ -285,7 +285,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 $(let $element = self.$element.next();)+
 
                 if let (Some(hue), $(Some($element),)+) = (hue, $($element,)+) {
-                    Some($self_ty {hue $(, $element)+ $(, $phantom: PhantomData)?})
+                    Some($self_ty {hue $(, $element)+ $(, $phantom: core::marker::PhantomData)?})
                 } else {
                     None
                 }
@@ -318,7 +318,7 @@ macro_rules! impl_struct_of_array_traits_hue {
                 $(let $element = self.$element.next_back();)+
 
                 if let (Some(hue), $(Some($element),)+) = (hue, $($element,)+) {
-                    Some($self_ty {hue $(, $element)+ $(, $phantom: PhantomData)?})
+                    Some($self_ty {hue $(, $element)+ $(, $phantom: core::marker::PhantomData)?})
                 } else {
                     None
                 }
@@ -371,7 +371,7 @@ macro_rules! impl_struct_of_arrays_methods {
                 if let ($(Some($element),)+) = ($($element,)+) {
                     Some($self_ty {
                         $($element,)+
-                        $($phantom: PhantomData,)?
+                        $($phantom: core::marker::PhantomData,)?
                     })
                 } else {
                     None
@@ -391,7 +391,7 @@ macro_rules! impl_struct_of_arrays_methods {
                 if let ($(Some($element),)+) = ($($element,)+) {
                     Some($self_ty {
                         $($element,)+
-                        $($phantom: PhantomData,)?
+                        $($phantom: core::marker::PhantomData,)?
                     })
                 } else {
                     None
@@ -408,7 +408,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
                 Self {
                     $($element,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
 
@@ -425,7 +425,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
                 Some($self_ty {
                     $($element: $element?,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 })
             }
 
@@ -443,7 +443,7 @@ macro_rules! impl_struct_of_arrays_methods {
             {
                 Iter {
                     $($element: self.$element.drain(range.clone()),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }
@@ -578,7 +578,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
                 $(let $element = self.$element.as_ref().get(index.clone());)+
 
                 if let (Some(hue) $(, Some($element))+) = (hue $(,$element)+) {
-                    Some($self_ty {hue $(, $element)+ $(, $phantom: PhantomData)?})
+                    Some($self_ty {hue $(, $element)+ $(, $phantom: core::marker::PhantomData)?})
                 } else {
                     None
                 }
@@ -596,7 +596,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
                 $(let $element = self.$element.as_mut().get_mut(index.clone());)+
 
                 if let (Some(hue) $(, Some($element))+) = (hue $(,$element)+) {
-                    Some($self_ty {hue $(, $element)+ $(, $phantom: PhantomData)?})
+                    Some($self_ty {hue $(, $element)+ $(, $phantom: core::marker::PhantomData)?})
                 } else {
                     None
                 }
@@ -611,7 +611,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
                 let hue = Vec::with_capacity(capacity);
                 $(let $element = Vec::with_capacity(capacity);)+
 
-                Self {hue: hue.into() $(, $element)+ $(, $phantom: PhantomData)?}
+                Self {hue: hue.into() $(, $element)+ $(, $phantom: core::marker::PhantomData)?}
             }
 
             /// Push an additional color's components onto the component vectors. See [`Vec::push`] for details.
@@ -630,7 +630,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
                 Some($self_ty {
                     hue: hue?,
                     $($element: $element?,)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 })
             }
 
@@ -650,7 +650,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
                 Iter {
                     hue: self.hue.drain(range.clone()),
                     $($element: self.$element.drain(range.clone()),)+
-                    $($phantom: PhantomData,)?
+                    $($phantom: core::marker::PhantomData,)?
                 }
             }
         }

@@ -1,13 +1,7 @@
 //! Types for the HWB color space.
 
-use core::{
-    any::TypeId,
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, DivAssign, Sub, SubAssign},
-};
+use core::{any::TypeId, marker::PhantomData};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -17,20 +11,19 @@ use rand::{
     Rng,
 };
 
+#[cfg(feature = "random")]
+use crate::num::MinMax;
+
 use crate::{
-    angle::{FromAngle, RealAngle, SignedAngle},
+    angle::FromAngle,
     bool_mask::{HasBoolMask, LazySelect, Select},
-    clamp, clamp_min, clamp_min_assign,
     convert::FromColorUnclamped,
     encoding::Srgb,
     hues::RgbHueIter,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, One, PartialCmp, Real},
     rgb::{RgbSpace, RgbStandard},
     stimulus::{FromStimulus, Stimulus},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, Hsv, IsWithinBounds, Lighten, LightenAssign, Mix,
-    MixAssign, RgbHue, SetHue, ShiftHue, ShiftHueAssign, WithHue, Xyz,
+    Alpha, FromColor, Hsv, RgbHue, Xyz,
 };
 
 /// Linear HWB with an alpha component. See the [`Hwba` implementation in
@@ -93,22 +86,6 @@ pub struct Hwb<S = Srgb, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
-}
-
-impl<S, T> Copy for Hwb<S, T> where T: Copy {}
-
-impl<S, T> Clone for Hwb<S, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hwb<S, T> {
-        Hwb {
-            hue: self.hue.clone(),
-            whiteness: self.whiteness.clone(),
-            blackness: self.blackness.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 impl<T> Hwb<Srgb, T> {
@@ -207,25 +184,6 @@ where
     pub fn max_blackness() -> T {
         T::max_intensity()
     }
-}
-
-impl<S, T> PartialEq for Hwb<S, T>
-where
-    T: PartialEq,
-    RgbHue<T>: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.hue == other.hue
-            && self.whiteness == other.whiteness
-            && self.blackness == other.blackness
-    }
-}
-
-impl<S, T> Eq for Hwb<S, T>
-where
-    T: Eq,
-    RgbHue<T>: Eq,
-{
 }
 
 ///<span id="Hwba"></span>[`Hwba`](crate::Hwba) implementations.
@@ -362,199 +320,12 @@ impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
     }
 }
 
-impl<S, T> IsWithinBounds for Hwb<S, T>
-where
-    T: Stimulus + PartialCmp + Add<Output = T> + HasBoolMask + Clone,
-    T::Mask: BitAnd<Output = T::Mask>,
-{
-    #[rustfmt::skip]
-    #[inline]
-    fn is_within_bounds(&self) -> T::Mask {
-        self.blackness.gt_eq(&Self::min_blackness()) & self.blackness.lt_eq(&Self::max_blackness()) &
-        self.whiteness.gt_eq(&Self::min_whiteness()) & self.whiteness.lt_eq(&Self::max_blackness()) &
-        (self.whiteness.clone() + self.blackness.clone()).lt_eq(&T::max_intensity())
-    }
-}
-
-impl<S, T> Clamp for Hwb<S, T>
-where
-    T: Stimulus + One + num::Clamp + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        let mut whiteness = clamp_min(self.whiteness.clone(), Self::min_whiteness());
-        let mut blackness = clamp_min(self.blackness.clone(), Self::min_blackness());
-
-        let sum = self.blackness + self.whiteness;
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        whiteness /= divisor.clone();
-        blackness /= divisor;
-
-        Self::new(self.hue, whiteness, blackness)
-    }
-}
-
-impl<S, T> ClampAssign for Hwb<S, T>
-where
-    T: Stimulus + One + num::ClampAssign + PartialCmp + Add<Output = T> + DivAssign + Clone,
-    T::Mask: Select<T>,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-
-        let sum = self.blackness.clone() + self.whiteness.clone();
-        let divisor = sum.gt(&T::max_intensity()).select(sum, T::one());
-        self.whiteness /= divisor.clone();
-        self.blackness /= divisor;
-    }
-}
+impl_is_within_bounds_hwb!(Hwb<S> where T: Stimulus);
+impl_clamp_hwb!(Hwb<S> phantom: standard where T: Stimulus);
 
 impl_mix_hue!(Hwb<S> {whiteness, blackness} phantom: standard);
-
-impl<S, T> Lighten for Hwb<S, T>
-where
-    T: Stimulus + Real + Zero + MinMax + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten(self, factor: T) -> Self {
-        let difference_whiteness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
-            else => self.whiteness.clone(),
-        };
-        let delta_whiteness = difference_whiteness.max(T::zero()) * &factor;
-
-        let difference_blackness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
-            else => Self::max_blackness() - &self.blackness,
-        };
-        let delta_blackness = difference_blackness.max(T::zero()) * factor;
-
-        Hwb {
-            hue: self.hue,
-            whiteness: (self.whiteness + delta_whiteness).max(Self::min_whiteness()),
-            blackness: (self.blackness - delta_blackness).max(Self::min_blackness()),
-            standard: PhantomData,
-        }
-    }
-
-    #[inline]
-    fn lighten_fixed(self, amount: T) -> Self {
-        Hwb {
-            hue: self.hue,
-            whiteness: (self.whiteness + Self::max_whiteness() * &amount)
-                .max(Self::min_whiteness()),
-            blackness: (self.blackness - Self::max_blackness() * amount).max(Self::min_blackness()),
-            standard: PhantomData,
-        }
-    }
-}
-
-impl<S, T> LightenAssign for Hwb<S, T>
-where
-    T: Stimulus
-        + Real
-        + Zero
-        + MinMax
-        + num::ClampAssign
-        + AddAssign
-        + SubAssign
-        + Arithmetics
-        + PartialCmp
-        + Clone,
-    T::Mask: LazySelect<T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn lighten_assign(&mut self, factor: T) {
-        let difference_whiteness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => Self::max_whiteness() - &self.whiteness,
-            else => self.whiteness.clone(),
-        };
-        self.whiteness += difference_whiteness.max(T::zero()) * &factor;
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-
-        let difference_blackness = lazy_select! {
-            if factor.gt_eq(&T::zero()) => self.blackness.clone(),
-            else => Self::max_blackness() - &self.blackness,
-        };
-        self.blackness -= difference_blackness.max(T::zero()) * factor;
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-    }
-
-    #[inline]
-    fn lighten_fixed_assign(&mut self, amount: T) {
-        self.whiteness += Self::max_whiteness() * &amount;
-        clamp_min_assign(&mut self.whiteness, Self::min_whiteness());
-
-        self.blackness -= Self::max_blackness() * amount;
-        clamp_min_assign(&mut self.blackness, Self::min_blackness());
-    }
-}
-
-impl<S, T> GetHue for Hwb<S, T>
-where
-    T: Clone,
-{
-    type Hue = RgbHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> RgbHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<S, T, H> WithHue<H> for Hwb<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<S, T, H> SetHue<H> for Hwb<S, T>
-where
-    H: Into<RgbHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<S, T> ShiftHue for Hwb<S, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<S, T> ShiftHueAssign for Hwb<S, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_lighten_hwb!(Hwb<S> phantom: standard where T: Stimulus);
+impl_hue_ops!(Hwb<S>, RgbHue);
 
 impl<S, T> HasBoolMask for Hwb<S, T>
 where
@@ -577,103 +348,15 @@ where
     }
 }
 
-impl_color_add!(Hwb<S, T>, [hue, whiteness, blackness], standard);
-impl_color_sub!(Hwb<S, T>, [hue, whiteness, blackness], standard);
+impl_color_add!(Hwb<S>, [hue, whiteness, blackness], standard);
+impl_color_sub!(Hwb<S>, [hue, whiteness, blackness], standard);
 
 impl_array_casts!(Hwb<S, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hwb<S>, [whiteness, blackness], standard);
 impl_struct_of_array_traits_hue!(Hwb<S>, RgbHueIter, [whiteness, blackness], standard);
 
-#[cfg(feature = "approx")]
-impl<S, T> AbsDiffEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + AbsDiffEq + Clone,
-    RgbHue<T>: AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    #[rustfmt::skip]
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        let equal_shade = self.whiteness.abs_diff_eq(&other.whiteness, epsilon.clone())
-            && self.blackness.abs_diff_eq(&other.blackness, epsilon.clone());
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.abs_diff_eq(&other.hue, epsilon) && equal_shade
-        }
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> RelativeEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + RelativeEq + Clone,
-    RgbHue<T>: RelativeEq + AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    fn default_max_relative() -> Self::Epsilon {
-        T::default_max_relative()
-    }
-
-    #[rustfmt::skip]
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        let equal_shade = self.whiteness.relative_eq(&other.whiteness, epsilon.clone(), max_relative.clone())
-            && self.blackness.relative_eq(&other.blackness, epsilon.clone(), max_relative.clone());
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.relative_eq(&other.hue, epsilon, max_relative) && equal_shade
-        }
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> UlpsEq for Hwb<S, T>
-where
-    T: Stimulus + PartialOrd + Add<Output = T> + UlpsEq + Clone,
-    RgbHue<T>: UlpsEq + AbsDiffEq<Epsilon = T::Epsilon>,
-    T::Epsilon: Clone,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    #[rustfmt::skip]
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        let equal_shade = self.whiteness.ulps_eq(&other.whiteness, epsilon.clone(), max_ulps)
-            && self.blackness.ulps_eq(&other.blackness, epsilon.clone(), max_ulps);
-
-        // The hue doesn't matter that much when the color is gray, and may fluctuate
-        // due to precision errors. This is a blunt tool, but works for now.
-        let is_gray = self.blackness.clone() + self.whiteness.clone() >= T::max_intensity()
-            || other.blackness.clone() + other.whiteness.clone() >= T::max_intensity();
-        if is_gray {
-            equal_shade
-        } else {
-            self.hue.ulps_eq(&other.hue, epsilon, max_ulps) && equal_shade
-        }
-    }
-}
+impl_copy_clone!(Hwb<S>, [hue, whiteness, blackness], standard);
+impl_eq_hue!(Hwb<S>, RgbHue, [hue, whiteness, blackness]);
 
 #[allow(deprecated)]
 impl<S, T> crate::RelativeContrast for Hwb<S, T>

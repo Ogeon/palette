@@ -3,11 +3,9 @@ use core::{
     convert::TryInto,
     fmt,
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, Div},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -18,22 +16,16 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
-    clamp, clamp_assign,
     color_difference::Wcag21RelativeContrast,
     convert::FromColorUnclamped,
     encoding::{FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Real, Zero,
-    },
+    num::{Arithmetics, MinMax, PartialCmp, Real},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, IntoColor, IsWithinBounds, Lighten, LightenAssign, Mix, MixAssign,
-    Xyz, Yxy,
+    Alpha, IntoColor, Xyz, Yxy,
 };
 
 /// Luminance with an alpha component. See the [`Lumaa` implementation
@@ -66,17 +58,6 @@ pub struct Luma<S = Srgb, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
-}
-
-impl<S, T: Copy> Copy for Luma<S, T> {}
-
-impl<S, T: Clone> Clone for Luma<S, T> {
-    fn clone(&self) -> Luma<S, T> {
-        Luma {
-            luma: self.luma.clone(),
-            standard: PhantomData,
-        }
-    }
 }
 
 impl<S, T> Luma<S, T> {
@@ -294,17 +275,6 @@ impl<Wp, T> Luma<Linear<Wp>, T> {
         color.into_linear()
     }
 }
-
-impl<S, T> PartialEq for Luma<S, T>
-where
-    T: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.luma == other.luma
-    }
-}
-
-impl<S, T> Eq for Luma<S, T> where T: Eq {}
 
 // Safety:
 //
@@ -624,25 +594,12 @@ impl_is_within_bounds! {
     }
     where T: Stimulus
 }
-
-impl<S, T> Clamp for Luma<S, T>
-where
-    T: Stimulus + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(clamp(self.luma, Self::min_luma(), Self::max_luma()))
+impl_clamp! {
+    Luma<S> {
+        luma => [Self::min_luma(), Self::max_luma()]
     }
-}
-
-impl<S, T> ClampAssign for Luma<S, T>
-where
-    T: Stimulus + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.luma, Self::min_luma(), Self::max_luma());
-    }
+    other {standard}
+    where T: Stimulus
 }
 
 impl_mix!(Luma<S>);
@@ -668,10 +625,10 @@ where
     }
 }
 
-impl_color_add!(Luma<S, T>, [luma], standard);
-impl_color_sub!(Luma<S, T>, [luma], standard);
-impl_color_mul!(Luma<S, T>, [luma], standard);
-impl_color_div!(Luma<S, T>, [luma], standard);
+impl_color_add!(Luma<S>, [luma], standard);
+impl_color_sub!(Luma<S>, [luma], standard);
+impl_color_mul!(Luma<S>, [luma], standard);
+impl_color_div!(Luma<S>, [luma], standard);
 
 impl_array_casts!(Luma<S, T>, [T; 1]);
 
@@ -830,54 +787,8 @@ impl<S> From<Lumaa<S, u8>> for u16 {
 impl_simd_array_conversion!(Luma<S>, [luma], standard);
 impl_struct_of_array_traits!(Luma<S>, [luma], standard);
 
-#[cfg(feature = "approx")]
-impl<S, T> AbsDiffEq for Luma<S, T>
-where
-    T: AbsDiffEq,
-{
-    type Epsilon = T::Epsilon;
-
-    fn default_epsilon() -> Self::Epsilon {
-        T::default_epsilon()
-    }
-
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.luma.abs_diff_eq(&other.luma, epsilon)
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> RelativeEq for Luma<S, T>
-where
-    T: RelativeEq,
-{
-    fn default_max_relative() -> Self::Epsilon {
-        T::default_max_relative()
-    }
-
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        self.luma.relative_eq(&other.luma, epsilon, max_relative)
-    }
-}
-
-#[cfg(feature = "approx")]
-impl<S, T> UlpsEq for Luma<S, T>
-where
-    T: UlpsEq,
-{
-    fn default_max_ulps() -> u32 {
-        T::default_max_ulps()
-    }
-
-    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.luma.ulps_eq(&other.luma, epsilon, max_ulps)
-    }
-}
+impl_copy_clone!(Luma<S>, [luma], standard);
+impl_eq!(Luma<S>, [luma]);
 
 impl<S, T> fmt::LowerHex for Luma<S, T>
 where

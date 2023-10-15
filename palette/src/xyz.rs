@@ -1,12 +1,7 @@
 //! Types for the CIE 1931 XYZ color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
-};
+use core::{marker::PhantomData, ops::Mul};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -17,23 +12,17 @@ use rand::{
 };
 
 use crate::{
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
     matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
-    num::{
-        self, Arithmetics, FromScalar, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax,
-        One, PartialCmp, Powi, Real, Recip, Zero,
-    },
+    num::{Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powi, Real, Recip, Zero},
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
     white_point::{Any, WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, IsWithinBounds, Lab, Lighten, LightenAssign, Luma, Luv, Mix,
-    MixAssign, Oklab, Yxy,
+    Alpha, Lab, Luma, Luv, Oklab, Yxy,
 };
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
@@ -77,22 +66,6 @@ pub struct Xyz<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Xyz<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Xyz<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Xyz<Wp, T> {
-        Xyz {
-            x: self.x.clone(),
-            y: self.y.clone(),
-            z: self.z.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Xyz<Wp, T> {
@@ -388,33 +361,16 @@ impl_is_within_bounds! {
         T: Zero,
         Wp: WhitePoint<T>
 }
-
-impl<Wp, T> Clamp for Xyz<Wp, T>
-where
-    T: Zero + num::Clamp,
-    Wp: WhitePoint<T>,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.x, Self::min_x(), Self::max_x()),
-            clamp(self.y, Self::min_y(), Self::max_y()),
-            clamp(self.z, Self::min_z(), Self::max_z()),
-        )
+impl_clamp! {
+    Xyz<Wp> {
+        x => [Self::min_x(), Self::max_x()],
+        y => [Self::min_y(), Self::max_y()],
+        z => [Self::min_z(), Self::max_z()]
     }
-}
-
-impl<Wp, T> ClampAssign for Xyz<Wp, T>
-where
-    T: Zero + num::ClampAssign,
-    Wp: WhitePoint<T>,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.x, Self::min_x(), Self::max_x());
-        clamp_assign(&mut self.y, Self::min_y(), Self::max_y());
-        clamp_assign(&mut self.z, Self::min_z(), Self::max_z());
-    }
+    other {white_point}
+    where
+        T: Zero,
+        Wp: WhitePoint<T>
 }
 
 impl_mix!(Xyz<Wp>);
@@ -450,15 +406,16 @@ where
     }
 }
 
-impl_color_add!(Xyz<Wp, T>, [x, y, z], white_point);
-impl_color_sub!(Xyz<Wp, T>, [x, y, z], white_point);
-impl_color_mul!(Xyz<Wp, T>, [x, y, z], white_point);
-impl_color_div!(Xyz<Wp, T>, [x, y, z], white_point);
+impl_color_add!(Xyz<Wp>, [x, y, z], white_point);
+impl_color_sub!(Xyz<Wp>, [x, y, z], white_point);
+impl_color_mul!(Xyz<Wp>, [x, y, z], white_point);
+impl_color_div!(Xyz<Wp>, [x, y, z], white_point);
 
 impl_array_casts!(Xyz<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Xyz<Wp>, [x, y, z], white_point);
 impl_struct_of_array_traits!(Xyz<Wp>, [x, y, z], white_point);
 
+impl_copy_clone!(Xyz<Wp>, [x, y, z], white_point);
 impl_eq!(Xyz<Wp>, [x, y, z]);
 
 #[allow(deprecated)]

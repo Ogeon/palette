@@ -32,12 +32,14 @@ mod clamp;
 mod convert;
 #[macro_use]
 mod color_difference;
-
 #[macro_use]
 mod struct_of_arrays;
-
 #[macro_use]
 mod reference_component;
+#[macro_use]
+mod copy_clone;
+#[macro_use]
+mod hue;
 
 #[cfg(feature = "random")]
 #[macro_use]

@@ -1,9 +1,6 @@
 //! Types for the HSLuv color space.
 
-use core::{
-    marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Sub, SubAssign},
-};
+use core::marker::PhantomData;
 
 #[cfg(feature = "random")]
 use rand::{
@@ -14,27 +11,18 @@ use rand::{
     Rng,
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
 #[cfg(feature = "random")]
-use crate::num::{Cbrt, Sqrt};
+use crate::num::{Cbrt, One, Sqrt};
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
+    angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
     hues::LuvHueIter,
     luv_bounds::LuvBounds,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, MinMax, One, PartialCmp, Powi, Real,
-        Zero,
-    },
+    num::{Arithmetics, PartialCmp, Powi, Real, Zero},
     white_point::D65,
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
-    LuvHue, Mix, MixAssign, Saturate, SaturateAssign, SetHue, ShiftHue, ShiftHueAssign, WithHue,
-    Xyz,
+    Alpha, FromColor, Lchuv, LuvHue, Xyz,
 };
 
 /// HSLuv with an alpha component. See the [`Hsluva` implementation in
@@ -79,22 +67,6 @@ pub struct Hsluv<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Hsluv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Hsluv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Hsluv<Wp, T> {
-        Hsluv {
-            hue: self.hue.clone(),
-            saturation: self.saturation.clone(),
-            l: self.l.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Hsluv<Wp, T> {
@@ -241,101 +213,19 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Hsluv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            self.hue,
-            clamp(
-                self.saturation,
-                Self::min_saturation(),
-                Self::max_saturation(),
-            ),
-            clamp(self.l, Self::min_l(), Self::max_l()),
-        )
+impl_clamp! {
+    Hsluv<Wp> {
+        saturation => [Self::min_saturation(), Self::max_saturation()],
+        l => [Self::min_l(), Self::max_l()]
     }
-}
-
-impl<Wp, T> ClampAssign for Hsluv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(
-            &mut self.saturation,
-            Self::min_saturation(),
-            Self::max_saturation(),
-        );
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-    }
+    other {hue, white_point}
+    where T: Real + Zero
 }
 
 impl_mix_hue!(Hsluv<Wp> {saturation, l} phantom: white_point);
 impl_lighten!(Hsluv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {hue, saturation} phantom: white_point);
 impl_saturate!(Hsluv<Wp> increase {saturation => [Self::min_saturation(), Self::max_saturation()]} other {hue, l} phantom: white_point);
-
-impl<Wp, T> GetHue for Hsluv<Wp, T>
-where
-    T: Clone,
-{
-    type Hue = LuvHue<T>;
-
-    #[inline]
-    fn get_hue(&self) -> LuvHue<T> {
-        self.hue.clone()
-    }
-}
-
-impl<Wp, T, H> WithHue<H> for Hsluv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn with_hue(mut self, hue: H) -> Self {
-        self.hue = hue.into();
-        self
-    }
-}
-
-impl<Wp, T, H> SetHue<H> for Hsluv<Wp, T>
-where
-    H: Into<LuvHue<T>>,
-{
-    #[inline]
-    fn set_hue(&mut self, hue: H) {
-        self.hue = hue.into();
-    }
-}
-
-impl<Wp, T> ShiftHue for Hsluv<Wp, T>
-where
-    T: Add<Output = T>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue(mut self, amount: Self::Scalar) -> Self {
-        self.hue = self.hue + amount;
-        self
-    }
-}
-
-impl<Wp, T> ShiftHueAssign for Hsluv<Wp, T>
-where
-    T: AddAssign,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn shift_hue_assign(&mut self, amount: Self::Scalar) {
-        self.hue += amount;
-    }
-}
+impl_hue_ops!(Hsluv<Wp>, LuvHue);
 
 impl<Wp, T> HasBoolMask for Hsluv<Wp, T>
 where
@@ -354,14 +244,15 @@ where
     }
 }
 
-impl_color_add!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
-impl_color_sub!(Hsluv<Wp, T>, [hue, saturation, l], white_point);
+impl_color_add!(Hsluv<Wp>, [hue, saturation, l], white_point);
+impl_color_sub!(Hsluv<Wp>, [hue, saturation, l], white_point);
 
 impl_array_casts!(Hsluv<Wp, T>, [T; 3]);
 impl_simd_array_conversion_hue!(Hsluv<Wp>, [saturation, l], white_point);
 impl_struct_of_array_traits_hue!(Hsluv<Wp>, LuvHueIter, [saturation, l], white_point);
 
 impl_eq_hue!(Hsluv<Wp>, LuvHue, [hue, saturation, l]);
+impl_copy_clone!(Hsluv<Wp>, [hue, saturation, l], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Hsluv<Wp, T>

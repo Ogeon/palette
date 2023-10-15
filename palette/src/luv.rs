@@ -2,11 +2,12 @@
 
 use core::{
     marker::PhantomData,
-    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{Add, Mul, Neg},
 };
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+#[cfg(feature = "random")]
+use core::ops::Sub;
+
 #[cfg(feature = "random")]
 use rand::{
     distributions::{
@@ -18,18 +19,11 @@ use rand::{
 
 use crate::{
     angle::RealAngle,
-    blend::{PreAlpha, Premultiply},
     bool_mask::{HasBoolMask, LazySelect},
-    clamp, clamp_assign,
     convert::FromColorUnclamped,
-    num::{
-        self, Arithmetics, FromScalarArray, IntoScalarArray, IsValidDivisor, MinMax, One,
-        PartialCmp, Powf, Powi, Real, Recip, Trigonometry, Zero,
-    },
-    stimulus::Stimulus,
+    num::{Arithmetics, MinMax, PartialCmp, Powf, Powi, Real, Recip, Trigonometry, Zero},
     white_point::{WhitePoint, D65},
-    Alpha, Clamp, ClampAssign, FromColor, GetHue, IsWithinBounds, Lchuv, Lighten, LightenAssign,
-    LuvHue, Mix, MixAssign, Xyz,
+    Alpha, FromColor, GetHue, Lchuv, LuvHue, Xyz,
 };
 
 /// CIE L\*u\*v\* (CIELUV) with an alpha component. See the [`Luva`
@@ -75,22 +69,6 @@ pub struct Luv<Wp = D65, T = f32> {
     #[cfg_attr(feature = "serializing", serde(skip))]
     #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
-}
-
-impl<Wp, T> Copy for Luv<Wp, T> where T: Copy {}
-
-impl<Wp, T> Clone for Luv<Wp, T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Luv<Wp, T> {
-        Luv {
-            l: self.l.clone(),
-            u: self.u.clone(),
-            v: self.v.clone(),
-            white_point: PhantomData,
-        }
-    }
 }
 
 impl<Wp, T> Luv<Wp, T> {
@@ -274,31 +252,14 @@ impl_is_within_bounds! {
     }
     where T: Real + Zero
 }
-
-impl<Wp, T> Clamp for Luv<Wp, T>
-where
-    T: Zero + Real + num::Clamp,
-{
-    #[inline]
-    fn clamp(self) -> Self {
-        Self::new(
-            clamp(self.l, Self::min_l(), Self::max_l()),
-            clamp(self.u, Self::min_u(), Self::max_u()),
-            clamp(self.v, Self::min_v(), Self::max_v()),
-        )
+impl_clamp! {
+    Luv<Wp> {
+        l => [Self::min_l(), Self::max_l()],
+        u => [Self::min_u(), Self::max_u()],
+        v => [Self::min_v(), Self::max_v()]
     }
-}
-
-impl<Wp, T> ClampAssign for Luv<Wp, T>
-where
-    T: Zero + Real + num::ClampAssign,
-{
-    #[inline]
-    fn clamp_assign(&mut self) {
-        clamp_assign(&mut self.l, Self::min_l(), Self::max_l());
-        clamp_assign(&mut self.u, Self::min_u(), Self::max_u());
-        clamp_assign(&mut self.v, Self::min_v(), Self::max_v());
-    }
+    other {white_point}
+    where T: Real + Zero
 }
 
 impl_mix!(Luv<Wp>);
@@ -334,16 +295,17 @@ where
     }
 }
 
-impl_color_add!(Luv<Wp, T>, [l, u, v], white_point);
-impl_color_sub!(Luv<Wp, T>, [l, u, v], white_point);
-impl_color_mul!(Luv<Wp, T>, [l, u, v], white_point);
-impl_color_div!(Luv<Wp, T>, [l, u, v], white_point);
+impl_color_add!(Luv<Wp>, [l, u, v], white_point);
+impl_color_sub!(Luv<Wp>, [l, u, v], white_point);
+impl_color_mul!(Luv<Wp>, [l, u, v], white_point);
+impl_color_div!(Luv<Wp>, [l, u, v], white_point);
 
 impl_array_casts!(Luv<Wp, T>, [T; 3]);
 impl_simd_array_conversion!(Luv<Wp>, [l, u, v], white_point);
 impl_struct_of_array_traits!(Luv<Wp>, [l, u, v], white_point);
 
 impl_eq!(Luv<Wp>, [l, u, v]);
+impl_copy_clone!(Luv<Wp>, [l, u, v], white_point);
 
 #[allow(deprecated)]
 impl<Wp, T> crate::RelativeContrast for Luv<Wp, T>
