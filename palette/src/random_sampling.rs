@@ -1,6 +1,6 @@
 mod cone;
 
-pub use self::cone::*;
+pub(crate) use self::cone::*;
 
 #[cfg(test)]
 pub(crate) mod test_utils {

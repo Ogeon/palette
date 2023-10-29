@@ -2,15 +2,6 @@
 
 use core::{marker::PhantomData, ops::Mul};
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     convert::{FromColorUnclamped, IntoColorUnclamped},
@@ -327,29 +318,7 @@ where
     }
 }
 
-impl<Wp, T> From<(T, T, T)> for Xyz<Wp, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Xyz<Wp, T>> for (T, T, T) {
-    fn from(color: Xyz<Wp, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Xyz<Wp, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Xyz<Wp, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Xyz<Wp> as (T, T, T));
 
 impl_is_within_bounds! {
     Xyz<Wp> {
@@ -432,92 +401,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Xyz<Wp, T>> for Standard
-where
-    T: Mul<Output = T>,
-    Wp: WhitePoint<T>,
-    Standard: Distribution<T>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
-        let xyz_ref: Xyz<Wp, T> = Wp::get_xyz().with_white_point();
-        Xyz {
-            x: rng.gen(),
-            y: rng.gen(),
-            z: rng.gen(),
-            white_point: PhantomData,
-        } * xyz_ref
+impl_rand_traits_cartesian!(
+    UniformXyz,
+    Xyz<Wp> {
+        x => [|x| x * Wp::get_xyz().x],
+        y => [|y| y * Wp::get_xyz().y],
+        z => [|z| z * Wp::get_xyz().z]
     }
-}
-
-/// Sample CIE 1931 XYZ colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformXyz<Wp, T>
-where
-    T: SampleUniform,
-{
-    x: Uniform<T>,
-    y: Uniform<T>,
-    z: Uniform<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Xyz<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type Sampler = UniformXyz<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformXyz<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type X = Xyz<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformXyz {
-            x: Uniform::new::<_, T>(low.x.clone(), high.x.clone()),
-            y: Uniform::new::<_, T>(low.y.clone(), high.y.clone()),
-            z: Uniform::new::<_, T>(low.z.clone(), high.z.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformXyz {
-            x: Uniform::new_inclusive::<_, T>(low.x.clone(), high.x.clone()),
-            y: Uniform::new_inclusive::<_, T>(low.y.clone(), high.y.clone()),
-            z: Uniform::new_inclusive::<_, T>(low.z.clone(), high.z.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Xyz<Wp, T> {
-        Xyz {
-            x: self.x.sample(rng),
-            y: self.y.sample(rng),
-            z: self.z.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+    where T: core::ops::Mul<Output = T>, Wp: WhitePoint<T>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Xyz<Wp, T> where T: bytemuck::Zeroable {}
@@ -629,7 +522,6 @@ mod test {
         assert_eq!(deserialized, Xyz::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Xyz<D65, f32> {
             x: (0.0, D65::get_xyz().x),

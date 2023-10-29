@@ -2,18 +2,6 @@
 
 use core::marker::PhantomData;
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
-#[cfg(feature = "random")]
-use crate::num::{Cbrt, One, Sqrt};
-
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
@@ -182,29 +170,7 @@ where
     }
 }
 
-impl<Wp, T, H: Into<LuvHue<T>>> From<(H, T, T)> for Hsluv<Wp, T> {
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Hsluv<Wp, T>> for (LuvHue<T>, T, T) {
-    fn from(color: Hsluv<Wp, T>) -> (LuvHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, H: Into<LuvHue<T>>, A> From<(H, T, T, A)> for Alpha<Hsluv<Wp, T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
-    fn from(color: Alpha<Hsluv<Wp, T>, A>) -> (LuvHue<T>, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Hsluv<Wp> as (H, T, T), LuvHue);
 
 impl_is_within_bounds! {
     Hsluv<Wp> {
@@ -272,101 +238,15 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Hsluv<Wp, T>> for Standard
-where
-    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T> + Clone,
-    Standard: Distribution<T> + Distribution<LuvHue<T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsluv<Wp, T> {
-        crate::random_sampling::sample_hsluv(rng.gen::<LuvHue<T>>(), rng.gen(), rng.gen())
+impl_rand_traits_hsl_bicone!(
+    UniformHsluv,
+    Hsluv<Wp> {
+        hue: UniformLuvHue => LuvHue,
+        height: l => [|l: T| l * T::from_f64(100.0), |l: T| l / T::from_f64(100.0)],
+        radius: saturation => [|s: T| s * T::from_f64(100.0), |s: T| s / T::from_f64(100.0)]
     }
-}
-
-/// Sample HSLuv colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformHsluv<Wp, T>
-where
-    T: SampleUniform,
-{
-    hue: crate::hues::UniformLuvHue<T>,
-    u1: Uniform<T>,
-    u2: Uniform<T>,
-    space: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Hsluv<Wp, T>
-where
-    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
-    T::Mask: LazySelect<T> + Clone,
-    LuvHue<T>: SampleBorrow<LuvHue<T>>,
-    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
-{
-    type Sampler = UniformHsluv<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformHsluv<Wp, T>
-where
-    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
-    T::Mask: LazySelect<T> + Clone,
-    LuvHue<T>: SampleBorrow<LuvHue<T>>,
-    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
-{
-    type X = Hsluv<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        use crate::random_sampling::invert_hsluv_sample;
-
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
-        let (r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
-
-        UniformHsluv {
-            hue: crate::hues::UniformLuvHue::new(low.hue, high.hue),
-            u1: Uniform::new::<_, T>(r1_min, r1_max),
-            u2: Uniform::new::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        use crate::random_sampling::invert_hsluv_sample;
-
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min): (T, T) = invert_hsluv_sample(low.saturation, low.l);
-        let (r1_max, r2_max): (T, T) = invert_hsluv_sample(high.saturation, high.l);
-
-        UniformHsluv {
-            hue: crate::hues::UniformLuvHue::new_inclusive(low.hue, high.hue),
-            u1: Uniform::new_inclusive::<_, T>(r1_min, r1_max),
-            u2: Uniform::new_inclusive::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsluv<Wp, T> {
-        crate::random_sampling::sample_hsluv(
-            self.hue.sample(rng),
-            self.u1.sample(rng),
-            self.u2.sample(rng),
-        )
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Hsluv<Wp, T> where T: bytemuck::Zeroable {}

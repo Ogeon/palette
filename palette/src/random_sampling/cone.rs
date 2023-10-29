@@ -1,10 +1,6 @@
-use core::marker::PhantomData;
-
 use crate::{
     bool_mask::LazySelect,
-    hues::{LuvHue, RgbHue},
     num::{Arithmetics, Cbrt, One, PartialCmp, Powi, Real, Sqrt},
-    Hsl, Hsluv, Hsv, Okhsl, Okhsv, OklabHue,
 };
 
 // Based on https://stackoverflow.com/q/4778147 and https://math.stackexchange.com/q/18686,
@@ -18,73 +14,46 @@ use crate::{
 // Substituting, we get `x = scale * radius, y = scale` and thus for cone
 // sampling: `scale = powf(r1, 1.0/3.0)` and `radius = sqrt(r2)`.
 
+#[derive(Debug, PartialEq)]
+pub(crate) struct HsvSample<T> {
+    pub(crate) value: T,
+    pub(crate) saturation: T,
+}
+
 #[inline]
-pub fn sample_hsv<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsv<S, T>
+pub(crate) fn sample_hsv<T>(r1: T, r2: T) -> HsvSample<T>
 where
     T: Cbrt + Sqrt,
 {
-    let (value, saturation) = (r1.cbrt(), r2.sqrt());
-
-    Hsv {
-        hue,
-        saturation,
-        value,
-        standard: PhantomData,
+    HsvSample {
+        value: r1.cbrt(),
+        saturation: r2.sqrt(),
     }
 }
 
 #[inline]
-pub fn sample_okhsv<T>(hue: OklabHue<T>, r1: T, r2: T) -> Okhsv<T>
+pub(crate) fn invert_hsv_sample<T>(sample: HsvSample<T>) -> (T, T)
 where
-    T: Cbrt + Sqrt,
+    T: Powi,
 {
-    let (value, saturation) = (r1.cbrt(), r2.sqrt());
+    (sample.value.powi(3), sample.saturation.powi(2))
+}
 
-    Okhsv {
-        hue,
-        saturation,
-        value,
-    }
+#[derive(Debug, PartialEq)]
+pub(crate) struct HslSample<T> {
+    pub(crate) saturation: T,
+    pub(crate) lightness: T,
 }
 
 #[inline]
-pub fn sample_hsl<S, T>(hue: RgbHue<T>, r1: T, r2: T) -> Hsl<S, T>
+pub(crate) fn sample_hsl<T>(r1: T, r2: T) -> HslSample<T>
 where
     T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
     T::Mask: LazySelect<T> + Clone,
 {
-    Hsl {
-        hue,
+    HslSample {
         saturation: r2.sqrt(),
         lightness: sample_bicone_height(r1),
-        standard: PhantomData,
-    }
-}
-
-#[inline]
-pub fn sample_okhsl<T>(hue: OklabHue<T>, r1: T, r2: T) -> Okhsl<T>
-where
-    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T> + Clone,
-{
-    Okhsl {
-        hue,
-        saturation: r2.sqrt(),
-        lightness: sample_bicone_height(r1),
-    }
-}
-
-#[inline]
-pub fn sample_hsluv<Wp, T>(hue: LuvHue<T>, r1: T, r2: T) -> Hsluv<Wp, T>
-where
-    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T> + Clone,
-{
-    Hsluv {
-        hue,
-        saturation: r2.sqrt() * T::from_f64(100.0),
-        l: sample_bicone_height(r1) * T::from_f64(100.0),
-        white_point: PhantomData,
     }
 }
 
@@ -113,31 +82,21 @@ where
 }
 
 #[inline]
-pub fn invert_hsl_sample<T>(saturation: T, lightness: T) -> (T, T)
+pub(crate) fn invert_hsl_sample<T>(sample: HslSample<T>) -> (T, T)
 where
     T: Real + Powi + Arithmetics + PartialCmp + Clone,
     T::Mask: LazySelect<T>,
 {
+    let HslSample {
+        saturation,
+        lightness,
+    } = sample;
+
     let r1 = invert_bicone_height_sample(lightness);
 
     // saturation is first multiplied, then divided by h before squaring.
     // h can be completely eliminated, leaving only the saturation.
     let r2 = saturation.powi(2);
-
-    (r1, r2)
-}
-
-#[inline]
-pub fn invert_hsluv_sample<T>(saturation: T, lightness: T) -> (T, T)
-where
-    T: Real + Powi + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T>,
-{
-    let r1 = invert_bicone_height_sample(lightness / T::from_f64(100.0));
-
-    // saturation is first multiplied, then divided by h before squaring.
-    // h can be completely eliminated, leaving only the saturation.
-    let r2 = (saturation / T::from_f64(100.0)).powi(2);
 
     (r1, r2)
 }
@@ -163,26 +122,43 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{invert_hsl_sample, invert_hsluv_sample, sample_hsl, sample_hsluv, sample_hsv};
-    use crate::hues::{LuvHue, RgbHue};
-    use crate::white_point::D65;
-    use crate::{Hsl, Hsluv, Hsv};
+    use super::{invert_hsl_sample, sample_hsl, sample_hsv, HslSample, HsvSample};
 
     #[cfg(feature = "random")]
     #[test]
     fn sample_max_min() {
-        let a = sample_hsv(RgbHue::from(0.0), 0.0, 0.0);
-        let b = sample_hsv(RgbHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsv::new_srgb(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsv::new_srgb(360.0, 1.0, 1.0), b);
-        let a = sample_hsl(RgbHue::from(0.0), 0.0, 0.0);
-        let b = sample_hsl(RgbHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsl::new_srgb(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsl::new_srgb(360.0, 1.0, 1.0), b);
-        let a = sample_hsluv(LuvHue::from(0.0), 0.0, 0.0);
-        let b = sample_hsluv(LuvHue::from(360.0), 1.0, 1.0);
-        assert_relative_eq!(Hsluv::<D65>::new(0.0, 0.0, 0.0), a);
-        assert_relative_eq!(Hsluv::<D65>::new(360.0, 100.0, 100.0), b);
+        let a = sample_hsv(0.0, 0.0);
+        let b = sample_hsv(1.0, 1.0);
+        assert_eq!(
+            HsvSample {
+                saturation: 0.0,
+                value: 0.0
+            },
+            a
+        );
+        assert_eq!(
+            HsvSample {
+                saturation: 1.0,
+                value: 1.0
+            },
+            b
+        );
+        let a = sample_hsl(0.0, 0.0);
+        let b = sample_hsl(1.0, 1.0);
+        assert_eq!(
+            HslSample {
+                saturation: 0.0,
+                lightness: 0.0
+            },
+            a
+        );
+        assert_eq!(
+            HslSample {
+                saturation: 1.0,
+                lightness: 1.0
+            },
+            b
+        );
     }
 
     #[cfg(feature = "random")]
@@ -192,8 +168,8 @@ mod test {
         // Sanity check that sampling and inverting from sample are equivalent
         macro_rules! test_hsl {
             ( $x:expr, $y:expr ) => {{
-                let hsl: Hsl = sample_hsl(RgbHue::from(0.0), $x, $y);
-                let a = invert_hsl_sample(hsl.saturation, hsl.lightness);
+                let hsl = sample_hsl($x, $y);
+                let a = invert_hsl_sample(hsl);
                 assert_relative_eq!(a.0, $x);
                 assert_relative_eq!(a.1, $y);
             }};
@@ -214,36 +190,5 @@ mod test {
         test_hsl!(0.9802381158, 0.9742974964);
         test_hsl!(0.1666129293, 0.4396910574);
         test_hsl!(0.6190216210, 0.7175675180);
-    }
-
-    #[cfg(feature = "random")]
-    #[allow(clippy::excessive_precision)]
-    #[test]
-    fn hsluv_sampling() {
-        // Sanity check that sampling and inverting from sample are equivalent
-        macro_rules! test_hsluv {
-            ( $x:expr, $y:expr ) => {{
-                let hsluv: Hsluv = sample_hsluv(LuvHue::from(0.0), $x, $y);
-                let a = invert_hsluv_sample(hsluv.saturation, hsluv.l);
-                assert_relative_eq!(a.0, $x);
-                assert_relative_eq!(a.1, $y);
-            }};
-        }
-
-        test_hsluv!(0.8464721407, 0.8271899200);
-        test_hsluv!(0.8797234442, 0.4924621591);
-        test_hsluv!(0.9179406120, 0.8771350605);
-        test_hsluv!(0.5458023108, 0.1154283005);
-        test_hsluv!(0.2691241774, 0.7881780600);
-        test_hsluv!(0.2085030453, 0.9975406626);
-        test_hsluv!(0.8483632811, 0.4955013942);
-        test_hsluv!(0.0857919040, 0.0652214785);
-        test_hsluv!(0.7152662838, 0.2788421565);
-        test_hsluv!(0.2973598808, 0.5585230243);
-        test_hsluv!(0.0936619602, 0.7289450731);
-        test_hsluv!(0.4364395449, 0.9362269009);
-        test_hsluv!(0.9802381158, 0.9742974964);
-        test_hsluv!(0.1666129293, 0.4396910574);
-        test_hsluv!(0.6190216210, 0.7175675180);
     }
 }

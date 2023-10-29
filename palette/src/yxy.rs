@@ -2,15 +2,6 @@
 
 use core::marker::PhantomData;
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     convert::{FromColorUnclamped, IntoColorUnclamped},
@@ -172,29 +163,7 @@ impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
 impl_reference_component_methods!(Yxy<Wp>, [x, y, luma], white_point);
 impl_struct_of_arrays_methods!(Yxy<Wp>, [x, y, luma], white_point);
 
-impl<Wp, T> From<(T, T, T)> for Yxy<Wp, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Yxy<Wp, T>> for (T, T, T) {
-    fn from(color: Yxy<Wp, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Yxy<Wp, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Yxy<Wp, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Yxy<Wp> as (T, T, T));
 
 impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T> {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
@@ -317,89 +286,7 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Yxy<Wp, T>> for Standard
-where
-    Standard: Distribution<T>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Yxy<Wp, T> {
-        Yxy {
-            x: rng.gen(),
-            y: rng.gen(),
-            luma: rng.gen(),
-            white_point: PhantomData,
-        }
-    }
-}
-
-/// Sample CIE 1931 Yxy (xyY) colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformYxy<Wp, T>
-where
-    T: SampleUniform,
-{
-    x: Uniform<T>,
-    y: Uniform<T>,
-    luma: Uniform<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Yxy<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type Sampler = UniformYxy<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformYxy<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type X = Yxy<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformYxy {
-            x: Uniform::new::<_, T>(low.x.clone(), high.x.clone()),
-            y: Uniform::new::<_, T>(low.y.clone(), high.y.clone()),
-            luma: Uniform::new::<_, T>(low.luma.clone(), high.luma.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformYxy {
-            x: Uniform::new_inclusive::<_, T>(low.x.clone(), high.x.clone()),
-            y: Uniform::new_inclusive::<_, T>(low.y.clone(), high.y.clone()),
-            luma: Uniform::new_inclusive::<_, T>(low.luma.clone(), high.luma.clone()),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Yxy<Wp, T> {
-        Yxy {
-            x: self.x.sample(rng),
-            y: self.y.sample(rng),
-            luma: self.luma.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+impl_rand_traits_cartesian!(UniformYxy, Yxy<Wp> {x, y, luma} phantom: white_point: PhantomData<Wp>);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Yxy<Wp, T> where T: bytemuck::Zeroable {}
@@ -504,7 +391,6 @@ mod test {
         assert_eq!(deserialized, Yxy::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Yxy<D65, f32> {
             x: (0.0, 1.0),

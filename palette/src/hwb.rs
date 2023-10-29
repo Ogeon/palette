@@ -3,16 +3,7 @@
 use core::{any::TypeId, marker::PhantomData};
 
 #[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
-#[cfg(feature = "random")]
-use crate::num::MinMax;
+use crate::hsv::UniformHsv;
 
 use crate::{
     angle::FromAngle,
@@ -296,30 +287,7 @@ where
     }
 }
 
-impl<S, T, H: Into<RgbHue<T>>> From<(H, T, T)> for Hwb<S, T> {
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T> From<Hwb<S, T>> for (RgbHue<T>, T, T) {
-    fn from(color: Hwb<S, T>) -> (RgbHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<S, T, H: Into<RgbHue<T>>, A> From<(H, T, T, A)> for Alpha<Hwb<S, T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
-    fn from(color: Alpha<Hwb<S, T>, A>) -> (RgbHue<T>, T, T, A) {
-        color.into_components()
-    }
-}
-
+impl_tuple_conversion_hue!(Hwb<S> as (H, T, T), RgbHue);
 impl_is_within_bounds_hwb!(Hwb<S> where T: Stimulus);
 impl_clamp_hwb!(Hwb<S> phantom: standard where T: Stimulus);
 
@@ -377,96 +345,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<S, T> Distribution<Hwb<S, T>> for Standard
-where
-    Standard: Distribution<Hsv<S, T>>,
-    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
-        Hwb::from_color_unclamped(rng.gen::<Hsv<S, T>>())
+impl_rand_traits_hwb_cone!(
+    UniformHwb,
+    Hwb<S>,
+    UniformHsv,
+    Hsv {
+        height: value,
+        radius: saturation
     }
-}
-
-/// Sample HWB colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformHwb<S, T>
-where
-    T: SampleUniform,
-{
-    sampler: crate::hsv::UniformHsv<S, T>,
-    space: PhantomData<S>,
-}
-
-#[cfg(feature = "random")]
-impl<S, T> SampleUniform for Hwb<S, T>
-where
-    T: MinMax + Clone + SampleUniform,
-    Hsv<S, T>: FromColorUnclamped<Hwb<S, T>> + SampleBorrow<Hsv<S, T>>,
-    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
-    crate::hsv::UniformHsv<S, T>: UniformSampler<X = Hsv<S, T>>,
-{
-    type Sampler = UniformHwb<S, T>;
-}
-
-#[cfg(feature = "random")]
-impl<S, T> UniformSampler for UniformHwb<S, T>
-where
-    T: MinMax + Clone + SampleUniform,
-    Hsv<S, T>: FromColorUnclamped<Hwb<S, T>> + SampleBorrow<Hsv<S, T>>,
-    Hwb<S, T>: FromColorUnclamped<Hsv<S, T>>,
-    crate::hsv::UniformHsv<S, T>: UniformSampler<X = Hsv<S, T>>,
-{
-    type X = Hwb<S, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low_input = Hsv::from_color_unclamped(low_b.borrow().clone());
-        let high_input = Hsv::from_color_unclamped(high_b.borrow().clone());
-
-        let (low_saturation, high_saturation) = low_input.saturation.min_max(high_input.saturation);
-        let (low_value, high_value) = low_input.value.min_max(high_input.value);
-
-        let low = Hsv::new(low_input.hue, low_saturation, low_value);
-        let high = Hsv::new(high_input.hue, high_saturation, high_value);
-
-        let sampler = crate::hsv::UniformHsv::<S, _>::new(low, high);
-
-        UniformHwb {
-            sampler,
-            space: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low_input = Hsv::from_color_unclamped(low_b.borrow().clone());
-        let high_input = Hsv::from_color_unclamped(high_b.borrow().clone());
-
-        let (low_saturation, high_saturation) = low_input.saturation.min_max(high_input.saturation);
-        let (low_value, high_value) = low_input.value.min_max(high_input.value);
-
-        let low = Hsv::new(low_input.hue, low_saturation, low_value);
-        let high = Hsv::new(high_input.hue, high_saturation, high_value);
-
-        let sampler = crate::hsv::UniformHsv::<S, _>::new_inclusive(low, high);
-
-        UniformHwb {
-            sampler,
-            space: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hwb<S, T> {
-        Hwb::from_color_unclamped(self.sampler.sample(rng))
-    }
-}
+    phantom: standard: PhantomData<S>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<S, T> bytemuck::Zeroable for Hwb<S, T> where T: bytemuck::Zeroable {}
@@ -590,7 +478,6 @@ mod test {
         assert_eq!(deserialized, Hwb::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Hwb<crate::encoding::Srgb, f32> as crate::rgb::Rgb {
             red: (0.0, 1.0),

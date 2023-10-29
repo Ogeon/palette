@@ -1352,7 +1352,6 @@ mod test {
         test_roundtrip!(Struct { value: 0.1 }, "Struct");
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Rgba<Srgb, f32> {
             red: (0.0, 1.0),

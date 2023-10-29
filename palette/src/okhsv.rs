@@ -75,14 +75,7 @@ pub struct Okhsv<T = f32> {
     pub value: T,
 }
 
-impl<T, H: Into<OklabHue<T>>> From<(H, T, T)> for Okhsv<T>
-where
-    T: Zero + MinMax,
-{
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
+impl_tuple_conversion_hue!(Okhsv as (H, T, T), OklabHue);
 
 impl<T> HasBoolMask for Okhsv<T>
 where

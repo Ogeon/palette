@@ -2,18 +2,6 @@
 
 use core::{marker::PhantomData, ops::Mul};
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
-#[cfg(feature = "random")]
-use crate::num::Sqrt;
-
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
@@ -192,29 +180,7 @@ where
     }
 }
 
-impl<Wp, T, H: Into<LuvHue<T>>> From<(T, T, H)> for Lchuv<Wp, T> {
-    fn from(components: (T, T, H)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Lchuv<Wp, T>> for (T, T, LuvHue<T>) {
-    fn from(color: Lchuv<Wp, T>) -> (T, T, LuvHue<T>) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, H: Into<LuvHue<T>>, A> From<(T, T, H, A)> for Alpha<Lchuv<Wp, T>, A> {
-    fn from(components: (T, T, H, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Lchuv<Wp, T>, A>> for (T, T, LuvHue<T>, A) {
-    fn from(color: Alpha<Lchuv<Wp, T>, A>) -> (T, T, LuvHue<T>, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Lchuv<Wp> as (T, T, H), LuvHue);
 
 impl_is_within_bounds! {
     Lchuv<Wp> {
@@ -282,100 +248,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Lchuv<Wp, T>> for Standard
-where
-    T: Real + Zero + Sqrt + core::ops::Mul<Output = T>,
-    Standard: Distribution<T> + Distribution<LuvHue<T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: rng.gen::<T>() * Lchuv::<Wp, T>::max_l(),
-            chroma: rng.gen::<T>().sqrt() * Lchuv::<Wp, T>::max_chroma(),
-            hue: rng.gen::<LuvHue<T>>(),
-            white_point: PhantomData,
-        }
+impl_rand_traits_cylinder!(
+    UniformLchuv,
+    Lchuv<Wp> {
+        hue: UniformLuvHue => LuvHue,
+        height: l => [|l: T| l * Lchuv::<Wp, T>::max_l()],
+        radius: chroma => [|chroma| chroma *  Lchuv::<Wp, T>::max_chroma()]
     }
-}
-
-/// Sample CIE L\*C\*uv h°uv colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformLchuv<Wp, T>
-where
-    T: SampleUniform,
-{
-    l: Uniform<T>,
-    chroma: Uniform<T>,
-    hue: crate::hues::UniformLuvHue<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Lchuv<Wp, T>
-where
-    T: Sqrt + Mul<Output = T> + Clone + SampleUniform,
-    LuvHue<T>: SampleBorrow<LuvHue<T>>,
-    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
-{
-    type Sampler = UniformLchuv<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformLchuv<Wp, T>
-where
-    T: Sqrt + Mul<Output = T> + Clone + SampleUniform,
-    LuvHue<T>: SampleBorrow<LuvHue<T>>,
-    crate::hues::UniformLuvHue<T>: UniformSampler<X = LuvHue<T>>,
-{
-    type X = Lchuv<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLchuv {
-            l: Uniform::new::<_, T>(low.l, high.l),
-            chroma: Uniform::new::<_, T>(
-                low.chroma.clone() * low.chroma,
-                high.chroma.clone() * high.chroma,
-            ),
-            hue: crate::hues::UniformLuvHue::new(low.hue, high.hue),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLchuv {
-            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
-            chroma: Uniform::new_inclusive::<_, T>(
-                low.chroma.clone() * low.chroma,
-                high.chroma.clone() * high.chroma,
-            ),
-            hue: crate::hues::UniformLuvHue::new_inclusive(low.hue, high.hue),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lchuv<Wp, T> {
-        Lchuv {
-            l: self.l.sample(rng),
-            chroma: self.chroma.sample(rng).sqrt(),
-            hue: self.hue.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+    where T: Real + Zero + core::ops::Mul<Output = T>,
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Lchuv<Wp, T> where T: bytemuck::Zeroable {}
@@ -469,7 +351,6 @@ mod test {
         assert_eq!(deserialized, Lchuv::new(70.0, 80.0, 130.0));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Lchuv<D65, f32> as crate::Luv {
             l: (0.0, 100.0),

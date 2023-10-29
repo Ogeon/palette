@@ -24,15 +24,3 @@ impl<T, A> Alpha<Oklab<T>, A> {
         Self::new(l, a, b, alpha)
     }
 }
-
-impl<T, A> From<(T, T, T, A)> for Alpha<Oklab<T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T, A> From<Alpha<Oklab<T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Oklab<T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
