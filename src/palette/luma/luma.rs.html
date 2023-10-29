@@ -936,124 +936,12 @@
 <a href="#936" id="936">936</a>
 <a href="#937" id="937">937</a>
 <a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
-<a href="#942" id="942">942</a>
-<a href="#943" id="943">943</a>
-<a href="#944" id="944">944</a>
-<a href="#945" id="945">945</a>
-<a href="#946" id="946">946</a>
-<a href="#947" id="947">947</a>
-<a href="#948" id="948">948</a>
-<a href="#949" id="949">949</a>
-<a href="#950" id="950">950</a>
-<a href="#951" id="951">951</a>
-<a href="#952" id="952">952</a>
-<a href="#953" id="953">953</a>
-<a href="#954" id="954">954</a>
-<a href="#955" id="955">955</a>
-<a href="#956" id="956">956</a>
-<a href="#957" id="957">957</a>
-<a href="#958" id="958">958</a>
-<a href="#959" id="959">959</a>
-<a href="#960" id="960">960</a>
-<a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
-<a href="#988" id="988">988</a>
-<a href="#989" id="989">989</a>
-<a href="#990" id="990">990</a>
-<a href="#991" id="991">991</a>
-<a href="#992" id="992">992</a>
-<a href="#993" id="993">993</a>
-<a href="#994" id="994">994</a>
-<a href="#995" id="995">995</a>
-<a href="#996" id="996">996</a>
-<a href="#997" id="997">997</a>
-<a href="#998" id="998">998</a>
-<a href="#999" id="999">999</a>
-<a href="#1000" id="1000">1000</a>
-<a href="#1001" id="1001">1001</a>
-<a href="#1002" id="1002">1002</a>
-<a href="#1003" id="1003">1003</a>
-<a href="#1004" id="1004">1004</a>
-<a href="#1005" id="1005">1005</a>
-<a href="#1006" id="1006">1006</a>
-<a href="#1007" id="1007">1007</a>
-<a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
-<a href="#1013" id="1013">1013</a>
-<a href="#1014" id="1014">1014</a>
-<a href="#1015" id="1015">1015</a>
-<a href="#1016" id="1016">1016</a>
-<a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a>
-<a href="#1020" id="1020">1020</a>
-<a href="#1021" id="1021">1021</a>
-<a href="#1022" id="1022">1022</a>
-<a href="#1023" id="1023">1023</a>
-<a href="#1024" id="1024">1024</a>
-<a href="#1025" id="1025">1025</a>
-<a href="#1026" id="1026">1026</a>
-<a href="#1027" id="1027">1027</a>
-<a href="#1028" id="1028">1028</a>
-<a href="#1029" id="1029">1029</a>
-<a href="#1030" id="1030">1030</a>
-<a href="#1031" id="1031">1031</a>
-<a href="#1032" id="1032">1032</a>
-<a href="#1033" id="1033">1033</a>
-<a href="#1034" id="1034">1034</a>
-<a href="#1035" id="1035">1035</a>
-<a href="#1036" id="1036">1036</a>
-<a href="#1037" id="1037">1037</a>
-<a href="#1038" id="1038">1038</a>
-<a href="#1039" id="1039">1039</a>
-<a href="#1040" id="1040">1040</a>
-<a href="#1041" id="1041">1041</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     convert::TryInto,
     fmt,
     marker::PhantomData,
     ops::{Add, Div},
-};
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-</span><span class="kw">use </span>rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
 };
 
 <span class="kw">use crate</span>::{
@@ -1605,29 +1493,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S, T&gt; From&lt;(T,)&gt; <span class="kw">for </span>Luma&lt;S, T&gt; {
-    <span class="kw">fn </span>from(components: (T,)) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::from_components(components)
-    }
-}
-
-<span class="kw">impl</span>&lt;S, T&gt; From&lt;Luma&lt;S, T&gt;&gt; <span class="kw">for </span>(T,) {
-    <span class="kw">fn </span>from(color: Luma&lt;S, T&gt;) -&gt; (T,) {
-        color.into_components()
-    }
-}
-
-<span class="kw">impl</span>&lt;S, T, A&gt; From&lt;(T, A)&gt; <span class="kw">for </span>Alpha&lt;Luma&lt;S, T&gt;, A&gt; {
-    <span class="kw">fn </span>from(components: (T, A)) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::from_components(components)
-    }
-}
-
-<span class="kw">impl</span>&lt;S, T, A&gt; From&lt;Alpha&lt;Luma&lt;S, T&gt;, A&gt;&gt; <span class="kw">for </span>(T, A) {
-    <span class="kw">fn </span>from(color: Alpha&lt;Luma&lt;S, T&gt;, A&gt;) -&gt; (T, A) {
-        color.into_components()
-    }
-}
+<span class="macro">impl_tuple_conversion!</span>(Luma&lt;S&gt; <span class="kw">as </span>(T));
 
 <span class="macro">impl_is_within_bounds! </span>{
     Luma&lt;S&gt; {
@@ -1883,78 +1749,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; Distribution&lt;Luma&lt;S, T&gt;&gt; <span class="kw">for </span>Standard
-<span class="kw">where
-    </span>Standard: Distribution&lt;T&gt;,
-{
-    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Luma&lt;S, T&gt; {
-        Luma {
-            luma: rng.gen(),
-            standard: PhantomData,
-        }
-    }
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-</span><span class="kw">pub struct </span>UniformLuma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: SampleUniform,
-{
-    luma: Uniform&lt;T&gt;,
-    standard: PhantomData&lt;S&gt;,
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; SampleUniform <span class="kw">for </span>Luma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: SampleUniform + Clone,
-{
-    <span class="kw">type </span>Sampler = UniformLuma&lt;S, T&gt;;
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-</span><span class="kw">impl</span>&lt;S, T&gt; UniformSampler <span class="kw">for </span>UniformLuma&lt;S, T&gt;
-<span class="kw">where
-    </span>T: SampleUniform + Clone,
-{
-    <span class="kw">type </span>X = Luma&lt;S, T&gt;;
-
-    <span class="kw">fn </span>new&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
-    </span><span class="kw">where
-        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
-        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
-    {
-        <span class="kw">let </span>low = low_b.borrow();
-        <span class="kw">let </span>high = high_b.borrow();
-
-        UniformLuma {
-            luma: Uniform::new::&lt;<span class="kw">_</span>, T&gt;(low.luma.clone(), high.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    <span class="kw">fn </span>new_inclusive&lt;B1, B2&gt;(low_b: B1, high_b: B2) -&gt; <span class="self">Self
-    </span><span class="kw">where
-        </span>B1: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
-        B2: SampleBorrow&lt;<span class="self">Self</span>::X&gt; + Sized,
-    {
-        <span class="kw">let </span>low = low_b.borrow();
-        <span class="kw">let </span>high = high_b.borrow();
-
-        UniformLuma {
-            luma: Uniform::new_inclusive::&lt;<span class="kw">_</span>, T&gt;(low.luma.clone(), high.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; Luma&lt;S, T&gt; {
-        Luma {
-            luma: <span class="self">self</span>.luma.sample(rng),
-            standard: PhantomData,
-        }
-    }
-}
+<span class="macro">impl_rand_traits_cartesian!</span>(UniformLuma, Luma&lt;S&gt; {luma} phantom: standard: PhantomData&lt;S&gt;);
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
 </span><span class="kw">unsafe impl</span>&lt;S, T&gt; bytemuck::Zeroable <span class="kw">for </span>Luma&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
@@ -2071,8 +1866,7 @@
         <span class="macro">assert_eq!</span>(deserialized, Luma::&lt;Srgb&gt;::new(<span class="number">0.3</span>));
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
-    </span><span class="macro">test_uniform_distribution! </span>{
+    <span class="macro">test_uniform_distribution! </span>{
         Luma&lt;Srgb, f32&gt; {
             luma: (<span class="number">0.0</span>, <span class="number">1.0</span>)
         },
