@@ -206,29 +206,7 @@ where
     }
 }
 
-impl<Wp, T> From<(T, T, T)> for Lab<Wp, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Lab<Wp, T>> for (T, T, T) {
-    fn from(color: Lab<Wp, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Lab<Wp, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Lab<Wp, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Lab<Wp, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Lab<Wp> as (T, T, T));
 
 impl_is_within_bounds! {
     Lab<Wp> {

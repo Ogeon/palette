@@ -163,29 +163,7 @@ impl<Wp, T, A> Alpha<Yxy<Wp, T>, A> {
 impl_reference_component_methods!(Yxy<Wp>, [x, y, luma], white_point);
 impl_struct_of_arrays_methods!(Yxy<Wp>, [x, y, luma], white_point);
 
-impl<Wp, T> From<(T, T, T)> for Yxy<Wp, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Yxy<Wp, T>> for (T, T, T) {
-    fn from(color: Yxy<Wp, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Yxy<Wp, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Yxy<Wp, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Yxy<Wp, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Yxy<Wp> as (T, T, T));
 
 impl<Wp, T> FromColorUnclamped<Yxy<Wp, T>> for Yxy<Wp, T> {
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {

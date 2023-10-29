@@ -440,29 +440,7 @@ where
     }
 }
 
-impl<S, T, H: Into<RgbHue<T>>> From<(H, T, T)> for Hsl<S, T> {
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T> From<Hsl<S, T>> for (RgbHue<T>, T, T) {
-    fn from(color: Hsl<S, T>) -> (RgbHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<S, T, H: Into<RgbHue<T>>, A> From<(H, T, T, A)> for Alpha<Hsl<S, T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T, A> From<Alpha<Hsl<S, T>, A>> for (RgbHue<T>, T, T, A) {
-    fn from(color: Alpha<Hsl<S, T>, A>) -> (RgbHue<T>, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Hsl<S> as (H, T, T), RgbHue);
 
 impl_is_within_bounds! {
     Hsl<S> {

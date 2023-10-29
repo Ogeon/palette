@@ -555,29 +555,7 @@ where
     }
 }
 
-impl<S, T> From<(T,)> for Luma<S, T> {
-    fn from(components: (T,)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T> From<Luma<S, T>> for (T,) {
-    fn from(color: Luma<S, T>) -> (T,) {
-        color.into_components()
-    }
-}
-
-impl<S, T, A> From<(T, A)> for Alpha<Luma<S, T>, A> {
-    fn from(components: (T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T, A> From<Alpha<Luma<S, T>, A>> for (T, A) {
-    fn from(color: Alpha<Luma<S, T>, A>) -> (T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Luma<S> as (T));
 
 impl_is_within_bounds! {
     Luma<S> {

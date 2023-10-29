@@ -287,30 +287,7 @@ where
     }
 }
 
-impl<S, T, H: Into<RgbHue<T>>> From<(H, T, T)> for Hwb<S, T> {
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T> From<Hwb<S, T>> for (RgbHue<T>, T, T) {
-    fn from(color: Hwb<S, T>) -> (RgbHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<S, T, H: Into<RgbHue<T>>, A> From<(H, T, T, A)> for Alpha<Hwb<S, T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T, A> From<Alpha<Hwb<S, T>, A>> for (RgbHue<T>, T, T, A) {
-    fn from(color: Alpha<Hwb<S, T>, A>) -> (RgbHue<T>, T, T, A) {
-        color.into_components()
-    }
-}
-
+impl_tuple_conversion_hue!(Hwb<S> as (H, T, T), RgbHue);
 impl_is_within_bounds_hwb!(Hwb<S> where T: Stimulus);
 impl_clamp_hwb!(Hwb<S> phantom: standard where T: Stimulus);
 

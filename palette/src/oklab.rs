@@ -510,17 +510,7 @@ where
     }
 }
 
-impl<T> From<(T, T, T)> for Oklab<T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T> From<Oklab<T>> for (T, T, T) {
-    fn from(color: Oklab<T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Oklab as (T, T, T));
 
 impl<T> HasBoolMask for Oklab<T>
 where

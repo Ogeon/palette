@@ -318,29 +318,7 @@ where
     }
 }
 
-impl<Wp, T> From<(T, T, T)> for Xyz<Wp, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Xyz<Wp, T>> for (T, T, T) {
-    fn from(color: Xyz<Wp, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, A> From<(T, T, T, A)> for Alpha<Xyz<Wp, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Xyz<Wp, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Xyz<Wp, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion!(Xyz<Wp> as (T, T, T));
 
 impl_is_within_bounds! {
     Xyz<Wp> {

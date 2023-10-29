@@ -67,21 +67,3 @@ impl<T, A> Alpha<Okhsv<T>, A> {
         Self::new(hue, saturation, value, alpha)
     }
 }
-
-impl<T> From<Okhsv<T>> for (OklabHue<T>, T, T) {
-    fn from(color: Okhsv<T>) -> (OklabHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<T, H: Into<OklabHue<T>>, A> From<(H, T, T, A)> for Alpha<Okhsv<T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T, A> From<Alpha<Okhsv<T>, A>> for (OklabHue<T>, T, T, A) {
-    fn from(color: Alpha<Okhsv<T>, A>) -> (OklabHue<T>, T, T, A) {
-        color.into_components()
-    }
-}

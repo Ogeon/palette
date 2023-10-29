@@ -170,29 +170,7 @@ where
     }
 }
 
-impl<Wp, T, H: Into<LuvHue<T>>> From<(H, T, T)> for Hsluv<Wp, T> {
-    fn from(components: (H, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Hsluv<Wp, T>> for (LuvHue<T>, T, T) {
-    fn from(color: Hsluv<Wp, T>) -> (LuvHue<T>, T, T) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, H: Into<LuvHue<T>>, A> From<(H, T, T, A)> for Alpha<Hsluv<Wp, T>, A> {
-    fn from(components: (H, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Hsluv<Wp, T>, A>> for (LuvHue<T>, T, T, A) {
-    fn from(color: Alpha<Hsluv<Wp, T>, A>) -> (LuvHue<T>, T, T, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Hsluv<Wp> as (H, T, T), LuvHue);
 
 impl_is_within_bounds! {
     Hsluv<Wp> {

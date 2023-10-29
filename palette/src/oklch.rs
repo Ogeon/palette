@@ -123,17 +123,7 @@ where
     }
 }
 
-impl<T, H: Into<OklabHue<T>>> From<(T, T, H)> for Oklch<T> {
-    fn from(components: (T, T, H)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T> From<Oklch<T>> for (T, T, OklabHue<T>) {
-    fn from(color: Oklch<T>) -> (T, T, OklabHue<T>) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Oklch as (T, T, H), OklabHue);
 
 impl<T> HasBoolMask for Oklch<T>
 where

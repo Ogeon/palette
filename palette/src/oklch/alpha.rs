@@ -35,15 +35,3 @@ impl<T, A> Alpha<Oklch<T>, A> {
         Self::new(l, chroma, hue, alpha)
     }
 }
-
-impl<T, H: Into<OklabHue<T>>, A> From<(T, T, H, A)> for Alpha<Oklch<T>, A> {
-    fn from(components: (T, T, H, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<T, A> From<Alpha<Oklch<T>, A>> for (T, T, OklabHue<T>, A) {
-    fn from(color: Alpha<Oklch<T>, A>) -> (T, T, OklabHue<T>, A) {
-        color.into_components()
-    }
-}

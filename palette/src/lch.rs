@@ -172,29 +172,7 @@ where
     }
 }
 
-impl<Wp, T, H: Into<LabHue<T>>> From<(T, T, H)> for Lch<Wp, T> {
-    fn from(components: (T, T, H)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T> From<Lch<Wp, T>> for (T, T, LabHue<T>) {
-    fn from(color: Lch<Wp, T>) -> (T, T, LabHue<T>) {
-        color.into_components()
-    }
-}
-
-impl<Wp, T, H: Into<LabHue<T>>, A> From<(T, T, H, A)> for Alpha<Lch<Wp, T>, A> {
-    fn from(components: (T, T, H, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<Wp, T, A> From<Alpha<Lch<Wp, T>, A>> for (T, T, LabHue<T>, A) {
-    fn from(color: Alpha<Lch<Wp, T>, A>) -> (T, T, LabHue<T>, A) {
-        color.into_components()
-    }
-}
+impl_tuple_conversion_hue!(Lch<Wp> as (T, T, H), LabHue);
 
 impl_is_within_bounds! {
     Lch<Wp> {

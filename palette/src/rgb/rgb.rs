@@ -993,30 +993,7 @@ impl_color_sub!(Rgb<S>, [red, green, blue], standard);
 impl_color_mul!(Rgb<S>, [red, green, blue], standard);
 impl_color_div!(Rgb<S>, [red, green, blue], standard);
 
-impl<S, T> From<(T, T, T)> for Rgb<S, T> {
-    fn from(components: (T, T, T)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T> From<Rgb<S, T>> for (T, T, T) {
-    fn from(color: Rgb<S, T>) -> (T, T, T) {
-        color.into_components()
-    }
-}
-
-impl<S, T, A> From<(T, T, T, A)> for Alpha<Rgb<S, T>, A> {
-    fn from(components: (T, T, T, A)) -> Self {
-        Self::from_components(components)
-    }
-}
-
-impl<S, T, A> From<Alpha<Rgb<S, T>, A>> for (T, T, T, A) {
-    fn from(color: Alpha<Rgb<S, T>, A>) -> (T, T, T, A) {
-        color.into_components()
-    }
-}
-
+impl_tuple_conversion!(Rgb<S> as (T, T, T));
 impl_array_casts!(Rgb<S, T>, [T; 3]);
 impl_simd_array_conversion!(Rgb<S>, [red, green, blue], standard);
 impl_struct_of_array_traits!(Rgb<S>, [red, green, blue], standard);
