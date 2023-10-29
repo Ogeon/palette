@@ -2,18 +2,6 @@
 
 use core::{any::TypeId, marker::PhantomData};
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
-#[cfg(feature = "random")]
-use crate::num::{Cbrt, Powi, Sqrt};
-
 use crate::{
     angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
@@ -554,94 +542,15 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<S, T> Distribution<Hsv<S, T>> for Standard
-where
-    T: Cbrt + Sqrt,
-    Standard: Distribution<T> + Distribution<RgbHue<T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsv<S, T> {
-        crate::random_sampling::sample_hsv(rng.gen::<RgbHue<T>>(), rng.gen(), rng.gen())
+impl_rand_traits_hsv_cone!(
+    UniformHsv,
+    Hsv<S> {
+        hue: UniformRgbHue => RgbHue,
+        height: value,
+        radius: saturation
     }
-}
-
-/// Sample HSV colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformHsv<S, T>
-where
-    T: SampleUniform,
-{
-    hue: crate::hues::UniformRgbHue<T>,
-    u1: Uniform<T>,
-    u2: Uniform<T>,
-    space: PhantomData<S>,
-}
-
-#[cfg(feature = "random")]
-impl<S, T> SampleUniform for Hsv<S, T>
-where
-    T: Cbrt + Sqrt + Powi + Clone + SampleUniform,
-    RgbHue<T>: SampleBorrow<RgbHue<T>>,
-    crate::hues::UniformRgbHue<T>: UniformSampler<X = RgbHue<T>>,
-{
-    type Sampler = UniformHsv<S, T>;
-}
-
-#[cfg(feature = "random")]
-impl<S, T> UniformSampler for UniformHsv<S, T>
-where
-    T: Cbrt + Sqrt + Powi + Clone + SampleUniform,
-    RgbHue<T>: SampleBorrow<RgbHue<T>>,
-    crate::hues::UniformRgbHue<T>: UniformSampler<X = RgbHue<T>>,
-{
-    type X = Hsv<S, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min) = (low.value.powi(3), low.saturation.powi(2));
-        let (r1_max, r2_max) = (high.value.powi(3), high.saturation.powi(2));
-
-        UniformHsv {
-            hue: crate::hues::UniformRgbHue::new(low.hue, high.hue),
-            u1: Uniform::new::<_, T>(r1_min, r1_max),
-            u2: Uniform::new::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min) = (low.value.powi(3), low.saturation.powi(2));
-        let (r1_max, r2_max) = (high.value.powi(3), high.saturation.powi(2));
-
-        UniformHsv {
-            hue: crate::hues::UniformRgbHue::new_inclusive(low.hue, high.hue),
-            u1: Uniform::new_inclusive::<_, T>(r1_min, r1_max),
-            u2: Uniform::new_inclusive::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsv<S, T> {
-        crate::random_sampling::sample_hsv(
-            self.hue.sample(rng),
-            self.u1.sample(rng),
-            self.u2.sample(rng),
-        )
-    }
-}
+    phantom: standard: PhantomData<S>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<S, T> bytemuck::Zeroable for Hsv<S, T> where T: bytemuck::Zeroable {}

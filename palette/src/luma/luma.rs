@@ -6,15 +6,6 @@ use core::{
     ops::{Add, Div},
 };
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed, UintCast},
@@ -842,78 +833,7 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<S, T> Distribution<Luma<S, T>> for Standard
-where
-    Standard: Distribution<T>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luma<S, T> {
-        Luma {
-            luma: rng.gen(),
-            standard: PhantomData,
-        }
-    }
-}
-
-#[cfg(feature = "random")]
-pub struct UniformLuma<S, T>
-where
-    T: SampleUniform,
-{
-    luma: Uniform<T>,
-    standard: PhantomData<S>,
-}
-
-#[cfg(feature = "random")]
-impl<S, T> SampleUniform for Luma<S, T>
-where
-    T: SampleUniform + Clone,
-{
-    type Sampler = UniformLuma<S, T>;
-}
-
-#[cfg(feature = "random")]
-impl<S, T> UniformSampler for UniformLuma<S, T>
-where
-    T: SampleUniform + Clone,
-{
-    type X = Luma<S, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformLuma {
-            luma: Uniform::new::<_, T>(low.luma.clone(), high.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformLuma {
-            luma: Uniform::new_inclusive::<_, T>(low.luma.clone(), high.luma.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luma<S, T> {
-        Luma {
-            luma: self.luma.sample(rng),
-            standard: PhantomData,
-        }
-    }
-}
+impl_rand_traits_cartesian!(UniformLuma, Luma<S> {luma} phantom: standard: PhantomData<S>);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<S, T> bytemuck::Zeroable for Luma<S, T> where T: bytemuck::Zeroable {}

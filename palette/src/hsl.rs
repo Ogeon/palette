@@ -2,18 +2,6 @@
 
 use core::{any::TypeId, marker::PhantomData, ops::Not};
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
-#[cfg(feature = "random")]
-use crate::num::{Cbrt, Powi, Sqrt};
-
 use crate::{
     angle::{FromAngle, RealAngle},
     bool_mask::{BitOps, BoolMask, HasBoolMask, LazySelect, Select},
@@ -547,101 +535,15 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<S, T> Distribution<Hsl<S, T>> for Standard
-where
-    T: Real + One + Cbrt + Sqrt + Arithmetics + PartialCmp + Clone,
-    T::Mask: LazySelect<T> + Clone,
-    Standard: Distribution<T> + Distribution<RgbHue<T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsl<S, T> {
-        crate::random_sampling::sample_hsl(rng.gen::<RgbHue<T>>(), rng.gen(), rng.gen())
+impl_rand_traits_hsl_bicone!(
+    UniformHsl,
+    Hsl<S> {
+        hue: UniformRgbHue => RgbHue,
+        height: lightness,
+        radius: saturation
     }
-}
-
-/// Sample HSL colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformHsl<S, T>
-where
-    T: SampleUniform,
-{
-    hue: crate::hues::UniformRgbHue<T>,
-    u1: Uniform<T>,
-    u2: Uniform<T>,
-    space: PhantomData<S>,
-}
-
-#[cfg(feature = "random")]
-impl<S, T> SampleUniform for Hsl<S, T>
-where
-    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
-    T::Mask: LazySelect<T> + Clone,
-    RgbHue<T>: SampleBorrow<RgbHue<T>>,
-    crate::hues::UniformRgbHue<T>: UniformSampler<X = RgbHue<T>>,
-{
-    type Sampler = UniformHsl<S, T>;
-}
-
-#[cfg(feature = "random")]
-impl<S, T> UniformSampler for UniformHsl<S, T>
-where
-    T: Real + One + Cbrt + Sqrt + Powi + Arithmetics + PartialCmp + Clone + SampleUniform,
-    T::Mask: LazySelect<T> + Clone,
-    RgbHue<T>: SampleBorrow<RgbHue<T>>,
-    crate::hues::UniformRgbHue<T>: UniformSampler<X = RgbHue<T>>,
-{
-    type X = Hsl<S, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        use crate::random_sampling::invert_hsl_sample;
-
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min) = invert_hsl_sample(low.saturation, low.lightness);
-        let (r1_max, r2_max) = invert_hsl_sample(high.saturation, high.lightness);
-
-        UniformHsl {
-            hue: crate::hues::UniformRgbHue::new(low.hue, high.hue),
-            u1: Uniform::new::<_, T>(r1_min, r1_max),
-            u2: Uniform::new::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        use crate::random_sampling::invert_hsl_sample;
-
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        let (r1_min, r2_min) = invert_hsl_sample(low.saturation, low.lightness);
-        let (r1_max, r2_max) = invert_hsl_sample(high.saturation, high.lightness);
-
-        UniformHsl {
-            hue: crate::hues::UniformRgbHue::new_inclusive(low.hue, high.hue),
-            u1: Uniform::new_inclusive::<_, T>(r1_min, r1_max),
-            u2: Uniform::new_inclusive::<_, T>(r2_min, r2_max),
-            space: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Hsl<S, T> {
-        crate::random_sampling::sample_hsl(
-            self.hue.sample(rng),
-            self.u1.sample(rng),
-            self.u2.sample(rng),
-        )
-    }
-}
+    phantom: standard: PhantomData<S>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<S, T> bytemuck::Zeroable for Hsl<S, T> where T: bytemuck::Zeroable {}

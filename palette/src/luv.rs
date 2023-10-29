@@ -5,18 +5,6 @@ use core::{
     ops::{Add, Mul, Neg},
 };
 
-#[cfg(feature = "random")]
-use core::ops::Sub;
-
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
@@ -326,90 +314,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Luv<Wp, T>> for Standard
-where
-    T: Real + Mul<Output = T> + Sub<Output = T>,
-    Standard: Distribution<T>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
-        Luv {
-            l: rng.gen() * T::from_f64(100.0),
-            u: rng.gen() * T::from_f64(260.0) - T::from_f64(84.0),
-            v: rng.gen() * T::from_f64(243.0) - T::from_f64(135.0),
-            white_point: PhantomData,
-        }
+impl_rand_traits_cartesian!(
+    UniformLuv,
+    Luv<Wp> {
+        l => [|x| x * T::from_f64(100.0)],
+        u => [|x| x * T::from_f64(260.0) - T::from_f64(84.0)],
+        v => [|x| x * T::from_f64(243.0) - T::from_f64(135.0)]
     }
-}
-
-/// Sample CIE L\*u\*v\* (CIELUV) colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformLuv<Wp, T>
-where
-    T: SampleUniform,
-{
-    l: Uniform<T>,
-    u: Uniform<T>,
-    v: Uniform<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Luv<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type Sampler = UniformLuv<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformLuv<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type X = Luv<Wp, T>;
-
-    fn new<B1, B2>(low_v: B1, high_v: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_v.borrow().clone();
-        let high = high_v.borrow().clone();
-
-        UniformLuv {
-            l: Uniform::new::<_, T>(low.l, high.l),
-            u: Uniform::new::<_, T>(low.u, high.u),
-            v: Uniform::new::<_, T>(low.v, high.v),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_v: B1, high_v: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_v.borrow().clone();
-        let high = high_v.borrow().clone();
-
-        UniformLuv {
-            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
-            u: Uniform::new_inclusive::<_, T>(low.u, high.u),
-            v: Uniform::new_inclusive::<_, T>(low.v, high.v),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Luv<Wp, T> {
-        Luv {
-            l: self.l.sample(rng),
-            u: self.u.sample(rng),
-            v: self.v.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+    where T: Real + core::ops::Sub<Output = T> + core::ops::Mul<Output = T>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Luv<Wp, T> where T: bytemuck::Zeroable {}

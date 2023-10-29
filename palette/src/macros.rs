@@ -40,7 +40,5 @@ mod reference_component;
 mod copy_clone;
 #[macro_use]
 mod hue;
-
-#[cfg(feature = "random")]
 #[macro_use]
 mod random;

@@ -5,15 +5,6 @@ use core::{
     ops::{BitAnd, BitOr},
 };
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
@@ -348,100 +339,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Lch<Wp, T>> for Standard
-where
-    T: Real + Zero + Sqrt + core::ops::Mul<Output = T>,
-    Standard: Distribution<T> + Distribution<LabHue<T>>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
-        Lch {
-            l: rng.gen::<T>() * Lch::<Wp, T>::max_l(),
-            chroma: rng.gen::<T>().sqrt() * Lch::<Wp, T>::max_chroma(),
-            hue: rng.gen::<LabHue<T>>(),
-            white_point: PhantomData,
-        }
+impl_rand_traits_cylinder!(
+    UniformLch,
+    Lch<Wp> {
+        hue: UniformLabHue => LabHue,
+        height: l => [|l: T| l * Lch::<Wp, T>::max_l()],
+        radius: chroma => [|chroma| chroma *  Lch::<Wp, T>::max_chroma()]
     }
-}
-
-/// Sample CIE L\*C\*h° colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformLch<Wp, T>
-where
-    T: SampleUniform,
-{
-    l: Uniform<T>,
-    chroma: Uniform<T>,
-    hue: crate::hues::UniformLabHue<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Lch<Wp, T>
-where
-    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
-    LabHue<T>: SampleBorrow<LabHue<T>>,
-    crate::hues::UniformLabHue<T>: UniformSampler<X = LabHue<T>>,
-{
-    type Sampler = UniformLch<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformLch<Wp, T>
-where
-    T: Sqrt + core::ops::Mul<Output = T> + Clone + SampleUniform,
-    LabHue<T>: SampleBorrow<LabHue<T>>,
-    crate::hues::UniformLabHue<T>: UniformSampler<X = LabHue<T>>,
-{
-    type X = Lch<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLch {
-            l: Uniform::new::<_, T>(low.l, high.l),
-            chroma: Uniform::new::<_, T>(
-                low.chroma.clone() * low.chroma,
-                high.chroma.clone() * high.chroma,
-            ),
-            hue: crate::hues::UniformLabHue::new(low.hue, high.hue),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLch {
-            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
-            chroma: Uniform::new_inclusive::<_, T>(
-                low.chroma.clone() * low.chroma,
-                high.chroma.clone() * high.chroma,
-            ),
-            hue: crate::hues::UniformLabHue::new_inclusive(low.hue, high.hue),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lch<Wp, T> {
-        Lch {
-            l: self.l.sample(rng),
-            chroma: self.chroma.sample(rng).sqrt(),
-            hue: self.hue.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+    where T: Real + Zero + core::ops::Mul<Output = T>,
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Lch<Wp, T> where T: bytemuck::Zeroable {}

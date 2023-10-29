@@ -8,15 +8,6 @@ use core::{
     str::FromStr,
 };
 
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     alpha::Alpha,
     angle::{RealAngle, UnsignedAngle},
@@ -1276,88 +1267,7 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<S, T> Distribution<Rgb<S, T>> for Standard
-where
-    Standard: Distribution<T>,
-{
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rgb<S, T> {
-        Rgb {
-            red: rng.gen(),
-            green: rng.gen(),
-            blue: rng.gen(),
-            standard: PhantomData,
-        }
-    }
-}
-
-#[cfg(feature = "random")]
-pub struct UniformRgb<S, T>
-where
-    T: SampleUniform,
-{
-    red: Uniform<T>,
-    green: Uniform<T>,
-    blue: Uniform<T>,
-    standard: PhantomData<S>,
-}
-
-#[cfg(feature = "random")]
-impl<S, T> SampleUniform for Rgb<S, T>
-where
-    T: SampleUniform + Clone,
-{
-    type Sampler = UniformRgb<S, T>;
-}
-
-#[cfg(feature = "random")]
-impl<S, T> UniformSampler for UniformRgb<S, T>
-where
-    T: SampleUniform + Clone,
-{
-    type X = Rgb<S, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformRgb {
-            red: Uniform::new::<_, T>(low.red.clone(), high.red.clone()),
-            green: Uniform::new::<_, T>(low.green.clone(), high.green.clone()),
-            blue: Uniform::new::<_, T>(low.blue.clone(), high.blue.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow();
-        let high = high_b.borrow();
-
-        UniformRgb {
-            red: Uniform::new_inclusive::<_, T>(low.red.clone(), high.red.clone()),
-            green: Uniform::new_inclusive::<_, T>(low.green.clone(), high.green.clone()),
-            blue: Uniform::new_inclusive::<_, T>(low.blue.clone(), high.blue.clone()),
-            standard: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rgb<S, T> {
-        Rgb {
-            red: self.red.sample(rng),
-            green: self.green.sample(rng),
-            blue: self.blue.sample(rng),
-            standard: PhantomData,
-        }
-    }
-}
+impl_rand_traits_cartesian!(UniformRgb, Rgb<S> {red, green, blue} phantom: standard: PhantomData<S>);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<S, T> bytemuck::Zeroable for Rgb<S, T> where T: bytemuck::Zeroable {}

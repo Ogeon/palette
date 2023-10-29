@@ -5,18 +5,6 @@ use core::{
     ops::{Add, BitAnd, BitOr, Mul, Neg},
 };
 
-#[cfg(feature = "random")]
-use core::ops::Sub;
-
-#[cfg(feature = "random")]
-use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
-    },
-    Rng,
-};
-
 use crate::{
     angle::RealAngle,
     bool_mask::{HasBoolMask, LazySelect},
@@ -401,91 +389,16 @@ where
     }
 }
 
-#[cfg(feature = "random")]
-impl<Wp, T> Distribution<Lab<Wp, T>> for Standard
-where
-    T: Real + Sub<Output = T> + Mul<Output = T>,
-    Standard: Distribution<T>,
-{
-    // `a` and `b` both range from (-128.0, 127.0)
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lab<Wp, T> {
-        Lab {
-            l: rng.gen() * T::from_f64(100.0),
-            a: rng.gen() * T::from_f64(255.0) - T::from_f64(128.0),
-            b: rng.gen() * T::from_f64(255.0) - T::from_f64(128.0),
-            white_point: PhantomData,
-        }
+impl_rand_traits_cartesian!(
+    UniformLab,
+    Lab<Wp> {
+        l => [|x| x * T::from_f64(100.0)],
+        a => [|x| x * T::from_f64(255.0) - T::from_f64(128.0)],
+        b => [|x| x * T::from_f64(255.0) - T::from_f64(128.0)]
     }
-}
-
-/// Sample CIE L\*a\*b\* (CIELAB) colors uniformly.
-#[cfg(feature = "random")]
-pub struct UniformLab<Wp, T>
-where
-    T: SampleUniform,
-{
-    l: Uniform<T>,
-    a: Uniform<T>,
-    b: Uniform<T>,
-    white_point: PhantomData<Wp>,
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> SampleUniform for Lab<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type Sampler = UniformLab<Wp, T>;
-}
-
-#[cfg(feature = "random")]
-impl<Wp, T> UniformSampler for UniformLab<Wp, T>
-where
-    T: Clone + SampleUniform,
-{
-    type X = Lab<Wp, T>;
-
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLab {
-            l: Uniform::new::<_, T>(low.l, high.l),
-            a: Uniform::new::<_, T>(low.a, high.a),
-            b: Uniform::new::<_, T>(low.b, high.b),
-            white_point: PhantomData,
-        }
-    }
-
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
-    where
-        B1: SampleBorrow<Self::X> + Sized,
-        B2: SampleBorrow<Self::X> + Sized,
-    {
-        let low = low_b.borrow().clone();
-        let high = high_b.borrow().clone();
-
-        UniformLab {
-            l: Uniform::new_inclusive::<_, T>(low.l, high.l),
-            a: Uniform::new_inclusive::<_, T>(low.a, high.a),
-            b: Uniform::new_inclusive::<_, T>(low.b, high.b),
-            white_point: PhantomData,
-        }
-    }
-
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Lab<Wp, T> {
-        Lab {
-            l: self.l.sample(rng),
-            a: self.a.sample(rng),
-            b: self.b.sample(rng),
-            white_point: PhantomData,
-        }
-    }
-}
+    phantom: white_point: PhantomData<Wp>
+    where T: Real + core::ops::Sub<Output = T> + core::ops::Mul<Output = T>
+);
 
 #[cfg(feature = "bytemuck")]
 unsafe impl<Wp, T> bytemuck::Zeroable for Lab<Wp, T> where T: bytemuck::Zeroable {}
