@@ -522,7 +522,6 @@ mod test {
         assert_eq!(deserialized, Xyz::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Xyz<D65, f32> {
             x: (0.0, D65::get_xyz().x),

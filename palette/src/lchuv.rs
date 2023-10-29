@@ -351,7 +351,6 @@ mod test {
         assert_eq!(deserialized, Lchuv::new(70.0, 80.0, 130.0));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Lchuv<D65, f32> as crate::Luv {
             l: (0.0, 100.0),

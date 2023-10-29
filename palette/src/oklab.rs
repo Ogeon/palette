@@ -703,7 +703,6 @@ mod test {
         assert_eq!(deserialized, Oklab::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Oklab {
             l: (0.0, 1.0),

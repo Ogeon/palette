@@ -391,7 +391,6 @@ mod test {
         assert_eq!(deserialized, Yxy::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Yxy<D65, f32> {
             x: (0.0, 1.0),

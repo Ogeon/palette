@@ -656,7 +656,6 @@ mod test {
         assert_eq!(deserialized, Hsv::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Hsv<crate::encoding::Srgb, f32> as crate::rgb::Rgb {
             red: (0.0, 1.0),

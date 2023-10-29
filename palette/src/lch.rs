@@ -480,7 +480,6 @@ mod test {
         assert_eq!(deserialized, Lch::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Lch<D65, f32> as crate::Lab {
             l: (0.0, 100.0),

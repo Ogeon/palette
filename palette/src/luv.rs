@@ -415,14 +415,13 @@ mod test {
         assert_eq!(deserialized, Luv::new(80.0, 20.0, 30.0));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
-    Luv<D65, f32> {
-    l: (0.0, 100.0),
-    u: (-84.0, 176.0),
-    v: (-135.0, 108.0)
-    },
-    min: Luv::new(0.0f32, -84.0, -135.0),
-    max: Luv::new(100.0, 176.0, 108.0)
+        Luv<D65, f32> {
+        l: (0.0, 100.0),
+        u: (-84.0, 176.0),
+        v: (-135.0, 108.0)
+        },
+        min: Luv::new(0.0f32, -84.0, -135.0),
+        max: Luv::new(100.0, 176.0, 108.0)
     }
 }

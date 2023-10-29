@@ -928,7 +928,6 @@ mod test {
         assert_eq!(deserialized, Luma::<Srgb>::new(0.3));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Luma<Srgb, f32> {
             luma: (0.0, 1.0)

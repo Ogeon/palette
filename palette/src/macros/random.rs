@@ -1,3 +1,4 @@
+#[cfg(feature = "random")]
 #[cfg(test)]
 macro_rules! assert_uniform_distribution {
     ($bins:expr) => {{

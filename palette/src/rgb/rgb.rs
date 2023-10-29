@@ -1515,7 +1515,6 @@ mod test {
         );
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Rgb<Srgb, f32> {
             red: (0.0, 1.0),

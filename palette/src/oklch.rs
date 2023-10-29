@@ -283,7 +283,6 @@ mod test {
         );
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Oklch<f32> as crate::Oklab {
             l: (0.0, 1.0),

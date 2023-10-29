@@ -474,7 +474,6 @@ mod test {
         assert_eq!(deserialized, Lab::new(0.3, 0.8, 0.1));
     }
 
-    #[cfg(feature = "random")]
     test_uniform_distribution! {
         Lab<D65, f32> {
             l: (0.0, 100.0),
