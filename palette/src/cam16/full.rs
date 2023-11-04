@@ -8,9 +8,6 @@ use crate::{
 
 use super::{BakedParameters, IntoCam16, StaticWp};
 
-#[cfg(feature = "approx")]
-use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-
 /// The CIE CAM16 color appearance model.
 ///
 /// It's a set of six technically defined attributes that describe the
