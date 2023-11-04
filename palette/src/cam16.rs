@@ -11,8 +11,8 @@ use crate::{
 pub use full::*;
 pub use parameters::*;
 pub use partial::*;
-pub use ucs_jab::*;
-pub use ucs_jmh::*;
+pub use ucs_jab::{Cam16UcsJab, Cam16UcsJaba, Iter as Cam16UcsJabIter, UniformCam16UcsJab};
+pub use ucs_jmh::{Cam16UcsJmh, Cam16UcsJmha, Iter as Cam16UcsJmhIter, UniformCam16UcsJmh};
 
 mod full;
 mod math;

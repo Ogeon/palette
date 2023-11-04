@@ -1,15 +1,22 @@
 use crate::{
     angle::RealAngle,
+    bool_mask::HasBoolMask,
     color_difference::{DeltaE, ImprovedDeltaE},
     convert::{FromColorUnclamped, IntoColorUnclamped},
-    hues::Cam16Hue,
-    num::{Arithmetics, Hypot, Ln, One, Real, Trigonometry},
+    hues::{Cam16Hue, Cam16HueIter},
+    num::{Arithmetics, Hypot, Ln, One, Real, Trigonometry, Zero},
+    Alpha,
 };
 
 use super::{Cam16UcsJab, Colorfulness, Lightness, PartialCam16Jmh};
 
+/// Polar CAM16-UCS with an alpha component. See the [`Cam16UcsJmha`
+/// implementation in `Alpha`](crate::Alpha#Cam16UcsJmha).
+pub type Cam16UcsJmha<T> = Alpha<Cam16UcsJmh<T>, T>;
+
 /// The polar form of CAM16-UCS, or J'M'h'.
-#[derive(Clone, Copy, Debug, WithAlpha, ArrayCast, FromColorUnclamped)]
+#[derive(Clone, Copy, Debug, Default, WithAlpha, ArrayCast, FromColorUnclamped)]
+#[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
     component = "T",
@@ -60,6 +67,71 @@ impl<T> Cam16UcsJmh<T> {
     }
 }
 
+impl<T> Cam16UcsJmh<T>
+where
+    T: Zero + Real,
+{
+    /// Return the `lightness` value minimum.
+    pub fn min_lightness() -> T {
+        T::zero()
+    }
+
+    /// Return the `lightness` value maximum.
+    pub fn max_lightness() -> T {
+        T::from_f64(100.0)
+    }
+
+    /// Return the `colorfulness` value minimum.
+    pub fn min_colorfulness() -> T {
+        T::zero()
+    }
+
+    /// Return a `colorfulness` value maximum that includes the sRGB gamut.
+    ///
+    /// ***Note:** This is entirely arbitrary and only for use in `Lighten`,
+    /// `Darken` and random generation. Colorfulness doesn't have a well defined
+    /// upper bound.*
+    pub fn max_srgb_colorfulness() -> T {
+        // Based on a plot from https://facelessuser.github.io/coloraide/colors/cam16_ucs/
+        T::from_f64(50.0)
+    }
+}
+
+///<span id="Cam16UcsJmha"></span>[`Cam16UcsJmha`](crate::cam16::Cam16UcsJmha) implementations.
+impl<T, A> Alpha<Cam16UcsJmh<T>, A> {
+    /// Create a CAM16-UCS J' M' h' color with transparency.
+    pub fn new<H: Into<Cam16Hue<T>>>(lightness: T, colorfulness: T, hue: H, alpha: A) -> Self {
+        Self::new_const(lightness, colorfulness, hue.into(), alpha)
+    }
+
+    /// Create a CAM16-UCS J' M' h' color with transparency. This is the same as
+    /// `Cam16UcsJmha::new` without the generic hue type. It's temporary until
+    /// `const fn` supports traits.
+    pub const fn new_const(lightness: T, colorfulness: T, hue: Cam16Hue<T>, alpha: A) -> Self {
+        Self {
+            color: Cam16UcsJmh::new_const(lightness, colorfulness, hue),
+            alpha,
+        }
+    }
+
+    /// Convert to a `(J', M', h', a)` tuple.
+    pub fn into_components(self) -> (T, T, Cam16Hue<T>, A) {
+        (
+            self.color.lightness,
+            self.color.colorfulness,
+            self.color.hue,
+            self.alpha,
+        )
+    }
+
+    /// Convert from a `(J', M', h', a)` tuple.
+    pub fn from_components<H: Into<Cam16Hue<T>>>(
+        (lightness, colorfulness, hue, alpha): (T, T, H, A),
+    ) -> Self {
+        Self::new(lightness, colorfulness, hue, alpha)
+    }
+}
+
 impl<T> FromColorUnclamped<Cam16UcsJmh<T>> for Cam16UcsJmh<T> {
     fn from_color_unclamped(val: Cam16UcsJmh<T>) -> Self {
         val
@@ -97,9 +169,6 @@ where
     }
 }
 
-impl_color_add!(Cam16UcsJmh, [lightness, colorfulness, hue]);
-impl_color_sub!(Cam16UcsJmh, [lightness, colorfulness, hue]);
-
 impl<T> DeltaE for Cam16UcsJmh<T>
 where
     Cam16UcsJab<T>: DeltaE<Scalar = T> + FromColorUnclamped<Self>,
@@ -124,6 +193,70 @@ where
     }
 }
 
+impl<T> HasBoolMask for Cam16UcsJmh<T>
+where
+    T: HasBoolMask,
+{
+    type Mask = T::Mask;
+}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<T> bytemuck::Zeroable for Cam16UcsJmh<T> where T: bytemuck::Zeroable {}
+
+#[cfg(feature = "bytemuck")]
+unsafe impl<T> bytemuck::Pod for Cam16UcsJmh<T> where T: bytemuck::Pod {}
+
+// Macro implementations
+
+impl_reference_component_methods_hue!(Cam16UcsJmh, [lightness, colorfulness]);
+impl_struct_of_arrays_methods_hue!(Cam16UcsJmh, [lightness, colorfulness]);
+impl_tuple_conversion_hue!(Cam16UcsJmh as (T, T, H), Cam16Hue);
+
+impl_is_within_bounds! {
+    Cam16UcsJmh {
+        lightness => [Self::min_lightness(), Self::max_lightness()],
+        colorfulness => [Self::min_colorfulness(), None]
+    }
+    where T: Zero + Real
+}
+impl_clamp! {
+    Cam16UcsJmh {
+        lightness => [Self::min_lightness(), Self::max_lightness()],
+        colorfulness => [Self::min_colorfulness()]
+    }
+    other {hue}
+    where T: Zero + Real
+}
+
+impl_mix_hue!(Cam16UcsJmh {
+    lightness,
+    colorfulness
+});
+impl_lighten!(Cam16UcsJmh increase {lightness => [Self::min_lightness(), Self::max_lightness()]} other {hue, colorfulness});
+impl_saturate!(Cam16UcsJmh increase {colorfulness => [Self::min_colorfulness(), Self::max_srgb_colorfulness()]} other {hue, lightness});
+impl_hue_ops!(Cam16UcsJmh, Cam16Hue);
+
+impl_color_add!(Cam16UcsJmh, [lightness, colorfulness, hue]);
+impl_color_sub!(Cam16UcsJmh, [lightness, colorfulness, hue]);
+
+impl_array_casts!(Cam16UcsJmh<T>, [T; 3]);
+impl_simd_array_conversion_hue!(Cam16UcsJmh, [lightness, colorfulness]);
+impl_struct_of_array_traits_hue!(Cam16UcsJmh, Cam16HueIter, [lightness, colorfulness]);
+
+impl_eq_hue!(Cam16UcsJmh, Cam16Hue, [lightness, colorfulness, hue]);
+
+impl_rand_traits_cylinder!(
+    UniformCam16UcsJmh,
+    Cam16UcsJmh {
+        hue: UniformCam16Hue => Cam16Hue,
+        height: lightness => [|l: T| l * Cam16UcsJmh::<T>::max_lightness()],
+        radius: colorfulness => [|c| c *  Cam16UcsJmh::<T>::max_srgb_colorfulness()]
+    }
+    where T: Real + Zero + core::ops::Mul<Output = T>,
+);
+
+// Unit tests
+
 #[cfg(test)]
 mod test {
     use crate::{
@@ -131,6 +264,27 @@ mod test {
         color_difference::{DeltaE, ImprovedDeltaE},
         convert::IntoColorUnclamped,
     };
+
+    test_convert_into_from_xyz!(Cam16UcsJmh<f32>);
+
+    #[test]
+    fn ranges() {
+        assert_ranges! {
+            Cam16UcsJmh<f64>;
+            clamped {
+                lightness: 0.0 => 100.0
+            }
+            clamped_min {
+                colorfulness: 0.0 => 200.0
+            }
+            unclamped {
+                hue: -360.0 => 360.0
+            }
+        }
+    }
+
+    raw_pixel_conversion_tests!(Cam16UcsJmh<>: lightness, colorfulness, hue);
+    raw_pixel_conversion_fail_tests!(Cam16UcsJmh<>: lightness, colorfulness, hue);
 
     #[test]
     fn delta_e_large_hue_diff() {
@@ -202,5 +356,53 @@ mod test {
                 assert_relative_eq!(delta_e_jab, delta_e_jmh, epsilon = 0.0000000000001);
             }
         }
+    }
+
+    struct_of_arrays_tests!(
+        Cam16UcsJmh,
+        Cam16UcsJmh::new(0.1f32, 0.2, 0.3),
+        Cam16UcsJmh::new(0.2, 0.3, 0.4),
+        Cam16UcsJmh::new(0.3, 0.4, 0.5)
+    );
+
+    mod alpha {
+        use crate::cam16::Cam16UcsJmha;
+
+        struct_of_arrays_tests!(
+            Cam16UcsJmha,
+            Cam16UcsJmha::new(0.1f32, 0.2, 0.3, 0.4),
+            Cam16UcsJmha::new(0.2, 0.3, 0.4, 0.5),
+            Cam16UcsJmha::new(0.3, 0.4, 0.5, 0.6)
+        );
+    }
+
+    #[cfg(feature = "serializing")]
+    #[test]
+    fn serialize() {
+        let serialized = ::serde_json::to_string(&Cam16UcsJmh::new(0.3, 0.8, 0.1)).unwrap();
+
+        assert_eq!(
+            serialized,
+            r#"{"lightness":0.3,"colorfulness":0.8,"hue":0.1}"#
+        );
+    }
+
+    #[cfg(feature = "serializing")]
+    #[test]
+    fn deserialize() {
+        let deserialized: Cam16UcsJmh<f32> =
+            ::serde_json::from_str(r#"{"lightness":0.3,"colorfulness":0.8,"hue":0.1}"#).unwrap();
+
+        assert_eq!(deserialized, Cam16UcsJmh::new(0.3, 0.8, 0.1));
+    }
+
+    test_uniform_distribution! {
+        Cam16UcsJmh<f32> as crate::cam16::Cam16UcsJab<f32> {
+            lightness: (0.0, 100.0),
+            a: (-30.0, 30.0),
+            b: (-30.0, 30.0),
+        },
+        min: Cam16UcsJmh::new(0.0f32, 0.0, 0.0),
+        max: Cam16UcsJmh::new(100.0, 50.0, 360.0)
     }
 }
