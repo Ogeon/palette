@@ -21,6 +21,7 @@ pub type Cam16UcsJaba<T> = Alpha<Cam16UcsJab<T>, T>;
 #[palette(
     palette_internal,
     component = "T",
+    color_group = "cam16",
     skip_derives(Cam16UcsJmh, Cam16UcsJab)
 )]
 #[repr(C)]
@@ -246,8 +247,6 @@ impl_rand_traits_cartesian!(
 #[cfg(test)]
 mod test {
     use super::Cam16UcsJab;
-
-    test_convert_into_from_xyz!(Cam16UcsJab<f32>);
 
     #[test]
     fn ranges() {

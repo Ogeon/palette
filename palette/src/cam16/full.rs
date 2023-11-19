@@ -1,32 +1,40 @@
 use crate::{
-    convert::FromColorUnclamped,
+    angle::{RealAngle, SignedAngle},
+    bool_mask::LazySelect,
     hues::Cam16Hue,
-    num::{Clamp, ClampAssign, Zero},
-    white_point::WhitePoint,
-    Xyz,
+    num::{
+        Abs, Arithmetics, Clamp, ClampAssign, One, PartialCmp, Powf, Real, Signum, Sqrt,
+        Trigonometry, Zero,
+    },
+    white_point, Xyz,
 };
 
-use super::{BakedParameters, IntoCam16, StaticWp};
+use super::{
+    BakedParameters, Cam16Chromaticity, Cam16Luminance, PartialCam16, WhitePointParameter,
+};
 
 /// The CIE CAM16 color appearance model.
 ///
 /// It's a set of six technically defined attributes that describe the
 /// appearance of a color under certain viewing conditions, and it's a successor
 /// of [CIECAM02](https://en.wikipedia.org/wiki/CIECAM02). The viewing
-/// conditions are defined using [`Parameters`][super::Parameters] and two set
-/// of `Cam16` attributes are only really comparable if they were calculated
-/// from the same set of viewing condition parameters. The implementations of
-/// [`FromColor`][crate::FromColor], [`IntoColor`][crate::IntoColor], etc. use
-/// `Parameters::default()` as their viewing conditions. See
-/// [`FromCam16`][super::FromCam16] and [`IntoCam16`] for options with more
-/// control over the parameters.
+/// conditions are defined using [`Parameters`][super::Parameters], and two sets
+/// of parameters can be used to translate the appearance of a color from one
+/// set of viewing conditions to another.
 ///
-/// Not all attributes are needed to be known to convert _from_ CAM16, since
-/// they are correlated and derived from each other. This library provides a
-/// separate [`PartialCam16`][super::PartialCam16] to make it easier to specify
+/// The use of the viewing conditions parameters sets `Cam16` and its derived
+/// types apart from most other color types in this library. It's, for example,
+/// not possible to use [`FromColor`][crate::FromColor] and friends to convert
+/// to and from other types, since that would require default viewing conditions
+/// to exist. Instead, the explicit [`Cam16::from_xyz`] and [`Cam16::into_xyz`]
+/// are there to bridge the gap.
+///
+/// Not all attributes are used when converting _from_ CAM16, since they are
+/// correlated and derived from each other. This library provides a separate
+/// [`PartialCam16`][super::PartialCam16] to make it easier to correctly specify
 /// a minimum attribute set.
-#[derive(Clone, Copy, Debug, WithAlpha, FromColorUnclamped)]
-#[palette(palette_internal, component = "T", skip_derives(Xyz, Cam16))]
+#[derive(Clone, Copy, Debug, WithAlpha)]
+#[palette(palette_internal, component = "T")]
 pub struct Cam16<T> {
     /// The [lightness](https://en.wikipedia.org/wiki/Lightness) (J) of the color.
     #[doc(alias = "J")]
@@ -51,6 +59,82 @@ pub struct Cam16<T> {
     /// The [saturation](https://en.wikipedia.org/wiki/Colorfulness#Saturation) (s) of the color.
     #[doc(alias = "s")]
     pub saturation: T,
+}
+
+impl<T> Cam16<T> {
+    /// Derive CIE CAM16 attributes for the provided color, under the provided
+    /// viewing conditions.
+    #[inline]
+    pub fn from_xyz<WpParam>(
+        color: Xyz<WpParam::StaticWp, T>,
+        parameters: impl Into<BakedParameters<WpParam, T>>,
+    ) -> Self
+    where
+        WpParam: WhitePointParameter<T>,
+        T: Real + Arithmetics + Powf + Sqrt + Abs + Signum + Trigonometry + RealAngle + Clone,
+    {
+        super::math::xyz_to_cam16(color.with_white_point(), parameters.into().inner)
+    }
+
+    /// Construct an XYZ color that matches these CIE CAM16 attributes, under
+    /// the provided viewing conditions.
+    ///
+    /// This assumes that all of the correlated attributes are consistent, as
+    /// only some of them are actually used. You may want to use
+    /// [`PartialCam16`] for more control over which set of attributes that
+    /// should be.
+    #[inline]
+    pub fn into_xyz<WpParam>(
+        self,
+        parameters: impl Into<BakedParameters<WpParam, T>>,
+    ) -> Xyz<WpParam::StaticWp, T>
+    where
+        WpParam: WhitePointParameter<T>,
+        T: Real
+            + One
+            + Zero
+            + Sqrt
+            + Powf
+            + Abs
+            + Signum
+            + Arithmetics
+            + Trigonometry
+            + RealAngle
+            + SignedAngle
+            + PartialCmp
+            + Clone,
+        T::Mask: LazySelect<Xyz<white_point::Any, T>>,
+    {
+        super::math::cam16_to_xyz(self.into(), parameters.into().inner).with_white_point()
+    }
+
+    /// Reconstruct a full set of CIE CAM16 attributes, using the original viewing conditions.
+    #[inline]
+    pub fn from_partial<WpParam, L, C>(
+        partial: PartialCam16<T, L, C>,
+        parameters: impl Into<BakedParameters<WpParam, T>>,
+    ) -> Self
+    where
+        WpParam: WhitePointParameter<T>,
+        T: Real + Zero + Arithmetics + Sqrt + PartialCmp + Clone,
+        T::Mask: LazySelect<T> + Clone,
+        L: Cam16Luminance<T>,
+        C: Cam16Chromaticity<T>,
+    {
+        partial.into_full(parameters)
+    }
+
+    /// Create a partial set of CIE CAM16 attributes.
+    ///
+    /// It's also possible to use `PartialCam16::from` or `Cam16::into`.
+    #[inline]
+    pub fn into_partial<L, C>(self) -> PartialCam16<T, L, C>
+    where
+        L: Cam16Luminance<T>,
+        C: Cam16Chromaticity<T>,
+    {
+        PartialCam16::from_full(self)
+    }
 }
 
 impl<T> crate::Clamp for Cam16<T>
@@ -88,27 +172,10 @@ impl_eq_hue!(
     [lightness, chroma, brightness, colorfulness, saturation]
 );
 
-impl<T> FromColorUnclamped<Cam16<T>> for Cam16<T> {
-    fn from_color_unclamped(val: Cam16<T>) -> Self {
-        val
-    }
-}
-
-impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Cam16<T>
-where
-    Wp: WhitePoint<T>,
-    Xyz<Wp, T>: IntoCam16<StaticWp<Wp>, T>,
-    BakedParameters<StaticWp<Wp>, T>: Default,
-{
-    fn from_color_unclamped(val: Xyz<Wp, T>) -> Self {
-        val.into_cam16(BakedParameters::default())
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::{
-        cam16::{ChromaticityType, LuminanceType, PartialCam16},
+        cam16::{ChromaticityType, LuminanceType, Parameters, PartialCam16},
         convert::{FromColorUnclamped, IntoColorUnclamped},
         Srgb,
     };
@@ -118,8 +185,9 @@ mod test {
     macro_rules! assert_cam16_to_rgb {
         ($cam16:expr, $rgb:expr, $($params:tt)*) => {
             let cam16 = $cam16;
+            let parameters = Parameters::TEST_DEFAULTS;
 
-            let rgb: Srgb<f64> = cam16.into_color_unclamped();
+            let rgb: Srgb<f64> = cam16.into_xyz(parameters).into_color_unclamped();
             assert_relative_eq!(rgb, $rgb, $($params)*);
 
             let chromaticities = [
@@ -140,7 +208,7 @@ mod test {
                         luminance,
                     };
                     assert_relative_eq!(
-                        Srgb::<f64>::from_color_unclamped(dbg!(partial)),
+                        Srgb::<f64>::from_color_unclamped(dbg!(partial).into_xyz(parameters)),
                         $rgb,
                         $($params)*
                     );
@@ -152,7 +220,8 @@ mod test {
     #[test]
     fn example_blue() {
         // Uses the example color from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0x5588cc).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0x5588cc).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(
@@ -178,7 +247,8 @@ mod test {
     #[test]
     fn black() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0x000000).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0x000000).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(
@@ -204,7 +274,8 @@ mod test {
     #[test]
     fn white() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0xffffff).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0xffffff).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(
@@ -230,7 +301,8 @@ mod test {
     #[test]
     fn red() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0xff0000).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0xff0000).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(
@@ -252,7 +324,8 @@ mod test {
     #[test]
     fn green() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0x00ff00).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0x00ff00).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(
@@ -278,7 +351,8 @@ mod test {
     #[test]
     fn blue() {
         // Checks against the output from https://observablehq.com/@jrus/cam16
-        let mut cam16: Cam16<f64> = Srgb::from(0x0000ff).into_linear().into_color_unclamped();
+        let xyz = Srgb::from(0x0000ff).into_linear().into_color_unclamped();
+        let mut cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();
 
         assert_relative_eq!(

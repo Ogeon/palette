@@ -1,18 +1,14 @@
-use std::collections::HashSet;
-
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{parse_quote, DeriveInput, Generics, Ident, Result, Type};
 
-use crate::convert::util::WhitePointSource;
 use crate::meta::{
     parse_field_attributes, parse_namespaced_attributes, FieldAttributes, IdentOrIndex,
     TypeItemAttributes,
 };
 use crate::util;
-
-use crate::COLOR_TYPES;
+use crate::{color_types::ColorInfo, convert::util::WhitePointSource};
 
 use super::util::{component_type, find_nearest_color, get_convert_color_type, white_point_type};
 
@@ -46,18 +42,15 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
 
     let alpha_field = fields_meta.alpha_property;
 
-    // Assume conversion from Xyz by default
+    // Assume conversion from the root type (Xyz for the base group) by default
     if item_meta.skip_derives.is_empty() {
-        item_meta.skip_derives.insert("Xyz".into());
+        item_meta
+            .skip_derives
+            .insert(item_meta.color_group.get_group().root_type.name.into());
     }
 
-    let (all_from_impl_params, impl_params_errors) = prepare_from_impl(
-        &item_meta.skip_derives,
-        &component,
-        white_point,
-        &item_meta,
-        &generics,
-    );
+    let (all_from_impl_params, impl_params_errors) =
+        prepare_from_impl(&component, white_point, &item_meta, &generics);
 
     let mut implementations =
         generate_from_implementations(&ident, &generics, &item_meta, &all_from_impl_params);
@@ -97,21 +90,23 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
 }
 
 fn prepare_from_impl(
-    skip: &HashSet<String>,
     component: &Type,
     white_point: Option<(Type, WhitePointSource)>,
     meta: &TypeItemAttributes,
     generics: &Generics,
 ) -> (Vec<FromImplParameters>, Vec<syn::Error>) {
-    let included_colors = COLOR_TYPES.iter().filter(|&&color| !skip.contains(color));
+    let included_colors = meta
+        .color_group
+        .get_group()
+        .color_names()
+        .filter(|&color| !meta.skip_derives.contains(color.name));
 
     let mut parameters = Vec::new();
     let mut errors = Vec::new();
 
-    for &color_name in included_colors {
+    for color in included_colors {
         let impl_params = prepare_from_impl_for_pair(
-            color_name,
-            skip,
+            color,
             component,
             white_point.clone(),
             meta,
@@ -129,21 +124,20 @@ fn prepare_from_impl(
 }
 
 fn prepare_from_impl_for_pair(
-    color_name: &str,
-    skip: &HashSet<String>,
+    color: &ColorInfo,
     component: &Type,
     white_point: Option<(Type, WhitePointSource)>,
     meta: &TypeItemAttributes,
     mut generics: Generics,
 ) -> Result<Option<FromImplParameters>> {
     let linear_path = util::path(["encoding", "Linear"], meta.internal);
-    let nearest_color_name = find_nearest_color(color_name, skip)?;
+    let nearest_color_name = find_nearest_color(color.name, meta)?;
 
     // Figures out which white point the target type prefers, unless it's specified in `white_point`.
     let (white_point, white_point_source) = if let Some((white_point, source)) = white_point {
         (white_point, source)
     } else {
-        match color_name {
+        match color.name {
             "Oklab" | "Oklch" | "Okhsv" | "Okhsl" | "Okhwb" => (
                 util::path_type(&["white_point", "D65"], meta.internal),
                 WhitePointSource::ConcreteType,
@@ -173,7 +167,7 @@ fn prepare_from_impl_for_pair(
     };
 
     let (color_ty, mut used_input) = get_convert_color_type(
-        color_name,
+        color.name,
         &white_point,
         component,
         meta,
@@ -184,11 +178,11 @@ fn prepare_from_impl_for_pair(
     // Figures out the remaining preferred meta types. Failing to figure out
     // what they are is currently a hard error.
     let nearest_color_path = util::color_path(nearest_color_name, meta.internal);
-    let target_color_rgb_standard = match color_name {
+    let target_color_rgb_standard = match color.name {
         "Rgb" | "Hsl" | "Hsv" | "Hwb" => Some(parse_quote!(_S)),
         _ => None,
     };
-    let target_color_cam16_chromaticity = match color_name {
+    let target_color_cam16_chromaticity = match color.name {
         "PartialCam16" => Some(parse_quote!(_C)),
         "Cam16UcsJmh" | "Cam16UcsJab" => {
             let path = util::path(["cam16", "Colorfulness"], meta.internal);
@@ -196,7 +190,7 @@ fn prepare_from_impl_for_pair(
         }
         _ => None,
     };
-    let target_color_cam16_luminance = match color_name {
+    let target_color_cam16_luminance = match color.name {
         "PartialCam16" => Some(parse_quote!(_L)),
         "Cam16UcsJmh" | "Cam16UcsJab" => {
             let path = util::path(["cam16", "Lightness"], meta.internal);
@@ -215,7 +209,7 @@ fn prepare_from_impl_for_pair(
                             Span::call_site(),
                             format!(
                                 "could not determine which RGB standard to use when converting to and from `{}` via `{}`",
-                                color_name,
+                                color.name,
                                 nearest_color_name
                             ),
                         )
@@ -246,7 +240,7 @@ fn prepare_from_impl_for_pair(
                             Span::call_site(),
                             format!(
                                 "could not determine which CAM16 chromaticity to use when converting to and from `{}` via `{}`",
-                                color_name,
+                                color.name,
                                 nearest_color_name
                             ),
                         )
@@ -259,7 +253,7 @@ fn prepare_from_impl_for_pair(
                             Span::call_site(),
                             format!(
                                 "could not determine which CAM16 luminance to use when converting to and from `{}` via `{}`",
-                                color_name,
+                                color.name,
                                 nearest_color_name
                             ),
                         )

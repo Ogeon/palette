@@ -4,7 +4,7 @@ use quote::quote;
 use syn::{punctuated::Punctuated, spanned::Spanned, token::Comma, Expr, ExprLit};
 use syn::{Ident, Lit, Meta, MetaNameValue, Type};
 
-use crate::{COLOR_TYPES, REQUIRED_COLOR_FEATURES};
+use crate::color_types::{AvailableColorGroup, ColorError};
 
 use super::AttributeArgumentParser;
 
@@ -19,6 +19,7 @@ pub struct TypeItemAttributes {
     pub luma_standard: Option<Type>,
     pub cam16_chromaticity: Option<Type>,
     pub cam16_luminance: Option<Type>,
+    pub(crate) color_group: AvailableColorGroup,
 }
 
 impl AttributeArgumentParser for TypeItemAttributes {
@@ -34,27 +35,27 @@ impl AttributeArgumentParser for TypeItemAttributes {
 
                     let mut errors = Vec::new();
                     for skipped_color in skipped {
-                        if COLOR_TYPES
-                            .iter()
-                            .any(|valid_color| skipped_color == valid_color)
+                        self.skip_derives.insert(skipped_color.to_string());
+                        // Assumes that `color_group` has already been set.
+                        match self
+                            .color_group
+                            .get_group()
+                            .check_availability(&skipped_color.to_string())
                         {
-                            self.skip_derives.insert(skipped_color.to_string());
-                        } else if let Some(feature) = REQUIRED_COLOR_FEATURES
-                            .iter()
-                            .find_map(|(name, feature)| (skipped_color == name).then(|| feature))
-                        {
-                            errors.push(syn::Error::new(
-                                skipped_color.span(),
-                                format!(
-                                    "`{}` is only usable with the `{}` feature",
-                                    skipped_color, feature
-                                ),
-                            ));
-                        } else {
-                            errors.push(syn::Error::new(
+                            Ok(()) => {}
+                            Err(ColorError::UnknownColor) => errors.push(syn::Error::new(
                                 skipped_color.span(),
                                 format!("`{}` is not a valid color type", skipped_color),
-                            ));
+                            )),
+                            Err(ColorError::RequiresFeature(feature)) => {
+                                errors.push(syn::Error::new(
+                                    skipped_color.span(),
+                                    format!(
+                                        "`{}` is only usable with the `{}` feature",
+                                        skipped_color, feature
+                                    ),
+                                ))
+                            }
                         }
                     }
 
@@ -101,6 +102,49 @@ impl AttributeArgumentParser for TypeItemAttributes {
                     argument.span(),
                     "`cam16_luminance` is only usable with the `cam16` feature",
                 )]);
+            }
+            Some("color_group") => {
+                let mut errors = Vec::new();
+
+                // This makes validation easier.
+                if !self.skip_derives.is_empty() {
+                    errors.push(::syn::parse::Error::new(
+                        argument.span(),
+                        "expected `color_group` to be specified before `skip_derives`",
+                    ));
+                }
+
+                if let Meta::NameValue(MetaNameValue {
+                    value:
+                        Expr::Lit(ExprLit {
+                            lit: Lit::Str(string),
+                            ..
+                        }),
+                    ..
+                }) = argument
+                {
+                    self.color_group = match &*string.value() {
+                        "base" => AvailableColorGroup::Base,
+                        "cam16" => AvailableColorGroup::Cam16,
+                        _ => {
+                            errors.push(::syn::parse::Error::new(
+                                string.span(),
+                                "expected `\"base\"` or `\"cam16\"`",
+                            ));
+
+                            self.color_group
+                        }
+                    };
+                } else {
+                    errors.push(::syn::parse::Error::new(
+                        argument.span(),
+                        "expected `color_group = \"group_name\"`",
+                    ));
+                };
+
+                if !errors.is_empty() {
+                    return Err(errors);
+                }
             }
             Some("palette_internal") => {
                 if let Meta::Path(_) = argument {

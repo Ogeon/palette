@@ -154,6 +154,19 @@
 //! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard type
 //! that should be used when deriving, similar to `rgb_standard`.
 //!
+//! * `color_group = "group_name"`: A special option that tells the macro that
+//!   the color is not part of the "base group", if it's derived from something
+//!   other than `Xyz`. The current groups are `"base"` (default) and `"cam16"`.
+//!   Specify this before `skip_derives`.
+//!
+//! * `cam16_chromaticity = "some::cam16_chromaticity::Type`: Sets the
+//!   chromaticity type to use when converting to and from partial CIE CAM16.
+//!   This is only relevant if the color is part of the `cam16` group.
+//!
+//! * `cam16_luminance = "some::cam16_luminance::Type`: Sets the luminance type
+//!   to use when converting to and from partial CIE CAM16. This is only
+//!   relevant if the color is part of the `cam16` group.
+//!
 //! ### Field Attributes
 //!
 //! * `alpha`: Specifies field as the color's transparency value.

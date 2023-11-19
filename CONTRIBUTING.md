@@ -232,13 +232,9 @@ The central trait for color conversion is `FromColorUnclamped`. This should be d
 
 #### In The `palette_derive` Crate
 
-Add the type's name to `COLOR_TYPES` in `lib.rs`. This includes it in the list of possible derived conversions.
+Add the type's name to its color group (typically `BASE_COLORS`) in `color_types.rs`. This includes it in the list of possible derived conversions. The `preferred_source` tells the library how to find a path to the color type. Each color space has a "parent" space that all connects to `Xyz`. For example, `Hwb` connects to `Hsv`, which connects to `Rgb`, which connects to `Xyz`. The derived conversion code will backtrack as far towards `Xyz` as it needs, until it finds a way to convert to your type.
 
-Add the type's name and another type's name to `PREFERRED_CONVERSION_SOURCE` in `lib.rs`. This tells the library how to find a path to the color type. Each color space has a "parent" space that all connects to `Xyz`. For example, `Hwb` connects to `Hsv`, which connects to `Rgb`, which connects to `Xyz`. The derived conversion code will backtrack as far towards `Xyz` as it needs, until it finds a way to convert to your type.
-
-Add the type's name and a Cargo feature to `REQUIRED_COLOR_FEATURES` in `lib.rs` if it's optional. Optional color spaces should have a `#[cfg(feature = "feature_name")]` attribute on each of the above additions.
-
-Other special casing may be needed in other parts of the code, depending on the type.
+Other special casing may be needed in other parts of the code, depending on the type. This part can be confusing, so feel free to ask!
 
 #### In The `palette` Crate
 
@@ -248,6 +244,7 @@ In addition to that, add the following in the attribute:
 
 * `component = "T"` to point out the component type.
 * `white_point = "Wp"` and other meta info to point out the white point type, if necessary. See the list in the documentation or follow the error hints.
+* `color_group = "group"` if it's not part of the bas group, such as `"cam16"` if it's a CIE CAM16 derivative.
 * `skip_derives(Xyz, Hsv, Hsl)` with all color types you want to convert from with manual implementations.
 
 Add manual conversions for at least one color type and list it in `skip_derives`. `Xyz` is assumed if `skip_derives` is omitted. These are the minimum requirements:

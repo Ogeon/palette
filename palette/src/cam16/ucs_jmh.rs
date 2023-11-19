@@ -22,6 +22,7 @@ pub type Cam16UcsJmha<T> = Alpha<Cam16UcsJmh<T>, T>;
     component = "T",
     cam16_chromaticity = "Colorfulness<T>",
     cam16_luminance = "Lightness<T>",
+    color_group = "cam16",
     skip_derives(PartialCam16, Cam16UcsJmh, Cam16UcsJab)
 )]
 #[repr(C)]
@@ -264,8 +265,6 @@ mod test {
         color_difference::{DeltaE, ImprovedDeltaE},
         convert::IntoColorUnclamped,
     };
-
-    test_convert_into_from_xyz!(Cam16UcsJmh<f32>);
 
     #[test]
     fn ranges() {

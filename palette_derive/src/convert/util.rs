@@ -1,10 +1,10 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{parse_quote, GenericParam, Generics, Ident, Result, Type};
 
-use crate::{meta::TypeItemAttributes, util, PREFERRED_CONVERSION_SOURCE};
+use crate::{meta::TypeItemAttributes, util};
 
 pub fn white_point_type(
     white_point: Option<&Type>,
@@ -158,16 +158,16 @@ pub fn get_convert_color_type(
     }
 }
 
-pub fn find_nearest_color<'a>(color: &'a str, skip: &HashSet<String>) -> Result<&'a str> {
+pub fn find_nearest_color<'a>(color: &'a str, meta: &TypeItemAttributes) -> Result<&'a str> {
     let mut stack = vec![(color, 0)];
     let mut found = None;
     let mut visited = HashMap::new();
 
     // Make sure there is at least one valid color in the skip list
-    assert!(!skip.is_empty());
+    assert!(!meta.skip_derives.is_empty());
 
     while let Some((color, distance)) = stack.pop() {
-        if skip.contains(color) {
+        if meta.skip_derives.contains(color) {
             if let Some((_, found_distance)) = found {
                 if distance < found_distance {
                     found = Some((color, distance));
@@ -188,16 +188,16 @@ pub fn find_nearest_color<'a>(color: &'a str, skip: &HashSet<String>) -> Result<
         visited.insert(color, distance);
 
         // Start by pushing the plan B routes...
-        for &(destination, source) in PREFERRED_CONVERSION_SOURCE {
-            if color == source {
-                stack.push((destination, distance + 1));
+        for candidate in meta.color_group.get_group().colors {
+            if color == candidate.preferred_source {
+                stack.push((candidate.info.name, distance + 1));
             }
         }
 
         // ...then push the preferred routes. They will be popped first.
-        for &(destination, source) in PREFERRED_CONVERSION_SOURCE {
-            if color == destination {
-                stack.push((source, distance + 1));
+        for candidate in meta.color_group.get_group().colors {
+            if color == candidate.info.name {
+                stack.push((candidate.preferred_source, distance + 1));
             }
         }
     }

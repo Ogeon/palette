@@ -37,7 +37,6 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     component = "T",
     skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma)
 )]
-#[cfg_attr(feature = "cam16", palette(skip_derives(Cam16, PartialCam16)))]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32> {
     /// X is the scale of what can be seen as a response curve for the cone
@@ -316,36 +315,6 @@ where
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
-    }
-}
-
-#[cfg(feature = "cam16")]
-impl<Wp, T> FromColorUnclamped<crate::cam16::Cam16<T>> for Xyz<Wp, T>
-where
-    Wp: WhitePoint<T>,
-    Xyz<Wp, T>: crate::cam16::FromCam16<crate::cam16::StaticWp<Wp>, T>,
-    crate::cam16::BakedParameters<crate::cam16::StaticWp<Wp>, T>: Default,
-{
-    fn from_color_unclamped(val: crate::cam16::Cam16<T>) -> Self {
-        use crate::cam16::FromCam16;
-
-        Self::from_cam16(val, crate::cam16::BakedParameters::default())
-    }
-}
-
-#[cfg(feature = "cam16")]
-impl<Wp, T, L, C> FromColorUnclamped<crate::cam16::PartialCam16<T, L, C>> for Xyz<Wp, T>
-where
-    Wp: WhitePoint<T>,
-    L: crate::cam16::Cam16Luminance<T>,
-    C: crate::cam16::Cam16Chromaticity<T>,
-    Xyz<Wp, T>: crate::cam16::FromCam16<crate::cam16::StaticWp<Wp>, T>,
-    crate::cam16::BakedParameters<crate::cam16::StaticWp<Wp>, T>: Default,
-{
-    fn from_color_unclamped(val: crate::cam16::PartialCam16<T, L, C>) -> Self {
-        use crate::cam16::FromCam16;
-
-        Self::from_partial_cam16(val, crate::cam16::BakedParameters::default())
     }
 }
 
