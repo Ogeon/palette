@@ -141,6 +141,8 @@ where
         + PartialOrd,
     Oklab<T>: IntoColorUnclamped<LinSrgb<T>>,
 {
+    // Corresponds to `get_Cs` in the reference implementation. Assumes that
+    // `lightness != 1.0` and `lightness != 0.0`.
     pub fn from_normalized(lightness: T, a_: T, b_: T) -> Self {
         let cusp = LC::find_cusp(a_.clone(), b_.clone());
 

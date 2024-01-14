@@ -178,38 +178,38 @@ where
     fn from_color_unclamped(lab: Oklab<T>) -> Self {
         // refer to the SRGB reference-white-based lightness L_r as l for consistency with HSL
         let l = toe(lab.l.clone());
-
         let chroma = lab.get_chroma();
-        let hue = lab.get_hue();
-        if chroma.is_valid_divisor() {
-            let cs = ChromaValues::from_normalized(lab.l, lab.a / &chroma, lab.b / &chroma);
 
-            // Inverse of the interpolation in okhsl_to_srgb:
-
-            let mid = T::from_f64(0.8);
-            let mid_inv = T::from_f64(1.25);
-
-            let s = if chroma < cs.mid {
-                let k_1 = mid.clone() * cs.zero;
-                let k_2 = T::one() - k_1.clone() / cs.mid;
-
-                let t = chroma.clone() / (k_1 + k_2 * chroma);
-                t * mid
-            } else {
-                let k_0 = cs.mid.clone();
-                let k_1 = (T::one() - &mid) * (cs.mid.clone() * mid_inv).powi(2) / cs.zero;
-                let k_2 = T::one() - k_1.clone() / (cs.max - cs.mid);
-
-                let t = (chroma.clone() - &k_0) / (k_1 + k_2 * (chroma - k_0));
-                mid.clone() + (T::one() - mid) * t
-            };
-
-            Self::new(hue, s, l)
-        } else {
-            // `a` describes how green/red the color is, `b` how blue/yellow the color is
-            // both are zero -> the color is totally desaturated.
-            Self::new(T::zero(), T::zero(), l)
+        // Not part of the reference implementation. Added to prevent
+        // https://github.com/Ogeon/palette/issues/368 and other cases of NaN.
+        if !chroma.is_valid_divisor() || lab.l == T::one() || !lab.l.is_valid_divisor() {
+            return Self::new(T::zero(), T::zero(), l);
         }
+
+        let hue = lab.get_hue();
+        let cs = ChromaValues::from_normalized(lab.l, lab.a / &chroma, lab.b / &chroma);
+
+        // Inverse of the interpolation in okhsl_to_srgb:
+
+        let mid = T::from_f64(0.8);
+        let mid_inv = T::from_f64(1.25);
+
+        let s = if chroma < cs.mid {
+            let k_1 = mid.clone() * cs.zero;
+            let k_2 = T::one() - k_1.clone() / cs.mid;
+
+            let t = chroma.clone() / (k_1 + k_2 * chroma);
+            t * mid
+        } else {
+            let k_0 = cs.mid.clone();
+            let k_1 = (T::one() - &mid) * (cs.mid.clone() * mid_inv).powi(2) / cs.zero;
+            let k_2 = T::one() - k_1.clone() / (cs.max - cs.mid);
+
+            let t = (chroma.clone() - &k_0) / (k_1 + k_2 * (chroma - k_0));
+            mid.clone() + (T::one() - mid) * t
+        };
+
+        Self::new(hue, s, l)
     }
 }
 
@@ -244,10 +244,13 @@ unsafe impl<T> bytemuck::Pod for Okhsl<T> where T: bytemuck::Pod {}
 mod tests {
     use core::str::FromStr;
 
-    use crate::convert::FromColorUnclamped;
-    use crate::rgb::Rgb;
-    use crate::visual::{VisualColor, VisuallyEqual};
-    use crate::{encoding, LinSrgb, Okhsl, Oklab, Srgb};
+    use crate::{
+        convert::{FromColorUnclamped, IntoColorUnclamped},
+        encoding,
+        rgb::Rgb,
+        visual::{VisualColor, VisuallyEqual},
+        LinSrgb, Okhsl, Oklab, Srgb,
+    };
 
     test_convert_into_from_xyz!(Okhsl);
 
@@ -395,6 +398,27 @@ mod tests {
         let okhsl = Okhsl::new(0.0_f32, 1.0, 0.0);
         let rgb = Srgb::from_color_unclamped(okhsl);
         assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn test_oklab_to_okhsl_saturated_white() {
+        // Minimized check for the case in
+        // https://github.com/Ogeon/palette/issues/368. It ended up resulting in
+        // an Oklab value where a or b was larger than 0, which bypassed the
+        // chroma check.
+        let oklab = Oklab::new(1.0, 1.0, 0.0);
+        let okhsl: Okhsl = oklab.into_color_unclamped();
+        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn test_oklab_to_okhsl_saturated_black() {
+        // Minimized check for the case in
+        // https://github.com/Ogeon/palette/issues/368. This wasn't the reported
+        // case, but another variant of it.
+        let oklab = Oklab::new(0.0, 1.0, 0.0);
+        let okhsl: Okhsl = oklab.into_color_unclamped();
+        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 0.0));
     }
 
     struct_of_arrays_tests!(
