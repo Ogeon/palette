@@ -14,15 +14,15 @@
     "@actions/exec": "^1.1.0",
     "@actions/io": "^1.1.1",
     "@iarna/toml": "^2.2.5",
-    "@toml-tools/lexer": "^0.3.1",
-    "chevrotain": "^4.1.1",
+    "@toml-tools/lexer": "^1.0.0",
+    "chevrotain": "^11.0.3",
     "semver": "^7.5.2"
   },
   "devDependencies": {
     "@types/iarna__toml": "^2.0.2",
-    "@types/node": "^16.0.0",
+    "@types/node": "^20.11.0",
     "@types/semver": "^7.3.6",
-    "@vercel/ncc": "^0.28.6",
-    "typescript": "~4.3.4"
+    "@vercel/ncc": "^0.38.1",
+    "typescript": "~5.3.3"
   }
 }
