@@ -33,9 +33,9 @@ named_from_str = ["named", "phf"]
 named = []
 random = ["rand"]
 serializing = ["serde", "std"]
-#ignore in feature test
 find-crate = ["palette_derive/find-crate"]
-std = ["approx?/std"]
+std = ["alloc", "approx?/std"]
+alloc = []
 
 [lib]
 bench = false

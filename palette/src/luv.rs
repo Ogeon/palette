@@ -313,29 +313,33 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Luv<Wp, T> where T: bytemuck::Pod 
 mod test {
     use super::Luv;
     use crate::white_point::D65;
-    use crate::{FromColor, LinSrgb};
 
     test_convert_into_from_xyz!(Luv);
 
-    #[test]
-    fn red() {
-        let u = Luv::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-        let v = Luv::new(53.237116, 175.0098, 37.7650);
-        assert_relative_eq!(u, v, epsilon = 0.01);
-    }
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{FromColor, LinSrgb, Luv};
 
-    #[test]
-    fn green() {
-        let u = Luv::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-        let v = Luv::new(87.73703, -83.07975, 107.40136);
-        assert_relative_eq!(u, v, epsilon = 0.01);
-    }
+        #[test]
+        fn red() {
+            let u = Luv::from_color(LinSrgb::new(1.0, 0.0, 0.0));
+            let v = Luv::new(53.237116, 175.0098, 37.7650);
+            assert_relative_eq!(u, v, epsilon = 0.01);
+        }
 
-    #[test]
-    fn blue() {
-        let u = Luv::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-        let v = Luv::new(32.30087, -9.40241, -130.35109);
-        assert_relative_eq!(u, v, epsilon = 0.01);
+        #[test]
+        fn green() {
+            let u = Luv::from_color(LinSrgb::new(0.0, 1.0, 0.0));
+            let v = Luv::new(87.73703, -83.07975, 107.40136);
+            assert_relative_eq!(u, v, epsilon = 0.01);
+        }
+
+        #[test]
+        fn blue() {
+            let u = Luv::from_color(LinSrgb::new(0.0, 0.0, 1.0));
+            let v = Luv::new(32.30087, -9.40241, -130.35109);
+            assert_relative_eq!(u, v, epsilon = 0.01);
+        }
     }
 
     #[test]
@@ -373,12 +377,12 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Luv::<D65, f32>::min_l(), 0.0);
-        assert_relative_eq!(Luv::<D65, f32>::min_u(), -84.0);
-        assert_relative_eq!(Luv::<D65, f32>::min_v(), -135.0);
-        assert_relative_eq!(Luv::<D65, f32>::max_l(), 100.0);
-        assert_relative_eq!(Luv::<D65, f32>::max_u(), 176.0);
-        assert_relative_eq!(Luv::<D65, f32>::max_v(), 108.0);
+        assert_eq!(Luv::<D65, f32>::min_l(), 0.0);
+        assert_eq!(Luv::<D65, f32>::min_u(), -84.0);
+        assert_eq!(Luv::<D65, f32>::min_v(), -135.0);
+        assert_eq!(Luv::<D65, f32>::max_l(), 100.0);
+        assert_eq!(Luv::<D65, f32>::max_u(), 176.0);
+        assert_eq!(Luv::<D65, f32>::max_v(), 108.0);
     }
 
     struct_of_arrays_tests!(
@@ -389,6 +393,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{luv::Luva, white_point::D65};
 
         struct_of_arrays_tests!(

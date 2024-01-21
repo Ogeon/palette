@@ -890,8 +890,8 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Luma::<Srgb, f32>::min_luma(), 0.0);
-        assert_relative_eq!(Luma::<Srgb, f32>::max_luma(), 1.0);
+        assert_eq!(Luma::<Srgb, f32>::min_luma(), 0.0);
+        assert_eq!(Luma::<Srgb, f32>::max_luma(), 1.0);
     }
 
     struct_of_arrays_tests!(
@@ -902,6 +902,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{encoding::Srgb, luma::Lumaa};
 
         struct_of_arrays_tests!(

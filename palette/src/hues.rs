@@ -249,11 +249,11 @@ macro_rules! make_hues {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<T> $name<Vec<T>> {
+        #[cfg(feature = "alloc")]
+        impl<T> $name<alloc::vec::Vec<T>> {
             /// Create a struct with a vector with a minimum capacity. See [`Vec::with_capacity`] for details.
             pub fn with_capacity(capacity: usize) -> Self {
-                Self(Vec::with_capacity(capacity))
+                Self(alloc::vec::Vec::with_capacity(capacity))
             }
 
             /// Push an additional hue onto the hue vector. See [`Vec::push`] for details.
@@ -272,7 +272,7 @@ macro_rules! make_hues {
             }
 
             /// Return an iterator that moves hues out of the specified range.
-            pub fn drain<R>(&mut self, range: R) -> $iter_name<std::vec::Drain<T>>
+            pub fn drain<R>(&mut self, range: R) -> $iter_name<alloc::vec::Drain<T>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -795,130 +795,136 @@ impl_uniform!(UniformOklabHue, OklabHue);
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        angle::{SignedAngle, UnsignedAngle},
-        OklabHue, RgbHue,
-    };
+    #[cfg(feature = "approx")]
+    mod math {
+        use crate::{
+            angle::{SignedAngle, UnsignedAngle},
+            OklabHue, RgbHue,
+        };
 
-    #[test]
-    fn oklabhue_ab_roundtrip() {
-        for degree in [0.0_f64, 90.0, 30.0, 330.0, 120.0, 240.0] {
-            let hue = OklabHue::from_degrees(degree);
-            let (a, b) = hue.into_cartesian();
-            let roundtrip_hue = OklabHue::from_cartesian(a * 10000.0, b * 10000.0);
-            assert_abs_diff_eq!(roundtrip_hue, hue);
+        #[test]
+        fn oklabhue_ab_roundtrip() {
+            for degree in [0.0_f64, 90.0, 30.0, 330.0, 120.0, 240.0] {
+                let hue = OklabHue::from_degrees(degree);
+                let (a, b) = hue.into_cartesian();
+                let roundtrip_hue = OklabHue::from_cartesian(a * 10000.0, b * 10000.0);
+                assert_abs_diff_eq!(roundtrip_hue, hue);
+            }
         }
-    }
 
-    #[test]
-    fn normalize_angle_0_360() {
-        let inp = [
-            -1000.0_f32,
-            -900.0,
-            -360.5,
-            -360.0,
-            -359.5,
-            -240.0,
-            -180.5,
-            -180.0,
-            -179.5,
-            -90.0,
-            -0.5,
-            0.0,
-            0.5,
-            90.0,
-            179.5,
-            180.0,
-            180.5,
-            240.0,
-            359.5,
-            360.0,
-            360.5,
-            900.0,
-            1000.0,
-        ];
+        #[test]
+        fn normalize_angle_0_360() {
+            let inp = [
+                -1000.0_f32,
+                -900.0,
+                -360.5,
+                -360.0,
+                -359.5,
+                -240.0,
+                -180.5,
+                -180.0,
+                -179.5,
+                -90.0,
+                -0.5,
+                0.0,
+                0.5,
+                90.0,
+                179.5,
+                180.0,
+                180.5,
+                240.0,
+                359.5,
+                360.0,
+                360.5,
+                900.0,
+                1000.0,
+            ];
 
-        let expected = [
-            80.0_f32, 180.0, 359.5, 0.0, 0.5, 120.0, 179.5, 180.0, 180.5, 270.0, 359.5, 0.0, 0.5,
-            90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 0.0, 0.5, 180.0, 280.0,
-        ];
+            let expected = [
+                80.0_f32, 180.0, 359.5, 0.0, 0.5, 120.0, 179.5, 180.0, 180.5, 270.0, 359.5, 0.0,
+                0.5, 90.0, 179.5, 180.0, 180.5, 240.0, 359.5, 0.0, 0.5, 180.0, 280.0,
+            ];
 
-        let result: Vec<f32> = inp
-            .iter()
-            .map(|x| (*x).normalize_unsigned_angle())
-            .collect();
-        for (res, exp) in result.iter().zip(expected.iter()) {
-            assert_relative_eq!(res, exp);
+            let result: Vec<f32> = inp
+                .iter()
+                .map(|x| (*x).normalize_unsigned_angle())
+                .collect();
+            for (res, exp) in result.iter().zip(expected.iter()) {
+                assert_relative_eq!(res, exp);
+            }
         }
-    }
 
-    #[test]
-    fn normalize_angle_180_180() {
-        let inp = [
-            -1000.0_f32,
-            -900.0,
-            -360.5,
-            -360.0,
-            -359.5,
-            -240.0,
-            -180.5,
-            -180.0,
-            -179.5,
-            -90.0,
-            -0.5,
-            0.0,
-            0.5,
-            90.0,
-            179.5,
-            180.0,
-            180.5,
-            240.0,
-            359.5,
-            360.0,
-            360.5,
-            900.0,
-            1000.0,
-        ];
+        #[test]
+        fn normalize_angle_180_180() {
+            let inp = [
+                -1000.0_f32,
+                -900.0,
+                -360.5,
+                -360.0,
+                -359.5,
+                -240.0,
+                -180.5,
+                -180.0,
+                -179.5,
+                -90.0,
+                -0.5,
+                0.0,
+                0.5,
+                90.0,
+                179.5,
+                180.0,
+                180.5,
+                240.0,
+                359.5,
+                360.0,
+                360.5,
+                900.0,
+                1000.0,
+            ];
 
-        let expected = [
-            80.0, 180.0, -0.5, 0.0, 0.5, 120.0, 179.5, 180.0, -179.5, -90.0, -0.5, 0.0, 0.5, 90.0,
-            179.5, 180.0, -179.5, -120.0, -0.5, 0.0, 0.5, 180.0, -80.0,
-        ];
+            let expected = [
+                80.0, 180.0, -0.5, 0.0, 0.5, 120.0, 179.5, 180.0, -179.5, -90.0, -0.5, 0.0, 0.5,
+                90.0, 179.5, 180.0, -179.5, -120.0, -0.5, 0.0, 0.5, 180.0, -80.0,
+            ];
 
-        let result: Vec<f32> = inp.iter().map(|x| (*x).normalize_signed_angle()).collect();
-        for (res, exp) in result.iter().zip(expected.iter()) {
-            assert_relative_eq!(res, exp);
+            let result: Vec<f32> = inp.iter().map(|x| (*x).normalize_signed_angle()).collect();
+            for (res, exp) in result.iter().zip(expected.iter()) {
+                assert_relative_eq!(res, exp);
+            }
         }
-    }
 
-    #[test]
-    fn float_conversion() {
-        for i in -180..180 {
-            let hue = RgbHue::from(4.0 * i as f32);
+        #[test]
+        fn float_conversion() {
+            for i in -180..180 {
+                let hue = RgbHue::from(4.0 * i as f32);
 
-            let degs = hue.into_degrees();
-            assert!(degs > -180.0 && degs <= 180.0);
+                let degs = hue.into_degrees();
+                assert!(degs > -180.0 && degs <= 180.0);
 
-            let pos_degs = hue.into_positive_degrees();
-            assert!((0.0..360.0).contains(&pos_degs));
+                let pos_degs = hue.into_positive_degrees();
+                assert!((0.0..360.0).contains(&pos_degs));
 
-            assert_relative_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
+                assert_relative_eq!(RgbHue::from(degs), RgbHue::from(pos_degs));
+            }
         }
     }
 
     #[cfg(feature = "serializing")]
-    #[test]
-    fn serialize() {
-        let serialized = ::serde_json::to_string(&RgbHue::from_degrees(10.2)).unwrap();
+    mod serde {
+        use crate::RgbHue;
 
-        assert_eq!(serialized, "10.2");
-    }
+        #[test]
+        fn serialize() {
+            let serialized = ::serde_json::to_string(&RgbHue::from_degrees(10.2)).unwrap();
 
-    #[cfg(feature = "serializing")]
-    #[test]
-    fn deserialize() {
-        let deserialized: RgbHue = ::serde_json::from_str("10.2").unwrap();
+            assert_eq!(serialized, "10.2");
+        }
 
-        assert_eq!(deserialized, RgbHue::from_degrees(10.2));
+        #[test]
+        fn deserialize() {
+            let deserialized: RgbHue = ::serde_json::from_str("10.2").unwrap();
+
+            assert_eq!(deserialized, RgbHue::from_degrees(10.2));
+        }
     }
 }

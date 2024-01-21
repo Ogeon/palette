@@ -271,7 +271,6 @@ convert_uint_to_uint!(u128; via f64 (u8, u16, u32, u64););
 #[cfg(test)]
 mod test {
     use crate::stimulus::IntoStimulus;
-    use approx::assert_relative_eq;
 
     #[test]
     fn float_to_uint() {
@@ -295,11 +294,11 @@ mod test {
             1.0,
             1.4,
             f32::from_bits(0x4b44_0000),
-            std::f32::MAX,
-            std::f32::MIN,
-            std::f32::NAN,
-            std::f32::INFINITY,
-            std::f32::NEG_INFINITY,
+            core::f32::MAX,
+            core::f32::MIN,
+            core::f32::NAN,
+            core::f32::INFINITY,
+            core::f32::NEG_INFINITY,
         ];
 
         let expected = vec![
@@ -334,11 +333,11 @@ mod test {
             1.0,
             1.4,
             f64::from_bits(0x4334_0000_0000_0000),
-            std::f64::MAX,
-            std::f64::MIN,
-            std::f64::NAN,
-            std::f64::INFINITY,
-            std::f64::NEG_INFINITY,
+            core::f64::MAX,
+            core::f64::MIN,
+            core::f64::NAN,
+            core::f64::INFINITY,
+            core::f64::NEG_INFINITY,
         ];
 
         let expected = vec![
@@ -351,6 +350,7 @@ mod test {
         }
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn uint_to_float() {
         fn into_stimulus_old(n: u8) -> f32 {
@@ -363,6 +363,7 @@ mod test {
         }
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn uint_to_double() {
         fn into_stimulus_old(n: u8) -> f64 {

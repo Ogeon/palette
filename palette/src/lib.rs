@@ -253,6 +253,9 @@
 #![doc(html_root_url = "https://docs.rs/palette/0.7.3/")]
 #![warn(missing_docs)]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 #[cfg(any(feature = "std", test))]
 extern crate core;
 

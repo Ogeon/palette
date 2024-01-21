@@ -336,11 +336,13 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Lch<Wp, T> where T: bytemuck::Pod 
 
 #[cfg(test)]
 mod test {
+    use crate::{white_point::D65, Lch};
+
+    #[cfg(all(feature = "alloc", feature = "approx"))]
     use crate::{
         color_difference::{DeltaE, ImprovedDeltaE},
         convert::IntoColorUnclamped,
-        white_point::D65,
-        Lab, Lch,
+        Lab,
     };
 
     test_convert_into_from_xyz!(Lch);
@@ -366,15 +368,20 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Lch::<D65, f64>::min_l(), 0.0);
-        assert_relative_eq!(Lch::<D65, f64>::max_l(), 100.0);
-        assert_relative_eq!(Lch::<D65, f64>::min_chroma(), 0.0);
-        assert_relative_eq!(Lch::<D65, f64>::max_chroma(), 128.0);
+        assert_eq!(Lch::<D65, f64>::min_l(), 0.0);
+        assert_eq!(Lch::<D65, f64>::max_l(), 100.0);
+        assert_eq!(Lch::<D65, f64>::min_chroma(), 0.0);
+        assert_eq!(Lch::<D65, f64>::max_chroma(), 128.0);
+
+        #[cfg(feature = "approx")]
         assert_relative_eq!(Lch::<D65, f64>::max_extended_chroma(), 181.01933598375618);
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn delta_e_large_hue_diff() {
+        use crate::color_difference::DeltaE;
+
         let lhs1 = Lch::<D65, f64>::new(50.0, 64.0, -730.0);
         let rhs1 = Lch::new(50.0, 64.0, 730.0);
 
@@ -389,6 +396,7 @@ mod test {
     }
 
     // Lab and Lch have the same delta E.
+    #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
     fn lab_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
@@ -418,6 +426,7 @@ mod test {
 
     // Lab and Lch have the same delta E, so should also have the same improved
     // delta E.
+    #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
     fn lab_improved_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
@@ -453,6 +462,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{lch::Lcha, white_point::D65};
 
         struct_of_arrays_tests!(

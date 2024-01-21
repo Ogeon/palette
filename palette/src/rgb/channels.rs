@@ -82,6 +82,7 @@ impl<S, T> ComponentOrder<rgb::Rgba<S, T>, [T; 4]> for Rgba {
     }
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
     use super::{Abgr, Argb, Bgra, Rgba};

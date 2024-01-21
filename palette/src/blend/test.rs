@@ -1,3 +1,5 @@
+#![cfg(feature = "approx")]
+
 use crate::{
     blend::{Blend, BlendWith, Compose},
     LinSrgb, LinSrgba,

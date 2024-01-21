@@ -41,7 +41,8 @@ These features are enabled by default:
 
 * `"named"` - Enables color constants, located in the `named` module.
 * `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors.
-* `"std"` - Enables use of the standard library.
+* `"std"` - Enables use of the standard library. Also enables `"alloc"`.
+* `"alloc"` - Enables implementations for allocating types, such as `Vec` or `Box`.
 * `"approx"` - Enables approximate comparison using [`approx`].
 
 These features are disabled by default:
@@ -55,7 +56,7 @@ These features are disabled by default:
 
 ### Using palette in an embedded environment
 
-Palette supports `#![no_std]` environments by disabling the `"std"` feature. It uses [`libm`] to provide the floating-point operations that are typically in `std`. However, serializing with `serde` is not available without the standard library.
+Palette supports `#![no_std]` environments by disabling the `"std"` feature. It uses [`libm`], via the `"libm"` feature, to provide the floating-point operations that are typically in `std`, and the `"alloc"` feature to provide features that use allocating types. However, serializing with `serde` is not available without the standard library.
 
 ## Examples
 

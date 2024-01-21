@@ -94,8 +94,8 @@ macro_rules! impl_as_uints {
 
 impl_as_uints!([C], [C; N] where (const N: usize));
 
-#[cfg(feature = "std")]
-impl_as_uints!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_as_uints!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
 /// Trait for casting a reference to a collection of unsigned integers into a
 /// reference to a collection of colors without copying.
@@ -219,8 +219,8 @@ macro_rules! impl_uints_as {
 
 impl_uints_as!([C::Uint], [C::Uint; N] where (const N: usize));
 
-#[cfg(feature = "std")]
-impl_uints_as!(Box<[C::Uint]>, Vec<C::Uint>);
+#[cfg(feature = "alloc")]
+impl_uints_as!(alloc::boxed::Box<[C::Uint]>, alloc::vec::Vec<C::Uint>);
 
 #[cfg(test)]
 mod test {

@@ -215,6 +215,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
     use super::{AdaptFrom, AdaptInto, Method, TransformMatrix};

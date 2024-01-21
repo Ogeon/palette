@@ -218,6 +218,7 @@ fn mat3_from_primaries<T>(r: Xyz<Any, T>, g: Xyz<Any, T>, b: Xyz<Any, T>) -> Mat
     ]
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
     use super::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};

@@ -24,6 +24,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.60.0
         with:
           components: clippy
+      - uses: taiki-e/install-action@cargo-hack
       - name: Minimal check
         run: cargo clippy -v -p palette --no-default-features --features std
       - name: find-crate check
@@ -33,9 +34,7 @@ jobs:
       - name: Test all features
         run: cargo test -v -p palette --all-features
       - name: Test each feature
-        shell: bash
-        working-directory: palette
-        run: bash ../scripts/test_features.sh
+        run: cargo hack test --tests --feature-powerset --ignore-private --skip default,find-crate --optional-deps libm --depth 2
   integration_tests:
     name: integration tests
     strategy:
@@ -63,8 +62,13 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
+      - uses: taiki-e/install-action@cargo-hack
       - name: Check all features
         run: cargo clippy -v -p palette --all-features
+      - name: Check each feature with libm
+        run: cargo hack clippy --each-feature --ignore-private --features libm --skip default,find-crate --ignore-unknown-features
+      - name: Check each feature with std
+        run: cargo hack clippy --each-feature --ignore-private --features std --skip default,find-crate --optional-deps libm --ignore-unknown-features
   no_std:
     name: "Test #[no_std]"
     runs-on: ubuntu-latest

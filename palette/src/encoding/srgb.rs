@@ -152,24 +152,29 @@ impl FromLinear<f64, u8> for Srgb {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        encoding::{FromLinear, IntoLinear, Srgb},
-        matrix::{matrix_inverse, rgb_to_xyz_matrix},
-        rgb::RgbSpace,
-    };
+    use crate::encoding::{FromLinear, IntoLinear, Srgb};
 
-    #[test]
-    fn rgb_to_xyz() {
-        let dynamic = rgb_to_xyz_matrix::<Srgb, f64>();
-        let constant = Srgb::rgb_to_xyz_matrix().unwrap();
-        assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
-    }
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{
+            encoding::Srgb,
+            matrix::{matrix_inverse, rgb_to_xyz_matrix},
+            rgb::RgbSpace,
+        };
 
-    #[test]
-    fn xyz_to_rgb() {
-        let dynamic = matrix_inverse(rgb_to_xyz_matrix::<Srgb, f64>());
-        let constant = Srgb::xyz_to_rgb_matrix().unwrap();
-        assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+        #[test]
+        fn rgb_to_xyz() {
+            let dynamic = rgb_to_xyz_matrix::<Srgb, f64>();
+            let constant = Srgb::rgb_to_xyz_matrix().unwrap();
+            assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+        }
+
+        #[test]
+        fn xyz_to_rgb() {
+            let dynamic = matrix_inverse(rgb_to_xyz_matrix::<Srgb, f64>());
+            let constant = Srgb::xyz_to_rgb_matrix().unwrap();
+            assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+        }
     }
 
     #[test]

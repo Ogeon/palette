@@ -78,8 +78,8 @@ macro_rules! impl_as_arrays {
 
 impl_as_arrays!([C], [C; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_as_arrays!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_as_arrays!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
 /// Trait for casting a reference to collection of arrays into a reference to
 /// collection of colors without copying.
@@ -167,8 +167,8 @@ macro_rules! impl_arrays_as {
 
 impl_arrays_as!([[T; N]], [[T; N]; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_arrays_as!(Box<[[T; N]]>, Vec<[T; N]>);
+#[cfg(feature = "alloc")]
+impl_arrays_as!(alloc::boxed::Box<[[T; N]]>, alloc::vec::Vec<[T; N]>);
 
 #[cfg(test)]
 mod test {

@@ -365,69 +365,81 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hwb<S, T> where T: bytemuck::Pod {}
 #[cfg(test)]
 mod test {
     use super::Hwb;
-    use crate::{Clamp, FromColor, Srgb};
+
+    #[cfg(feature = "alloc")]
+    use crate::Srgb;
 
     test_convert_into_from_xyz!(Hwb);
 
-    #[test]
-    fn red() {
-        let a = Hwb::from_color(Srgb::new(1.0, 0.0, 0.0));
-        let b = Hwb::new_srgb(0.0, 0.0, 0.0);
-        assert_relative_eq!(a, b);
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{FromColor, Hwb, Srgb};
+
+        #[test]
+        fn red() {
+            let a = Hwb::from_color(Srgb::new(1.0, 0.0, 0.0));
+            let b = Hwb::new_srgb(0.0, 0.0, 0.0);
+            assert_relative_eq!(a, b);
+        }
+
+        #[test]
+        fn orange() {
+            let a = Hwb::from_color(Srgb::new(1.0, 0.5, 0.0));
+            let b = Hwb::new_srgb(30.0, 0.0, 0.0);
+            assert_relative_eq!(a, b);
+        }
+
+        #[test]
+        fn green() {
+            let a = Hwb::from_color(Srgb::new(0.0, 1.0, 0.0));
+            let b = Hwb::new_srgb(120.0, 0.0, 0.0);
+            assert_relative_eq!(a, b);
+        }
+
+        #[test]
+        fn blue() {
+            let a = Hwb::from_color(Srgb::new(0.0, 0.0, 1.0));
+            let b = Hwb::new_srgb(240.0, 0.0, 0.0);
+            assert_relative_eq!(a, b);
+        }
+
+        #[test]
+        fn purple() {
+            let a = Hwb::from_color(Srgb::new(0.5, 0.0, 1.0));
+            let b = Hwb::new_srgb(270.0, 0.0, 0.0);
+            assert_relative_eq!(a, b);
+        }
     }
 
-    #[test]
-    fn orange() {
-        let a = Hwb::from_color(Srgb::new(1.0, 0.5, 0.0));
-        let b = Hwb::new_srgb(30.0, 0.0, 0.0);
-        assert_relative_eq!(a, b);
-    }
+    #[cfg(feature = "approx")]
+    mod clamp {
+        use crate::{Clamp, Hwb};
 
-    #[test]
-    fn green() {
-        let a = Hwb::from_color(Srgb::new(0.0, 1.0, 0.0));
-        let b = Hwb::new_srgb(120.0, 0.0, 0.0);
-        assert_relative_eq!(a, b);
-    }
+        #[test]
+        fn clamp_invalid() {
+            let expected = Hwb::new_srgb(240.0, 0.0, 0.0);
+            let clamped = Hwb::new_srgb(240.0, -3.0, -4.0).clamp();
+            assert_relative_eq!(expected, clamped);
+        }
 
-    #[test]
-    fn blue() {
-        let a = Hwb::from_color(Srgb::new(0.0, 0.0, 1.0));
-        let b = Hwb::new_srgb(240.0, 0.0, 0.0);
-        assert_relative_eq!(a, b);
-    }
-
-    #[test]
-    fn purple() {
-        let a = Hwb::from_color(Srgb::new(0.5, 0.0, 1.0));
-        let b = Hwb::new_srgb(270.0, 0.0, 0.0);
-        assert_relative_eq!(a, b);
-    }
-
-    #[test]
-    fn clamp_invalid() {
-        let expected = Hwb::new_srgb(240.0, 0.0, 0.0);
-        let clamped = Hwb::new_srgb(240.0, -3.0, -4.0).clamp();
-        assert_relative_eq!(expected, clamped);
-    }
-
-    #[test]
-    fn clamp_none() {
-        let expected = Hwb::new_srgb(240.0, 0.3, 0.7);
-        let clamped = Hwb::new_srgb(240.0, 0.3, 0.7).clamp();
-        assert_relative_eq!(expected, clamped);
-    }
-    #[test]
-    fn clamp_over_one() {
-        let expected = Hwb::new_srgb(240.0, 0.2, 0.8);
-        let clamped = Hwb::new_srgb(240.0, 5.0, 20.0).clamp();
-        assert_relative_eq!(expected, clamped);
-    }
-    #[test]
-    fn clamp_under_one() {
-        let expected = Hwb::new_srgb(240.0, 0.3, 0.1);
-        let clamped = Hwb::new_srgb(240.0, 0.3, 0.1).clamp();
-        assert_relative_eq!(expected, clamped);
+        #[test]
+        fn clamp_none() {
+            let expected = Hwb::new_srgb(240.0, 0.3, 0.7);
+            let clamped = Hwb::new_srgb(240.0, 0.3, 0.7).clamp();
+            assert_relative_eq!(expected, clamped);
+        }
+        #[test]
+        fn clamp_over_one() {
+            let expected = Hwb::new_srgb(240.0, 0.2, 0.8);
+            let clamped = Hwb::new_srgb(240.0, 5.0, 20.0).clamp();
+            assert_relative_eq!(expected, clamped);
+        }
+        #[test]
+        fn clamp_under_one() {
+            let expected = Hwb::new_srgb(240.0, 0.3, 0.1);
+            let clamped = Hwb::new_srgb(240.0, 0.3, 0.1).clamp();
+            assert_relative_eq!(expected, clamped);
+        }
     }
 
     raw_pixel_conversion_tests!(Hwb<crate::encoding::Srgb>: hue, whiteness, blackness);
@@ -437,10 +449,10 @@ mod test {
     fn check_min_max_components() {
         use crate::encoding::Srgb;
 
-        assert_relative_eq!(Hwb::<Srgb>::min_whiteness(), 0.0,);
-        assert_relative_eq!(Hwb::<Srgb>::min_blackness(), 0.0,);
-        assert_relative_eq!(Hwb::<Srgb>::max_whiteness(), 1.0,);
-        assert_relative_eq!(Hwb::<Srgb>::max_blackness(), 1.0,);
+        assert_eq!(Hwb::<Srgb>::min_whiteness(), 0.0,);
+        assert_eq!(Hwb::<Srgb>::min_blackness(), 0.0,);
+        assert_eq!(Hwb::<Srgb>::max_whiteness(), 1.0,);
+        assert_eq!(Hwb::<Srgb>::max_blackness(), 1.0,);
     }
 
     struct_of_arrays_tests!(
@@ -451,6 +463,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{encoding::Srgb, hwb::Hwba};
 
         struct_of_arrays_tests!(

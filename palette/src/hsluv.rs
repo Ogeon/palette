@@ -257,13 +257,16 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Hsluv<Wp, T> where T: bytemuck::Po
 #[cfg(test)]
 mod test {
     use super::Hsluv;
-    use crate::{white_point::D65, FromColor, Lchuv, LuvHue, Saturate};
+    use crate::white_point::D65;
 
     test_convert_into_from_xyz!(Hsluv);
 
+    #[cfg(feature = "approx")]
     #[cfg_attr(miri, ignore)]
     #[test]
     fn lchuv_round_trip() {
+        use crate::{FromColor, Lchuv, LuvHue};
+
         for hue in (0..=20).map(|x| x as f64 * 18.0) {
             for sat in (0..=20).map(|x| x as f64 * 5.0) {
                 for l in (1..=20).map(|x| x as f64 * 5.0) {
@@ -311,8 +314,11 @@ mod test {
         _hsl3 -= 0.1;
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn saturate() {
+        use crate::Saturate;
+
         for sat in (0..=10).map(|s| s as f64 * 10.0) {
             for a in (0..=10).map(|l| l as f64 * 10.0) {
                 let hsl = Hsluv::<D65, _>::new(150.0, sat, a);
@@ -332,10 +338,10 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Hsluv::<D65>::min_saturation(), 0.0);
-        assert_relative_eq!(Hsluv::<D65>::min_l(), 0.0);
-        assert_relative_eq!(Hsluv::<D65>::max_saturation(), 100.0);
-        assert_relative_eq!(Hsluv::<D65>::max_l(), 100.0);
+        assert_eq!(Hsluv::<D65>::min_saturation(), 0.0);
+        assert_eq!(Hsluv::<D65>::min_l(), 0.0);
+        assert_eq!(Hsluv::<D65>::max_saturation(), 100.0);
+        assert_eq!(Hsluv::<D65>::max_l(), 100.0);
     }
 
     struct_of_arrays_tests!(
@@ -346,6 +352,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{hsluv::Hsluva, white_point::D65};
 
         struct_of_arrays_tests!(

@@ -532,58 +532,65 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hsl<S, T> where T: bytemuck::Pod {}
 #[cfg(test)]
 mod test {
     use super::Hsl;
-    use crate::{FromColor, Hsv, Srgb};
+
+    #[cfg(feature = "alloc")]
+    use crate::Srgb;
 
     test_convert_into_from_xyz!(Hsl);
 
-    #[test]
-    fn red() {
-        let a = Hsl::from_color(Srgb::new(1.0, 0.0, 0.0));
-        let b = Hsl::new_srgb(0.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new_srgb(0.0, 1.0, 1.0));
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{FromColor, Hsl, Hsv, Srgb};
 
-        assert_relative_eq!(a, b);
-        assert_relative_eq!(a, c);
-    }
+        #[test]
+        fn red() {
+            let a = Hsl::from_color(Srgb::new(1.0, 0.0, 0.0));
+            let b = Hsl::new_srgb(0.0, 1.0, 0.5);
+            let c = Hsl::from_color(Hsv::new_srgb(0.0, 1.0, 1.0));
 
-    #[test]
-    fn orange() {
-        let a = Hsl::from_color(Srgb::new(1.0, 0.5, 0.0));
-        let b = Hsl::new_srgb(30.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new_srgb(30.0, 1.0, 1.0));
+            assert_relative_eq!(a, b);
+            assert_relative_eq!(a, c);
+        }
 
-        assert_relative_eq!(a, b);
-        assert_relative_eq!(a, c);
-    }
+        #[test]
+        fn orange() {
+            let a = Hsl::from_color(Srgb::new(1.0, 0.5, 0.0));
+            let b = Hsl::new_srgb(30.0, 1.0, 0.5);
+            let c = Hsl::from_color(Hsv::new_srgb(30.0, 1.0, 1.0));
 
-    #[test]
-    fn green() {
-        let a = Hsl::from_color(Srgb::new(0.0, 1.0, 0.0));
-        let b = Hsl::new_srgb(120.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new_srgb(120.0, 1.0, 1.0));
+            assert_relative_eq!(a, b);
+            assert_relative_eq!(a, c);
+        }
 
-        assert_relative_eq!(a, b);
-        assert_relative_eq!(a, c);
-    }
+        #[test]
+        fn green() {
+            let a = Hsl::from_color(Srgb::new(0.0, 1.0, 0.0));
+            let b = Hsl::new_srgb(120.0, 1.0, 0.5);
+            let c = Hsl::from_color(Hsv::new_srgb(120.0, 1.0, 1.0));
 
-    #[test]
-    fn blue() {
-        let a = Hsl::from_color(Srgb::new(0.0, 0.0, 1.0));
-        let b = Hsl::new_srgb(240.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new_srgb(240.0, 1.0, 1.0));
+            assert_relative_eq!(a, b);
+            assert_relative_eq!(a, c);
+        }
 
-        assert_relative_eq!(a, b);
-        assert_relative_eq!(a, c);
-    }
+        #[test]
+        fn blue() {
+            let a = Hsl::from_color(Srgb::new(0.0, 0.0, 1.0));
+            let b = Hsl::new_srgb(240.0, 1.0, 0.5);
+            let c = Hsl::from_color(Hsv::new_srgb(240.0, 1.0, 1.0));
 
-    #[test]
-    fn purple() {
-        let a = Hsl::from_color(Srgb::new(0.5, 0.0, 1.0));
-        let b = Hsl::new_srgb(270.0, 1.0, 0.5);
-        let c = Hsl::from_color(Hsv::new_srgb(270.0, 1.0, 1.0));
+            assert_relative_eq!(a, b);
+            assert_relative_eq!(a, c);
+        }
 
-        assert_relative_eq!(a, b);
-        assert_relative_eq!(a, c);
+        #[test]
+        fn purple() {
+            let a = Hsl::from_color(Srgb::new(0.5, 0.0, 1.0));
+            let b = Hsl::new_srgb(270.0, 1.0, 0.5);
+            let c = Hsl::from_color(Hsv::new_srgb(270.0, 1.0, 1.0));
+
+            assert_relative_eq!(a, b);
+            assert_relative_eq!(a, c);
+        }
     }
 
     #[test]
@@ -608,10 +615,10 @@ mod test {
     fn check_min_max_components() {
         use crate::encoding::Srgb;
 
-        assert_relative_eq!(Hsl::<Srgb>::min_saturation(), 0.0);
-        assert_relative_eq!(Hsl::<Srgb>::min_lightness(), 0.0);
-        assert_relative_eq!(Hsl::<Srgb>::max_saturation(), 1.0);
-        assert_relative_eq!(Hsl::<Srgb>::max_lightness(), 1.0);
+        assert_eq!(Hsl::<Srgb>::min_saturation(), 0.0);
+        assert_eq!(Hsl::<Srgb>::min_lightness(), 0.0);
+        assert_eq!(Hsl::<Srgb>::max_saturation(), 1.0);
+        assert_eq!(Hsl::<Srgb>::max_lightness(), 1.0);
     }
 
     struct_of_arrays_tests!(
@@ -622,6 +629,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{encoding::Srgb, hsl::Hsla};
 
         struct_of_arrays_tests!(

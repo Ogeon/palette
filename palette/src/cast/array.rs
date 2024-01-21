@@ -1,5 +1,8 @@
 use core::mem::{transmute_copy, ManuallyDrop};
 
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, vec::Vec};
+
 pub use palette_derive::ArrayCast;
 
 use crate::ArrayExt;
@@ -958,7 +961,7 @@ where
 /// let color2 = Box::new(Srgb::new(23u8, 198, 76));
 /// let array2 = <Box<[_; 3]>>::from(color2);
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn into_array_box<T>(value: Box<T>) -> Box<T::Array>
 where
@@ -1000,7 +1003,7 @@ where
 /// let array2 = Box::new([23, 198, 76]);
 /// let color2 = <Box<Srgb<u8>>>::from(array2);
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn from_array_box<T>(value: Box<T::Array>) -> Box<T>
 where
@@ -1030,7 +1033,7 @@ where
 ///     vec![[64, 139, 10], [93, 18, 214]].into_boxed_slice()
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn into_array_slice_box<T>(values: Box<[T]>) -> Box<[T::Array]>
 where
@@ -1053,7 +1056,7 @@ where
 ///     vec![64, 139, 10, 93, 18, 214].into_boxed_slice()
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn into_component_slice_box<T>(values: Box<[T]>) -> Box<[<T::Array as ArrayExt>::Item]>
 where
@@ -1076,7 +1079,7 @@ where
 ///     vec![Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)].into_boxed_slice()
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn from_array_slice_box<T>(values: Box<[T::Array]>) -> Box<[T]>
 where
@@ -1116,7 +1119,7 @@ where
 /// let components = vec![64, 139, 10, 93, 18, 214, 0, 123].into_boxed_slice();
 /// cast::from_component_slice_box::<Srgb<u8>>(components);
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn from_component_slice_box<T>(values: Box<[<T::Array as ArrayExt>::Item]>) -> Box<[T]>
 where
@@ -1162,7 +1165,7 @@ where
 ///     unreachable!();
 /// }
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn try_from_component_slice_box<T>(
     values: Box<[<T::Array as ArrayExt>::Item]>,
@@ -1191,7 +1194,7 @@ where
 ///     vec![[64, 139, 10], [93, 18, 214]]
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn into_array_vec<T>(values: Vec<T>) -> Vec<T::Array>
 where
@@ -1223,7 +1226,7 @@ where
 ///     vec![64, 139, 10, 93, 18, 214]
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn into_component_vec<T>(values: Vec<T>) -> Vec<<T::Array as ArrayExt>::Item>
 where
@@ -1257,7 +1260,7 @@ where
 ///     vec![Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn from_array_vec<T>(values: Vec<T::Array>) -> Vec<T>
 where
@@ -1316,7 +1319,7 @@ where
 /// components.reserve_exact(2); // Not a multiple of 3
 /// cast::from_component_vec::<Srgb<u8>>(components);
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn from_component_vec<T>(values: Vec<<T::Array as ArrayExt>::Item>) -> Vec<T>
 where
@@ -1376,7 +1379,7 @@ where
 ///     unreachable!();
 /// }
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn try_from_component_vec<T>(
     values: Vec<<T::Array as ArrayExt>::Item>,
@@ -1419,7 +1422,7 @@ where
 /// Map values of color A to values of color B without creating a new `Vec`.
 ///
 /// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn map_vec_in_place<A, B, F>(values: Vec<A>, mut map: F) -> Vec<B>
 where
@@ -1453,7 +1456,7 @@ where
 /// Map values of color A to values of color B without creating a new `Box<[B]>`.
 ///
 /// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn map_slice_box_in_place<A, B, F>(values: Box<[A]>, mut map: F) -> Box<[B]>
 where
@@ -1499,20 +1502,20 @@ impl std::error::Error for SliceCastError {}
 
 /// The error type returned when casting a boxed slice of components fails.
 #[derive(Clone, PartialEq, Eq)]
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 pub struct BoxedSliceCastError<T> {
     /// The original values.
     pub values: Box<[T]>,
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T> core::fmt::Debug for BoxedSliceCastError<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("BoxedSliceCastError").finish()
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T> core::fmt::Display for BoxedSliceCastError<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.write_str("could not convert boxed component slice to colors")
@@ -1524,7 +1527,7 @@ impl<T> std::error::Error for BoxedSliceCastError<T> {}
 
 /// The error type returned when casting a `Vec` of components fails.
 #[derive(Clone, PartialEq, Eq)]
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 pub struct VecCastError<T> {
     /// The type of error that occurred.
     pub kind: VecCastErrorKind,
@@ -1533,7 +1536,7 @@ pub struct VecCastError<T> {
     pub values: Vec<T>,
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T> core::fmt::Debug for VecCastError<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("VecCastError")
@@ -1542,7 +1545,7 @@ impl<T> core::fmt::Debug for VecCastError<T> {
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T> core::fmt::Display for VecCastError<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.write_str("could not convert component vector to colors")
@@ -1554,7 +1557,7 @@ impl<T> std::error::Error for VecCastError<T> {}
 
 /// The type of error that is returned when casting a `Vec` of components.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 pub enum VecCastErrorKind {
     /// The type of error returned when the length of a `Vec` didn't match the
     /// requirements.
@@ -1567,9 +1570,10 @@ pub enum VecCastErrorKind {
 
 #[cfg(test)]
 mod test {
+    #[cfg(feature = "alloc")]
     use crate::{LinSrgb, Srgb};
 
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     #[test]
     fn array_vec_len_cap() {
         let mut original = vec![
@@ -1596,11 +1600,12 @@ mod test {
         assert_eq!(colors.capacity(), 8);
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn map_vec_in_place() {
         fn do_things(rgb: Srgb) -> LinSrgb {
             let mut linear = rgb.into_linear();
-            std::mem::swap(&mut linear.red, &mut linear.blue);
+            core::mem::swap(&mut linear.red, &mut linear.blue);
             linear
         }
 
@@ -1615,11 +1620,12 @@ mod test {
         )
     }
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn map_slice_box_in_place() {
         fn do_things(rgb: Srgb) -> LinSrgb {
             let mut linear = rgb.into_linear();
-            std::mem::swap(&mut linear.red, &mut linear.blue);
+            core::mem::swap(&mut linear.red, &mut linear.blue);
             linear
         }
 

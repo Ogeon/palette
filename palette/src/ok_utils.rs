@@ -1,5 +1,6 @@
 //! Traits and functions used in Ok* color spaces
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 use crate::{angle::RealAngle, num::Trigonometry, OklabHue};
 
@@ -351,6 +352,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 impl<T> OklabHue<T>
 where
@@ -487,6 +489,7 @@ where
     (l_r.clone().powi(2) + k_1 * &l_r) / (k_3 * (l_r + k_2))
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod tests {
 
@@ -518,7 +521,7 @@ mod tests {
             .into_format();
         let grey50oklab = Oklab::from_color_unclamped(grey50srgb);
         println!("grey 50% oklab lightness: {}", grey50oklab.l);
-        assert!(relative_eq!(toe(grey50oklab.l), 0.5, epsilon = 1e-3));
+        assert_relative_eq!(toe(grey50oklab.l), 0.5, epsilon = 1e-3);
     }
 
     #[cfg_attr(miri, ignore)]
