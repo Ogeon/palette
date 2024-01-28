@@ -2,7 +2,7 @@
 
 A color management and conversion library that focuses on maintaining correctness, flexibility and ease of use. It makes use of the type system to prevent mistakes, support a wide range of color spaces (including user defined variants) and offer different ways of integrating with other libraries.
 
-[The announcement post for 0.7.3](https://ogeon.github.io/2023/08/10/palette-0.7.3.html).
+[The announcement post for 0.7.4](https://ogeon.github.io/2024/01/28/palette-0.7.4.html).
 
 ## Feature Summary
 
@@ -23,14 +23,14 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette = "0.7.3"
+palette = "0.7.4"
 ```
 
 or these lines if you want to opt out of `std`:
 
 ```toml
 [dependencies.palette]
-version = "0.7.3"
+version = "0.7.4"
 default-features = false
 features = ["libm"] # Uses libm instead of std for floating point math
 ```

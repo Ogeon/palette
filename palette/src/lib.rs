@@ -250,7 +250,7 @@
 
 // Keep the standard library when running tests, too
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
-#![doc(html_root_url = "https://docs.rs/palette/0.7.3/")]
+#![doc(html_root_url = "https://docs.rs/palette/0.7.4/")]
 #![warn(missing_docs)]
 
 #[cfg(feature = "alloc")]

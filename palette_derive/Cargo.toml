@@ -1,10 +1,10 @@
 [package]
 name = "palette_derive"
-version = "0.7.3" #automatically updated
+version = "0.7.4" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = []
 description = "Automatically implement traits from the palette crate."
-documentation = "https://docs.rs/palette/0.7.3/palette/"
+documentation = "https://docs.rs/palette/0.7.4/palette/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["palette", "derive", "macros"]
