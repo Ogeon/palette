@@ -253,6 +253,7 @@
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Channel orders for packed RGBA types.
 
 </span><span class="kw">use crate</span>::{cast::ComponentOrder, rgb};
@@ -337,7 +338,8 @@
     }
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::{Abgr, Argb, Bgra, Rgba};
     <span class="kw">use crate</span>::{cast::Packed, Srgb, Srgba};

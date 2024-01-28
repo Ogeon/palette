@@ -575,7 +575,7 @@
                     </span>};
 
                     <span class="macro">assert!</span>(!color.is_within_bounds());
-                    <span class="macro">assert_relative_eq!</span>(clamped, expected);
+                    <span class="macro">assert_eq!</span>(clamped, expected);
                 }
 
                 <span class="macro">println!</span>(<span class="string">&quot;ok&quot;</span>)
@@ -615,7 +615,7 @@
                     <span class="kw">let </span>clamped = color.clamp();
 
                     <span class="macro">assert!</span>(color.is_within_bounds());
-                    <span class="macro">assert_relative_eq!</span>(clamped, color);
+                    <span class="macro">assert_eq!</span>(clamped, color);
                 }
 
                 <span class="macro">println!</span>(<span class="string">&quot;ok&quot;</span>)
@@ -662,7 +662,7 @@
                     </span>};
 
                     <span class="macro">assert!</span>(!color.is_within_bounds());
-                    <span class="macro">assert_relative_eq!</span>(clamped, expected);
+                    <span class="macro">assert_eq!</span>(clamped, expected);
                 }
 
                 <span class="macro">println!</span>(<span class="string">&quot;ok&quot;</span>)

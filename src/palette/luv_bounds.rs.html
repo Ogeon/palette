@@ -177,6 +177,7 @@
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Utility functions for computing in-gamut regions for CIELuv color space.
 </span><span class="kw">use crate</span>::{
     angle::RealAngle,
@@ -303,7 +304,8 @@
     }
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::BoundaryLine;
 
@@ -315,12 +317,12 @@
         };
         <span class="macro">assert_relative_eq!</span>(line.intersect_length_at_angle(<span class="number">0.0</span>).unwrap(), <span class="number">1.0</span>);
         <span class="macro">assert_relative_eq!</span>(
-            line.intersect_length_at_angle(std::f64::consts::FRAC_PI_4)
+            line.intersect_length_at_angle(core::f64::consts::FRAC_PI_4)
                 .unwrap(),
-            std::f64::consts::FRAC_1_SQRT_2
+            core::f64::consts::FRAC_1_SQRT_2
         );
         <span class="macro">assert_eq!</span>(
-            line.intersect_length_at_angle(-std::f64::consts::FRAC_PI_4),
+            line.intersect_length_at_angle(-core::f64::consts::FRAC_PI_4),
             <span class="prelude-val">None
         </span>);
 
@@ -330,12 +332,12 @@
         };
         <span class="macro">assert_eq!</span>(line.intersect_length_at_angle(<span class="number">0.0</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_relative_eq!</span>(
-            line.intersect_length_at_angle(std::f64::consts::FRAC_PI_2)
+            line.intersect_length_at_angle(core::f64::consts::FRAC_PI_2)
                 .unwrap(),
             <span class="number">2.0
         </span>);
         <span class="macro">assert_relative_eq!</span>(
-            line.intersect_length_at_angle(<span class="number">2.0 </span>* std::f64::consts::FRAC_PI_3)
+            line.intersect_length_at_angle(<span class="number">2.0 </span>* core::f64::consts::FRAC_PI_3)
                 .unwrap(),
             <span class="number">4.0 </span>/ <span class="number">3.0f64</span>.sqrt()
         );
@@ -353,7 +355,7 @@
             slope: <span class="number">1.0</span>,
             intercept: <span class="number">2.0</span>,
         };
-        <span class="macro">assert_relative_eq!</span>(line.distance_to_origin(), std::f64::consts::SQRT_2);
+        <span class="macro">assert_relative_eq!</span>(line.distance_to_origin(), core::f64::consts::SQRT_2);
     }
 }
 </code></pre></div></section></main></body></html>

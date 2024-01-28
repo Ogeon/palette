@@ -1355,7 +1355,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Trigonometry <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>sin(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1398,7 +1398,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Abs <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>abs(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1406,7 +1406,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Sqrt <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>sqrt(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1414,7 +1414,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Cbrt <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>cbrt(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1422,7 +1422,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Powf <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>powf(<span class="self">self</span>, exp: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
@@ -1430,7 +1430,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Powi <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>powi(<span class="self">self</span>, exp: i32) -&gt; <span class="self">Self </span>{
@@ -1438,7 +1438,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Recip <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>recip(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1446,7 +1446,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Exp <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>exp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1454,7 +1454,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Hypot <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>hypot(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
@@ -1462,7 +1462,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>Round <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>round(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
@@ -1514,7 +1514,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, all(test, not(feature = <span class="string">&quot;libm&quot;</span>))))]
             </span><span class="kw">impl </span>MulAdd <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="attr">#[inline]
                 </span><span class="kw">fn </span>mul_add(<span class="self">self</span>, m: <span class="self">Self</span>, a: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{

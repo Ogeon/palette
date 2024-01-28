@@ -137,7 +137,7 @@
 <a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Clamp;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::cast::{<span class="self">self</span>, ArrayCast};
 
 <span class="kw">use </span><span class="kw">super</span>::FromColorUnclamped;
@@ -197,8 +197,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;Vec&lt;T&gt;&gt; <span class="kw">for </span>Vec&lt;U&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;alloc::vec::Vec&lt;T&gt;&gt; <span class="kw">for </span>alloc::vec::Vec&lt;U&gt;
 <span class="kw">where
     </span>T: ArrayCast,
     U: ArrayCast&lt;Array = T::Array&gt; + FromColor&lt;T&gt;,
@@ -216,13 +216,13 @@
     /// let srgb = Vec::&lt;Srgb&gt;::from_color(lch);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>from_color(color: Vec&lt;T&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from_color(color: alloc::vec::Vec&lt;T&gt;) -&gt; <span class="self">Self </span>{
         cast::map_vec_in_place(color, U::from_color)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;Box&lt;[T]&gt;&gt; <span class="kw">for </span>Box&lt;[U]&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;T, U&gt; FromColor&lt;alloc::boxed::Box&lt;[T]&gt;&gt; <span class="kw">for </span>alloc::boxed::Box&lt;[U]&gt;
 <span class="kw">where
     </span>T: ArrayCast,
     U: ArrayCast&lt;Array = T::Array&gt; + FromColor&lt;T&gt;,
@@ -240,7 +240,7 @@
     /// let srgb = Box::&lt;[Srgb]&gt;::from_color(lch);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>from_color(color: Box&lt;[T]&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from_color(color: alloc::boxed::Box&lt;[T]&gt;) -&gt; <span class="self">Self </span>{
         cast::map_slice_box_in_place(color, U::from_color)
     }
 }

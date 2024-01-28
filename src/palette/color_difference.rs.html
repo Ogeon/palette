@@ -555,6 +555,7 @@
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
 <a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Algorithms for calculating the difference between colors.
 //!
 //! ## Selecting an algorithm
@@ -1053,7 +1054,8 @@
     </span><span class="kw">fn </span>improved_delta_e(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>core::str::FromStr;
 

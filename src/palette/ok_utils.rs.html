@@ -606,9 +606,13 @@
 <a href="#606" id="606">606</a>
 <a href="#607" id="607">607</a>
 <a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits and functions used in Ok* color spaces
 
-</span><span class="attr">#[cfg(test)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">use crate</span>::{angle::RealAngle, num::Trigonometry, OklabHue};
 
 <span class="kw">use crate</span>::{
@@ -959,7 +963,8 @@
     }
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">impl</span>&lt;T&gt; OklabHue&lt;T&gt;
 <span class="kw">where
     </span>T: RealAngle
@@ -1095,7 +1100,8 @@
     (l_r.clone().powi(<span class="number">2</span>) + k_1 * <span class="kw-2">&amp;</span>l_r) / (k_3 * (l_r + k_2))
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>tests {
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -1126,7 +1132,7 @@
             .into_format();
         <span class="kw">let </span>grey50oklab = Oklab::from_color_unclamped(grey50srgb);
         <span class="macro">println!</span>(<span class="string">&quot;grey 50% oklab lightness: {}&quot;</span>, grey50oklab.l);
-        <span class="macro">assert!</span>(<span class="macro">relative_eq!</span>(toe(grey50oklab.l), <span class="number">0.5</span>, epsilon = <span class="number">1e-3</span>));
+        <span class="macro">assert_relative_eq!</span>(toe(grey50oklab.l), <span class="number">0.5</span>, epsilon = <span class="number">1e-3</span>);
     }
 
     <span class="attr">#[cfg_attr(miri, ignore)]

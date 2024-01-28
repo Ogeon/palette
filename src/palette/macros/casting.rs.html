@@ -654,22 +654,22 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;&gt; <span class="kw">for </span>Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;alloc::boxed::Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;&gt; <span class="kw">for </span>alloc::boxed::Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;
         $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
         </span>{
             <span class="attr">#[<span class="macro-nonterminal">inline</span>]
-            </span><span class="kw">fn </span>from(color: Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;) -&gt; <span class="self">Self </span>{
+            </span><span class="kw">fn </span>from(color: alloc::boxed::Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;) -&gt; <span class="self">Self </span>{
                 <span class="kw">crate</span>::cast::into_array_box(color)
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;&gt; <span class="kw">for </span>Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$ty_param</span>)+&gt; From&lt;alloc::boxed::Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;&gt; <span class="kw">for </span>alloc::boxed::Box&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$self_ty_param</span>),+&gt;&gt;
         $(<span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">where</span>)+)<span class="question-mark">?
         </span>{
             <span class="attr">#[<span class="macro-nonterminal">inline</span>]
-            </span><span class="kw">fn </span>from(array: Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;) -&gt; <span class="self">Self</span>{
+            </span><span class="kw">fn </span>from(array: alloc::boxed::Box&lt;[<span class="macro-nonterminal">$array_item</span>; <span class="macro-nonterminal">$array_len</span>]&gt;) -&gt; <span class="self">Self</span>{
                 <span class="kw">crate</span>::cast::from_array_box(array)
             }
         }

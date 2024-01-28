@@ -514,12 +514,44 @@
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
 <a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     from_uint_array, from_uint_slice, from_uint_slice_mut, into_uint_array, into_uint_slice,
     into_uint_slice_mut, UintCast,
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">use super</span>::{from_uint_slice_box, from_uint_vec, into_uint_slice_box, into_uint_vec};
 
 <span class="doccomment">/// Trait for casting a collection of colors from a collection of unsigned
@@ -638,27 +670,27 @@
 
 <span class="macro">impl_from_uints_slice!</span>([C::Uint], [C::Uint; N] <span class="kw">where </span>(<span class="kw">const </span>N: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_from_uints_slice!</span>(Box&lt;[C::Uint]&gt;, Vec&lt;C::Uint&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_from_uints_slice!</span>(alloc::boxed::Box&lt;[C::Uint]&gt;, alloc::vec::Vec&lt;C::Uint&gt;);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;C&gt; FromUints&lt;Box&lt;[C::Uint]&gt;&gt; <span class="kw">for </span>Box&lt;[C]&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C&gt; FromUints&lt;alloc::boxed::Box&lt;[C::Uint]&gt;&gt; <span class="kw">for </span>alloc::boxed::Box&lt;[C]&gt;
 <span class="kw">where
     </span>C: UintCast,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from_uints(uints: Box&lt;[C::Uint]&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from_uints(uints: alloc::boxed::Box&lt;[C::Uint]&gt;) -&gt; <span class="self">Self </span>{
         from_uint_slice_box(uints)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;C&gt; FromUints&lt;Vec&lt;C::Uint&gt;&gt; <span class="kw">for </span>Vec&lt;C&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C&gt; FromUints&lt;alloc::vec::Vec&lt;C::Uint&gt;&gt; <span class="kw">for </span>alloc::vec::Vec&lt;C&gt;
 <span class="kw">where
     </span>C: UintCast,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from_uints(uints: Vec&lt;C::Uint&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from_uints(uints: alloc::vec::Vec&lt;C::Uint&gt;) -&gt; <span class="self">Self </span>{
         from_uint_vec(uints)
     }
 }
@@ -757,27 +789,27 @@
 
 <span class="macro">impl_into_uints_slice!</span>([C], [C; M] <span class="kw">where </span>(<span class="kw">const </span>M: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_into_uints_slice!</span>(Box&lt;[C]&gt;, Vec&lt;C&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_into_uints_slice!</span>(alloc::boxed::Box&lt;[C]&gt;, alloc::vec::Vec&lt;C&gt;);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;C&gt; IntoUints&lt;Box&lt;[C::Uint]&gt;&gt; <span class="kw">for </span>Box&lt;[C]&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C&gt; IntoUints&lt;alloc::boxed::Box&lt;[C::Uint]&gt;&gt; <span class="kw">for </span>alloc::boxed::Box&lt;[C]&gt;
 <span class="kw">where
     </span>C: UintCast,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>into_uints(<span class="self">self</span>) -&gt; Box&lt;[C::Uint]&gt; {
+    </span><span class="kw">fn </span>into_uints(<span class="self">self</span>) -&gt; alloc::boxed::Box&lt;[C::Uint]&gt; {
         into_uint_slice_box(<span class="self">self</span>)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;C&gt; IntoUints&lt;Vec&lt;C::Uint&gt;&gt; <span class="kw">for </span>Vec&lt;C&gt;
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">impl</span>&lt;C&gt; IntoUints&lt;alloc::vec::Vec&lt;C::Uint&gt;&gt; <span class="kw">for </span>alloc::vec::Vec&lt;C&gt;
 <span class="kw">where
     </span>C: UintCast,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>into_uints(<span class="self">self</span>) -&gt; Vec&lt;C::Uint&gt; {
+    </span><span class="kw">fn </span>into_uints(<span class="self">self</span>) -&gt; alloc::vec::Vec&lt;C::Uint&gt; {
         into_uint_vec(<span class="self">self</span>)
     }
 }
@@ -934,46 +966,62 @@
     </span><span class="kw">fn </span>from_uints() {
         <span class="kw">let </span>slice: <span class="kw-2">&amp;</span>[u32] = <span class="kw-2">&amp;</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
         <span class="kw">let </span>slice_mut: <span class="kw-2">&amp;mut </span>[u32] = <span class="kw-2">&amp;mut </span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
-        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[u32]&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>].into_boxed_slice();
-        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;u32&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>array: [u32; <span class="number">2</span>] = [<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
 
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(slice);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;</span>slice_box);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;</span>vec);
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;</span>array);
 
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[PackedRgba]&gt;::from_uints(slice_mut);
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;mut </span>array);
+
+        <span class="kw">let _ </span>= &lt;[PackedRgba; <span class="number">2</span>]&gt;::from_uints(array);
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>from_uints_alloc() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[u32]&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>].into_boxed_slice();
+        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;u32&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
+
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;</span>slice_box);
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;</span>vec);
+
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;mut </span>slice_box);
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;mut </span>vec);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[PackedRgba]&gt;::from_uints(<span class="kw-2">&amp;mut </span>array);
 
         <span class="kw">let _ </span>= Box::&lt;[PackedRgba]&gt;::from_uints(slice_box);
         <span class="kw">let _ </span>= Vec::&lt;PackedRgba&gt;::from_uints(vec);
-        <span class="kw">let _ </span>= &lt;[PackedRgba; <span class="number">2</span>]&gt;::from_uints(array);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>uints_into() {
         <span class="kw">let </span>slice: <span class="kw-2">&amp;</span>[u32] = <span class="kw-2">&amp;</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
         <span class="kw">let </span>slice_mut: <span class="kw-2">&amp;mut </span>[u32] = <span class="kw-2">&amp;mut </span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
-        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[u32]&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>].into_boxed_slice();
-        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;u32&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>array: [u32; <span class="number">2</span>] = [<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
 
         <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = slice.uints_into();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = (<span class="kw-2">&amp;</span>slice_box).uints_into();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = (<span class="kw-2">&amp;</span>vec).uints_into();
         <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = (<span class="kw-2">&amp;</span>array).uints_into();
 
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[PackedRgba] = slice_mut.uints_into();
+        <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[PackedRgba] = (<span class="kw-2">&amp;mut </span>array).uints_into();
+
+        <span class="kw">let _</span>: [PackedRgba; <span class="number">2</span>] = array.uints_into();
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>uints_into_alloc() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[u32]&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>].into_boxed_slice();
+        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;u32&gt; = <span class="macro">vec!</span>[<span class="number">0x01020304</span>, <span class="number">0x05060708</span>];
+
+        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = (<span class="kw-2">&amp;</span>slice_box).uints_into();
+        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[PackedRgba] = (<span class="kw-2">&amp;</span>vec).uints_into();
+
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[PackedRgba] = (<span class="kw-2">&amp;mut </span>slice_box).uints_into();
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[PackedRgba] = (<span class="kw-2">&amp;mut </span>vec).uints_into();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[PackedRgba] = (<span class="kw-2">&amp;mut </span>array).uints_into();
 
         <span class="kw">let _</span>: Box&lt;[PackedRgba]&gt; = slice_box.uints_into();
         <span class="kw">let _</span>: Vec&lt;PackedRgba&gt; = vec.uints_into();
-        <span class="kw">let _</span>: [PackedRgba; <span class="number">2</span>] = array.uints_into();
     }
 
     <span class="attr">#[test]
@@ -981,26 +1029,34 @@
         <span class="kw">let </span>slice: <span class="kw-2">&amp;</span>[PackedRgba] = <span class="kw-2">&amp;</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
         <span class="kw">let </span>slice_mut: <span class="kw-2">&amp;mut </span>[PackedRgba] =
             <span class="kw-2">&amp;mut </span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
-        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[PackedRgba]&gt; =
-            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()].into_boxed_slice();
-        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;PackedRgba&gt; =
-            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
         <span class="kw">let </span><span class="kw-2">mut </span>array: [PackedRgba; <span class="number">2</span>] =
             [Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
 
         <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = slice.into_uints();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = (<span class="kw-2">&amp;</span>slice_box).into_uints();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = (<span class="kw-2">&amp;</span>vec).into_uints();
         <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = (<span class="kw-2">&amp;</span>array).into_uints();
 
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[u32] = slice_mut.into_uints();
+        <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[u32] = (<span class="kw-2">&amp;mut </span>array).into_uints();
+
+        <span class="kw">let _</span>: [u32; <span class="number">2</span>] = array.into_uints();
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>into_uints_alloc() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[PackedRgba]&gt; =
+            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()].into_boxed_slice();
+        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;PackedRgba&gt; =
+            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
+
+        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = (<span class="kw-2">&amp;</span>slice_box).into_uints();
+        <span class="kw">let _</span>: <span class="kw-2">&amp;</span>[u32] = (<span class="kw-2">&amp;</span>vec).into_uints();
+
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[u32] = (<span class="kw-2">&amp;mut </span>slice_box).into_uints();
         <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[u32] = (<span class="kw-2">&amp;mut </span>vec).into_uints();
-        <span class="kw">let _</span>: <span class="kw-2">&amp;mut </span>[u32] = (<span class="kw-2">&amp;mut </span>array).into_uints();
 
         <span class="kw">let _</span>: Box&lt;[u32]&gt; = slice_box.into_uints();
         <span class="kw">let _</span>: Vec&lt;u32&gt; = vec.into_uints();
-        <span class="kw">let _</span>: [u32; <span class="number">2</span>] = array.into_uints();
     }
 
     <span class="attr">#[test]
@@ -1008,26 +1064,34 @@
         <span class="kw">let </span>slice: <span class="kw-2">&amp;</span>[PackedRgba] = <span class="kw-2">&amp;</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
         <span class="kw">let </span>slice_mut: <span class="kw-2">&amp;mut </span>[PackedRgba] =
             <span class="kw-2">&amp;mut </span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
-        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[PackedRgba]&gt; =
-            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()].into_boxed_slice();
-        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;PackedRgba&gt; =
-            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
         <span class="kw">let </span><span class="kw-2">mut </span>array: [PackedRgba; <span class="number">2</span>] =
             [Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
 
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(slice);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(<span class="kw-2">&amp;</span>slice_box);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(<span class="kw-2">&amp;</span>vec);
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(<span class="kw-2">&amp;</span>array);
 
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[u32]&gt;::uints_from(slice_mut);
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[u32]&gt;::uints_from(<span class="kw-2">&amp;mut </span>array);
+
+        <span class="kw">let _ </span>= &lt;[u32; <span class="number">2</span>]&gt;::uints_from(array);
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>uints_from_alloc() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice_box: Box&lt;[PackedRgba]&gt; =
+            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()].into_boxed_slice();
+        <span class="kw">let </span><span class="kw-2">mut </span>vec: Vec&lt;PackedRgba&gt; =
+            <span class="macro">vec!</span>[Srgba::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>).into(), Srgba::new(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>).into()];
+
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(<span class="kw-2">&amp;</span>slice_box);
+        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;</span>[u32]&gt;::uints_from(<span class="kw-2">&amp;</span>vec);
+
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[u32]&gt;::uints_from(<span class="kw-2">&amp;mut </span>slice_box);
         <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[u32]&gt;::uints_from(<span class="kw-2">&amp;mut </span>vec);
-        <span class="kw">let _ </span>= &lt;<span class="kw-2">&amp;mut </span>[u32]&gt;::uints_from(<span class="kw-2">&amp;mut </span>array);
 
         <span class="kw">let _ </span>= Box::&lt;[u32]&gt;::uints_from(slice_box);
         <span class="kw">let _ </span>= Vec::&lt;u32&gt;::uints_from(vec);
-        <span class="kw">let _ </span>= &lt;[u32; <span class="number">2</span>]&gt;::uints_from(array);
     }
 }
 </code></pre></div></section></main></body></html>

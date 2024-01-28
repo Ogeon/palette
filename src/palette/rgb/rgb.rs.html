@@ -1525,6 +1525,7 @@
 <a href="#1525" id="1525">1525</a>
 <a href="#1526" id="1526">1526</a>
 <a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::{
     any::TypeId,
     fmt,
@@ -3016,12 +3017,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_red(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_green(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_blue(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_red(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_green(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_blue(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_red(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_green(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::min_blue(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_red(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_green(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Rgb::&lt;Srgb, f32&gt;::max_blue(), <span class="number">1.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -3032,7 +3033,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{encoding::Srgb, rgb::Rgba};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{encoding::Srgb, rgb::Rgba};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Rgba&lt;Srgb&gt;,

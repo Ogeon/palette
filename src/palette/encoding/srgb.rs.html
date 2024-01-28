@@ -190,6 +190,11 @@
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
 <a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The sRGB standard.
 
 </span><span class="kw">use crate</span>::{
@@ -344,24 +349,29 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use crate</span>::{
-        encoding::{FromLinear, IntoLinear, Srgb},
-        matrix::{matrix_inverse, rgb_to_xyz_matrix},
-        rgb::RgbSpace,
-    };
+    <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, Srgb};
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>rgb_to_xyz() {
-        <span class="kw">let </span>dynamic = rgb_to_xyz_matrix::&lt;Srgb, f64&gt;();
-        <span class="kw">let </span>constant = Srgb::rgb_to_xyz_matrix().unwrap();
-        <span class="macro">assert_relative_eq!</span>(dynamic[..], constant[..], epsilon = <span class="number">0.0000001</span>);
-    }
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{
+            encoding::Srgb,
+            matrix::{matrix_inverse, rgb_to_xyz_matrix},
+            rgb::RgbSpace,
+        };
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>xyz_to_rgb() {
-        <span class="kw">let </span>dynamic = matrix_inverse(rgb_to_xyz_matrix::&lt;Srgb, f64&gt;());
-        <span class="kw">let </span>constant = Srgb::xyz_to_rgb_matrix().unwrap();
-        <span class="macro">assert_relative_eq!</span>(dynamic[..], constant[..], epsilon = <span class="number">0.0000001</span>);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>rgb_to_xyz() {
+            <span class="kw">let </span>dynamic = rgb_to_xyz_matrix::&lt;Srgb, f64&gt;();
+            <span class="kw">let </span>constant = Srgb::rgb_to_xyz_matrix().unwrap();
+            <span class="macro">assert_relative_eq!</span>(dynamic[..], constant[..], epsilon = <span class="number">0.0000001</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>xyz_to_rgb() {
+            <span class="kw">let </span>dynamic = matrix_inverse(rgb_to_xyz_matrix::&lt;Srgb, f64&gt;());
+            <span class="kw">let </span>constant = Srgb::xyz_to_rgb_matrix().unwrap();
+            <span class="macro">assert_relative_eq!</span>(dynamic[..], constant[..], epsilon = <span class="number">0.0000001</span>);
+        }
     }
 
     <span class="attr">#[test]

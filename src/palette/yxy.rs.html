@@ -401,6 +401,11 @@
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
 <a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 Yxy (xyY) color space.
 
 </span><span class="kw">use </span>core::marker::PhantomData;
@@ -701,36 +706,40 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Yxy;
     <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
-    <span class="kw">use crate</span>::{FromColor, LinLuma, LinSrgb};
 
     <span class="macro">test_convert_into_from_xyz!</span>(Yxy);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>luma() {
-        <span class="kw">let </span>a = Yxy::&lt;D65&gt;::from_color(LinLuma::new(<span class="number">0.5</span>));
-        <span class="kw">let </span>b = Yxy::new(<span class="number">0.312727</span>, <span class="number">0.329023</span>, <span class="number">0.5</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
-    }
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{white_point::D65, FromColor, LinLuma, LinSrgb, Yxy};
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>red() {
-        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Yxy::new(<span class="number">0.64</span>, <span class="number">0.33</span>, <span class="number">0.212673</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>luma() {
+            <span class="kw">let </span>a = Yxy::&lt;D65&gt;::from_color(LinLuma::new(<span class="number">0.5</span>));
+            <span class="kw">let </span>b = Yxy::new(<span class="number">0.312727</span>, <span class="number">0.329023</span>, <span class="number">0.5</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>green() {
-        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Yxy::new(<span class="number">0.3</span>, <span class="number">0.6</span>, <span class="number">0.715152</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>red() {
+            <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Yxy::new(<span class="number">0.64</span>, <span class="number">0.33</span>, <span class="number">0.212673</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Yxy::new(<span class="number">0.15</span>, <span class="number">0.06</span>, <span class="number">0.072175</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>green() {
+            <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Yxy::new(<span class="number">0.3</span>, <span class="number">0.6</span>, <span class="number">0.715152</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>a = Yxy::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Yxy::new(<span class="number">0.15</span>, <span class="number">0.06</span>, <span class="number">0.072175</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.000001</span>);
+        }
     }
 
     <span class="attr">#[test]
@@ -752,12 +761,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_x(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_y(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::min_luma(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_x(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_y(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Yxy::&lt;D65&gt;::max_luma(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::min_x(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::min_y(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::min_luma(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::max_x(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::max_y(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Yxy::&lt;D65&gt;::max_luma(), <span class="number">1.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -768,7 +777,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{white_point::D65, yxy::Yxya};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{white_point::D65, yxy::Yxya};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Yxya&lt;D65&gt;,

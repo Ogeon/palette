@@ -493,8 +493,8 @@
 
 <span class="macro">impl_as_components!</span>([C], [C; M] <span class="kw">where </span>(<span class="kw">const </span>M: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_as_components!</span>(Box&lt;[C]&gt;, Vec&lt;C&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_as_components!</span>(alloc::boxed::Box&lt;[C]&gt;, alloc::vec::Vec&lt;C&gt;);
 
 <span class="doccomment">/// Trait for trying to cast a reference to collection of color components into
 /// a reference to collection of colors without copying.
@@ -632,8 +632,8 @@
 
 <span class="macro">impl_try_components_as!</span>([T], [T; M] <span class="kw">where </span>(<span class="kw">const </span>M: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_try_components_as!</span>(Box&lt;[T]&gt;, Vec&lt;T&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_try_components_as!</span>(alloc::boxed::Box&lt;[T]&gt;, alloc::vec::Vec&lt;T&gt;);
 
 <span class="doccomment">/// Trait for casting a reference to collection of color components into a
 /// reference to collection of colors without copying.

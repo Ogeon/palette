@@ -300,6 +300,7 @@
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in
 //! chromatic adaptation and conversion calculations.
 
@@ -520,7 +521,8 @@
     ]
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
     <span class="kw">use </span><span class="kw">crate</span>::chromatic_adaptation::AdaptInto;

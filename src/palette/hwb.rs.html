@@ -488,6 +488,19 @@
 <a href="#488" id="488">488</a>
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the HWB color space.
 
 </span><span class="kw">use </span>core::{any::TypeId, marker::PhantomData};
@@ -855,69 +868,81 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Hwb;
-    <span class="kw">use crate</span>::{Clamp, FromColor, Srgb};
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="kw">use </span><span class="kw">crate</span>::Srgb;
 
     <span class="macro">test_convert_into_from_xyz!</span>(Hwb);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>red() {
-        <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b);
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{FromColor, Hwb, Srgb};
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>red() {
+            <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>orange() {
+            <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">30.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>green() {
+            <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">120.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>purple() {
+            <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">270.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b);
+        }
     }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>orange() {
-        <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">30.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b);
-    }
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>clamp {
+        <span class="kw">use crate</span>::{Clamp, Hwb};
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>green() {
-        <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">120.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>clamp_invalid() {
+            <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
+            <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, -<span class="number">3.0</span>, -<span class="number">4.0</span>).clamp();
+            <span class="macro">assert_relative_eq!</span>(expected, clamped);
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>purple() {
-        <span class="kw">let </span>a = Hwb::from_color(Srgb::new(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Hwb::new_srgb(<span class="number">270.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>clamp_invalid() {
-        <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);
-        <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, -<span class="number">3.0</span>, -<span class="number">4.0</span>).clamp();
-        <span class="macro">assert_relative_eq!</span>(expected, clamped);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>clamp_none() {
-        <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.7</span>);
-        <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.7</span>).clamp();
-        <span class="macro">assert_relative_eq!</span>(expected, clamped);
-    }
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>clamp_over_one() {
-        <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.2</span>, <span class="number">0.8</span>);
-        <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">5.0</span>, <span class="number">20.0</span>).clamp();
-        <span class="macro">assert_relative_eq!</span>(expected, clamped);
-    }
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>clamp_under_one() {
-        <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.1</span>);
-        <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.1</span>).clamp();
-        <span class="macro">assert_relative_eq!</span>(expected, clamped);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>clamp_none() {
+            <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.7</span>);
+            <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.7</span>).clamp();
+            <span class="macro">assert_relative_eq!</span>(expected, clamped);
+        }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>clamp_over_one() {
+            <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.2</span>, <span class="number">0.8</span>);
+            <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">5.0</span>, <span class="number">20.0</span>).clamp();
+            <span class="macro">assert_relative_eq!</span>(expected, clamped);
+        }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>clamp_under_one() {
+            <span class="kw">let </span>expected = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.1</span>);
+            <span class="kw">let </span>clamped = Hwb::new_srgb(<span class="number">240.0</span>, <span class="number">0.3</span>, <span class="number">0.1</span>).clamp();
+            <span class="macro">assert_relative_eq!</span>(expected, clamped);
+        }
     }
 
     <span class="macro">raw_pixel_conversion_tests!</span>(Hwb&lt;<span class="kw">crate</span>::encoding::Srgb&gt;: hue, whiteness, blackness);
@@ -927,10 +952,10 @@
     </span><span class="kw">fn </span>check_min_max_components() {
         <span class="kw">use </span><span class="kw">crate</span>::encoding::Srgb;
 
-        <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::min_whiteness(), <span class="number">0.0</span>,);
-        <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::min_blackness(), <span class="number">0.0</span>,);
-        <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::max_whiteness(), <span class="number">1.0</span>,);
-        <span class="macro">assert_relative_eq!</span>(Hwb::&lt;Srgb&gt;::max_blackness(), <span class="number">1.0</span>,);
+        <span class="macro">assert_eq!</span>(Hwb::&lt;Srgb&gt;::min_whiteness(), <span class="number">0.0</span>,);
+        <span class="macro">assert_eq!</span>(Hwb::&lt;Srgb&gt;::min_blackness(), <span class="number">0.0</span>,);
+        <span class="macro">assert_eq!</span>(Hwb::&lt;Srgb&gt;::max_whiteness(), <span class="number">1.0</span>,);
+        <span class="macro">assert_eq!</span>(Hwb::&lt;Srgb&gt;::max_blackness(), <span class="number">1.0</span>,);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -941,7 +966,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{encoding::Srgb, hwb::Hwba};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{encoding::Srgb, hwb::Hwba};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Hwba&lt;Srgb&gt;,

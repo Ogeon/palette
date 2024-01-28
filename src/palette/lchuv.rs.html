@@ -361,6 +361,7 @@
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*C\*uv h°uv color space.
 
 </span><span class="kw">use </span>core::{marker::PhantomData, ops::Mul};
@@ -673,10 +674,10 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::min_chroma(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_chroma(), <span class="number">180.0</span>);
+        <span class="macro">assert_eq!</span>(Lchuv::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
+        <span class="macro">assert_eq!</span>(Lchuv::&lt;D65, f32&gt;::min_chroma(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Lchuv::&lt;D65, f32&gt;::max_chroma(), <span class="number">180.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -687,7 +688,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{lchuv::Lchuva, white_point::D65};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{lchuv::Lchuva, white_point::D65};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Lchuva&lt;D65&gt;,

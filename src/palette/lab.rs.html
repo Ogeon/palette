@@ -484,6 +484,11 @@
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*a\*b\* (CIELAB) color space.
 
 </span><span class="kw">use </span>core::{
@@ -874,29 +879,33 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Lab;
     <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
-    <span class="kw">use crate</span>::{FromColor, LinSrgb};
 
     <span class="macro">test_convert_into_from_xyz!</span>(Lab);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>red() {
-        <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Lab::new(<span class="number">53.23288</span>, <span class="number">80.09246</span>, <span class="number">67.2031</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
-    }
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{FromColor, Lab, LinSrgb};
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>green() {
-        <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Lab::new(<span class="number">87.73704</span>, -<span class="number">86.184654</span>, <span class="number">83.18117</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>red() {
+            <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Lab::new(<span class="number">53.23288</span>, <span class="number">80.09246</span>, <span class="number">67.2031</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Lab::new(<span class="number">32.302586</span>, <span class="number">79.19668</span>, -<span class="number">107.863686</span>);
-        <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>green() {
+            <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Lab::new(<span class="number">87.73704</span>, -<span class="number">86.184654</span>, <span class="number">83.18117</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>a = Lab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Lab::new(<span class="number">32.302586</span>, <span class="number">79.19668</span>, -<span class="number">107.863686</span>);
+            <span class="macro">assert_relative_eq!</span>(a, b, epsilon = <span class="number">0.01</span>);
+        }
     }
 
     <span class="attr">#[test]
@@ -918,12 +927,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::min_a(), -<span class="number">128.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::min_b(), -<span class="number">128.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::max_a(), <span class="number">127.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Lab::&lt;D65, f32&gt;::max_b(), <span class="number">127.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::min_a(), -<span class="number">128.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::min_b(), -<span class="number">128.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::max_a(), <span class="number">127.0</span>);
+        <span class="macro">assert_eq!</span>(Lab::&lt;D65, f32&gt;::max_b(), <span class="number">127.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -934,7 +943,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{lab::Laba, white_point::D65};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{lab::Laba, white_point::D65};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Laba&lt;D65&gt;,

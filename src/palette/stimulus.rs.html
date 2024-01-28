@@ -375,6 +375,7 @@
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits for working with stimulus colors and values, such as RGB and XYZ.
 
 </span><span class="kw">use crate</span>::{
@@ -648,7 +649,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">crate</span>::stimulus::IntoStimulus;
-    <span class="kw">use </span>approx::assert_relative_eq;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>float_to_uint() {
@@ -672,11 +672,11 @@
             <span class="number">1.0</span>,
             <span class="number">1.4</span>,
             f32::from_bits(<span class="number">0x4b44_0000</span>),
-            std::f32::MAX,
-            std::f32::MIN,
-            std::f32::NAN,
-            std::f32::INFINITY,
-            std::f32::NEG_INFINITY,
+            core::f32::MAX,
+            core::f32::MIN,
+            core::f32::NAN,
+            core::f32::INFINITY,
+            core::f32::NEG_INFINITY,
         ];
 
         <span class="kw">let </span>expected = <span class="macro">vec!</span>[
@@ -711,11 +711,11 @@
             <span class="number">1.0</span>,
             <span class="number">1.4</span>,
             f64::from_bits(<span class="number">0x4334_0000_0000_0000</span>),
-            std::f64::MAX,
-            std::f64::MIN,
-            std::f64::NAN,
-            std::f64::INFINITY,
-            std::f64::NEG_INFINITY,
+            core::f64::MAX,
+            core::f64::MIN,
+            core::f64::NAN,
+            core::f64::INFINITY,
+            core::f64::NEG_INFINITY,
         ];
 
         <span class="kw">let </span>expected = <span class="macro">vec!</span>[
@@ -728,7 +728,8 @@
         }
     }
 
-    <span class="attr">#[test]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    #[test]
     </span><span class="kw">fn </span>uint_to_float() {
         <span class="kw">fn </span>into_stimulus_old(n: u8) -&gt; f32 {
             <span class="kw">let </span>max = core::u8::MAX <span class="kw">as </span>f32;
@@ -740,7 +741,8 @@
         }
     }
 
-    <span class="attr">#[test]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    #[test]
     </span><span class="kw">fn </span>uint_to_double() {
         <span class="kw">fn </span>into_stimulus_old(n: u8) -&gt; f64 {
             <span class="kw">let </span>max = core::u8::MAX <span class="kw">as </span>f64;

@@ -560,6 +560,17 @@
 <a href="#560" id="560">560</a>
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the Okhsv color space.
 
 </span><span class="kw">use </span>core::fmt::Debug;
@@ -848,214 +859,224 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>core::str::FromStr;
-
-    <span class="kw">use </span><span class="kw">crate</span>::convert::FromColorUnclamped;
-    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
-    <span class="kw">use </span><span class="kw">crate</span>::visual::VisuallyEqual;
-    <span class="kw">use crate</span>::{encoding, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+    <span class="kw">use crate</span>::{convert::FromColorUnclamped, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab};
 
     <span class="macro">test_convert_into_from_xyz!</span>(Okhsv);
 
-    <span class="attr">#[cfg_attr(miri, ignore)]
-    #[test]
-    </span><span class="kw">fn </span>test_roundtrip_okhsv_oklab_is_original() {
-        <span class="kw">let </span>colors = [
-            (
-                <span class="string">&quot;red&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;green&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;cyan&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;magenta&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;white&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;black&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;grey&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)),
-            ),
-            (
-                <span class="string">&quot;yellow&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;blue&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
-            ),
-        ];
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use </span>core::str::FromStr;
 
-        <span class="comment">// unlike in okhwb we are using f64 here, which actually works.
-        // So we can afford a small tolerance
-        </span><span class="kw">const </span>EPSILON: f64 = <span class="number">1e-10</span>;
+        <span class="kw">use crate</span>::{
+            convert::FromColorUnclamped, encoding, rgb::Rgb, visual::VisuallyEqual, LinSrgb, Okhsv,
+            Oklab, OklabHue, Srgb,
+        };
 
-        <span class="kw">for </span>(name, color) <span class="kw">in </span>colors {
-            <span class="kw">let </span>rgb: Rgb&lt;encoding::Srgb, u8&gt; =
-                <span class="kw">crate</span>::Srgb::&lt;f64&gt;::from_color_unclamped(color).into_format();
-            <span class="macro">println!</span>(
-                <span class="string">&quot;\n\
-            roundtrip of {} (#{:x} / {:?})\n\
-            =================================================&quot;</span>,
-                name, rgb, color
-            );
+        <span class="attr">#[cfg_attr(miri, ignore)]
+        #[test]
+        </span><span class="kw">fn </span>test_roundtrip_okhsv_oklab_is_original() {
+            <span class="kw">let </span>colors = [
+                (
+                    <span class="string">&quot;red&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;green&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;cyan&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;magenta&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;white&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;black&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;grey&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)),
+                ),
+                (
+                    <span class="string">&quot;yellow&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;blue&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
+                ),
+            ];
 
-            <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(color);
-            <span class="macro">println!</span>(<span class="string">&quot;Okhsv: {:?}&quot;</span>, okhsv);
-            <span class="kw">let </span>roundtrip_color = Oklab::from_color_unclamped(okhsv);
-            <span class="macro">assert!</span>(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                <span class="string">&quot;&#39;{}&#39; failed.\n{:?}\n!=\n{:?}&quot;</span>,
-                name,
-                roundtrip_color,
-                color
-            );
+            <span class="comment">// unlike in okhwb we are using f64 here, which actually works.
+            // So we can afford a small tolerance
+            </span><span class="kw">const </span>EPSILON: f64 = <span class="number">1e-10</span>;
+
+            <span class="kw">for </span>(name, color) <span class="kw">in </span>colors {
+                <span class="kw">let </span>rgb: Rgb&lt;encoding::Srgb, u8&gt; =
+                    <span class="kw">crate</span>::Srgb::&lt;f64&gt;::from_color_unclamped(color).into_format();
+                <span class="macro">println!</span>(
+                    <span class="string">&quot;\n\
+                    roundtrip of {} (#{:x} / {:?})\n\
+                    =================================================&quot;</span>,
+                    name, rgb, color
+                );
+
+                <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(color);
+                <span class="macro">println!</span>(<span class="string">&quot;Okhsv: {:?}&quot;</span>, okhsv);
+                <span class="kw">let </span>roundtrip_color = Oklab::from_color_unclamped(okhsv);
+                <span class="macro">assert!</span>(
+                    Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                    <span class="string">&quot;&#39;{}&#39; failed.\n{:?}\n!=\n{:?}&quot;</span>,
+                    name,
+                    roundtrip_color,
+                    color
+                );
+            }
+        }
+
+        <span class="doccomment">/// Compares results to results for a run of
+        /// https://github.com/bottosson/bottosson.github.io/blob/3d3f17644d7f346e1ce1ca08eb8b01782eea97af/misc/ok_color.h
+        /// Not to the ideal values, which should be
+        /// hue: as is
+        /// saturation: 1.0
+        /// value: 1.0
+        </span><span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>lin_srgb_blue = LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);
+            <span class="kw">let </span>oklab_blue_64 = Oklab::&lt;f64&gt;::from_color_unclamped(lin_srgb_blue);
+            <span class="kw">let </span>okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
+
+            <span class="macro">println!</span>(<span class="string">&quot;Okhsv f64: {:?}\n&quot;</span>, okhsv_blue_64);
+            <span class="comment">// HSV values of the reference implementation (in C)
+            // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
+            // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
+            // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+            </span><span class="attr">#[allow(clippy::excessive_precision)]
+            </span><span class="kw">let </span>expected_hue = OklabHue::new(<span class="number">264.0520206380550121</span>);
+            <span class="kw">let </span>expected_saturation = <span class="number">0.9999910912349018</span>;
+            <span class="kw">let </span>expected_value = <span class="number">0.9999999646150918</span>;
+
+            <span class="comment">// compare to the reference implementation values
+            </span><span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.hue, expected_hue, epsilon = <span class="number">1e-12</span>);
+            <span class="macro">assert_abs_diff_eq!</span>(
+                okhsv_blue_64.saturation,
+                expected_saturation,
+                epsilon = <span class="number">1e-12
+            </span>);
+            <span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.value, expected_value, epsilon = <span class="number">1e-12</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>test_srgb_to_okhsv() {
+            <span class="kw">let </span>red_hex = <span class="string">&quot;#ff0004&quot;</span>;
+            <span class="kw">let </span>rgb: Srgb = Rgb::&lt;encoding::Srgb, <span class="kw">_</span>&gt;::from_str(red_hex)
+                .unwrap()
+                .into_format();
+            <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(rgb);
+            <span class="macro">assert_relative_eq!</span>(okhsv.saturation, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
+            <span class="macro">assert_relative_eq!</span>(okhsv.value, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
+            <span class="macro">assert_relative_eq!</span>(
+                okhsv.hue.into_raw_degrees(),
+                <span class="number">29.0</span>,
+                epsilon = <span class="number">1e-3</span>,
+                max_relative = <span class="number">1e-3
+            </span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>test_okhsv_to_srgb() {
+            <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">0.5</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
+            <span class="kw">let </span>rgb8: Rgb&lt;encoding::Srgb, u8&gt; = rgb.into_format();
+            <span class="kw">let </span>hex_str = <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, rgb8);
+            <span class="macro">assert_eq!</span>(hex_str, <span class="string">&quot;7a4355&quot;</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>test_okhsv_to_srgb_saturated_black() {
+            <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">1.0</span>, <span class="number">0.0</span>);
+            <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
+            <span class="macro">assert_relative_eq!</span>(rgb, Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>black_eq_different_black() {
+            <span class="macro">assert!</span>(Okhsv::visually_eq(
+                Okhsv::from_color_unclamped(Oklab::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
+                Okhsv::from_color_unclamped(Oklab::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
+                <span class="number">1e-12
+            </span>));
         }
     }
 
-    <span class="doccomment">/// Compares results to results for a run of
-    /// https://github.com/bottosson/bottosson.github.io/blob/3d3f17644d7f346e1ce1ca08eb8b01782eea97af/misc/ok_color.h
-    /// Not to the ideal values, which should be
-    /// hue: as is
-    /// saturation: 1.0
-    /// value: 1.0
-    </span><span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>lin_srgb_blue = LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);
-        <span class="kw">let </span>oklab_blue_64 = Oklab::&lt;f64&gt;::from_color_unclamped(lin_srgb_blue);
-        <span class="kw">let </span>okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>visual_eq {
+        <span class="kw">use crate</span>::{visual::VisuallyEqual, Okhsv};
 
-        <span class="macro">println!</span>(<span class="string">&quot;Okhsv f64: {:?}\n&quot;</span>, okhsv_blue_64);
-        <span class="comment">// HSV values of the reference implementation (in C)
-        // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
-        // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
-        // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
-        </span><span class="attr">#[allow(clippy::excessive_precision)]
-        </span><span class="kw">let </span>expected_hue = OklabHue::new(<span class="number">264.0520206380550121</span>);
-        <span class="kw">let </span>expected_saturation = <span class="number">0.9999910912349018</span>;
-        <span class="kw">let </span>expected_value = <span class="number">0.9999999646150918</span>;
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>white_eq_different_white() {
+            <span class="macro">assert!</span>(Okhsv::visually_eq(
+                Okhsv::new(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+                Okhsv::new(<span class="number">24.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+                <span class="number">1e-12
+            </span>));
+        }
 
-        <span class="comment">// compare to the reference implementation values
-        </span><span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.hue, expected_hue, epsilon = <span class="number">1e-12</span>);
-        <span class="macro">assert_abs_diff_eq!</span>(
-            okhsv_blue_64.saturation,
-            expected_saturation,
-            epsilon = <span class="number">1e-12
-        </span>);
-        <span class="macro">assert_abs_diff_eq!</span>(okhsv_blue_64.value, expected_value, epsilon = <span class="number">1e-12</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>white_ne_grey_or_black() {
+            <span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+                <span class="number">1e-12
+            </span>));
+            <span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
+                <span class="number">1e-12
+            </span>));
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_srgb_to_okhsv() {
-        <span class="kw">let </span>red_hex = <span class="string">&quot;#ff0004&quot;</span>;
-        <span class="kw">let </span>rgb: Srgb = Rgb::&lt;encoding::Srgb, <span class="kw">_</span>&gt;::from_str(red_hex)
-            .unwrap()
-            .into_format();
-        <span class="kw">let </span>okhsv = Okhsv::from_color_unclamped(rgb);
-        <span class="macro">assert_relative_eq!</span>(okhsv.saturation, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
-        <span class="macro">assert_relative_eq!</span>(okhsv.value, <span class="number">1.0</span>, epsilon = <span class="number">1e-3</span>);
-        <span class="macro">assert_relative_eq!</span>(
-            okhsv.hue.into_raw_degrees(),
-            <span class="number">29.0</span>,
-            epsilon = <span class="number">1e-3</span>,
-            max_relative = <span class="number">1e-3
-        </span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>color_neq_different_color() {
+            <span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
+                Okhsv::new(<span class="number">11.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
+                <span class="number">1e-12
+            </span>));
+            <span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
+                Okhsv::new(<span class="number">10.0</span>, <span class="number">0.02</span>, <span class="number">0.5</span>),
+                <span class="number">1e-12
+            </span>));
+            <span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
+                Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.6</span>),
+                <span class="number">1e-12
+            </span>));
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_okhsv_to_srgb() {
-        <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">0.5</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
-        <span class="kw">let </span>rgb8: Rgb&lt;encoding::Srgb, u8&gt; = rgb.into_format();
-        <span class="kw">let </span>hex_str = <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, rgb8);
-        <span class="macro">assert_eq!</span>(hex_str, <span class="string">&quot;7a4355&quot;</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_okhsv_to_srgb_saturated_black() {
-        <span class="kw">let </span>okhsv = Okhsv::new(<span class="number">0.0_f32</span>, <span class="number">1.0</span>, <span class="number">0.0</span>);
-        <span class="kw">let </span>rgb = Srgb::from_color_unclamped(okhsv);
-        <span class="macro">assert_relative_eq!</span>(rgb, Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>black_eq_different_black() {
-        <span class="macro">assert!</span>(Okhsv::visually_eq(
-            Okhsv::from_color_unclamped(Oklab::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
-            Okhsv::from_color_unclamped(Oklab::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
-            <span class="number">1e-12
-        </span>));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>white_eq_different_white() {
-        <span class="macro">assert!</span>(Okhsv::visually_eq(
-            Okhsv::new(<span class="number">240.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
-            Okhsv::new(<span class="number">24.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="number">1e-12
-        </span>));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>white_ne_grey_or_black() {
-        <span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>),
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="number">1e-12
-        </span>));
-        <span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>),
-            <span class="number">1e-12
-        </span>));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>color_neq_different_color() {
-        <span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
-            Okhsv::new(<span class="number">11.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
-            <span class="number">1e-12
-        </span>));
-        <span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
-            Okhsv::new(<span class="number">10.0</span>, <span class="number">0.02</span>, <span class="number">0.5</span>),
-            <span class="number">1e-12
-        </span>));
-        <span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.5</span>),
-            Okhsv::new(<span class="number">10.0</span>, <span class="number">0.01</span>, <span class="number">0.6</span>),
-            <span class="number">1e-12
-        </span>));
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>grey_vs_grey() {
-        <span class="comment">// greys of different lightness are not equal
-        </span><span class="macro">assert!</span>(!Okhsv::visually_eq(
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.4</span>),
-            <span class="number">1e-12
-        </span>));
-        <span class="comment">// greys of same lightness but different hue are equal
-        </span><span class="macro">assert!</span>(Okhsv::visually_eq(
-            Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
-            Okhsv::new(<span class="number">12.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
-            <span class="number">1e-12
-        </span>));
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>grey_vs_grey() {
+            <span class="comment">// greys of different lightness are not equal
+            </span><span class="macro">assert!</span>(!Okhsv::visually_eq(
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.4</span>),
+                <span class="number">1e-12
+            </span>));
+            <span class="comment">// greys of same lightness but different hue are equal
+            </span><span class="macro">assert!</span>(Okhsv::visually_eq(
+                Okhsv::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
+                Okhsv::new(<span class="number">12.0</span>, <span class="number">0.0</span>, <span class="number">0.3</span>),
+                <span class="number">1e-12
+            </span>));
+        }
     }
 
     <span class="attr">#[test]
@@ -1112,7 +1133,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use </span><span class="kw">crate</span>::okhsv::Okhsva;
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use </span><span class="kw">crate</span>::okhsv::Okhsva;
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Okhsva,

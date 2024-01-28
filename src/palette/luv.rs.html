@@ -425,6 +425,11 @@
 <a href="#425" id="425">425</a>
 <a href="#426" id="426">426</a>
 <a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*u\*v\* (CIELUV) color space.
 
 </span><span class="kw">use </span>core::{
@@ -740,29 +745,33 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Luv;
     <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
-    <span class="kw">use crate</span>::{FromColor, LinSrgb};
 
     <span class="macro">test_convert_into_from_xyz!</span>(Luv);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>red() {
-        <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>v = Luv::new(<span class="number">53.237116</span>, <span class="number">175.0098</span>, <span class="number">37.7650</span>);
-        <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
-    }
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{FromColor, LinSrgb, Luv};
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>green() {
-        <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>v = Luv::new(<span class="number">87.73703</span>, -<span class="number">83.07975</span>, <span class="number">107.40136</span>);
-        <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>red() {
+            <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>v = Luv::new(<span class="number">53.237116</span>, <span class="number">175.0098</span>, <span class="number">37.7650</span>);
+            <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
+        }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>v = Luv::new(<span class="number">32.30087</span>, -<span class="number">9.40241</span>, -<span class="number">130.35109</span>);
-        <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>green() {
+            <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>v = Luv::new(<span class="number">87.73703</span>, -<span class="number">83.07975</span>, <span class="number">107.40136</span>);
+            <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>u = Luv::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>v = Luv::new(<span class="number">32.30087</span>, -<span class="number">9.40241</span>, -<span class="number">130.35109</span>);
+            <span class="macro">assert_relative_eq!</span>(u, v, epsilon = <span class="number">0.01</span>);
+        }
     }
 
     <span class="attr">#[test]
@@ -800,12 +809,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::min_u(), -<span class="number">84.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::min_v(), -<span class="number">135.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::max_u(), <span class="number">176.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Luv::&lt;D65, f32&gt;::max_v(), <span class="number">108.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::min_u(), -<span class="number">84.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::min_v(), -<span class="number">135.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::max_l(), <span class="number">100.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::max_u(), <span class="number">176.0</span>);
+        <span class="macro">assert_eq!</span>(Luv::&lt;D65, f32&gt;::max_v(), <span class="number">108.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -816,7 +825,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{luv::Luva, white_point::D65};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{luv::Luva, white_point::D65};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Luva&lt;D65&gt;,

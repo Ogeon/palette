@@ -833,6 +833,12 @@
 <a href="#833" id="833">833</a>
 <a href="#834" id="834">834</a>
 <a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
 </pre></div><pre class="rust"><code><span class="macro">macro_rules! </span>first {
     (($(<span class="macro-nonterminal">$first</span>: tt)+) $(, ($(<span class="macro-nonterminal">$rest</span>: tt)+))<span class="kw-2">*</span>) =&gt; {
         $(<span class="macro-nonterminal">$first</span>)+
@@ -1234,12 +1240,12 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Vec&lt;T&gt;&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
-                $(<span class="kw">let </span><span class="macro-nonterminal">$element </span>= Vec::with_capacity(capacity);)+
+                $(<span class="kw">let </span><span class="macro-nonterminal">$element </span>= alloc::vec::Vec::with_capacity(capacity);)+
 
                 <span class="self">Self </span>{
                     $(<span class="macro-nonterminal">$element</span>,)+
@@ -1272,7 +1278,7 @@
 
             <span class="doccomment">/// Return an iterator that moves colors out of the specified range.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Iter&lt;std::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;
+            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Iter&lt;alloc::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;
             <span class="kw">where
                 </span>R: core::ops::RangeBounds&lt;usize&gt; + Clone,
             {
@@ -1331,14 +1337,14 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Vec&lt;T&gt;&gt;, Vec&lt;A&gt;&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt;, alloc::vec::Vec&lt;A&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
                 <span class="kw">crate</span>::Alpha {
                     color: <span class="macro-nonterminal">$self_ty::with_capacity</span>(capacity),
-                    alpha: Vec::with_capacity(capacity),
+                    alpha: alloc::vec::Vec::with_capacity(capacity),
                 }
             }
 
@@ -1370,7 +1376,7 @@
 
             <span class="doccomment">/// Return an iterator that moves colors out of the specified range.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="kw">crate</span>::alpha::Iter&lt;Iter&lt;std::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;, std::vec::Drain&lt;A&gt;&gt;
+            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="kw">crate</span>::alpha::Iter&lt;Iter&lt;alloc::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;, alloc::vec::Drain&lt;A&gt;&gt;
             <span class="kw">where
                 </span>R: core::ops::RangeBounds&lt;usize&gt; + Clone,
             {
@@ -1438,13 +1444,13 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Vec&lt;T&gt;&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
-                <span class="kw">let </span>hue = Vec::with_capacity(capacity);
-                $(<span class="kw">let </span><span class="macro-nonterminal">$element </span>= Vec::with_capacity(capacity);)+
+                <span class="kw">let </span>hue = alloc::vec::Vec::with_capacity(capacity);
+                $(<span class="kw">let </span><span class="macro-nonterminal">$element </span>= alloc::vec::Vec::with_capacity(capacity);)+
 
                 <span class="self">Self </span>{hue: hue.into() $(, <span class="macro-nonterminal">$element</span>)+ $(, <span class="macro-nonterminal">$phantom</span>: core::marker::PhantomData)<span class="question-mark">?</span>}
             }
@@ -1478,7 +1484,7 @@
 
             <span class="doccomment">/// Return an iterator that moves colors out of the specified range.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Iter&lt;std::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;
+            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Iter&lt;alloc::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;
             <span class="kw">where
                 </span>R: core::ops::RangeBounds&lt;usize&gt; + Clone,
             {
@@ -1538,14 +1544,14 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Vec&lt;T&gt;&gt;, Vec&lt;A&gt;&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt;, alloc::vec::Vec&lt;A&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
                 <span class="kw">crate</span>::Alpha {
                     color: <span class="macro-nonterminal">$self_ty::with_capacity</span>(capacity),
-                    alpha: Vec::with_capacity(capacity),
+                    alpha: alloc::vec::Vec::with_capacity(capacity),
                 }
             }
 
@@ -1577,7 +1583,7 @@
 
             <span class="doccomment">/// Return an iterator that moves colors out of the specified range.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="kw">crate</span>::alpha::Iter&lt;Iter&lt;std::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;, std::vec::Drain&lt;A&gt;&gt;
+            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="kw">crate</span>::alpha::Iter&lt;Iter&lt;alloc::vec::Drain&lt;T&gt; $(, <span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;, alloc::vec::Drain&lt;A&gt;&gt;
             <span class="kw">where
                 </span>R: core::ops::RangeBounds&lt;usize&gt; + Clone,
             {
@@ -1593,7 +1599,8 @@
 <span class="attr">#[cfg(test)]
 </span><span class="macro">macro_rules! </span>struct_of_arrays_tests {
     (<span class="macro-nonterminal">$color_ty</span>: ident $(&lt;<span class="macro-nonterminal">$phantom_ty</span>:ident&gt;)<span class="question-mark">?</span>, $(<span class="macro-nonterminal">$values</span>:expr),+) =&gt; {
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>collect() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
             <span class="kw">let </span>color_of_vecs: <span class="macro-nonterminal">$color_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Vec&lt;<span class="kw">_</span>&gt;&gt; = vec_of_colors.into_iter().collect();
@@ -1602,7 +1609,8 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>extend() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
 
@@ -1614,7 +1622,8 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>pop_push() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
 
@@ -1627,7 +1636,8 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>clear() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
 
@@ -1639,7 +1649,8 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[]);
         }
 
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>drain() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
 
@@ -1652,7 +1663,8 @@
             <span class="macro">assert_eq!</span>(vec_of_colors2, <span class="macro">vec!</span>[]);
         }
 
-        <span class="attr">#[test]
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        #[test]
         </span><span class="kw">fn </span>modify() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
 

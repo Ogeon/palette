@@ -2605,8 +2605,8 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Rgba::&lt;Srgb&gt;::min_alpha(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Rgba::&lt;Srgb&gt;::max_alpha(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Rgba::&lt;Srgb&gt;::min_alpha(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Rgba::&lt;Srgb&gt;::max_alpha(), <span class="number">1.0</span>);
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]

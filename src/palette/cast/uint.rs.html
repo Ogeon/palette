@@ -470,6 +470,8 @@
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
 <a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::mem::{transmute_copy, ManuallyDrop};
 
 <span class="doccomment">/// Marker trait for types that can be represented as an unsigned integer.
@@ -830,20 +832,20 @@
 ///     vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>into_uint_slice_box&lt;T&gt;(values: Box&lt;[T]&gt;) -&gt; Box&lt;[T::Uint]&gt;
+</span><span class="kw">pub fn </span>into_uint_slice_box&lt;T&gt;(values: alloc::boxed::Box&lt;[T]&gt;) -&gt; alloc::boxed::Box&lt;[T::Uint]&gt;
 <span class="kw">where
     </span>T: UintCast,
 {
     <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
     <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T::Uint] = into_uint_slice_mut(Box::leak(values));
+    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T::Uint] = into_uint_slice_mut(alloc::boxed::Box::leak(values));
 
     <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
-    </span><span class="kw">unsafe </span>{ Box::from_raw(raw) }
+    </span><span class="kw">unsafe </span>{ alloc::boxed::Box::from_raw(raw) }
 }
 
 <span class="doccomment">/// Cast from a boxed slice of unsigned integers to a boxed slice of colors.
@@ -861,20 +863,20 @@
 ///     colors
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>from_uint_slice_box&lt;T&gt;(values: Box&lt;[T::Uint]&gt;) -&gt; Box&lt;[T]&gt;
+</span><span class="kw">pub fn </span>from_uint_slice_box&lt;T&gt;(values: alloc::boxed::Box&lt;[T::Uint]&gt;) -&gt; alloc::boxed::Box&lt;[T]&gt;
 <span class="kw">where
     </span>T: UintCast,
 {
     <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
     <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
 
-    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T] = from_uint_slice_mut(Box::leak(values));
+    <span class="kw">let </span>raw: <span class="kw-2">*mut </span>[T] = from_uint_slice_mut(alloc::boxed::Box::leak(values));
 
     <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
-    </span><span class="kw">unsafe </span>{ Box::from_raw(raw) }
+    </span><span class="kw">unsafe </span>{ alloc::boxed::Box::from_raw(raw) }
 }
 
 <span class="doccomment">/// Cast from a `Vec` of colors to a `Vec` of unsigned integers.
@@ -892,9 +894,9 @@
 ///     vec![0xFF17C64C, 0xFF5D12D6]
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>into_uint_vec&lt;T&gt;(values: Vec&lt;T&gt;) -&gt; Vec&lt;T::Uint&gt;
+</span><span class="kw">pub fn </span>into_uint_vec&lt;T&gt;(values: alloc::vec::Vec&lt;T&gt;) -&gt; alloc::vec::Vec&lt;T::Uint&gt;
 <span class="kw">where
     </span>T: UintCast,
 {
@@ -907,7 +909,9 @@
     <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
     // Length and capacity are the same because the size is the same.
-    </span><span class="kw">unsafe </span>{ Vec::from_raw_parts(raw.cast::&lt;T::Uint&gt;(), values.len(), values.capacity()) }
+    </span><span class="kw">unsafe </span>{
+        alloc::vec::Vec::from_raw_parts(raw.cast::&lt;T::Uint&gt;(), values.len(), values.capacity())
+    }
 }
 
 <span class="doccomment">/// Cast from a `Vec` of unsigned integers to a `Vec` of colors.
@@ -925,9 +929,9 @@
 ///     colors
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>from_uint_vec&lt;T&gt;(values: Vec&lt;T::Uint&gt;) -&gt; Vec&lt;T&gt;
+</span><span class="kw">pub fn </span>from_uint_vec&lt;T&gt;(values: alloc::vec::Vec&lt;T::Uint&gt;) -&gt; alloc::vec::Vec&lt;T&gt;
 <span class="kw">where
     </span>T: UintCast,
 {
@@ -940,6 +944,6 @@
     <span class="comment">// Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
     // Length and capacity are the same because the size is the same.
-    </span><span class="kw">unsafe </span>{ Vec::from_raw_parts(raw.cast::&lt;T&gt;(), values.len(), values.capacity()) }
+    </span><span class="kw">unsafe </span>{ alloc::vec::Vec::from_raw_parts(raw.cast::&lt;T&gt;(), values.len(), values.capacity()) }
 }
 </code></pre></div></section></main></body></html>

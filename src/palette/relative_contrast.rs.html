@@ -172,6 +172,7 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     bool_mask::{HasBoolMask, LazySelect},
     num::{Arithmetics, PartialCmp, Real},
@@ -298,7 +299,8 @@
     }
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 #[allow(deprecated)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>core::str::FromStr;

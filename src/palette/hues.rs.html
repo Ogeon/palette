@@ -922,6 +922,12 @@
 <a href="#922" id="922">922</a>
 <a href="#923" id="923">923</a>
 <a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Hues and hue related types.
 
 </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;approx&quot;</span>, feature = <span class="string">&quot;random&quot;</span>))]
@@ -1173,11 +1179,11 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">impl</span>&lt;T&gt; <span class="macro-nonterminal">$name</span>&lt;Vec&lt;T&gt;&gt; {
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">impl</span>&lt;T&gt; <span class="macro-nonterminal">$name</span>&lt;alloc::vec::Vec&lt;T&gt;&gt; {
             <span class="doccomment">/// Create a struct with a vector with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
-                <span class="self">Self</span>(Vec::with_capacity(capacity))
+                <span class="self">Self</span>(alloc::vec::Vec::with_capacity(capacity))
             }
 
             <span class="doccomment">/// Push an additional hue onto the hue vector. See [`Vec::push`] for details.
@@ -1196,7 +1202,7 @@
             }
 
             <span class="doccomment">/// Return an iterator that moves hues out of the specified range.
-            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="macro-nonterminal">$iter_name</span>&lt;std::vec::Drain&lt;T&gt;&gt;
+            </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; <span class="macro-nonterminal">$iter_name</span>&lt;alloc::vec::Drain&lt;T&gt;&gt;
             <span class="kw">where
                 </span>R: core::ops::RangeBounds&lt;usize&gt; + Clone,
             {
@@ -1719,131 +1725,137 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use crate</span>::{
-        angle::{SignedAngle, UnsignedAngle},
-        OklabHue, RgbHue,
-    };
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>math {
+        <span class="kw">use crate</span>::{
+            angle::{SignedAngle, UnsignedAngle},
+            OklabHue, RgbHue,
+        };
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>oklabhue_ab_roundtrip() {
-        <span class="kw">for </span>degree <span class="kw">in </span>[<span class="number">0.0_f64</span>, <span class="number">90.0</span>, <span class="number">30.0</span>, <span class="number">330.0</span>, <span class="number">120.0</span>, <span class="number">240.0</span>] {
-            <span class="kw">let </span>hue = OklabHue::from_degrees(degree);
-            <span class="kw">let </span>(a, b) = hue.into_cartesian();
-            <span class="kw">let </span>roundtrip_hue = OklabHue::from_cartesian(a * <span class="number">10000.0</span>, b * <span class="number">10000.0</span>);
-            <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>oklabhue_ab_roundtrip() {
+            <span class="kw">for </span>degree <span class="kw">in </span>[<span class="number">0.0_f64</span>, <span class="number">90.0</span>, <span class="number">30.0</span>, <span class="number">330.0</span>, <span class="number">120.0</span>, <span class="number">240.0</span>] {
+                <span class="kw">let </span>hue = OklabHue::from_degrees(degree);
+                <span class="kw">let </span>(a, b) = hue.into_cartesian();
+                <span class="kw">let </span>roundtrip_hue = OklabHue::from_cartesian(a * <span class="number">10000.0</span>, b * <span class="number">10000.0</span>);
+                <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue);
+            }
         }
-    }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>normalize_angle_0_360() {
-        <span class="kw">let </span>inp = [
-            -<span class="number">1000.0_f32</span>,
-            -<span class="number">900.0</span>,
-            -<span class="number">360.5</span>,
-            -<span class="number">360.0</span>,
-            -<span class="number">359.5</span>,
-            -<span class="number">240.0</span>,
-            -<span class="number">180.5</span>,
-            -<span class="number">180.0</span>,
-            -<span class="number">179.5</span>,
-            -<span class="number">90.0</span>,
-            -<span class="number">0.5</span>,
-            <span class="number">0.0</span>,
-            <span class="number">0.5</span>,
-            <span class="number">90.0</span>,
-            <span class="number">179.5</span>,
-            <span class="number">180.0</span>,
-            <span class="number">180.5</span>,
-            <span class="number">240.0</span>,
-            <span class="number">359.5</span>,
-            <span class="number">360.0</span>,
-            <span class="number">360.5</span>,
-            <span class="number">900.0</span>,
-            <span class="number">1000.0</span>,
-        ];
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>normalize_angle_0_360() {
+            <span class="kw">let </span>inp = [
+                -<span class="number">1000.0_f32</span>,
+                -<span class="number">900.0</span>,
+                -<span class="number">360.5</span>,
+                -<span class="number">360.0</span>,
+                -<span class="number">359.5</span>,
+                -<span class="number">240.0</span>,
+                -<span class="number">180.5</span>,
+                -<span class="number">180.0</span>,
+                -<span class="number">179.5</span>,
+                -<span class="number">90.0</span>,
+                -<span class="number">0.5</span>,
+                <span class="number">0.0</span>,
+                <span class="number">0.5</span>,
+                <span class="number">90.0</span>,
+                <span class="number">179.5</span>,
+                <span class="number">180.0</span>,
+                <span class="number">180.5</span>,
+                <span class="number">240.0</span>,
+                <span class="number">359.5</span>,
+                <span class="number">360.0</span>,
+                <span class="number">360.5</span>,
+                <span class="number">900.0</span>,
+                <span class="number">1000.0</span>,
+            ];
 
-        <span class="kw">let </span>expected = [
-            <span class="number">80.0_f32</span>, <span class="number">180.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">270.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>,
-            <span class="number">90.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">240.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, <span class="number">280.0</span>,
-        ];
+            <span class="kw">let </span>expected = [
+                <span class="number">80.0_f32</span>, <span class="number">180.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">270.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>,
+                <span class="number">0.5</span>, <span class="number">90.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, <span class="number">180.5</span>, <span class="number">240.0</span>, <span class="number">359.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, <span class="number">280.0</span>,
+            ];
 
-        <span class="kw">let </span>result: Vec&lt;f32&gt; = inp
-            .iter()
-            .map(|x| (<span class="kw-2">*</span>x).normalize_unsigned_angle())
-            .collect();
-        <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
-            <span class="macro">assert_relative_eq!</span>(res, exp);
+            <span class="kw">let </span>result: Vec&lt;f32&gt; = inp
+                .iter()
+                .map(|x| (<span class="kw-2">*</span>x).normalize_unsigned_angle())
+                .collect();
+            <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
+                <span class="macro">assert_relative_eq!</span>(res, exp);
+            }
         }
-    }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>normalize_angle_180_180() {
-        <span class="kw">let </span>inp = [
-            -<span class="number">1000.0_f32</span>,
-            -<span class="number">900.0</span>,
-            -<span class="number">360.5</span>,
-            -<span class="number">360.0</span>,
-            -<span class="number">359.5</span>,
-            -<span class="number">240.0</span>,
-            -<span class="number">180.5</span>,
-            -<span class="number">180.0</span>,
-            -<span class="number">179.5</span>,
-            -<span class="number">90.0</span>,
-            -<span class="number">0.5</span>,
-            <span class="number">0.0</span>,
-            <span class="number">0.5</span>,
-            <span class="number">90.0</span>,
-            <span class="number">179.5</span>,
-            <span class="number">180.0</span>,
-            <span class="number">180.5</span>,
-            <span class="number">240.0</span>,
-            <span class="number">359.5</span>,
-            <span class="number">360.0</span>,
-            <span class="number">360.5</span>,
-            <span class="number">900.0</span>,
-            <span class="number">1000.0</span>,
-        ];
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>normalize_angle_180_180() {
+            <span class="kw">let </span>inp = [
+                -<span class="number">1000.0_f32</span>,
+                -<span class="number">900.0</span>,
+                -<span class="number">360.5</span>,
+                -<span class="number">360.0</span>,
+                -<span class="number">359.5</span>,
+                -<span class="number">240.0</span>,
+                -<span class="number">180.5</span>,
+                -<span class="number">180.0</span>,
+                -<span class="number">179.5</span>,
+                -<span class="number">90.0</span>,
+                -<span class="number">0.5</span>,
+                <span class="number">0.0</span>,
+                <span class="number">0.5</span>,
+                <span class="number">90.0</span>,
+                <span class="number">179.5</span>,
+                <span class="number">180.0</span>,
+                <span class="number">180.5</span>,
+                <span class="number">240.0</span>,
+                <span class="number">359.5</span>,
+                <span class="number">360.0</span>,
+                <span class="number">360.5</span>,
+                <span class="number">900.0</span>,
+                <span class="number">1000.0</span>,
+            ];
 
-        <span class="kw">let </span>expected = [
-            <span class="number">80.0</span>, <span class="number">180.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">90.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">90.0</span>,
-            <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">120.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, -<span class="number">80.0</span>,
-        ];
+            <span class="kw">let </span>expected = [
+                <span class="number">80.0</span>, <span class="number">180.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">120.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">90.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>,
+                <span class="number">90.0</span>, <span class="number">179.5</span>, <span class="number">180.0</span>, -<span class="number">179.5</span>, -<span class="number">120.0</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.5</span>, <span class="number">180.0</span>, -<span class="number">80.0</span>,
+            ];
 
-        <span class="kw">let </span>result: Vec&lt;f32&gt; = inp.iter().map(|x| (<span class="kw-2">*</span>x).normalize_signed_angle()).collect();
-        <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
-            <span class="macro">assert_relative_eq!</span>(res, exp);
+            <span class="kw">let </span>result: Vec&lt;f32&gt; = inp.iter().map(|x| (<span class="kw-2">*</span>x).normalize_signed_angle()).collect();
+            <span class="kw">for </span>(res, exp) <span class="kw">in </span>result.iter().zip(expected.iter()) {
+                <span class="macro">assert_relative_eq!</span>(res, exp);
+            }
         }
-    }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>float_conversion() {
-        <span class="kw">for </span>i <span class="kw">in </span>-<span class="number">180</span>..<span class="number">180 </span>{
-            <span class="kw">let </span>hue = RgbHue::from(<span class="number">4.0 </span>* i <span class="kw">as </span>f32);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>float_conversion() {
+            <span class="kw">for </span>i <span class="kw">in </span>-<span class="number">180</span>..<span class="number">180 </span>{
+                <span class="kw">let </span>hue = RgbHue::from(<span class="number">4.0 </span>* i <span class="kw">as </span>f32);
 
-            <span class="kw">let </span>degs = hue.into_degrees();
-            <span class="macro">assert!</span>(degs &gt; -<span class="number">180.0 </span>&amp;&amp; degs &lt;= <span class="number">180.0</span>);
+                <span class="kw">let </span>degs = hue.into_degrees();
+                <span class="macro">assert!</span>(degs &gt; -<span class="number">180.0 </span>&amp;&amp; degs &lt;= <span class="number">180.0</span>);
 
-            <span class="kw">let </span>pos_degs = hue.into_positive_degrees();
-            <span class="macro">assert!</span>((<span class="number">0.0</span>..<span class="number">360.0</span>).contains(<span class="kw-2">&amp;</span>pos_degs));
+                <span class="kw">let </span>pos_degs = hue.into_positive_degrees();
+                <span class="macro">assert!</span>((<span class="number">0.0</span>..<span class="number">360.0</span>).contains(<span class="kw-2">&amp;</span>pos_degs));
 
-            <span class="macro">assert_relative_eq!</span>(RgbHue::from(degs), RgbHue::from(pos_degs));
+                <span class="macro">assert_relative_eq!</span>(RgbHue::from(degs), RgbHue::from(pos_degs));
+            }
         }
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
-    #[test]
-    </span><span class="kw">fn </span>serialize() {
-        <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>RgbHue::from_degrees(<span class="number">10.2</span>)).unwrap();
+    </span><span class="kw">mod </span>serde {
+        <span class="kw">use </span><span class="kw">crate</span>::RgbHue;
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">&quot;10.2&quot;</span>);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>serialize() {
+            <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>RgbHue::from_degrees(<span class="number">10.2</span>)).unwrap();
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
-    #[test]
-    </span><span class="kw">fn </span>deserialize() {
-        <span class="kw">let </span>deserialized: RgbHue = ::serde_json::from_str(<span class="string">&quot;10.2&quot;</span>).unwrap();
+            <span class="macro">assert_eq!</span>(serialized, <span class="string">&quot;10.2&quot;</span>);
+        }
 
-        <span class="macro">assert_eq!</span>(deserialized, RgbHue::from_degrees(<span class="number">10.2</span>));
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>deserialize() {
+            <span class="kw">let </span>deserialized: RgbHue = ::serde_json::from_str(<span class="string">&quot;10.2&quot;</span>).unwrap();
+
+            <span class="macro">assert_eq!</span>(deserialized, RgbHue::from_degrees(<span class="number">10.2</span>));
+        }
     }
 }
 </code></pre></div></section></main></body></html>

@@ -1635,7 +1635,16 @@
 <a href="#1635" id="1635">1635</a>
 <a href="#1636" id="1636">1636</a>
 <a href="#1637" id="1637">1637</a>
+<a href="#1638" id="1638">1638</a>
+<a href="#1639" id="1639">1639</a>
+<a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::mem::{transmute_copy, ManuallyDrop};
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">use </span>alloc::{boxed::Box, vec::Vec};
 
 <span class="kw">pub use </span>palette_derive::ArrayCast;
 
@@ -2595,7 +2604,7 @@
 /// let color2 = Box::new(Srgb::new(23u8, 198, 76));
 /// let array2 = &lt;Box&lt;[_; 3]&gt;&gt;::from(color2);
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>into_array_box&lt;T&gt;(value: Box&lt;T&gt;) -&gt; Box&lt;T::Array&gt;
 <span class="kw">where
@@ -2637,7 +2646,7 @@
 /// let array2 = Box::new([23, 198, 76]);
 /// let color2 = &lt;Box&lt;Srgb&lt;u8&gt;&gt;&gt;::from(array2);
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>from_array_box&lt;T&gt;(value: Box&lt;T::Array&gt;) -&gt; Box&lt;T&gt;
 <span class="kw">where
@@ -2667,7 +2676,7 @@
 ///     vec![[64, 139, 10], [93, 18, 214]].into_boxed_slice()
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>into_array_slice_box&lt;T&gt;(values: Box&lt;[T]&gt;) -&gt; Box&lt;[T::Array]&gt;
 <span class="kw">where
@@ -2690,7 +2699,7 @@
 ///     vec![64, 139, 10, 93, 18, 214].into_boxed_slice()
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>into_component_slice_box&lt;T&gt;(values: Box&lt;[T]&gt;) -&gt; Box&lt;[&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item]&gt;
 <span class="kw">where
@@ -2713,7 +2722,7 @@
 ///     vec![Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)].into_boxed_slice()
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>from_array_slice_box&lt;T&gt;(values: Box&lt;[T::Array]&gt;) -&gt; Box&lt;[T]&gt;
 <span class="kw">where
@@ -2753,7 +2762,7 @@
 /// let components = vec![64, 139, 10, 93, 18, 214, 0, 123].into_boxed_slice();
 /// cast::from_component_slice_box::&lt;Srgb&lt;u8&gt;&gt;(components);
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>from_component_slice_box&lt;T&gt;(values: Box&lt;[&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item]&gt;) -&gt; Box&lt;[T]&gt;
 <span class="kw">where
@@ -2799,7 +2808,7 @@
 ///     unreachable!();
 /// }
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>try_from_component_slice_box&lt;T&gt;(
     values: Box&lt;[&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item]&gt;,
@@ -2828,7 +2837,7 @@
 ///     vec![[64, 139, 10], [93, 18, 214]]
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>into_array_vec&lt;T&gt;(values: Vec&lt;T&gt;) -&gt; Vec&lt;T::Array&gt;
 <span class="kw">where
@@ -2860,7 +2869,7 @@
 ///     vec![64, 139, 10, 93, 18, 214]
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>into_component_vec&lt;T&gt;(values: Vec&lt;T&gt;) -&gt; Vec&lt;&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item&gt;
 <span class="kw">where
@@ -2894,7 +2903,7 @@
 ///     vec![Srgb::new(64u8, 139, 10), Srgb::new(93, 18, 214)]
 /// )
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>from_array_vec&lt;T&gt;(values: Vec&lt;T::Array&gt;) -&gt; Vec&lt;T&gt;
 <span class="kw">where
@@ -2953,7 +2962,7 @@
 /// components.reserve_exact(2); // Not a multiple of 3
 /// cast::from_component_vec::&lt;Srgb&lt;u8&gt;&gt;(components);
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>from_component_vec&lt;T&gt;(values: Vec&lt;&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item&gt;) -&gt; Vec&lt;T&gt;
 <span class="kw">where
@@ -3013,7 +3022,7 @@
 ///     unreachable!();
 /// }
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>try_from_component_vec&lt;T&gt;(
     values: Vec&lt;&lt;T::Array <span class="kw">as </span>ArrayExt&gt;::Item&gt;,
@@ -3056,7 +3065,7 @@
 <span class="doccomment">/// Map values of color A to values of color B without creating a new `Vec`.
 ///
 /// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>map_vec_in_place&lt;A, B, F&gt;(values: Vec&lt;A&gt;, <span class="kw-2">mut </span>map: F) -&gt; Vec&lt;B&gt;
 <span class="kw">where
@@ -3090,7 +3099,7 @@
 <span class="doccomment">/// Map values of color A to values of color B without creating a new `Box&lt;[B]&gt;`.
 ///
 /// This uses the guarantees of [`ArrayCast`] to reuse the allocation.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 #[inline]
 </span><span class="kw">pub fn </span>map_slice_box_in_place&lt;A, B, F&gt;(values: Box&lt;[A]&gt;, <span class="kw-2">mut </span>map: F) -&gt; Box&lt;[B]&gt;
 <span class="kw">where
@@ -3136,20 +3145,20 @@
 
 <span class="doccomment">/// The error type returned when casting a boxed slice of components fails.
 </span><span class="attr">#[derive(Clone, PartialEq, Eq)]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">pub struct </span>BoxedSliceCastError&lt;T&gt; {
     <span class="doccomment">/// The original values.
     </span><span class="kw">pub </span>values: Box&lt;[T]&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">impl</span>&lt;T&gt; core::fmt::Debug <span class="kw">for </span>BoxedSliceCastError&lt;T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         f.debug_struct(<span class="string">&quot;BoxedSliceCastError&quot;</span>).finish()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">impl</span>&lt;T&gt; core::fmt::Display <span class="kw">for </span>BoxedSliceCastError&lt;T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         f.write_str(<span class="string">&quot;could not convert boxed component slice to colors&quot;</span>)
@@ -3161,7 +3170,7 @@
 
 <span class="doccomment">/// The error type returned when casting a `Vec` of components fails.
 </span><span class="attr">#[derive(Clone, PartialEq, Eq)]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">pub struct </span>VecCastError&lt;T&gt; {
     <span class="doccomment">/// The type of error that occurred.
     </span><span class="kw">pub </span>kind: VecCastErrorKind,
@@ -3170,7 +3179,7 @@
     </span><span class="kw">pub </span>values: Vec&lt;T&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">impl</span>&lt;T&gt; core::fmt::Debug <span class="kw">for </span>VecCastError&lt;T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         f.debug_struct(<span class="string">&quot;VecCastError&quot;</span>)
@@ -3179,7 +3188,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">impl</span>&lt;T&gt; core::fmt::Display <span class="kw">for </span>VecCastError&lt;T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         f.write_str(<span class="string">&quot;could not convert component vector to colors&quot;</span>)
@@ -3191,7 +3200,7 @@
 
 <span class="doccomment">/// The type of error that is returned when casting a `Vec` of components.
 </span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
 </span><span class="kw">pub enum </span>VecCastErrorKind {
     <span class="doccomment">/// The type of error returned when the length of a `Vec` didn&#39;t match the
     /// requirements.
@@ -3204,9 +3213,10 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use crate</span>::{LinSrgb, Srgb};
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="kw">use crate</span>::{LinSrgb, Srgb};
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
     #[test]
     </span><span class="kw">fn </span>array_vec_len_cap() {
         <span class="kw">let </span><span class="kw-2">mut </span>original = <span class="macro">vec!</span>[
@@ -3233,11 +3243,12 @@
         <span class="macro">assert_eq!</span>(colors.capacity(), <span class="number">8</span>);
     }
 
-    <span class="attr">#[test]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
     </span><span class="kw">fn </span>map_vec_in_place() {
         <span class="kw">fn </span>do_things(rgb: Srgb) -&gt; LinSrgb {
             <span class="kw">let </span><span class="kw-2">mut </span>linear = rgb.into_linear();
-            std::mem::swap(<span class="kw-2">&amp;mut </span>linear.red, <span class="kw-2">&amp;mut </span>linear.blue);
+            core::mem::swap(<span class="kw-2">&amp;mut </span>linear.red, <span class="kw-2">&amp;mut </span>linear.blue);
             linear
         }
 
@@ -3252,11 +3263,12 @@
         )
     }
 
-    <span class="attr">#[test]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[test]
     </span><span class="kw">fn </span>map_slice_box_in_place() {
         <span class="kw">fn </span>do_things(rgb: Srgb) -&gt; LinSrgb {
             <span class="kw">let </span><span class="kw-2">mut </span>linear = rgb.into_linear();
-            std::mem::swap(<span class="kw-2">&amp;mut </span>linear.red, <span class="kw-2">&amp;mut </span>linear.blue);
+            core::mem::swap(<span class="kw-2">&amp;mut </span>linear.red, <span class="kw-2">&amp;mut </span>linear.blue);
             linear
         }
 

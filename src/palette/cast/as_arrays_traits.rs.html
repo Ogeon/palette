@@ -295,8 +295,8 @@
 
 <span class="macro">impl_as_arrays!</span>([C], [C; M] <span class="kw">where </span>(<span class="kw">const </span>M: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_as_arrays!</span>(Box&lt;[C]&gt;, Vec&lt;C&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_as_arrays!</span>(alloc::boxed::Box&lt;[C]&gt;, alloc::vec::Vec&lt;C&gt;);
 
 <span class="doccomment">/// Trait for casting a reference to collection of arrays into a reference to
 /// collection of colors without copying.
@@ -384,8 +384,8 @@
 
 <span class="macro">impl_arrays_as!</span>([[T; N]], [[T; N]; M] <span class="kw">where </span>(<span class="kw">const </span>M: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_arrays_as!</span>(Box&lt;[[T; N]]&gt;, Vec&lt;[T; N]&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_arrays_as!</span>(alloc::boxed::Box&lt;[[T; N]]&gt;, alloc::vec::Vec&lt;[T; N]&gt;);
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {

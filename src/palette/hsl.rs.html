@@ -696,6 +696,14 @@
 <a href="#696" id="696">696</a>
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the HSL color space.
 
 </span><span class="kw">use </span>core::{any::TypeId, marker::PhantomData, ops::Not};
@@ -1230,58 +1238,65 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Hsl;
-    <span class="kw">use crate</span>::{FromColor, Hsv, Srgb};
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="kw">use </span><span class="kw">crate</span>::Srgb;
 
     <span class="macro">test_convert_into_from_xyz!</span>(Hsl);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>red() {
-        <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{FromColor, Hsl, Hsv, Srgb};
 
-        <span class="macro">assert_relative_eq!</span>(a, b);
-        <span class="macro">assert_relative_eq!</span>(a, c);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>red() {
+            <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>orange() {
-        <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">30.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">30.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+            <span class="macro">assert_relative_eq!</span>(a, b);
+            <span class="macro">assert_relative_eq!</span>(a, c);
+        }
 
-        <span class="macro">assert_relative_eq!</span>(a, b);
-        <span class="macro">assert_relative_eq!</span>(a, c);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>orange() {
+            <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">30.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">30.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>green() {
-        <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
-        <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">120.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">120.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+            <span class="macro">assert_relative_eq!</span>(a, b);
+            <span class="macro">assert_relative_eq!</span>(a, c);
+        }
 
-        <span class="macro">assert_relative_eq!</span>(a, b);
-        <span class="macro">assert_relative_eq!</span>(a, c);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>green() {
+            <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>));
+            <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">120.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">120.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>blue() {
-        <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">240.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">240.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+            <span class="macro">assert_relative_eq!</span>(a, b);
+            <span class="macro">assert_relative_eq!</span>(a, c);
+        }
 
-        <span class="macro">assert_relative_eq!</span>(a, b);
-        <span class="macro">assert_relative_eq!</span>(a, c);
-    }
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>blue() {
+            <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">240.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">240.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>purple() {
-        <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-        <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">270.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
-        <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">270.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+            <span class="macro">assert_relative_eq!</span>(a, b);
+            <span class="macro">assert_relative_eq!</span>(a, c);
+        }
 
-        <span class="macro">assert_relative_eq!</span>(a, b);
-        <span class="macro">assert_relative_eq!</span>(a, c);
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>purple() {
+            <span class="kw">let </span>a = Hsl::from_color(Srgb::new(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
+            <span class="kw">let </span>b = Hsl::new_srgb(<span class="number">270.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>);
+            <span class="kw">let </span>c = Hsl::from_color(Hsv::new_srgb(<span class="number">270.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>));
+
+            <span class="macro">assert_relative_eq!</span>(a, b);
+            <span class="macro">assert_relative_eq!</span>(a, c);
+        }
     }
 
     <span class="attr">#[test]
@@ -1306,10 +1321,10 @@
     </span><span class="kw">fn </span>check_min_max_components() {
         <span class="kw">use </span><span class="kw">crate</span>::encoding::Srgb;
 
-        <span class="macro">assert_relative_eq!</span>(Hsl::&lt;Srgb&gt;::min_saturation(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsl::&lt;Srgb&gt;::min_lightness(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsl::&lt;Srgb&gt;::max_saturation(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsl::&lt;Srgb&gt;::max_lightness(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Hsl::&lt;Srgb&gt;::min_saturation(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Hsl::&lt;Srgb&gt;::min_lightness(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Hsl::&lt;Srgb&gt;::max_saturation(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Hsl::&lt;Srgb&gt;::max_lightness(), <span class="number">1.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -1320,7 +1335,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{encoding::Srgb, hsl::Hsla};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{encoding::Srgb, hsl::Hsla};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Hsla&lt;Srgb&gt;,

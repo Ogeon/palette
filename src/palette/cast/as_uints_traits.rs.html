@@ -366,8 +366,8 @@
 
 <span class="macro">impl_as_uints!</span>([C], [C; N] <span class="kw">where </span>(<span class="kw">const </span>N: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_as_uints!</span>(Box&lt;[C]&gt;, Vec&lt;C&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_as_uints!</span>(alloc::boxed::Box&lt;[C]&gt;, alloc::vec::Vec&lt;C&gt;);
 
 <span class="doccomment">/// Trait for casting a reference to a collection of unsigned integers into a
 /// reference to a collection of colors without copying.
@@ -491,8 +491,8 @@
 
 <span class="macro">impl_uints_as!</span>([C::Uint], [C::Uint; N] <span class="kw">where </span>(<span class="kw">const </span>N: usize));
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="macro">impl_uints_as!</span>(Box&lt;[C::Uint]&gt;, Vec&lt;C::Uint&gt;);
+<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="macro">impl_uints_as!</span>(alloc::boxed::Box&lt;[C::Uint]&gt;, alloc::vec::Vec&lt;C::Uint&gt;);
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {

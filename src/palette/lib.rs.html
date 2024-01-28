@@ -1424,6 +1424,9 @@
 <a href="#1424" id="1424">1424</a>
 <a href="#1425" id="1425">1425</a>
 <a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
@@ -1679,7 +1682,10 @@
 #![doc(html_root_url = <span class="string">&quot;https://docs.rs/palette/0.7.3/&quot;</span>)]
 #![warn(missing_docs)]
 
-#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
+#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">extern crate </span>alloc;
+
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">extern crate </span>core;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]

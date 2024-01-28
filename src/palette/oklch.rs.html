@@ -293,6 +293,12 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the Oklch color space.
 
 </span><span class="kw">pub use </span>alpha::Oklcha;
@@ -445,79 +451,84 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use </span><span class="kw">crate</span>::convert::FromColorUnclamped;
-    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
-    <span class="kw">use </span><span class="kw">crate</span>::visual::{VisualColor, VisuallyEqual};
-    <span class="kw">use crate</span>::{encoding, LinSrgb, Oklab, Oklch};
+    <span class="kw">use </span><span class="kw">crate</span>::Oklch;
 
     <span class="macro">test_convert_into_from_xyz!</span>(Oklch);
 
-    <span class="attr">#[cfg_attr(miri, ignore)]
-    #[test]
-    </span><span class="kw">fn </span>test_roundtrip_oklch_oklab_is_original() {
-        <span class="kw">let </span>colors = [
-            (
-                <span class="string">&quot;red&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;green&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;cyan&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;magenta&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;black&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;grey&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)),
-            ),
-            (
-                <span class="string">&quot;yellow&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
-            ),
-            (
-                <span class="string">&quot;blue&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
-            ),
-            (
-                <span class="string">&quot;white&quot;</span>,
-                Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
-            ),
-        ];
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    </span><span class="kw">mod </span>conversion {
+        <span class="kw">use crate</span>::{
+            convert::FromColorUnclamped,
+            visual::{VisualColor, VisuallyEqual},
+            LinSrgb, Oklab, Oklch, Srgb,
+        };
 
-        <span class="kw">const </span>EPSILON: f64 = <span class="number">1e-14</span>;
+        <span class="attr">#[cfg_attr(miri, ignore)]
+        #[test]
+        </span><span class="kw">fn </span>test_roundtrip_oklch_oklab_is_original() {
+            <span class="kw">let </span>colors = [
+                (
+                    <span class="string">&quot;red&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;green&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;cyan&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;magenta&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;black&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;grey&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>)),
+                ),
+                (
+                    <span class="string">&quot;yellow&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;blue&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)),
+                ),
+                (
+                    <span class="string">&quot;white&quot;</span>,
+                    Oklab::from_color_unclamped(LinSrgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>)),
+                ),
+            ];
 
-        <span class="kw">for </span>(name, color) <span class="kw">in </span>colors {
-            <span class="kw">let </span>rgb: Rgb&lt;encoding::Srgb, u8&gt; =
-                <span class="kw">crate</span>::Srgb::&lt;f64&gt;::from_color_unclamped(color).into_format();
-            <span class="macro">println!</span>(
-                <span class="string">&quot;\n\
-            roundtrip of {} (#{:x} / {:?})\n\
-            =================================================&quot;</span>,
-                name, rgb, color
-            );
+            <span class="kw">const </span>EPSILON: f64 = <span class="number">1e-14</span>;
 
-            <span class="macro">println!</span>(<span class="string">&quot;Color is white: {}&quot;</span>, color.is_white(EPSILON));
+            <span class="kw">for </span>(name, color) <span class="kw">in </span>colors {
+                <span class="kw">let </span>rgb: Srgb&lt;u8&gt; = Srgb::&lt;f64&gt;::from_color_unclamped(color).into_format();
+                <span class="macro">println!</span>(
+                    <span class="string">&quot;\n\
+                    roundtrip of {} (#{:x} / {:?})\n\
+                    =================================================&quot;</span>,
+                    name, rgb, color
+                );
 
-            <span class="kw">let </span>oklch = Oklch::from_color_unclamped(color);
-            <span class="macro">println!</span>(<span class="string">&quot;Oklch: {:?}&quot;</span>, oklch);
-            <span class="kw">let </span>roundtrip_color = Oklab::from_color_unclamped(oklch);
-            <span class="macro">assert!</span>(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                <span class="string">&quot;&#39;{}&#39; failed.\n{:?}\n!=\n{:?}&quot;</span>,
-                name,
-                roundtrip_color,
-                color
-            );
+                <span class="macro">println!</span>(<span class="string">&quot;Color is white: {}&quot;</span>, color.is_white(EPSILON));
+
+                <span class="kw">let </span>oklch = Oklch::from_color_unclamped(color);
+                <span class="macro">println!</span>(<span class="string">&quot;Oklch: {:?}&quot;</span>, oklch);
+                <span class="kw">let </span>roundtrip_color = Oklab::from_color_unclamped(oklch);
+                <span class="macro">assert!</span>(
+                    Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                    <span class="string">&quot;&#39;{}&#39; failed.\n{:?}\n!=\n{:?}&quot;</span>,
+                    name,
+                    roundtrip_color,
+                    color
+                );
+            }
         }
     }
 
@@ -538,9 +549,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Oklch::&lt;f32&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Oklch::&lt;f32&gt;::max_l(), <span class="number">1.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Oklch::&lt;f32&gt;::min_chroma(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Oklch::&lt;f32&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Oklch::&lt;f32&gt;::max_l(), <span class="number">1.0</span>);
+        <span class="macro">assert_eq!</span>(Oklch::&lt;f32&gt;::min_chroma(), <span class="number">0.0</span>);
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
@@ -568,7 +579,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use </span><span class="kw">crate</span>::oklch::Oklcha;
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use </span><span class="kw">crate</span>::oklch::Oklcha;
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Oklcha,

@@ -294,6 +294,7 @@
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
 <a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convert colors from one reference white point to another
 //!
 //! Chromatic adaptation is the human visual system’s ability to adjust to
@@ -511,7 +512,8 @@
     }
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::{AdaptFrom, AdaptInto, Method, TransformMatrix};
     <span class="kw">use </span><span class="kw">crate</span>::white_point::{WhitePoint, A, C, D50, D65};

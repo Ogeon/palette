@@ -373,6 +373,13 @@
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the HSLuv color space.
 
 </span><span class="kw">use </span>core::marker::PhantomData;
@@ -632,13 +639,16 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Hsluv;
-    <span class="kw">use crate</span>::{white_point::D65, FromColor, Lchuv, LuvHue, Saturate};
+    <span class="kw">use </span><span class="kw">crate</span>::white_point::D65;
 
     <span class="macro">test_convert_into_from_xyz!</span>(Hsluv);
 
-    <span class="attr">#[cfg_attr(miri, ignore)]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    #[cfg_attr(miri, ignore)]
     #[test]
     </span><span class="kw">fn </span>lchuv_round_trip() {
+        <span class="kw">use crate</span>::{FromColor, Lchuv, LuvHue};
+
         <span class="kw">for </span>hue <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">18.0</span>) {
             <span class="kw">for </span>sat <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">5.0</span>) {
                 <span class="kw">for </span>l <span class="kw">in </span>(<span class="number">1</span>..=<span class="number">20</span>).map(|x| x <span class="kw">as </span>f64 * <span class="number">5.0</span>) {
@@ -686,8 +696,11 @@
         _hsl3 -= <span class="number">0.1</span>;
     }
 
-    <span class="attr">#[test]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    #[test]
     </span><span class="kw">fn </span>saturate() {
+        <span class="kw">use </span><span class="kw">crate</span>::Saturate;
+
         <span class="kw">for </span>sat <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">10</span>).map(|s| s <span class="kw">as </span>f64 * <span class="number">10.0</span>) {
             <span class="kw">for </span>a <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">10</span>).map(|l| l <span class="kw">as </span>f64 * <span class="number">10.0</span>) {
                 <span class="kw">let </span>hsl = Hsluv::&lt;D65, <span class="kw">_</span>&gt;::new(<span class="number">150.0</span>, sat, a);
@@ -707,10 +720,10 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>check_min_max_components() {
-        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::min_saturation(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::min_l(), <span class="number">0.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::max_saturation(), <span class="number">100.0</span>);
-        <span class="macro">assert_relative_eq!</span>(Hsluv::&lt;D65&gt;::max_l(), <span class="number">100.0</span>);
+        <span class="macro">assert_eq!</span>(Hsluv::&lt;D65&gt;::min_saturation(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Hsluv::&lt;D65&gt;::min_l(), <span class="number">0.0</span>);
+        <span class="macro">assert_eq!</span>(Hsluv::&lt;D65&gt;::max_saturation(), <span class="number">100.0</span>);
+        <span class="macro">assert_eq!</span>(Hsluv::&lt;D65&gt;::max_l(), <span class="number">100.0</span>);
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
@@ -721,7 +734,8 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="kw">use crate</span>::{hsluv::Hsluva, white_point::D65};
+        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        </span><span class="kw">use crate</span>::{hsluv::Hsluva, white_point::D65};
 
         <span class="macro">struct_of_arrays_tests!</span>(
             Hsluva&lt;D65&gt;,
