@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.7.4 - 2024-01-28
+
+* [#373][373]: Add an "alloc" feature and make tests work with any feature combination. Closes [#366][366].
+* [#374][374]: Fix typo about max range of u8. Closes [#1234][1234], [#4321][4321].
+* [#369][369]: Fix potential `NaN` from converting to `Okhsl` when the input is white or black. Closes [#368][368].
+* [#355][355]: Add traits for delta E and the improved formulas from Huang et al.
+* [#351][351]: Improve some documentation for beginners.
+* [#347][347]: Implements Rgba::from_str().
+
 ## Version 0.7.3 - 2023-08-10
 
 * [#345][345]: Add `ArraysAs`, `AsArrays`, and corresponding traits for components and uints.
@@ -277,6 +286,12 @@ The first published version.
 [343]: https://github.com/Ogeon/palette/pull/343
 [344]: https://github.com/Ogeon/palette/pull/344
 [345]: https://github.com/Ogeon/palette/pull/345
+[347]: https://github.com/Ogeon/palette/pull/347
+[351]: https://github.com/Ogeon/palette/pull/351
+[355]: https://github.com/Ogeon/palette/pull/355
+[369]: https://github.com/Ogeon/palette/pull/369
+[373]: https://github.com/Ogeon/palette/pull/373
+[374]: https://github.com/Ogeon/palette/pull/374
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -342,5 +357,7 @@ The first published version.
 [318]: https://github.com/Ogeon/palette/issues/318
 [322]: https://github.com/Ogeon/palette/issues/322
 [330]: https://github.com/Ogeon/palette/issues/330
+[366]: https://github.com/Ogeon/palette/issues/366
+[368]: https://github.com/Ogeon/palette/issues/368
 [1234]: https://github.com/Ogeon/palette/issues/1234
 [4321]: https://github.com/Ogeon/palette/issues/4321
