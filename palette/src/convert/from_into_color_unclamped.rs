@@ -1,6 +1,6 @@
 pub use palette_derive::FromColorUnclamped;
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 use crate::cast::{self, ArrayCast};
 
 /// A trait for unchecked conversion of one color from another.
@@ -25,8 +25,8 @@ pub trait FromColorUnclamped<T>: Sized {
     fn from_color_unclamped(val: T) -> Self;
 }
 
-#[cfg(feature = "std")]
-impl<T, U> FromColorUnclamped<Vec<T>> for Vec<U>
+#[cfg(feature = "alloc")]
+impl<T, U> FromColorUnclamped<alloc::vec::Vec<T>> for alloc::vec::Vec<U>
 where
     T: ArrayCast,
     U: ArrayCast<Array = T::Array> + FromColorUnclamped<T>,
@@ -44,13 +44,13 @@ where
     /// let srgb = Vec::<Srgb>::from_color_unclamped(lch);
     /// ```
     #[inline]
-    fn from_color_unclamped(color: Vec<T>) -> Self {
+    fn from_color_unclamped(color: alloc::vec::Vec<T>) -> Self {
         cast::map_vec_in_place(color, U::from_color_unclamped)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, U> FromColorUnclamped<Box<[T]>> for Box<[U]>
+#[cfg(feature = "alloc")]
+impl<T, U> FromColorUnclamped<alloc::boxed::Box<[T]>> for alloc::boxed::Box<[U]>
 where
     T: ArrayCast,
     U: ArrayCast<Array = T::Array> + FromColorUnclamped<T>,
@@ -68,7 +68,7 @@ where
     /// let srgb = Box::<[Srgb]>::from_color_unclamped(lch);
     /// ```
     #[inline]
-    fn from_color_unclamped(color: Box<[T]>) -> Self {
+    fn from_color_unclamped(color: alloc::boxed::Box<[T]>) -> Self {
         cast::map_slice_box_in_place(color, U::from_color_unclamped)
     }
 }

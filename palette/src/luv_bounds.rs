@@ -124,6 +124,7 @@ impl LuvBounds {
     }
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod tests {
     use super::BoundaryLine;
@@ -136,12 +137,12 @@ mod tests {
         };
         assert_relative_eq!(line.intersect_length_at_angle(0.0).unwrap(), 1.0);
         assert_relative_eq!(
-            line.intersect_length_at_angle(std::f64::consts::FRAC_PI_4)
+            line.intersect_length_at_angle(core::f64::consts::FRAC_PI_4)
                 .unwrap(),
-            std::f64::consts::FRAC_1_SQRT_2
+            core::f64::consts::FRAC_1_SQRT_2
         );
         assert_eq!(
-            line.intersect_length_at_angle(-std::f64::consts::FRAC_PI_4),
+            line.intersect_length_at_angle(-core::f64::consts::FRAC_PI_4),
             None
         );
 
@@ -151,12 +152,12 @@ mod tests {
         };
         assert_eq!(line.intersect_length_at_angle(0.0), None);
         assert_relative_eq!(
-            line.intersect_length_at_angle(std::f64::consts::FRAC_PI_2)
+            line.intersect_length_at_angle(core::f64::consts::FRAC_PI_2)
                 .unwrap(),
             2.0
         );
         assert_relative_eq!(
-            line.intersect_length_at_angle(2.0 * std::f64::consts::FRAC_PI_3)
+            line.intersect_length_at_angle(2.0 * core::f64::consts::FRAC_PI_3)
                 .unwrap(),
             4.0 / 3.0f64.sqrt()
         );
@@ -174,6 +175,6 @@ mod tests {
             slope: 1.0,
             intercept: 2.0,
         };
-        assert_relative_eq!(line.distance_to_origin(), std::f64::consts::SQRT_2);
+        assert_relative_eq!(line.distance_to_origin(), core::f64::consts::SQRT_2);
     }
 }

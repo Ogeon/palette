@@ -532,7 +532,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Trigonometry for $ty {
                 #[inline]
                 fn sin(self) -> Self {
@@ -575,7 +575,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Abs for $ty {
                 #[inline]
                 fn abs(self) -> Self {
@@ -583,7 +583,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Sqrt for $ty {
                 #[inline]
                 fn sqrt(self) -> Self {
@@ -591,7 +591,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Cbrt for $ty {
                 #[inline]
                 fn cbrt(self) -> Self {
@@ -599,7 +599,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Powf for $ty {
                 #[inline]
                 fn powf(self, exp: Self) -> Self {
@@ -607,7 +607,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Powi for $ty {
                 #[inline]
                 fn powi(self, exp: i32) -> Self {
@@ -615,7 +615,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Recip for $ty {
                 #[inline]
                 fn recip(self) -> Self {
@@ -623,7 +623,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Exp for $ty {
                 #[inline]
                 fn exp(self) -> Self {
@@ -631,7 +631,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Hypot for $ty {
                 #[inline]
                 fn hypot(self, other: Self) -> Self {
@@ -639,7 +639,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl Round for $ty {
                 #[inline]
                 fn round(self) -> Self {
@@ -691,7 +691,7 @@ macro_rules! impl_float {
                 }
             }
 
-            #[cfg(feature = "std")]
+            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
             impl MulAdd for $ty {
                 #[inline]
                 fn mul_add(self, m: Self, a: Self) -> Self {

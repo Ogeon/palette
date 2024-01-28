@@ -1,6 +1,6 @@
 use crate::Clamp;
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 use crate::cast::{self, ArrayCast};
 
 use super::FromColorUnclamped;
@@ -60,8 +60,8 @@ where
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, U> FromColor<Vec<T>> for Vec<U>
+#[cfg(feature = "alloc")]
+impl<T, U> FromColor<alloc::vec::Vec<T>> for alloc::vec::Vec<U>
 where
     T: ArrayCast,
     U: ArrayCast<Array = T::Array> + FromColor<T>,
@@ -79,13 +79,13 @@ where
     /// let srgb = Vec::<Srgb>::from_color(lch);
     /// ```
     #[inline]
-    fn from_color(color: Vec<T>) -> Self {
+    fn from_color(color: alloc::vec::Vec<T>) -> Self {
         cast::map_vec_in_place(color, U::from_color)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, U> FromColor<Box<[T]>> for Box<[U]>
+#[cfg(feature = "alloc")]
+impl<T, U> FromColor<alloc::boxed::Box<[T]>> for alloc::boxed::Box<[U]>
 where
     T: ArrayCast,
     U: ArrayCast<Array = T::Array> + FromColor<T>,
@@ -103,7 +103,7 @@ where
     /// let srgb = Box::<[Srgb]>::from_color(lch);
     /// ```
     #[inline]
-    fn from_color(color: Box<[T]>) -> Self {
+    fn from_color(color: alloc::boxed::Box<[T]>) -> Self {
         cast::map_slice_box_in_place(color, U::from_color)
     }
 }

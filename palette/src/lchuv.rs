@@ -310,10 +310,10 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Lchuv::<D65, f32>::min_l(), 0.0);
-        assert_relative_eq!(Lchuv::<D65, f32>::max_l(), 100.0);
-        assert_relative_eq!(Lchuv::<D65, f32>::min_chroma(), 0.0);
-        assert_relative_eq!(Lchuv::<D65, f32>::max_chroma(), 180.0);
+        assert_eq!(Lchuv::<D65, f32>::min_l(), 0.0);
+        assert_eq!(Lchuv::<D65, f32>::max_l(), 100.0);
+        assert_eq!(Lchuv::<D65, f32>::min_chroma(), 0.0);
+        assert_eq!(Lchuv::<D65, f32>::max_chroma(), 180.0);
     }
 
     struct_of_arrays_tests!(
@@ -324,6 +324,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{lchuv::Lchuva, white_point::D65};
 
         struct_of_arrays_tests!(

@@ -239,7 +239,7 @@ macro_rules! assert_ranges {
                     };
 
                     assert!(!color.is_within_bounds());
-                    assert_relative_eq!(clamped, expected);
+                    assert_eq!(clamped, expected);
                 }
 
                 println!("ok")
@@ -279,7 +279,7 @@ macro_rules! assert_ranges {
                     let clamped = color.clamp();
 
                     assert!(color.is_within_bounds());
-                    assert_relative_eq!(clamped, color);
+                    assert_eq!(clamped, color);
                 }
 
                 println!("ok")
@@ -326,7 +326,7 @@ macro_rules! assert_ranges {
                     };
 
                     assert!(!color.is_within_bounds());
-                    assert_relative_eq!(clamped, expected);
+                    assert_eq!(clamped, expected);
                 }
 
                 println!("ok")

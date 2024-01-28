@@ -3,7 +3,7 @@ use super::{
     into_uint_slice_mut, UintCast,
 };
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 use super::{from_uint_slice_box, from_uint_vec, into_uint_slice_box, into_uint_vec};
 
 /// Trait for casting a collection of colors from a collection of unsigned
@@ -122,27 +122,27 @@ macro_rules! impl_from_uints_slice {
 
 impl_from_uints_slice!([C::Uint], [C::Uint; N] where (const N: usize));
 
-#[cfg(feature = "std")]
-impl_from_uints_slice!(Box<[C::Uint]>, Vec<C::Uint>);
+#[cfg(feature = "alloc")]
+impl_from_uints_slice!(alloc::boxed::Box<[C::Uint]>, alloc::vec::Vec<C::Uint>);
 
-#[cfg(feature = "std")]
-impl<C> FromUints<Box<[C::Uint]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<C> FromUints<alloc::boxed::Box<[C::Uint]>> for alloc::boxed::Box<[C]>
 where
     C: UintCast,
 {
     #[inline]
-    fn from_uints(uints: Box<[C::Uint]>) -> Self {
+    fn from_uints(uints: alloc::boxed::Box<[C::Uint]>) -> Self {
         from_uint_slice_box(uints)
     }
 }
 
-#[cfg(feature = "std")]
-impl<C> FromUints<Vec<C::Uint>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<C> FromUints<alloc::vec::Vec<C::Uint>> for alloc::vec::Vec<C>
 where
     C: UintCast,
 {
     #[inline]
-    fn from_uints(uints: Vec<C::Uint>) -> Self {
+    fn from_uints(uints: alloc::vec::Vec<C::Uint>) -> Self {
         from_uint_vec(uints)
     }
 }
@@ -241,27 +241,27 @@ macro_rules! impl_into_uints_slice {
 
 impl_into_uints_slice!([C], [C; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_into_uints_slice!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_into_uints_slice!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
-#[cfg(feature = "std")]
-impl<C> IntoUints<Box<[C::Uint]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<C> IntoUints<alloc::boxed::Box<[C::Uint]>> for alloc::boxed::Box<[C]>
 where
     C: UintCast,
 {
     #[inline]
-    fn into_uints(self) -> Box<[C::Uint]> {
+    fn into_uints(self) -> alloc::boxed::Box<[C::Uint]> {
         into_uint_slice_box(self)
     }
 }
 
-#[cfg(feature = "std")]
-impl<C> IntoUints<Vec<C::Uint>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<C> IntoUints<alloc::vec::Vec<C::Uint>> for alloc::vec::Vec<C>
 where
     C: UintCast,
 {
     #[inline]
-    fn into_uints(self) -> Vec<C::Uint> {
+    fn into_uints(self) -> alloc::vec::Vec<C::Uint> {
         into_uint_vec(self)
     }
 }
@@ -418,46 +418,62 @@ mod test {
     fn from_uints() {
         let slice: &[u32] = &[0x01020304, 0x05060708];
         let slice_mut: &mut [u32] = &mut [0x01020304, 0x05060708];
-        let mut slice_box: Box<[u32]> = vec![0x01020304, 0x05060708].into_boxed_slice();
-        let mut vec: Vec<u32> = vec![0x01020304, 0x05060708];
         let mut array: [u32; 2] = [0x01020304, 0x05060708];
 
         let _ = <&[PackedRgba]>::from_uints(slice);
-        let _ = <&[PackedRgba]>::from_uints(&slice_box);
-        let _ = <&[PackedRgba]>::from_uints(&vec);
         let _ = <&[PackedRgba]>::from_uints(&array);
 
         let _ = <&mut [PackedRgba]>::from_uints(slice_mut);
+        let _ = <&mut [PackedRgba]>::from_uints(&mut array);
+
+        let _ = <[PackedRgba; 2]>::from_uints(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn from_uints_alloc() {
+        let mut slice_box: Box<[u32]> = vec![0x01020304, 0x05060708].into_boxed_slice();
+        let mut vec: Vec<u32> = vec![0x01020304, 0x05060708];
+
+        let _ = <&[PackedRgba]>::from_uints(&slice_box);
+        let _ = <&[PackedRgba]>::from_uints(&vec);
+
         let _ = <&mut [PackedRgba]>::from_uints(&mut slice_box);
         let _ = <&mut [PackedRgba]>::from_uints(&mut vec);
-        let _ = <&mut [PackedRgba]>::from_uints(&mut array);
 
         let _ = Box::<[PackedRgba]>::from_uints(slice_box);
         let _ = Vec::<PackedRgba>::from_uints(vec);
-        let _ = <[PackedRgba; 2]>::from_uints(array);
     }
 
     #[test]
     fn uints_into() {
         let slice: &[u32] = &[0x01020304, 0x05060708];
         let slice_mut: &mut [u32] = &mut [0x01020304, 0x05060708];
-        let mut slice_box: Box<[u32]> = vec![0x01020304, 0x05060708].into_boxed_slice();
-        let mut vec: Vec<u32> = vec![0x01020304, 0x05060708];
         let mut array: [u32; 2] = [0x01020304, 0x05060708];
 
         let _: &[PackedRgba] = slice.uints_into();
-        let _: &[PackedRgba] = (&slice_box).uints_into();
-        let _: &[PackedRgba] = (&vec).uints_into();
         let _: &[PackedRgba] = (&array).uints_into();
 
         let _: &mut [PackedRgba] = slice_mut.uints_into();
+        let _: &mut [PackedRgba] = (&mut array).uints_into();
+
+        let _: [PackedRgba; 2] = array.uints_into();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn uints_into_alloc() {
+        let mut slice_box: Box<[u32]> = vec![0x01020304, 0x05060708].into_boxed_slice();
+        let mut vec: Vec<u32> = vec![0x01020304, 0x05060708];
+
+        let _: &[PackedRgba] = (&slice_box).uints_into();
+        let _: &[PackedRgba] = (&vec).uints_into();
+
         let _: &mut [PackedRgba] = (&mut slice_box).uints_into();
         let _: &mut [PackedRgba] = (&mut vec).uints_into();
-        let _: &mut [PackedRgba] = (&mut array).uints_into();
 
         let _: Box<[PackedRgba]> = slice_box.uints_into();
         let _: Vec<PackedRgba> = vec.uints_into();
-        let _: [PackedRgba; 2] = array.uints_into();
     }
 
     #[test]
@@ -465,26 +481,34 @@ mod test {
         let slice: &[PackedRgba] = &[Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
         let slice_mut: &mut [PackedRgba] =
             &mut [Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
-        let mut slice_box: Box<[PackedRgba]> =
-            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()].into_boxed_slice();
-        let mut vec: Vec<PackedRgba> =
-            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
         let mut array: [PackedRgba; 2] =
             [Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
 
         let _: &[u32] = slice.into_uints();
-        let _: &[u32] = (&slice_box).into_uints();
-        let _: &[u32] = (&vec).into_uints();
         let _: &[u32] = (&array).into_uints();
 
         let _: &mut [u32] = slice_mut.into_uints();
+        let _: &mut [u32] = (&mut array).into_uints();
+
+        let _: [u32; 2] = array.into_uints();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn into_uints_alloc() {
+        let mut slice_box: Box<[PackedRgba]> =
+            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()].into_boxed_slice();
+        let mut vec: Vec<PackedRgba> =
+            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
+
+        let _: &[u32] = (&slice_box).into_uints();
+        let _: &[u32] = (&vec).into_uints();
+
         let _: &mut [u32] = (&mut slice_box).into_uints();
         let _: &mut [u32] = (&mut vec).into_uints();
-        let _: &mut [u32] = (&mut array).into_uints();
 
         let _: Box<[u32]> = slice_box.into_uints();
         let _: Vec<u32> = vec.into_uints();
-        let _: [u32; 2] = array.into_uints();
     }
 
     #[test]
@@ -492,25 +516,33 @@ mod test {
         let slice: &[PackedRgba] = &[Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
         let slice_mut: &mut [PackedRgba] =
             &mut [Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
-        let mut slice_box: Box<[PackedRgba]> =
-            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()].into_boxed_slice();
-        let mut vec: Vec<PackedRgba> =
-            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
         let mut array: [PackedRgba; 2] =
             [Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
 
         let _ = <&[u32]>::uints_from(slice);
-        let _ = <&[u32]>::uints_from(&slice_box);
-        let _ = <&[u32]>::uints_from(&vec);
         let _ = <&[u32]>::uints_from(&array);
 
         let _ = <&mut [u32]>::uints_from(slice_mut);
+        let _ = <&mut [u32]>::uints_from(&mut array);
+
+        let _ = <[u32; 2]>::uints_from(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn uints_from_alloc() {
+        let mut slice_box: Box<[PackedRgba]> =
+            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()].into_boxed_slice();
+        let mut vec: Vec<PackedRgba> =
+            vec![Srgba::new(1, 2, 3, 4).into(), Srgba::new(5, 6, 7, 8).into()];
+
+        let _ = <&[u32]>::uints_from(&slice_box);
+        let _ = <&[u32]>::uints_from(&vec);
+
         let _ = <&mut [u32]>::uints_from(&mut slice_box);
         let _ = <&mut [u32]>::uints_from(&mut vec);
-        let _ = <&mut [u32]>::uints_from(&mut array);
 
         let _ = Box::<[u32]>::uints_from(slice_box);
         let _ = Vec::<u32>::uints_from(vec);
-        let _ = <[u32; 2]>::uints_from(array);
     }
 }

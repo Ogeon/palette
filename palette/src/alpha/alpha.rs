@@ -1240,8 +1240,8 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Rgba::<Srgb>::min_alpha(), 0.0);
-        assert_relative_eq!(Rgba::<Srgb>::max_alpha(), 1.0);
+        assert_eq!(Rgba::<Srgb>::min_alpha(), 0.0);
+        assert_eq!(Rgba::<Srgb>::max_alpha(), 1.0);
     }
 
     #[cfg(feature = "serializing")]

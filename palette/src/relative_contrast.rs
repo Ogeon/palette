@@ -124,6 +124,7 @@ where
     }
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 #[allow(deprecated)]
 mod test {

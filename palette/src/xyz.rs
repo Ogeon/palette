@@ -422,7 +422,6 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Xyz<Wp, T> where T: bytemuck::Pod 
 mod test {
     use super::Xyz;
     use crate::white_point::D65;
-    use crate::{FromColor, LinLuma, LinSrgb};
 
     #[cfg(feature = "random")]
     use crate::white_point::WhitePoint;
@@ -433,32 +432,37 @@ mod test {
 
     test_convert_into_from_xyz!(Xyz);
 
-    #[test]
-    fn luma() {
-        let a = Xyz::<D65>::from_color(LinLuma::new(0.5));
-        let b = Xyz::new(0.475235, 0.5, 0.544415);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
-    }
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{white_point::D65, FromColor, LinLuma, LinSrgb, Xyz};
 
-    #[test]
-    fn red() {
-        let a = Xyz::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-        let b = Xyz::new(0.41240, 0.21260, 0.01930);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
-    }
+        #[test]
+        fn luma() {
+            let a = Xyz::<D65>::from_color(LinLuma::new(0.5));
+            let b = Xyz::new(0.475235, 0.5, 0.544415);
+            assert_relative_eq!(a, b, epsilon = 0.0001);
+        }
 
-    #[test]
-    fn green() {
-        let a = Xyz::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-        let b = Xyz::new(0.35760, 0.71520, 0.11920);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
-    }
+        #[test]
+        fn red() {
+            let a = Xyz::from_color(LinSrgb::new(1.0, 0.0, 0.0));
+            let b = Xyz::new(0.41240, 0.21260, 0.01930);
+            assert_relative_eq!(a, b, epsilon = 0.0001);
+        }
 
-    #[test]
-    fn blue() {
-        let a = Xyz::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-        let b = Xyz::new(0.18050, 0.07220, 0.95030);
-        assert_relative_eq!(a, b, epsilon = 0.0001);
+        #[test]
+        fn green() {
+            let a = Xyz::from_color(LinSrgb::new(0.0, 1.0, 0.0));
+            let b = Xyz::new(0.35760, 0.71520, 0.11920);
+            assert_relative_eq!(a, b, epsilon = 0.0001);
+        }
+
+        #[test]
+        fn blue() {
+            let a = Xyz::from_color(LinSrgb::new(0.0, 0.0, 1.0));
+            let b = Xyz::new(0.18050, 0.07220, 0.95030);
+            assert_relative_eq!(a, b, epsilon = 0.0001);
+        }
     }
 
     #[test]
@@ -480,12 +484,12 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Xyz::<D65>::min_x(), 0.0);
-        assert_relative_eq!(Xyz::<D65>::min_y(), 0.0);
-        assert_relative_eq!(Xyz::<D65>::min_z(), 0.0);
-        assert_relative_eq!(Xyz::<D65, f64>::max_x(), X_N);
-        assert_relative_eq!(Xyz::<D65, f64>::max_y(), Y_N);
-        assert_relative_eq!(Xyz::<D65, f64>::max_z(), Z_N);
+        assert_eq!(Xyz::<D65>::min_x(), 0.0);
+        assert_eq!(Xyz::<D65>::min_y(), 0.0);
+        assert_eq!(Xyz::<D65>::min_z(), 0.0);
+        assert_eq!(Xyz::<D65, f64>::max_x(), X_N);
+        assert_eq!(Xyz::<D65, f64>::max_y(), Y_N);
+        assert_eq!(Xyz::<D65, f64>::max_z(), Z_N);
     }
 
     struct_of_arrays_tests!(
@@ -496,6 +500,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{white_point::D65, xyz::Xyza};
 
         struct_of_arrays_tests!(

@@ -496,6 +496,7 @@ pub trait ImprovedDeltaE: DeltaE {
     fn improved_delta_e(self, other: Self) -> Self::Scalar;
 }
 
+#[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
     use core::str::FromStr;

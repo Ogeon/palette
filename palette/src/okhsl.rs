@@ -242,146 +242,153 @@ unsafe impl<T> bytemuck::Pod for Okhsl<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
-
     use crate::{
         convert::{FromColorUnclamped, IntoColorUnclamped},
         encoding,
         rgb::Rgb,
-        visual::{VisualColor, VisuallyEqual},
-        LinSrgb, Okhsl, Oklab, Srgb,
+        Okhsl, Oklab, Srgb,
     };
 
     test_convert_into_from_xyz!(Okhsl);
 
-    #[cfg_attr(miri, ignore)]
-    #[test]
-    fn test_roundtrip_okhsl_oklab_is_original() {
-        let colors = [
-            (
-                "red",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
-            ),
-            (
-                "green",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
-            ),
-            (
-                "cyan",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
-            ),
-            (
-                "magenta",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
-            ),
-            (
-                "black",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
-            ),
-            (
-                "grey",
-                Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
-            ),
-            (
-                "yellow",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
-            ),
-            (
-                "blue",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
-            ),
-            (
-                "white",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
-            ),
-        ];
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use core::str::FromStr;
 
-        // unlike in okhwb we are using f64 here, which actually works.
-        // So we can afford a small tolerance.
-        // For some reason the roundtrip of Okhsl seems to produce a greater
-        // divergence than the round trip of Okhsv (1e-8 vs 1e-10)
-        const EPSILON: f64 = 1e-8;
+        use crate::{
+            convert::FromColorUnclamped,
+            visual::{VisualColor, VisuallyEqual},
+            LinSrgb, Okhsl, Oklab, Srgb,
+        };
 
-        for (name, color) in colors {
-            let rgb: Rgb<encoding::Srgb, u8> =
-                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
-            println!(
-                "\n\
-            roundtrip of {} (#{:x} / {:?})\n\
-            =================================================",
-                name, rgb, color
+        #[cfg_attr(miri, ignore)]
+        #[test]
+        fn test_roundtrip_okhsl_oklab_is_original() {
+            let colors = [
+                (
+                    "red",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
+                ),
+                (
+                    "green",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
+                ),
+                (
+                    "cyan",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
+                ),
+                (
+                    "magenta",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
+                ),
+                (
+                    "black",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
+                ),
+                (
+                    "grey",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
+                ),
+                (
+                    "yellow",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
+                ),
+                (
+                    "blue",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
+                ),
+                (
+                    "white",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
+                ),
+            ];
+
+            // unlike in okhwb we are using f64 here, which actually works.
+            // So we can afford a small tolerance.
+            // For some reason the roundtrip of Okhsl seems to produce a greater
+            // divergence than the round trip of Okhsv (1e-8 vs 1e-10)
+            const EPSILON: f64 = 1e-8;
+
+            for (name, color) in colors {
+                let rgb: Srgb<u8> = Srgb::<f64>::from_color_unclamped(color).into_format();
+                println!(
+                    "\n\
+                    roundtrip of {} (#{:x} / {:?})\n\
+                    =================================================",
+                    name, rgb, color
+                );
+
+                println!("Color is white: {}", color.is_white(EPSILON));
+
+                let okhsl = Okhsl::from_color_unclamped(color);
+                println!("Okhsl: {:?}", okhsl);
+                let roundtrip_color = Oklab::from_color_unclamped(okhsl);
+                assert!(
+                    Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                    "'{}' failed.\n{:?}\n!=\n{:?}",
+                    name,
+                    roundtrip_color,
+                    color
+                );
+            }
+        }
+
+        #[test]
+        fn test_blue() {
+            let lab = Oklab::new(
+                0.45201371519623734_f64,
+                -0.03245697990291002,
+                -0.3115281336419824,
             );
-
-            println!("Color is white: {}", color.is_white(EPSILON));
-
-            let okhsl = Okhsl::from_color_unclamped(color);
-            println!("Okhsl: {:?}", okhsl);
-            let roundtrip_color = Oklab::from_color_unclamped(okhsl);
+            let okhsl = Okhsl::<f64>::from_color_unclamped(lab);
             assert!(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                "'{}' failed.\n{:?}\n!=\n{:?}",
-                name,
-                roundtrip_color,
-                color
+                abs_diff_eq!(
+                    okhsl.hue.into_raw_degrees(),
+                    360.0 * 0.7334778365225699,
+                    epsilon = 1e-10
+                ),
+                "{}\n!=\n{}",
+                okhsl.hue.into_raw_degrees(),
+                360.0 * 0.7334778365225699
+            );
+            assert!(
+                abs_diff_eq!(okhsl.saturation, 0.9999999897262261, epsilon = 1e-8),
+                "{}\n!=\n{}",
+                okhsl.saturation,
+                0.9999999897262261
+            );
+            assert!(
+                abs_diff_eq!(okhsl.lightness, 0.366565335813274, epsilon = 1e-10),
+                "{}\n!=\n{}",
+                okhsl.lightness,
+                0.366565335813274
             );
         }
-    }
 
-    #[test]
-    fn test_blue() {
-        let lab = Oklab::new(
-            0.45201371519623734_f64,
-            -0.03245697990291002,
-            -0.3115281336419824,
-        );
-        let okhsl = Okhsl::<f64>::from_color_unclamped(lab);
-        assert!(
-            abs_diff_eq!(
-                okhsl.hue.into_raw_degrees(),
-                360.0 * 0.7334778365225699,
-                epsilon = 1e-10
-            ),
-            "{}\n!=\n{}",
-            okhsl.hue.into_raw_degrees(),
-            360.0 * 0.7334778365225699
-        );
-        assert!(
-            abs_diff_eq!(okhsl.saturation, 0.9999999897262261, epsilon = 1e-8),
-            "{}\n!=\n{}",
-            okhsl.saturation,
-            0.9999999897262261
-        );
-        assert!(
-            abs_diff_eq!(okhsl.lightness, 0.366565335813274, epsilon = 1e-10),
-            "{}\n!=\n{}",
-            okhsl.lightness,
-            0.366565335813274
-        );
-    }
-
-    #[test]
-    fn test_srgb_to_okhsl() {
-        let red_hex = "#834941";
-        let rgb: Srgb<f64> = Srgb::from_str(red_hex).unwrap().into_format();
-        let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
-        let oklab = Oklab::from_color_unclamped(lin_rgb);
-        println!(
-            "RGB: {:?}\n\
+        #[test]
+        fn test_srgb_to_okhsl() {
+            let red_hex = "#834941";
+            let rgb: Srgb<f64> = Srgb::from_str(red_hex).unwrap().into_format();
+            let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
+            let oklab = Oklab::from_color_unclamped(lin_rgb);
+            println!(
+                "RGB: {:?}\n\
             LinRgb: {:?}\n\
             Oklab: {:?}",
-            rgb, lin_rgb, oklab
-        );
-        let okhsl = Okhsl::from_color_unclamped(oklab);
+                rgb, lin_rgb, oklab
+            );
+            let okhsl = Okhsl::from_color_unclamped(oklab);
 
-        // test data from Ok Color picker
-        assert_relative_eq!(
-            okhsl.hue.into_raw_degrees(),
-            360.0 * 0.07992730371382328,
-            epsilon = 1e-10,
-            max_relative = 1e-13
-        );
-        assert_relative_eq!(okhsl.saturation, 0.4629217183454986, epsilon = 1e-10);
-        assert_relative_eq!(okhsl.lightness, 0.3900998146147427, epsilon = 1e-10);
+            // test data from Ok Color picker
+            assert_relative_eq!(
+                okhsl.hue.into_raw_degrees(),
+                360.0 * 0.07992730371382328,
+                epsilon = 1e-10,
+                max_relative = 1e-13
+            );
+            assert_relative_eq!(okhsl.saturation, 0.4629217183454986, epsilon = 1e-10);
+            assert_relative_eq!(okhsl.lightness, 0.3900998146147427, epsilon = 1e-10);
+        }
     }
 
     #[test]
@@ -397,7 +404,7 @@ mod tests {
     fn test_okhsl_to_srgb_saturated_black() {
         let okhsl = Okhsl::new(0.0_f32, 1.0, 0.0);
         let rgb = Srgb::from_color_unclamped(okhsl);
-        assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
+        assert_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
     }
 
     #[test]
@@ -429,6 +436,7 @@ mod tests {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::okhsl::Okhsla;
 
         struct_of_arrays_tests!(

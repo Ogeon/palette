@@ -1489,12 +1489,12 @@ mod test {
 
     #[test]
     fn check_min_max_components() {
-        assert_relative_eq!(Rgb::<Srgb, f32>::min_red(), 0.0);
-        assert_relative_eq!(Rgb::<Srgb, f32>::min_green(), 0.0);
-        assert_relative_eq!(Rgb::<Srgb, f32>::min_blue(), 0.0);
-        assert_relative_eq!(Rgb::<Srgb, f32>::max_red(), 1.0);
-        assert_relative_eq!(Rgb::<Srgb, f32>::max_green(), 1.0);
-        assert_relative_eq!(Rgb::<Srgb, f32>::max_blue(), 1.0);
+        assert_eq!(Rgb::<Srgb, f32>::min_red(), 0.0);
+        assert_eq!(Rgb::<Srgb, f32>::min_green(), 0.0);
+        assert_eq!(Rgb::<Srgb, f32>::min_blue(), 0.0);
+        assert_eq!(Rgb::<Srgb, f32>::max_red(), 1.0);
+        assert_eq!(Rgb::<Srgb, f32>::max_green(), 1.0);
+        assert_eq!(Rgb::<Srgb, f32>::max_blue(), 1.0);
     }
 
     struct_of_arrays_tests!(
@@ -1505,6 +1505,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::{encoding::Srgb, rgb::Rgba};
 
         struct_of_arrays_tests!(

@@ -82,8 +82,8 @@ macro_rules! impl_as_components {
 
 impl_as_components!([C], [C; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_as_components!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_as_components!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
 /// Trait for trying to cast a reference to collection of color components into
 /// a reference to collection of colors without copying.
@@ -221,8 +221,8 @@ macro_rules! impl_try_components_as {
 
 impl_try_components_as!([T], [T; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_try_components_as!(Box<[T]>, Vec<T>);
+#[cfg(feature = "alloc")]
+impl_try_components_as!(alloc::boxed::Box<[T]>, alloc::vec::Vec<T>);
 
 /// Trait for casting a reference to collection of color components into a
 /// reference to collection of colors without copying.

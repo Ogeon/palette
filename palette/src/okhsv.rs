@@ -286,214 +286,224 @@ where
 
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
-
-    use crate::convert::FromColorUnclamped;
-    use crate::rgb::Rgb;
-    use crate::visual::VisuallyEqual;
-    use crate::{encoding, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab, OklabHue, Srgb};
+    use crate::{convert::FromColorUnclamped, Clamp, IsWithinBounds, LinSrgb, Okhsv, Oklab};
 
     test_convert_into_from_xyz!(Okhsv);
 
-    #[cfg_attr(miri, ignore)]
-    #[test]
-    fn test_roundtrip_okhsv_oklab_is_original() {
-        let colors = [
-            (
-                "red",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
-            ),
-            (
-                "green",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
-            ),
-            (
-                "cyan",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
-            ),
-            (
-                "magenta",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
-            ),
-            (
-                "white",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
-            ),
-            (
-                "black",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
-            ),
-            (
-                "grey",
-                Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
-            ),
-            (
-                "yellow",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
-            ),
-            (
-                "blue",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
-            ),
-        ];
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use core::str::FromStr;
 
-        // unlike in okhwb we are using f64 here, which actually works.
-        // So we can afford a small tolerance
-        const EPSILON: f64 = 1e-10;
+        use crate::{
+            convert::FromColorUnclamped, encoding, rgb::Rgb, visual::VisuallyEqual, LinSrgb, Okhsv,
+            Oklab, OklabHue, Srgb,
+        };
 
-        for (name, color) in colors {
-            let rgb: Rgb<encoding::Srgb, u8> =
-                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
-            println!(
-                "\n\
-            roundtrip of {} (#{:x} / {:?})\n\
-            =================================================",
-                name, rgb, color
+        #[cfg_attr(miri, ignore)]
+        #[test]
+        fn test_roundtrip_okhsv_oklab_is_original() {
+            let colors = [
+                (
+                    "red",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
+                ),
+                (
+                    "green",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
+                ),
+                (
+                    "cyan",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
+                ),
+                (
+                    "magenta",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
+                ),
+                (
+                    "white",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
+                ),
+                (
+                    "black",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
+                ),
+                (
+                    "grey",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
+                ),
+                (
+                    "yellow",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
+                ),
+                (
+                    "blue",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
+                ),
+            ];
+
+            // unlike in okhwb we are using f64 here, which actually works.
+            // So we can afford a small tolerance
+            const EPSILON: f64 = 1e-10;
+
+            for (name, color) in colors {
+                let rgb: Rgb<encoding::Srgb, u8> =
+                    crate::Srgb::<f64>::from_color_unclamped(color).into_format();
+                println!(
+                    "\n\
+                    roundtrip of {} (#{:x} / {:?})\n\
+                    =================================================",
+                    name, rgb, color
+                );
+
+                let okhsv = Okhsv::from_color_unclamped(color);
+                println!("Okhsv: {:?}", okhsv);
+                let roundtrip_color = Oklab::from_color_unclamped(okhsv);
+                assert!(
+                    Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                    "'{}' failed.\n{:?}\n!=\n{:?}",
+                    name,
+                    roundtrip_color,
+                    color
+                );
+            }
+        }
+
+        /// Compares results to results for a run of
+        /// https://github.com/bottosson/bottosson.github.io/blob/3d3f17644d7f346e1ce1ca08eb8b01782eea97af/misc/ok_color.h
+        /// Not to the ideal values, which should be
+        /// hue: as is
+        /// saturation: 1.0
+        /// value: 1.0
+        #[test]
+        fn blue() {
+            let lin_srgb_blue = LinSrgb::new(0.0, 0.0, 1.0);
+            let oklab_blue_64 = Oklab::<f64>::from_color_unclamped(lin_srgb_blue);
+            let okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
+
+            println!("Okhsv f64: {:?}\n", okhsv_blue_64);
+            // HSV values of the reference implementation (in C)
+            // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
+            // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
+            // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
+            #[allow(clippy::excessive_precision)]
+            let expected_hue = OklabHue::new(264.0520206380550121);
+            let expected_saturation = 0.9999910912349018;
+            let expected_value = 0.9999999646150918;
+
+            // compare to the reference implementation values
+            assert_abs_diff_eq!(okhsv_blue_64.hue, expected_hue, epsilon = 1e-12);
+            assert_abs_diff_eq!(
+                okhsv_blue_64.saturation,
+                expected_saturation,
+                epsilon = 1e-12
             );
+            assert_abs_diff_eq!(okhsv_blue_64.value, expected_value, epsilon = 1e-12);
+        }
 
-            let okhsv = Okhsv::from_color_unclamped(color);
-            println!("Okhsv: {:?}", okhsv);
-            let roundtrip_color = Oklab::from_color_unclamped(okhsv);
-            assert!(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                "'{}' failed.\n{:?}\n!=\n{:?}",
-                name,
-                roundtrip_color,
-                color
+        #[test]
+        fn test_srgb_to_okhsv() {
+            let red_hex = "#ff0004";
+            let rgb: Srgb = Rgb::<encoding::Srgb, _>::from_str(red_hex)
+                .unwrap()
+                .into_format();
+            let okhsv = Okhsv::from_color_unclamped(rgb);
+            assert_relative_eq!(okhsv.saturation, 1.0, epsilon = 1e-3);
+            assert_relative_eq!(okhsv.value, 1.0, epsilon = 1e-3);
+            assert_relative_eq!(
+                okhsv.hue.into_raw_degrees(),
+                29.0,
+                epsilon = 1e-3,
+                max_relative = 1e-3
             );
+        }
+
+        #[test]
+        fn test_okhsv_to_srgb() {
+            let okhsv = Okhsv::new(0.0_f32, 0.5, 0.5);
+            let rgb = Srgb::from_color_unclamped(okhsv);
+            let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
+            let hex_str = format!("{:x}", rgb8);
+            assert_eq!(hex_str, "7a4355");
+        }
+
+        #[test]
+        fn test_okhsv_to_srgb_saturated_black() {
+            let okhsv = Okhsv::new(0.0_f32, 1.0, 0.0);
+            let rgb = Srgb::from_color_unclamped(okhsv);
+            assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
+        }
+
+        #[test]
+        fn black_eq_different_black() {
+            assert!(Okhsv::visually_eq(
+                Okhsv::from_color_unclamped(Oklab::new(0.0, 1.0, 0.0)),
+                Okhsv::from_color_unclamped(Oklab::new(0.0, 0.0, 1.0)),
+                1e-12
+            ));
         }
     }
 
-    /// Compares results to results for a run of
-    /// https://github.com/bottosson/bottosson.github.io/blob/3d3f17644d7f346e1ce1ca08eb8b01782eea97af/misc/ok_color.h
-    /// Not to the ideal values, which should be
-    /// hue: as is
-    /// saturation: 1.0
-    /// value: 1.0
-    #[test]
-    fn blue() {
-        let lin_srgb_blue = LinSrgb::new(0.0, 0.0, 1.0);
-        let oklab_blue_64 = Oklab::<f64>::from_color_unclamped(lin_srgb_blue);
-        let okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
+    #[cfg(feature = "approx")]
+    mod visual_eq {
+        use crate::{visual::VisuallyEqual, Okhsv};
 
-        println!("Okhsv f64: {:?}\n", okhsv_blue_64);
-        // HSV values of the reference implementation (in C)
-        // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
-        // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
-        // 3 iterations: 264.0520206380550121, 0.9999999869716024, 0.9999999646150842
-        #[allow(clippy::excessive_precision)]
-        let expected_hue = OklabHue::new(264.0520206380550121);
-        let expected_saturation = 0.9999910912349018;
-        let expected_value = 0.9999999646150918;
+        #[test]
+        fn white_eq_different_white() {
+            assert!(Okhsv::visually_eq(
+                Okhsv::new(240.0, 0.0, 1.0),
+                Okhsv::new(24.0, 0.0, 1.0),
+                1e-12
+            ));
+        }
 
-        // compare to the reference implementation values
-        assert_abs_diff_eq!(okhsv_blue_64.hue, expected_hue, epsilon = 1e-12);
-        assert_abs_diff_eq!(
-            okhsv_blue_64.saturation,
-            expected_saturation,
-            epsilon = 1e-12
-        );
-        assert_abs_diff_eq!(okhsv_blue_64.value, expected_value, epsilon = 1e-12);
-    }
+        #[test]
+        fn white_ne_grey_or_black() {
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(0.0, 0.0, 0.0),
+                Okhsv::new(0.0, 0.0, 1.0),
+                1e-12
+            ));
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(0.0, 0.0, 0.3),
+                Okhsv::new(0.0, 0.0, 1.0),
+                1e-12
+            ));
+        }
 
-    #[test]
-    fn test_srgb_to_okhsv() {
-        let red_hex = "#ff0004";
-        let rgb: Srgb = Rgb::<encoding::Srgb, _>::from_str(red_hex)
-            .unwrap()
-            .into_format();
-        let okhsv = Okhsv::from_color_unclamped(rgb);
-        assert_relative_eq!(okhsv.saturation, 1.0, epsilon = 1e-3);
-        assert_relative_eq!(okhsv.value, 1.0, epsilon = 1e-3);
-        assert_relative_eq!(
-            okhsv.hue.into_raw_degrees(),
-            29.0,
-            epsilon = 1e-3,
-            max_relative = 1e-3
-        );
-    }
+        #[test]
+        fn color_neq_different_color() {
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(10.0, 0.01, 0.5),
+                Okhsv::new(11.0, 0.01, 0.5),
+                1e-12
+            ));
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(10.0, 0.01, 0.5),
+                Okhsv::new(10.0, 0.02, 0.5),
+                1e-12
+            ));
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(10.0, 0.01, 0.5),
+                Okhsv::new(10.0, 0.01, 0.6),
+                1e-12
+            ));
+        }
 
-    #[test]
-    fn test_okhsv_to_srgb() {
-        let okhsv = Okhsv::new(0.0_f32, 0.5, 0.5);
-        let rgb = Srgb::from_color_unclamped(okhsv);
-        let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
-        let hex_str = format!("{:x}", rgb8);
-        assert_eq!(hex_str, "7a4355");
-    }
-
-    #[test]
-    fn test_okhsv_to_srgb_saturated_black() {
-        let okhsv = Okhsv::new(0.0_f32, 1.0, 0.0);
-        let rgb = Srgb::from_color_unclamped(okhsv);
-        assert_relative_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
-    }
-
-    #[test]
-    fn black_eq_different_black() {
-        assert!(Okhsv::visually_eq(
-            Okhsv::from_color_unclamped(Oklab::new(0.0, 1.0, 0.0)),
-            Okhsv::from_color_unclamped(Oklab::new(0.0, 0.0, 1.0)),
-            1e-12
-        ));
-    }
-
-    #[test]
-    fn white_eq_different_white() {
-        assert!(Okhsv::visually_eq(
-            Okhsv::new(240.0, 0.0, 1.0),
-            Okhsv::new(24.0, 0.0, 1.0),
-            1e-12
-        ));
-    }
-
-    #[test]
-    fn white_ne_grey_or_black() {
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(0.0, 0.0, 0.0),
-            Okhsv::new(0.0, 0.0, 1.0),
-            1e-12
-        ));
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(0.0, 0.0, 0.3),
-            Okhsv::new(0.0, 0.0, 1.0),
-            1e-12
-        ));
-    }
-
-    #[test]
-    fn color_neq_different_color() {
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(10.0, 0.01, 0.5),
-            Okhsv::new(11.0, 0.01, 0.5),
-            1e-12
-        ));
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(10.0, 0.01, 0.5),
-            Okhsv::new(10.0, 0.02, 0.5),
-            1e-12
-        ));
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(10.0, 0.01, 0.5),
-            Okhsv::new(10.0, 0.01, 0.6),
-            1e-12
-        ));
-    }
-
-    #[test]
-    fn grey_vs_grey() {
-        // greys of different lightness are not equal
-        assert!(!Okhsv::visually_eq(
-            Okhsv::new(0.0, 0.0, 0.3),
-            Okhsv::new(0.0, 0.0, 0.4),
-            1e-12
-        ));
-        // greys of same lightness but different hue are equal
-        assert!(Okhsv::visually_eq(
-            Okhsv::new(0.0, 0.0, 0.3),
-            Okhsv::new(12.0, 0.0, 0.3),
-            1e-12
-        ));
+        #[test]
+        fn grey_vs_grey() {
+            // greys of different lightness are not equal
+            assert!(!Okhsv::visually_eq(
+                Okhsv::new(0.0, 0.0, 0.3),
+                Okhsv::new(0.0, 0.0, 0.4),
+                1e-12
+            ));
+            // greys of same lightness but different hue are equal
+            assert!(Okhsv::visually_eq(
+                Okhsv::new(0.0, 0.0, 0.3),
+                Okhsv::new(12.0, 0.0, 0.3),
+                1e-12
+            ));
+        }
     }
 
     #[test]
@@ -550,6 +560,7 @@ mod tests {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::okhsv::Okhsva;
 
         struct_of_arrays_tests!(

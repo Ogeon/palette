@@ -358,20 +358,20 @@ where
 ///     vec![0xFF17C64C, 0xFF5D12D6].into_boxed_slice()
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
-pub fn into_uint_slice_box<T>(values: Box<[T]>) -> Box<[T::Uint]>
+pub fn into_uint_slice_box<T>(values: alloc::boxed::Box<[T]>) -> alloc::boxed::Box<[T::Uint]>
 where
     T: UintCast,
 {
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
-    let raw: *mut [T::Uint] = into_uint_slice_mut(Box::leak(values));
+    let raw: *mut [T::Uint] = into_uint_slice_mut(alloc::boxed::Box::leak(values));
 
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
-    unsafe { Box::from_raw(raw) }
+    unsafe { alloc::boxed::Box::from_raw(raw) }
 }
 
 /// Cast from a boxed slice of unsigned integers to a boxed slice of colors.
@@ -389,20 +389,20 @@ where
 ///     colors
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
-pub fn from_uint_slice_box<T>(values: Box<[T::Uint]>) -> Box<[T]>
+pub fn from_uint_slice_box<T>(values: alloc::boxed::Box<[T::Uint]>) -> alloc::boxed::Box<[T]>
 where
     T: UintCast,
 {
     assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
     assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
 
-    let raw: *mut [T] = from_uint_slice_mut(Box::leak(values));
+    let raw: *mut [T] = from_uint_slice_mut(alloc::boxed::Box::leak(values));
 
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
-    unsafe { Box::from_raw(raw) }
+    unsafe { alloc::boxed::Box::from_raw(raw) }
 }
 
 /// Cast from a `Vec` of colors to a `Vec` of unsigned integers.
@@ -420,9 +420,9 @@ where
 ///     vec![0xFF17C64C, 0xFF5D12D6]
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
-pub fn into_uint_vec<T>(values: Vec<T>) -> Vec<T::Uint>
+pub fn into_uint_vec<T>(values: alloc::vec::Vec<T>) -> alloc::vec::Vec<T::Uint>
 where
     T: UintCast,
 {
@@ -435,7 +435,9 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T` as `T::Uint` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw.cast::<T::Uint>(), values.len(), values.capacity()) }
+    unsafe {
+        alloc::vec::Vec::from_raw_parts(raw.cast::<T::Uint>(), values.len(), values.capacity())
+    }
 }
 
 /// Cast from a `Vec` of unsigned integers to a `Vec` of colors.
@@ -453,9 +455,9 @@ where
 ///     colors
 /// )
 /// ```
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[inline]
-pub fn from_uint_vec<T>(values: Vec<T::Uint>) -> Vec<T>
+pub fn from_uint_vec<T>(values: alloc::vec::Vec<T::Uint>) -> alloc::vec::Vec<T>
 where
     T: UintCast,
 {
@@ -468,5 +470,5 @@ where
     // Safety: The requirements of implementing `UintCast`, as well as the size
     // and alignment asserts, ensures that reading `T::Uint` as `T` is safe.
     // Length and capacity are the same because the size is the same.
-    unsafe { Vec::from_raw_parts(raw.cast::<T>(), values.len(), values.capacity()) }
+    unsafe { alloc::vec::Vec::from_raw_parts(raw.cast::<T>(), values.len(), values.capacity()) }
 }

@@ -399,12 +399,12 @@ macro_rules! impl_struct_of_arrays_methods {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($phantom_ty,)? T> $self_ty<$($phantom_ty,)? Vec<T>> {
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>> {
             /// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             #[inline(always)]
             pub fn with_capacity(capacity: usize) -> Self {
-                $(let $element = Vec::with_capacity(capacity);)+
+                $(let $element = alloc::vec::Vec::with_capacity(capacity);)+
 
                 Self {
                     $($element,)+
@@ -437,7 +437,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> Iter<std::vec::Drain<T> $(, $phantom_ty)?>
+            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -496,14 +496,14 @@ macro_rules! impl_struct_of_arrays_methods {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($phantom_ty,)? T, A> crate::Alpha<$self_ty<$($phantom_ty,)? Vec<T>>, Vec<A>> {
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T, A> crate::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<A>> {
             /// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             #[inline(always)]
             pub fn with_capacity(capacity: usize) -> Self {
                 crate::Alpha {
                     color: $self_ty::with_capacity(capacity),
-                    alpha: Vec::with_capacity(capacity),
+                    alpha: alloc::vec::Vec::with_capacity(capacity),
                 }
             }
 
@@ -535,7 +535,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<std::vec::Drain<T> $(, $phantom_ty)?>, std::vec::Drain<A>>
+            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>, alloc::vec::Drain<A>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -603,13 +603,13 @@ macro_rules! impl_struct_of_arrays_methods_hue {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($phantom_ty,)? T> $self_ty<$($phantom_ty,)? Vec<T>> {
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>> {
             /// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             #[inline(always)]
             pub fn with_capacity(capacity: usize) -> Self {
-                let hue = Vec::with_capacity(capacity);
-                $(let $element = Vec::with_capacity(capacity);)+
+                let hue = alloc::vec::Vec::with_capacity(capacity);
+                $(let $element = alloc::vec::Vec::with_capacity(capacity);)+
 
                 Self {hue: hue.into() $(, $element)+ $(, $phantom: core::marker::PhantomData)?}
             }
@@ -643,7 +643,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> Iter<std::vec::Drain<T> $(, $phantom_ty)?>
+            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -703,14 +703,14 @@ macro_rules! impl_struct_of_arrays_methods_hue {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($phantom_ty,)? T, A> crate::Alpha<$self_ty<$($phantom_ty,)? Vec<T>>, Vec<A>> {
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T, A> crate::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<A>> {
             /// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             #[inline(always)]
             pub fn with_capacity(capacity: usize) -> Self {
                 crate::Alpha {
                     color: $self_ty::with_capacity(capacity),
-                    alpha: Vec::with_capacity(capacity),
+                    alpha: alloc::vec::Vec::with_capacity(capacity),
                 }
             }
 
@@ -742,7 +742,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<std::vec::Drain<T> $(, $phantom_ty)?>, std::vec::Drain<A>>
+            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>, alloc::vec::Drain<A>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -758,6 +758,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 #[cfg(test)]
 macro_rules! struct_of_arrays_tests {
     ($color_ty: ident $(<$phantom_ty:ident>)?, $($values:expr),+) => {
+        #[cfg(feature = "alloc")]
         #[test]
         fn collect() {
             let vec_of_colors = vec![$($values),+];
@@ -767,6 +768,7 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+        #[cfg(feature = "alloc")]
         #[test]
         fn extend() {
             let vec_of_colors = vec![$($values),+];
@@ -779,6 +781,7 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+        #[cfg(feature = "alloc")]
         #[test]
         fn pop_push() {
             let vec_of_colors = vec![$($values),+];
@@ -792,6 +795,7 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+        #[cfg(feature = "alloc")]
         #[test]
         fn clear() {
             let vec_of_colors = vec![$($values),+];
@@ -804,6 +808,7 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![]);
         }
 
+        #[cfg(feature = "alloc")]
         #[test]
         fn drain() {
             let vec_of_colors = vec![$($values),+];
@@ -817,6 +822,7 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors2, vec![]);
         }
 
+        #[cfg(feature = "alloc")]
         #[test]
         fn modify() {
             let vec_of_colors = vec![$($values),+];

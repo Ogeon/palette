@@ -3,7 +3,7 @@ use super::{
     into_array_slice_mut, ArrayCast,
 };
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 use super::{from_array_slice_box, from_array_vec, into_array_slice_box, into_array_vec};
 
 /// Trait for casting a collection of colors from a collection of arrays without
@@ -104,27 +104,27 @@ macro_rules! impl_from_arrays_slice {
 
 impl_from_arrays_slice!([[T; N]], [[T; N]; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_from_arrays_slice!(Box<[[T; N]]>, Vec<[T; N]>);
+#[cfg(feature = "alloc")]
+impl_from_arrays_slice!(alloc::boxed::Box<[[T; N]]>, alloc::vec::Vec<[T; N]>);
 
-#[cfg(feature = "std")]
-impl<T, C, const N: usize> FromArrays<Box<[[T; N]]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<T, C, const N: usize> FromArrays<alloc::boxed::Box<[[T; N]]>> for alloc::boxed::Box<[C]>
 where
     C: ArrayCast<Array = [T; N]>,
 {
     #[inline]
-    fn from_arrays(arrays: Box<[[T; N]]>) -> Self {
+    fn from_arrays(arrays: alloc::boxed::Box<[[T; N]]>) -> Self {
         from_array_slice_box(arrays)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, C, const N: usize> FromArrays<Vec<[T; N]>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<T, C, const N: usize> FromArrays<alloc::vec::Vec<[T; N]>> for alloc::vec::Vec<C>
 where
     C: ArrayCast<Array = [T; N]>,
 {
     #[inline]
-    fn from_arrays(arrays: Vec<[T; N]>) -> Self {
+    fn from_arrays(arrays: alloc::vec::Vec<[T; N]>) -> Self {
         from_array_vec(arrays)
     }
 }
@@ -205,27 +205,27 @@ macro_rules! impl_into_arrays_slice {
 
 impl_into_arrays_slice!([C], [C; M] where (const M: usize));
 
-#[cfg(feature = "std")]
-impl_into_arrays_slice!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_into_arrays_slice!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
-#[cfg(feature = "std")]
-impl<T, C, const N: usize> IntoArrays<Box<[[T; N]]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<T, C, const N: usize> IntoArrays<alloc::boxed::Box<[[T; N]]>> for alloc::boxed::Box<[C]>
 where
     C: ArrayCast<Array = [T; N]>,
 {
     #[inline]
-    fn into_arrays(self) -> Box<[[T; N]]> {
+    fn into_arrays(self) -> alloc::boxed::Box<[[T; N]]> {
         into_array_slice_box(self)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, C, const N: usize> IntoArrays<Vec<[T; N]>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<T, C, const N: usize> IntoArrays<alloc::vec::Vec<[T; N]>> for alloc::vec::Vec<C>
 where
     C: ArrayCast<Array = [T; N]>,
 {
     #[inline]
-    fn into_arrays(self) -> Vec<[T; N]> {
+    fn into_arrays(self) -> alloc::vec::Vec<[T; N]> {
         into_array_vec(self)
     }
 }
@@ -346,93 +346,125 @@ mod test {
     fn from_arrays() {
         let slice: &[[u8; 3]] = &[[1, 2, 3], [4, 5, 6]];
         let slice_mut: &mut [[u8; 3]] = &mut [[1, 2, 3], [4, 5, 6]];
-        let mut slice_box: Box<[[u8; 3]]> = vec![[1, 2, 3], [4, 5, 6]].into_boxed_slice();
-        let mut vec: Vec<[u8; 3]> = vec![[1, 2, 3], [4, 5, 6]];
         let mut array: [[u8; 3]; 2] = [[1, 2, 3], [4, 5, 6]];
 
         let _ = <&[Srgb<u8>]>::from_arrays(slice);
-        let _ = <&[Srgb<u8>]>::from_arrays(&slice_box);
-        let _ = <&[Srgb<u8>]>::from_arrays(&vec);
         let _ = <&[Srgb<u8>]>::from_arrays(&array);
 
         let _ = <&mut [Srgb<u8>]>::from_arrays(slice_mut);
+        let _ = <&mut [Srgb<u8>]>::from_arrays(&mut array);
+
+        let _ = <[Srgb<u8>; 2]>::from_arrays(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn from_arrays_alloc() {
+        let mut slice_box: Box<[[u8; 3]]> = vec![[1, 2, 3], [4, 5, 6]].into_boxed_slice();
+        let mut vec: Vec<[u8; 3]> = vec![[1, 2, 3], [4, 5, 6]];
+
+        let _ = <&[Srgb<u8>]>::from_arrays(&slice_box);
+        let _ = <&[Srgb<u8>]>::from_arrays(&vec);
+
         let _ = <&mut [Srgb<u8>]>::from_arrays(&mut slice_box);
         let _ = <&mut [Srgb<u8>]>::from_arrays(&mut vec);
-        let _ = <&mut [Srgb<u8>]>::from_arrays(&mut array);
 
         let _ = Box::<[Srgb<u8>]>::from_arrays(slice_box);
         let _ = Vec::<Srgb<u8>>::from_arrays(vec);
-        let _ = <[Srgb<u8>; 2]>::from_arrays(array);
     }
 
     #[test]
     fn arrays_into() {
         let slice: &[[u8; 3]] = &[[1, 2, 3], [4, 5, 6]];
         let slice_mut: &mut [[u8; 3]] = &mut [[1, 2, 3], [4, 5, 6]];
-        let mut slice_box: Box<[[u8; 3]]> = vec![[1, 2, 3], [4, 5, 6]].into_boxed_slice();
-        let mut vec: Vec<[u8; 3]> = vec![[1, 2, 3], [4, 5, 6]];
         let mut array: [[u8; 3]; 2] = [[1, 2, 3], [4, 5, 6]];
 
         let _: &[Srgb<u8>] = slice.arrays_into();
-        let _: &[Srgb<u8>] = (&slice_box).arrays_into();
-        let _: &[Srgb<u8>] = (&vec).arrays_into();
         let _: &[Srgb<u8>] = (&array).arrays_into();
 
         let _: &mut [Srgb<u8>] = slice_mut.arrays_into();
+        let _: &mut [Srgb<u8>] = (&mut array).arrays_into();
+
+        let _: [Srgb<u8>; 2] = array.arrays_into();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn arrays_into_alloc() {
+        let mut slice_box: Box<[[u8; 3]]> = vec![[1, 2, 3], [4, 5, 6]].into_boxed_slice();
+        let mut vec: Vec<[u8; 3]> = vec![[1, 2, 3], [4, 5, 6]];
+
+        let _: &[Srgb<u8>] = (&slice_box).arrays_into();
+        let _: &[Srgb<u8>] = (&vec).arrays_into();
+
         let _: &mut [Srgb<u8>] = (&mut slice_box).arrays_into();
         let _: &mut [Srgb<u8>] = (&mut vec).arrays_into();
-        let _: &mut [Srgb<u8>] = (&mut array).arrays_into();
 
         let _: Box<[Srgb<u8>]> = slice_box.arrays_into();
         let _: Vec<Srgb<u8>> = vec.arrays_into();
-        let _: [Srgb<u8>; 2] = array.arrays_into();
     }
 
     #[test]
     fn into_arrays() {
         let slice: &[Srgb<u8>] = &[Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let slice_mut: &mut [Srgb<u8>] = &mut [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
-        let mut slice_box: Box<[Srgb<u8>]> =
-            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
-        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let mut array: [Srgb<u8>; 2] = [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
 
         let _: &[[u8; 3]] = slice.into_arrays();
-        let _: &[[u8; 3]] = (&slice_box).into_arrays();
-        let _: &[[u8; 3]] = (&vec).into_arrays();
         let _: &[[u8; 3]] = (&array).into_arrays();
 
         let _: &mut [[u8; 3]] = slice_mut.into_arrays();
+        let _: &mut [[u8; 3]] = (&mut array).into_arrays();
+
+        let _: [[u8; 3]; 2] = array.into_arrays();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn into_arrays_alloc() {
+        let mut slice_box: Box<[Srgb<u8>]> =
+            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
+        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
+
+        let _: &[[u8; 3]] = (&slice_box).into_arrays();
+        let _: &[[u8; 3]] = (&vec).into_arrays();
+
         let _: &mut [[u8; 3]] = (&mut slice_box).into_arrays();
         let _: &mut [[u8; 3]] = (&mut vec).into_arrays();
-        let _: &mut [[u8; 3]] = (&mut array).into_arrays();
 
         let _: Box<[[u8; 3]]> = slice_box.into_arrays();
         let _: Vec<[u8; 3]> = vec.into_arrays();
-        let _: [[u8; 3]; 2] = array.into_arrays();
     }
 
     #[test]
     fn arrays_from() {
         let slice: &[Srgb<u8>] = &[Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let slice_mut: &mut [Srgb<u8>] = &mut [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
-        let mut slice_box: Box<[Srgb<u8>]> =
-            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
-        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let mut array: [Srgb<u8>; 2] = [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
 
         let _ = <&[[u8; 3]]>::arrays_from(slice);
-        let _ = <&[[u8; 3]]>::arrays_from(&slice_box);
-        let _ = <&[[u8; 3]]>::arrays_from(&vec);
         let _ = <&[[u8; 3]]>::arrays_from(&array);
 
         let _ = <&mut [[u8; 3]]>::arrays_from(slice_mut);
+        let _ = <&mut [[u8; 3]]>::arrays_from(&mut array);
+
+        let _ = <[[u8; 3]; 2]>::arrays_from(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn arrays_from_alloc() {
+        let mut slice_box: Box<[Srgb<u8>]> =
+            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
+        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
+
+        let _ = <&[[u8; 3]]>::arrays_from(&slice_box);
+        let _ = <&[[u8; 3]]>::arrays_from(&vec);
+
         let _ = <&mut [[u8; 3]]>::arrays_from(&mut slice_box);
         let _ = <&mut [[u8; 3]]>::arrays_from(&mut vec);
-        let _ = <&mut [[u8; 3]]>::arrays_from(&mut array);
 
         let _ = Box::<[[u8; 3]]>::arrays_from(slice_box);
         let _ = Vec::<[u8; 3]>::arrays_from(vec);
-        let _ = <[[u8; 3]; 2]>::arrays_from(array);
     }
 }

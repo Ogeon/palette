@@ -173,106 +173,111 @@ unsafe impl<T> bytemuck::Pod for Okhwb<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod tests {
-    use crate::convert::FromColorUnclamped;
-    use crate::rgb::Rgb;
-    use crate::visual::VisuallyEqual;
-    use crate::{encoding, LinSrgb, Okhsv, Okhwb, Oklab};
+    use crate::Okhwb;
 
     test_convert_into_from_xyz!(Okhwb);
 
-    #[cfg_attr(miri, ignore)]
-    #[test]
-    fn test_roundtrip_okhwb_oklab_is_original() {
-        let colors = [
-            (
-                "red",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
-            ),
-            (
-                "green",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
-            ),
-            (
-                "cyan",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
-            ),
-            (
-                "magenta",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
-            ),
-            (
-                "white",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
-            ),
-            (
-                "black",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
-            ),
-            (
-                "grey",
-                Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
-            ),
-            (
-                "yellow",
-                Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
-            ),
-            (
-                "blue",
-                Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
-            ),
-        ];
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use crate::{
+            convert::FromColorUnclamped, encoding, rgb::Rgb, visual::VisuallyEqual, LinSrgb, Okhsv,
+            Okhwb, Oklab,
+        };
 
-        const EPSILON: f64 = 1e-14;
+        #[cfg_attr(miri, ignore)]
+        #[test]
+        fn test_roundtrip_okhwb_oklab_is_original() {
+            let colors = [
+                (
+                    "red",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0)),
+                ),
+                (
+                    "green",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 0.0)),
+                ),
+                (
+                    "cyan",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 1.0, 1.0)),
+                ),
+                (
+                    "magenta",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 1.0)),
+                ),
+                (
+                    "white",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 1.0)),
+                ),
+                (
+                    "black",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 0.0)),
+                ),
+                (
+                    "grey",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.5, 0.5, 0.5)),
+                ),
+                (
+                    "yellow",
+                    Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, 0.0)),
+                ),
+                (
+                    "blue",
+                    Oklab::from_color_unclamped(LinSrgb::new(0.0, 0.0, 1.0)),
+                ),
+            ];
 
-        for (name, color) in colors {
-            let rgb: Rgb<encoding::Srgb, u8> =
-                crate::Srgb::<f64>::from_color_unclamped(color).into_format();
-            println!(
-                "\n\
-            roundtrip of {} (#{:x} / {:?})\n\
-            =================================================",
-                name, rgb, color
-            );
+            const EPSILON: f64 = 1e-14;
 
-            let okhsv = Okhsv::from_color_unclamped(color);
-            println!("Okhsv: {:?}", okhsv);
-            let okhwb_from_okhsv = Okhwb::from_color_unclamped(okhsv);
-            let okhwb = Okhwb::from_color_unclamped(color);
-            println!("Okhwb: {:?}", okhwb);
-            assert!(
+            for (name, color) in colors {
+                let rgb: Rgb<encoding::Srgb, u8> =
+                    crate::Srgb::<f64>::from_color_unclamped(color).into_format();
+                println!(
+                    "\n\
+                    roundtrip of {} (#{:x} / {:?})\n\
+                    =================================================",
+                    name, rgb, color
+                );
+
+                let okhsv = Okhsv::from_color_unclamped(color);
+                println!("Okhsv: {:?}", okhsv);
+                let okhwb_from_okhsv = Okhwb::from_color_unclamped(okhsv);
+                let okhwb = Okhwb::from_color_unclamped(color);
+                println!("Okhwb: {:?}", okhwb);
+                assert!(
                 Okhwb::visually_eq(okhwb, okhwb_from_okhsv, EPSILON),
                 "Okhwb \n{:?} is not visually equal to Okhwb from Okhsv \n{:?}\nwithin EPSILON {}",
                 okhwb,
                 okhwb_from_okhsv,
                 EPSILON
             );
-            let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
-            assert!(
+                let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
+                assert!(
                 Okhsv::visually_eq(okhsv, okhsv_from_okhwb, EPSILON),
                 "Okhsv \n{:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{:?}\nwithin EPSILON {}",
                 okhsv,
                 okhsv_from_okhwb, EPSILON
             );
 
-            let roundtrip_color = Oklab::from_color_unclamped(okhwb);
-            let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
-            assert!(
-                Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, EPSILON),
-                "roundtrip color \n{:?} does not match \n{:?}\nwithin EPSILON {}",
-                roundtrip_color,
-                oklab_from_okhsv,
-                EPSILON
-            );
-            assert!(
-                Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                "'{}' failed.\n\
+                let roundtrip_color = Oklab::from_color_unclamped(okhwb);
+                let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
+                assert!(
+                    Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, EPSILON),
+                    "roundtrip color \n{:?} does not match \n{:?}\nwithin EPSILON {}",
+                    roundtrip_color,
+                    oklab_from_okhsv,
+                    EPSILON
+                );
+                assert!(
+                    Oklab::visually_eq(roundtrip_color, color, EPSILON),
+                    "'{}' failed.\n\
                 {:?}\n\
                 !=\n\
                 \n{:?}\n",
-                name,
-                roundtrip_color,
-                color
-            );
+                    name,
+                    roundtrip_color,
+                    color
+                );
+            }
         }
     }
 
@@ -284,6 +289,7 @@ mod tests {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::okhwb::Okhwba;
 
         struct_of_arrays_tests!(

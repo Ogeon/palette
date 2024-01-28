@@ -261,22 +261,22 @@ macro_rules! impl_array_casts {
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($ty_param)+> From<Box<$self_ty<$($self_ty_param),+>>> for Box<[$array_item; $array_len]>
+        #[cfg(feature = "alloc")]
+        impl<$($ty_param)+> From<alloc::boxed::Box<$self_ty<$($self_ty_param),+>>> for alloc::boxed::Box<[$array_item; $array_len]>
         $(where $($where)+)?
         {
             #[inline]
-            fn from(color: Box<$self_ty<$($self_ty_param),+>>) -> Self {
+            fn from(color: alloc::boxed::Box<$self_ty<$($self_ty_param),+>>) -> Self {
                 crate::cast::into_array_box(color)
             }
         }
 
-        #[cfg(feature = "std")]
-        impl<$($ty_param)+> From<Box<[$array_item; $array_len]>> for Box<$self_ty<$($self_ty_param),+>>
+        #[cfg(feature = "alloc")]
+        impl<$($ty_param)+> From<alloc::boxed::Box<[$array_item; $array_len]>> for alloc::boxed::Box<$self_ty<$($self_ty_param),+>>
         $(where $($where)+)?
         {
             #[inline]
-            fn from(array: Box<[$array_item; $array_len]>) -> Self{
+            fn from(array: alloc::boxed::Box<[$array_item; $array_len]>) -> Self{
                 crate::cast::from_array_box(array)
             }
         }

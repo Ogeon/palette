@@ -7,7 +7,7 @@ use super::{
     try_from_component_slice, try_from_component_slice_mut, ArrayCast, SliceCastError,
 };
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 use super::{
     into_component_slice_box, into_component_vec, try_from_component_slice_box,
     try_from_component_vec, BoxedSliceCastError, VecCastError,
@@ -144,11 +144,11 @@ macro_rules! impl_try_from_components_slice {
 
 impl_try_from_components_slice!([T], [T; N] where (const N: usize));
 
-#[cfg(feature = "std")]
-impl_try_from_components_slice!(Box<[T]>, Vec<T>);
+#[cfg(feature = "alloc")]
+impl_try_from_components_slice!(alloc::boxed::Box<[T]>, alloc::vec::Vec<T>);
 
-#[cfg(feature = "std")]
-impl<T, C> TryFromComponents<Box<[T]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<T, C> TryFromComponents<alloc::boxed::Box<[T]>> for alloc::boxed::Box<[C]>
 where
     C: ArrayCast,
     C::Array: ArrayExt<Item = T>,
@@ -156,13 +156,13 @@ where
     type Error = BoxedSliceCastError<T>;
 
     #[inline]
-    fn try_from_components(components: Box<[T]>) -> Result<Self, Self::Error> {
+    fn try_from_components(components: alloc::boxed::Box<[T]>) -> Result<Self, Self::Error> {
         try_from_component_slice_box(components)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, C> TryFromComponents<Vec<T>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<T, C> TryFromComponents<alloc::vec::Vec<T>> for alloc::vec::Vec<C>
 where
     C: ArrayCast,
     C::Array: ArrayExt<Item = T>,
@@ -170,7 +170,7 @@ where
     type Error = VecCastError<T>;
 
     #[inline]
-    fn try_from_components(components: Vec<T>) -> Result<Self, Self::Error> {
+    fn try_from_components(components: alloc::vec::Vec<T>) -> Result<Self, Self::Error> {
         try_from_component_vec(components)
     }
 }
@@ -346,29 +346,29 @@ macro_rules! impl_into_components_slice {
 
 impl_into_components_slice!([C], [C; N] where (const N: usize));
 
-#[cfg(feature = "std")]
-impl_into_components_slice!(Box<[C]>, Vec<C>);
+#[cfg(feature = "alloc")]
+impl_into_components_slice!(alloc::boxed::Box<[C]>, alloc::vec::Vec<C>);
 
-#[cfg(feature = "std")]
-impl<T, C> IntoComponents<Box<[T]>> for Box<[C]>
+#[cfg(feature = "alloc")]
+impl<T, C> IntoComponents<alloc::boxed::Box<[T]>> for alloc::boxed::Box<[C]>
 where
     C: ArrayCast,
     C::Array: ArrayExt<Item = T>,
 {
     #[inline]
-    fn into_components(self) -> Box<[T]> {
+    fn into_components(self) -> alloc::boxed::Box<[T]> {
         into_component_slice_box(self)
     }
 }
 
-#[cfg(feature = "std")]
-impl<T, C> IntoComponents<Vec<T>> for Vec<C>
+#[cfg(feature = "alloc")]
+impl<T, C> IntoComponents<alloc::vec::Vec<T>> for alloc::vec::Vec<C>
 where
     C: ArrayCast,
     C::Array: ArrayExt<Item = T>,
 {
     #[inline]
-    fn into_components(self) -> Vec<T> {
+    fn into_components(self) -> alloc::vec::Vec<T> {
         into_component_vec(self)
     }
 }
@@ -606,139 +606,187 @@ mod test {
     fn try_from_components() {
         let slice: &[u8] = &[1, 2, 3, 4, 5, 6];
         let slice_mut: &mut [u8] = &mut [1, 2, 3, 4, 5, 6];
-        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
-        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
         let mut array: [u8; 6] = [1, 2, 3, 4, 5, 6];
 
         let _ = <&[Srgb<u8>]>::try_from_components(slice).unwrap();
-        let _ = <&[Srgb<u8>]>::try_from_components(&slice_box).unwrap();
-        let _ = <&[Srgb<u8>]>::try_from_components(&vec).unwrap();
         let _ = <&[Srgb<u8>]>::try_from_components(&array).unwrap();
 
         let _ = <&mut [Srgb<u8>]>::try_from_components(slice_mut).unwrap();
+        let _ = <&mut [Srgb<u8>]>::try_from_components(&mut array).unwrap();
+
+        let _ = <[Srgb<u8>; 2]>::try_from_components(array).unwrap();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn try_from_components_alloc() {
+        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
+        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
+
+        let _ = <&[Srgb<u8>]>::try_from_components(&slice_box).unwrap();
+        let _ = <&[Srgb<u8>]>::try_from_components(&vec).unwrap();
+
         let _ = <&mut [Srgb<u8>]>::try_from_components(&mut slice_box).unwrap();
         let _ = <&mut [Srgb<u8>]>::try_from_components(&mut vec).unwrap();
-        let _ = <&mut [Srgb<u8>]>::try_from_components(&mut array).unwrap();
 
         let _ = Box::<[Srgb<u8>]>::try_from_components(slice_box).unwrap();
         let _ = Vec::<Srgb<u8>>::try_from_components(vec).unwrap();
-        let _ = <[Srgb<u8>; 2]>::try_from_components(array).unwrap();
     }
 
     #[test]
     fn try_components_into() {
         let slice: &[u8] = &[1, 2, 3, 4, 5, 6];
         let slice_mut: &mut [u8] = &mut [1, 2, 3, 4, 5, 6];
-        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
-        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
         let mut array: [u8; 6] = [1, 2, 3, 4, 5, 6];
 
         let _: &[Srgb<u8>] = slice.try_components_into().unwrap();
-        let _: &[Srgb<u8>] = (&slice_box).try_components_into().unwrap();
-        let _: &[Srgb<u8>] = (&vec).try_components_into().unwrap();
         let _: &[Srgb<u8>] = (&array).try_components_into().unwrap();
 
         let _: &mut [Srgb<u8>] = slice_mut.try_components_into().unwrap();
+        let _: &mut [Srgb<u8>] = (&mut array).try_components_into().unwrap();
+
+        let _: [Srgb<u8>; 2] = array.try_components_into().unwrap();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn try_components_into_alloc() {
+        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
+        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
+
+        let _: &[Srgb<u8>] = (&slice_box).try_components_into().unwrap();
+        let _: &[Srgb<u8>] = (&vec).try_components_into().unwrap();
+
         let _: &mut [Srgb<u8>] = (&mut slice_box).try_components_into().unwrap();
         let _: &mut [Srgb<u8>] = (&mut vec).try_components_into().unwrap();
-        let _: &mut [Srgb<u8>] = (&mut array).try_components_into().unwrap();
 
         let _: Box<[Srgb<u8>]> = slice_box.try_components_into().unwrap();
         let _: Vec<Srgb<u8>> = vec.try_components_into().unwrap();
-        let _: [Srgb<u8>; 2] = array.try_components_into().unwrap();
     }
 
     #[test]
     fn from_components() {
         let slice: &[u8] = &[1, 2, 3, 4, 5, 6];
         let slice_mut: &mut [u8] = &mut [1, 2, 3, 4, 5, 6];
-        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
-        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
         let mut array: [u8; 6] = [1, 2, 3, 4, 5, 6];
 
         let _ = <&[Srgb<u8>]>::from_components(slice);
-        let _ = <&[Srgb<u8>]>::from_components(&slice_box);
-        let _ = <&[Srgb<u8>]>::from_components(&vec);
         let _ = <&[Srgb<u8>]>::from_components(&array);
 
         let _ = <&mut [Srgb<u8>]>::from_components(slice_mut);
+        let _ = <&mut [Srgb<u8>]>::from_components(&mut array);
+
+        let _ = <[Srgb<u8>; 2]>::from_components(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn from_components_alloc() {
+        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
+        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
+
+        let _ = <&[Srgb<u8>]>::from_components(&slice_box);
+        let _ = <&[Srgb<u8>]>::from_components(&vec);
+
         let _ = <&mut [Srgb<u8>]>::from_components(&mut slice_box);
         let _ = <&mut [Srgb<u8>]>::from_components(&mut vec);
-        let _ = <&mut [Srgb<u8>]>::from_components(&mut array);
 
         let _ = Box::<[Srgb<u8>]>::from_components(slice_box);
         let _ = Vec::<Srgb<u8>>::from_components(vec);
-        let _ = <[Srgb<u8>; 2]>::from_components(array);
     }
 
     #[test]
     fn components_into() {
         let slice: &[u8] = &[1, 2, 3, 4, 5, 6];
         let slice_mut: &mut [u8] = &mut [1, 2, 3, 4, 5, 6];
-        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
-        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
         let mut array: [u8; 6] = [1, 2, 3, 4, 5, 6];
 
         let _: &[Srgb<u8>] = slice.components_into();
-        let _: &[Srgb<u8>] = (&slice_box).components_into();
-        let _: &[Srgb<u8>] = (&vec).components_into();
         let _: &[Srgb<u8>] = (&array).components_into();
 
         let _: &mut [Srgb<u8>] = slice_mut.components_into();
+        let _: &mut [Srgb<u8>] = (&mut array).components_into();
+
+        let _: [Srgb<u8>; 2] = array.components_into();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn components_into_alloc() {
+        let mut slice_box: Box<[u8]> = vec![1, 2, 3, 4, 5, 6].into_boxed_slice();
+        let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
+
+        let _: &[Srgb<u8>] = (&slice_box).components_into();
+        let _: &[Srgb<u8>] = (&vec).components_into();
+
         let _: &mut [Srgb<u8>] = (&mut slice_box).components_into();
         let _: &mut [Srgb<u8>] = (&mut vec).components_into();
-        let _: &mut [Srgb<u8>] = (&mut array).components_into();
 
         let _: Box<[Srgb<u8>]> = slice_box.components_into();
         let _: Vec<Srgb<u8>> = vec.components_into();
-        let _: [Srgb<u8>; 2] = array.components_into();
     }
 
     #[test]
     fn into_components() {
         let slice: &[Srgb<u8>] = &[Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let slice_mut: &mut [Srgb<u8>] = &mut [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
-        let mut slice_box: Box<[Srgb<u8>]> =
-            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
-        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let mut array: [Srgb<u8>; 2] = [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
 
         let _: &[u8] = slice.into_components();
-        let _: &[u8] = (&slice_box).into_components();
-        let _: &[u8] = (&vec).into_components();
         let _: &[u8] = (&array).into_components();
 
         let _: &mut [u8] = slice_mut.into_components();
+        let _: &mut [u8] = (&mut array).into_components();
+
+        let _: [u8; 6] = array.into_components();
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn into_components_alloc() {
+        let mut slice_box: Box<[Srgb<u8>]> =
+            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
+        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
+
+        let _: &[u8] = (&slice_box).into_components();
+        let _: &[u8] = (&vec).into_components();
+
         let _: &mut [u8] = (&mut slice_box).into_components();
         let _: &mut [u8] = (&mut vec).into_components();
-        let _: &mut [u8] = (&mut array).into_components();
 
         let _: Box<[u8]> = slice_box.into_components();
         let _: Vec<u8> = vec.into_components();
-        let _: [u8; 6] = array.into_components();
     }
 
     #[test]
     fn components_from() {
         let slice: &[Srgb<u8>] = &[Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let slice_mut: &mut [Srgb<u8>] = &mut [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
-        let mut slice_box: Box<[Srgb<u8>]> =
-            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
-        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
         let mut array: [Srgb<u8>; 2] = [Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
 
         let _ = <&[u8]>::components_from(slice);
-        let _ = <&[u8]>::components_from(&slice_box);
-        let _ = <&[u8]>::components_from(&vec);
         let _ = <&[u8]>::components_from(&array);
 
         let _ = <&mut [u8]>::components_from(slice_mut);
+        let _ = <&mut [u8]>::components_from(&mut array);
+
+        let _ = <[u8; 6]>::components_from(array);
+    }
+
+    #[cfg(feature = "alloc")]
+    #[test]
+    fn components_from_alloc() {
+        let mut slice_box: Box<[Srgb<u8>]> =
+            vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)].into_boxed_slice();
+        let mut vec: Vec<Srgb<u8>> = vec![Srgb::new(1, 2, 3), Srgb::new(4, 5, 6)];
+
+        let _ = <&[u8]>::components_from(&slice_box);
+        let _ = <&[u8]>::components_from(&vec);
+
         let _ = <&mut [u8]>::components_from(&mut slice_box);
         let _ = <&mut [u8]>::components_from(&mut vec);
-        let _ = <&mut [u8]>::components_from(&mut array);
 
         let _ = Box::<[u8]>::components_from(slice_box);
         let _ = Vec::<u8>::components_from(vec);
-        let _ = <[u8; 6]>::components_from(array);
     }
 }

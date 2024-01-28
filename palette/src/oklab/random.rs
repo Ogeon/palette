@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, Sub};
+use core::ops::{Add, Mul, Sub};
 
 use crate::{num::One, Oklab};
 

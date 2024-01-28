@@ -122,7 +122,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{invert_hsl_sample, sample_hsl, sample_hsv, HslSample, HsvSample};
+    use super::{sample_hsl, sample_hsv, HslSample, HsvSample};
 
     #[cfg(feature = "random")]
     #[test]
@@ -161,10 +161,12 @@ mod test {
         );
     }
 
-    #[cfg(feature = "random")]
+    #[cfg(all(feature = "random", feature = "approx"))]
     #[allow(clippy::excessive_precision)]
     #[test]
     fn hsl_sampling() {
+        use super::invert_hsl_sample;
+
         // Sanity check that sampling and inverting from sample are equivalent
         macro_rules! test_hsl {
             ( $x:expr, $y:expr ) => {{

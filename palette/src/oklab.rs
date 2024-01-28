@@ -536,118 +536,127 @@ unsafe impl<T> bytemuck::Pod for Oklab<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
-    use core::str::FromStr;
-
-    use crate::rgb::Rgb;
-    use crate::visual::VisuallyEqual;
-    use crate::{FromColor, Lab, LinSrgb, Srgb};
-
-    use super::*;
+    use crate::Oklab;
 
     test_convert_into_from_xyz!(Oklab);
 
-    /// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
-    #[test]
-    fn lightness_of_white_is_one() {
-        let rgb: Srgb<f64> = Rgb::from_str("#ffffff").unwrap().into_format();
-        let lin_rgb = LinSrgb::from_color_unclamped(rgb);
-        let oklab = Oklab::from_color_unclamped(lin_rgb);
-        println!("white {rgb:?} == {oklab:?}");
-        assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-7);
-        assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-7);
-        assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-7);
+    #[cfg(feature = "approx")]
+    mod conversion {
+        use core::str::FromStr;
 
-        let lab: Lab<D65, f64> = Lab::from_components((100.0, 0.0, 0.0));
-        let rgb: Srgb<f64> = Srgb::from_color_unclamped(lab);
-        let oklab = Oklab::from_color_unclamped(lab);
-        println!("white {lab:?} == {rgb:?} == {oklab:?}");
-        assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-4);
-        assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-4);
-        assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-4);
+        use crate::{
+            convert::FromColorUnclamped, rgb::Rgb, visual::VisuallyEqual, white_point::D65,
+            FromColor, Lab, LinSrgb, Oklab, Srgb,
+        };
+
+        /// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
+        #[test]
+        fn lightness_of_white_is_one() {
+            let rgb: Srgb<f64> = Rgb::from_str("#ffffff").unwrap().into_format();
+            let lin_rgb = LinSrgb::from_color_unclamped(rgb);
+            let oklab = Oklab::from_color_unclamped(lin_rgb);
+            println!("white {rgb:?} == {oklab:?}");
+            assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-7);
+            assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-7);
+            assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-7);
+
+            let lab: Lab<D65, f64> = Lab::from_components((100.0, 0.0, 0.0));
+            let rgb: Srgb<f64> = Srgb::from_color_unclamped(lab);
+            let oklab = Oklab::from_color_unclamped(lab);
+            println!("white {lab:?} == {rgb:?} == {oklab:?}");
+            assert_abs_diff_eq!(oklab.l, 1.0, epsilon = 1e-4);
+            assert_abs_diff_eq!(oklab.a, 0.0, epsilon = 1e-4);
+            assert_abs_diff_eq!(oklab.b, 0.0, epsilon = 1e-4);
+        }
+
+        #[test]
+        fn blue_srgb() {
+            // use f64 to be comparable to javascript
+            let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap().into_format();
+            let lin_rgb = LinSrgb::from_color_unclamped(rgb);
+            let oklab = Oklab::from_color_unclamped(lin_rgb);
+
+            // values from Ok Color Picker, which seems to use  Björn Ottosson's original
+            // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
+            assert_abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-9);
+            assert_abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-9);
+            assert_abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-9);
+        }
+
+        #[test]
+        fn red() {
+            let a = Oklab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
+            // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+            let b = Oklab::new(0.6279553606145516, 0.22486306106597395, 0.1258462985307351);
+            assert!(Oklab::visually_eq(a, b, 1e-8));
+        }
+
+        #[test]
+        fn green() {
+            let a = Oklab::from_color(LinSrgb::new(0.0, 1.0, 0.0));
+            // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+            let b = Oklab::new(
+                0.8664396115356694,
+                -0.23388757418790812,
+                0.17949847989672985,
+            );
+            assert!(Oklab::visually_eq(a, b, 1e-8));
+        }
+
+        #[test]
+        fn blue() {
+            let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
+            println!("Oklab blue: {:?}", a);
+            // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
+            let b = Oklab::new(0.4520137183853429, -0.0324569841687640, -0.3115281476783751);
+            assert!(Oklab::visually_eq(a, b, 1e-8));
+        }
     }
 
-    #[test]
-    fn blue_srgb() {
-        // use f64 to be comparable to javascript
-        let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap().into_format();
-        let lin_rgb = LinSrgb::from_color_unclamped(rgb);
-        let oklab = Oklab::from_color_unclamped(lin_rgb);
+    #[cfg(feature = "approx")]
+    mod visually_eq {
+        use crate::{visual::VisuallyEqual, Oklab};
 
-        // values from Ok Color Picker, which seems to use  Björn Ottosson's original
-        // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
-        assert!(abs_diff_eq!(oklab.l, 0.4520137183853429, epsilon = 1e-9));
-        assert!(abs_diff_eq!(oklab.a, -0.03245698416876397, epsilon = 1e-9));
-        assert!(abs_diff_eq!(oklab.b, -0.3115281476783751, epsilon = 1e-9));
-    }
+        #[test]
+        fn black_eq_different_black() {
+            assert!(Oklab::visually_eq(
+                Oklab::new(0.0, 1.0, 0.0),
+                Oklab::new(0.0, 0.0, 1.0),
+                1e-8
+            ));
+        }
 
-    #[test]
-    fn red() {
-        let a = Oklab::from_color(LinSrgb::new(1.0, 0.0, 0.0));
-        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
-        let b = Oklab::new(0.6279553606145516, 0.22486306106597395, 0.1258462985307351);
-        assert!(Oklab::visually_eq(a, b, 1e-8));
-    }
+        #[test]
+        fn white_eq_different_white() {
+            assert!(Oklab::visually_eq(
+                Oklab::new(1.0, 1.0, 0.0),
+                Oklab::new(1.0, 0.0, 1.0),
+                1e-8
+            ));
+        }
 
-    #[test]
-    fn green() {
-        let a = Oklab::from_color(LinSrgb::new(0.0, 1.0, 0.0));
-        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
-        let b = Oklab::new(
-            0.8664396115356694,
-            -0.23388757418790812,
-            0.17949847989672985,
-        );
-        assert!(Oklab::visually_eq(a, b, 1e-8));
-    }
+        #[test]
+        fn white_ne_black() {
+            assert!(!Oklab::visually_eq(
+                Oklab::new(1.0, 1.0, 0.0),
+                Oklab::new(0.0, 0.0, 1.0),
+                1e-8
+            ));
+            assert!(!Oklab::visually_eq(
+                Oklab::new(1.0, 1.0, 0.0),
+                Oklab::new(0.0, 1.0, 0.0),
+                1e-8
+            ));
+        }
 
-    #[test]
-    fn blue() {
-        let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-        println!("Oklab blue: {:?}", a);
-        // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
-        let b = Oklab::new(0.4520137183853429, -0.0324569841687640, -0.3115281476783751);
-        assert!(Oklab::visually_eq(a, b, 1e-8));
-    }
-
-    #[test]
-    fn black_eq_different_black() {
-        assert!(Oklab::visually_eq(
-            Oklab::new(0.0, 1.0, 0.0),
-            Oklab::new(0.0, 0.0, 1.0),
-            1e-8
-        ));
-    }
-
-    #[test]
-    fn white_eq_different_white() {
-        assert!(Oklab::visually_eq(
-            Oklab::new(1.0, 1.0, 0.0),
-            Oklab::new(1.0, 0.0, 1.0),
-            1e-8
-        ));
-    }
-
-    #[test]
-    fn white_ne_black() {
-        assert!(!Oklab::visually_eq(
-            Oklab::new(1.0, 1.0, 0.0),
-            Oklab::new(0.0, 0.0, 1.0),
-            1e-8
-        ));
-        assert!(!Oklab::visually_eq(
-            Oklab::new(1.0, 1.0, 0.0),
-            Oklab::new(0.0, 1.0, 0.0),
-            1e-8
-        ));
-    }
-
-    #[test]
-    fn non_bw_neq_different_non_bw() {
-        assert!(!Oklab::visually_eq(
-            Oklab::new(0.3, 1.0, 0.0),
-            Oklab::new(0.3, 0.0, 1.0),
-            1e-8
-        ));
+        #[test]
+        fn non_bw_neq_different_non_bw() {
+            assert!(!Oklab::visually_eq(
+                Oklab::new(0.3, 1.0, 0.0),
+                Oklab::new(0.3, 0.0, 1.0),
+                1e-8
+            ));
+        }
     }
 
     #[test]
@@ -677,6 +686,7 @@ mod test {
     );
 
     mod alpha {
+        #[cfg(feature = "alloc")]
         use crate::oklab::Oklaba;
 
         struct_of_arrays_tests!(
