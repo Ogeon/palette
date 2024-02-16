@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/lchuv.rs`."><title>lchuv.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/lchuv.rs`."><title>lchuv.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -384,15 +385,15 @@
 <span class="doccomment">/// CIE L\*C\*uv h°uv, a polar version of [CIE L\*u\*v\*](crate::Luv).
 ///
 /// L\*C\*uv h°uv shares its range and perceptual uniformity with L\*u\*v\*, but
-/// it&#39;s a cylindrical color space, like [HSL](crate::Hsl) and
+/// it's a cylindrical color space, like [HSL](crate::Hsl) and
 /// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
 </span><span class="attr">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
-#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    white_point = <span class="string">&quot;Wp&quot;</span>,
-    component = <span class="string">&quot;T&quot;</span>,
+    white_point = <span class="string">"Wp"</span>,
+    component = <span class="string">"T"</span>,
     skip_derives(Luv, Lchuv, Hsluv)
 )]
 #[repr(C)]
@@ -401,21 +402,21 @@
     /// gives the brightest white.
     </span><span class="kw">pub </span>l: T,
 
-    <span class="doccomment">/// C\*uv is the colorfulness of the color. It&#39;s similar to
+    <span class="doccomment">/// C\*uv is the colorfulness of the color. It's similar to
     /// saturation. 0.0 gives gray scale colors, and numbers around
     /// 130-180 gives fully saturated colors, depending on the
     /// hue. The upper limit of 180 should include the whole
     /// L\*u\*v\*.
     </span><span class="kw">pub </span>chroma: T,
 
-    <span class="doccomment">/// The hue of the color, in degrees. Decides if it&#39;s red, blue, purple,
+    <span class="doccomment">/// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    </span><span class="attr">#[palette(unsafe_same_layout_as = <span class="string">&quot;T&quot;</span>)]
+    </span><span class="attr">#[palette(unsafe_same_layout_as = <span class="string">"T"</span>)]
     </span><span class="kw">pub </span>hue: LuvHue&lt;T&gt;,
 
-    <span class="doccomment">/// The white point associated with the color&#39;s illuminant and observer.
+    <span class="doccomment">/// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"serializing"</span>, serde(skip))]
     #[palette(unsafe_zero_sized)]
     </span><span class="kw">pub </span>white_point: PhantomData&lt;Wp&gt;,
 }
@@ -427,7 +428,7 @@
     }
 
     <span class="doccomment">/// Create a CIE L\*C\*uv h°uv color. This is the same as `Lchuv::new`
-    /// without the generic hue type. It&#39;s temporary until `const fn` supports
+    /// without the generic hue type. It's temporary until `const fn` supports
     /// traits.
     </span><span class="kw">pub const fn </span>new_const(l: T, chroma: T, hue: LuvHue&lt;T&gt;) -&gt; <span class="self">Self </span>{
         Lchuv {
@@ -474,7 +475,7 @@
     }
 }
 
-<span class="doccomment">///&lt;span id=&quot;Lchuva&quot;&gt;&lt;/span&gt;[`Lchuva`](crate::Lchuva) implementations.
+<span class="doccomment">///&lt;span id="Lchuva"&gt;&lt;/span&gt;[`Lchuva`](crate::Lchuva) implementations.
 </span><span class="kw">impl</span>&lt;Wp, T, A&gt; Alpha&lt;Lchuv&lt;Wp, T&gt;, A&gt; {
     <span class="doccomment">/// Create a CIE L\*C\*uv h°uv color with transparency.
     </span><span class="kw">pub fn </span>new&lt;H: Into&lt;LuvHue&lt;T&gt;&gt;&gt;(l: T, chroma: T, hue: H, alpha: A) -&gt; <span class="self">Self </span>{
@@ -482,7 +483,7 @@
     }
 
     <span class="doccomment">/// Create a CIE L\*C\*uv h°uv color with transparency. This is the same as
-    /// `Lchuva::new` without the generic hue type. It&#39;s temporary until `const
+    /// `Lchuva::new` without the generic hue type. It's temporary until `const
     /// fn` supports traits.
     </span><span class="kw">pub const fn </span>new_const(l: T, chroma: T, hue: LuvHue&lt;T&gt;, alpha: A) -&gt; <span class="self">Self </span>{
         Alpha {
@@ -623,11 +624,11 @@
     <span class="kw">where </span>T: Real + Zero + core::ops::Mul&lt;Output = T&gt;,
 );
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;Wp, T&gt; bytemuck::Zeroable <span class="kw">for </span>Lchuv&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
-</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Lchuv&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">'static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Lchuv&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
@@ -688,7 +689,7 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">use crate</span>::{lchuv::Lchuva, white_point::D65};
 
         <span class="macro">struct_of_arrays_tests!</span>(
@@ -699,19 +700,19 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Lchuv::&lt;D65&gt;::new(<span class="number">80.0</span>, <span class="number">70.0</span>, <span class="number">130.0</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;l&quot;:80.0,&quot;chroma&quot;:70.0,&quot;hue&quot;:130.0}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#"{"l":80.0,"chroma":70.0,"hue":130.0}"#</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
         <span class="kw">let </span>deserialized: Lchuv =
-            ::serde_json::from_str(<span class="string">r#&quot;{&quot;l&quot;:70.0,&quot;chroma&quot;:80.0,&quot;hue&quot;:130.0}&quot;#</span>).unwrap();
+            ::serde_json::from_str(<span class="string">r#"{"l":70.0,"chroma":80.0,"hue":130.0}"#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Lchuv::new(<span class="number">70.0</span>, <span class="number">80.0</span>, <span class="number">130.0</span>));
     }

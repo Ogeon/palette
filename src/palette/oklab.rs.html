@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/oklab.rs`."><title>oklab.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/oklab.rs`."><title>oklab.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -744,15 +745,15 @@
 
 <span class="kw">pub use </span><span class="self">self</span>::properties::Iter;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">pub use </span><span class="self">self</span>::random::UniformOklab;
 
 <span class="kw">mod </span>alpha;
 <span class="kw">mod </span>properties;
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">mod </span>random;
 <span class="attr">#[cfg(test)]
-#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+#[cfg(feature = <span class="string">"approx"</span>)]
 </span><span class="kw">mod </span>visual_eq;
 
 <span class="comment">// Using recalculated matrix values from
@@ -819,12 +820,12 @@
 ///   lightness
 /// * Creating smooth and uniform looking transitions between colors
 ///
-/// `Oklab`&#39;s structure is similar to [L\*a\*b\*](crate::Lab). It is based on
+/// `Oklab`'s structure is similar to [L\*a\*b\*](crate::Lab). It is based on
 /// the [opponent color model of human
 /// vision](https://en.wikipedia.org/wiki/Opponent_process), where red and green
 /// form an opponent pair, and blue and yellow form an opponent pair.
 ///
-/// `Oklab` uses [D65](https://en.wikipedia.org/wiki/Illuminant_D65)&#39;s
+/// `Oklab` uses [D65](https://en.wikipedia.org/wiki/Illuminant_D65)'s
 /// whitepoint -- daylight illumination, which is also used by sRGB, rec2020 and
 /// Display P3 color spaces -- and assumes normal well-lit viewing conditions,
 /// to which the eye is adapted. Thus `Oklab`s lightness `l` technically is a
@@ -832,11 +833,11 @@
 /// luminance. The lightness is scale/exposure-independend, i.e. independent of
 /// the actual luminance of the color, as displayed by some medium, and even for
 /// blindingly bright colors or very bright or dark viewing conditions assumes,
-/// that the eye is adapted to the color&#39;s luminance and the hue and chroma are
+/// that the eye is adapted to the color's luminance and the hue and chroma are
 /// perceived linearly.
 ///
 ///
-/// `Oklab`&#39;s chroma is unlimited. Thus it can represent colors of any color
+/// `Oklab`'s chroma is unlimited. Thus it can represent colors of any color
 /// space (including HDR). `l` is in the range `0.0 .. 1.0` and `a` and `b` are
 /// unbounded.
 ///
@@ -857,7 +858,7 @@
 /// When a `Oklab` color is converted from [`Srgb`](crate::rgb::Srgb) or a
 /// equivalent color space, e.g. [`Hsv`][crate::Hsv], [`Okhsv`],
 /// [`Hsl`][crate::Hsl], [`Okhsl`], [`Hwb`][crate::Hwb],
-/// [`Okhwb`][crate::Okhwb], it&#39;s lightness will be relative to the (user
+/// [`Okhwb`][crate::Okhwb], it's lightness will be relative to the (user
 /// controlled) maximum contrast and luminance of the display device, to which
 /// the eye is assumed to be adapted.
 ///
@@ -898,11 +899,11 @@
 /// lighten/darken it there and convert it back to `Oklab`.
 
 </span><span class="attr">#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
-#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    white_point = <span class="string">&quot;D65&quot;</span>,
-    component = <span class="string">&quot;T&quot;</span>,
+    white_point = <span class="string">"D65"</span>,
+    component = <span class="string">"T"</span>,
     skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz, Rgb)
 )]
 #[repr(C)]
@@ -1061,14 +1062,14 @@
     </span>T: Real + Cbrt + Arithmetics + Copy,
     S: RgbStandard,
     S::TransferFn: IntoLinear&lt;T, T&gt;,
-    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">&#39;static</span>,
+    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">'static</span>,
     Xyz&lt;D65, T&gt;: FromColorUnclamped&lt;Rgb&lt;S, T&gt;&gt;,
 {
     <span class="kw">fn </span>from_color_unclamped(rgb: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>TypeId::of::&lt;&lt;S <span class="kw">as </span>RgbStandard&gt;::Space&gt;() == TypeId::of::&lt;Srgb&gt;() {
             <span class="comment">// Use direct sRGB to Oklab conversion
             // Rounding errors are likely a contributing factor to differences.
-            // Also the conversion via XYZ doesn&#39;t use pre-defined matrices (yet)
+            // Also the conversion via XYZ doesn't use pre-defined matrices (yet)
             </span>linear_srgb_to_oklab(rgb.into_linear().reinterpret_as())
         } <span class="kw">else </span>{
             <span class="comment">// Convert via XYZ
@@ -1253,10 +1254,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;T&gt; bytemuck::Zeroable <span class="kw">for </span>Oklab&lt;T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;T&gt; bytemuck::Pod <span class="kw">for </span>Oklab&lt;T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
 <span class="attr">#[cfg(test)]
@@ -1265,7 +1266,7 @@
 
     <span class="macro">test_convert_into_from_xyz!</span>(Oklab);
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
     </span><span class="kw">mod </span>conversion {
         <span class="kw">use </span>core::str::FromStr;
 
@@ -1277,10 +1278,10 @@
         <span class="doccomment">/// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
         </span><span class="attr">#[test]
         </span><span class="kw">fn </span>lightness_of_white_is_one() {
-            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">&quot;#ffffff&quot;</span>).unwrap().into_format();
+            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#ffffff"</span>).unwrap().into_format();
             <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
-            <span class="macro">println!</span>(<span class="string">&quot;white {rgb:?} == {oklab:?}&quot;</span>);
+            <span class="macro">println!</span>(<span class="string">"white {rgb:?} == {oklab:?}"</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.l, <span class="number">1.0</span>, epsilon = <span class="number">1e-7</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.a, <span class="number">0.0</span>, epsilon = <span class="number">1e-7</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.b, <span class="number">0.0</span>, epsilon = <span class="number">1e-7</span>);
@@ -1288,7 +1289,7 @@
             <span class="kw">let </span>lab: Lab&lt;D65, f64&gt; = Lab::from_components((<span class="number">100.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>));
             <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Srgb::from_color_unclamped(lab);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lab);
-            <span class="macro">println!</span>(<span class="string">&quot;white {lab:?} == {rgb:?} == {oklab:?}&quot;</span>);
+            <span class="macro">println!</span>(<span class="string">"white {lab:?} == {rgb:?} == {oklab:?}"</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.l, <span class="number">1.0</span>, epsilon = <span class="number">1e-4</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.a, <span class="number">0.0</span>, epsilon = <span class="number">1e-4</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.b, <span class="number">0.0</span>, epsilon = <span class="number">1e-4</span>);
@@ -1297,11 +1298,11 @@
         <span class="attr">#[test]
         </span><span class="kw">fn </span>blue_srgb() {
             <span class="comment">// use f64 to be comparable to javascript
-            </span><span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">&quot;#0000ff&quot;</span>).unwrap().into_format();
+            </span><span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#0000ff"</span>).unwrap().into_format();
             <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
 
-            <span class="comment">// values from Ok Color Picker, which seems to use  Björn Ottosson&#39;s original
+            <span class="comment">// values from Ok Color Picker, which seems to use  Björn Ottosson's original
             // algorithm (from the direct srgb2oklab conversion, not via the XYZ color space)
             </span><span class="macro">assert_abs_diff_eq!</span>(oklab.l, <span class="number">0.4520137183853429</span>, epsilon = <span class="number">1e-9</span>);
             <span class="macro">assert_abs_diff_eq!</span>(oklab.a, -<span class="number">0.03245698416876397</span>, epsilon = <span class="number">1e-9</span>);
@@ -1331,14 +1332,14 @@
         <span class="attr">#[test]
         </span><span class="kw">fn </span>blue() {
             <span class="kw">let </span>a = Oklab::from_color(LinSrgb::new(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>));
-            <span class="macro">println!</span>(<span class="string">&quot;Oklab blue: {:?}&quot;</span>, a);
+            <span class="macro">println!</span>(<span class="string">"Oklab blue: {:?}"</span>, a);
             <span class="comment">// from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
             </span><span class="kw">let </span>b = Oklab::new(<span class="number">0.4520137183853429</span>, -<span class="number">0.0324569841687640</span>, -<span class="number">0.3115281476783751</span>);
             <span class="macro">assert!</span>(Oklab::visually_eq(a, b, <span class="number">1e-8</span>));
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
     </span><span class="kw">mod </span>visually_eq {
         <span class="kw">use crate</span>::{visual::VisuallyEqual, Oklab};
 
@@ -1411,7 +1412,7 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">use </span><span class="kw">crate</span>::oklab::Oklaba;
 
         <span class="macro">struct_of_arrays_tests!</span>(
@@ -1422,18 +1423,18 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Oklab::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#"{"l":0.3,"a":0.8,"b":0.1}"#</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
-        <span class="kw">let </span>deserialized: Oklab = ::serde_json::from_str(<span class="string">r#&quot;{&quot;l&quot;:0.3,&quot;a&quot;:0.8,&quot;b&quot;:0.1}&quot;#</span>).unwrap();
+        <span class="kw">let </span>deserialized: Oklab = ::serde_json::from_str(<span class="string">r#"{"l":0.3,"a":0.8,"b":0.1}"#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Oklab::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
     }

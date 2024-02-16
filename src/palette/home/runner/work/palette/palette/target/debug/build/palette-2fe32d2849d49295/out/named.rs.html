@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/work/palette/palette/target/debug/build/palette-b32b4b33fda1f572/out/named.rs`."><title>named.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../../../../../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../../../../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../../../../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../../../../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/work/palette/palette/target/debug/build/palette-2fe32d2849d49295/out/named.rs`."><title>named.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../../../../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../../../../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../../../../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -593,597 +594,597 @@
 <a href="#593" id="593">593</a>
 <a href="#594" id="594">594</a>
 </pre></div><pre class="rust"><code>
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aliceblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aliceblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ALICEBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">240</span>, <span class="number">248</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: antiquewhite;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: antiquewhite;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ANTIQUEWHITE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">250</span>, <span class="number">235</span>, <span class="number">215</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aqua;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aqua;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>AQUA: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">255</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aquamarine;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: aquamarine;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>AQUAMARINE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">127</span>, <span class="number">255</span>, <span class="number">212</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: azure;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: azure;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>AZURE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">240</span>, <span class="number">255</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: beige;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: beige;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BEIGE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">245</span>, <span class="number">245</span>, <span class="number">220</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: bisque;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: bisque;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BISQUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">228</span>, <span class="number">196</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: black;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: black;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BLACK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blanchedalmond;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blanchedalmond;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BLANCHEDALMOND: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">235</span>, <span class="number">205</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blueviolet;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: blueviolet;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BLUEVIOLET: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">138</span>, <span class="number">43</span>, <span class="number">226</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: brown;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: brown;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BROWN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">165</span>, <span class="number">42</span>, <span class="number">42</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: burlywood;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: burlywood;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>BURLYWOOD: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">222</span>, <span class="number">184</span>, <span class="number">135</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cadetblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cadetblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CADETBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">95</span>, <span class="number">158</span>, <span class="number">160</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: chartreuse;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: chartreuse;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CHARTREUSE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">127</span>, <span class="number">255</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: chocolate;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: chocolate;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CHOCOLATE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">210</span>, <span class="number">105</span>, <span class="number">30</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: coral;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: coral;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CORAL: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">127</span>, <span class="number">80</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cornflowerblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cornflowerblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CORNFLOWERBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">100</span>, <span class="number">149</span>, <span class="number">237</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cornsilk;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cornsilk;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CORNSILK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">248</span>, <span class="number">220</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: crimson;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: crimson;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CRIMSON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">220</span>, <span class="number">20</span>, <span class="number">60</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cyan;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: cyan;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>CYAN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">255</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">139</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkcyan;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkcyan;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKCYAN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">139</span>, <span class="number">139</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgoldenrod;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgoldenrod;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKGOLDENROD: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">184</span>, <span class="number">134</span>, <span class="number">11</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">169</span>, <span class="number">169</span>, <span class="number">169</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">100</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkgrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">169</span>, <span class="number">169</span>, <span class="number">169</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkkhaki;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkkhaki;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKKHAKI: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">189</span>, <span class="number">183</span>, <span class="number">107</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkmagenta;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkmagenta;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKMAGENTA: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">139</span>, <span class="number">0</span>, <span class="number">139</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkolivegreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkolivegreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKOLIVEGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">85</span>, <span class="number">107</span>, <span class="number">47</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkorange;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkorange;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKORANGE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">140</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkorchid;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkorchid;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKORCHID: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">153</span>, <span class="number">50</span>, <span class="number">204</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkred;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkred;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKRED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">139</span>, <span class="number">0</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darksalmon;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darksalmon;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKSALMON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">233</span>, <span class="number">150</span>, <span class="number">122</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkseagreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkseagreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKSEAGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">143</span>, <span class="number">188</span>, <span class="number">143</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslateblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslateblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKSLATEBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">72</span>, <span class="number">61</span>, <span class="number">139</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslategray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslategray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKSLATEGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">47</span>, <span class="number">79</span>, <span class="number">79</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslategrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkslategrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKSLATEGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">47</span>, <span class="number">79</span>, <span class="number">79</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkturquoise;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkturquoise;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKTURQUOISE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">206</span>, <span class="number">209</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkviolet;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: darkviolet;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DARKVIOLET: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">148</span>, <span class="number">0</span>, <span class="number">211</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: deeppink;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: deeppink;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DEEPPINK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">20</span>, <span class="number">147</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: deepskyblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: deepskyblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DEEPSKYBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">191</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dimgray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dimgray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DIMGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">105</span>, <span class="number">105</span>, <span class="number">105</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dimgrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dimgrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DIMGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">105</span>, <span class="number">105</span>, <span class="number">105</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dodgerblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: dodgerblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>DODGERBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">30</span>, <span class="number">144</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: firebrick;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: firebrick;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>FIREBRICK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">178</span>, <span class="number">34</span>, <span class="number">34</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: floralwhite;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: floralwhite;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>FLORALWHITE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">250</span>, <span class="number">240</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: forestgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: forestgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>FORESTGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">34</span>, <span class="number">139</span>, <span class="number">34</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: fuchsia;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: fuchsia;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>FUCHSIA: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">0</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gainsboro;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gainsboro;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GAINSBORO: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">220</span>, <span class="number">220</span>, <span class="number">220</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: ghostwhite;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: ghostwhite;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GHOSTWHITE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">248</span>, <span class="number">248</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gold;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gold;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GOLD: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">215</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: goldenrod;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: goldenrod;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GOLDENROD: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">218</span>, <span class="number">165</span>, <span class="number">32</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: gray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">128</span>, <span class="number">128</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: grey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: grey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">128</span>, <span class="number">128</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: green;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: green;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">128</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: greenyellow;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: greenyellow;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>GREENYELLOW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">173</span>, <span class="number">255</span>, <span class="number">47</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: honeydew;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: honeydew;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>HONEYDEW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">240</span>, <span class="number">255</span>, <span class="number">240</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: hotpink;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: hotpink;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>HOTPINK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">105</span>, <span class="number">180</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: indianred;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: indianred;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>INDIANRED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">205</span>, <span class="number">92</span>, <span class="number">92</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: indigo;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: indigo;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>INDIGO: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">75</span>, <span class="number">0</span>, <span class="number">130</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: ivory;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: ivory;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>IVORY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">240</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: khaki;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: khaki;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>KHAKI: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">240</span>, <span class="number">230</span>, <span class="number">140</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lavender;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lavender;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LAVENDER: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">230</span>, <span class="number">230</span>, <span class="number">250</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lavenderblush;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lavenderblush;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LAVENDERBLUSH: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">240</span>, <span class="number">245</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lawngreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lawngreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LAWNGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">124</span>, <span class="number">252</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lemonchiffon;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lemonchiffon;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LEMONCHIFFON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">250</span>, <span class="number">205</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">173</span>, <span class="number">216</span>, <span class="number">230</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightcoral;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightcoral;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTCORAL: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">240</span>, <span class="number">128</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightcyan;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightcyan;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTCYAN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">224</span>, <span class="number">255</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgoldenrodyellow;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgoldenrodyellow;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTGOLDENRODYELLOW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">250</span>, <span class="number">250</span>, <span class="number">210</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">211</span>, <span class="number">211</span>, <span class="number">211</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">144</span>, <span class="number">238</span>, <span class="number">144</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightgrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">211</span>, <span class="number">211</span>, <span class="number">211</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightpink;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightpink;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTPINK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">182</span>, <span class="number">193</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightsalmon;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightsalmon;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSALMON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">160</span>, <span class="number">122</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightseagreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightseagreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSEAGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">32</span>, <span class="number">178</span>, <span class="number">170</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightskyblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightskyblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSKYBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">135</span>, <span class="number">206</span>, <span class="number">250</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightslategray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightslategray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSLATEGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">119</span>, <span class="number">136</span>, <span class="number">153</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightslategrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightslategrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSLATEGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">119</span>, <span class="number">136</span>, <span class="number">153</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightsteelblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightsteelblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTSTEELBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">176</span>, <span class="number">196</span>, <span class="number">222</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightyellow;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lightyellow;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIGHTYELLOW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">224</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lime;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: lime;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIME: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">255</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: limegreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: limegreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LIMEGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">50</span>, <span class="number">205</span>, <span class="number">50</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: linen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: linen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>LINEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">250</span>, <span class="number">240</span>, <span class="number">230</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: magenta;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: magenta;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MAGENTA: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">0</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: maroon;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: maroon;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MAROON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">128</span>, <span class="number">0</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumaquamarine;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumaquamarine;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMAQUAMARINE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">102</span>, <span class="number">205</span>, <span class="number">170</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">205</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumorchid;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumorchid;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMORCHID: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">186</span>, <span class="number">85</span>, <span class="number">211</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumpurple;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumpurple;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMPURPLE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">147</span>, <span class="number">112</span>, <span class="number">219</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumseagreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumseagreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMSEAGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">60</span>, <span class="number">179</span>, <span class="number">113</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumslateblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumslateblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMSLATEBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">123</span>, <span class="number">104</span>, <span class="number">238</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumspringgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumspringgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMSPRINGGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">250</span>, <span class="number">154</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumturquoise;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumturquoise;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMTURQUOISE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">72</span>, <span class="number">209</span>, <span class="number">204</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumvioletred;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mediumvioletred;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MEDIUMVIOLETRED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">199</span>, <span class="number">21</span>, <span class="number">133</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: midnightblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: midnightblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MIDNIGHTBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">25</span>, <span class="number">25</span>, <span class="number">112</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mintcream;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mintcream;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MINTCREAM: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">245</span>, <span class="number">255</span>, <span class="number">250</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mistyrose;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: mistyrose;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MISTYROSE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">228</span>, <span class="number">225</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: moccasin;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: moccasin;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>MOCCASIN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">228</span>, <span class="number">181</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: navajowhite;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: navajowhite;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>NAVAJOWHITE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">222</span>, <span class="number">173</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: navy;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: navy;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>NAVY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: oldlace;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: oldlace;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>OLDLACE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">253</span>, <span class="number">245</span>, <span class="number">230</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: olive;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: olive;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>OLIVE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">128</span>, <span class="number">128</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: olivedrab;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: olivedrab;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>OLIVEDRAB: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">107</span>, <span class="number">142</span>, <span class="number">35</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orange;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orange;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ORANGE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">165</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orangered;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orangered;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ORANGERED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">69</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orchid;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: orchid;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ORCHID: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">218</span>, <span class="number">112</span>, <span class="number">214</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palegoldenrod;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palegoldenrod;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PALEGOLDENROD: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">238</span>, <span class="number">232</span>, <span class="number">170</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palegreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palegreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PALEGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">152</span>, <span class="number">251</span>, <span class="number">152</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: paleturquoise;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: paleturquoise;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PALETURQUOISE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">175</span>, <span class="number">238</span>, <span class="number">238</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palevioletred;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: palevioletred;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PALEVIOLETRED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">219</span>, <span class="number">112</span>, <span class="number">147</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: papayawhip;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: papayawhip;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PAPAYAWHIP: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">239</span>, <span class="number">213</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: peachpuff;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: peachpuff;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PEACHPUFF: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">218</span>, <span class="number">185</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: peru;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: peru;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PERU: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">205</span>, <span class="number">133</span>, <span class="number">63</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: pink;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: pink;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PINK: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">192</span>, <span class="number">203</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: plum;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: plum;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PLUM: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">221</span>, <span class="number">160</span>, <span class="number">221</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: powderblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: powderblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>POWDERBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">176</span>, <span class="number">224</span>, <span class="number">230</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: purple;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: purple;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>PURPLE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">128</span>, <span class="number">0</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: rebeccapurple;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: rebeccapurple;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>REBECCAPURPLE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">102</span>, <span class="number">51</span>, <span class="number">153</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: red;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: red;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>RED: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: rosybrown;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: rosybrown;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ROSYBROWN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">188</span>, <span class="number">143</span>, <span class="number">143</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: royalblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: royalblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>ROYALBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">65</span>, <span class="number">105</span>, <span class="number">225</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: saddlebrown;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: saddlebrown;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SADDLEBROWN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">139</span>, <span class="number">69</span>, <span class="number">19</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: salmon;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: salmon;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SALMON: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">250</span>, <span class="number">128</span>, <span class="number">114</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: sandybrown;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: sandybrown;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SANDYBROWN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">244</span>, <span class="number">164</span>, <span class="number">96</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: seagreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: seagreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SEAGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">46</span>, <span class="number">139</span>, <span class="number">87</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: seashell;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: seashell;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SEASHELL: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">245</span>, <span class="number">238</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: sienna;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: sienna;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SIENNA: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">160</span>, <span class="number">82</span>, <span class="number">45</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: silver;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: silver;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SILVER: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">192</span>, <span class="number">192</span>, <span class="number">192</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: skyblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: skyblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SKYBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">135</span>, <span class="number">206</span>, <span class="number">235</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slateblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slateblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SLATEBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">106</span>, <span class="number">90</span>, <span class="number">205</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slategray;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slategray;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SLATEGRAY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">112</span>, <span class="number">128</span>, <span class="number">144</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slategrey;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: slategrey;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SLATEGREY: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">112</span>, <span class="number">128</span>, <span class="number">144</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: snow;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: snow;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SNOW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">250</span>, <span class="number">250</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: springgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: springgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>SPRINGGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">255</span>, <span class="number">127</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: steelblue;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: steelblue;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>STEELBLUE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">70</span>, <span class="number">130</span>, <span class="number">180</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: tan;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: tan;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>TAN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">210</span>, <span class="number">180</span>, <span class="number">140</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: teal;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: teal;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>TEAL: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">0</span>, <span class="number">128</span>, <span class="number">128</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: thistle;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: thistle;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>THISTLE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">216</span>, <span class="number">191</span>, <span class="number">216</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: tomato;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: tomato;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>TOMATO: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">99</span>, <span class="number">71</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: turquoise;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: turquoise;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>TURQUOISE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">64</span>, <span class="number">224</span>, <span class="number">208</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: violet;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: violet;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>VIOLET: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">238</span>, <span class="number">130</span>, <span class="number">238</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: wheat;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: wheat;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>WHEAT: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">245</span>, <span class="number">222</span>, <span class="number">179</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: white;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: white;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>WHITE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: whitesmoke;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: whitesmoke;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>WHITESMOKE: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">245</span>, <span class="number">245</span>, <span class="number">245</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: yellow;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: yellow;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>YELLOW: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>);
 
-<span class="doccomment">///&lt;div style=&quot;display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: yellowgreen;&quot;&gt;&lt;/div&gt;
+<span class="doccomment">///&lt;div style="display: inline-block; width: 3em; height: 1em; border: 1px solid black; background: yellowgreen;"&gt;&lt;/div&gt;
 </span><span class="kw">pub const </span>YELLOWGREEN: <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt; = <span class="kw">crate</span>::rgb::Srgb::new(<span class="number">154</span>, <span class="number">205</span>, <span class="number">50</span>);
-<span class="kw">static </span>COLORS: ::phf::Map&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt;&gt; = <span class="macro">phf::phf_map! </span>{
-    <span class="string">&quot;aliceblue&quot; </span>=&gt; ALICEBLUE,
-    <span class="string">&quot;antiquewhite&quot; </span>=&gt; ANTIQUEWHITE,
-    <span class="string">&quot;aqua&quot; </span>=&gt; AQUA,
-    <span class="string">&quot;aquamarine&quot; </span>=&gt; AQUAMARINE,
-    <span class="string">&quot;azure&quot; </span>=&gt; AZURE,
-    <span class="string">&quot;beige&quot; </span>=&gt; BEIGE,
-    <span class="string">&quot;bisque&quot; </span>=&gt; BISQUE,
-    <span class="string">&quot;black&quot; </span>=&gt; BLACK,
-    <span class="string">&quot;blanchedalmond&quot; </span>=&gt; BLANCHEDALMOND,
-    <span class="string">&quot;blue&quot; </span>=&gt; BLUE,
-    <span class="string">&quot;blueviolet&quot; </span>=&gt; BLUEVIOLET,
-    <span class="string">&quot;brown&quot; </span>=&gt; BROWN,
-    <span class="string">&quot;burlywood&quot; </span>=&gt; BURLYWOOD,
-    <span class="string">&quot;cadetblue&quot; </span>=&gt; CADETBLUE,
-    <span class="string">&quot;chartreuse&quot; </span>=&gt; CHARTREUSE,
-    <span class="string">&quot;chocolate&quot; </span>=&gt; CHOCOLATE,
-    <span class="string">&quot;coral&quot; </span>=&gt; CORAL,
-    <span class="string">&quot;cornflowerblue&quot; </span>=&gt; CORNFLOWERBLUE,
-    <span class="string">&quot;cornsilk&quot; </span>=&gt; CORNSILK,
-    <span class="string">&quot;crimson&quot; </span>=&gt; CRIMSON,
-    <span class="string">&quot;cyan&quot; </span>=&gt; CYAN,
-    <span class="string">&quot;darkblue&quot; </span>=&gt; DARKBLUE,
-    <span class="string">&quot;darkcyan&quot; </span>=&gt; DARKCYAN,
-    <span class="string">&quot;darkgoldenrod&quot; </span>=&gt; DARKGOLDENROD,
-    <span class="string">&quot;darkgray&quot; </span>=&gt; DARKGRAY,
-    <span class="string">&quot;darkgreen&quot; </span>=&gt; DARKGREEN,
-    <span class="string">&quot;darkgrey&quot; </span>=&gt; DARKGREY,
-    <span class="string">&quot;darkkhaki&quot; </span>=&gt; DARKKHAKI,
-    <span class="string">&quot;darkmagenta&quot; </span>=&gt; DARKMAGENTA,
-    <span class="string">&quot;darkolivegreen&quot; </span>=&gt; DARKOLIVEGREEN,
-    <span class="string">&quot;darkorange&quot; </span>=&gt; DARKORANGE,
-    <span class="string">&quot;darkorchid&quot; </span>=&gt; DARKORCHID,
-    <span class="string">&quot;darkred&quot; </span>=&gt; DARKRED,
-    <span class="string">&quot;darksalmon&quot; </span>=&gt; DARKSALMON,
-    <span class="string">&quot;darkseagreen&quot; </span>=&gt; DARKSEAGREEN,
-    <span class="string">&quot;darkslateblue&quot; </span>=&gt; DARKSLATEBLUE,
-    <span class="string">&quot;darkslategray&quot; </span>=&gt; DARKSLATEGRAY,
-    <span class="string">&quot;darkslategrey&quot; </span>=&gt; DARKSLATEGREY,
-    <span class="string">&quot;darkturquoise&quot; </span>=&gt; DARKTURQUOISE,
-    <span class="string">&quot;darkviolet&quot; </span>=&gt; DARKVIOLET,
-    <span class="string">&quot;deeppink&quot; </span>=&gt; DEEPPINK,
-    <span class="string">&quot;deepskyblue&quot; </span>=&gt; DEEPSKYBLUE,
-    <span class="string">&quot;dimgray&quot; </span>=&gt; DIMGRAY,
-    <span class="string">&quot;dimgrey&quot; </span>=&gt; DIMGREY,
-    <span class="string">&quot;dodgerblue&quot; </span>=&gt; DODGERBLUE,
-    <span class="string">&quot;firebrick&quot; </span>=&gt; FIREBRICK,
-    <span class="string">&quot;floralwhite&quot; </span>=&gt; FLORALWHITE,
-    <span class="string">&quot;forestgreen&quot; </span>=&gt; FORESTGREEN,
-    <span class="string">&quot;fuchsia&quot; </span>=&gt; FUCHSIA,
-    <span class="string">&quot;gainsboro&quot; </span>=&gt; GAINSBORO,
-    <span class="string">&quot;ghostwhite&quot; </span>=&gt; GHOSTWHITE,
-    <span class="string">&quot;gold&quot; </span>=&gt; GOLD,
-    <span class="string">&quot;goldenrod&quot; </span>=&gt; GOLDENROD,
-    <span class="string">&quot;gray&quot; </span>=&gt; GRAY,
-    <span class="string">&quot;grey&quot; </span>=&gt; GREY,
-    <span class="string">&quot;green&quot; </span>=&gt; GREEN,
-    <span class="string">&quot;greenyellow&quot; </span>=&gt; GREENYELLOW,
-    <span class="string">&quot;honeydew&quot; </span>=&gt; HONEYDEW,
-    <span class="string">&quot;hotpink&quot; </span>=&gt; HOTPINK,
-    <span class="string">&quot;indianred&quot; </span>=&gt; INDIANRED,
-    <span class="string">&quot;indigo&quot; </span>=&gt; INDIGO,
-    <span class="string">&quot;ivory&quot; </span>=&gt; IVORY,
-    <span class="string">&quot;khaki&quot; </span>=&gt; KHAKI,
-    <span class="string">&quot;lavender&quot; </span>=&gt; LAVENDER,
-    <span class="string">&quot;lavenderblush&quot; </span>=&gt; LAVENDERBLUSH,
-    <span class="string">&quot;lawngreen&quot; </span>=&gt; LAWNGREEN,
-    <span class="string">&quot;lemonchiffon&quot; </span>=&gt; LEMONCHIFFON,
-    <span class="string">&quot;lightblue&quot; </span>=&gt; LIGHTBLUE,
-    <span class="string">&quot;lightcoral&quot; </span>=&gt; LIGHTCORAL,
-    <span class="string">&quot;lightcyan&quot; </span>=&gt; LIGHTCYAN,
-    <span class="string">&quot;lightgoldenrodyellow&quot; </span>=&gt; LIGHTGOLDENRODYELLOW,
-    <span class="string">&quot;lightgray&quot; </span>=&gt; LIGHTGRAY,
-    <span class="string">&quot;lightgreen&quot; </span>=&gt; LIGHTGREEN,
-    <span class="string">&quot;lightgrey&quot; </span>=&gt; LIGHTGREY,
-    <span class="string">&quot;lightpink&quot; </span>=&gt; LIGHTPINK,
-    <span class="string">&quot;lightsalmon&quot; </span>=&gt; LIGHTSALMON,
-    <span class="string">&quot;lightseagreen&quot; </span>=&gt; LIGHTSEAGREEN,
-    <span class="string">&quot;lightskyblue&quot; </span>=&gt; LIGHTSKYBLUE,
-    <span class="string">&quot;lightslategray&quot; </span>=&gt; LIGHTSLATEGRAY,
-    <span class="string">&quot;lightslategrey&quot; </span>=&gt; LIGHTSLATEGREY,
-    <span class="string">&quot;lightsteelblue&quot; </span>=&gt; LIGHTSTEELBLUE,
-    <span class="string">&quot;lightyellow&quot; </span>=&gt; LIGHTYELLOW,
-    <span class="string">&quot;lime&quot; </span>=&gt; LIME,
-    <span class="string">&quot;limegreen&quot; </span>=&gt; LIMEGREEN,
-    <span class="string">&quot;linen&quot; </span>=&gt; LINEN,
-    <span class="string">&quot;magenta&quot; </span>=&gt; MAGENTA,
-    <span class="string">&quot;maroon&quot; </span>=&gt; MAROON,
-    <span class="string">&quot;mediumaquamarine&quot; </span>=&gt; MEDIUMAQUAMARINE,
-    <span class="string">&quot;mediumblue&quot; </span>=&gt; MEDIUMBLUE,
-    <span class="string">&quot;mediumorchid&quot; </span>=&gt; MEDIUMORCHID,
-    <span class="string">&quot;mediumpurple&quot; </span>=&gt; MEDIUMPURPLE,
-    <span class="string">&quot;mediumseagreen&quot; </span>=&gt; MEDIUMSEAGREEN,
-    <span class="string">&quot;mediumslateblue&quot; </span>=&gt; MEDIUMSLATEBLUE,
-    <span class="string">&quot;mediumspringgreen&quot; </span>=&gt; MEDIUMSPRINGGREEN,
-    <span class="string">&quot;mediumturquoise&quot; </span>=&gt; MEDIUMTURQUOISE,
-    <span class="string">&quot;mediumvioletred&quot; </span>=&gt; MEDIUMVIOLETRED,
-    <span class="string">&quot;midnightblue&quot; </span>=&gt; MIDNIGHTBLUE,
-    <span class="string">&quot;mintcream&quot; </span>=&gt; MINTCREAM,
-    <span class="string">&quot;mistyrose&quot; </span>=&gt; MISTYROSE,
-    <span class="string">&quot;moccasin&quot; </span>=&gt; MOCCASIN,
-    <span class="string">&quot;navajowhite&quot; </span>=&gt; NAVAJOWHITE,
-    <span class="string">&quot;navy&quot; </span>=&gt; NAVY,
-    <span class="string">&quot;oldlace&quot; </span>=&gt; OLDLACE,
-    <span class="string">&quot;olive&quot; </span>=&gt; OLIVE,
-    <span class="string">&quot;olivedrab&quot; </span>=&gt; OLIVEDRAB,
-    <span class="string">&quot;orange&quot; </span>=&gt; ORANGE,
-    <span class="string">&quot;orangered&quot; </span>=&gt; ORANGERED,
-    <span class="string">&quot;orchid&quot; </span>=&gt; ORCHID,
-    <span class="string">&quot;palegoldenrod&quot; </span>=&gt; PALEGOLDENROD,
-    <span class="string">&quot;palegreen&quot; </span>=&gt; PALEGREEN,
-    <span class="string">&quot;paleturquoise&quot; </span>=&gt; PALETURQUOISE,
-    <span class="string">&quot;palevioletred&quot; </span>=&gt; PALEVIOLETRED,
-    <span class="string">&quot;papayawhip&quot; </span>=&gt; PAPAYAWHIP,
-    <span class="string">&quot;peachpuff&quot; </span>=&gt; PEACHPUFF,
-    <span class="string">&quot;peru&quot; </span>=&gt; PERU,
-    <span class="string">&quot;pink&quot; </span>=&gt; PINK,
-    <span class="string">&quot;plum&quot; </span>=&gt; PLUM,
-    <span class="string">&quot;powderblue&quot; </span>=&gt; POWDERBLUE,
-    <span class="string">&quot;purple&quot; </span>=&gt; PURPLE,
-    <span class="string">&quot;rebeccapurple&quot; </span>=&gt; REBECCAPURPLE,
-    <span class="string">&quot;red&quot; </span>=&gt; RED,
-    <span class="string">&quot;rosybrown&quot; </span>=&gt; ROSYBROWN,
-    <span class="string">&quot;royalblue&quot; </span>=&gt; ROYALBLUE,
-    <span class="string">&quot;saddlebrown&quot; </span>=&gt; SADDLEBROWN,
-    <span class="string">&quot;salmon&quot; </span>=&gt; SALMON,
-    <span class="string">&quot;sandybrown&quot; </span>=&gt; SANDYBROWN,
-    <span class="string">&quot;seagreen&quot; </span>=&gt; SEAGREEN,
-    <span class="string">&quot;seashell&quot; </span>=&gt; SEASHELL,
-    <span class="string">&quot;sienna&quot; </span>=&gt; SIENNA,
-    <span class="string">&quot;silver&quot; </span>=&gt; SILVER,
-    <span class="string">&quot;skyblue&quot; </span>=&gt; SKYBLUE,
-    <span class="string">&quot;slateblue&quot; </span>=&gt; SLATEBLUE,
-    <span class="string">&quot;slategray&quot; </span>=&gt; SLATEGRAY,
-    <span class="string">&quot;slategrey&quot; </span>=&gt; SLATEGREY,
-    <span class="string">&quot;snow&quot; </span>=&gt; SNOW,
-    <span class="string">&quot;springgreen&quot; </span>=&gt; SPRINGGREEN,
-    <span class="string">&quot;steelblue&quot; </span>=&gt; STEELBLUE,
-    <span class="string">&quot;tan&quot; </span>=&gt; TAN,
-    <span class="string">&quot;teal&quot; </span>=&gt; TEAL,
-    <span class="string">&quot;thistle&quot; </span>=&gt; THISTLE,
-    <span class="string">&quot;tomato&quot; </span>=&gt; TOMATO,
-    <span class="string">&quot;turquoise&quot; </span>=&gt; TURQUOISE,
-    <span class="string">&quot;violet&quot; </span>=&gt; VIOLET,
-    <span class="string">&quot;wheat&quot; </span>=&gt; WHEAT,
-    <span class="string">&quot;white&quot; </span>=&gt; WHITE,
-    <span class="string">&quot;whitesmoke&quot; </span>=&gt; WHITESMOKE,
-    <span class="string">&quot;yellow&quot; </span>=&gt; YELLOW,
-    <span class="string">&quot;yellowgreen&quot; </span>=&gt; YELLOWGREEN,
+<span class="kw">static </span>COLORS: ::phf::Map&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw">crate</span>::rgb::Srgb&lt;u8&gt;&gt; = <span class="macro">phf::phf_map! </span>{
+    <span class="string">"aliceblue" </span>=&gt; ALICEBLUE,
+    <span class="string">"antiquewhite" </span>=&gt; ANTIQUEWHITE,
+    <span class="string">"aqua" </span>=&gt; AQUA,
+    <span class="string">"aquamarine" </span>=&gt; AQUAMARINE,
+    <span class="string">"azure" </span>=&gt; AZURE,
+    <span class="string">"beige" </span>=&gt; BEIGE,
+    <span class="string">"bisque" </span>=&gt; BISQUE,
+    <span class="string">"black" </span>=&gt; BLACK,
+    <span class="string">"blanchedalmond" </span>=&gt; BLANCHEDALMOND,
+    <span class="string">"blue" </span>=&gt; BLUE,
+    <span class="string">"blueviolet" </span>=&gt; BLUEVIOLET,
+    <span class="string">"brown" </span>=&gt; BROWN,
+    <span class="string">"burlywood" </span>=&gt; BURLYWOOD,
+    <span class="string">"cadetblue" </span>=&gt; CADETBLUE,
+    <span class="string">"chartreuse" </span>=&gt; CHARTREUSE,
+    <span class="string">"chocolate" </span>=&gt; CHOCOLATE,
+    <span class="string">"coral" </span>=&gt; CORAL,
+    <span class="string">"cornflowerblue" </span>=&gt; CORNFLOWERBLUE,
+    <span class="string">"cornsilk" </span>=&gt; CORNSILK,
+    <span class="string">"crimson" </span>=&gt; CRIMSON,
+    <span class="string">"cyan" </span>=&gt; CYAN,
+    <span class="string">"darkblue" </span>=&gt; DARKBLUE,
+    <span class="string">"darkcyan" </span>=&gt; DARKCYAN,
+    <span class="string">"darkgoldenrod" </span>=&gt; DARKGOLDENROD,
+    <span class="string">"darkgray" </span>=&gt; DARKGRAY,
+    <span class="string">"darkgreen" </span>=&gt; DARKGREEN,
+    <span class="string">"darkgrey" </span>=&gt; DARKGREY,
+    <span class="string">"darkkhaki" </span>=&gt; DARKKHAKI,
+    <span class="string">"darkmagenta" </span>=&gt; DARKMAGENTA,
+    <span class="string">"darkolivegreen" </span>=&gt; DARKOLIVEGREEN,
+    <span class="string">"darkorange" </span>=&gt; DARKORANGE,
+    <span class="string">"darkorchid" </span>=&gt; DARKORCHID,
+    <span class="string">"darkred" </span>=&gt; DARKRED,
+    <span class="string">"darksalmon" </span>=&gt; DARKSALMON,
+    <span class="string">"darkseagreen" </span>=&gt; DARKSEAGREEN,
+    <span class="string">"darkslateblue" </span>=&gt; DARKSLATEBLUE,
+    <span class="string">"darkslategray" </span>=&gt; DARKSLATEGRAY,
+    <span class="string">"darkslategrey" </span>=&gt; DARKSLATEGREY,
+    <span class="string">"darkturquoise" </span>=&gt; DARKTURQUOISE,
+    <span class="string">"darkviolet" </span>=&gt; DARKVIOLET,
+    <span class="string">"deeppink" </span>=&gt; DEEPPINK,
+    <span class="string">"deepskyblue" </span>=&gt; DEEPSKYBLUE,
+    <span class="string">"dimgray" </span>=&gt; DIMGRAY,
+    <span class="string">"dimgrey" </span>=&gt; DIMGREY,
+    <span class="string">"dodgerblue" </span>=&gt; DODGERBLUE,
+    <span class="string">"firebrick" </span>=&gt; FIREBRICK,
+    <span class="string">"floralwhite" </span>=&gt; FLORALWHITE,
+    <span class="string">"forestgreen" </span>=&gt; FORESTGREEN,
+    <span class="string">"fuchsia" </span>=&gt; FUCHSIA,
+    <span class="string">"gainsboro" </span>=&gt; GAINSBORO,
+    <span class="string">"ghostwhite" </span>=&gt; GHOSTWHITE,
+    <span class="string">"gold" </span>=&gt; GOLD,
+    <span class="string">"goldenrod" </span>=&gt; GOLDENROD,
+    <span class="string">"gray" </span>=&gt; GRAY,
+    <span class="string">"grey" </span>=&gt; GREY,
+    <span class="string">"green" </span>=&gt; GREEN,
+    <span class="string">"greenyellow" </span>=&gt; GREENYELLOW,
+    <span class="string">"honeydew" </span>=&gt; HONEYDEW,
+    <span class="string">"hotpink" </span>=&gt; HOTPINK,
+    <span class="string">"indianred" </span>=&gt; INDIANRED,
+    <span class="string">"indigo" </span>=&gt; INDIGO,
+    <span class="string">"ivory" </span>=&gt; IVORY,
+    <span class="string">"khaki" </span>=&gt; KHAKI,
+    <span class="string">"lavender" </span>=&gt; LAVENDER,
+    <span class="string">"lavenderblush" </span>=&gt; LAVENDERBLUSH,
+    <span class="string">"lawngreen" </span>=&gt; LAWNGREEN,
+    <span class="string">"lemonchiffon" </span>=&gt; LEMONCHIFFON,
+    <span class="string">"lightblue" </span>=&gt; LIGHTBLUE,
+    <span class="string">"lightcoral" </span>=&gt; LIGHTCORAL,
+    <span class="string">"lightcyan" </span>=&gt; LIGHTCYAN,
+    <span class="string">"lightgoldenrodyellow" </span>=&gt; LIGHTGOLDENRODYELLOW,
+    <span class="string">"lightgray" </span>=&gt; LIGHTGRAY,
+    <span class="string">"lightgreen" </span>=&gt; LIGHTGREEN,
+    <span class="string">"lightgrey" </span>=&gt; LIGHTGREY,
+    <span class="string">"lightpink" </span>=&gt; LIGHTPINK,
+    <span class="string">"lightsalmon" </span>=&gt; LIGHTSALMON,
+    <span class="string">"lightseagreen" </span>=&gt; LIGHTSEAGREEN,
+    <span class="string">"lightskyblue" </span>=&gt; LIGHTSKYBLUE,
+    <span class="string">"lightslategray" </span>=&gt; LIGHTSLATEGRAY,
+    <span class="string">"lightslategrey" </span>=&gt; LIGHTSLATEGREY,
+    <span class="string">"lightsteelblue" </span>=&gt; LIGHTSTEELBLUE,
+    <span class="string">"lightyellow" </span>=&gt; LIGHTYELLOW,
+    <span class="string">"lime" </span>=&gt; LIME,
+    <span class="string">"limegreen" </span>=&gt; LIMEGREEN,
+    <span class="string">"linen" </span>=&gt; LINEN,
+    <span class="string">"magenta" </span>=&gt; MAGENTA,
+    <span class="string">"maroon" </span>=&gt; MAROON,
+    <span class="string">"mediumaquamarine" </span>=&gt; MEDIUMAQUAMARINE,
+    <span class="string">"mediumblue" </span>=&gt; MEDIUMBLUE,
+    <span class="string">"mediumorchid" </span>=&gt; MEDIUMORCHID,
+    <span class="string">"mediumpurple" </span>=&gt; MEDIUMPURPLE,
+    <span class="string">"mediumseagreen" </span>=&gt; MEDIUMSEAGREEN,
+    <span class="string">"mediumslateblue" </span>=&gt; MEDIUMSLATEBLUE,
+    <span class="string">"mediumspringgreen" </span>=&gt; MEDIUMSPRINGGREEN,
+    <span class="string">"mediumturquoise" </span>=&gt; MEDIUMTURQUOISE,
+    <span class="string">"mediumvioletred" </span>=&gt; MEDIUMVIOLETRED,
+    <span class="string">"midnightblue" </span>=&gt; MIDNIGHTBLUE,
+    <span class="string">"mintcream" </span>=&gt; MINTCREAM,
+    <span class="string">"mistyrose" </span>=&gt; MISTYROSE,
+    <span class="string">"moccasin" </span>=&gt; MOCCASIN,
+    <span class="string">"navajowhite" </span>=&gt; NAVAJOWHITE,
+    <span class="string">"navy" </span>=&gt; NAVY,
+    <span class="string">"oldlace" </span>=&gt; OLDLACE,
+    <span class="string">"olive" </span>=&gt; OLIVE,
+    <span class="string">"olivedrab" </span>=&gt; OLIVEDRAB,
+    <span class="string">"orange" </span>=&gt; ORANGE,
+    <span class="string">"orangered" </span>=&gt; ORANGERED,
+    <span class="string">"orchid" </span>=&gt; ORCHID,
+    <span class="string">"palegoldenrod" </span>=&gt; PALEGOLDENROD,
+    <span class="string">"palegreen" </span>=&gt; PALEGREEN,
+    <span class="string">"paleturquoise" </span>=&gt; PALETURQUOISE,
+    <span class="string">"palevioletred" </span>=&gt; PALEVIOLETRED,
+    <span class="string">"papayawhip" </span>=&gt; PAPAYAWHIP,
+    <span class="string">"peachpuff" </span>=&gt; PEACHPUFF,
+    <span class="string">"peru" </span>=&gt; PERU,
+    <span class="string">"pink" </span>=&gt; PINK,
+    <span class="string">"plum" </span>=&gt; PLUM,
+    <span class="string">"powderblue" </span>=&gt; POWDERBLUE,
+    <span class="string">"purple" </span>=&gt; PURPLE,
+    <span class="string">"rebeccapurple" </span>=&gt; REBECCAPURPLE,
+    <span class="string">"red" </span>=&gt; RED,
+    <span class="string">"rosybrown" </span>=&gt; ROSYBROWN,
+    <span class="string">"royalblue" </span>=&gt; ROYALBLUE,
+    <span class="string">"saddlebrown" </span>=&gt; SADDLEBROWN,
+    <span class="string">"salmon" </span>=&gt; SALMON,
+    <span class="string">"sandybrown" </span>=&gt; SANDYBROWN,
+    <span class="string">"seagreen" </span>=&gt; SEAGREEN,
+    <span class="string">"seashell" </span>=&gt; SEASHELL,
+    <span class="string">"sienna" </span>=&gt; SIENNA,
+    <span class="string">"silver" </span>=&gt; SILVER,
+    <span class="string">"skyblue" </span>=&gt; SKYBLUE,
+    <span class="string">"slateblue" </span>=&gt; SLATEBLUE,
+    <span class="string">"slategray" </span>=&gt; SLATEGRAY,
+    <span class="string">"slategrey" </span>=&gt; SLATEGREY,
+    <span class="string">"snow" </span>=&gt; SNOW,
+    <span class="string">"springgreen" </span>=&gt; SPRINGGREEN,
+    <span class="string">"steelblue" </span>=&gt; STEELBLUE,
+    <span class="string">"tan" </span>=&gt; TAN,
+    <span class="string">"teal" </span>=&gt; TEAL,
+    <span class="string">"thistle" </span>=&gt; THISTLE,
+    <span class="string">"tomato" </span>=&gt; TOMATO,
+    <span class="string">"turquoise" </span>=&gt; TURQUOISE,
+    <span class="string">"violet" </span>=&gt; VIOLET,
+    <span class="string">"wheat" </span>=&gt; WHEAT,
+    <span class="string">"white" </span>=&gt; WHITE,
+    <span class="string">"whitesmoke" </span>=&gt; WHITESMOKE,
+    <span class="string">"yellow" </span>=&gt; YELLOW,
+    <span class="string">"yellowgreen" </span>=&gt; YELLOWGREEN,
 };
 </code></pre></div></section></main></body></html>

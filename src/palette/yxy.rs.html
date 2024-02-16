@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/yxy.rs`."><title>yxy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/yxy.rs`."><title>yxy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -428,19 +429,19 @@
 ///
 /// Yxy is a luminance-chromaticity color space derived from the CIE XYZ
 /// color space. It is widely used to define colors. The chromaticity diagrams
-/// for the color spaces are a plot of this color space&#39;s x and y coordinates.
+/// for the color spaces are a plot of this color space's x and y coordinates.
 ///
 /// Conversions and operations on this color space depend on the white point.
 </span><span class="attr">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
-#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    white_point = <span class="string">&quot;Wp&quot;</span>,
-    component = <span class="string">&quot;T&quot;</span>,
+    white_point = <span class="string">"Wp"</span>,
+    component = <span class="string">"T"</span>,
     skip_derives(Xyz, Yxy, Luma)
 )]
 #[repr(C)]
-#[doc(alias = <span class="string">&quot;xyY&quot;</span>)]
+#[doc(alias = <span class="string">"xyY"</span>)]
 </span><span class="kw">pub struct </span>Yxy&lt;Wp = D65, T = f32&gt; {
     <span class="doccomment">/// x chromaticity co-ordinate derived from XYZ color space as X/(X+Y+Z).
     /// Typical range is between 0 and 1
@@ -455,9 +456,9 @@
     ///0 to 1, where 0 is black and 1 is white.
     </span><span class="kw">pub </span>luma: T,
 
-    <span class="doccomment">/// The white point associated with the color&#39;s illuminant and observer.
+    <span class="doccomment">/// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"serializing"</span>, serde(skip))]
     #[palette(unsafe_zero_sized)]
     </span><span class="kw">pub </span>white_point: PhantomData&lt;Wp&gt;,
 }
@@ -485,13 +486,13 @@
 
     <span class="doccomment">/// Changes the reference white point without changing the color value.
     ///
-    /// This function doesn&#39;t change the numerical values, and thus the color it
+    /// This function doesn't change the numerical values, and thus the color it
     /// represents in an absolute sense. However, the appearance of the color
     /// may not be the same when observed with the new white point. The effect
     /// would be similar to taking a photo with an incorrect white balance.
     ///
     /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
-    /// that can change the white point while preserving the color&#39;s appearance.
+    /// that can change the white point while preserving the color's appearance.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>with_white_point&lt;NewWp&gt;(<span class="self">self</span>) -&gt; Yxy&lt;NewWp, T&gt; {
         Yxy::new(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.luma)
@@ -533,7 +534,7 @@
     }
 }
 
-<span class="doccomment">///&lt;span id=&quot;Yxya&quot;&gt;&lt;/span&gt;[`Yxya`](crate::Yxya) implementations.
+<span class="doccomment">///&lt;span id="Yxya"&gt;&lt;/span&gt;[`Yxya`](crate::Yxya) implementations.
 </span><span class="kw">impl</span>&lt;Wp, T, A&gt; Alpha&lt;Yxy&lt;Wp, T&gt;, A&gt; {
     <span class="doccomment">/// Create a CIE Yxy color with transparency.
     </span><span class="kw">pub const fn </span>new(x: T, y: T, luma: T, alpha: A) -&gt; <span class="self">Self </span>{
@@ -555,13 +556,13 @@
 
     <span class="doccomment">/// Changes the reference white point without changing the color value.
     ///
-    /// This function doesn&#39;t change the numerical values, and thus the color it
+    /// This function doesn't change the numerical values, and thus the color it
     /// represents in an absolute sense. However, the appearance of the color
     /// may not be the same when observed with the new white point. The effect
     /// would be similar to taking a photo with an incorrect white balance.
     ///
     /// See [chromatic_adaptation](crate::chromatic_adaptation) for operations
-    /// that can change the white point while preserving the color&#39;s appearance.
+    /// that can change the white point while preserving the color's appearance.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>with_white_point&lt;NewWp&gt;(<span class="self">self</span>) -&gt; Alpha&lt;Yxy&lt;NewWp, T&gt;, A&gt; {
         Alpha::&lt;Yxy&lt;NewWp, T&gt;, A&gt;::new(<span class="self">self</span>.color.x, <span class="self">self</span>.color.y, <span class="self">self</span>.color.luma, <span class="self">self</span>.alpha)
@@ -696,11 +697,11 @@
 
 <span class="macro">impl_rand_traits_cartesian!</span>(UniformYxy, Yxy&lt;Wp&gt; {x, y, luma} phantom: white_point: PhantomData&lt;Wp&gt;);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;Wp, T&gt; bytemuck::Zeroable <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
-</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
+</span><span class="kw">unsafe impl</span>&lt;Wp: <span class="lifetime">'static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Yxy&lt;Wp, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
@@ -709,7 +710,7 @@
 
     <span class="macro">test_convert_into_from_xyz!</span>(Yxy);
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
     </span><span class="kw">mod </span>conversion {
         <span class="kw">use crate</span>::{white_point::D65, FromColor, LinLuma, LinSrgb, Yxy};
 
@@ -777,7 +778,7 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">use crate</span>::{white_point::D65, yxy::Yxya};
 
         <span class="macro">struct_of_arrays_tests!</span>(
@@ -788,18 +789,18 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Yxy::&lt;D65&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#"{"x":0.3,"y":0.8,"luma":0.1}"#</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
-        <span class="kw">let </span>deserialized: Yxy = ::serde_json::from_str(<span class="string">r#&quot;{&quot;x&quot;:0.3,&quot;y&quot;:0.8,&quot;luma&quot;:0.1}&quot;#</span>).unwrap();
+        <span class="kw">let </span>deserialized: Yxy = ::serde_json::from_str(<span class="string">r#"{"x":0.3,"y":0.8,"luma":0.1}"#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Yxy::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
     }

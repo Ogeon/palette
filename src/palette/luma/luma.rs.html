@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/luma/luma.rs`."><title>luma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/luma/luma.rs`."><title>luma.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -966,26 +967,26 @@
 ///
 /// Luma is a purely gray scale color space, which is included more for
 /// completeness than anything else, and represents how bright a color is
-/// perceived to be. It&#39;s basically the `Y` component of [CIE
+/// perceived to be. It's basically the `Y` component of [CIE
 /// XYZ](crate::Xyz). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
 </span><span class="attr">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
-#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    luma_standard = <span class="string">&quot;S&quot;</span>,
-    component = <span class="string">&quot;T&quot;</span>,
+    luma_standard = <span class="string">"S"</span>,
+    component = <span class="string">"T"</span>,
     skip_derives(Xyz, Yxy, Luma)
 )]
 #[repr(C)]
-#[doc(alias = <span class="string">&quot;gray&quot;</span>)]
-#[doc(alias = <span class="string">&quot;grey&quot;</span>)]
+#[doc(alias = <span class="string">"gray"</span>)]
+#[doc(alias = <span class="string">"grey"</span>)]
 </span><span class="kw">pub struct </span>Luma&lt;S = Srgb, T = f32&gt; {
     <span class="doccomment">/// The lightness of the color. 0.0 is black and 1.0 is white.
     </span><span class="kw">pub </span>luma: T,
 
     <span class="doccomment">/// The kind of RGB standard. sRGB is the default.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"serializing"</span>, serde(skip))]
     #[palette(unsafe_zero_sized)]
     </span><span class="kw">pub </span>standard: PhantomData&lt;S&gt;,
 }
@@ -1065,7 +1066,7 @@
     /// assert_eq!(0x60FF, integer);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xAALL` component order:
     ///
     /// ```
@@ -1093,7 +1094,7 @@
     /// assert_eq!(SrgbLuma::new(96u8), luma);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xAALL` component order:
     ///
     /// ```
@@ -1246,7 +1247,7 @@
     <span class="kw">type </span>Uint = u128;
 }
 
-<span class="doccomment">///&lt;span id=&quot;Lumaa&quot;&gt;&lt;/span&gt;[`Lumaa`](crate::luma::Lumaa) implementations.
+<span class="doccomment">///&lt;span id="Lumaa"&gt;&lt;/span&gt;[`Lumaa`](crate::luma::Lumaa) implementations.
 </span><span class="kw">impl</span>&lt;S, T, A&gt; Alpha&lt;Luma&lt;S, T&gt;, A&gt; {
     <span class="doccomment">/// Create a luminance color with transparency.
     </span><span class="kw">pub const fn </span>new(luma: T, alpha: A) -&gt; <span class="self">Self </span>{
@@ -1298,7 +1299,7 @@
     /// assert_eq!(0xFF60, integer);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xLLAA` component order:
     ///
     /// ```
@@ -1326,7 +1327,7 @@
     /// assert_eq!(SrgbLumaa::new(96u8, 255), luma);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xLLAA` component order:
     ///
     /// ```
@@ -1454,8 +1455,8 @@
 
 <span class="kw">impl</span>&lt;S1, S2, T&gt; FromColorUnclamped&lt;Luma&lt;S2, T&gt;&gt; <span class="kw">for </span>Luma&lt;S1, T&gt;
 <span class="kw">where
-    </span>S1: LumaStandard + <span class="lifetime">&#39;static</span>,
-    S2: LumaStandard&lt;WhitePoint = S1::WhitePoint&gt; + <span class="lifetime">&#39;static</span>,
+    </span>S1: LumaStandard + <span class="lifetime">'static</span>,
+    S2: LumaStandard&lt;WhitePoint = S1::WhitePoint&gt; + <span class="lifetime">'static</span>,
     S1::TransferFn: FromLinear&lt;T, T&gt;,
     S2::TransferFn: IntoLinear&lt;T, T&gt;,
 {
@@ -1564,22 +1565,22 @@
 <span class="macro">macro_rules! </span>impl_luma_cast_other {
     ($(<span class="macro-nonterminal">$other</span>: ty),+) =&gt; {
         $(
-            <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$other</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;
+            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="macro-nonterminal">$other</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;
             <span class="kw">where
                 </span><span class="macro-nonterminal">$other</span>: AsRef&lt;Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt;,
             {
                 <span class="attr">#[inline]
-                </span><span class="kw">fn </span>from(luma: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$other</span>) -&gt; <span class="self">Self </span>{
+                </span><span class="kw">fn </span>from(luma: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="macro-nonterminal">$other</span>) -&gt; <span class="self">Self </span>{
                     luma.as_ref()
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;
+            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;
             <span class="kw">where
                 </span><span class="macro-nonterminal">$other</span>: AsMut&lt;Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt;,
             {
                 <span class="attr">#[inline]
-                </span><span class="kw">fn </span>from(luma: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other</span>) -&gt; <span class="self">Self </span>{
+                </span><span class="kw">fn </span>from(luma: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other</span>) -&gt; <span class="self">Self </span>{
                     luma.as_mut()
                 }
             }
@@ -1605,16 +1606,16 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$other </span>{
+            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="macro-nonterminal">$other </span>{
                 <span class="attr">#[inline]
-                </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;) -&gt; <span class="self">Self </span>{
+                </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;) -&gt; <span class="self">Self </span>{
                     color.as_ref()
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other </span>{
+            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$other </span>{
                 <span class="attr">#[inline]
-                </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;) -&gt; <span class="self">Self </span>{
+                </span><span class="kw">fn </span>from(color: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Luma&lt;S, <span class="macro-nonterminal">$other</span>&gt;) -&gt; <span class="self">Self </span>{
                     color.as_mut()
                 }
             }
@@ -1704,7 +1705,7 @@
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
-        <span class="macro">write!</span>(f, <span class="string">&quot;{:0width$x}&quot;</span>, <span class="self">self</span>.luma, width = size)
+        <span class="macro">write!</span>(f, <span class="string">"{:0width$x}"</span>, <span class="self">self</span>.luma, width = size)
     }
 }
 
@@ -1714,7 +1715,7 @@
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
-        <span class="macro">write!</span>(f, <span class="string">&quot;{:0width$X}&quot;</span>, <span class="self">self</span>.luma, width = size)
+        <span class="macro">write!</span>(f, <span class="string">"{:0width$X}"</span>, <span class="self">self</span>.luma, width = size)
     }
 }
 
@@ -1752,11 +1753,11 @@
 
 <span class="macro">impl_rand_traits_cartesian!</span>(UniformLuma, Luma&lt;S&gt; {luma} phantom: standard: PhantomData&lt;S&gt;);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;S, T&gt; bytemuck::Zeroable <span class="kw">for </span>Luma&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
-</span><span class="kw">unsafe impl</span>&lt;S: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Luma&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
+</span><span class="kw">unsafe impl</span>&lt;S: <span class="lifetime">'static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Luma&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
@@ -1781,50 +1782,50 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">161</span>)), <span class="string">&quot;a1&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:x}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">161</span>)), <span class="string">"a1"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_small_numbers() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">&quot;01&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">&quot;0001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">&quot;00000001&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:x}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">"01"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:x}"</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">"0001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:x}"</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">"00000001"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)),
-            <span class="string">&quot;0000000000000001&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)),
+            <span class="string">"0000000000000001"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_custom_width() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">161</span>)), <span class="string">&quot;A1&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:X}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">161</span>)), <span class="string">"A1"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_small_numbers() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">&quot;01&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">&quot;0001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">&quot;00000001&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:X}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">"01"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:X}"</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">"0001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:X}"</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">"00000001"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)),
-            <span class="string">&quot;0000000000000001&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)),
+            <span class="string">"0000000000000001"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_custom_width() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)), <span class="string">&quot;001&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Luma::&lt;Srgb, u8&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Luma::&lt;Srgb, u16&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Luma::&lt;Srgb, u32&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Luma::&lt;Srgb, u64&gt;::new(<span class="number">1</span>)), <span class="string">"001"</span>);
     }
 
     <span class="attr">#[test]
@@ -1841,7 +1842,7 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">use crate</span>::{encoding::Srgb, luma::Lumaa};
 
         <span class="macro">struct_of_arrays_tests!</span>(
@@ -1852,18 +1853,18 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Luma::&lt;Srgb&gt;::new(<span class="number">0.3</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;luma&quot;:0.3}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#"{"luma":0.3}"#</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
-        <span class="kw">let </span>deserialized: Luma&lt;Srgb&gt; = ::serde_json::from_str(<span class="string">r#&quot;{&quot;luma&quot;:0.3}&quot;#</span>).unwrap();
+        <span class="kw">let </span>deserialized: Luma&lt;Srgb&gt; = ::serde_json::from_str(<span class="string">r#"{"luma":0.3}"#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Luma::&lt;Srgb&gt;::new(<span class="number">0.3</span>));
     }

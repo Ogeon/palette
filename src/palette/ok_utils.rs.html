@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/ok_utils.rs`."><title>ok_utils.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/ok_utils.rs`."><title>ok_utils.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -611,7 +612,7 @@
 <a href="#611" id="611">611</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits and functions used in Ok* color spaces
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 #[cfg(test)]
 </span><span class="kw">use crate</span>::{angle::RealAngle, num::Trigonometry, OklabHue};
 
@@ -644,7 +645,7 @@
         </span><span class="kw">let </span>t = cusp.chroma.clone() * (l0.clone() - T::one())
             / (c1.clone() * (cusp.lightness - T::one()) + cusp.chroma * (l0.clone() - <span class="kw-2">&amp;</span>l1));
 
-        <span class="comment">// Then one step Halley&#39;s method
+        <span class="comment">// Then one step Halley's method
         </span>{
             <span class="kw">let </span>dl = l1.clone() - <span class="kw-2">&amp;</span>l0;
             <span class="kw">let </span>dc = c1.clone();
@@ -842,7 +843,7 @@
     </span>T: Real + One + Arithmetics + Powi + HasBoolMask&lt;Mask = bool&gt; + PartialOrd + Clone,
 {
     <span class="doccomment">/// Returns the cusp of the geometrical shape of representable `sRGB` colors for
-    /// normalized `a` and `b` values of an `OKlabHue`, where &quot;normalized&quot; means, `a² + b² == 1`.
+    /// normalized `a` and `b` values of an `OKlabHue`, where "normalized" means, `a² + b² == 1`.
     ///
     /// The cusp solely depends on the maximum saturation of the hue, but is expressed as a
     /// combination of lightness and chroma.
@@ -925,7 +926,7 @@
         <span class="comment">// Approximate max saturation using a polynomial
         </span><span class="kw">let </span><span class="kw-2">mut </span>approx_max_saturation =
             k0 + k1 * <span class="kw-2">&amp;</span>a + k2 * <span class="kw-2">&amp;</span>b + k3 * a.clone().powi(<span class="number">2</span>) + k4 * <span class="kw-2">&amp;</span>a * <span class="kw-2">&amp;</span>b;
-        <span class="comment">// Get closer with Halley&#39;s method
+        <span class="comment">// Get closer with Halley's method
         </span><span class="kw">let </span>k_l = T::from_f64(<span class="number">0.3963377774</span>) * <span class="kw-2">&amp;</span>a + T::from_f64(<span class="number">0.2158037573</span>) * <span class="kw-2">&amp;</span>b;
         <span class="kw">let </span>k_m = T::from_f64(-<span class="number">0.1055613458</span>) * <span class="kw-2">&amp;</span>a - T::from_f64(<span class="number">0.0638541728</span>) * <span class="kw-2">&amp;</span>b;
         <span class="kw">let </span>k_s = T::from_f64(-<span class="number">0.0894841775</span>) * a - T::from_f64(<span class="number">1.2914855480</span>) * b;
@@ -951,7 +952,7 @@
 
             <span class="comment">// let x be the approximate maximum saturation and
             // i the current iteration
-            // f = f(x_i), f1 = f&#39;(x_i), f2 = f&#39;&#39;(x_i) for
+            // f = f(x_i), f1 = f'(x_i), f2 = f''(x_i) for
             </span><span class="kw">let </span>f = wl.clone() * l + wm.clone() * m + ws.clone() * s;
             <span class="kw">let </span>f1 = wl.clone() * l_ds + wm.clone() * m_ds + ws.clone() * s_ds;
             <span class="kw">let </span>f2 = wl.clone() * l_ds2 + wm.clone() * m_ds2 + ws.clone() * s_ds2;
@@ -963,7 +964,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 #[cfg(test)]
 </span><span class="kw">impl</span>&lt;T&gt; OklabHue&lt;T&gt;
 <span class="kw">where
@@ -1100,7 +1101,7 @@
     (l_r.clone().powi(<span class="number">2</span>) + k_1 * <span class="kw-2">&amp;</span>l_r) / (k_3 * (l_r + k_2))
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 #[cfg(test)]
 </span><span class="kw">mod </span>tests {
 
@@ -1127,11 +1128,11 @@
     </span><span class="kw">fn </span>test_toe() {
         <span class="macro">assert_eq!</span>(toe(<span class="number">0.0</span>), <span class="number">0.0</span>);
         <span class="macro">assert_eq!</span>(toe(<span class="number">1.0</span>), <span class="number">1.0</span>);
-        <span class="kw">let </span>grey50srgb: Srgb = Rgb::&lt;encoding::Srgb, u8&gt;::from_str(<span class="string">&quot;#777777&quot;</span>)
+        <span class="kw">let </span>grey50srgb: Srgb = Rgb::&lt;encoding::Srgb, u8&gt;::from_str(<span class="string">"#777777"</span>)
             .unwrap()
             .into_format();
         <span class="kw">let </span>grey50oklab = Oklab::from_color_unclamped(grey50srgb);
-        <span class="macro">println!</span>(<span class="string">&quot;grey 50% oklab lightness: {}&quot;</span>, grey50oklab.l);
+        <span class="macro">println!</span>(<span class="string">"grey 50% oklab lightness: {}"</span>, grey50oklab.l);
         <span class="macro">assert_relative_eq!</span>(toe(grey50oklab.l), <span class="number">0.5</span>, epsilon = <span class="number">1e-3</span>);
     }
 
@@ -1187,16 +1188,16 @@
         );
 
         <span class="macro">println!</span>(
-            <span class="string">&quot;Min chroma {} at hue {:?}°.&quot;</span>,
+            <span class="string">"Min chroma {} at hue {:?}°."</span>,
             min_chroma.lc.chroma, min_chroma.hue,
         );
 
         <span class="macro">println!</span>(
-            <span class="string">&quot;Max chroma {} at hue {:?}° (Oklab a and b {}, {}).&quot;</span>,
+            <span class="string">"Max chroma {} at hue {:?}° (Oklab a and b {}, {})."</span>,
             max_chroma.lc.chroma, max_chroma.hue, max_chroma_a, max_chroma_b
         );
-        <span class="macro">println!</span>(<span class="string">&quot;{} &lt;= a &lt;= {}&quot;</span>, min_a, max_a);
-        <span class="macro">println!</span>(<span class="string">&quot;{} &lt;= b &lt;= {}&quot;</span>, min_b, max_b);
+        <span class="macro">println!</span>(<span class="string">"{} &lt;= a &lt;= {}"</span>, min_a, max_a);
+        <span class="macro">println!</span>(<span class="string">"{} &lt;= b &lt;= {}"</span>, min_b, max_b);
     }
 
     <span class="attr">#[test]

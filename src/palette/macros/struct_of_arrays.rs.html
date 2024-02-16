@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/struct_of_arrays.rs`."><title>struct_of_arrays.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/macros/struct_of_arrays.rs`."><title>struct_of_arrays.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -904,13 +905,13 @@
             }
         }
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C: IntoIterator,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>C: IntoIterator,
         {
-            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
-            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
+            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
 
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -921,13 +922,13 @@
             }
         }
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C: IntoIterator,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C: IntoIterator,
         {
-            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
-            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
+            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
 
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -938,7 +939,7 @@
             }
         }
 
-        <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">&quot;An iterator for [`&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$self_ty</span>), <span class="string">&quot;`] values.&quot;</span>)]
+        <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">"An iterator for [`"</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$self_ty</span>), <span class="string">"`] values."</span>)]
         </span><span class="kw">pub struct </span>Iter&lt;I $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt; {
             $(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="macro-nonterminal">$element</span>: I,)+
             $(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="macro-nonterminal">$phantom</span>: core::marker::PhantomData&lt;<span class="macro-nonterminal">$phantom_ty</span>&gt;)<span class="question-mark">?
@@ -967,7 +968,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
                 <span class="kw">let </span>hint = <span class="macro">first!</span>($((<span class="self">self</span>.<span class="macro-nonterminal">$element</span>)),+).size_hint();
-                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.size_hint(), hint, <span class="string">&quot;the component iterators have different size hints&quot;</span>);)),+);
+                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.size_hint(), hint, <span class="string">"the component iterators have different size hints"</span>);)),+);
 
                 hint
             }
@@ -975,7 +976,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>count(<span class="self">self</span>) -&gt; usize {
                 <span class="kw">let </span>count = <span class="macro">first!</span>($((<span class="self">self</span>.<span class="macro-nonterminal">$element</span>)),+).count();
-                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.count(), count, <span class="string">&quot;the component iterators have different counts&quot;</span>);)),+);
+                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.count(), count, <span class="string">"the component iterators have different counts"</span>);)),+);
 
                 count
             }
@@ -1007,7 +1008,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
                 <span class="kw">let </span>len = <span class="macro">first!</span>($((<span class="self">self</span>.<span class="macro-nonterminal">$element</span>)),+).len();
-                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.len(), len, <span class="string">&quot;the component iterators have different lengths&quot;</span>);)),+);
+                <span class="macro">skip_first!</span>($((<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.len(), len, <span class="string">"the component iterators have different lengths"</span>);)),+);
 
                 len
             }
@@ -1071,13 +1072,13 @@
             }
         }
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C: IntoIterator + <span class="lifetime">&#39;a</span>,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>C: IntoIterator + <span class="lifetime">'a</span>,
         {
-            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
-            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
+            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
 
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -1089,13 +1090,13 @@
             }
         }
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, $(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C: IntoIterator + <span class="lifetime">&#39;a</span>,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C: IntoIterator + <span class="lifetime">'a</span>,
         {
-            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+            <span class="kw">type </span>Item = <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
-            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
+            <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt;;
 
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -1107,7 +1108,7 @@
             }
         }
 
-        <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">&quot;An iterator for [`&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$self_ty</span>), <span class="string">&quot;`] values.&quot;</span>)]
+        <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">"An iterator for [`"</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$self_ty</span>), <span class="string">"`] values."</span>)]
         </span><span class="kw">pub struct </span>Iter&lt;I $(,<span class="macro-nonterminal">$phantom_ty</span>)<span class="question-mark">?</span>&gt; {
             <span class="kw">pub</span>(<span class="kw">crate</span>) hue: <span class="macro-nonterminal">$hue_iter_ty</span>&lt;I&gt;,
             $(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="macro-nonterminal">$element</span>: I,)+
@@ -1135,7 +1136,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
                 <span class="kw">let </span>hint = <span class="self">self</span>.hue.size_hint();
-                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.size_hint(), hint, <span class="string">&quot;the component iterators have different size hints&quot;</span>);)+
+                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.size_hint(), hint, <span class="string">"the component iterators have different size hints"</span>);)+
 
                 hint
             }
@@ -1143,7 +1144,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>count(<span class="self">self</span>) -&gt; usize {
                 <span class="kw">let </span>count = <span class="self">self</span>.hue.count();
-                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.count(), count, <span class="string">&quot;the component iterators have different counts&quot;</span>);)+
+                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.count(), count, <span class="string">"the component iterators have different counts"</span>);)+
 
                 count
             }
@@ -1173,7 +1174,7 @@
             <span class="attr">#[inline(always)]
             </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
                 <span class="kw">let </span>len = <span class="self">self</span>.hue.len();
-                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.len(), len, <span class="string">&quot;the component iterators have different lengths&quot;</span>);)+
+                $(<span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.len(), len, <span class="string">"the component iterators have different lengths"</span>);)+
 
                 len
             }
@@ -1189,21 +1190,21 @@
         <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; {
             <span class="doccomment">/// Return an iterator over the colors in the wrapped collections.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>: IntoIterator {
+            </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self</span>: IntoIterator {
                 <span class="self">self</span>.into_iter()
             }
 
             <span class="doccomment">/// Return an iterator that allows modifying the colors in the wrapped collections.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator {
+            </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator {
                 <span class="self">self</span>.into_iter()
             }
 
             <span class="doccomment">/// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">&#39;a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
+            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">'a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
                 C: AsRef&lt;[T]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + Clone,
             {
@@ -1221,9 +1222,9 @@
 
             <span class="doccomment">/// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">&#39;a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
+            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">'a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
                 C: AsMut&lt;[T]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + Clone,
             {
@@ -1240,7 +1241,7 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
@@ -1253,13 +1254,13 @@
                 </span>}
             }
 
-            <span class="doccomment">/// Push an additional color&#39;s components onto the component vectors. See [`Vec::push`] for details.
+            <span class="doccomment">/// Push an additional color's components onto the component vectors. See [`Vec::push`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;) {
                 $(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.push(value.<span class="macro-nonterminal">$element</span>);)+
             }
 
-            <span class="doccomment">/// Pop a color&#39;s components from the component vectors. See [`Vec::pop`] for details.
+            <span class="doccomment">/// Pop a color's components from the component vectors. See [`Vec::pop`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;&gt; {
                 $(<span class="kw">let </span><span class="macro-nonterminal">$element </span>= <span class="self">self</span>.<span class="macro-nonterminal">$element</span>.pop();)+
@@ -1292,13 +1293,13 @@
         <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Ct, Ca&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Ct&gt;, Ca&gt; {
             <span class="doccomment">/// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">&#39;a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
+            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">'a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
                 <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;,
                 <span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[A]&gt;&gt;::Output
             &gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
-                A: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
+                A: <span class="lifetime">'a</span>,
                 Ct: AsRef&lt;[T]&gt;,
                 Ca: AsRef&lt;[A]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + core::slice::SliceIndex&lt;[A]&gt; + Clone
@@ -1315,13 +1316,13 @@
 
             <span class="doccomment">/// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">&#39;a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
+            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">'a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
                 <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;,
                 <span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[A]&gt;&gt;::Output
             &gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
-                A: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
+                A: <span class="lifetime">'a</span>,
                 Ct: AsMut&lt;[T]&gt;,
                 Ca: AsMut&lt;[A]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + core::slice::SliceIndex&lt;[A]&gt; + Clone
@@ -1337,7 +1338,7 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt;, alloc::vec::Vec&lt;A&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
@@ -1348,14 +1349,14 @@
                 }
             }
 
-            <span class="doccomment">/// Push an additional color&#39;s components onto the component vectors. See [`Vec::push`] for details.
+            <span class="doccomment">/// Push an additional color's components onto the component vectors. See [`Vec::push`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;, A&gt;) {
                 <span class="self">self</span>.color.push(value.color);
                 <span class="self">self</span>.alpha.push(value.alpha);
             }
 
-            <span class="doccomment">/// Pop a color&#39;s components from the component vectors. See [`Vec::pop`] for details.
+            <span class="doccomment">/// Pop a color's components from the component vectors. See [`Vec::pop`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;, A&gt;&gt; {
                 <span class="kw">let </span>color = <span class="self">self</span>.color.pop();
@@ -1397,21 +1398,21 @@
         <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>C&gt; {
             <span class="doccomment">/// Return an iterator over the colors in the wrapped collections.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>: IntoIterator {
+            </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self</span>: IntoIterator {
                 <span class="self">self</span>.into_iter()
             }
 
             <span class="doccomment">/// Return an iterator that allows modifying the colors in the wrapped collections.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator {
+            </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">where </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator {
                 <span class="self">self</span>.into_iter()
             }
 
             <span class="doccomment">/// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">&#39;a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
+            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">'a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
                 C: AsRef&lt;[T]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + Clone,
             {
@@ -1427,9 +1428,9 @@
 
             <span class="doccomment">/// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">&#39;a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
+            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">'a</span>, I, T&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
                 C: AsMut&lt;[T]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + Clone,
             {
@@ -1444,7 +1445,7 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt; <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
@@ -1455,14 +1456,14 @@
                 <span class="self">Self </span>{hue: hue.into() $(, <span class="macro-nonterminal">$element</span>)+ $(, <span class="macro-nonterminal">$phantom</span>: core::marker::PhantomData)<span class="question-mark">?</span>}
             }
 
-            <span class="doccomment">/// Push an additional color&#39;s components onto the component vectors. See [`Vec::push`] for details.
+            <span class="doccomment">/// Push an additional color's components onto the component vectors. See [`Vec::push`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;) {
                 <span class="self">self</span>.hue.push(value.hue);
                 $(<span class="self">self</span>.<span class="macro-nonterminal">$element</span>.push(value.<span class="macro-nonterminal">$element</span>);)+
             }
 
-            <span class="doccomment">/// Pop a color&#39;s components from the component vectors. See [`Vec::pop`] for details.
+            <span class="doccomment">/// Pop a color's components from the component vectors. See [`Vec::pop`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;&gt; {
                 <span class="kw">let </span>hue = <span class="self">self</span>.hue.pop();
@@ -1499,13 +1500,13 @@
         <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Ct, Ca&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>Ct&gt;, Ca&gt; {
             <span class="doccomment">/// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">&#39;a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
+            </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">'a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
                 <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;,
                 <span class="kw-2">&amp;</span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[A]&gt;&gt;::Output
             &gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
-                A: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
+                A: <span class="lifetime">'a</span>,
                 Ct: AsRef&lt;[T]&gt;,
                 Ca: AsRef&lt;[A]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + core::slice::SliceIndex&lt;[A]&gt; + Clone
@@ -1522,13 +1523,13 @@
 
             <span class="doccomment">/// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">&#39;a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
+            </span><span class="kw">pub fn </span>get_mut&lt;<span class="lifetime">'a</span>, I, T, A&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, index: I) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;
                 <span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span><span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[T]&gt;&gt;::Output&gt;,
                 <span class="kw-2">&amp;mut </span>&lt;I <span class="kw">as </span>core::slice::SliceIndex&lt;[A]&gt;&gt;::Output
             &gt;&gt;
             <span class="kw">where
-                </span>T: <span class="lifetime">&#39;a</span>,
-                A: <span class="lifetime">&#39;a</span>,
+                </span>T: <span class="lifetime">'a</span>,
+                A: <span class="lifetime">'a</span>,
                 Ct: AsMut&lt;[T]&gt;,
                 Ca: AsMut&lt;[A]&gt;,
                 I: core::slice::SliceIndex&lt;[T]&gt; + core::slice::SliceIndex&lt;[A]&gt; + Clone
@@ -1544,7 +1545,7 @@
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T, A&gt; <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>alloc::vec::Vec&lt;T&gt;&gt;, alloc::vec::Vec&lt;A&gt;&gt; {
             <span class="doccomment">/// Create a struct of vectors with a minimum capacity. See [`Vec::with_capacity`] for details.
             </span><span class="attr">#[inline(always)]
@@ -1555,14 +1556,14 @@
                 }
             }
 
-            <span class="doccomment">/// Push an additional color&#39;s components onto the component vectors. See [`Vec::push`] for details.
+            <span class="doccomment">/// Push an additional color's components onto the component vectors. See [`Vec::push`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;, A&gt;) {
                 <span class="self">self</span>.color.push(value.color);
                 <span class="self">self</span>.alpha.push(value.alpha);
             }
 
-            <span class="doccomment">/// Pop a color&#39;s components from the component vectors. See [`Vec::pop`] for details.
+            <span class="doccomment">/// Pop a color's components from the component vectors. See [`Vec::pop`] for details.
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Alpha&lt;<span class="macro-nonterminal">$self_ty</span>&lt;$(<span class="macro-nonterminal">$phantom_ty</span>,)<span class="question-mark">? </span>T&gt;, A&gt;&gt; {
                 <span class="kw">let </span>color = <span class="self">self</span>.color.pop();
@@ -1599,7 +1600,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="macro">macro_rules! </span>struct_of_arrays_tests {
     (<span class="macro-nonterminal">$color_ty</span>: ident $(&lt;<span class="macro-nonterminal">$phantom_ty</span>:ident&gt;)<span class="question-mark">?</span>, $(<span class="macro-nonterminal">$values</span>:expr),+) =&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>collect() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
@@ -1609,7 +1610,7 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>extend() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
@@ -1622,7 +1623,7 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>pop_push() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
@@ -1636,7 +1637,7 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+]);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>clear() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
@@ -1649,7 +1650,7 @@
             <span class="macro">assert_eq!</span>(vec_of_colors, <span class="macro">vec!</span>[]);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>drain() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];
@@ -1663,7 +1664,7 @@
             <span class="macro">assert_eq!</span>(vec_of_colors2, <span class="macro">vec!</span>[]);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         #[test]
         </span><span class="kw">fn </span>modify() {
             <span class="kw">let </span>vec_of_colors = <span class="macro">vec!</span>[$(<span class="macro-nonterminal">$values</span>),+];

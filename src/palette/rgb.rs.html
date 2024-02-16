@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb.rs`."><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb.rs`."><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -282,9 +283,9 @@
 //!
 //! # Linear And Non-linear RGB
 //!
-//! Colors in images are often &quot;gamma corrected&quot;, or converted using some
+//! Colors in images are often "gamma corrected", or converted using some
 //! non-linear transfer function into a format like sRGB before being stored or
-//! displayed. This is done as a compression method and to prevent banding; it&#39;s
+//! displayed. This is done as a compression method and to prevent banding; it's
 //! also a bit of a legacy from the ages of the CRT monitors, where the output
 //! from the electron gun was non-linear. The problem is that these formats are
 //! *non-linear color spaces*, which means that many operations that you may
@@ -293,7 +294,7 @@
 //! non-linear color space. Thus, the compression has to be reverted to restore
 //! linearity and ensure that many operations on the colors behave as expected.
 //!
-//! But, even when colors *are* &#39;linear&#39;, there is yet more to explore.
+//! But, even when colors *are* 'linear', there is yet more to explore.
 //!
 //! The most common way that colors are defined, especially for computer
 //! storage, is in terms of so-called *tristimulus values*, meaning that all
@@ -302,10 +303,10 @@
 //! vector, and not an *N*-dimensional one, where *N* is some number of possible
 //! wavelengths of light, is because our eyes contain only three types of cones.
 //! Each of these cones has its own sensitivity curve in response to the
-//! wavelengths of visible light, giving us three &quot;dimensions&quot; of sensitivity to color.
+//! wavelengths of visible light, giving us three "dimensions" of sensitivity to color.
 //! These cones are often called the L, M, and S (for long, medium, and short)
 //! cones, and their sensitivity curves *roughly* position them as most
-//! sensitive to &quot;red&quot;, &quot;green&quot;, and &quot;blue&quot; parts of the spectrum. As such, we
+//! sensitive to "red", "green", and "blue" parts of the spectrum. As such, we
 //! can choose only three values to represent any possible color that a human is
 //! able to see. An interesting consequence of this is that humans can see two
 //! different objects which are emitting *completely different actual light
@@ -324,14 +325,14 @@
 //! range of colors) of that color space. The **white point** defines a
 //! concrete tristimulus value that corresponds to a real, physical white
 //! reflecting object being lit by a known light source and observed by the
-//! &#39;standard observer&#39; (i.e. a standardized model of human color perception).
+//! 'standard observer' (i.e. a standardized model of human color perception).
 //!
-//! The informal &quot;RGB&quot; color space is such a tristimulus color space, since it
-//! is defined by three values, but it is underspecified since we don&#39;t know
-//! which primaries are being used (i.e. how exactly are the canonical &quot;red&quot;,
-//! &quot;green&quot;, and &quot;blue&quot; defined?), nor its white point. In most cases, when
-//! people talk about &quot;RGB&quot; or &quot;Linear RGB&quot; colors, what they are *actually*
-//! talking about is the &quot;Linear sRGB&quot; color space, which uses the primaries and
+//! The informal "RGB" color space is such a tristimulus color space, since it
+//! is defined by three values, but it is underspecified since we don't know
+//! which primaries are being used (i.e. how exactly are the canonical "red",
+//! "green", and "blue" defined?), nor its white point. In most cases, when
+//! people talk about "RGB" or "Linear RGB" colors, what they are *actually*
+//! talking about is the "Linear sRGB" color space, which uses the primaries and
 //! white point defined in the sRGB standard, but which *does not* have the
 //! (non-linear) sRGB *transfer function* applied.
 //!
@@ -355,7 +356,7 @@
 
 <span class="doccomment">/// Non-linear sRGB, the most common RGB input/output format.
 ///
-/// If you are looking for &quot;just RGB&quot;, this is probably it. This type alias
+/// If you are looking for "just RGB", this is probably it. This type alias
 /// helps by locking the more generic [`Rgb`] type to the sRGB format.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
@@ -364,7 +365,7 @@
 <span class="doccomment">/// Non-linear sRGB with an alpha component.
 ///
 /// This is a transparent version of [`Srgb`], which is commonly used as the
-/// input or output format. If you are looking for &quot;just RGBA&quot;, this is probably
+/// input or output format. If you are looking for "just RGBA", this is probably
 /// it.
 ///
 /// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
@@ -374,29 +375,29 @@
 <span class="doccomment">/// Linear sRGB.
 ///
 /// You probably want [`Srgb`] if you are looking for an input or output format
-/// (or &quot;just RGB&quot;). This is the linear version of sRGB, which is what you would
+/// (or "just RGB"). This is the linear version of sRGB, which is what you would
 /// usually convert to before working with the color.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
-</span><span class="attr">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
+</span><span class="attr">#[doc(alias = <span class="string">"linear"</span>)]
 </span><span class="kw">pub type </span>LinSrgb&lt;T = f32&gt; = Rgb&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
 
 <span class="doccomment">/// Linear sRGB with an alpha component.
 ///
 /// You probably want [`Srgba`] if you are looking for an input or output format
-/// (or &quot;just RGB&quot;). This is the linear version of sRGBA, which is what you
+/// (or "just RGB"). This is the linear version of sRGBA, which is what you
 /// would usually convert to before working with the color.
 ///
 /// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
 /// create a value and use it.
-</span><span class="attr">#[doc(alias = <span class="string">&quot;linear&quot;</span>)]
+</span><span class="attr">#[doc(alias = <span class="string">"linear"</span>)]
 </span><span class="kw">pub type </span>LinSrgba&lt;T = f32&gt; = Rgba&lt;Linear&lt;encoding::Srgb&gt;, T&gt;;
 
 <span class="doccomment">/// Gamma 2.2 encoded sRGB.
 ///
 /// This is similar to [`Srgb`], but uses the exponent function as an
-/// approximation. It&#39;s a common trick to speed up conversion when accuracy can
-/// be sacrificed. It&#39;s still faster to use `Srgb` when also converting to and
+/// approximation. It's a common trick to speed up conversion when accuracy can
+/// be sacrificed. It's still faster to use `Srgb` when also converting to and
 /// from `u8` at the same time.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
@@ -405,8 +406,8 @@
 <span class="doccomment">/// Gamma 2.2 encoded sRGB with an alpha component.
 ///
 /// This is similar to [`Srgba`], but uses the exponent function as an
-/// approximation. It&#39;s a common trick to speed up conversion when accuracy can
-/// be sacrificed. It&#39;s still faster to use `Srgba` when also converting to and
+/// approximation. It's a common trick to speed up conversion when accuracy can
+/// be sacrificed. It's still faster to use `Srgba` when also converting to and
 /// from `u8` at the same time.
 ///
 /// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to

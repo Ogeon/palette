@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert.rs`."><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/convert.rs`."><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -827,11 +828,11 @@
 //! will see a substantial list of `FromColorUnclamped` implementations. There
 //! are, however, exceptions and restrictions in some cases:
 //!
-//! * **It&#39;s not always possible to change the component type while
+//! * **It's not always possible to change the component type while
 //!   converting.** This can only be enabled in specific cases, to allow type
 //!   inference to work. The input and output component types need to be the
 //!   same in the general case.
-//! * **It&#39;s not always possible to change meta types while converting.** Meta
+//! * **It's not always possible to change meta types while converting.** Meta
 //!   types are the additional input types on colors, such as white point or RGB
 //!   standard. Similar to component types, these are generally restricted to
 //!   help type inference.
@@ -849,7 +850,7 @@
 //!
 //! # In-place Conversion
 //!
-//! It&#39;s possible for some color spaces to be converted in-place, meaning the
+//! It's possible for some color spaces to be converted in-place, meaning the
 //! destination color will use the memory space of the source color. The
 //! requirement for this is that the source and destination color types have the
 //! same memory layout. That is, the same component types and the same number of
@@ -903,8 +904,8 @@
 //! #
 //! #[derive(FromColorUnclamped)]
 //! #[palette(
-//!     component = &quot;T&quot;,
-//!     rgb_standard = &quot;S&quot;,
+//!     component = "T",
+//!     rgb_standard = "S",
 //! )]
 //! #[repr(C)]
 //! struct ExampleType&lt;S, T&gt; {
@@ -941,25 +942,25 @@
 //! these colors. They are instead to be implemented manually, and serve as the
 //! basis for the automatic implementations.
 //!
-//! * `white_point = &quot;some::white_point::Type&quot;`: Sets the white point type that
+//! * `white_point = "some::white_point::Type"`: Sets the white point type that
 //! should be used when deriving. The default is `D65`, but it may be any other
 //! type, including type parameters.
 //!
-//! * `component = &quot;some::component::Type&quot;`: Sets the color component type that
+//! * `component = "some::component::Type"`: Sets the color component type that
 //! should be used when deriving. The default is `f32`, but it may be any other
 //! type, including type parameters.
 //!
-//! * `rgb_standard = &quot;some::rgb_standard::Type&quot;`: Sets the RGB standard type
+//! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard type
 //! that should be used when deriving. The default is to either use `Srgb` or a
 //! best effort to convert between standards, but sometimes it has to be set to
 //! a specific type. This also accepts type parameters.
 //!
-//! * `luma_standard = &quot;some::rgb_standard::Type&quot;`: Sets the Luma standard type
+//! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard type
 //! that should be used when deriving, similar to `rgb_standard`.
 //!
 //! ### Field Attributes
 //!
-//! * `alpha`: Specifies field as the color&#39;s transparency value.
+//! * `alpha`: Specifies field as the color's transparency value.
 //!
 //! ## Examples
 //!
@@ -977,7 +978,7 @@
 //!     z: u8,
 //! }
 //!
-//! // We have to implement at least one &quot;manual&quot; conversion. The default
+//! // We have to implement at least one "manual" conversion. The default
 //! // is to and from `Xyz`, but it can be customized with `skip_derives(...)`.
 //! impl FromColorUnclamped&lt;Xyz&gt; for Xyz100 {
 //!     fn from_color_unclamped(color: Xyz) -&gt; Xyz100 {
@@ -1029,8 +1030,8 @@
 //! #[derive(Copy, Clone, ArrayCast, FromColorUnclamped)]
 //! #[palette(
 //!     skip_derives(Rgb),
-//!     component = &quot;T&quot;,
-//!     rgb_standard = &quot;palette::encoding::Srgb&quot;
+//!     component = "T",
+//!     rgb_standard = "palette::encoding::Srgb"
 //! )]
 //! #[repr(C)] // Makes sure the memory layout is as we want it.
 //! struct Bgr&lt;T&gt; {
@@ -1040,7 +1041,7 @@
 //! }
 //!
 //! // It converts from and into any linear Rgb type that has the
-//! // D65 white point, which is the default if we don&#39;t specify
+//! // D65 white point, which is the default if we don't specify
 //! // anything else with the `white_point` attribute argument.
 //! impl&lt;S, T&gt; FromColorUnclamped&lt;Bgr&lt;T&gt;&gt; for Rgb&lt;S, T&gt;
 //! where
@@ -1100,7 +1101,7 @@
 //! #[derive(PartialEq, Debug, FromColorUnclamped, WithAlpha)]
 //! #[palette(
 //!     skip_derives(Rgb),
-//!     rgb_standard = &quot;palette::encoding::Srgb&quot;
+//!     rgb_standard = "palette::encoding::Srgb"
 //! )]
 //! struct CssRgb {
 //!     red: u8,
@@ -1182,8 +1183,8 @@
     <span class="attr">#[derive(FromColorUnclamped, WithAlpha)]
     #[palette(
         skip_derives(Xyz, Luma),
-        component = <span class="string">&quot;f64&quot;</span>,
-        rgb_standard = <span class="string">&quot;Linear&lt;S&gt;&quot;</span>,
+        component = <span class="string">"f64"</span>,
+        rgb_standard = <span class="string">"Linear&lt;S&gt;"</span>,
         palette_internal,
         palette_internal_not_base_type
     )]
@@ -1254,9 +1255,9 @@
     <span class="attr">#[derive(Copy, Clone, FromColorUnclamped, WithAlpha)]
     #[palette(
         skip_derives(Lch, Luma),
-        white_point = <span class="string">&quot;crate::white_point::E&quot;</span>,
-        component = <span class="string">&quot;T&quot;</span>,
-        rgb_standard = <span class="string">&quot;Linear&lt;(crate::encoding::Srgb, crate::white_point::E)&gt;&quot;</span>,
+        white_point = <span class="string">"crate::white_point::E"</span>,
+        component = <span class="string">"T"</span>,
+        rgb_standard = <span class="string">"Linear&lt;(crate::encoding::Srgb, crate::white_point::E)&gt;"</span>,
         palette_internal,
         palette_internal_not_base_type
     )]

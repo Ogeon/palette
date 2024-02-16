@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb/rgb.rs`."><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/rgb/rgb.rs`."><title>rgb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1566,7 +1567,7 @@
 <span class="doccomment">/// Generic RGB.
 ///
 /// RGB is probably the most common color space, when it comes to computer
-/// graphics, and it&#39;s defined as an additive mixture of red, green and blue
+/// graphics, and it's defined as an additive mixture of red, green and blue
 /// light, where gray scale colors are created when these three channels are
 /// equal in strength.
 ///
@@ -1591,16 +1592,16 @@
 /// let rgb_u8_from_f32 = Srgb::new(0.3f32, 0.8, 0.1).into_format::&lt;u8&gt;();
 ///
 /// // Hexadecimal is also supported, with or without the #:
-/// let rgb_from_hex1: Srgb&lt;u8&gt; = &quot;#f034e6&quot;.parse().unwrap();
-/// let rgb_from_hex2: Srgb&lt;u8&gt; = &quot;f034e6&quot;.parse().unwrap();
+/// let rgb_from_hex1: Srgb&lt;u8&gt; = "#f034e6".parse().unwrap();
+/// let rgb_from_hex2: Srgb&lt;u8&gt; = "f034e6".parse().unwrap();
 /// assert_eq!(rgb_from_hex1, rgb_from_hex2);
 ///
 /// // This includes the shorthand format:
-/// let rgb_from_short_hex: Srgb&lt;u8&gt; = &quot;f3e&quot;.parse().unwrap();
-/// let rgb_from_long_hex: Srgb&lt;u8&gt; = &quot;ff33ee&quot;.parse().unwrap();
+/// let rgb_from_short_hex: Srgb&lt;u8&gt; = "f3e".parse().unwrap();
+/// let rgb_from_long_hex: Srgb&lt;u8&gt; = "ff33ee".parse().unwrap();
 /// assert_eq!(rgb_from_short_hex, rgb_from_long_hex);
 ///
-/// // It&#39;s also possible to convert from (and to) arrays, tuples and `u32` values:
+/// // It's also possible to convert from (and to) arrays, tuples and `u32` values:
 /// let rgb_from_array = Srgb::from([171u8, 193, 35]);
 /// let rgb_from_tuple = Srgb::from((171u8, 193, 35));
 /// let rgb_from_u32 = Srgb::from(0x607F00);
@@ -1608,9 +1609,9 @@
 ///
 /// # Linear, sRGB and Gamma Correction
 ///
-/// Many conversions and operations on RGB require that it&#39;s linear, meaning
+/// Many conversions and operations on RGB require that it's linear, meaning
 /// that gamma correction is required when converting to and from displayable
-/// RGB, such as sRGB. It&#39;s common to store and send RGB values where the
+/// RGB, such as sRGB. It's common to store and send RGB values where the
 /// numbers are on a non-linear scale. In a non-linear format, a value of, for
 /// example, 0.5 would not represent a light intensity of 50%, which makes some
 /// operations (such as blurring) give incorrect results.
@@ -1629,7 +1630,7 @@
 /// // Linear sRGB will usually be created from non-linear sRGB:
 /// let output = uses_linear_srgb(Srgb::new(0.3, 0.8, 0.1).into_linear());
 ///
-/// // It&#39;s also possible to convert directly from u8 to f32 for sRGB.
+/// // It's also possible to convert directly from u8 to f32 for sRGB.
 /// // This is much faster than using `into_format` first:
 /// let output = uses_linear_srgb(Srgb::new(171u8, 193, 35).into_linear());
 ///
@@ -1639,8 +1640,8 @@
 /// let output_u8: Srgb&lt;u8&gt; = output.into_encoding();
 /// ```
 ///
-/// It&#39;s of course also possible to create a linear value from constants, but
-/// it&#39;s not necessarily as intuitive. It&#39;s best to avoid storing them as
+/// It's of course also possible to create a linear value from constants, but
+/// it's not necessarily as intuitive. It's best to avoid storing them as
 /// `LinSrgb&lt;u8&gt;` (or `LinRgb&lt;_, u8&gt;`) values, to avoid banding among dark
 /// colors.
 ///
@@ -1648,7 +1649,7 @@
 ///
 /// # Storage Formats and Pixel Buffers
 ///
-/// It&#39;s common to read and write RGB values as bytes, hexadecimal strings, or
+/// It's common to read and write RGB values as bytes, hexadecimal strings, or
 /// sometimes `u32` values. A single RGB value can be converted to all of these
 /// formats and more.
 ///
@@ -1658,13 +1659,13 @@
 /// let source: LinSrgb&lt;f32&gt; = todo!();
 ///
 /// let u8_array: [u8; 3] = Srgb::from_linear(source).into();
-/// let hex_string1 = format!(&quot;#{:x}&quot;, Srgb::&lt;u8&gt;::from_linear(source)); // The # is optional.
+/// let hex_string1 = format!("#{:x}", Srgb::&lt;u8&gt;::from_linear(source)); // The # is optional.
 /// let u32_value: u32 = Srgb::from_linear(source).into();
 /// ```
 ///
-/// It&#39;s also possible to control the component order.
+/// It's also possible to control the component order.
 /// [`PackedArgb`](crate::rgb::PackedArgb) is one of a few aliases for
-/// [`Packed`], which represents a color that has been &quot;packed&quot; into a specific
+/// [`Packed`], which represents a color that has been "packed" into a specific
 /// data format. This can be a `u32` or `[u8; 4]`, for example. This is helpful
 /// for reading and writing colors with a different order than the default RGBA.
 ///
@@ -1678,7 +1679,7 @@
 /// ```
 ///
 /// If you need to work with colors in a byte buffer, such as `[u8]`, `Vec&lt;u8&gt;`
-/// or the `image` crate, there&#39;s a quick way to borrow that buffer as a slice
+/// or the `image` crate, there's a quick way to borrow that buffer as a slice
 /// of RGB(A) colors. The [`cast`](crate::cast) module has a number of traits
 /// and functions for casting values without copying them.
 ///
@@ -1694,11 +1695,11 @@
 /// }
 /// ```
 </span><span class="attr">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
-#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
 #[palette(
     palette_internal,
-    rgb_standard = <span class="string">&quot;S&quot;</span>,
-    component = <span class="string">&quot;T&quot;</span>,
+    rgb_standard = <span class="string">"S"</span>,
+    component = <span class="string">"T"</span>,
     skip_derives(Xyz, Hsv, Hsl, Luma, Rgb, Oklab)
 )]
 #[repr(C)]
@@ -1716,7 +1717,7 @@
     </span><span class="kw">pub </span>blue: T,
 
     <span class="doccomment">/// The kind of RGB standard. sRGB is the default.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serializing&quot;</span>, serde(skip))]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"serializing"</span>, serde(skip))]
     #[palette(unsafe_zero_sized)]
     </span><span class="kw">pub </span>standard: PhantomData&lt;S&gt;,
 }
@@ -1724,7 +1725,7 @@
 <span class="kw">impl</span>&lt;S, T&gt; Rgb&lt;S, T&gt; {
     <span class="doccomment">/// Create an RGB color.
     ///
-    /// It&#39;s possible to create a color in one number format and convert it to
+    /// It's possible to create a color in one number format and convert it to
     /// another format with either [`into_format`](Rgb::into_format) or
     /// [`into_linear`](Rgb::into_linear).
     ///
@@ -1844,7 +1845,7 @@
     /// assert_eq!(0x607F00FF, integer);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xAARRGGBB` component order:
     ///
     /// ```
@@ -1872,7 +1873,7 @@
     /// assert_eq!(Srgb::new(96u8, 127, 0), rgb);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xAARRGGBB` component order:
     ///
     /// ```
@@ -2011,7 +2012,7 @@
     }
 }
 
-<span class="doccomment">/// &lt;span id=&quot;Rgba&quot;&gt;&lt;/span&gt;[`Rgba`](crate::rgb::Rgba) implementations.
+<span class="doccomment">/// &lt;span id="Rgba"&gt;&lt;/span&gt;[`Rgba`](crate::rgb::Rgba) implementations.
 </span><span class="kw">impl</span>&lt;S, T, A&gt; Alpha&lt;Rgb&lt;S, T&gt;, A&gt; {
     <span class="doccomment">/// Non-linear RGB.
     </span><span class="kw">pub const fn </span>new(red: T, green: T, blue: T, alpha: A) -&gt; <span class="self">Self </span>{
@@ -2086,7 +2087,7 @@
     /// assert_eq!(0xFF607F00, integer);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xRRGGBBAA` component order:
     ///
     /// ```
@@ -2114,7 +2115,7 @@
     /// assert_eq!(Srgba::new(96u8, 127, 0, 255), rgba);
     /// ```
     ///
-    /// It&#39;s also possible to use `From` and `Into`, which defaults to the
+    /// It's also possible to use `From` and `Into`, which defaults to the
     /// `0xRRGGBBAA` component order:
     ///
     /// ```
@@ -2239,8 +2240,8 @@
 
 <span class="kw">impl</span>&lt;S1, S2, T&gt; FromColorUnclamped&lt;Rgb&lt;S2, T&gt;&gt; <span class="kw">for </span>Rgb&lt;S1, T&gt;
 <span class="kw">where
-    </span>S1: RgbStandard + <span class="lifetime">&#39;static</span>,
-    S2: RgbStandard + <span class="lifetime">&#39;static</span>,
+    </span>S1: RgbStandard + <span class="lifetime">'static</span>,
+    S2: RgbStandard + <span class="lifetime">'static</span>,
     S1::TransferFn: FromLinear&lt;T, T&gt;,
     S2::TransferFn: IntoLinear&lt;T, T&gt;,
     S2::Space: RgbSpace&lt;WhitePoint = &lt;S1::Space <span class="kw">as </span>RgbSpace&gt;::WhitePoint&gt;,
@@ -2303,7 +2304,7 @@
         <span class="kw">let </span>c = (T::one() - (hsl.lightness.clone() * T::from_f64(<span class="number">2.0</span>) - T::one()).abs())
             * hsl.saturation;
         <span class="kw">let </span>h = hsl.hue.into_positive_degrees() / T::from_f64(<span class="number">60.0</span>);
-        <span class="comment">// We avoid using %, since it&#39;s not always (or never?) supported in SIMD
+        <span class="comment">// We avoid using %, since it's not always (or never?) supported in SIMD
         </span><span class="kw">let </span>h_mod_two = h.clone() - Round::floor(h.clone() * T::from_f64(<span class="number">0.5</span>)) * T::from_f64(<span class="number">2.0</span>);
         <span class="kw">let </span>x = c.clone() * (T::one() - (h_mod_two - T::one()).abs());
         <span class="kw">let </span>m = hsl.lightness - c.clone() * T::from_f64(<span class="number">0.5</span>);
@@ -2358,7 +2359,7 @@
     <span class="kw">fn </span>from_color_unclamped(hsv: Hsv&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>c = hsv.value.clone() * hsv.saturation;
         <span class="kw">let </span>h = hsv.hue.into_positive_degrees() / T::from_f64(<span class="number">60.0</span>);
-        <span class="comment">// We avoid using %, since it&#39;s not always (or never?) supported in SIMD
+        <span class="comment">// We avoid using %, since it's not always (or never?) supported in SIMD
         </span><span class="kw">let </span>h_mod_two = h.clone() - Round::floor(h.clone() * T::from_f64(<span class="number">0.5</span>)) * T::from_f64(<span class="number">2.0</span>);
         <span class="kw">let </span>x = c.clone() * (T::one() - (h_mod_two - T::one()).abs());
         <span class="kw">let </span>m = hsv.value - c.clone();
@@ -2398,8 +2399,8 @@
 
 <span class="kw">impl</span>&lt;S, St, T&gt; FromColorUnclamped&lt;Luma&lt;St, T&gt;&gt; <span class="kw">for </span>Rgb&lt;S, T&gt;
 <span class="kw">where
-    </span>S: RgbStandard + <span class="lifetime">&#39;static</span>,
-    St: LumaStandard&lt;WhitePoint = &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::WhitePoint&gt; + <span class="lifetime">&#39;static</span>,
+    </span>S: RgbStandard + <span class="lifetime">'static</span>,
+    St: LumaStandard&lt;WhitePoint = &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::WhitePoint&gt; + <span class="lifetime">'static</span>,
     S::TransferFn: FromLinear&lt;T, T&gt;,
     St::TransferFn: IntoLinear&lt;T, T&gt;,
     T: Clone,
@@ -2431,7 +2432,7 @@
     </span>T: Real + Arithmetics + Copy,
     S: RgbStandard,
     S::TransferFn: FromLinear&lt;T, T&gt;,
-    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">&#39;static</span>,
+    S::Space: RgbSpace&lt;WhitePoint = D65&gt; + <span class="lifetime">'static</span>,
     Rgb&lt;Linear&lt;Srgb&gt;, T&gt;: IntoColorUnclamped&lt;<span class="self">Self</span>&gt;,
     Xyz&lt;D65, T&gt;: FromColorUnclamped&lt;Oklab&lt;T&gt;&gt; + IntoColorUnclamped&lt;<span class="self">Self</span>&gt;,
 {
@@ -2439,7 +2440,7 @@
         <span class="kw">if </span>TypeId::of::&lt;&lt;S <span class="kw">as </span>RgbStandard&gt;::Space&gt;() == TypeId::of::&lt;Srgb&gt;() {
             <span class="comment">// Use direct sRGB to Oklab conversion
             // Rounding errors are likely a contributing factor to differences.
-            // Also the conversion via XYZ doesn&#39;t use pre-defined matrices (yet)
+            // Also the conversion via XYZ doesn't use pre-defined matrices (yet)
             </span>oklab_to_linear_srgb(oklab).into_color_unclamped()
         } <span class="kw">else </span>{
             <span class="comment">// Convert via XYZ
@@ -2537,7 +2538,7 @@
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{:0width$x}{:0width$x}{:0width$x}&quot;</span>,
+            <span class="string">"{:0width$x}{:0width$x}{:0width$x}"</span>,
             <span class="self">self</span>.red,
             <span class="self">self</span>.green,
             <span class="self">self</span>.blue,
@@ -2554,7 +2555,7 @@
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{:0width$X}{:0width$X}{:0width$X}&quot;</span>,
+            <span class="string">"{:0width$X}{:0width$X}{:0width$X}"</span>,
             <span class="self">self</span>.red,
             <span class="self">self</span>.green,
             <span class="self">self</span>.blue,
@@ -2569,9 +2570,9 @@
     <span class="doccomment">/// An error occurred while parsing the string into a valid integer.
     </span>ParseIntError(ParseIntError),
     <span class="doccomment">/// The hex value was not in a valid 3 or 6 character format.
-    </span>HexFormatError(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+    </span>HexFormatError(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str),
     <span class="doccomment">/// The hex value was not in a valid 4 or 8 character format.
-    </span>RgbaHexFormatError(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+    </span>RgbaHexFormatError(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str),
 }
 
 <span class="kw">impl </span>From&lt;ParseIntError&gt; <span class="kw">for </span>FromHexError {
@@ -2580,33 +2581,33 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; <span class="kw">for </span>FromHexError {
-    <span class="kw">fn </span>from(err: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; FromHexError {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; <span class="kw">for </span>FromHexError {
+    <span class="kw">fn </span>from(err: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; FromHexError {
         FromHexError::HexFormatError(err)
     }
 }
 
 <span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>FromHexError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            FromHexError::ParseIntError(e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, e),
+            FromHexError::ParseIntError(e) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, e),
             FromHexError::HexFormatError(s) =&gt; <span class="macro">write!</span>(
                 f,
-                <span class="string">&quot;{}, please use format &#39;#fff&#39;, &#39;fff&#39;, &#39;#ffffff&#39; or &#39;ffffff&#39;.&quot;</span>,
+                <span class="string">"{}, please use format '#fff', 'fff', '#ffffff' or 'ffffff'."</span>,
                 s
             ),
             FromHexError::RgbaHexFormatError(s) =&gt; <span class="macro">write!</span>(
                 f,
-                <span class="string">&quot;{}, please use format &#39;#ffff&#39;, &#39;ffff&#39;, &#39;#ffffffff&#39; or &#39;ffffffff&#39;.&quot;</span>,
+                <span class="string">"{}, please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'."</span>,
                 s
             ),
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>FromHexError {
-    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">&#39;static</span>)&gt; {
+    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             FromHexError::HexFormatError(_s) =&gt; <span class="prelude-val">None</span>,
             FromHexError::RgbaHexFormatError(_s) =&gt; <span class="prelude-val">None</span>,
@@ -2618,10 +2619,10 @@
 <span class="kw">impl</span>&lt;S&gt; FromStr <span class="kw">for </span>Rgb&lt;S, u8&gt; {
     <span class="kw">type </span><span class="prelude-val">Err </span>= FromHexError;
 
-    <span class="doccomment">/// Parses a color hex code of format &#39;#ff00bb&#39; or &#39;#abc&#39; (with or without the leading &#39;#&#39;) into a
+    <span class="doccomment">/// Parses a color hex code of format '#ff00bb' or '#abc' (with or without the leading '#') into a
     /// [`Rgb&lt;S, u8&gt;`] instance.
     </span><span class="kw">fn </span>from_str(hex: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="kw">let </span>hex_code = hex.strip_prefix(<span class="string">&#39;#&#39;</span>).map_or(hex, |stripped| stripped);
+        <span class="kw">let </span>hex_code = hex.strip_prefix(<span class="string">'#'</span>).map_or(hex, |stripped| stripped);
         <span class="kw">match </span>hex_code.len() {
             <span class="number">3 </span>=&gt; {
                 <span class="kw">let </span>red = u8::from_str_radix(<span class="kw-2">&amp;</span>hex_code[..<span class="number">1</span>], <span class="number">16</span>)<span class="question-mark">?</span>;
@@ -2637,7 +2638,7 @@
                 <span class="kw">let </span>col: Rgb&lt;S, u8&gt; = Rgb::new(red, green, blue);
                 <span class="prelude-val">Ok</span>(col)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(FromHexError::HexFormatError(<span class="string">&quot;invalid hex code format&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(FromHexError::HexFormatError(<span class="string">"invalid hex code format"</span>)),
         }
     }
 }
@@ -2645,10 +2646,10 @@
 <span class="kw">impl</span>&lt;S&gt; FromStr <span class="kw">for </span>Rgba&lt;S, u8&gt; {
     <span class="kw">type </span><span class="prelude-val">Err </span>= FromHexError;
 
-    <span class="doccomment">/// Parses a color hex code of format &#39;#ff00bbff&#39; or &#39;#abcd&#39; (with or without the leading &#39;#&#39;) into a
+    <span class="doccomment">/// Parses a color hex code of format '#ff00bbff' or '#abcd' (with or without the leading '#') into a
     /// [`Rgba&lt;S, u8&gt;`] instance.
     </span><span class="kw">fn </span>from_str(hex: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="kw">let </span>hex_code = hex.strip_prefix(<span class="string">&#39;#&#39;</span>).map_or(hex, |stripped| stripped);
+        <span class="kw">let </span>hex_code = hex.strip_prefix(<span class="string">'#'</span>).map_or(hex, |stripped| stripped);
         <span class="kw">match </span>hex_code.len() {
             <span class="number">4 </span>=&gt; {
                 <span class="kw">let </span>red = u8::from_str_radix(<span class="kw-2">&amp;</span>hex_code[..<span class="number">1</span>], <span class="number">16</span>)<span class="question-mark">?</span>;
@@ -2666,7 +2667,7 @@
                 <span class="kw">let </span>col: Rgba&lt;S, u8&gt; = Rgba::new(red, green, blue, alpha);
                 <span class="prelude-val">Ok</span>(col)
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(FromHexError::RgbaHexFormatError(<span class="string">&quot;invalid hex code format&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(FromHexError::RgbaHexFormatError(<span class="string">"invalid hex code format"</span>)),
         }
     }
 }
@@ -2774,11 +2775,11 @@
 
 <span class="macro">impl_rand_traits_cartesian!</span>(UniformRgb, Rgb&lt;S&gt; {red, green, blue} phantom: standard: PhantomData&lt;S&gt;);
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;S, T&gt; bytemuck::Zeroable <span class="kw">for </span>Rgb&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Zeroable {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
-</span><span class="kw">unsafe impl</span>&lt;S: <span class="lifetime">&#39;static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Rgb&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
+</span><span class="kw">unsafe impl</span>&lt;S: <span class="lifetime">'static</span>, T&gt; bytemuck::Pod <span class="kw">for </span>Rgb&lt;S, T&gt; <span class="kw">where </span>T: bytemuck::Pod {}
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
@@ -2811,90 +2812,90 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>)),
-            <span class="string">&quot;abc123&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>)),
+            <span class="string">"abc123"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_small_numbers() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)), <span class="string">&quot;010203&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)), <span class="string">"010203"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000100020003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000100020003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000000010000000200000003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000000010000000200000003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000000000000000100000000000000020000000000000003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000000000000000100000000000000020000000000000003"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>)),
-            <span class="string">&quot;ABC123&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>)),
+            <span class="string">"ABC123"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_small_numbers() {
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)), <span class="string">&quot;010203&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)), <span class="string">"010203"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000100020003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000100020003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000000010000000200000003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000000010000000200000003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;000000000000000100000000000000020000000000000003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"000000000000000100000000000000020000000000000003"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgb::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgb::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgb::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
-            <span class="string">&quot;001002003&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgb::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)),
+            <span class="string">"001002003"
         </span>);
     }
 
@@ -2923,95 +2924,95 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>serialized = ::serde_json::to_string(<span class="kw-2">&amp;</span>Rgb::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>)).unwrap();
 
-        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1}&quot;#</span>);
+        <span class="macro">assert_eq!</span>(serialized, <span class="string">r#"{"red":0.3,"green":0.8,"blue":0.1}"#</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
         <span class="kw">let </span>deserialized: Rgb&lt;Srgb&gt; =
-            ::serde_json::from_str(<span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1}&quot;#</span>).unwrap();
+            ::serde_json::from_str(<span class="string">r#"{"red":0.3,"green":0.8,"blue":0.1}"#</span>).unwrap();
 
         <span class="macro">assert_eq!</span>(deserialized, Rgb::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_str() {
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#ffffff&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#ffffff"</span>);
         <span class="macro">assert!</span>(c.is_ok());
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#gggggg&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#gggggg"</span>);
         <span class="macro">assert!</span>(c.is_err());
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#fff&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#fff"</span>);
         <span class="macro">assert!</span>(c.is_ok());
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#000000&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#000000"</span>);
         <span class="macro">assert!</span>(c.is_ok());
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">""</span>);
         <span class="macro">assert!</span>(c.is_err());
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#123456&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#123456"</span>);
         <span class="macro">assert!</span>(c.is_ok());
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">18</span>, <span class="number">52</span>, <span class="number">86</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#iii&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#iii"</span>);
         <span class="macro">assert!</span>(c.is_err());
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, c.err().unwrap()),
-            <span class="string">&quot;invalid digit found in string&quot;
+            <span class="macro">format!</span>(<span class="string">"{}"</span>, c.err().unwrap()),
+            <span class="string">"invalid digit found in string"
         </span>);
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#08f&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#08f"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">0</span>, <span class="number">136</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;08f&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"08f"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">0</span>, <span class="number">136</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;ffffff&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"ffffff"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#12&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"#12"</span>);
         <span class="macro">assert!</span>(c.is_err());
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, c.err().unwrap()),
-            <span class="string">&quot;invalid hex code format, \
-             please use format \&#39;#fff\&#39;, \&#39;fff\&#39;, \&#39;#ffffff\&#39; or \&#39;ffffff\&#39;.&quot;
+            <span class="macro">format!</span>(<span class="string">"{}"</span>, c.err().unwrap()),
+            <span class="string">"invalid hex code format, \
+             please use format \'#fff\', \'fff\', \'#ffffff\' or \'ffffff\'."
         </span>);
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;da0bce&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"da0bce"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">218</span>, <span class="number">11</span>, <span class="number">206</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;f034e6&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"f034e6"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">240</span>, <span class="number">52</span>, <span class="number">230</span>));
-        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;abc&quot;</span>);
+        <span class="kw">let </span>c = Rgb::&lt;Srgb, u8&gt;::from_str(<span class="string">"abc"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgb::&lt;Srgb, u8&gt;::new(<span class="number">170</span>, <span class="number">187</span>, <span class="number">204</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#08ff&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#08ff"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">0</span>, <span class="number">136</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;08f0&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"08f0"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">0</span>, <span class="number">136</span>, <span class="number">255</span>, <span class="number">0</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#da0bce80&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#da0bce80"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">218</span>, <span class="number">11</span>, <span class="number">206</span>, <span class="number">128</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;f034e680&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"f034e680"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">240</span>, <span class="number">52</span>, <span class="number">230</span>, <span class="number">128</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#ffffffff&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#ffffffff"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#ffff&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#ffff"</span>);
         <span class="macro">assert_eq!</span>(c.unwrap(), Rgba::&lt;Srgb, u8&gt;::new(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>));
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#gggggggg&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#gggggggg"</span>);
         <span class="macro">assert!</span>(c.is_err());
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, c.err().unwrap()),
-            <span class="string">&quot;invalid digit found in string&quot;
+            <span class="macro">format!</span>(<span class="string">"{}"</span>, c.err().unwrap()),
+            <span class="string">"invalid digit found in string"
         </span>);
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#fff&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#fff"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, c.err().unwrap()),
-            <span class="string">&quot;invalid hex code format, \
-            please use format &#39;#ffff&#39;, &#39;ffff&#39;, &#39;#ffffffff&#39; or &#39;ffffffff&#39;.&quot;
+            <span class="macro">format!</span>(<span class="string">"{}"</span>, c.err().unwrap()),
+            <span class="string">"invalid hex code format, \
+            please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'."
         </span>);
-        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">&quot;#ffffff&quot;</span>);
+        <span class="kw">let </span>c = Rgba::&lt;Srgb, u8&gt;::from_str(<span class="string">"#ffffff"</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, c.err().unwrap()),
-            <span class="string">&quot;invalid hex code format, \
-            please use format &#39;#ffff&#39;, &#39;ffff&#39;, &#39;#ffffffff&#39; or &#39;ffffffff&#39;.&quot;
+            <span class="macro">format!</span>(<span class="string">"{}"</span>, c.err().unwrap()),
+            <span class="string">"invalid hex code format, \
+            please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'."
         </span>);
     }
 
@@ -3033,7 +3034,7 @@
     );
 
     <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
         </span><span class="kw">use crate</span>::{encoding::Srgb, rgb::Rgba};
 
         <span class="macro">struct_of_arrays_tests!</span>(

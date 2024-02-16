@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/color_difference.rs`."><title>color_difference.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/color_difference.rs`."><title>color_difference.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -565,7 +566,7 @@
 //! for certain color spaces. This table may help navigating the options a bit
 //! by summarizing the difference between the traits in this module.
 //!
-//! **Disclaimer:** _This is not an actual benchmark! It&#39;s always best to test
+//! **Disclaimer:** _This is not an actual benchmark! It's always best to test
 //! and evaluate the differences in an actual application, when possible._
 //!
 //! Property explanations:
@@ -580,7 +581,7 @@
 //! | [`ImprovedCiede2000`] | High | High for small differences, lower for large differences | A general improvement of [`Ciede2000`], using a formula by Huang et al.
 //! | [`DeltaE`] | Usually low | Medium to high | The formula differs between color spaces and may not always be the best. Other formulas, such as [`Ciede2000`], may be preferred for some spaces.
 //! | [`ImprovedDeltaE`] | Usually low | Medium to high | A general improvement of [`DeltaE`], using a formula by Huang et al.
-//! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a &quot;quick and dirty&quot; check.
+//! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a "quick and dirty" check.
 //! | [`HyAb`] | Low | High accuracy for medium to large differences. Less accurate than CIEDE2000 for small differences, but still performs well and is much less computationally expensive. | Similar to Euclidean distance, but separates lightness and chroma more. Limited to Cartesian spaces with a lightness axis and a chroma plane.
 //! | [`Wcag21RelativeContrast`] | Low | Low and only compares lightness | Meant for checking contrasts in computer graphics (such as between text and background colors), assuming sRGB. Mostly useful as a hint or for checking WCAG 2.1 compliance, considering the criticism it has received.
 
@@ -600,8 +601,8 @@
 
 <span class="doccomment">/// A trait for calculating the color difference between two colors.
 </span><span class="attr">#[deprecated(
-    since = <span class="string">&quot;0.7.2&quot;</span>,
-    note = <span class="string">&quot;replaced by `palette::color_difference::Ciede2000`&quot;
+    since = <span class="string">"0.7.2"</span>,
+    note = <span class="string">"replaced by `palette::color_difference::Ciede2000`"
 </span>)]
 </span><span class="kw">pub trait </span>ColorDifference {
     <span class="doccomment">/// The type of the calculated color difference.
@@ -620,10 +621,10 @@
 /// difference. CIEDE2000 is an improvement over Δ*E* (see [`DeltaE`]) for CIE
 /// L\*a\*b\* and CIE L\*C\*h° (see [`Lab`] and [`Lch`]).
 ///
-/// There is a &quot;just noticeable difference&quot; between two colors when the Δ*E\**
+/// There is a "just noticeable difference" between two colors when the Δ*E\**
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
-</span><span class="attr">#[doc(alias = <span class="string">&quot;ColorDifference&quot;</span>)]
+</span><span class="attr">#[doc(alias = <span class="string">"ColorDifference"</span>)]
 </span><span class="kw">pub trait </span>Ciede2000 {
     <span class="doccomment">/// The type for the Δ*E\** (Delta E).
     </span><span class="kw">type </span>Scalar;
@@ -633,13 +634,13 @@
     </span><span class="kw">fn </span>difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 }
 
-<span class="doccomment">/// Calculate the CIEDE2000 Δ*E&#39;* (improved IEDE2000 Δ*E\**) color difference.
+<span class="doccomment">/// Calculate the CIEDE2000 Δ*E'* (improved IEDE2000 Δ*E\**) color difference.
 ///
-/// The &quot;improved CIEDE2000&quot; uses the output of [`Ciede2000`] and enhances it
+/// The "improved CIEDE2000" uses the output of [`Ciede2000`] and enhances it
 /// according to *Power functions improving the performance of color-difference
 /// formulas* by Huang et al.
 </span><span class="kw">pub trait </span>ImprovedCiede2000: Ciede2000 {
-    <span class="doccomment">/// Calculate the CIEDE2000 Δ*E&#39;* (improved IEDE2000 Δ*E\**) color
+    <span class="doccomment">/// Calculate the CIEDE2000 Δ*E'* (improved IEDE2000 Δ*E\**) color
     /// difference between `self` and `other`.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>improved_difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
@@ -652,8 +653,8 @@
 {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>improved_difference(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar {
-        <span class="comment">// Coefficients from &quot;Power functions improving the performance of
-        // color-difference formulas&quot; by Huang et al.
+        <span class="comment">// Coefficients from "Power functions improving the performance of
+        // color-difference formulas" by Huang et al.
         // https://opg.optica.org/oe/fulltext.cfm?uri=oe-23-1-597&amp;id=307643
         </span>C::Scalar::from_f64(<span class="number">1.43</span>) * <span class="self">self</span>.difference(other).powf(C::Scalar::from_f64(<span class="number">0.7</span>))
     }
@@ -704,7 +705,7 @@
 }
 
 <span class="doccomment">/// Calculate the CIEDE2000 color difference for two colors in Lab color space.
-/// There is a &quot;just noticeable difference&quot; between two colors when the delta E
+/// There is a "just noticeable difference" between two colors when the delta E
 /// is roughly greater than 1. Thus, the color difference is more suited for
 /// calculating small distances between colors as opposed to large differences.
 </span><span class="attr">#[rustfmt::skip]
@@ -816,7 +817,7 @@
 /// difference, depending on the color space. Some spaces, like
 /// [`Lab`][crate::Lab] and [`Oklab`][crate::Oklab], will give a fairly uniform
 /// result, while other spaces, such as [`Rgb`][crate::rgb::Rgb], will give much
-/// less uniform results. Despite that, it&#39;s still appropriate for some
+/// less uniform results. Despite that, it's still appropriate for some
 /// applications.
 </span><span class="kw">pub trait </span>EuclideanDistance: Sized {
     <span class="doccomment">/// The type for the distance value.
@@ -841,13 +842,13 @@
 
 <span class="doccomment">/// Calculate and check the WCAG 2.1 relative contrast and relative luminance.
 ///
-/// W3C&#39;s Web Content Accessibility Guidelines (WCAG) 2.1 suggest a method to
+/// W3C's Web Content Accessibility Guidelines (WCAG) 2.1 suggest a method to
 /// calculate accessible contrast ratios of text and background colors for those
 /// with low vision or color vision deficiencies, and for contrast of colors
 /// used in user interface graphics objects.
 ///
 /// These criteria come with a couple of caveats:
-/// * sRGB is assumed as the presentation color space, which is why it&#39;s only
+/// * sRGB is assumed as the presentation color space, which is why it's only
 ///   implemented for a limited set of [`Rgb`][crate::rgb::Rgb] and
 ///   [`Luma`][crate::Luma] spaces.
 /// * The contrast ratio is not considered entirely consistent with the
@@ -867,9 +868,9 @@
 /// use palette::{Srgb, color_difference::Wcag21RelativeContrast};
 /// # fn main() -&gt; Result&lt;(), palette::rgb::FromHexError&gt; {
 ///
-/// // the rustdoc &quot;DARK&quot; theme background and text colors
+/// // the rustdoc "DARK" theme background and text colors
 /// let background: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();
-/// let foreground = Srgb::from_str(&quot;#ddd&quot;)?.into_format();
+/// let foreground = Srgb::from_str("#ddd")?.into_format();
 ///
 /// assert!(background.has_enhanced_contrast_text(foreground));
 /// # Ok(())
@@ -984,7 +985,7 @@
     <span class="doccomment">/// Verify the contrast between two colors satisfies SC 1.4.11 for graphical
     /// objects. Contrast is at least 3:1 (Level AA).
     ///
-    /// This applies for any graphical object that aren&#39;t text, such as
+    /// This applies for any graphical object that aren't text, such as
     /// meaningful images and interactive user interface elements.
     ///
     /// [Success Criterion 1.4.11 Non-text Contrast (Level
@@ -1004,7 +1005,7 @@
 /// color differences in [Distance metrics for very large color
 /// differences](http://markfairchild.org/PDFs/PAP40.pdf) (in [Color Res Appl.
 /// 2019;1–16](https://doi.org/10.1002/col.22451)) by Saeedeh Abasi, Mohammad
-/// Amani Tehran and Mark D. Fairchild. It&#39;s originally meant for [CIE L\*a\*b\*
+/// Amani Tehran and Mark D. Fairchild. It's originally meant for [CIE L\*a\*b\*
 /// (CIELAB)][crate::Lab], but this trait is also implemented for other color
 /// spaces that have similar semantics, although **without the same quality
 /// guarantees**.
@@ -1027,7 +1028,7 @@
 
 <span class="doccomment">/// Calculate the Δ*E* color difference between two colors.
 ///
-/// This represents the original Δ*E* formula for a color space. It&#39;s often a
+/// This represents the original Δ*E* formula for a color space. It's often a
 /// Euclidean distance for perceptually uniform color spaces and may not always
 /// be the best option. See the [`color_difference`](self) module for more
 /// details and options.
@@ -1036,25 +1037,25 @@
     </span><span class="kw">type </span>Scalar;
 
     <span class="doccomment">/// Calculate the Δ*E* color difference metric for `self` and `other`,
-    /// according to the color space&#39;s specification.
+    /// according to the color space's specification.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>delta_e(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 }
 
-<span class="doccomment">/// Calculate the Δ*E&#39;* (improved Δ*E*) color difference between two colors.
+<span class="doccomment">/// Calculate the Δ*E'* (improved Δ*E*) color difference between two colors.
 ///
-/// The Δ*E&#39;* uses the output of [`DeltaE`] and enhances it according to *Power
+/// The Δ*E'* uses the output of [`DeltaE`] and enhances it according to *Power
 /// functions improving the performance of color-difference formulas* by Huang
 /// et al. Only spaces with specified coefficients implement this trait.
 </span><span class="kw">pub trait </span>ImprovedDeltaE: DeltaE {
-    <span class="doccomment">/// Calculate the Δ*E&#39;* (improved Δ*E*) color difference metric for `self`
-    /// and `other`, according to the color space&#39;s specification and later
+    <span class="doccomment">/// Calculate the Δ*E'* (improved Δ*E*) color difference metric for `self`
+    /// and `other`, according to the color space's specification and later
     /// improvements by Huang et al.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>improved_delta_e(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Scalar;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 #[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>core::str::FromStr;
@@ -1074,7 +1075,7 @@
             black.relative_contrast(white)
         );
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#600&quot;</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#600"</span>).unwrap().into_format();
 
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(white), <span class="number">13.41</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(black), <span class="number">1.56</span>, epsilon = <span class="number">0.01</span>);
@@ -1091,12 +1092,12 @@
         <span class="macro">assert!</span>(!c1.has_enhanced_contrast_large_text(black));
         <span class="macro">assert!</span>(!c1.has_min_contrast_graphics(black));
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#066&quot;</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#066"</span>).unwrap().into_format();
 
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(white), <span class="number">6.79</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(black), <span class="number">3.09</span>, epsilon = <span class="number">0.01</span>);
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">&quot;#9f9&quot;</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#9f9"</span>).unwrap().into_format();
 
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(white), <span class="number">1.22</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.relative_contrast(black), <span class="number">17.11</span>, epsilon = <span class="number">0.01</span>);

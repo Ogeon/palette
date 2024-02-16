@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha/alpha.rs`."><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/alpha/alpha.rs`."><title>alpha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1371,9 +1372,9 @@
     },
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 </span><span class="kw">use </span>approx::{AbsDiffEq, RelativeEq, UlpsEq};
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">use </span>rand::{
     distributions::{
         uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
@@ -1396,7 +1397,7 @@
 
 <span class="doccomment">/// An alpha component wrapper for colors, for adding transparency.
 ///
-/// Instead of having separate types for &quot;RGB with alpha&quot;, &quot;HSV with alpha&quot;, and
+/// Instead of having separate types for "RGB with alpha", "HSV with alpha", and
 /// so on, Palette uses this wrapper type to attach the alpha component. The
 /// memory representation is the same as if `alpha` was the last member/property
 /// of `color`, which is just as space efficient. The perk of having a wrapper
@@ -1407,7 +1408,7 @@
 /// The color types in Palette have transparent type aliases, such as
 /// [`Srgba`](crate::Srgba) for [`Srgb`][crate::Srgb] or [`Hsla`](crate::Hsla)
 /// for [`Hsl`](crate::Hsl). These aliases implement `new` and other useful
-/// methods. Here&#39;s the same example as for [`Rgb`](crate::rgb::Rgb), but with
+/// methods. Here's the same example as for [`Rgb`](crate::rgb::Rgb), but with
 /// transparency:
 ///
 /// ```
@@ -1424,16 +1425,16 @@
 /// let rgb_u8_from_f32 = Srgba::new(0.3f32, 0.8, 0.1, 0.5).into_format::&lt;u8, u8&gt;();
 ///
 /// // Hexadecimal is also supported for RGBA, with or without the #:
-/// let rgb_from_hex1: Srgba&lt;u8&gt; = &quot;#f034e65a&quot;.parse().unwrap();
-/// let rgb_from_hex2: Srgba&lt;u8&gt; = &quot;f034e65a&quot;.parse().unwrap();
+/// let rgb_from_hex1: Srgba&lt;u8&gt; = "#f034e65a".parse().unwrap();
+/// let rgb_from_hex2: Srgba&lt;u8&gt; = "f034e65a".parse().unwrap();
 /// assert_eq!(rgb_from_hex1, rgb_from_hex2);
 ///
 /// // This includes the shorthand format:
-/// let rgb_from_short_hex: Srgba&lt;u8&gt; = &quot;f3ea&quot;.parse().unwrap();
-/// let rgb_from_long_hex: Srgba&lt;u8&gt; = &quot;ff33eeaa&quot;.parse().unwrap();
+/// let rgb_from_short_hex: Srgba&lt;u8&gt; = "f3ea".parse().unwrap();
+/// let rgb_from_long_hex: Srgba&lt;u8&gt; = "ff33eeaa".parse().unwrap();
 /// assert_eq!(rgb_from_short_hex, rgb_from_long_hex);
 ///
-/// // It&#39;s also possible to convert from (and to) arrays, tuples and `u32` values:
+/// // It's also possible to convert from (and to) arrays, tuples and `u32` values:
 /// let rgb_from_array = Srgba::from([171u8, 193, 35, 128]);
 /// let rgb_from_tuple = Srgba::from((171u8, 193, 35, 128));
 /// let rgb_from_u32 = Srgba::from(0x607F005A);
@@ -1441,7 +1442,7 @@
 ///
 /// Opaque values can be made transparent using the [`WithAlpha`] trait, in
 /// addition to simply wrapping them in `Alpha`. [`WithAlpha`] is also useful in
-/// generic code, since it&#39;s implemented for both opaque and transparent types.
+/// generic code, since it's implemented for both opaque and transparent types.
 ///
 /// ```
 /// use palette::{WithAlpha, Srgb};
@@ -1451,7 +1452,7 @@
 /// assert_eq!(rgba.alpha, 128);
 /// ```
 ///
-/// You may have noticed the `u8` in `rgb.with_alpha(128u8)`. That&#39;s because
+/// You may have noticed the `u8` in `rgb.with_alpha(128u8)`. That's because
 /// `Alpha` allows the transparency component to have a different type than the
 /// color components. It would be just as valid to write
 /// `rgb.with_alpha(0.5f32)`, for example.
@@ -1459,7 +1460,7 @@
 /// # Accessing Color Components
 ///
 /// To help with the nesting, `Alpha` implements [`Deref`] and [`DerefMut`].
-/// This use of the traits is a bit unconventional, since `Alpha` isn&#39;t a smart
+/// This use of the traits is a bit unconventional, since `Alpha` isn't a smart
 /// pointer. It turned out to be a quite successful experiment that stuck
 /// around.
 ///
@@ -1504,17 +1505,17 @@
 
 <span class="kw">impl</span>&lt;C, A&gt; Alpha&lt;C, A&gt; {
     <span class="doccomment">/// Return an iterator over the colors in the wrapped collections.
-    </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter
+    </span><span class="kw">pub fn </span>iter&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter
     <span class="kw">where
-        </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>: IntoIterator,
+        </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">Self</span>: IntoIterator,
     {
         <span class="self">self</span>.into_iter()
     }
 
     <span class="doccomment">/// Return an iterator that allows modifying the colors in the wrapped collections.
-    </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter
+    </span><span class="kw">pub fn </span>iter_mut&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter
     <span class="kw">where
-        </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator,
+        </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">Self</span>: IntoIterator,
     {
         <span class="self">self</span>.into_iter()
     }
@@ -1824,7 +1825,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; AbsDiffEq <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>C: AbsDiffEq&lt;Epsilon = T::Epsilon&gt;,
@@ -1843,7 +1844,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; RelativeEq <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>C: RelativeEq&lt;Epsilon = T::Epsilon&gt;,
@@ -1866,7 +1867,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;approx&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; UlpsEq <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>C: UlpsEq&lt;Epsilon = T::Epsilon&gt;,
@@ -2171,7 +2172,7 @@
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{:0width$x}{:0width$x}&quot;</span>,
+            <span class="string">"{:0width$x}{:0width$x}"</span>,
             <span class="self">self</span>.color,
             <span class="self">self</span>.alpha,
             width = size
@@ -2188,7 +2189,7 @@
         <span class="kw">let </span>size = f.width().unwrap_or(::core::mem::size_of::&lt;T&gt;() * <span class="number">2</span>);
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{:0width$X}{:0width$X}&quot;</span>,
+            <span class="string">"{:0width$X}{:0width$X}"</span>,
             <span class="self">self</span>.color,
             <span class="self">self</span>.alpha,
             width = size
@@ -2216,7 +2217,7 @@
 {
     <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = Alpha&lt;Tc, Ta&gt;&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="self">Self </span>{
-            color: C::from_iter(<span class="prelude-val">None</span>), <span class="comment">// Default is currently a used for black, meaning it&#39;s not always what we want here.
+            color: C::from_iter(<span class="prelude-val">None</span>), <span class="comment">// Default is currently a used for black, meaning it's not always what we want here.
             </span>alpha: A::default(),
         };
 
@@ -2246,14 +2247,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, A&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Alpha&lt;C, A&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C, A&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Alpha&lt;C, A&gt;
 <span class="kw">where
-    </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C: IntoIterator,
-    <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A: IntoIterator,
+    </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>C: IntoIterator,
+    <span class="kw-2">&amp;</span><span class="lifetime">'a </span>A: IntoIterator,
 {
-    <span class="kw">type </span>Item = Alpha&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::Item, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+    <span class="kw">type </span>Item = Alpha&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::Item, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>A <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
-    <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A <span class="kw">as </span>IntoIterator&gt;::IntoIter&gt;;
+    <span class="kw">type </span>IntoIter = Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>A <span class="kw">as </span>IntoIterator&gt;::IntoIter&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         Iter {
@@ -2263,15 +2264,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, A&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Alpha&lt;C, A&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C, A&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Alpha&lt;C, A&gt;
 <span class="kw">where
-    </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C: IntoIterator,
-    <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>A: IntoIterator,
+    </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C: IntoIterator,
+    <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>A: IntoIterator,
 {
-    <span class="kw">type </span>Item = Alpha&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>A <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
+    <span class="kw">type </span>Item = Alpha&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::Item, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>A <span class="kw">as </span>IntoIterator&gt;::Item&gt;;
 
     <span class="kw">type </span>IntoIter =
-        Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>A <span class="kw">as </span>IntoIterator&gt;::IntoIter&gt;;
+        Iter&lt;&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>C <span class="kw">as </span>IntoIterator&gt;::IntoIter, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>A <span class="kw">as </span>IntoIterator&gt;::IntoIter&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         Iter {
@@ -2310,7 +2311,7 @@
         <span class="macro">debug_assert_eq!</span>(
             <span class="self">self</span>.alpha.size_hint(),
             hint,
-            <span class="string">&quot;the color and alpha iterators have different size hints&quot;
+            <span class="string">"the color and alpha iterators have different size hints"
         </span>);
 
         hint
@@ -2321,7 +2322,7 @@
         <span class="macro">debug_assert_eq!</span>(
             <span class="self">self</span>.alpha.count(),
             count,
-            <span class="string">&quot;the color and alpha iterators have different counts&quot;
+            <span class="string">"the color and alpha iterators have different counts"
         </span>);
 
         count
@@ -2355,14 +2356,14 @@
         <span class="macro">debug_assert_eq!</span>(
             <span class="self">self</span>.alpha.len(),
             len,
-            <span class="string">&quot;the color and alpha iterators have different lengths&quot;
+            <span class="string">"the color and alpha iterators have different lengths"
         </span>);
 
         len
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; serde::Serialize <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>C: serde::Serialize,
@@ -2379,15 +2380,15 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, C, T&gt; serde::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
+<span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, C, T&gt; serde::Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
-    </span>C: serde::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
-    T: serde::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>C: serde::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
+    T: serde::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
     <span class="kw">where
-        </span>D: serde::Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>D: serde::Deserializer&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>alpha: <span class="prelude-ty">Option</span>&lt;T&gt; = <span class="prelude-val">None</span>;
 
@@ -2399,12 +2400,12 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(alpha) = alpha {
             <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ color, alpha })
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(serde::de::Error::missing_field(<span class="string">&quot;alpha&quot;</span>))
+            <span class="prelude-val">Err</span>(serde::de::Error::missing_field(<span class="string">"alpha"</span>))
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; Distribution&lt;Alpha&lt;C, T&gt;&gt; <span class="kw">for </span>Standard
 <span class="kw">where
     </span>Standard: Distribution&lt;C&gt; + Distribution&lt;T&gt;,
@@ -2418,7 +2419,7 @@
 }
 
 <span class="doccomment">/// Sample transparent colors uniformly.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">pub struct </span>UniformAlpha&lt;C, T&gt;
 <span class="kw">where
     </span>T: SampleUniform,
@@ -2428,7 +2429,7 @@
     alpha: Uniform&lt;T&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; SampleUniform <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>T: Clone + SampleUniform,
@@ -2437,7 +2438,7 @@
     <span class="kw">type </span>Sampler = UniformAlpha&lt;C, T&gt;;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;random&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"random"</span>)]
 </span><span class="kw">impl</span>&lt;C, T&gt; UniformSampler <span class="kw">for </span>UniformAlpha&lt;C, T&gt;
 <span class="kw">where
     </span>T: Clone + SampleUniform,
@@ -2481,7 +2482,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;C, T&gt; bytemuck::Zeroable <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>C: bytemuck::Zeroable,
@@ -2494,7 +2495,7 @@
 // It is a requirement of `ArrayCast` that the in-memory representation of `C`
 // is made of `T`s. Because `T` is `Pod`, `Alpha&lt;C, T&gt;` is `Pod` as well because
 // no internal padding can be introduced during monomorphization.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;bytemuck&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"bytemuck"</span>)]
 </span><span class="kw">unsafe impl</span>&lt;C, T&gt; bytemuck::Pod <span class="kw">for </span>Alpha&lt;C, T&gt;
 <span class="kw">where
     </span>T: bytemuck::Pod,
@@ -2510,96 +2511,96 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
-            <span class="string">&quot;abc123a1&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
+            <span class="string">"abc123a1"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_small_numbers() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;01020304&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"01020304"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0001000200030004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"0001000200030004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;00000001000000020000000300000004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"00000001000000020000000300000004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:x}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:x}"</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"0000000000000001000000000000000200000000000000030000000000000004"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>lower_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03x}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03x}"</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
-            <span class="string">&quot;ABC123A1&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">171</span>, <span class="number">193</span>, <span class="number">35</span>, <span class="number">161</span>)),
+            <span class="string">"ABC123A1"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_small_numbers() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;01020304&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"01020304"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0001000200030004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"0001000200030004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;00000001000000020000000300000004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"00000001000000020000000300000004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:X}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;0000000000000001000000000000000200000000000000030000000000000004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:X}"</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"0000000000000001000000000000000200000000000000030000000000000004"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>upper_hex_custom_width() {
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgba::&lt;Srgb, u8&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgba::&lt;Srgb, u16&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgba::&lt;Srgb, u32&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:03X}&quot;</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
-            <span class="string">&quot;001002003004&quot;
+            <span class="macro">format!</span>(<span class="string">"{:03X}"</span>, Rgba::&lt;Srgb, u64&gt;::new(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)),
+            <span class="string">"001002003004"
         </span>);
     }
 
@@ -2609,45 +2610,45 @@
         <span class="macro">assert_eq!</span>(Rgba::&lt;Srgb&gt;::max_alpha(), <span class="number">1.0</span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialize() {
         <span class="kw">let </span>color = Rgba::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>);
 
         <span class="macro">assert_eq!</span>(
             serde_json::to_string(<span class="kw-2">&amp;</span>color).unwrap(),
-            <span class="string">r#&quot;{&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1,&quot;alpha&quot;:0.5}&quot;#
+            <span class="string">r#"{"red":0.3,"green":0.8,"blue":0.1,"alpha":0.5}"#
         </span>);
 
         <span class="macro">assert_eq!</span>(
             ron::to_string(<span class="kw-2">&amp;</span>color).unwrap(),
-            <span class="string">r#&quot;(red:0.3,green:0.8,blue:0.1,alpha:0.5)&quot;#
+            <span class="string">r#"(red:0.3,green:0.8,blue:0.1,alpha:0.5)"#
         </span>);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialize() {
         <span class="kw">let </span>color = Rgba::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>);
 
         <span class="macro">assert_eq!</span>(
-            serde_json::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#&quot;{&quot;alpha&quot;:0.5,&quot;red&quot;:0.3,&quot;green&quot;:0.8,&quot;blue&quot;:0.1}&quot;#</span>)
+            serde_json::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#"{"alpha":0.5,"red":0.3,"green":0.8,"blue":0.1}"#</span>)
                 .unwrap(),
             color
         );
 
         <span class="macro">assert_eq!</span>(
-            ron::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#&quot;(alpha:0.5,red:0.3,green:0.8,blue:0.1)&quot;#</span>).unwrap(),
+            ron::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#"(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#</span>).unwrap(),
             color
         );
 
         <span class="macro">assert_eq!</span>(
-            ron::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#&quot;Rgb(alpha:0.5,red:0.3,green:0.8,blue:0.1)&quot;#</span>).unwrap(),
+            ron::from_str::&lt;Rgba&lt;Srgb&gt;&gt;(<span class="string">r#"Rgb(alpha:0.5,red:0.3,green:0.8,blue:0.1)"#</span>).unwrap(),
             color
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serde_round_trips() {
         <span class="kw">let </span>color = Rgba::&lt;Srgb&gt;::new(<span class="number">0.3</span>, <span class="number">0.8</span>, <span class="number">0.1</span>, <span class="number">0.5</span>);
@@ -2663,7 +2664,7 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serializing&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]
     </span><span class="kw">fn </span>serde_various_types() {
         <span class="macro">macro_rules! </span>test_roundtrip {
@@ -2674,22 +2675,22 @@
                 };
                 <span class="macro">assert_eq!</span>(
                     serde_json::from_str::&lt;<span class="kw">super</span>::Alpha&lt;<span class="kw">_</span>, f32&gt;&gt;(
-                        <span class="kw-2">&amp;</span>serde_json::to_string(<span class="kw-2">&amp;</span>value).expect(<span class="string">&quot;json serialization&quot;</span>)
+                        <span class="kw-2">&amp;</span>serde_json::to_string(<span class="kw-2">&amp;</span>value).expect(<span class="string">"json serialization"</span>)
                     )
-                    .expect(<span class="string">&quot;json deserialization&quot;</span>),
+                    .expect(<span class="string">"json deserialization"</span>),
                     value
                 );
 
-                <span class="kw">let </span>ron_string = ron::to_string(<span class="kw-2">&amp;</span>value).expect(<span class="string">&quot;ron serialization&quot;</span>);
+                <span class="kw">let </span>ron_string = ron::to_string(<span class="kw-2">&amp;</span>value).expect(<span class="string">"ron serialization"</span>);
                 <span class="macro">assert_eq!</span>(
                     ron::from_str::&lt;<span class="kw">super</span>::Alpha&lt;<span class="kw">_</span>, f32&gt;&gt;(<span class="kw-2">&amp;</span>ron_string)
-                        .expect(<span class="string">&quot;ron deserialization&quot;</span>),
+                        .expect(<span class="string">"ron deserialization"</span>),
                     value
                 );
                 $(
                     <span class="macro">assert_eq!</span>(
-                        ron::from_str::&lt;<span class="kw">super</span>::Alpha&lt;<span class="kw">_</span>, f32&gt;&gt;(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}{ron_string}&quot;</span>, <span class="macro-nonterminal">$ron_name</span>))
-                            .expect(<span class="string">&quot;ron deserialization&quot;</span>),
+                        ron::from_str::&lt;<span class="kw">super</span>::Alpha&lt;<span class="kw">_</span>, f32&gt;&gt;(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}{ron_string}"</span>, <span class="macro-nonterminal">$ron_name</span>))
+                            .expect(<span class="string">"ron deserialization"</span>),
                         value
                     );
                 )<span class="question-mark">?
@@ -2710,11 +2711,11 @@
         }
 
         <span class="macro">test_roundtrip!</span>(());
-        <span class="macro">test_roundtrip!</span>(Empty, <span class="string">&quot;Empty&quot;</span>);
-        <span class="macro">test_roundtrip!</span>(UnitTuple(), <span class="string">&quot;UnitTuple&quot;</span>);
-        <span class="macro">test_roundtrip!</span>(Newtype(<span class="number">0.1</span>), <span class="string">&quot;Newtype&quot;</span>);
-        <span class="macro">test_roundtrip!</span>(Tuple(<span class="number">0.1</span>, <span class="number">0.2</span>), <span class="string">&quot;Tuple&quot;</span>);
-        <span class="macro">test_roundtrip!</span>(Struct { value: <span class="number">0.1 </span>}, <span class="string">&quot;Struct&quot;</span>);
+        <span class="macro">test_roundtrip!</span>(Empty, <span class="string">"Empty"</span>);
+        <span class="macro">test_roundtrip!</span>(UnitTuple(), <span class="string">"UnitTuple"</span>);
+        <span class="macro">test_roundtrip!</span>(Newtype(<span class="number">0.1</span>), <span class="string">"Newtype"</span>);
+        <span class="macro">test_roundtrip!</span>(Tuple(<span class="number">0.1</span>, <span class="number">0.2</span>), <span class="string">"Tuple"</span>);
+        <span class="macro">test_roundtrip!</span>(Struct { value: <span class="number">0.1 </span>}, <span class="string">"Struct"</span>);
     }
 
     <span class="macro">test_uniform_distribution! </span>{
