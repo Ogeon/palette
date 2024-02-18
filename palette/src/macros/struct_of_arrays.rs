@@ -46,13 +46,28 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<$($phantom_ty,)? C> IntoIterator for $self_ty<$($phantom_ty,)? C>
-        where
-            C: IntoIterator,
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for $self_ty<$($phantom_ty,)? [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? C::Item>;
+            type Item = $self_ty<$($phantom_ty,)? T>;
 
-            type IntoIter = Iter<C::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: IntoIterator::into_iter(self.$element),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a [T]>
+        where
+            T: 'a,
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -63,13 +78,63 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a $self_ty<$($phantom_ty,)? C>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a mut [T]>
         where
-            &'a C: IntoIterator,
+            T: 'a,
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a C as IntoIterator>::Item>;
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
 
-            type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? T>;
+
+            type IntoIter = Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<$($phantom_ty,)? C, T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? T>>,
+            C: IntoIterator<Item = T>,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<<$self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, C::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a $self_ty<$($phantom_ty,)? [T; N]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -80,19 +145,178 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? C>
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b [T]>
         where
-            &'a mut C: IntoIterator,
+            T: 'a
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a mut C as IntoIterator>::Item>;
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
 
-            type IntoIter = Iter<<&'a mut C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b mut [T]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&*self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? C, T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            &'a $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? &'a T>>,
+            &'a C: IntoIterator<Item = &'a T>,
+            T: 'a,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<<&'a $self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, <&'a C as IntoIterator>::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? [T; N]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
                 Iter {
                     $($element: (&mut self.$element).into_iter(),)+
                     $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? &'b mut [T]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&mut self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&mut *self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? C, T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            &'a mut $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? &'a mut T>>,
+            &'a mut C: IntoIterator<Item = &'a mut T>,
+            T: 'a,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<<&'a mut $self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, <&'a mut C as IntoIterator>::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
                 }
             }
         }
@@ -212,13 +436,29 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<$($phantom_ty,)? C> IntoIterator for $self_ty<$($phantom_ty,)? C>
-        where
-            C: IntoIterator,
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for $self_ty<$($phantom_ty,)? [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? C::Item>;
+            type Item = $self_ty<$($phantom_ty,)? T>;
 
-            type IntoIter = Iter<C::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: IntoIterator::into_iter(self.$element),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a [T]>
+        where
+            T: 'a,
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -230,13 +470,65 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a $self_ty<$($phantom_ty,)? C>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a mut [T]>
         where
-            &'a C: IntoIterator + 'a,
+            T: 'a,
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a C as IntoIterator>::Item>;
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
 
-            type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? T>;
+
+            type IntoIter = Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<$($phantom_ty,)? C, T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? T>>,
+            C: IntoIterator<Item = T>,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<<$self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, C::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a $self_ty<$($phantom_ty,)? [T; N]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -248,13 +540,105 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? C>
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b [T]>
         where
-            &'a mut C: IntoIterator + 'a,
+            T: 'a
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a mut C as IntoIterator>::Item>;
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
 
-            type IntoIter = Iter<<&'a mut C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b mut [T]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&*self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? C, T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            &'a $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? &'a T>>,
+            &'a C: IntoIterator<Item = &'a T>,
+            T: 'a,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<<&'a $self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, <&'a C as IntoIterator>::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? [T; N]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -262,6 +646,80 @@ macro_rules! impl_struct_of_array_traits_hue {
                     hue: (&mut self.hue).into_iter(),
                     $($element: (&mut self.$element).into_iter(),)+
                     $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? &'b mut [T]>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: (&mut self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: (&mut *self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? C, T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? C>, C>
+        where
+            &'a mut $self_ty<$($phantom_ty,)? C>: IntoIterator<Item = $self_ty<$($phantom_ty,)? &'a mut T>>,
+            &'a mut C: IntoIterator<Item = &'a mut T>,
+            T: 'a,
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<<&'a mut $self_ty<$($phantom_ty,)? C> as IntoIterator>::IntoIter, <&'a mut C as IntoIterator>::IntoIter>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
                 }
             }
         }

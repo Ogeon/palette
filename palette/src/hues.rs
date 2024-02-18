@@ -582,9 +582,19 @@ macro_rules! make_hues {
             }
         }
 
-        impl<C> IntoIterator for $name<C> where C: IntoIterator {
-            type Item = $name<C::Item>;
-            type IntoIter = $iter_name<C::IntoIter>;
+        impl<T, const N: usize> IntoIterator for $name<[T; N]> {
+            type Item = $name<T>;
+            type IntoIter = $iter_name<core::array::IntoIter<T, N>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(IntoIterator::into_iter(self.0))
+            }
+        }
+
+        impl<'a, T> IntoIterator for $name<&'a [T]> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -592,9 +602,9 @@ macro_rules! make_hues {
             }
         }
 
-        impl<'a, C> IntoIterator for &'a $name<C> where &'a C: IntoIterator {
-            type Item = $name<<&'a C as IntoIterator>::Item>;
-            type IntoIter = $iter_name<<&'a C as IntoIterator>::IntoIter>;
+        impl<'a, T> IntoIterator for $name<&'a mut [T]> {
+            type Item = $name<&'a mut T>;
+            type IntoIter = $iter_name<core::slice::IterMut<'a, T>>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -602,13 +612,108 @@ macro_rules! make_hues {
             }
         }
 
-        impl<'a, C> IntoIterator for &'a mut $name<C> where &'a mut C: IntoIterator {
-            type Item = $name<<&'a mut C as IntoIterator>::Item>;
-            type IntoIter = $iter_name<<&'a mut C as IntoIterator>::IntoIter>;
+        #[cfg(feature = "alloc")]
+        impl<T> IntoIterator for $name<alloc::vec::Vec<T>> {
+            type Item = $name<T>;
+            type IntoIter = $iter_name<alloc::vec::IntoIter<T>>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
                 $iter_name(self.0.into_iter())
+            }
+        }
+
+        impl<'a, T, const N: usize> IntoIterator for &'a $name<[T; N]> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&self.0).into_iter())
+            }
+        }
+
+        impl<'a, 'b, T> IntoIterator for &'a $name<&'b [T]> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(self.0.into_iter())
+            }
+        }
+
+        impl<'a, 'b, T> IntoIterator for &'a $name<&'b mut [T]> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&*self.0).into_iter())
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, T> IntoIterator for &'a $name<alloc::vec::Vec<T>> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&self.0).into_iter())
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, T> IntoIterator for &'a $name<alloc::boxed::Box<[T]>> {
+            type Item = $name<&'a T>;
+            type IntoIter = $iter_name<core::slice::Iter<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&self.0).into_iter())
+            }
+        }
+
+        impl<'a, T, const N: usize> IntoIterator for &'a mut $name<[T; N]> {
+            type Item = $name<&'a mut T>;
+            type IntoIter = $iter_name<core::slice::IterMut<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&mut self.0).into_iter())
+            }
+        }
+
+        impl<'a, 'b, T> IntoIterator for &'a mut $name<&'b mut [T]> {
+            type Item = $name<&'a mut T>;
+            type IntoIter = $iter_name<core::slice::IterMut<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name(self.0.into_iter())
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, T> IntoIterator for &'a mut $name<alloc::vec::Vec<T>> {
+            type Item = $name<&'a mut T>;
+            type IntoIter = $iter_name<core::slice::IterMut<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&mut self.0).into_iter())
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, T> IntoIterator for &'a mut $name<alloc::boxed::Box<[T]>> {
+            type Item = $name<&'a mut T>;
+            type IntoIter = $iter_name<core::slice::IterMut<'a, T>>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                $iter_name((&mut *self.0).into_iter())
             }
         }
 
