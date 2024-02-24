@@ -533,9 +533,6 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hsl<S, T> where T: bytemuck::Pod {}
 mod test {
     use super::Hsl;
 
-    #[cfg(feature = "alloc")]
-    use crate::Srgb;
-
     test_convert_into_from_xyz!(Hsl);
 
     #[cfg(feature = "approx")]

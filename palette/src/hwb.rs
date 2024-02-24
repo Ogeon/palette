@@ -366,9 +366,6 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hwb<S, T> where T: bytemuck::Pod {}
 mod test {
     use super::Hwb;
 
-    #[cfg(feature = "alloc")]
-    use crate::Srgb;
-
     test_convert_into_from_xyz!(Hwb);
 
     #[cfg(feature = "approx")]

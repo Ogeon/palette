@@ -3,10 +3,7 @@
 #[cfg(any(feature = "approx", feature = "random"))]
 use core::ops::Mul;
 
-use core::{
-    cmp::PartialEq,
-    ops::{Add, AddAssign, Neg, Sub, SubAssign},
-};
+use core::ops::{Add, AddAssign, Neg, Sub, SubAssign};
 
 #[cfg(feature = "approx")]
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};

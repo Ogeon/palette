@@ -540,9 +540,6 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hsv<S, T> where T: bytemuck::Pod {}
 mod test {
     use super::Hsv;
 
-    #[cfg(feature = "alloc")]
-    use crate::Srgb;
-
     test_convert_into_from_xyz!(Hsv);
 
     #[cfg(feature = "approx")]

@@ -207,21 +207,6 @@ impl ::quote::ToTokens for IdentOrIndex {
     }
 }
 
-pub trait MetaParser: Default {
-    fn internal(&mut self);
-    fn parse_attribute(&mut self, attribute_name: Ident, attribute_tts: TokenStream) -> Result<()>;
-}
-
-pub trait DataMetaParser: Default {
-    fn parse_struct_field_attribute(
-        &mut self,
-        field_name: IdentOrIndex,
-        ty: Type,
-        attribute_name: Ident,
-        attribute_tts: TokenStream,
-    ) -> Result<()>;
-}
-
 pub trait AttributeArgumentParser: Default {
     fn argument(&mut self, argument: Meta) -> Result<()>;
 }
