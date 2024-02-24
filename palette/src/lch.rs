@@ -455,23 +455,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Lch<D65>,
-        Lch::new(0.1f32, 0.2, 0.3),
-        Lch::new(0.2, 0.3, 0.4),
-        Lch::new(0.3, 0.4, 0.5)
+        Lch<D65>[l, chroma, hue] phantom: white_point,
+        super::Lcha::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Lcha::new(0.2, 0.3, 0.4, 0.5),
+        super::Lcha::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{lch::Lcha, white_point::D65};
-
-        struct_of_arrays_tests!(
-            Lcha<D65>,
-            Lcha::new(0.1f32, 0.2, 0.3, 0.4),
-            Lcha::new(0.2, 0.3, 0.4, 0.5),
-            Lcha::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

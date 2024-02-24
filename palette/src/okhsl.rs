@@ -429,21 +429,9 @@ mod tests {
     }
 
     struct_of_arrays_tests!(
-        Okhsl,
-        Okhsl::new(0.1f32, 0.2, 0.3),
-        Okhsl::new(0.2, 0.3, 0.4),
-        Okhsl::new(0.3, 0.4, 0.5)
+        Okhsl[hue, saturation, lightness],
+        super::Okhsla::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Okhsla::new(0.2, 0.3, 0.4, 0.5),
+        super::Okhsla::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::okhsl::Okhsla;
-
-        struct_of_arrays_tests!(
-            Okhsla,
-            Okhsla::new(0.1f32, 0.2, 0.3, 0.4),
-            Okhsla::new(0.2, 0.3, 0.4, 0.5),
-            Okhsla::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 }

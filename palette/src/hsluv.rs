@@ -345,23 +345,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Hsluv<D65>,
-        Hsluv::new(0.1f32, 0.2, 0.3),
-        Hsluv::new(0.2, 0.3, 0.4),
-        Hsluv::new(0.3, 0.4, 0.5)
+        Hsluv<D65>[hue, saturation, l] phantom: white_point,
+        super::Hsluva::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Hsluva::new(0.2, 0.3, 0.4, 0.5),
+        super::Hsluva::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{hsluv::Hsluva, white_point::D65};
-
-        struct_of_arrays_tests!(
-            Hsluva<D65>,
-            Hsluva::new(0.1f32, 0.2, 0.3, 0.4),
-            Hsluva::new(0.2, 0.3, 0.4, 0.5),
-            Hsluva::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

@@ -622,23 +622,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Hsl<Srgb>,
-        Hsl::new(0.1f32, 0.2, 0.3),
-        Hsl::new(0.2, 0.3, 0.4),
-        Hsl::new(0.3, 0.4, 0.5)
+        Hsl<crate::encoding::Srgb>[hue, saturation, lightness] phantom: standard,
+        super::Hsla::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Hsla::new(0.2, 0.3, 0.4, 0.5),
+        super::Hsla::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{encoding::Srgb, hsl::Hsla};
-
-        struct_of_arrays_tests!(
-            Hsla<Srgb>,
-            Hsla::new(0.1f32, 0.2, 0.3, 0.4),
-            Hsla::new(0.2, 0.3, 0.4, 0.5),
-            Hsla::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

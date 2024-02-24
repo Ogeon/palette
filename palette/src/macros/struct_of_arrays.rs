@@ -1441,23 +1441,48 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
 #[cfg(test)]
 macro_rules! struct_of_arrays_tests {
-    ($color_ty: ident $(<$phantom_ty:ident>)?, $($values:expr),+) => {
+    ($color_ty: ident $(<$phantom_ty:ty>)? [$($element: ident),+] $(phantom: $phantom: ident)?, $($values:expr),+) => {
         #[cfg(feature = "alloc")]
         #[test]
         fn collect() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
             let color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn collect_alpha() {
+            let vec_of_colors = vec![$($values),+];
+            let color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
 
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+
         #[cfg(feature = "alloc")]
         #[test]
         fn extend() {
+            let vec_of_colors = vec![$($values.color),+];
+
+            let mut color_of_vecs = $color_ty::<$($phantom_ty,)? Vec<_>>::with_capacity(vec_of_colors.len());
+            color_of_vecs.extend(vec_of_colors);
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn extend_alpha() {
             let vec_of_colors = vec![$($values),+];
 
-            let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = $color_ty::with_capacity(vec_of_colors.len());
+            let mut color_of_vecs = crate::alpha::Alpha::<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>>::with_capacity(vec_of_colors.len());
             color_of_vecs.extend(vec_of_colors);
 
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
@@ -1465,12 +1490,28 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+
         #[cfg(feature = "alloc")]
         #[test]
         fn pop_push() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+            let last = color_of_vecs.pop().unwrap();
+            color_of_vecs.push(last);
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn pop_push_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
             let last = color_of_vecs.pop().unwrap();
             color_of_vecs.push(last);
 
@@ -1482,7 +1523,7 @@ macro_rules! struct_of_arrays_tests {
         #[cfg(feature = "alloc")]
         #[test]
         fn clear() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
             color_of_vecs.clear();
@@ -1494,10 +1535,39 @@ macro_rules! struct_of_arrays_tests {
 
         #[cfg(feature = "alloc")]
         #[test]
-        fn drain() {
+        fn clear_alpha() {
             let vec_of_colors = vec![$($values),+];
 
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
+            color_of_vecs.clear();
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn drain() {
+            let vec_of_colors = vec![$($values.color),+];
+
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+
+            let vec_of_colors1: Vec<_> = color_of_vecs.drain(..).collect();
+            let vec_of_colors2: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors1, vec![$($values.color),+]);
+            assert_eq!(vec_of_colors2, vec![]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn drain_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
 
             let vec_of_colors1: Vec<_> = color_of_vecs.drain(..).collect();
             let vec_of_colors2: Vec<_> = color_of_vecs.into_iter().collect();
@@ -1509,7 +1579,7 @@ macro_rules! struct_of_arrays_tests {
         #[cfg(feature = "alloc")]
         #[test]
         fn modify() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
 
@@ -1519,7 +1589,245 @@ macro_rules! struct_of_arrays_tests {
 
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
 
+            assert_eq!(vec_of_colors, vec![$($values.color + 2.0),+]);
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn modify_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
+
+            for mut color in &mut color_of_vecs {
+                color.set(color.copied() + 2.0);
+            }
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
             assert_eq!(vec_of_colors, vec![$($values + 2.0),+]);
+        }
+
+        #[test]
+        fn into_iterator() {
+            fn expect_move(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let arrays = $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let slices = $color_ty::<$($phantom_ty,)? &[f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut_slices = $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_move(arrays.into_iter());
+            expect_ref(slices.into_iter());
+            expect_ref_mut(mut_slices.into_iter());
+        }
+
+        #[test]
+        fn into_iterator_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_move(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? f32>, f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let arrays = Alpha::<_, [f32; 0]>{
+                color: $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let slices = Alpha::<_, &[f32]>{
+                color: $color_ty::<$($phantom_ty,)? &[f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut_slices = Alpha::<_, &mut [f32]>{
+                color: $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_move(arrays.into_iter());
+            expect_ref(slices.into_iter());
+            expect_ref_mut(mut_slices.into_iter());
+        }
+
+        #[test]
+        fn into_iterator_ref() {
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let mut arrays = $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut slices = $color_ty::<$($phantom_ty,)? &[f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut mut_slices = $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_ref((&arrays).into_iter());
+            expect_ref((&slices).into_iter());
+            expect_ref((&mut_slices).into_iter());
+
+            expect_ref_mut((&mut arrays).into_iter());
+            expect_ref((&mut slices).into_iter());
+            expect_ref_mut((&mut mut_slices).into_iter());
+        }
+
+        #[test]
+        fn into_iterator_ref_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let mut arrays = Alpha::<_, [f32; 0]>{
+                color: $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut slices = Alpha::<_, &[f32]>{
+                color: $color_ty::<$($phantom_ty,)? &[f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut mut_slices = Alpha::<_, &mut [f32]>{
+                color: $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_ref((&arrays).into_iter());
+            expect_ref((&slices).into_iter());
+            expect_ref((&mut_slices).into_iter());
+
+            expect_ref_mut((&mut arrays).into_iter());
+            expect_ref((&mut slices).into_iter());
+            expect_ref_mut((&mut mut_slices).into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc() {
+            fn expect_move(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+
+            let vecs = $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let boxed_slices = $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_move(vecs.into_iter());
+            expect_ref(boxed_slices.into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_move(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? f32>, f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+
+            let vecs = Alpha::<_, Vec<f32>>{
+                color: $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let boxed_slices = Alpha::<_, Box<[f32]>>{
+                color: $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_move(vecs.into_iter());
+            expect_ref(boxed_slices.into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_ref() {
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let mut vecs = $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut boxed_slices = $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_ref((&vecs).into_iter());
+            expect_ref((&boxed_slices).into_iter());
+
+            expect_ref_mut((&mut vecs).into_iter());
+            expect_ref_mut((&mut boxed_slices).into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_ref_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let mut vecs = Alpha::<_, Vec<f32>>{
+                color: $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut boxed_slices = Alpha::<_, Box<[f32]>>{
+                color: $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_ref((&vecs).into_iter());
+            expect_ref((&boxed_slices).into_iter());
+
+            expect_ref_mut((&mut vecs).into_iter());
+            expect_ref_mut((&mut boxed_slices).into_iter());
         }
     }
 }

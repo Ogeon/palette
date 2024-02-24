@@ -679,23 +679,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Oklab,
-        Oklab::new(0.1f32, 0.2, 0.3),
-        Oklab::new(0.2, 0.3, 0.4),
-        Oklab::new(0.3, 0.4, 0.5)
+        Oklab[l, a, b],
+        super::Oklaba::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Oklaba::new(0.2, 0.3, 0.4, 0.5),
+        super::Oklaba::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::oklab::Oklaba;
-
-        struct_of_arrays_tests!(
-            Oklaba,
-            Oklaba::new(0.1f32, 0.2, 0.3, 0.4),
-            Oklaba::new(0.2, 0.3, 0.4, 0.5),
-            Oklaba::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

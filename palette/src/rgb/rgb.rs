@@ -1498,23 +1498,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Rgb<Srgb>,
-        Rgb::new(0.1f32, 0.2, 0.3),
-        Rgb::new(0.2, 0.3, 0.4),
-        Rgb::new(0.3, 0.4, 0.5)
+        Rgb<Srgb>[red, green, blue] phantom: standard,
+        Rgba::new(0.1f32, 0.2, 0.3, 0.4),
+        Rgba::new(0.2, 0.3, 0.4, 0.5),
+        Rgba::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{encoding::Srgb, rgb::Rgba};
-
-        struct_of_arrays_tests!(
-            Rgba<Srgb>,
-            Rgba::new(0.1f32, 0.2, 0.3, 0.4),
-            Rgba::new(0.2, 0.3, 0.4, 0.5),
-            Rgba::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     test_uniform_distribution! {
         Rgb<Srgb, f32> {

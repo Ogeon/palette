@@ -317,23 +317,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Lchuv<D65>,
-        Lchuv::new(0.1f32, 0.2, 0.3),
-        Lchuv::new(0.2, 0.3, 0.4),
-        Lchuv::new(0.3, 0.4, 0.5)
+        Lchuv<D65>[l, chroma, hue] phantom: white_point,
+        super::Lchuva::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Lchuva::new(0.2, 0.3, 0.4, 0.5),
+        super::Lchuva::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{lchuv::Lchuva, white_point::D65};
-
-        struct_of_arrays_tests!(
-            Lchuva<D65>,
-            Lchuva::new(0.1f32, 0.2, 0.3, 0.4),
-            Lchuva::new(0.2, 0.3, 0.4, 0.5),
-            Lchuva::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

@@ -282,21 +282,9 @@ mod tests {
     }
 
     struct_of_arrays_tests!(
-        Okhwb,
-        Okhwb::new(0.1f32, 0.2, 0.3),
-        Okhwb::new(0.2, 0.3, 0.4),
-        Okhwb::new(0.3, 0.4, 0.5)
+        Okhwb[hue, whiteness, blackness],
+        super::Okhwba::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Okhwba::new(0.2, 0.3, 0.4, 0.5),
+        super::Okhwba::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::okhwb::Okhwba;
-
-        struct_of_arrays_tests!(
-            Okhwba,
-            Okhwba::new(0.1f32, 0.2, 0.3, 0.4),
-            Okhwba::new(0.2, 0.3, 0.4, 0.5),
-            Okhwba::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 }
