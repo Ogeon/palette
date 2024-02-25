@@ -540,9 +540,6 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hsv<S, T> where T: bytemuck::Pod {}
 mod test {
     use super::Hsv;
 
-    #[cfg(feature = "alloc")]
-    use crate::Srgb;
-
     test_convert_into_from_xyz!(Hsv);
 
     #[cfg(feature = "approx")]
@@ -629,23 +626,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Hsv<Srgb>,
-        Hsv::new(0.1f32, 0.2, 0.3),
-        Hsv::new(0.2, 0.3, 0.4),
-        Hsv::new(0.3, 0.4, 0.5)
+        Hsv<crate::encoding::Srgb>[hue, saturation, value] phantom: standard,
+        super::Hsva::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Hsva::new(0.2, 0.3, 0.4, 0.5),
+        super::Hsva::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{encoding::Srgb, hsv::Hsva};
-
-        struct_of_arrays_tests!(
-            Hsva<Srgb>,
-            Hsva::new(0.1f32, 0.2, 0.3, 0.4),
-            Hsva::new(0.2, 0.3, 0.4, 0.5),
-            Hsva::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

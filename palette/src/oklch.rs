@@ -271,23 +271,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Oklch,
-        Oklch::new(0.1f32, 0.2, 0.3),
-        Oklch::new(0.2, 0.3, 0.4),
-        Oklch::new(0.3, 0.4, 0.5)
+        Oklch[l, chroma, hue],
+        super::Oklcha::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Oklcha::new(0.2, 0.3, 0.4, 0.5),
+        super::Oklcha::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::oklch::Oklcha;
-
-        struct_of_arrays_tests!(
-            Oklcha,
-            Oklcha::new(0.1f32, 0.2, 0.3, 0.4),
-            Oklcha::new(0.2, 0.3, 0.4, 0.5),
-            Oklcha::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     test_uniform_distribution! {
         Oklch<f32> as crate::Oklab {

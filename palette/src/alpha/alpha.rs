@@ -864,58 +864,6 @@ where
     }
 }
 
-impl<C, A> IntoIterator for Alpha<C, A>
-where
-    C: IntoIterator,
-    A: IntoIterator,
-{
-    type Item = Alpha<C::Item, A::Item>;
-
-    type IntoIter = Iter<C::IntoIter, A::IntoIter>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Iter {
-            color: self.color.into_iter(),
-            alpha: self.alpha.into_iter(),
-        }
-    }
-}
-
-impl<'a, C, A> IntoIterator for &'a Alpha<C, A>
-where
-    &'a C: IntoIterator,
-    &'a A: IntoIterator,
-{
-    type Item = Alpha<<&'a C as IntoIterator>::Item, <&'a A as IntoIterator>::Item>;
-
-    type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter, <&'a A as IntoIterator>::IntoIter>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Iter {
-            color: (&self.color).into_iter(),
-            alpha: (&self.alpha).into_iter(),
-        }
-    }
-}
-
-impl<'a, C, A> IntoIterator for &'a mut Alpha<C, A>
-where
-    &'a mut C: IntoIterator,
-    &'a mut A: IntoIterator,
-{
-    type Item = Alpha<<&'a mut C as IntoIterator>::Item, <&'a mut A as IntoIterator>::Item>;
-
-    type IntoIter =
-        Iter<<&'a mut C as IntoIterator>::IntoIter, <&'a mut A as IntoIterator>::IntoIter>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        Iter {
-            color: (&mut self.color).into_iter(),
-            alpha: (&mut self.alpha).into_iter(),
-        }
-    }
-}
-
 /// An iterator for transparent colors.
 pub struct Iter<C, A> {
     pub(crate) color: C,

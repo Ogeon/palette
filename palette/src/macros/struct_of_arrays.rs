@@ -46,13 +46,40 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<$($phantom_ty,)? C> IntoIterator for $self_ty<$($phantom_ty,)? C>
-        where
-            C: IntoIterator,
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for $self_ty<$($phantom_ty,)? [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? C::Item>;
+            type Item = $self_ty<$($phantom_ty,)? T>;
 
-            type IntoIter = Iter<C::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: IntoIterator::into_iter(self.$element),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>, core::array::IntoIter<T, N>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: IntoIterator::into_iter(self.alpha)
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -63,13 +90,85 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a $self_ty<$($phantom_ty,)? C>
-        where
-            &'a C: IntoIterator,
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a [T]>, &'a [T]>
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a C as IntoIterator>::Item>;
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
-            type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut [T]>, &'a mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? T>;
+
+            type IntoIter = Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>, alloc::vec::IntoIter<T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a $self_ty<$($phantom_ty,)? [T; N]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -80,19 +179,258 @@ macro_rules! impl_struct_of_array_traits {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? C>
-        where
-            &'a mut C: IntoIterator,
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a mut C as IntoIterator>::Item>;
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
-            type IntoIter = Iter<<&'a mut C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b [T]>, &'b [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&*self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b mut [T]>, &'b mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&*self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? [T; N]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
                 Iter {
                     $($element: (&mut self.$element).into_iter(),)+
                     $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? &'b mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b mut [T]>, &'b mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&mut self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        where
+            T: 'a
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    $($element: (&mut *self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut *self.alpha).into_iter(),
                 }
             }
         }
@@ -212,13 +550,41 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<$($phantom_ty,)? C> IntoIterator for $self_ty<$($phantom_ty,)? C>
-        where
-            C: IntoIterator,
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for $self_ty<$($phantom_ty,)? [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? C::Item>;
+            type Item = $self_ty<$($phantom_ty,)? T>;
 
-            type IntoIter = Iter<C::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: IntoIterator::into_iter(self.$element),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<$($phantom_ty,)? T, const N: usize> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::array::IntoIter<T, N> $(,$phantom_ty)?>, core::array::IntoIter<T, N>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: IntoIterator::into_iter(self.alpha)
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -230,13 +596,87 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a $self_ty<$($phantom_ty,)? C>
-        where
-            &'a C: IntoIterator + 'a,
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a [T]>, &'a [T]>
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a C as IntoIterator>::Item>;
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
-            type IntoIter = Iter<<&'a C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? &'a mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut [T]>, &'a mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<$($phantom_ty,)? T> IntoIterator for $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? T>;
+
+            type IntoIter = Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<alloc::vec::IntoIter<T> $(,$phantom_ty)?>, alloc::vec::IntoIter<T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a $self_ty<$($phantom_ty,)? [T; N]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -248,13 +688,149 @@ macro_rules! impl_struct_of_array_traits_hue {
             }
         }
 
-        impl<'a, $($phantom_ty,)? C> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? C>
-        where
-            &'a mut C: IntoIterator + 'a,
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
         {
-            type Item = $self_ty<$($phantom_ty,)? <&'a mut C as IntoIterator>::Item>;
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
-            type IntoIter = Iter<<&'a mut C as IntoIterator>::IntoIter $(,$phantom_ty)?>;
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: self.hue.into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b [T]>, &'b [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: self.color.into_iter(),
+                    alpha: self.alpha.into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? &'b mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&*self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b mut [T]>, &'b mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&*self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a T>;
+
+            type IntoIter = Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&self.hue).into_iter(),
+                    $($element: (&self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::Iter<'a, T> $(,$phantom_ty)?>, core::slice::Iter<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&self.color).into_iter(),
+                    alpha: (&self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? [T; N]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
 
             #[inline(always)]
             fn into_iter(self) -> Self::IntoIter {
@@ -262,6 +838,114 @@ macro_rules! impl_struct_of_array_traits_hue {
                     hue: (&mut self.hue).into_iter(),
                     $($element: (&mut self.$element).into_iter(),)+
                     $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, $($phantom_ty,)? T, const N: usize> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? [T; N]>, [T; N]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? &'b mut [T]>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: self.$element.into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'b mut [T]>, &'b mut [T]>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: (&mut self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut self.alpha).into_iter(),
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut $self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>
+        {
+            type Item = $self_ty<$($phantom_ty,)? &'a mut T>;
+
+            type IntoIter = Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>;
+
+            #[inline(always)]
+            fn into_iter(self) -> Self::IntoIter {
+                Iter {
+                    hue: (&mut self.hue).into_iter(),
+                    $($element: (&mut *self.$element).into_iter(),)+
+                    $($phantom: core::marker::PhantomData)?
+                }
+            }
+        }
+
+        #[cfg(feature = "alloc")]
+        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        {
+            type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
+
+            type IntoIter = crate::alpha::Iter<Iter<core::slice::IterMut<'a, T> $(,$phantom_ty)?>, core::slice::IterMut<'a, T>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                crate::alpha::Iter {
+                    color: (&mut self.color).into_iter(),
+                    alpha: (&mut *self.alpha).into_iter(),
                 }
             }
         }
@@ -757,23 +1441,48 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
 #[cfg(test)]
 macro_rules! struct_of_arrays_tests {
-    ($color_ty: ident $(<$phantom_ty:ident>)?, $($values:expr),+) => {
+    ($color_ty: ident $(<$phantom_ty:ty>)? [$($element: ident),+] $(phantom: $phantom: ident)?, $($values:expr),+) => {
         #[cfg(feature = "alloc")]
         #[test]
         fn collect() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
             let color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn collect_alpha() {
+            let vec_of_colors = vec![$($values),+];
+            let color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
 
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+
         #[cfg(feature = "alloc")]
         #[test]
         fn extend() {
+            let vec_of_colors = vec![$($values.color),+];
+
+            let mut color_of_vecs = $color_ty::<$($phantom_ty,)? Vec<_>>::with_capacity(vec_of_colors.len());
+            color_of_vecs.extend(vec_of_colors);
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn extend_alpha() {
             let vec_of_colors = vec![$($values),+];
 
-            let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = $color_ty::with_capacity(vec_of_colors.len());
+            let mut color_of_vecs = crate::alpha::Alpha::<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>>::with_capacity(vec_of_colors.len());
             color_of_vecs.extend(vec_of_colors);
 
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
@@ -781,12 +1490,28 @@ macro_rules! struct_of_arrays_tests {
             assert_eq!(vec_of_colors, vec![$($values),+]);
         }
 
+
         #[cfg(feature = "alloc")]
         #[test]
         fn pop_push() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+            let last = color_of_vecs.pop().unwrap();
+            color_of_vecs.push(last);
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![$($values.color),+]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn pop_push_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
             let last = color_of_vecs.pop().unwrap();
             color_of_vecs.push(last);
 
@@ -798,7 +1523,7 @@ macro_rules! struct_of_arrays_tests {
         #[cfg(feature = "alloc")]
         #[test]
         fn clear() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
             color_of_vecs.clear();
@@ -810,10 +1535,39 @@ macro_rules! struct_of_arrays_tests {
 
         #[cfg(feature = "alloc")]
         #[test]
-        fn drain() {
+        fn clear_alpha() {
             let vec_of_colors = vec![$($values),+];
 
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
+            color_of_vecs.clear();
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors, vec![]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn drain() {
+            let vec_of_colors = vec![$($values.color),+];
+
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
+
+            let vec_of_colors1: Vec<_> = color_of_vecs.drain(..).collect();
+            let vec_of_colors2: Vec<_> = color_of_vecs.into_iter().collect();
+
+            assert_eq!(vec_of_colors1, vec![$($values.color),+]);
+            assert_eq!(vec_of_colors2, vec![]);
+        }
+
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn drain_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
 
             let vec_of_colors1: Vec<_> = color_of_vecs.drain(..).collect();
             let vec_of_colors2: Vec<_> = color_of_vecs.into_iter().collect();
@@ -825,7 +1579,7 @@ macro_rules! struct_of_arrays_tests {
         #[cfg(feature = "alloc")]
         #[test]
         fn modify() {
-            let vec_of_colors = vec![$($values),+];
+            let vec_of_colors = vec![$($values.color),+];
 
             let mut color_of_vecs: $color_ty<$($phantom_ty,)? Vec<_>> = vec_of_colors.into_iter().collect();
 
@@ -835,7 +1589,245 @@ macro_rules! struct_of_arrays_tests {
 
             let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
 
+            assert_eq!(vec_of_colors, vec![$($values.color + 2.0),+]);
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn modify_alpha() {
+            let vec_of_colors = vec![$($values),+];
+
+            let mut color_of_vecs: crate::alpha::Alpha<$color_ty<$($phantom_ty,)? Vec<_>>, Vec<_>> = vec_of_colors.into_iter().collect();
+
+            for mut color in &mut color_of_vecs {
+                color.set(color.copied() + 2.0);
+            }
+
+            let vec_of_colors: Vec<_> = color_of_vecs.into_iter().collect();
+
             assert_eq!(vec_of_colors, vec![$($values + 2.0),+]);
+        }
+
+        #[test]
+        fn into_iterator() {
+            fn expect_move(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let arrays = $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let slices = $color_ty::<$($phantom_ty,)? &[f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut_slices = $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_move(arrays.into_iter());
+            expect_ref(slices.into_iter());
+            expect_ref_mut(mut_slices.into_iter());
+        }
+
+        #[test]
+        fn into_iterator_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_move(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? f32>, f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let arrays = Alpha::<_, [f32; 0]>{
+                color: $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let slices = Alpha::<_, &[f32]>{
+                color: $color_ty::<$($phantom_ty,)? &[f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut_slices = Alpha::<_, &mut [f32]>{
+                color: $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_move(arrays.into_iter());
+            expect_ref(slices.into_iter());
+            expect_ref_mut(mut_slices.into_iter());
+        }
+
+        #[test]
+        fn into_iterator_ref() {
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let mut arrays = $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut slices = $color_ty::<$($phantom_ty,)? &[f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut mut_slices = $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_ref((&arrays).into_iter());
+            expect_ref((&slices).into_iter());
+            expect_ref((&mut_slices).into_iter());
+
+            expect_ref_mut((&mut arrays).into_iter());
+            expect_ref((&mut slices).into_iter());
+            expect_ref_mut((&mut mut_slices).into_iter());
+        }
+
+        #[test]
+        fn into_iterator_ref_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let mut arrays = Alpha::<_, [f32; 0]>{
+                color: $color_ty::<$($phantom_ty,)? [f32; 0]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut slices = Alpha::<_, &[f32]>{
+                color: $color_ty::<$($phantom_ty,)? &[f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut mut_slices = Alpha::<_, &mut [f32]>{
+                color: $color_ty::<$($phantom_ty,)? &mut [f32]>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_ref((&arrays).into_iter());
+            expect_ref((&slices).into_iter());
+            expect_ref((&mut_slices).into_iter());
+
+            expect_ref_mut((&mut arrays).into_iter());
+            expect_ref((&mut slices).into_iter());
+            expect_ref_mut((&mut mut_slices).into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc() {
+            fn expect_move(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+
+            let vecs = $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let boxed_slices = $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_move(vecs.into_iter());
+            expect_ref(boxed_slices.into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_move(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? f32>, f32>>){}
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+
+            let vecs = Alpha::<_, Vec<f32>>{
+                color: $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let boxed_slices = Alpha::<_, Box<[f32]>>{
+                color: $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_move(vecs.into_iter());
+            expect_ref(boxed_slices.into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_ref() {
+            fn expect_ref<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = $color_ty::<$($phantom_ty,)? &'a mut f32>>){}
+
+            let mut vecs = $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+            let mut boxed_slices = $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                $($element: Default::default(),)+
+                $($phantom: core::marker::PhantomData,)?
+            };
+
+            expect_ref((&vecs).into_iter());
+            expect_ref((&boxed_slices).into_iter());
+
+            expect_ref_mut((&mut vecs).into_iter());
+            expect_ref_mut((&mut boxed_slices).into_iter());
+        }
+
+        #[cfg(feature = "alloc")]
+        #[test]
+        fn into_iterator_alloc_ref_alpha() {
+            use crate::alpha::Alpha;
+
+            fn expect_ref<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a f32>, &'a f32>>){}
+            fn expect_ref_mut<'a>(_: impl Iterator<Item = Alpha<$color_ty::<$($phantom_ty,)? &'a mut f32>, &'a mut f32>>){}
+
+            let mut vecs = Alpha::<_, Vec<f32>>{
+                color: $color_ty::<$($phantom_ty,)? Vec<f32>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+            let mut boxed_slices = Alpha::<_, Box<[f32]>>{
+                color: $color_ty::<$($phantom_ty,)? Box<[f32]>>{
+                    $($element: Default::default(),)+
+                    $($phantom: core::marker::PhantomData,)?
+                },
+                alpha: Default::default(),
+            };
+
+            expect_ref((&vecs).into_iter());
+            expect_ref((&boxed_slices).into_iter());
+
+            expect_ref_mut((&mut vecs).into_iter());
+            expect_ref_mut((&mut boxed_slices).into_iter());
         }
     }
 }

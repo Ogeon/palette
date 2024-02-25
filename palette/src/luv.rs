@@ -386,23 +386,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Luv<D65>,
-        Luv::new(0.1f32, 0.2, 0.3),
-        Luv::new(0.2, 0.3, 0.4),
-        Luv::new(0.3, 0.4, 0.5)
+        Luv<D65>[l, u, v] phantom: white_point,
+        super::Luva::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Luva::new(0.2, 0.3, 0.4, 0.5),
+        super::Luva::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{luv::Luva, white_point::D65};
-
-        struct_of_arrays_tests!(
-            Luva<D65>,
-            Luva::new(0.1f32, 0.2, 0.3, 0.4),
-            Luva::new(0.2, 0.3, 0.4, 0.5),
-            Luva::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

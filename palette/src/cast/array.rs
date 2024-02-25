@@ -1,6 +1,6 @@
 use core::mem::{transmute_copy, ManuallyDrop};
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::{boxed::Box, vec::Vec};
 
 pub use palette_derive::ArrayCast;

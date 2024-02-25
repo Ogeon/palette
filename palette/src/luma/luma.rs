@@ -895,23 +895,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Luma<Srgb>,
-        Luma::new(0.1f32),
-        Luma::new(0.2),
-        Luma::new(0.3)
+        Luma<Srgb>[luma] phantom: standard,
+        super::Lumaa::new(0.1f32, 0.4),
+        super::Lumaa::new(0.2, 0.5),
+        super::Lumaa::new(0.3, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{encoding::Srgb, luma::Lumaa};
-
-        struct_of_arrays_tests!(
-            Lumaa<Srgb>,
-            Lumaa::new(0.1f32, 0.4),
-            Lumaa::new(0.2, 0.5),
-            Lumaa::new(0.3, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

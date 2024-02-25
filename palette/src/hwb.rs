@@ -366,9 +366,6 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hwb<S, T> where T: bytemuck::Pod {}
 mod test {
     use super::Hwb;
 
-    #[cfg(feature = "alloc")]
-    use crate::Srgb;
-
     test_convert_into_from_xyz!(Hwb);
 
     #[cfg(feature = "approx")]
@@ -456,23 +453,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Hwb<Srgb>,
-        Hwb::new(0.1f32, 0.2, 0.3),
-        Hwb::new(0.2, 0.3, 0.4),
-        Hwb::new(0.3, 0.4, 0.5)
+        Hwb<crate::encoding::Srgb>[hue, whiteness, blackness] phantom: standard,
+        super::Hwba::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Hwba::new(0.2, 0.3, 0.4, 0.5),
+        super::Hwba::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{encoding::Srgb, hwb::Hwba};
-
-        struct_of_arrays_tests!(
-            Hwba<Srgb>,
-            Hwba::new(0.1f32, 0.2, 0.3, 0.4),
-            Hwba::new(0.2, 0.3, 0.4, 0.5),
-            Hwba::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]

@@ -493,23 +493,11 @@ mod test {
     }
 
     struct_of_arrays_tests!(
-        Xyz<D65>,
-        Xyz::new(0.1f32, 0.2, 0.3),
-        Xyz::new(0.2, 0.3, 0.4),
-        Xyz::new(0.3, 0.4, 0.5)
+        Xyz<D65>[x, y, z] phantom: white_point,
+        super::Xyza::new(0.1f32, 0.2, 0.3, 0.4),
+        super::Xyza::new(0.2, 0.3, 0.4, 0.5),
+        super::Xyza::new(0.3, 0.4, 0.5, 0.6)
     );
-
-    mod alpha {
-        #[cfg(feature = "alloc")]
-        use crate::{white_point::D65, xyz::Xyza};
-
-        struct_of_arrays_tests!(
-            Xyza<D65>,
-            Xyza::new(0.1f32, 0.2, 0.3, 0.4),
-            Xyza::new(0.2, 0.3, 0.4, 0.5),
-            Xyza::new(0.3, 0.4, 0.5, 0.6)
-        );
-    }
 
     #[cfg(feature = "serializing")]
     #[test]
