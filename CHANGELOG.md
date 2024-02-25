@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.7.5 - 2024-02-25
+
+* [#380][380]: Avoid recursive trait resolution for `IntoIterator`. Closes [#283][283].
+
 ## Version 0.7.4 - 2024-01-28
 
 * [#373][373]: Add an "alloc" feature and make tests work with any feature combination. Closes [#366][366].
@@ -292,6 +296,7 @@ The first published version.
 [369]: https://github.com/Ogeon/palette/pull/369
 [373]: https://github.com/Ogeon/palette/pull/373
 [374]: https://github.com/Ogeon/palette/pull/374
+[380]: https://github.com/Ogeon/palette/pull/380
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
