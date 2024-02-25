@@ -487,21 +487,6 @@
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
-<a href="#489" id="489">489</a>
-<a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
-<a href="#496" id="496">496</a>
-<a href="#497" id="497">497</a>
-<a href="#498" id="498">498</a>
-<a href="#499" id="499">499</a>
-<a href="#500" id="500">500</a>
-<a href="#501" id="501">501</a>
-<a href="#502" id="502">502</a>
-<a href="#503" id="503">503</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the HWB color space.
 
 </span><span class="kw">use </span>core::{any::TypeId, marker::PhantomData};
@@ -870,9 +855,6 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Hwb;
 
-    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-    </span><span class="kw">use </span><span class="kw">crate</span>::Srgb;
-
     <span class="macro">test_convert_into_from_xyz!</span>(Hwb);
 
     <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
@@ -960,23 +942,11 @@
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
-        Hwb&lt;Srgb&gt;,
-        Hwb::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
-        Hwb::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-        Hwb::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+        Hwb&lt;<span class="kw">crate</span>::encoding::Srgb&gt;[hue, whiteness, blackness] phantom: standard,
+        <span class="kw">super</span>::Hwba::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        <span class="kw">super</span>::Hwba::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+        <span class="kw">super</span>::Hwba::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
     );
-
-    <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-        </span><span class="kw">use crate</span>::{encoding::Srgb, hwb::Hwba};
-
-        <span class="macro">struct_of_arrays_tests!</span>(
-            Hwba&lt;Srgb&gt;,
-            Hwba::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-            Hwba::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
-            Hwba::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
-        );
-    }
 
     <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]

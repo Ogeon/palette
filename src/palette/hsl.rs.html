@@ -690,21 +690,6 @@
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the HSL color space.
 
 </span><span class="kw">use </span>core::{any::TypeId, marker::PhantomData, ops::Not};
@@ -1240,9 +1225,6 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Hsl;
 
-    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-    </span><span class="kw">use </span><span class="kw">crate</span>::Srgb;
-
     <span class="macro">test_convert_into_from_xyz!</span>(Hsl);
 
     <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
@@ -1329,23 +1311,11 @@
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
-        Hsl&lt;Srgb&gt;,
-        Hsl::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
-        Hsl::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-        Hsl::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+        Hsl&lt;<span class="kw">crate</span>::encoding::Srgb&gt;[hue, saturation, lightness] phantom: standard,
+        <span class="kw">super</span>::Hsla::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        <span class="kw">super</span>::Hsla::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+        <span class="kw">super</span>::Hsla::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
     );
-
-    <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-        </span><span class="kw">use crate</span>::{encoding::Srgb, hsl::Hsla};
-
-        <span class="macro">struct_of_arrays_tests!</span>(
-            Hsla&lt;Srgb&gt;,
-            Hsla::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-            Hsla::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
-            Hsla::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
-        );
-    }
 
     <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]

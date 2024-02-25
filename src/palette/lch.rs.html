@@ -489,18 +489,6 @@
 <a href="#488" id="488">488</a>
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
-<a href="#496" id="496">496</a>
-<a href="#497" id="497">497</a>
-<a href="#498" id="498">498</a>
-<a href="#499" id="499">499</a>
-<a href="#500" id="500">500</a>
-<a href="#501" id="501">501</a>
-<a href="#502" id="502">502</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE L\*C\*h° color space.
 
 </span><span class="kw">use </span>core::{
@@ -958,23 +946,11 @@
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
-        Lch&lt;D65&gt;,
-        Lch::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
-        Lch::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-        Lch::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+        Lch&lt;D65&gt;[l, chroma, hue] phantom: white_point,
+        <span class="kw">super</span>::Lcha::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        <span class="kw">super</span>::Lcha::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+        <span class="kw">super</span>::Lcha::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
     );
-
-    <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-        </span><span class="kw">use crate</span>::{lch::Lcha, white_point::D65};
-
-        <span class="macro">struct_of_arrays_tests!</span>(
-            Lcha&lt;D65&gt;,
-            Lcha::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-            Lcha::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
-            Lcha::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
-        );
-    }
 
     <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]

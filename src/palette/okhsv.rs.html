@@ -560,18 +560,6 @@
 <a href="#559" id="559">559</a>
 <a href="#560" id="560">560</a>
 <a href="#561" id="561">561</a>
-<a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the Okhsv color space.
 
 </span><span class="kw">use </span>core::fmt::Debug;
@@ -1127,22 +1115,10 @@
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
-        Okhsv,
-        Okhsv::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
-        Okhsv::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-        Okhsv::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+        Okhsv[hue, saturation, value],
+        <span class="kw">super</span>::Okhsva::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        <span class="kw">super</span>::Okhsva::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+        <span class="kw">super</span>::Okhsva::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
     );
-
-    <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-        </span><span class="kw">use </span><span class="kw">crate</span>::okhsv::Okhsva;
-
-        <span class="macro">struct_of_arrays_tests!</span>(
-            Okhsva,
-            Okhsva::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-            Okhsva::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
-            Okhsva::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
-        );
-    }
 }
 </code></pre></div></section></main></body></html>

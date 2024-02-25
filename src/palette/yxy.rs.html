@@ -395,18 +395,6 @@
 <a href="#394" id="394">394</a>
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 Yxy (xyY) color space.
 
 </span><span class="kw">use </span>core::marker::PhantomData;
@@ -771,23 +759,11 @@
     }
 
     <span class="macro">struct_of_arrays_tests!</span>(
-        Yxy&lt;D65&gt;,
-        Yxy::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>),
-        Yxy::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-        Yxy::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>)
+        Yxy&lt;D65&gt;[x, y, luma] phantom: white_point,
+        <span class="kw">super</span>::Yxya::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
+        <span class="kw">super</span>::Yxya::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
+        <span class="kw">super</span>::Yxya::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
     );
-
-    <span class="kw">mod </span>alpha {
-        <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-        </span><span class="kw">use crate</span>::{white_point::D65, yxy::Yxya};
-
-        <span class="macro">struct_of_arrays_tests!</span>(
-            Yxya&lt;D65&gt;,
-            Yxya::new(<span class="number">0.1f32</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>),
-            Yxya::new(<span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>),
-            Yxya::new(<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.5</span>, <span class="number">0.6</span>)
-        );
-    }
 
     <span class="attr">#[cfg(feature = <span class="string">"serializing"</span>)]
     #[test]

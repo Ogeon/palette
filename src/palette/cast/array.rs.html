@@ -1644,7 +1644,7 @@
 <a href="#1643" id="1643">1643</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::mem::{transmute_copy, ManuallyDrop};
 
-<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+<span class="attr">#[cfg(all(feature = <span class="string">"alloc"</span>, not(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">use </span>alloc::{boxed::Box, vec::Vec};
 
 <span class="kw">pub use </span>palette_derive::ArrayCast;
