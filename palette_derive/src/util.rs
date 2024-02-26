@@ -33,6 +33,9 @@ pub fn color_path(color: &str, internal: bool) -> TokenStream {
     match color {
         "Luma" => path(["luma", "Luma"], internal),
         "Rgb" => path(["rgb", "Rgb"], internal),
+        "Cam16" | "PartialCam16" | "Cam16UcsJmh" | "Cam16UcsJab" => {
+            path(["cam16", color], internal)
+        }
         _ => path([color], internal),
     }
 }

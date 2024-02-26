@@ -344,6 +344,8 @@ pub mod alpha;
 pub mod angle;
 pub mod blend;
 pub mod bool_mask;
+#[cfg(feature = "cam16")]
+pub mod cam16;
 pub mod cast;
 pub mod chromatic_adaptation;
 pub mod color_difference;

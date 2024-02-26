@@ -298,6 +298,20 @@ macro_rules! impl_wide_float {
                     $ty::mul_sub(self, m, s)
                 }
             }
+
+            impl Signum for $ty {
+                #[inline]
+                fn signum(self) -> Self {
+                    self.is_nan().blend(Self::from($scalar::NAN), $ty::copysign(Self::from(1.0), self))
+                }
+            }
+
+            impl Ln for $ty {
+                #[inline]
+                fn ln(self) -> Self {
+                    self.ln()
+                }
+            }
         )+
     };
 }

@@ -15,7 +15,7 @@ mod type_item_attributes;
 
 pub fn parse_namespaced_attributes<T: AttributeArgumentParser>(
     attributes: Vec<Attribute>,
-) -> ::std::result::Result<T, Vec<::syn::parse::Error>> {
+) -> (T, Vec<::syn::parse::Error>) {
     let mut result = T::default();
     let mut errors = Vec::new();
 
@@ -53,8 +53,8 @@ pub fn parse_namespaced_attributes<T: AttributeArgumentParser>(
         match parse_result {
             Ok(meta) => {
                 for argument in meta {
-                    if let Err(error) = result.argument(argument) {
-                        errors.push(error);
+                    if let Err(new_error) = result.argument(argument) {
+                        errors.extend(new_error);
                     }
                 }
             }
@@ -62,16 +62,12 @@ pub fn parse_namespaced_attributes<T: AttributeArgumentParser>(
         }
     }
 
-    if errors.is_empty() {
-        Ok(result)
-    } else {
-        Err(errors)
-    }
+    (result, errors)
 }
 
 pub fn parse_field_attributes<T: FieldAttributeArgumentParser>(
     fields: Fields,
-) -> ::std::result::Result<T, Vec<::syn::parse::Error>> {
+) -> (T, Vec<::syn::parse::Error>) {
     let mut result = T::default();
     let mut errors = Vec::new();
 
@@ -121,8 +117,8 @@ pub fn parse_field_attributes<T: FieldAttributeArgumentParser>(
         match parse_result {
             Ok(meta) => {
                 for argument in meta {
-                    if let Err(error) = result.argument(&field_name, &ty, argument) {
-                        errors.push(error);
+                    if let Err(new_errors) = result.argument(&field_name, &ty, argument) {
+                        errors.extend(new_errors);
                     }
                 }
             }
@@ -130,11 +126,7 @@ pub fn parse_field_attributes<T: FieldAttributeArgumentParser>(
         }
     }
 
-    if errors.is_empty() {
-        Ok(result)
-    } else {
-        Err(errors)
-    }
+    (result, errors)
 }
 
 pub fn assert_path_meta(meta: &Meta) -> Result<()> {
@@ -208,9 +200,14 @@ impl ::quote::ToTokens for IdentOrIndex {
 }
 
 pub trait AttributeArgumentParser: Default {
-    fn argument(&mut self, argument: Meta) -> Result<()>;
+    fn argument(&mut self, argument: Meta) -> std::result::Result<(), Vec<syn::Error>>;
 }
 
 pub trait FieldAttributeArgumentParser: Default {
-    fn argument(&mut self, field_name: &IdentOrIndex, ty: &Type, argument: Meta) -> Result<()>;
+    fn argument(
+        &mut self,
+        field_name: &IdentOrIndex,
+        ty: &Type,
+        argument: Meta,
+    ) -> std::result::Result<(), Vec<syn::Error>>;
 }
