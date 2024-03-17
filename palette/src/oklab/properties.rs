@@ -33,6 +33,7 @@ impl_hyab!(Oklab {
     chroma1: a,
     chroma2: b
 });
+impl_lab_color_schemes!(Oklab[l]);
 
 impl<T> GetHue for Oklab<T>
 where
@@ -72,4 +73,12 @@ where
 
         crate::contrast_ratio(xyz1.y, xyz2.y)
     }
+}
+
+#[cfg(test)]
+mod test {
+    #[cfg(feature = "approx")]
+    use crate::{Oklab, Oklch};
+
+    test_lab_color_schemes!(Oklab / Oklch[l]);
 }

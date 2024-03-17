@@ -231,6 +231,7 @@ impl_lighten!(Lab<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {a, b
 impl_premultiply!(Lab<Wp> {l, a, b} phantom: white_point);
 impl_euclidean_distance!(Lab<Wp> {l, a, b});
 impl_hyab!(Lab<Wp> {lightness: l, chroma1: a, chroma2: b});
+impl_lab_color_schemes!(Lab<Wp>[l, white_point]);
 
 impl<Wp, T> GetHue for Lab<Wp, T>
 where
@@ -389,6 +390,9 @@ mod test {
     use super::Lab;
     use crate::white_point::D65;
 
+    #[cfg(feature = "approx")]
+    use crate::Lch;
+
     test_convert_into_from_xyz!(Lab);
 
     #[cfg(feature = "approx")]
@@ -476,4 +480,6 @@ mod test {
         min: Lab::new(0.0f32, -128.0, -128.0),
         max: Lab::new(100.0, 127.0, 127.0)
     }
+
+    test_lab_color_schemes!(Lab/Lch [l, white_point]);
 }

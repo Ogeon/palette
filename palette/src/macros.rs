@@ -37,3 +37,5 @@ mod copy_clone;
 mod hue;
 #[macro_use]
 mod random;
+#[macro_use]
+mod color_theory;

@@ -233,6 +233,7 @@ impl_lighten!(Luv<Wp> increase {l => [Self::min_l(), Self::max_l()]} other {u, v
 impl_premultiply!(Luv<Wp> {l, u, v} phantom: white_point);
 impl_euclidean_distance!(Luv<Wp> {l, u, v});
 impl_hyab!(Luv<Wp> {lightness: l, chroma1: u, chroma2: v});
+impl_lab_color_schemes!(Luv<Wp>[u, v][l, white_point]);
 
 impl<Wp, T> GetHue for Luv<Wp, T>
 where
@@ -313,6 +314,9 @@ unsafe impl<Wp: 'static, T> bytemuck::Pod for Luv<Wp, T> where T: bytemuck::Pod 
 mod test {
     use super::Luv;
     use crate::white_point::D65;
+
+    #[cfg(feature = "approx")]
+    use crate::Lchuv;
 
     test_convert_into_from_xyz!(Luv);
 
@@ -417,4 +421,6 @@ mod test {
         min: Luv::new(0.0f32, -84.0, -135.0),
         max: Luv::new(100.0, 176.0, 108.0)
     }
+
+    test_lab_color_schemes!(Luv / Lchuv [u, v][l, white_point]);
 }
