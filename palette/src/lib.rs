@@ -347,6 +347,7 @@ pub mod bool_mask;
 pub mod cast;
 pub mod chromatic_adaptation;
 pub mod color_difference;
+pub mod color_theory;
 pub mod convert;
 pub mod encoding;
 pub mod hsl;
