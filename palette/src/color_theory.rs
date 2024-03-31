@@ -1,4 +1,20 @@
 //! Traits related to traditional color theory.
+//!
+//! Traditional color theory is sometimes used as a guide when selecting colors
+//! for artistic purposes. While it's not the same as modern color science, and
+//! much more subjective, it may still be a helpful set of principles.
+//!
+//! This module is primarily based on the 12 color wheel, meaning that they use
+//! colors that are separated by 30° around the hue circle. There are however
+//! some concepts, such as [`Complementary`] colors, that are generally
+//! independent from the 12 color wheel concept.
+//!
+//! Most of the traits in this module require the color space to have a hue
+//! component. You will often see people use [`Hsv`][crate::Hsv] or
+//! [`Hsl`][crate::Hsl] when demonstrating some of these techniques, but Palette
+//! lets you use any hue based color space. Some traits are also implemented for
+//! other color spaces, when it's possible to avoid converting them to their hue
+//! based counterparts.
 
 use crate::{angle::HalfRotation, num::Real, ShiftHue};
 
@@ -6,7 +22,7 @@ use crate::{angle::HalfRotation, num::Real, ShiftHue};
 ///
 /// A complementary color scheme consists of two colors on the opposite sides of
 /// the color wheel.
-pub trait Complementary {
+pub trait Complementary: Sized {
     /// Return the complementary color of `self`.
     ///
     /// This is the same as if the hue of `self` would be rotated by 180°.
