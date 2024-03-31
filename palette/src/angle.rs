@@ -163,7 +163,7 @@ macro_rules! impl_from_angle_u8 {
                 #[inline]
                 fn from_angle(angle: $float_ty) -> Self {
                     let normalized = angle.normalize_unsigned_angle() / $float_ty::full_rotation();
-                    let rounded = normalized.round();
+                    let rounded = (normalized * 256.0).round();
 
                     if rounded > 255.5 {
                         0
@@ -199,5 +199,24 @@ impl UnsignedAngle for u8 {
     #[inline]
     fn normalize_unsigned_angle(self) -> Self {
         self
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::RgbHue;
+
+    #[test]
+    fn f32_to_u8() {
+        let hue_f32 = RgbHue::new(180.0f32);
+        let hue_u8 = hue_f32.into_format::<u8>();
+        assert_eq!(hue_u8, RgbHue::new(128u8));
+    }
+
+    #[test]
+    fn u8_to_f32() {
+        let hue_f32 = RgbHue::new(128u8);
+        let hue_u8 = hue_f32.into_format::<f32>();
+        assert_eq!(hue_u8, RgbHue::new(180.0f32));
     }
 }
