@@ -59,8 +59,11 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// // `new` is also `const`:
 /// const RGB_U8: Srgb<u8> = Srgb::new(171, 193, 35);
 ///
-/// // Converting from one number format to another is as simple as this:
-/// let rgb_u8_from_f32 = Srgb::new(0.3f32, 0.8, 0.1).into_format::<u8>();
+/// // Converting from one number format to another can be as simple as this:
+/// let rgb_u8_from_f32_1: Srgb<u8> = Srgb::new(0.3f32, 0.8, 0.1).into();
+///
+/// // ...or more explicitly like this:
+/// let rgb_u8_from_f32_2 = Srgb::new(0.3f32, 0.8, 0.1).into_format::<u8>();
 ///
 /// // Hexadecimal is also supported, with or without the #:
 /// let rgb_from_hex1: Srgb<u8> = "#f034e6".parse().unwrap();
@@ -1209,6 +1212,90 @@ impl<S> From<Rgba<S, u8>> for u32 {
     #[inline]
     fn from(color: Rgba<S, u8>) -> Self {
         Rgba::into_u32::<super::channels::Rgba>(color)
+    }
+}
+
+impl<S> From<Rgb<S, u8>> for Rgb<S, f32> {
+    #[inline]
+    fn from(color: Rgb<S, u8>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, u8>> for Rgba<S, f32> {
+    #[inline]
+    fn from(color: Rgba<S, u8>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgb<S, f32>> for Rgb<S, u8> {
+    #[inline]
+    fn from(color: Rgb<S, f32>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, f32>> for Rgba<S, u8> {
+    #[inline]
+    fn from(color: Rgba<S, f32>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgb<S, u8>> for Rgb<S, f64> {
+    #[inline]
+    fn from(color: Rgb<S, u8>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, u8>> for Rgba<S, f64> {
+    #[inline]
+    fn from(color: Rgba<S, u8>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgb<S, f64>> for Rgb<S, u8> {
+    #[inline]
+    fn from(color: Rgb<S, f64>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, f64>> for Rgba<S, u8> {
+    #[inline]
+    fn from(color: Rgba<S, f64>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgb<S, f32>> for Rgb<S, f64> {
+    #[inline]
+    fn from(color: Rgb<S, f32>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, f32>> for Rgba<S, f64> {
+    #[inline]
+    fn from(color: Rgba<S, f32>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgb<S, f64>> for Rgb<S, f32> {
+    #[inline]
+    fn from(color: Rgb<S, f64>) -> Self {
+        color.into_format()
+    }
+}
+
+impl<S> From<Rgba<S, f64>> for Rgba<S, f32> {
+    #[inline]
+    fn from(color: Rgba<S, f64>) -> Self {
+        color.into_format()
     }
 }
 
