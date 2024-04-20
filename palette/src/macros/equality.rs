@@ -1,8 +1,8 @@
 macro_rules! impl_eq {
-    (  $self_ty: ident , [$element: ident]) => {
+    (  $self_ty: ident , [$element: tt]) => {
         impl_eq!($self_ty<>, [$element]);
     };
-    (  $self_ty: ident < $($ty_param: ident),* > , [$element: ident]) => {
+    (  $self_ty: ident < $($ty_param: ident),* > , [$element: tt]) => {
         impl<$($ty_param,)* T> PartialEq for $self_ty<$($ty_param,)* T>
         where
             T: PartialEq,

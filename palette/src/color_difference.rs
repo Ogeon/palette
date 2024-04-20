@@ -21,7 +21,7 @@
 //! | [`Ciede2000`] | High | High for small differences, lower for large differences | The de-facto standard, but requires complex calculations to compensate for increased errors in certain areas of the CIE L\*a\*b\* (CIELAB) space.
 //! | [`ImprovedCiede2000`] | High | High for small differences, lower for large differences | A general improvement of [`Ciede2000`], using a formula by Huang et al.
 //! | [`DeltaE`] | Usually low | Medium to high | The formula differs between color spaces and may not always be the best. Other formulas, such as [`Ciede2000`], may be preferred for some spaces.
-//! | [`ImprovedDeltaE`] | Usually low | Medium to high | A general improvement of [`DeltaE`], using a formula by Huang et al.
+//! | [`ImprovedDeltaE`] | Usually low to medium | Medium to high | A general improvement of [`DeltaE`], using a formula by Huang et al.
 //! | [`EuclideanDistance`] | Low | Medium to high for perceptually uniform spaces, otherwise low | Can be good enough for perceptually uniform spaces or as a "quick and dirty" check.
 //! | [`HyAb`] | Low | High accuracy for medium to large differences. Less accurate than CIEDE2000 for small differences, but still performs well and is much less computationally expensive. | Similar to Euclidean distance, but separates lightness and chroma more. Limited to Cartesian spaces with a lightness axis and a chroma plane.
 //! | [`Wcag21RelativeContrast`] | Low | Low and only compares lightness | Meant for checking contrasts in computer graphics (such as between text and background colors), assuming sRGB. Mostly useful as a hint or for checking WCAG 2.1 compliance, considering the criticism it has received.

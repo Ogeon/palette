@@ -194,13 +194,13 @@ where
     T: RealAngle + Zero + MinMax + Trigonometry + Mul<Output = T> + Clone,
 {
     fn from_color_unclamped(color: Lch<Wp, T>) -> Self {
-        let (hue_sin, hue_cos) = color.hue.into_raw_radians().sin_cos();
+        let (a, b) = color.hue.into_cartesian();
         let chroma = color.chroma.max(T::zero());
 
         Lab {
             l: color.l,
-            a: hue_cos * chroma.clone(),
-            b: hue_sin * chroma,
+            a: a * chroma.clone(),
+            b: b * chroma,
             white_point: PhantomData,
         }
     }
@@ -259,15 +259,18 @@ where
 
 impl<Wp, T> ImprovedDeltaE for Lab<Wp, T>
 where
-    Self: DeltaE<Scalar = T>,
-    T: Real + Mul<T, Output = T> + Powf + Sqrt,
+    Self: DeltaE<Scalar = T> + EuclideanDistance<Scalar = T>,
+    T: Real + Mul<T, Output = T> + Powf,
 {
     #[inline]
     fn improved_delta_e(self, other: Self) -> Self::Scalar {
         // Coefficients from "Power functions improving the performance of
         // color-difference formulas" by Huang et al.
         // https://opg.optica.org/oe/fulltext.cfm?uri=oe-23-1-597&id=307643
-        T::from_f64(1.26) * self.delta_e(other).powf(T::from_f64(0.55))
+        //
+        // The multiplication of 0.5 in the exponent makes it square root the
+        // squared distance.
+        T::from_f64(1.26) * self.distance_squared(other).powf(T::from_f64(0.55 * 0.5))
     }
 }
 

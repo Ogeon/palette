@@ -6,7 +6,7 @@ macro_rules! test_convert_into_from_xyz {
         fn convert_from_xyz() {
             use crate::FromColor;
 
-            let _: $ty = <$ty>::from_color(crate::Xyz::default());
+            let _: $ty = <$ty>::from_color(crate::Xyz::<crate::white_point::D65, f32>::default());
         }
 
         #[test]

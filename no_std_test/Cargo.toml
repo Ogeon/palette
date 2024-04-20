@@ -15,6 +15,8 @@ bench = false
 
 [features]
 nightly = []
+# Avoids getting these features included in other packages in the same workspace.
+all_features = ["palette/libm", "palette/named_from_str"]
 
 [dependencies.libc]
 version = "0.2"
@@ -23,4 +25,3 @@ default-features = false
 [dependencies.palette]
 path = "../palette"
 default-features = false
-features = ["libm", "named_from_str"]

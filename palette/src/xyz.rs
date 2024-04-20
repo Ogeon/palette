@@ -3,12 +3,20 @@
 use core::{marker::PhantomData, ops::Mul};
 
 use crate::{
+    angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
+    cam16::{
+        Cam16, Cam16IntoUnclamped, Cam16Jch, Cam16Jmh, Cam16Jsh, Cam16Qch, Cam16Qmh, Cam16Qsh,
+        FromCam16Unclamped, WhitePointParameter,
+    },
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
     luma::LumaStandard,
     matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
-    num::{Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powi, Real, Recip, Zero},
+    num::{
+        Abs, Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powf, Powi, Real, Recip,
+        Signum, Sqrt, Trigonometry, Zero,
+    },
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
@@ -317,6 +325,61 @@ where
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
     }
 }
+
+impl<WpParam, T> FromCam16Unclamped<WpParam, Cam16<T>> for Xyz<WpParam::StaticWp, T>
+where
+    WpParam: WhitePointParameter<T>,
+    T: FromScalar,
+    Cam16Jch<T>: Cam16IntoUnclamped<WpParam, Self, Scalar = T::Scalar>,
+{
+    type Scalar = T::Scalar;
+
+    fn from_cam16_unclamped(
+        cam16: Cam16<T>,
+        parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
+    ) -> Self {
+        Cam16Jch::from(cam16).cam16_into_unclamped(parameters)
+    }
+}
+
+macro_rules! impl_from_cam16_partial {
+    ($($name: ident),+) => {
+        $(
+            impl<WpParam, T> FromCam16Unclamped<WpParam, $name<T>> for Xyz<WpParam::StaticWp, T>
+            where
+                WpParam: WhitePointParameter<T>,
+                T: Real
+                    + FromScalar
+                    + One
+                    + Zero
+                    + Sqrt
+                    + Powf
+                    + Abs
+                    + Signum
+                    + Arithmetics
+                    + Trigonometry
+                    + RealAngle
+                    + SignedAngle
+                    + PartialCmp
+                    + Clone,
+                T::Mask: LazySelect<T> + Clone,
+                T::Scalar: Clone,
+            {
+                type Scalar = T::Scalar;
+
+                fn from_cam16_unclamped(
+                    cam16: $name<T>,
+                    parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
+                ) -> Self {
+                    crate::cam16::math::cam16_to_xyz(cam16.into_dynamic(), parameters.inner)
+                        .with_white_point()
+                }
+            }
+        )+
+    };
+}
+
+impl_from_cam16_partial!(Cam16Jmh, Cam16Jch, Cam16Jsh, Cam16Qmh, Cam16Qch, Cam16Qsh);
 
 impl_tuple_conversion!(Xyz<Wp> as (T, T, T));
 

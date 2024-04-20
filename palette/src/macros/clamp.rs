@@ -221,6 +221,7 @@ macro_rules! assert_ranges {
                     let $unclamped = (1..11).map(|i| from - (i as f64 / 10.0) * diff);
                 )*
 
+                #[allow(clippy::needless_update)]
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
@@ -268,6 +269,7 @@ macro_rules! assert_ranges {
                     let $unclamped = (0..11).map(|i| from + (i as f64 / 10.0) * diff);
                 )*
 
+                #[allow(clippy::needless_update)]
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
@@ -308,6 +310,7 @@ macro_rules! assert_ranges {
                     let $unclamped = (1..11).map(|i| to + (i as f64 / 10.0) * diff);
                 )*
 
+                #[allow(clippy::needless_update)]
                 for assert_ranges!(@make_tuple (), $($clamped,)+ $($clamped_min,)* $($unclamped,)* ) in repeat(()) $(.zip($clamped))+ $(.zip($clamped_min))* $(.zip($unclamped))* {
                     let color: $ty<$($ty_params),+> = $ty {
                         $($clamped: $clamped.into(),)+
