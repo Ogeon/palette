@@ -1,0 +1,15 @@
+comment:
+  layout: "header, diff, flags, components"
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+  individual_components:
+    - component_id: palette
+      paths:
+        - palette/**
+    - component_id: palette_derive
+      paths:
+        - palette_derive/**

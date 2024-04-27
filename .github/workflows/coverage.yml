@@ -4,11 +4,13 @@ on:
       - master
     paths:
       - '**.rs'
+      - 'codecov.yml'
   push:
     branches:
       - master
     paths:
       - '**.rs'
+      - 'codecov.yml'
 
 name: Test coverage
 
