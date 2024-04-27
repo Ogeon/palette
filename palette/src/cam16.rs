@@ -33,12 +33,12 @@
 //! For more control over the attributes to use when converting from CAM16, one
 //! of the partial CAM16 types can be used:
 //!
-//! * [`Cam16Jch`](crate::cam16::Cam16Jch): lightness and chroma.
-//! * [`Cam16Jmh`](crate::cam16::Cam16Jmh): lightness and colorfulness.
-//! * [`Cam16Jsh`](crate::cam16::Cam16Jsh): lightness and saturation.
-//! * [`Cam16Qch`](crate::cam16::Cam16Qch): brightness and chroma.
-//! * [`Cam16Qmh`](crate::cam16::Cam16Qmh): brightness and colorfulness.
-//! * [`Cam16Qsh`](crate::cam16::Cam16Qsh): brightness and saturation.
+//! * [`Cam16Jch`]: lightness and chroma.
+//! * [`Cam16Jmh`]: lightness and colorfulness.
+//! * [`Cam16Jsh`]: lightness and saturation.
+//! * [`Cam16Qch`]: brightness and chroma.
+//! * [`Cam16Qmh`]: brightness and colorfulness.
+//! * [`Cam16Qsh`]: brightness and saturation.
 //!
 //! Generic traits and functions can make use of the [`IntoCam16Unclamped`],
 //! [`FromCam16Unclamped`], [`Cam16IntoUnclamped`], and [`Cam16FromUnclamped`]

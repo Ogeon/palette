@@ -20,7 +20,7 @@ mod properties;
 #[cfg(feature = "random")]
 mod random;
 
-/// Oklch, a polar version of [Oklab](crate::Oklab).
+/// Oklch, a polar version of [Oklab].
 ///
 /// It is Oklab’s equivalent of [CIE L\*C\*h°](crate::Lch).
 ///

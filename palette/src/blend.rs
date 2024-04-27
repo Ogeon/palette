@@ -13,9 +13,8 @@
 //! let c = a.overlay(b);
 //! ```
 //!
-//! Blending equations can be defined using the
-//! [`Equations`](crate::blend::Equations) type, which is then passed to the
-//! `blend` function, from the `Blend` trait:
+//! Blending equations can be defined using the [`Equations`] type, which is
+//! then passed to the `blend` function, from the `Blend` trait:
 //!
 //! ```
 //! use palette::LinSrgba;

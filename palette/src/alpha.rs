@@ -19,7 +19,7 @@ mod alpha;
 /// channel of a color type. The color type itself doesn't need to store the
 /// transparency value as it can be transformed into or wrapped in a type that
 /// has a representation of transparency. This would typically be done by
-/// wrapping it in an [`Alpha`](crate::Alpha) instance.
+/// wrapping it in an [`Alpha`] instance.
 ///
 /// # Deriving
 /// The trait is trivial enough to be automatically derived. If the color type
