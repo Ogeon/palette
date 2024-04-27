@@ -138,7 +138,7 @@ pub trait Analogous: Sized {
     /// ```
     fn analogous(self) -> (Self, Self);
 
-    /// Return the two furthest colors of a 5 color analogous color scheme.
+    /// Return the next two analogous colors, after the colors `analogous` returns.
     ///
     /// The colors are ordered by ascending hue difference, or `(hue-60°,
     /// hue+60°)`. Combined with the input color and the colors from
@@ -157,7 +157,7 @@ pub trait Analogous: Sized {
     ///
     /// let primary = Hsl::new_srgb(120.0f32, 0.8, 0.5);
     /// let (analog_down1, analog_up1) = primary.analogous();
-    /// let (analog_down2, analog_up2) = primary.analogous2();
+    /// let (analog_down2, analog_up2) = primary.analogous_secondary();
     ///
     /// let hues = (
     ///     analog_down2.hue.into_positive_degrees(),
@@ -169,7 +169,7 @@ pub trait Analogous: Sized {
     ///
     /// assert_eq!(hues, (60.0, 90.0, 120.0, 150.0, 180.0));
     /// ```
-    fn analogous2(self) -> (Self, Self);
+    fn analogous_secondary(self) -> (Self, Self);
 }
 
 impl<T> Analogous for T
@@ -184,7 +184,7 @@ where
         (first, second)
     }
 
-    fn analogous2(self) -> (Self, Self) {
+    fn analogous_secondary(self) -> (Self, Self) {
         let first = self.clone().shift_hue(T::Scalar::from_f64(300.0));
         let second = self.shift_hue(T::Scalar::from_f64(60.0));
 
