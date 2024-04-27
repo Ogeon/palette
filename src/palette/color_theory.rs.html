@@ -429,7 +429,7 @@
     /// ```
     </span><span class="kw">fn </span>analogous(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>);
 
-    <span class="doccomment">/// Return the two furthest colors of a 5 color analogous color scheme.
+    <span class="doccomment">/// Return the next two analogous colors, after the colors `analogous` returns.
     ///
     /// The colors are ordered by ascending hue difference, or `(hue-60°,
     /// hue+60°)`. Combined with the input color and the colors from
@@ -448,7 +448,7 @@
     ///
     /// let primary = Hsl::new_srgb(120.0f32, 0.8, 0.5);
     /// let (analog_down1, analog_up1) = primary.analogous();
-    /// let (analog_down2, analog_up2) = primary.analogous2();
+    /// let (analog_down2, analog_up2) = primary.analogous_secondary();
     ///
     /// let hues = (
     ///     analog_down2.hue.into_positive_degrees(),
@@ -460,7 +460,7 @@
     ///
     /// assert_eq!(hues, (60.0, 90.0, 120.0, 150.0, 180.0));
     /// ```
-    </span><span class="kw">fn </span>analogous2(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>);
+    </span><span class="kw">fn </span>analogous_secondary(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>);
 }
 
 <span class="kw">impl</span>&lt;T&gt; Analogous <span class="kw">for </span>T
@@ -475,7 +475,7 @@
         (first, second)
     }
 
-    <span class="kw">fn </span>analogous2(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>) {
+    <span class="kw">fn </span>analogous_secondary(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>) {
         <span class="kw">let </span>first = <span class="self">self</span>.clone().shift_hue(T::Scalar::from_f64(<span class="number">300.0</span>));
         <span class="kw">let </span>second = <span class="self">self</span>.shift_hue(T::Scalar::from_f64(<span class="number">60.0</span>));
 
