@@ -95,6 +95,17 @@ jobs:
         run: cargo miri test -p palette --lib --features "bytemuck" -- -Z unstable-options --report-time
       - name: Documentation tests
         run: cargo miri test -p palette --doc --features "bytemuck" -- -Z unstable-options --report-time
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Generate documentation"
+        run: cargo doc -p palette --all-features
+
 
   # Refs: https://github.com/rust-lang/crater/blob/9ab6f9697c901c4a44025cf0a39b73ad5b37d198/.github/workflows/bors.yml#L125-L149
   #
@@ -109,6 +120,7 @@ jobs:
       - check_stable_beta_nightly
       - no_std
       - miri
+      - documentation
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success

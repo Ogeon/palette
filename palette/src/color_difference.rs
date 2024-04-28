@@ -255,11 +255,10 @@ where
 /// Euclidean space.
 ///
 /// Euclidean distance is not always a good measurement of visual color
-/// difference, depending on the color space. Some spaces, like
-/// [`Lab`][crate::Lab] and [`Oklab`][crate::Oklab], will give a fairly uniform
-/// result, while other spaces, such as [`Rgb`][crate::rgb::Rgb], will give much
-/// less uniform results. Despite that, it's still appropriate for some
-/// applications.
+/// difference, depending on the color space. Some spaces, like [`Lab`] and
+/// [`Oklab`][crate::Oklab], will give a fairly uniform result, while other
+/// spaces, such as [`Rgb`][crate::rgb::Rgb], will give much less uniform
+/// results. Despite that, it's still appropriate for some applications.
 pub trait EuclideanDistance: Sized {
     /// The type for the distance value.
     type Scalar;
