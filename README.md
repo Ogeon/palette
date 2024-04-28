@@ -9,7 +9,7 @@ A color management and conversion library that focuses on maintaining correctnes
 
 ## Online Documentation
 
-[Released](https://docs.rs/palette/0.7.5/palette/)
+[Released](https://docs.rs/palette/0.7.6/palette/)
 
 [Master branch](https://ogeon.github.io/palette/palette/index.html)
 

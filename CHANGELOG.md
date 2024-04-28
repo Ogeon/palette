@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.7.6 - 2024-04-28
+
+* [#390][390]: Add `From` implementations for changing `Rgb` component types between `u8`, `f32` and `f64`.
+* [#342][342]: Implement CAM16. Closes [#199][199].
+* [#386][386]: Fix angle conversion from `f32` to `u8`. Closes [#385][385].
+* [#384][384]: Add traits for color schemes from traditional color theory.
+
 ## Version 0.7.5 - 2024-02-25
 
 * [#380][380]: Avoid recursive trait resolution for `IntoIterator`. Closes [#283][283].
@@ -287,6 +294,7 @@ The first published version.
 [328]: https://github.com/Ogeon/palette/pull/328
 [332]: https://github.com/Ogeon/palette/pull/332
 [338]: https://github.com/Ogeon/palette/pull/338
+[342]: https://github.com/Ogeon/palette/pull/342
 [343]: https://github.com/Ogeon/palette/pull/343
 [344]: https://github.com/Ogeon/palette/pull/344
 [345]: https://github.com/Ogeon/palette/pull/345
@@ -297,6 +305,9 @@ The first published version.
 [373]: https://github.com/Ogeon/palette/pull/373
 [374]: https://github.com/Ogeon/palette/pull/374
 [380]: https://github.com/Ogeon/palette/pull/380
+[384]: https://github.com/Ogeon/palette/pull/384
+[386]: https://github.com/Ogeon/palette/pull/386
+[390]: https://github.com/Ogeon/palette/pull/390
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -349,6 +360,7 @@ The first published version.
 [177]: https://github.com/Ogeon/palette/issues/177
 [187]: https://github.com/Ogeon/palette/issues/187
 [194]: https://github.com/Ogeon/palette/issues/194
+[199]: https://github.com/Ogeon/palette/issues/199
 [206]: https://github.com/Ogeon/palette/issues/206
 [209]: https://github.com/Ogeon/palette/issues/209
 [215]: https://github.com/Ogeon/palette/issues/215
@@ -364,5 +376,6 @@ The first published version.
 [330]: https://github.com/Ogeon/palette/issues/330
 [366]: https://github.com/Ogeon/palette/issues/366
 [368]: https://github.com/Ogeon/palette/issues/368
+[385]: https://github.com/Ogeon/palette/issues/385
 [1234]: https://github.com/Ogeon/palette/issues/1234
 [4321]: https://github.com/Ogeon/palette/issues/4321
