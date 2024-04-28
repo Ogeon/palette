@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Iter","Okhwb"],"type":["Okhwba"]};
+window.SIDEBAR_ITEMS = {"struct":["Iter","Okhwb","UniformOkhwb"],"type":["Okhwba"]};

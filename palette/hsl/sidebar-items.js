@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Hsl","Iter"],"type":["Hsla"]};
+window.SIDEBAR_ITEMS = {"struct":["Hsl","Iter","UniformHsl"],"type":["Hsla"]};

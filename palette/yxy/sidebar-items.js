@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Iter","Yxy"],"type":["Yxya"]};
+window.SIDEBAR_ITEMS = {"struct":["Iter","UniformYxy","Yxy"],"type":["Yxya"]};

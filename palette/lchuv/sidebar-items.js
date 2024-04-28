@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Iter","Lchuv"],"type":["Lchuva"]};
+window.SIDEBAR_ITEMS = {"struct":["Iter","Lchuv","UniformLchuv"],"type":["Lchuva"]};

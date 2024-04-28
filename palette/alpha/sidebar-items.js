@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Alpha","Iter"],"trait":["WithAlpha"]};
+window.SIDEBAR_ITEMS = {"struct":["Alpha","Iter","UniformAlpha"],"trait":["WithAlpha"]};
