@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
 use palette::convert::FromColorUnclamped;
 use palette::encoding;
@@ -39,7 +41,7 @@ use data_color_mine::{load_data, ColorMine};
 
 fn rgb_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Rgb family");
-    let mut colormine: Vec<ColorMine<f32>> = load_data();
+    let mut colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new("../integration_tests/tests/convert/data_color_mine.csv")));
     colormine.truncate(colormine.len() - colormine.len() % 8);
     assert_eq!(
         colormine.len() % 8,

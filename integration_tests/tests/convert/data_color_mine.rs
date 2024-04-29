@@ -2,6 +2,8 @@
 List of color from www.colormine.org
 */
 
+use std::path::Path;
+
 use approx::assert_relative_eq;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
@@ -318,16 +320,18 @@ where
 }
 
 lazy_static! {
-    static ref TEST_DATA: Vec<ColorMine<f64>> = load_data();
+    static ref TEST_DATA: Vec<ColorMine<f64>> = load_data(None);
 }
 
-pub fn load_data<F>() -> Vec<ColorMine<F>>
+pub fn load_data<F>(data_path: Option<&Path>) -> Vec<ColorMine<F>>
 where
     F: for<'a> serde::Deserialize<'a>,
     ColorMineRaw<F>: Into<ColorMine<F>>,
 {
-    let mut rdr = csv::Reader::from_path("tests/convert/data_color_mine.csv")
-        .expect("csv file could not be loaded in tests for color mine data");
+    let mut rdr = csv::Reader::from_path(
+        data_path.unwrap_or_else(|| Path::new("tests/convert/data_color_mine.csv")),
+    )
+    .expect("csv file could not be loaded in tests for color mine data");
     let mut color_data: Vec<ColorMine<F>> = Vec::new();
     for record in rdr.deserialize() {
         let r: ColorMineRaw<F> =

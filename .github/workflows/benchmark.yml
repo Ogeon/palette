@@ -32,5 +32,4 @@ jobs:
         uses: CodSpeedHQ/action@v2
         with:
           run: cargo codspeed run
-          working-directory: integration_tests # mimics how tests work, so the colors CSV can be found
           token: ${{ secrets.CODSPEED_TOKEN }}
