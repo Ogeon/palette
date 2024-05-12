@@ -26,6 +26,10 @@
 
 use crate::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    lms::{
+        self,
+        meta::{LmsToXyz, XyzToLms},
+    },
     matrix::{multiply_3x3, multiply_xyz, Mat3},
     num::{Arithmetics, Real, Zero},
     white_point::{Any, WhitePoint},
@@ -95,44 +99,20 @@ where
         match *self {
              Method::Bradford => {
                 ConeResponseMatrices::<T> {
-                    ma: [
-                        T::from_f64(0.8951000), T::from_f64(0.2664000), T::from_f64(-0.1614000),
-                        T::from_f64(-0.7502000), T::from_f64(1.7135000), T::from_f64(0.0367000),
-                        T::from_f64(0.0389000), T::from_f64(-0.0685000), T::from_f64(1.0296000)
-                    ],
-                    inv_ma: [
-                        T::from_f64(0.9869929), T::from_f64(-0.1470543), T::from_f64(0.1599627),
-                        T::from_f64(0.4323053), T::from_f64(0.5183603), T::from_f64(0.0492912),
-                        T::from_f64(-0.0085287), T::from_f64(0.0400428), T::from_f64(0.9684867)
-                    ],
+                    ma: lms::meta::Bradford::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::Bradford::lms_to_xyz_matrix(),
                 }
             }
              Method::VonKries => {
                 ConeResponseMatrices::<T> {
-                    ma: [
-                        T::from_f64(0.4002400), T::from_f64(0.7076000), T::from_f64(-0.0808100),
-                        T::from_f64(-0.2263000), T::from_f64(1.1653200), T::from_f64(0.0457000),
-                        T::from_f64(0.0000000), T::from_f64(0.0000000), T::from_f64(0.9182200)
-                    ],
-                    inv_ma: [
-                        T::from_f64(1.8599364), T::from_f64(-1.1293816), T::from_f64(0.2198974),
-                        T::from_f64(0.3611914), T::from_f64(0.6388125), T::from_f64(-0.0000064),
-                        T::from_f64(0.0000000), T::from_f64(0.0000000), T::from_f64(1.0890636)
-                    ],
+                    ma: lms::meta::VonKries::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::VonKries::lms_to_xyz_matrix(),
                 }
             }
              Method::XyzScaling => {
                 ConeResponseMatrices::<T> {
-                    ma: [
-                        T::from_f64(1.0000000), T::from_f64(0.0000000), T::from_f64(0.0000000),
-                        T::from_f64(0.0000000), T::from_f64(1.0000000), T::from_f64(0.0000000),
-                        T::from_f64(0.0000000), T::from_f64(0.0000000), T::from_f64(1.0000000)
-                    ],
-                    inv_ma: [
-                        T::from_f64(1.0000000), T::from_f64(0.0000000), T::from_f64(0.0000000),
-                        T::from_f64(0.0000000), T::from_f64(1.0000000), T::from_f64(0.0000000),
-                        T::from_f64(0.0000000), T::from_f64(0.0000000), T::from_f64(1.0000000)
-                    ],
+                    ma: lms::meta::UnitMatrix::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::UnitMatrix::lms_to_xyz_matrix(),
                 }
             }
         }

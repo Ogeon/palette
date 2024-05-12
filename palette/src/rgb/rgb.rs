@@ -488,7 +488,7 @@ where
 
 /// <span id="Rgba"></span>[`Rgba`](crate::rgb::Rgba) implementations.
 impl<S, T, A> Alpha<Rgb<S, T>, A> {
-    /// Non-linear RGB.
+    /// Create an RGBA color.
     pub const fn new(red: T, green: T, blue: T, alpha: A) -> Self {
         Alpha {
             color: Rgb::new(red, green, blue),

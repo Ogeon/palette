@@ -14,32 +14,40 @@ use crate::{
 
 /// A 9 element array representing a 3x3 matrix.
 pub type Mat3<T> = [T; 9];
+pub type Vec3<T> = [T; 3];
 
 /// Multiply the 3x3 matrix with an XYZ color.
 #[inline]
-pub fn multiply_xyz<T>(c: Mat3<T>, f: Xyz<Any, T>) -> Xyz<Any, T>
+pub fn multiply_xyz<T>(matrix: Mat3<T>, color: Xyz<Any, T>) -> Xyz<Any, T>
 where
     T: Arithmetics,
 {
-    // Input Mat3 is destructured to avoid panic paths
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
+    multiply_3x3_and_vec3(matrix, color.into()).into()
+}
 
-    let x1 = c0 * &f.x;
-    let y1 = c3 * &f.x;
-    let z1 = c6 * f.x;
-    let x2 = c1 * &f.y;
-    let y2 = c4 * &f.y;
-    let z2 = c7 * f.y;
-    let x3 = c2 * &f.z;
-    let y3 = c5 * &f.z;
-    let z3 = c8 * f.z;
+/// Multiply the 3x3 matrix with an XYZ color.
+#[inline]
+pub fn multiply_3x3_and_vec3<T>(matrix: Mat3<T>, vector: Vec3<T>) -> Vec3<T>
+where
+    T: Arithmetics,
+{
+    // Input Mat3 and Vec3 are destructured to avoid panic paths.
+    let [m0, m1, m2, m3, m4, m5, m6, m7, m8] = matrix;
+    let [x, y, z] = vector;
 
-    Xyz {
-        x: x1 + x2 + x3,
-        y: y1 + y2 + y3,
-        z: z1 + z2 + z3,
-        white_point: PhantomData,
-    }
+    let x1 = m0 * &x;
+    let x2 = m1 * &y;
+    let x3 = m2 * &z;
+
+    let y1 = m3 * &x;
+    let y2 = m4 * &y;
+    let y3 = m5 * &z;
+
+    let z1 = m6 * x;
+    let z2 = m7 * y;
+    let z3 = m8 * z;
+
+    [x1 + x2 + x3, y1 + y2 + y3, z1 + z2 + z3]
 }
 /// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
 #[inline]

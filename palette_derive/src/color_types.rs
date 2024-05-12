@@ -288,6 +288,19 @@ pub(crate) static XYZ_COLORS: ColorGroup = ColorGroup {
         },
         ColorType {
             info: ColorInfo {
+                name: "Lms",
+                module: Some("lms"),
+                default_white_point: InternalExternal {
+                    internal: None,
+                    external: Some(&["white_point", "D65"]),
+                },
+                get_meta_type: Some(get_lms_meta),
+            },
+            infer_group: true,
+            preferred_source: "Xyz",
+        },
+        ColorType {
+            info: ColorInfo {
                 name: "Luv",
                 module: None,
                 default_white_point: InternalExternal {
@@ -662,6 +675,41 @@ fn get_white_point(
 ) -> syn::Result<Type> {
     used_input.white_point.set_used(user);
     Ok(white_point.clone())
+}
+
+fn get_lms_meta(
+    self_color: &ColorInfo,
+    meta_type_source: MetaTypeSource,
+    white_point: &Type,
+    used_input: &mut UsedInput,
+    user: InputUser,
+    meta: &TypeItemAttributes,
+) -> syn::Result<Type> {
+    match meta_type_source {
+        MetaTypeSource::Generics(generics) => {
+            used_input.white_point.set_used(user);
+
+            let has_xyz_meta_path = util::path(["xyz", "meta", "HasXyzMeta"], meta.internal);
+
+            generics.params.push(GenericParam::Type(
+                Ident::new("_LmsM", Span::call_site()).into(),
+            ));
+
+            generics
+                .make_where_clause()
+                .predicates
+                .push(parse_quote!(_LmsM: #has_xyz_meta_path<XyzMeta = #white_point>));
+
+            Ok(parse_quote!(_LmsM))
+        }
+        MetaTypeSource::OtherColor(other_color) => Err(syn::parse::Error::new(
+            Span::call_site(),
+            format!(
+                "could not determine the LMS meta when converting to and from `{}` via `{}`",
+                other_color.name, self_color.name
+            ),
+        )),
+    }
 }
 
 pub(crate) enum MetaTypeSource<'a> {

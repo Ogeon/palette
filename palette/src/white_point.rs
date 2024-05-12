@@ -6,7 +6,7 @@
 //! daylight. Defining "white" as daylight will give unacceptable results when
 //! attempting to color-correct a photograph taken with incandescent lighting.
 
-use crate::{num::Real, Xyz};
+use crate::{num::Real, xyz::meta::HasXyzMeta, Xyz};
 
 /// Represents an unspecified reference white point.
 ///
@@ -15,6 +15,10 @@ use crate::{num::Real, Xyz};
 /// in those situations.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Any;
+
+impl HasXyzMeta for Any {
+    type XyzMeta = Self;
+}
 
 /// WhitePoint defines the Xyz color co-ordinates for a given white point.
 ///
@@ -45,6 +49,10 @@ impl<T: Real> WhitePoint<T> for A {
         Xyz::new(T::from_f64(1.09850), T::from_f64(1.0), T::from_f64(0.35585))
     }
 }
+
+impl HasXyzMeta for A {
+    type XyzMeta = Self;
+}
 /// CIE standard illuminant B
 ///
 /// CIE standard illuminant B represents noon sunlight, with a correlated color
@@ -57,6 +65,11 @@ impl<T: Real> WhitePoint<T> for B {
         Xyz::new(T::from_f64(0.99072), T::from_f64(1.0), T::from_f64(0.85223))
     }
 }
+
+impl HasXyzMeta for B {
+    type XyzMeta = Self;
+}
+
 /// CIE standard illuminant C
 ///
 /// CIE standard illuminant C represents the average day light with a CCT of
@@ -69,6 +82,11 @@ impl<T: Real> WhitePoint<T> for C {
         Xyz::new(T::from_f64(0.98074), T::from_f64(1.0), T::from_f64(1.18232))
     }
 }
+
+impl HasXyzMeta for C {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D50
 ///
 /// D50 White Point is the natural daylight with a color temperature of around
@@ -81,6 +99,11 @@ impl<T: Real> WhitePoint<T> for D50 {
         Xyz::new(T::from_f64(0.96422), T::from_f64(1.0), T::from_f64(0.82521))
     }
 }
+
+impl HasXyzMeta for D50 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D55
 ///
 /// D55 White Point is the natural daylight with a color temperature of around
@@ -93,6 +116,11 @@ impl<T: Real> WhitePoint<T> for D55 {
         Xyz::new(T::from_f64(0.95682), T::from_f64(1.0), T::from_f64(0.92149))
     }
 }
+
+impl HasXyzMeta for D55 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D65
 ///
 /// D65 White Point is the natural daylight with a color temperature of 6500K
@@ -105,6 +133,11 @@ impl<T: Real> WhitePoint<T> for D65 {
         Xyz::new(T::from_f64(0.95047), T::from_f64(1.0), T::from_f64(1.08883))
     }
 }
+
+impl HasXyzMeta for D65 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D75
 ///
 /// D75 White Point is the natural daylight with a color temperature of around
@@ -117,6 +150,11 @@ impl<T: Real> WhitePoint<T> for D75 {
         Xyz::new(T::from_f64(0.94972), T::from_f64(1.0), T::from_f64(1.22638))
     }
 }
+
+impl HasXyzMeta for D75 {
+    type XyzMeta = Self;
+}
+
 /// CIE standard illuminant E
 ///
 /// CIE standard illuminant E represents the equal energy radiator
@@ -129,6 +167,11 @@ impl<T: Real> WhitePoint<T> for E {
         Xyz::new(T::from_f64(1.0), T::from_f64(1.0), T::from_f64(1.0))
     }
 }
+
+impl HasXyzMeta for E {
+    type XyzMeta = Self;
+}
+
 /// CIE fluorescent illuminant series - F2
 ///
 /// F2 represents a semi-broadband fluorescent lamp for 2° Standard Observer.
@@ -140,6 +183,11 @@ impl<T: Real> WhitePoint<T> for F2 {
         Xyz::new(T::from_f64(0.99186), T::from_f64(1.0), T::from_f64(0.67393))
     }
 }
+
+impl HasXyzMeta for F2 {
+    type XyzMeta = Self;
+}
+
 /// CIE fluorescent illuminant series - F7
 ///
 /// F7 represents a broadband fluorescent lamp for 2° Standard Observer.
@@ -151,6 +199,11 @@ impl<T: Real> WhitePoint<T> for F7 {
         Xyz::new(T::from_f64(0.95041), T::from_f64(1.0), T::from_f64(1.08747))
     }
 }
+
+impl HasXyzMeta for F7 {
+    type XyzMeta = Self;
+}
+
 /// CIE fluorescent illuminant series - F11
 ///
 /// F11 represents a narrowband fluorescent lamp for 2° Standard Observer.
@@ -162,6 +215,11 @@ impl<T: Real> WhitePoint<T> for F11 {
         Xyz::new(T::from_f64(1.00962), T::from_f64(1.0), T::from_f64(0.64350))
     }
 }
+
+impl HasXyzMeta for F11 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D50
 ///
 /// D50 White Point is the natural daylight with a color temperature of around
@@ -174,6 +232,11 @@ impl<T: Real> WhitePoint<T> for D50Degree10 {
         Xyz::new(T::from_f64(0.9672), T::from_f64(1.0), T::from_f64(0.8143))
     }
 }
+
+impl HasXyzMeta for D50Degree10 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D55
 ///
 /// D55 White Point is the natural daylight with a color temperature of around
@@ -186,6 +249,11 @@ impl<T: Real> WhitePoint<T> for D55Degree10 {
         Xyz::new(T::from_f64(0.958), T::from_f64(1.0), T::from_f64(0.9093))
     }
 }
+
+impl HasXyzMeta for D55Degree10 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D65
 ///
 /// D65 White Point is the natural daylight with a color temperature of 6500K
@@ -198,6 +266,11 @@ impl<T: Real> WhitePoint<T> for D65Degree10 {
         Xyz::new(T::from_f64(0.9481), T::from_f64(1.0), T::from_f64(1.073))
     }
 }
+
+impl HasXyzMeta for D65Degree10 {
+    type XyzMeta = Self;
+}
+
 /// CIE D series standard illuminant - D75
 ///
 /// D75 White Point is the natural daylight with a color temperature of around
@@ -209,4 +282,8 @@ impl<T: Real> WhitePoint<T> for D75Degree10 {
     fn get_xyz() -> Xyz<Any, T> {
         Xyz::new(T::from_f64(0.94416), T::from_f64(1.0), T::from_f64(1.2064))
     }
+}
+
+impl HasXyzMeta for D75Degree10 {
+    type XyzMeta = Self;
 }
