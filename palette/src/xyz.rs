@@ -1,5 +1,7 @@
 //! Types for the CIE 1931 XYZ color space.
 
+pub mod meta;
+
 use core::{marker::PhantomData, ops::Mul};
 
 use crate::{
@@ -11,8 +13,14 @@ use crate::{
     },
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::IntoLinear,
+    lms::{
+        meta::{HasLmsMatrix, LmsToXyz},
+        Lms,
+    },
     luma::LumaStandard,
-    matrix::{matrix_map, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix},
+    matrix::{
+        matrix_map, multiply_3x3_and_vec3, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix,
+    },
     num::{
         Abs, Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powf, Powi, Real, Recip,
         Signum, Sqrt, Trigonometry, Zero,
@@ -23,6 +31,8 @@ use crate::{
     white_point::{Any, WhitePoint, D65},
     Alpha, Lab, Luma, Luv, Oklab, Yxy,
 };
+
+use self::meta::HasXyzMeta;
 
 /// CIE 1931 XYZ with an alpha component. See the [`Xyza` implementation in
 /// `Alpha`](crate::Alpha#Xyza).
@@ -43,7 +53,7 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
     palette_internal,
     white_point = "Wp",
     component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma)
+    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma, Lms)
 )]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32> {
@@ -323,6 +333,17 @@ where
 {
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
+    }
+}
+
+impl<M, T> FromColorUnclamped<Lms<M, T>> for Xyz<M::XyzMeta, T>
+where
+    M: HasLmsMatrix + HasXyzMeta,
+    M::LmsMatrix: LmsToXyz<T>,
+    T: Arithmetics,
+{
+    fn from_color_unclamped(val: Lms<M, T>) -> Self {
+        multiply_3x3_and_vec3(M::LmsMatrix::lms_to_xyz_matrix(), val.into()).into()
     }
 }
 

@@ -359,6 +359,7 @@ pub mod hwb;
 pub mod lab;
 pub mod lch;
 pub mod lchuv;
+pub mod lms;
 pub mod luma;
 pub mod luv;
 mod luv_bounds;
