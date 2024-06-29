@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/chromatic_adaptation.rs`."><title>chromatic_adaptation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.2 (25ef9e3d8 2024-04-09)" data-channel="1.77.2" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../palette/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/chromatic_adaptation.rs`."><title>chromatic_adaptation.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../palette/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -277,26 +275,6 @@
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convert colors from one reference white point to another
 //!
 //! Chromatic adaptation is the human visual system’s ability to adjust to
@@ -325,6 +303,10 @@
 
 </span><span class="kw">use crate</span>::{
     convert::{FromColorUnclamped, IntoColorUnclamped},
+    lms::{
+        <span class="self">self</span>,
+        meta::{LmsToXyz, XyzToLms},
+    },
     matrix::{multiply_3x3, multiply_xyz, Mat3},
     num::{Arithmetics, Real, Zero},
     white_point::{Any, WhitePoint},
@@ -394,44 +376,20 @@
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
              Method::Bradford =&gt; {
                 ConeResponseMatrices::&lt;T&gt; {
-                    ma: [
-                        T::from_f64(<span class="number">0.8951000</span>), T::from_f64(<span class="number">0.2664000</span>), T::from_f64(-<span class="number">0.1614000</span>),
-                        T::from_f64(-<span class="number">0.7502000</span>), T::from_f64(<span class="number">1.7135000</span>), T::from_f64(<span class="number">0.0367000</span>),
-                        T::from_f64(<span class="number">0.0389000</span>), T::from_f64(-<span class="number">0.0685000</span>), T::from_f64(<span class="number">1.0296000</span>)
-                    ],
-                    inv_ma: [
-                        T::from_f64(<span class="number">0.9869929</span>), T::from_f64(-<span class="number">0.1470543</span>), T::from_f64(<span class="number">0.1599627</span>),
-                        T::from_f64(<span class="number">0.4323053</span>), T::from_f64(<span class="number">0.5183603</span>), T::from_f64(<span class="number">0.0492912</span>),
-                        T::from_f64(-<span class="number">0.0085287</span>), T::from_f64(<span class="number">0.0400428</span>), T::from_f64(<span class="number">0.9684867</span>)
-                    ],
+                    ma: lms::meta::Bradford::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::Bradford::lms_to_xyz_matrix(),
                 }
             }
              Method::VonKries =&gt; {
                 ConeResponseMatrices::&lt;T&gt; {
-                    ma: [
-                        T::from_f64(<span class="number">0.4002400</span>), T::from_f64(<span class="number">0.7076000</span>), T::from_f64(-<span class="number">0.0808100</span>),
-                        T::from_f64(-<span class="number">0.2263000</span>), T::from_f64(<span class="number">1.1653200</span>), T::from_f64(<span class="number">0.0457000</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.9182200</span>)
-                    ],
-                    inv_ma: [
-                        T::from_f64(<span class="number">1.8599364</span>), T::from_f64(-<span class="number">1.1293816</span>), T::from_f64(<span class="number">0.2198974</span>),
-                        T::from_f64(<span class="number">0.3611914</span>), T::from_f64(<span class="number">0.6388125</span>), T::from_f64(-<span class="number">0.0000064</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0890636</span>)
-                    ],
+                    ma: lms::meta::VonKries::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::VonKries::lms_to_xyz_matrix(),
                 }
             }
              Method::XyzScaling =&gt; {
                 ConeResponseMatrices::&lt;T&gt; {
-                    ma: [
-                        T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>)
-                    ],
-                    inv_ma: [
-                        T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>), T::from_f64(<span class="number">0.0000000</span>),
-                        T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">0.0000000</span>), T::from_f64(<span class="number">1.0000000</span>)
-                    ],
+                    ma: lms::meta::UnitMatrix::xyz_to_lms_matrix(),
+                    inv_ma: lms::meta::UnitMatrix::lms_to_xyz_matrix(),
                 }
             }
         }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Iter","UniformXyz","Xyz"],"type":["Xyza"]};
+window.SIDEBAR_ITEMS = {"mod":["meta"],"struct":["Iter","UniformXyz","Xyz"],"type":["Xyza"]};

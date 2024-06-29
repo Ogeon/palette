@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/matrix.rs`."><title>matrix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.2 (25ef9e3d8 2024-04-09)" data-channel="1.77.2" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../palette/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/matrix.rs`."><title>matrix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../palette/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -303,6 +301,14 @@
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in
 //! chromatic adaptation and conversion calculations.
 
@@ -319,32 +325,40 @@
 
 <span class="doccomment">/// A 9 element array representing a 3x3 matrix.
 </span><span class="kw">pub type </span>Mat3&lt;T&gt; = [T; <span class="number">9</span>];
+<span class="kw">pub type </span>Vec3&lt;T&gt; = [T; <span class="number">3</span>];
 
 <span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.
 </span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>multiply_xyz&lt;T&gt;(c: Mat3&lt;T&gt;, f: Xyz&lt;Any, T&gt;) -&gt; Xyz&lt;Any, T&gt;
+</span><span class="kw">pub fn </span>multiply_xyz&lt;T&gt;(matrix: Mat3&lt;T&gt;, color: Xyz&lt;Any, T&gt;) -&gt; Xyz&lt;Any, T&gt;
 <span class="kw">where
     </span>T: Arithmetics,
 {
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths
-    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
+    multiply_3x3_and_vec3(matrix, color.into()).into()
+}
 
-    <span class="kw">let </span>x1 = c0 * <span class="kw-2">&amp;</span>f.x;
-    <span class="kw">let </span>y1 = c3 * <span class="kw-2">&amp;</span>f.x;
-    <span class="kw">let </span>z1 = c6 * f.x;
-    <span class="kw">let </span>x2 = c1 * <span class="kw-2">&amp;</span>f.y;
-    <span class="kw">let </span>y2 = c4 * <span class="kw-2">&amp;</span>f.y;
-    <span class="kw">let </span>z2 = c7 * f.y;
-    <span class="kw">let </span>x3 = c2 * <span class="kw-2">&amp;</span>f.z;
-    <span class="kw">let </span>y3 = c5 * <span class="kw-2">&amp;</span>f.z;
-    <span class="kw">let </span>z3 = c8 * f.z;
+<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.
+</span><span class="attr">#[inline]
+</span><span class="kw">pub fn </span>multiply_3x3_and_vec3&lt;T&gt;(matrix: Mat3&lt;T&gt;, vector: Vec3&lt;T&gt;) -&gt; Vec3&lt;T&gt;
+<span class="kw">where
+    </span>T: Arithmetics,
+{
+    <span class="comment">// Input Mat3 and Vec3 are destructured to avoid panic paths.
+    </span><span class="kw">let </span>[m0, m1, m2, m3, m4, m5, m6, m7, m8] = matrix;
+    <span class="kw">let </span>[x, y, z] = vector;
 
-    Xyz {
-        x: x1 + x2 + x3,
-        y: y1 + y2 + y3,
-        z: z1 + z2 + z3,
-        white_point: PhantomData,
-    }
+    <span class="kw">let </span>x1 = m0 * <span class="kw-2">&amp;</span>x;
+    <span class="kw">let </span>x2 = m1 * <span class="kw-2">&amp;</span>y;
+    <span class="kw">let </span>x3 = m2 * <span class="kw-2">&amp;</span>z;
+
+    <span class="kw">let </span>y1 = m3 * <span class="kw-2">&amp;</span>x;
+    <span class="kw">let </span>y2 = m4 * <span class="kw-2">&amp;</span>y;
+    <span class="kw">let </span>y3 = m5 * <span class="kw-2">&amp;</span>z;
+
+    <span class="kw">let </span>z1 = m6 * x;
+    <span class="kw">let </span>z2 = m7 * y;
+    <span class="kw">let </span>z3 = m8 * z;
+
+    [x1 + x2 + x3, y1 + y2 + y3, z1 + z2 + z3]
 }
 <span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
 </span><span class="attr">#[inline]
