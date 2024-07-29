@@ -33,7 +33,7 @@ mod visual_eq;
 ///
 /// Allows
 /// * changing lightness/chroma/saturation while keeping perceived Hue constant
-/// (like HSV promises but delivers only partially)
+///   (like HSV promises but delivers only partially)
 /// * finding the strongest color (maximum chroma) at s == 1 (like HSV)
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
@@ -60,7 +60,7 @@ pub struct Okhsv<T = f32> {
     /// The saturation (freedom of whitishness) of the color.
     ///
     /// * `0.0` corresponds to pure mixture of black and white without any color.
-    /// The black to white relation depends on v.
+    ///   The black to white relation depends on v.
     /// * `1.0` to a fully saturated color without any white.
     ///
     /// For v == 0 the saturation is irrelevant.

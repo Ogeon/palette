@@ -31,7 +31,7 @@ mod visual_eq;
 /// * changing hue/chroma/saturation, while keeping perceived lightness constant (like HSLuv)
 /// * changing lightness/chroma/saturation, while keeping perceived hue constant
 /// * changing the perceived saturation (more or less) proportionally with the numerical
-/// amount of change (unlike HSLuv)
+///   amount of change (unlike HSLuv)
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
@@ -57,7 +57,7 @@ pub struct Okhsl<T = f32> {
     /// The saturation (freedom of black or white) of the color.
     ///
     /// * `0.0` corresponds to pure mixture of black and white without any color.
-    /// The black to white relation depends on v.
+    ///   The black to white relation depends on v.
     /// * `1.0` to a fully saturated color without any white.
     ///
     /// For v == 0 the saturation is irrelevant.
