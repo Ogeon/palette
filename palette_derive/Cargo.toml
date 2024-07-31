@@ -11,7 +11,7 @@ keywords = ["palette", "derive", "macros"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
 resolver = "2"
-rust-version = "1.60.0"
+rust-version = "1.61.0"
 
 [lib]
 proc-macro = true

@@ -21,7 +21,7 @@ jobs:
       RUSTFLAGS: -D warnings
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.60.0
+      - uses: dtolnay/rust-toolchain@1.61.0
         with:
           components: clippy
       - uses: taiki-e/install-action@cargo-hack
