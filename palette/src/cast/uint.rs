@@ -110,12 +110,12 @@ where
 /// assert_eq!(cast::into_uint_ref(&color), &0xFF17C64C);
 /// ```
 #[inline]
-pub fn into_uint_ref<T>(value: &T) -> &T::Uint
+pub const fn into_uint_ref<T>(value: &T) -> &T::Uint
 where
     T: UintCast,
 {
-    assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
-    assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
+    assert!(core::mem::size_of::<T::Uint>() == core::mem::size_of::<T>());
+    assert!(core::mem::align_of::<T::Uint>() == core::mem::align_of::<T>());
 
     let value: *const T = value;
 
@@ -133,12 +133,12 @@ where
 /// assert_eq!(cast::from_uint_ref::<PackedArgb>(&0xFF17C64C), &color);
 /// ```
 #[inline]
-pub fn from_uint_ref<T>(value: &T::Uint) -> &T
+pub const fn from_uint_ref<T>(value: &T::Uint) -> &T
 where
     T: UintCast,
 {
-    assert_eq!(core::mem::size_of::<T::Uint>(), core::mem::size_of::<T>());
-    assert_eq!(core::mem::align_of::<T::Uint>(), core::mem::align_of::<T>());
+    assert!(core::mem::size_of::<T::Uint>() == core::mem::size_of::<T>());
+    assert!(core::mem::align_of::<T::Uint>() == core::mem::align_of::<T>());
 
     let value: *const T::Uint = value;
 

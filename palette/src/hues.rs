@@ -81,7 +81,7 @@ macro_rules! make_hues {
         impl<T: RealAngle> $name<T> {
             /// Create a new hue from degrees. This is an alias for `new`.
             #[inline]
-            pub fn from_degrees(degrees: T) -> Self {
+            pub const fn from_degrees(degrees: T) -> Self {
                 Self::new(degrees)
             }
 
