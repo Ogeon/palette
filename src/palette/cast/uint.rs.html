@@ -584,12 +584,12 @@
 /// assert_eq!(cast::into_uint_ref(&amp;color), &amp;0xFF17C64C);
 /// ```
 </span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>into_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T) -&gt; <span class="kw-2">&amp;</span>T::Uint
+</span><span class="kw">pub const fn </span>into_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T) -&gt; <span class="kw-2">&amp;</span>T::Uint
 <span class="kw">where
     </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
-    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
+    <span class="macro">assert!</span>(core::mem::size_of::&lt;T::Uint&gt;() == core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert!</span>(core::mem::align_of::&lt;T::Uint&gt;() == core::mem::align_of::&lt;T&gt;());
 
     <span class="kw">let </span>value: <span class="kw-2">*const </span>T = value;
 
@@ -607,12 +607,12 @@
 /// assert_eq!(cast::from_uint_ref::&lt;PackedArgb&gt;(&amp;0xFF17C64C), &amp;color);
 /// ```
 </span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>from_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T::Uint) -&gt; <span class="kw-2">&amp;</span>T
+</span><span class="kw">pub const fn </span>from_uint_ref&lt;T&gt;(value: <span class="kw-2">&amp;</span>T::Uint) -&gt; <span class="kw-2">&amp;</span>T
 <span class="kw">where
     </span>T: UintCast,
 {
-    <span class="macro">assert_eq!</span>(core::mem::size_of::&lt;T::Uint&gt;(), core::mem::size_of::&lt;T&gt;());
-    <span class="macro">assert_eq!</span>(core::mem::align_of::&lt;T::Uint&gt;(), core::mem::align_of::&lt;T&gt;());
+    <span class="macro">assert!</span>(core::mem::size_of::&lt;T::Uint&gt;() == core::mem::size_of::&lt;T&gt;());
+    <span class="macro">assert!</span>(core::mem::align_of::&lt;T::Uint&gt;() == core::mem::align_of::&lt;T&gt;());
 
     <span class="kw">let </span>value: <span class="kw-2">*const </span>T::Uint = value;
 

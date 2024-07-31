@@ -1119,7 +1119,7 @@
         <span class="kw">impl</span>&lt;T: RealAngle&gt; <span class="macro-nonterminal">$name</span>&lt;T&gt; {
             <span class="doccomment">/// Create a new hue from degrees. This is an alias for `new`.
             </span><span class="attr">#[inline]
-            </span><span class="kw">pub fn </span>from_degrees(degrees: T) -&gt; <span class="self">Self </span>{
+            </span><span class="kw">pub const fn </span>from_degrees(degrees: T) -&gt; <span class="self">Self </span>{
                 <span class="self">Self</span>::new(degrees)
             }
 
