@@ -1,8 +1,12 @@
 use std::path::Path;
 
 use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
-use palette::convert::FromColorUnclamped;
-use palette::encoding;
+use palette::{
+    convert::{Convert, FromColorUnclamped},
+    white_point::D65,
+    Xyz,
+};
+use palette::{encoding, lms::BradfordLms};
 use palette::{Hsl, Hsv, Hwb, IntoColor, LinSrgb, Srgb};
 
 type SrgbHsv = Hsv<encoding::Srgb>;
@@ -41,7 +45,9 @@ use data_color_mine::{load_data, ColorMine};
 
 fn rgb_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Rgb family");
-    let mut colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new("../integration_tests/tests/convert/data_color_mine.csv")));
+    let mut colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new(
+        "../integration_tests/tests/convert/data_color_mine.csv",
+    )));
     colormine.truncate(colormine.len() - colormine.len() % 8);
     assert_eq!(
         colormine.len() % 8,
@@ -74,6 +80,11 @@ fn rgb_conversion(c: &mut Criterion) {
     let linear_hsv: Vec<LinHsv> = colormine.iter().map(|x| x.hsv.into_color()).collect();
     let linear_hsl: Vec<LinHsl> = colormine.iter().map(|x| x.hsl.into_color()).collect();
     let linear_hwb: Vec<LinHwb> = colormine.iter().map(|x| x.hwb.into_color()).collect();
+    let bradford_lms: Vec<BradfordLms<D65, _>> =
+        colormine.iter().map(|x| x.xyz.into_color()).collect();
+
+    let xyz_to_rgb_matrix = LinSrgb::matrix_from_xyz();
+    let lms_to_rgb_matrix = Xyz::matrix_from_lms().then(LinSrgb::matrix_from_xyz());
 
     group.bench_with_input("rgb to linsrgb", &colormine, |b, colormine| {
         b.iter(|| {
@@ -171,6 +182,35 @@ fn rgb_conversion(c: &mut Criterion) {
             b.iter(|| {
                 for c in wide_colormine {
                     black_box(LinSrgb::from_color_unclamped(c.xyz));
+                }
+            })
+        },
+    );
+    group.bench_with_input(
+        "xyz to linsrgb - Matrix3",
+        &(&colormine, xyz_to_rgb_matrix),
+        |b, &(colormine, matrix)| {
+            b.iter(|| {
+                for c in colormine {
+                    black_box(matrix.convert(c.xyz));
+                }
+            })
+        },
+    );
+    group.bench_with_input("lms to linsrgb", &bradford_lms, |b, bradford_lms| {
+        b.iter(|| {
+            for &c in bradford_lms {
+                black_box(LinSrgb::from_color_unclamped(c));
+            }
+        })
+    });
+    group.bench_with_input(
+        "lms to linsrgb - Matrix3",
+        &(&bradford_lms, lms_to_rgb_matrix),
+        |b, &(bradford_lms, matrix)| {
+            b.iter(|| {
+                for &c in bradford_lms {
+                    black_box(matrix.convert(c));
                 }
             })
         },

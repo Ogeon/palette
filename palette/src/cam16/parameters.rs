@@ -1,13 +1,18 @@
 use core::marker::PhantomData;
 
 use crate::{
+    angle::{RealAngle, SignedAngle},
     bool_mask::LazySelect,
+    convert::{Convert, ConvertOnce},
     num::{
-        Abs, Arithmetics, Clamp, Exp, FromScalar, One, PartialCmp, Powf, Real, Signum, Sqrt, Zero,
+        Abs, Arithmetics, Clamp, Exp, FromScalar, One, PartialCmp, Powf, Real, Signum, Sqrt,
+        Trigonometry, Zero,
     },
     white_point::{self, WhitePoint},
     Xyz,
 };
+
+use super::{Cam16, Cam16Jch, Cam16Jmh, Cam16Jsh, Cam16Qch, Cam16Qmh, Cam16Qsh};
 
 /// Parameters for CAM16 that describe the viewing conditions.
 ///
@@ -164,6 +169,116 @@ pub struct BakedParameters<WpParam, T> {
     white_point: PhantomData<WpParam>,
 }
 
+impl<WpParam, T, I, O> Convert<I, O> for BakedParameters<WpParam, T>
+where
+    Self: ConvertOnce<I, O> + Copy,
+{
+    #[inline]
+    fn convert(&self, input: I) -> O {
+        Self::convert_once(*self, input)
+    }
+}
+
+impl<WpParam, T> ConvertOnce<Xyz<WpParam::StaticWp, T>, Cam16<T>>
+    for BakedParameters<WpParam, T::Scalar>
+where
+    WpParam: WhitePointParameter<T::Scalar>,
+    T: Real
+        + FromScalar
+        + Arithmetics
+        + Powf
+        + Sqrt
+        + Abs
+        + Signum
+        + Trigonometry
+        + RealAngle
+        + Clone,
+    T::Scalar: Clone,
+{
+    #[inline]
+    fn convert_once(self, input: Xyz<WpParam::StaticWp, T>) -> Cam16<T> {
+        super::math::xyz_to_cam16(input.with_white_point(), self.inner)
+    }
+}
+
+impl<WpParam, T> ConvertOnce<Cam16<T>, Xyz<WpParam::StaticWp, T>>
+    for BakedParameters<WpParam, T::Scalar>
+where
+    T: FromScalar,
+    WpParam: WhitePointParameter<T>,
+    Self: ConvertOnce<Cam16Jch<T>, Xyz<WpParam::StaticWp, T>>,
+{
+    #[inline]
+    fn convert_once(self, input: Cam16<T>) -> Xyz<WpParam::StaticWp, T> {
+        self.convert_once(Cam16Jch::from(input))
+    }
+}
+
+macro_rules! impl_convert_cam16_partial {
+    ($($name: ident),+) => {
+        $(
+            impl<WpParam, T> ConvertOnce<$name<T>, Cam16<T>> for BakedParameters<WpParam, T::Scalar>
+            where
+                WpParam: WhitePointParameter<T>,
+                T: Real + FromScalar + Zero + Arithmetics + Sqrt + PartialCmp + Clone,
+                T::Mask: LazySelect<T> + Clone,
+                T::Scalar: Clone
+            {
+                #[inline]
+                fn convert_once(self, input: $name<T>) -> Cam16<T> {
+                    let (
+                        luminance,
+                        chromaticity,
+                        hue,
+                    ) = input.into_dynamic();
+
+                    let (lightness, brightness) = luminance.into_cam16(self.clone());
+                    let (chroma, colorfulness, saturation) =
+                        chromaticity.into_cam16(lightness.clone(), self.clone());
+
+                    Cam16 {
+                        lightness,
+                        chroma,
+                        hue,
+                        brightness,
+                        colorfulness,
+                        saturation,
+                    }
+                }
+            }
+
+            impl<WpParam, T> ConvertOnce<$name<T>, Xyz<WpParam::StaticWp, T>> for BakedParameters<WpParam, T::Scalar>
+            where
+                WpParam: WhitePointParameter<T>,
+                T: Real
+                    + FromScalar
+                    + One
+                    + Zero
+                    + Sqrt
+                    + Powf
+                    + Abs
+                    + Signum
+                    + Arithmetics
+                    + Trigonometry
+                    + RealAngle
+                    + SignedAngle
+                    + PartialCmp
+                    + Clone,
+                T::Mask: LazySelect<T> + Clone,
+                T::Scalar: Clone,
+            {
+                #[inline]
+                fn convert_once(self, cam16: $name<T>) -> Xyz<WpParam::StaticWp, T> {
+                    crate::cam16::math::cam16_to_xyz(cam16.into_dynamic(), self.inner.clone())
+                        .with_white_point()
+                }
+            }
+        )+
+    };
+}
+
+impl_convert_cam16_partial!(Cam16Jmh, Cam16Jch, Cam16Jsh, Cam16Qmh, Cam16Qch, Cam16Qsh);
+
 impl<WpParam, T> Clone for BakedParameters<WpParam, T>
 where
     T: Clone,
@@ -278,7 +393,7 @@ impl<T> WhitePointParameter<T> for Xyz<white_point::Any, T> {
 
 /// Represents a static white point in [`Parameters`], as opposed to a dynamic
 /// [`Xyz`] value.
-pub struct StaticWp<Wp>(PhantomData<Wp>);
+pub struct StaticWp<Wp>(pub(crate) PhantomData<Wp>);
 
 impl<T, Wp> WhitePointParameter<T> for StaticWp<Wp>
 where

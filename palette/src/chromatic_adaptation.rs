@@ -30,7 +30,7 @@ use crate::{
         self,
         meta::{LmsToXyz, XyzToLms},
     },
-    matrix::{multiply_3x3, multiply_xyz, Mat3},
+    matrix::{multiply_3x3, multiply_3x3_and_vec3, Mat3},
     num::{Arithmetics, Real, Zero},
     white_point::{Any, WhitePoint},
     Xyz,
@@ -74,14 +74,14 @@ where
     ) -> Mat3<T> {
         let adapt = self.get_cone_response();
 
-        let resp_src = multiply_xyz(adapt.ma.clone(), source_wp);
-        let resp_dst = multiply_xyz(adapt.ma.clone(), destination_wp);
+        let [src_x, src_y, src_z] = multiply_3x3_and_vec3(adapt.ma.clone(), source_wp.into());
+        let [dst_x, dst_y, dst_z] = multiply_3x3_and_vec3(adapt.ma.clone(), destination_wp.into());
 
         #[rustfmt::skip]
         let resp = [
-            resp_dst.x / resp_src.x, T::zero(), T::zero(),
-            T::zero(), resp_dst.y / resp_src.y, T::zero(),
-            T::zero(), T::zero(), resp_dst.z / resp_src.z,
+            dst_x / src_x, T::zero(), T::zero(),
+            T::zero(), dst_y / src_y, T::zero(),
+            T::zero(), T::zero(), dst_z / src_z,
         ];
 
         let tmp = multiply_3x3(resp, adapt.ma);
@@ -152,10 +152,10 @@ where
 {
     #[inline]
     fn adapt_from_using<M: TransformMatrix<T>>(color: S, method: M) -> D {
-        let src_xyz = color.into_color_unclamped().with_white_point();
+        let src_xyz: Xyz<Swp, T> = color.into_color_unclamped();
         let transform_matrix = method.generate_transform_matrix(Swp::get_xyz(), Dwp::get_xyz());
-        let dst_xyz = multiply_xyz(transform_matrix, src_xyz);
-        D::from_color_unclamped(dst_xyz.with_white_point())
+        let dst_xyz: Xyz<Dwp, T> = multiply_3x3_and_vec3(transform_matrix, src_xyz.into()).into();
+        D::from_color_unclamped(dst_xyz)
     }
 }
 

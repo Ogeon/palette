@@ -76,7 +76,67 @@
 //! }
 //! ```
 //!
-//! # Deriving
+//! # Reusing Intermediate Data
+//!
+//! Some conversions produce intermediate data that is the same for all values.
+//! For example, conversion between [`Rgb`][crate::rgb::Rgb] and
+//! [`Xyz`][crate::xyz::Xyz] uses a [`Matrix3`], while
+//! [`Cam16`][crate::cam16::Cam16] uses a set of viewing condition as
+//! [`BakedParameters`][crate::cam16::BakedParameters]. These values can be used
+//! as "converters" via the [`Convert`] and [`ConvertOnce`] traits.
+//!
+//! **Remember:** As with anything related to optimization, the performance
+//! difference may vary, depending on the compiler's ability to detect and
+//! optimize the repeated work on its own.
+//!
+//! It's sometimes possible to save some computation time by explicitly caching
+//! and reusing these intermediate values:
+//!
+//! ```
+//! use palette::{
+//!     Srgb, Xyz, FromColor,
+//!     cam16::{Cam16, Parameters},
+//!     convert::Convert,
+//! };
+//! # let image_data: [u8;0] = [];
+//!
+//! // Parameters only need to "bake" once per set of viewing conditions:
+//! let parameters = Parameters::default_static_wp(40.0).bake();
+//!
+//! let pixels: &[Srgb<u8>] = palette::cast::from_component_slice(&image_data);
+//! for &color in pixels {
+//!     let input = Xyz::from_color(color.into_linear());
+//!     let cam16: Cam16<f32> = parameters.convert(input);
+//!
+//!     // ...
+//! }
+//! ```
+//!
+//! It may also be possible to combine multiple matrix steps into a single
+//! matrix, instead of applying them one-by-one:
+//!
+//! ```
+//! use palette::{
+//!     Srgb, Xyz, lms::BradfordLms,
+//!     convert::Convert,
+//!     white_point::D65,
+//! };
+//! # let image_data: [u8;0] = [];
+//!
+//! // While each matrix may be a compile time constant, the compiler may not
+//! // combine them into a single matrix by itself:
+//! let matrix = Xyz::matrix_from_rgb()
+//!     .then(BradfordLms::<D65, f32>::matrix_from_xyz());
+//!
+//! let pixels: &[Srgb<u8>] = palette::cast::from_component_slice(&image_data);
+//! for &color in pixels {
+//!     let lms = matrix.convert(color.into_linear());
+//!
+//!     // ...
+//! }
+//! ```
+//!
+//! # Deriving `FromColorUnclamped`
 //!
 //! `FromColorUnclamped` can be derived in a mostly automatic way. The other
 //! traits are blanket implemented based on it. The default minimum requirement
@@ -135,21 +195,21 @@
 //! ### Item Attributes
 //!
 //! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for
-//!   these colors. They are instead to be implemented manually, and serve as the
-//!   basis for the automatic implementations.
+//!   these colors. They are instead to be implemented manually, and serve as
+//!   the basis for the automatic implementations.
 //!
 //! * `white_point = "some::white_point::Type"`: Sets the white point type that
-//!   should be used when deriving. The default is `D65`, but it may be any other
-//!   type, including type parameters.
+//!   should be used when deriving. The default is `D65`, but it may be any
+//!   other type, including type parameters.
 //!
 //! * `component = "some::component::Type"`: Sets the color component type that
-//!   should be used when deriving. The default is `f32`, but it may be any other
-//!   type, including type parameters.
+//!   should be used when deriving. The default is `f32`, but it may be any
+//!   other type, including type parameters.
 //!
 //! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard type
-//!   that should be used when deriving. The default is to either use `Srgb` or a
-//!   best effort to convert between standards, but sometimes it has to be set to
-//!   a specific type. This also accepts type parameters.
+//!   that should be used when deriving. The default is to either use `Srgb` or
+//!   a best effort to convert between standards, but sometimes it has to be set
+//!   to a specific type. This also accepts type parameters.
 //!
 //! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard type
 //!   that should be used when deriving, similar to `rgb_standard`.
@@ -353,14 +413,97 @@
 
 pub use self::{
     from_into_color::*, from_into_color_mut::*, from_into_color_unclamped::*,
-    from_into_color_unclamped_mut::*, try_from_into_color::*,
+    from_into_color_unclamped_mut::*, matrix3::*, try_from_into_color::*,
 };
 
 mod from_into_color;
 mod from_into_color_mut;
 mod from_into_color_unclamped;
 mod from_into_color_unclamped_mut;
+mod matrix3;
 mod try_from_into_color;
+
+/// Represents types that can convert a value from one type to another.
+pub trait Convert<I, O>: ConvertOnce<I, O> {
+    /// Convert an input value of type `I` to a value of type `O`.
+    ///
+    /// The conversion may produce values outside the typical range of `O`.
+    ///
+    /// ```
+    /// use palette::{
+    ///     Xyz, Srgb,
+    ///     convert::Convert,
+    /// };
+    ///
+    /// let matrix = Xyz::matrix_from_rgb();
+    /// let rgb = Srgb::new(0.8f32, 0.3, 0.3).into_linear();
+    /// let xyz = matrix.convert(rgb);
+    /// ```
+    #[must_use]
+    fn convert(&self, input: I) -> O;
+}
+
+impl<T, I, O> Convert<I, O> for &T
+where
+    T: Convert<I, O> + ?Sized,
+{
+    #[inline]
+    fn convert(&self, input: I) -> O {
+        T::convert(self, input)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T, I, O> Convert<I, O> for alloc::boxed::Box<T>
+where
+    T: Convert<I, O>,
+{
+    #[inline]
+    fn convert(&self, input: I) -> O {
+        T::convert(self, input)
+    }
+}
+
+/// Represents types that can convert a value from one type to another at least once.
+pub trait ConvertOnce<I, O> {
+    /// Convert an input value of type `I` to a value of type `O`, while consuming itself.
+    ///
+    /// The conversion may produce values outside the typical range of `O`.
+    ///
+    /// ```
+    /// use palette::{
+    ///     Xyz, Srgb,
+    ///     convert::ConvertOnce,
+    /// };
+    ///
+    /// let matrix = Xyz::matrix_from_rgb();
+    /// let rgb = Srgb::new(0.8f32, 0.3, 0.3).into_linear();
+    /// let xyz = matrix.convert_once(rgb);
+    /// ```
+    #[must_use]
+    fn convert_once(self, input: I) -> O;
+}
+
+impl<T, I, O> ConvertOnce<I, O> for &T
+where
+    T: Convert<I, O> + ?Sized,
+{
+    #[inline]
+    fn convert_once(self, input: I) -> O {
+        T::convert(self, input)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T, I, O> ConvertOnce<I, O> for alloc::boxed::Box<T>
+where
+    T: ConvertOnce<I, O>,
+{
+    #[inline]
+    fn convert_once(self, input: I) -> O {
+        T::convert_once(*self, input)
+    }
+}
 
 #[cfg(test)]
 mod tests {
