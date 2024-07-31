@@ -132,8 +132,8 @@ where
 
 impl<T, U> FromColorMut<[U]> for [T]
 where
-    T: FromColorMut<U> + ArrayCast + ?Sized,
-    U: FromColorMut<T> + ArrayCast<Array = T::Array> + ?Sized,
+    T: FromColorMut<U> + ArrayCast,
+    U: FromColorMut<T> + ArrayCast<Array = T::Array>,
 {
     #[inline]
     fn from_color_mut(colors: &mut [U]) -> FromColorMutGuard<Self, [U]> {

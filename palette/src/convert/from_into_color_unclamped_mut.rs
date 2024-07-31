@@ -133,8 +133,8 @@ where
 
 impl<T, U> FromColorUnclampedMut<[U]> for [T]
 where
-    T: FromColorUnclampedMut<U> + ArrayCast + ?Sized,
-    U: FromColorUnclampedMut<T> + ArrayCast<Array = T::Array> + ?Sized,
+    T: FromColorUnclampedMut<U> + ArrayCast,
+    U: FromColorUnclampedMut<T> + ArrayCast<Array = T::Array>,
 {
     #[inline]
     fn from_color_unclamped_mut(colors: &mut [U]) -> FromColorUnclampedMutGuard<Self, [U]> {
