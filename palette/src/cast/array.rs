@@ -238,15 +238,12 @@ where
 /// let array3 = <&[_; 3]>::from(&color);
 /// ```
 #[inline]
-pub fn into_array_ref<T>(value: &T) -> &T::Array
+pub const fn into_array_ref<T>(value: &T) -> &T::Array
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
+    assert!(core::mem::size_of::<T::Array>() == core::mem::size_of::<T>());
+    assert!(core::mem::align_of::<T::Array>() == core::mem::align_of::<T>());
 
     let value: *const T = value;
 
@@ -282,15 +279,12 @@ where
 /// let color3 = <&Srgb<u8>>::from(&array);
 /// ```
 #[inline]
-pub fn from_array_ref<T>(value: &T::Array) -> &T
+pub const fn from_array_ref<T>(value: &T::Array) -> &T
 where
     T: ArrayCast,
 {
-    assert_eq!(core::mem::size_of::<T::Array>(), core::mem::size_of::<T>());
-    assert_eq!(
-        core::mem::align_of::<T::Array>(),
-        core::mem::align_of::<T>()
-    );
+    assert!(core::mem::size_of::<T::Array>() == core::mem::size_of::<T>());
+    assert!(core::mem::align_of::<T::Array>() == core::mem::align_of::<T>());
 
     let value: *const T::Array = value;
 
