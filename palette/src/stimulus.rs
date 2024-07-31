@@ -294,11 +294,11 @@ mod test {
             1.0,
             1.4,
             f32::from_bits(0x4b44_0000),
-            core::f32::MAX,
-            core::f32::MIN,
-            core::f32::NAN,
-            core::f32::INFINITY,
-            core::f32::NEG_INFINITY,
+            f32::MAX,
+            f32::MIN,
+            f32::NAN,
+            f32::INFINITY,
+            f32::NEG_INFINITY,
         ];
 
         let expected = vec![
@@ -333,11 +333,11 @@ mod test {
             1.0,
             1.4,
             f64::from_bits(0x4334_0000_0000_0000),
-            core::f64::MAX,
-            core::f64::MIN,
-            core::f64::NAN,
-            core::f64::INFINITY,
-            core::f64::NEG_INFINITY,
+            f64::MAX,
+            f64::MIN,
+            f64::NAN,
+            f64::INFINITY,
+            f64::NEG_INFINITY,
         ];
 
         let expected = vec![
