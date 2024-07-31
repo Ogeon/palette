@@ -25,7 +25,7 @@ edition = "2018"
 resolver = "2"
 categories = ["graphics", "multimedia::images", "no-std"]
 build = "build/main.rs"
-rust-version = "1.60.0"
+rust-version = "1.61.0"
 
 [features]
 default = ["named_from_str", "std", "approx"]
