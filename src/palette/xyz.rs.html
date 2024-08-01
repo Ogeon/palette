@@ -601,14 +601,6 @@
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for the CIE 1931 XYZ color space.
 
 </span><span class="kw">pub mod </span>meta;
@@ -616,26 +608,17 @@
 <span class="kw">use </span>core::{marker::PhantomData, ops::Mul};
 
 <span class="kw">use crate</span>::{
-    angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
-    cam16::{
-        Cam16, Cam16IntoUnclamped, Cam16Jch, Cam16Jmh, Cam16Jsh, Cam16Qch, Cam16Qmh, Cam16Qsh,
-        FromCam16Unclamped, WhitePointParameter,
-    },
-    convert::{FromColorUnclamped, IntoColorUnclamped},
-    encoding::IntoLinear,
+    cam16::{FromCam16Unclamped, WhitePointParameter},
+    convert::{ConvertOnce, FromColorUnclamped, IntoColorUnclamped, Matrix3},
+    encoding::{linear::LinearFn, IntoLinear, Linear},
     lms::{
         meta::{HasLmsMatrix, LmsToXyz},
         Lms,
     },
     luma::LumaStandard,
-    matrix::{
-        matrix_map, multiply_3x3_and_vec3, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix,
-    },
-    num::{
-        Abs, Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powf, Powi, Real, Recip,
-        Signum, Sqrt, Trigonometry, Zero,
-    },
+    matrix::{matrix_map, multiply_3x3_and_vec3, rgb_to_xyz_matrix},
+    num::{Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powi, Real, Recip, Zero},
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
@@ -760,6 +743,43 @@
     }
 }
 
+<span class="kw">impl</span>&lt;Wp, T&gt; Xyz&lt;Wp, T&gt; {
+    <span class="doccomment">/// Produce a conversion matrix from linear [`Rgb`] to [`Xyz`].
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>matrix_from_rgb&lt;S&gt;() -&gt; Matrix3&lt;Rgb&lt;S, T&gt;, <span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span>T: FromScalar,
+        T::Scalar: Real
+            + Recip
+            + IsValidDivisor&lt;Mask = bool&gt;
+            + Arithmetics
+            + FromScalar&lt;Scalar = T::Scalar&gt;
+            + Clone,
+        Wp: WhitePoint&lt;T::Scalar&gt;,
+        S: RgbStandard&lt;TransferFn = LinearFn&gt;,
+        S::Space: RgbSpace&lt;WhitePoint = Wp&gt;,
+        &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
+        Yxy&lt;Any, T::Scalar&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T::Scalar&gt;&gt;,
+    {
+        <span class="kw">let </span>transform_matrix = S::Space::rgb_to_xyz_matrix()
+            .map_or_else(rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;, |matrix| {
+                matrix_map(matrix, T::Scalar::from_f64)
+            });
+
+        Matrix3::from_array(matrix_map(transform_matrix, T::from_scalar))
+    }
+
+    <span class="doccomment">/// Produce a conversion matrix from [`Lms`] to [`Xyz`].
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>matrix_from_lms&lt;M&gt;() -&gt; Matrix3&lt;Lms&lt;M, T&gt;, <span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span>M: HasXyzMeta&lt;XyzMeta = Wp&gt; + HasLmsMatrix,
+        M::LmsMatrix: LmsToXyz&lt;T&gt;,
+    {
+        Matrix3::from_array(M::LmsMatrix::lms_to_xyz_matrix())
+    }
+}
+
 <span class="doccomment">///&lt;span id="Xyza"&gt;&lt;/span&gt;[`Xyza`](crate::Xyza) implementations.
 </span><span class="kw">impl</span>&lt;Wp, T, A&gt; Alpha&lt;Xyz&lt;Wp, T&gt;, A&gt; {
     <span class="doccomment">/// Create a CIE XYZ color with transparency.
@@ -799,7 +819,8 @@
 <span class="macro">impl_struct_of_arrays_methods!</span>(Xyz&lt;Wp&gt;, [x, y, z], white_point);
 
 <span class="kw">impl</span>&lt;Wp, T&gt; FromColorUnclamped&lt;Xyz&lt;Wp, T&gt;&gt; <span class="kw">for </span>Xyz&lt;Wp, T&gt; {
-    <span class="kw">fn </span>from_color_unclamped(color: Xyz&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Xyz&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
         color
     }
 }
@@ -820,12 +841,10 @@
     &lt;S::Space <span class="kw">as </span>RgbSpace&gt;::Primaries: Primaries&lt;T::Scalar&gt;,
     Yxy&lt;Any, T::Scalar&gt;: IntoColorUnclamped&lt;Xyz&lt;Any, T::Scalar&gt;&gt;,
 {
-    <span class="kw">fn </span>from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>transform_matrix = S::Space::rgb_to_xyz_matrix()
-            .map_or_else(rgb_to_xyz_matrix::&lt;S::Space, T::Scalar&gt;, |matrix| {
-                matrix_map(matrix, T::Scalar::from_f64)
-            });
-        multiply_rgb_to_xyz(transform_matrix, color.into_linear())
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Rgb&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>transform_matrix = <span class="self">Self</span>::matrix_from_rgb::&lt;Linear&lt;S::Space&gt;&gt;();
+        transform_matrix.convert_once(color.into_linear())
     }
 }
 
@@ -834,7 +853,8 @@
     </span>T: Zero + One + IsValidDivisor + Arithmetics + Clone,
     T::Mask: LazySelect&lt;T&gt; + Clone,
 {
-    <span class="kw">fn </span>from_color_unclamped(color: Yxy&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Yxy&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>Yxy { x, y, luma, .. } = color;
 
         <span class="comment">// If denominator is zero, NAN or INFINITE leave x and z at the default 0
@@ -862,7 +882,8 @@
     T::Mask: LazySelect&lt;T&gt;,
     Wp: WhitePoint&lt;T&gt;,
 {
-    <span class="kw">fn </span>from_color_unclamped(color: Lab&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Lab&lt;Wp, T&gt;) -&gt; <span class="self">Self </span>{
         <span class="comment">// Recip call shows performance benefits in benchmarks for this function
         </span><span class="kw">let </span>y = (color.l + T::from_f64(<span class="number">16.0</span>)) * T::from_f64(<span class="number">116.0</span>).recip();
         <span class="kw">let </span>x = y.clone() + (color.a * T::from_f64(<span class="number">500.0</span>).recip());
@@ -922,16 +943,15 @@
 <span class="kw">where
     </span>T: Real + Powi + Arithmetics,
 {
-    <span class="kw">fn </span>from_color_unclamped(color: Oklab&lt;T&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Oklab&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>m1_inv = oklab::m1_inv();
         <span class="kw">let </span>m2_inv = oklab::m2_inv();
 
-        <span class="kw">let </span>Xyz {
-            x: l, y: m, z: s, ..
-        } = multiply_xyz(m2_inv, Xyz::new(color.l, color.a, color.b));
+        <span class="kw">let </span>[l, m, s] = multiply_3x3_and_vec3(m2_inv, [color.l, color.a, color.b]);
+        <span class="kw">let </span>[x, y, z] = multiply_3x3_and_vec3(m1_inv, [l.powi(<span class="number">3</span>), m.powi(<span class="number">3</span>), s.powi(<span class="number">3</span>)]);
 
-        <span class="kw">let </span>lms = Xyz::new(l.powi(<span class="number">3</span>), m.powi(<span class="number">3</span>), s.powi(<span class="number">3</span>));
-        multiply_xyz(m1_inv, lms).with_white_point()
+        <span class="self">Self</span>::new(x, y, z)
     }
 }
 
@@ -942,7 +962,8 @@
     S: LumaStandard&lt;WhitePoint = Wp&gt;,
     S::TransferFn: IntoLinear&lt;T, T&gt;,
 {
-    <span class="kw">fn </span>from_color_unclamped(color: Luma&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(color: Luma&lt;S, T&gt;) -&gt; <span class="self">Self </span>{
         Wp::get_xyz().with_white_point::&lt;Wp&gt;() * color.into_linear().luma
     }
 }
@@ -953,65 +974,28 @@
     M::LmsMatrix: LmsToXyz&lt;T&gt;,
     T: Arithmetics,
 {
-    <span class="kw">fn </span>from_color_unclamped(val: Lms&lt;M, T&gt;) -&gt; <span class="self">Self </span>{
-        multiply_3x3_and_vec3(M::LmsMatrix::lms_to_xyz_matrix(), val.into()).into()
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(val: Lms&lt;M, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::matrix_from_lms().convert_once(val)
     }
 }
 
-<span class="kw">impl</span>&lt;WpParam, T&gt; FromCam16Unclamped&lt;WpParam, Cam16&lt;T&gt;&gt; <span class="kw">for </span>Xyz&lt;WpParam::StaticWp, T&gt;
+<span class="kw">impl</span>&lt;WpParam, T, C&gt; FromCam16Unclamped&lt;WpParam, C&gt; <span class="kw">for </span>Xyz&lt;WpParam::StaticWp, T&gt;
 <span class="kw">where
     </span>WpParam: WhitePointParameter&lt;T&gt;,
     T: FromScalar,
-    Cam16Jch&lt;T&gt;: Cam16IntoUnclamped&lt;WpParam, <span class="self">Self</span>, Scalar = T::Scalar&gt;,
+    <span class="kw">crate</span>::cam16::BakedParameters&lt;WpParam, T::Scalar&gt;: ConvertOnce&lt;C, <span class="self">Self</span>&gt;,
 {
     <span class="kw">type </span>Scalar = T::Scalar;
 
-    <span class="kw">fn </span>from_cam16_unclamped(
-        cam16: Cam16&lt;T&gt;,
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_cam16_unclamped(
+        cam16: C,
         parameters: <span class="kw">crate</span>::cam16::BakedParameters&lt;WpParam, <span class="self">Self</span>::Scalar&gt;,
     ) -&gt; <span class="self">Self </span>{
-        Cam16Jch::from(cam16).cam16_into_unclamped(parameters)
+        parameters.convert_once(cam16)
     }
 }
-
-<span class="macro">macro_rules!</span> impl_from_cam16_partial {
-    ($(<span class="macro-nonterminal">$name</span>: ident),+) =&gt; {
-        $(
-            <span class="kw">impl</span>&lt;WpParam, T&gt; FromCam16Unclamped&lt;WpParam, <span class="macro-nonterminal">$name</span>&lt;T&gt;&gt; <span class="kw">for </span>Xyz&lt;WpParam::StaticWp, T&gt;
-            <span class="kw">where
-                </span>WpParam: WhitePointParameter&lt;T&gt;,
-                T: Real
-                    + FromScalar
-                    + One
-                    + Zero
-                    + Sqrt
-                    + Powf
-                    + Abs
-                    + Signum
-                    + Arithmetics
-                    + Trigonometry
-                    + RealAngle
-                    + SignedAngle
-                    + PartialCmp
-                    + Clone,
-                T::Mask: LazySelect&lt;T&gt; + Clone,
-                T::Scalar: Clone,
-            {
-                <span class="kw">type </span>Scalar = T::Scalar;
-
-                <span class="kw">fn </span>from_cam16_unclamped(
-                    cam16: <span class="macro-nonterminal">$name</span>&lt;T&gt;,
-                    parameters: <span class="kw">crate</span>::cam16::BakedParameters&lt;WpParam, <span class="self">Self</span>::Scalar&gt;,
-                ) -&gt; <span class="self">Self </span>{
-                    <span class="kw">crate</span>::cam16::math::cam16_to_xyz(cam16.into_dynamic(), parameters.inner)
-                        .with_white_point()
-                }
-            }
-        )+
-    };
-}
-
-<span class="macro">impl_from_cam16_partial!</span>(Cam16Jmh, Cam16Jch, Cam16Jsh, Cam16Qmh, Cam16Qch, Cam16Qsh);
 
 <span class="macro">impl_tuple_conversion!</span>(Xyz&lt;Wp&gt; <span class="kw">as </span>(T, T, T));
 

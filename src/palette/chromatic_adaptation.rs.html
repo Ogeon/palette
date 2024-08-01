@@ -307,7 +307,7 @@
         <span class="self">self</span>,
         meta::{LmsToXyz, XyzToLms},
     },
-    matrix::{multiply_3x3, multiply_xyz, Mat3},
+    matrix::{multiply_3x3, multiply_3x3_and_vec3, Mat3},
     num::{Arithmetics, Real, Zero},
     white_point::{Any, WhitePoint},
     Xyz,
@@ -351,14 +351,14 @@
     ) -&gt; Mat3&lt;T&gt; {
         <span class="kw">let </span>adapt = <span class="self">self</span>.get_cone_response();
 
-        <span class="kw">let </span>resp_src = multiply_xyz(adapt.ma.clone(), source_wp);
-        <span class="kw">let </span>resp_dst = multiply_xyz(adapt.ma.clone(), destination_wp);
+        <span class="kw">let </span>[src_x, src_y, src_z] = multiply_3x3_and_vec3(adapt.ma.clone(), source_wp.into());
+        <span class="kw">let </span>[dst_x, dst_y, dst_z] = multiply_3x3_and_vec3(adapt.ma.clone(), destination_wp.into());
 
         <span class="attr">#[rustfmt::skip]
         </span><span class="kw">let </span>resp = [
-            resp_dst.x / resp_src.x, T::zero(), T::zero(),
-            T::zero(), resp_dst.y / resp_src.y, T::zero(),
-            T::zero(), T::zero(), resp_dst.z / resp_src.z,
+            dst_x / src_x, T::zero(), T::zero(),
+            T::zero(), dst_y / src_y, T::zero(),
+            T::zero(), T::zero(), dst_z / src_z,
         ];
 
         <span class="kw">let </span>tmp = multiply_3x3(resp, adapt.ma);
@@ -429,10 +429,10 @@
 {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>adapt_from_using&lt;M: TransformMatrix&lt;T&gt;&gt;(color: S, method: M) -&gt; D {
-        <span class="kw">let </span>src_xyz = color.into_color_unclamped().with_white_point();
+        <span class="kw">let </span>src_xyz: Xyz&lt;Swp, T&gt; = color.into_color_unclamped();
         <span class="kw">let </span>transform_matrix = method.generate_transform_matrix(Swp::get_xyz(), Dwp::get_xyz());
-        <span class="kw">let </span>dst_xyz = multiply_xyz(transform_matrix, src_xyz);
-        D::from_color_unclamped(dst_xyz.with_white_point())
+        <span class="kw">let </span>dst_xyz: Xyz&lt;Dwp, T&gt; = multiply_3x3_and_vec3(transform_matrix, src_xyz.into()).into();
+        D::from_color_unclamped(dst_xyz)
     }
 }
 

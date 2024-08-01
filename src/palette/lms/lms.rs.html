@@ -429,12 +429,30 @@
 <a href="#429" id="429">429</a>
 <a href="#430" id="430">430</a>
 <a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::marker::PhantomData;
 
 <span class="kw">use crate</span>::{
     bool_mask::HasBoolMask,
-    convert::FromColorUnclamped,
-    matrix::multiply_3x3_and_vec3,
+    convert::{ConvertOnce, FromColorUnclamped, Matrix3},
     num::{Arithmetics, Zero},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     xyz::meta::HasXyzMeta,
@@ -493,7 +511,7 @@
 /// ```
 </span><span class="attr">#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = <span class="string">"serializing"</span>, derive(Serialize, Deserialize))]
-#[palette(palette_internal, component = <span class="string">"T"</span>, skip_derives(Xyz))]
+#[palette(palette_internal, component = <span class="string">"T"</span>, skip_derives(Lms, Xyz))]
 #[repr(C)]
 </span><span class="kw">pub struct </span>Lms&lt;M, T&gt; {
     <span class="doccomment">/// Stimulus from long wavelengths, or red, or ρ. The typical range is
@@ -611,6 +629,18 @@
     }
 }
 
+<span class="kw">impl</span>&lt;M, T&gt; Lms&lt;M, T&gt; {
+    <span class="doccomment">/// Produce a conversion matrix from [`Xyz`] to [`Lms`].
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>matrix_from_xyz() -&gt; Matrix3&lt;Xyz&lt;M::XyzMeta, T&gt;, <span class="self">Self</span>&gt;
+    <span class="kw">where
+        </span>M: HasXyzMeta + HasLmsMatrix,
+        M::LmsMatrix: XyzToLms&lt;T&gt;,
+    {
+        Matrix3::from_array(M::LmsMatrix::xyz_to_lms_matrix())
+    }
+}
+
 <span class="doccomment">/// &lt;span id="Lmsa"&gt;&lt;/span&gt;[`Lmsa`][Lmsa] implementations.
 </span><span class="kw">impl</span>&lt;S, T, A&gt; Alpha&lt;Lms&lt;S, T&gt;, A&gt; {
     <span class="doccomment">/// Create an LMSA color.
@@ -689,14 +719,22 @@
     }
 }
 
+<span class="kw">impl</span>&lt;M, T&gt; FromColorUnclamped&lt;Lms&lt;M, T&gt;&gt; <span class="kw">for </span>Lms&lt;M, T&gt; {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(val: Lms&lt;M, T&gt;) -&gt; <span class="self">Self </span>{
+        val
+    }
+}
+
 <span class="kw">impl</span>&lt;M, T&gt; FromColorUnclamped&lt;Xyz&lt;M::XyzMeta, T&gt;&gt; <span class="kw">for </span>Lms&lt;M, T&gt;
 <span class="kw">where
     </span>M: HasLmsMatrix + HasXyzMeta,
     M::LmsMatrix: XyzToLms&lt;T&gt;,
     T: Arithmetics,
 {
-    <span class="kw">fn </span>from_color_unclamped(val: Xyz&lt;M::XyzMeta, T&gt;) -&gt; <span class="self">Self </span>{
-        multiply_3x3_and_vec3(M::LmsMatrix::xyz_to_lms_matrix(), val.into()).into()
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_color_unclamped(val: Xyz&lt;M::XyzMeta, T&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::matrix_from_xyz().convert_once(val)
     }
 }
 

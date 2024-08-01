@@ -241,84 +241,13 @@
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This module provides simple matrix operations on 3x3 matrices to aid in
 //! chromatic adaptation and conversion calculations.
 
-</span><span class="kw">use </span>core::marker::PhantomData;
-
-<span class="kw">use crate</span>::{
+</span><span class="kw">use crate</span>::{
     convert::IntoColorUnclamped,
-    encoding::Linear,
     num::{Arithmetics, FromScalar, IsValidDivisor, Recip},
-    rgb::{Primaries, Rgb, RgbSpace},
+    rgb::{Primaries, RgbSpace},
     white_point::{Any, WhitePoint},
     Xyz, Yxy,
 };
@@ -326,15 +255,6 @@
 <span class="doccomment">/// A 9 element array representing a 3x3 matrix.
 </span><span class="kw">pub type </span>Mat3&lt;T&gt; = [T; <span class="number">9</span>];
 <span class="kw">pub type </span>Vec3&lt;T&gt; = [T; <span class="number">3</span>];
-
-<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.
-</span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>multiply_xyz&lt;T&gt;(matrix: Mat3&lt;T&gt;, color: Xyz&lt;Any, T&gt;) -&gt; Xyz&lt;Any, T&gt;
-<span class="kw">where
-    </span>T: Arithmetics,
-{
-    multiply_3x3_and_vec3(matrix, color.into()).into()
-}
 
 <span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color.
 </span><span class="attr">#[inline]
@@ -359,52 +279,6 @@
     <span class="kw">let </span>z3 = m8 * z;
 
     [x1 + x2 + x3, y1 + y2 + y3, z1 + z2 + z3]
-}
-<span class="doccomment">/// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
-</span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>multiply_xyz_to_rgb&lt;S, V, T&gt;(c: Mat3&lt;T&gt;, f: Xyz&lt;S::WhitePoint, V&gt;) -&gt; Rgb&lt;Linear&lt;S&gt;, V&gt;
-<span class="kw">where
-    </span>S: RgbSpace,
-    V: Arithmetics + FromScalar&lt;Scalar = T&gt;,
-{
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths. red, green, and blue
-    // can't be extracted like in `multiply_xyz` to get a performance increase
-    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
-
-    Rgb {
-        red: (V::from_scalar(c0) * <span class="kw-2">&amp;</span>f.x)
-            + (V::from_scalar(c1) * <span class="kw-2">&amp;</span>f.y)
-            + (V::from_scalar(c2) * <span class="kw-2">&amp;</span>f.z),
-        green: (V::from_scalar(c3) * <span class="kw-2">&amp;</span>f.x)
-            + (V::from_scalar(c4) * <span class="kw-2">&amp;</span>f.y)
-            + (V::from_scalar(c5) * <span class="kw-2">&amp;</span>f.z),
-        blue: (V::from_scalar(c6) * f.x) + (V::from_scalar(c7) * f.y) + (V::from_scalar(c8) * f.z),
-        standard: PhantomData,
-    }
-}
-<span class="doccomment">/// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
-</span><span class="attr">#[inline]
-</span><span class="kw">pub fn </span>multiply_rgb_to_xyz&lt;S, V, T&gt;(c: Mat3&lt;T&gt;, f: Rgb&lt;Linear&lt;S&gt;, V&gt;) -&gt; Xyz&lt;S::WhitePoint, V&gt;
-<span class="kw">where
-    </span>S: RgbSpace,
-    V: Arithmetics + FromScalar&lt;Scalar = T&gt;,
-{
-    <span class="comment">// Input Mat3 is destructured to avoid panic paths. Same problem as
-    // `multiply_xyz_to_rgb` for extracting x, y, z
-    </span><span class="kw">let </span>[c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
-
-    Xyz {
-        x: (V::from_scalar(c0) * <span class="kw-2">&amp;</span>f.red)
-            + (V::from_scalar(c1) * <span class="kw-2">&amp;</span>f.green)
-            + (V::from_scalar(c2) * <span class="kw-2">&amp;</span>f.blue),
-        y: (V::from_scalar(c3) * <span class="kw-2">&amp;</span>f.red)
-            + (V::from_scalar(c4) * <span class="kw-2">&amp;</span>f.green)
-            + (V::from_scalar(c5) * <span class="kw-2">&amp;</span>f.blue),
-        z: (V::from_scalar(c6) * f.red)
-            + (V::from_scalar(c7) * f.green)
-            + (V::from_scalar(c8) * f.blue),
-        white_point: PhantomData,
-    }
 }
 
 <span class="doccomment">/// Multiply two 3x3 matrices.
@@ -506,24 +380,24 @@
 
     <span class="kw">let </span>matrix = mat3_from_primaries(r, g, b);
 
-    <span class="kw">let </span>s_matrix: Rgb&lt;Linear&lt;S&gt;, T&gt; = multiply_xyz_to_rgb(
+    <span class="kw">let </span>[s_red, s_green, s_blue] = multiply_3x3_and_vec3(
         matrix_inverse(matrix.clone()),
-        S::WhitePoint::get_xyz().with_white_point(),
+        S::WhitePoint::get_xyz().into(),
     );
 
     <span class="comment">// Destructuring has some performance benefits, don't change unless measured
     </span><span class="kw">let </span>[t0, t1, t2, t3, t4, t5, t6, t7, t8] = matrix;
 
     [
-        t0 * <span class="kw-2">&amp;</span>s_matrix.red,
-        t1 * <span class="kw-2">&amp;</span>s_matrix.green,
-        t2 * <span class="kw-2">&amp;</span>s_matrix.blue,
-        t3 * <span class="kw-2">&amp;</span>s_matrix.red,
-        t4 * <span class="kw-2">&amp;</span>s_matrix.green,
-        t5 * <span class="kw-2">&amp;</span>s_matrix.blue,
-        t6 * s_matrix.red,
-        t7 * s_matrix.green,
-        t8 * s_matrix.blue,
+        t0 * <span class="kw-2">&amp;</span>s_red,
+        t1 * <span class="kw-2">&amp;</span>s_green,
+        t2 * <span class="kw-2">&amp;</span>s_blue,
+        t3 * <span class="kw-2">&amp;</span>s_red,
+        t4 * <span class="kw-2">&amp;</span>s_green,
+        t5 * <span class="kw-2">&amp;</span>s_blue,
+        t6 * s_red,
+        t7 * s_green,
+        t8 * s_blue,
     ]
 }
 
@@ -540,12 +414,9 @@
 <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
 #[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use super</span>::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
-    <span class="kw">use </span><span class="kw">crate</span>::chromatic_adaptation::AdaptInto;
-    <span class="kw">use </span><span class="kw">crate</span>::encoding::{Linear, Srgb};
-    <span class="kw">use </span><span class="kw">crate</span>::rgb::Rgb;
-    <span class="kw">use </span><span class="kw">crate</span>::white_point::D50;
-    <span class="kw">use </span><span class="kw">crate</span>::Xyz;
+    <span class="kw">use super</span>::{matrix_inverse, multiply_3x3, rgb_to_xyz_matrix};
+    <span class="kw">use </span><span class="kw">crate</span>::encoding::Srgb;
+    <span class="kw">use </span><span class="kw">crate</span>::matrix::multiply_3x3_and_vec3;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>matrix_multiply_3x3() {
@@ -560,14 +431,16 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>matrix_multiply_xyz() {
+    </span><span class="kw">fn </span>matrix_multiply_vec3() {
         <span class="kw">let </span>inp1 = [<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.3</span>, <span class="number">0.3</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.1</span>, <span class="number">0.3</span>];
-        <span class="kw">let </span>inp2 = Xyz::new(<span class="number">0.4</span>, <span class="number">0.6</span>, <span class="number">0.8</span>);
+        <span class="kw">let </span>inp2 = [<span class="number">0.4</span>, <span class="number">0.6</span>, <span class="number">0.8</span>];
 
-        <span class="kw">let </span>expected = Xyz::new(<span class="number">0.4</span>, <span class="number">0.32</span>, <span class="number">0.38</span>);
+        <span class="kw">let </span>expected = [<span class="number">0.4</span>, <span class="number">0.32</span>, <span class="number">0.38</span>];
 
-        <span class="kw">let </span>computed = multiply_xyz(inp1, inp2);
-        <span class="macro">assert_relative_eq!</span>(expected, computed)
+        <span class="kw">let </span>computed = multiply_3x3_and_vec3(inp1, inp2);
+        <span class="kw">for </span>(t1, t2) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
+            <span class="macro">assert_relative_eq!</span>(t1, t2);
+        }
     }
 
     <span class="attr">#[test]
@@ -609,15 +482,6 @@
         <span class="kw">for </span>(e, c) <span class="kw">in </span>expected.iter().zip(computed.iter()) {
             <span class="macro">assert_relative_eq!</span>(e, c, epsilon = <span class="number">0.000001</span>)
         }
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>d65_to_d50() {
-        <span class="kw">let </span>input: Rgb&lt;Linear&lt;Srgb&gt;&gt; = Rgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
-        <span class="kw">let </span>expected: Rgb&lt;Linear&lt;(Srgb, D50)&gt;&gt; = Rgb::new(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>);
-
-        <span class="kw">let </span>computed: Rgb&lt;Linear&lt;(Srgb, D50)&gt;&gt; = input.adapt_into();
-        <span class="macro">assert_relative_eq!</span>(expected, computed, epsilon = <span class="number">0.000001</span>);
     }
 }
 </code></pre></div></section></main></body></html>
