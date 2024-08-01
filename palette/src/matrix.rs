@@ -1,13 +1,10 @@
 //! This module provides simple matrix operations on 3x3 matrices to aid in
 //! chromatic adaptation and conversion calculations.
 
-use core::marker::PhantomData;
-
 use crate::{
     convert::IntoColorUnclamped,
-    encoding::Linear,
     num::{Arithmetics, FromScalar, IsValidDivisor, Recip},
-    rgb::{Primaries, Rgb, RgbSpace},
+    rgb::{Primaries, RgbSpace},
     white_point::{Any, WhitePoint},
     Xyz, Yxy,
 };
@@ -15,15 +12,6 @@ use crate::{
 /// A 9 element array representing a 3x3 matrix.
 pub type Mat3<T> = [T; 9];
 pub type Vec3<T> = [T; 3];
-
-/// Multiply the 3x3 matrix with an XYZ color.
-#[inline]
-pub fn multiply_xyz<T>(matrix: Mat3<T>, color: Xyz<Any, T>) -> Xyz<Any, T>
-where
-    T: Arithmetics,
-{
-    multiply_3x3_and_vec3(matrix, color.into()).into()
-}
 
 /// Multiply the 3x3 matrix with an XYZ color.
 #[inline]
@@ -48,52 +36,6 @@ where
     let z3 = m8 * z;
 
     [x1 + x2 + x3, y1 + y2 + y3, z1 + z2 + z3]
-}
-/// Multiply the 3x3 matrix with an XYZ color to return an RGB color.
-#[inline]
-pub fn multiply_xyz_to_rgb<S, V, T>(c: Mat3<T>, f: Xyz<S::WhitePoint, V>) -> Rgb<Linear<S>, V>
-where
-    S: RgbSpace,
-    V: Arithmetics + FromScalar<Scalar = T>,
-{
-    // Input Mat3 is destructured to avoid panic paths. red, green, and blue
-    // can't be extracted like in `multiply_xyz` to get a performance increase
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
-
-    Rgb {
-        red: (V::from_scalar(c0) * &f.x)
-            + (V::from_scalar(c1) * &f.y)
-            + (V::from_scalar(c2) * &f.z),
-        green: (V::from_scalar(c3) * &f.x)
-            + (V::from_scalar(c4) * &f.y)
-            + (V::from_scalar(c5) * &f.z),
-        blue: (V::from_scalar(c6) * f.x) + (V::from_scalar(c7) * f.y) + (V::from_scalar(c8) * f.z),
-        standard: PhantomData,
-    }
-}
-/// Multiply the 3x3 matrix with an RGB color to return an XYZ color.
-#[inline]
-pub fn multiply_rgb_to_xyz<S, V, T>(c: Mat3<T>, f: Rgb<Linear<S>, V>) -> Xyz<S::WhitePoint, V>
-where
-    S: RgbSpace,
-    V: Arithmetics + FromScalar<Scalar = T>,
-{
-    // Input Mat3 is destructured to avoid panic paths. Same problem as
-    // `multiply_xyz_to_rgb` for extracting x, y, z
-    let [c0, c1, c2, c3, c4, c5, c6, c7, c8] = c;
-
-    Xyz {
-        x: (V::from_scalar(c0) * &f.red)
-            + (V::from_scalar(c1) * &f.green)
-            + (V::from_scalar(c2) * &f.blue),
-        y: (V::from_scalar(c3) * &f.red)
-            + (V::from_scalar(c4) * &f.green)
-            + (V::from_scalar(c5) * &f.blue),
-        z: (V::from_scalar(c6) * f.red)
-            + (V::from_scalar(c7) * f.green)
-            + (V::from_scalar(c8) * f.blue),
-        white_point: PhantomData,
-    }
 }
 
 /// Multiply two 3x3 matrices.
@@ -195,24 +137,24 @@ where
 
     let matrix = mat3_from_primaries(r, g, b);
 
-    let s_matrix: Rgb<Linear<S>, T> = multiply_xyz_to_rgb(
+    let [s_red, s_green, s_blue] = multiply_3x3_and_vec3(
         matrix_inverse(matrix.clone()),
-        S::WhitePoint::get_xyz().with_white_point(),
+        S::WhitePoint::get_xyz().into(),
     );
 
     // Destructuring has some performance benefits, don't change unless measured
     let [t0, t1, t2, t3, t4, t5, t6, t7, t8] = matrix;
 
     [
-        t0 * &s_matrix.red,
-        t1 * &s_matrix.green,
-        t2 * &s_matrix.blue,
-        t3 * &s_matrix.red,
-        t4 * &s_matrix.green,
-        t5 * &s_matrix.blue,
-        t6 * s_matrix.red,
-        t7 * s_matrix.green,
-        t8 * s_matrix.blue,
+        t0 * &s_red,
+        t1 * &s_green,
+        t2 * &s_blue,
+        t3 * &s_red,
+        t4 * &s_green,
+        t5 * &s_blue,
+        t6 * s_red,
+        t7 * s_green,
+        t8 * s_blue,
     ]
 }
 
@@ -229,12 +171,9 @@ fn mat3_from_primaries<T>(r: Xyz<Any, T>, g: Xyz<Any, T>, b: Xyz<Any, T>) -> Mat
 #[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
-    use super::{matrix_inverse, multiply_3x3, multiply_xyz, rgb_to_xyz_matrix};
-    use crate::chromatic_adaptation::AdaptInto;
-    use crate::encoding::{Linear, Srgb};
-    use crate::rgb::Rgb;
-    use crate::white_point::D50;
-    use crate::Xyz;
+    use super::{matrix_inverse, multiply_3x3, rgb_to_xyz_matrix};
+    use crate::encoding::Srgb;
+    use crate::matrix::multiply_3x3_and_vec3;
 
     #[test]
     fn matrix_multiply_3x3() {
@@ -249,14 +188,16 @@ mod test {
     }
 
     #[test]
-    fn matrix_multiply_xyz() {
+    fn matrix_multiply_vec3() {
         let inp1 = [0.1, 0.2, 0.3, 0.3, 0.2, 0.1, 0.2, 0.1, 0.3];
-        let inp2 = Xyz::new(0.4, 0.6, 0.8);
+        let inp2 = [0.4, 0.6, 0.8];
 
-        let expected = Xyz::new(0.4, 0.32, 0.38);
+        let expected = [0.4, 0.32, 0.38];
 
-        let computed = multiply_xyz(inp1, inp2);
-        assert_relative_eq!(expected, computed)
+        let computed = multiply_3x3_and_vec3(inp1, inp2);
+        for (t1, t2) in expected.iter().zip(computed.iter()) {
+            assert_relative_eq!(t1, t2);
+        }
     }
 
     #[test]
@@ -298,14 +239,5 @@ mod test {
         for (e, c) in expected.iter().zip(computed.iter()) {
             assert_relative_eq!(e, c, epsilon = 0.000001)
         }
-    }
-
-    #[test]
-    fn d65_to_d50() {
-        let input: Rgb<Linear<Srgb>> = Rgb::new(1.0, 1.0, 1.0);
-        let expected: Rgb<Linear<(Srgb, D50)>> = Rgb::new(1.0, 1.0, 1.0);
-
-        let computed: Rgb<Linear<(Srgb, D50)>> = input.adapt_into();
-        assert_relative_eq!(expected, computed, epsilon = 0.000001);
     }
 }

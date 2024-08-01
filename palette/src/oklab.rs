@@ -9,7 +9,7 @@ use crate::{
     bool_mask::HasBoolMask,
     convert::{FromColorUnclamped, IntoColorUnclamped},
     encoding::{IntoLinear, Srgb},
-    matrix::multiply_xyz,
+    matrix::multiply_3x3_and_vec3,
     num::{Arithmetics, Cbrt, Hypot, MinMax, One, Powi, Real, Sqrt, Trigonometry, Zero},
     ok_utils::{toe_inv, ChromaValues, LC, ST},
     rgb::{Rgb, RgbSpace, RgbStandard},
@@ -267,15 +267,8 @@ where
         let m1 = m1();
         let m2 = m2();
 
-        let Xyz {
-            x: l, y: m, z: s, ..
-        } = multiply_xyz(m1, color.with_white_point());
-
-        let l_m_s_ = Xyz::new(l.cbrt(), m.cbrt(), s.cbrt());
-
-        let Xyz {
-            x: l, y: a, z: b, ..
-        } = multiply_xyz(m2, l_m_s_);
+        let [l, m, s] = multiply_3x3_and_vec3(m1, color.into());
+        let [l, a, b] = multiply_3x3_and_vec3(m2, [l.cbrt(), m.cbrt(), s.cbrt()]);
 
         Self::new(l, a, b)
     }

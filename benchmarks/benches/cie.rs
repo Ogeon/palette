@@ -3,7 +3,7 @@ use std::path::Path;
 use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, Criterion};
 use palette::{
     color_difference::{Ciede2000, DeltaE, ImprovedDeltaE},
-    convert::FromColorUnclamped,
+    convert::{Convert, FromColorUnclamped},
 };
 use palette::{Lab, Lch, Xyz, Yxy};
 
@@ -24,7 +24,9 @@ use data_color_mine::{load_data, ColorMine};
 
 fn cie_conversion(c: &mut Criterion) {
     let mut group = c.benchmark_group("Cie family");
-    let mut colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new("../integration_tests/tests/convert/data_color_mine.csv")));
+    let mut colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new(
+        "../integration_tests/tests/convert/data_color_mine.csv",
+    )));
     colormine.truncate(colormine.len() - colormine.len() % 8);
     assert_eq!(
         colormine.len() % 8,
@@ -56,6 +58,8 @@ fn cie_conversion(c: &mut Criterion) {
         .iter()
         .map(|x| Lch::from_color_unclamped(x.xyz))
         .collect();
+
+    let rgb_to_xyz_matrix = Xyz::matrix_from_rgb();
 
     group.bench_with_input("xyz to lab", &colormine, |b, colormine| {
         b.iter(|| {
@@ -96,6 +100,17 @@ fn cie_conversion(c: &mut Criterion) {
             })
         },
     );
+    group.bench_with_input(
+        "linsrgb to xyz - Matrix3",
+        &(&colormine, rgb_to_xyz_matrix),
+        |b, &(colormine, matrix)| {
+            b.iter(|| {
+                for c in colormine {
+                    black_box(matrix.convert(c.linear_rgb));
+                }
+            })
+        },
+    );
     group.bench_with_input("yxy to xyz", &colormine, |b, colormine| {
         b.iter(|| {
             for c in colormine {
@@ -123,7 +138,9 @@ fn cie_conversion(c: &mut Criterion) {
 
 fn cie_delta_e(c: &mut Criterion) {
     let mut group = c.benchmark_group("Cie delta E");
-    let colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new("../integration_tests/tests/convert/data_color_mine.csv")));
+    let colormine: Vec<ColorMine<f32>> = load_data(Some(Path::new(
+        "../integration_tests/tests/convert/data_color_mine.csv",
+    )));
 
     let lab: Vec<Lab> = colormine
         .iter()

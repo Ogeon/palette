@@ -14,10 +14,10 @@ use crate::{
     bool_mask::{BitOps, HasBoolMask, LazySelect},
     cast::{ComponentOrder, Packed},
     color_difference::Wcag21RelativeContrast,
-    convert::{FromColorUnclamped, IntoColorUnclamped},
-    encoding::{FromLinear, IntoLinear, Linear, Srgb},
+    convert::{ConvertOnce, FromColorUnclamped, IntoColorUnclamped, Matrix3},
+    encoding::{linear::LinearFn, FromLinear, IntoLinear, Linear, Srgb},
     luma::LumaStandard,
-    matrix::{matrix_inverse, matrix_map, multiply_xyz_to_rgb, rgb_to_xyz_matrix},
+    matrix::{matrix_inverse, matrix_map, rgb_to_xyz_matrix},
     num::{
         Abs, Arithmetics, FromScalar, IsValidDivisor, MinMax, One, PartialCmp, Real, Recip, Round,
         Trigonometry, Zero,
@@ -306,6 +306,33 @@ where
     /// Return the `blue` value maximum.
     pub fn max_blue() -> T {
         T::max_intensity()
+    }
+}
+
+impl<S, T> Rgb<S, T> {
+    /// Produce a conversion matrix from [`Xyz`] to linear [`Rgb`].
+    #[allow(clippy::type_complexity)]
+    #[inline]
+    pub fn matrix_from_xyz() -> Matrix3<Xyz<<S::Space as RgbSpace>::WhitePoint, T>, Self>
+    where
+        S: RgbStandard<TransferFn = LinearFn>,
+        <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
+        <S::Space as RgbSpace>::WhitePoint: WhitePoint<T::Scalar>,
+        T: FromScalar,
+        T::Scalar: Real
+            + Recip
+            + IsValidDivisor<Mask = bool>
+            + Arithmetics
+            + Clone
+            + FromScalar<Scalar = T::Scalar>,
+        Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
+    {
+        let transform_matrix = S::Space::xyz_to_rgb_matrix().map_or_else(
+            || matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>()),
+            |matrix| matrix_map(matrix, T::Scalar::from_f64),
+        );
+
+        Matrix3::from_array(matrix_map(transform_matrix, T::from_scalar))
     }
 }
 
@@ -751,12 +778,10 @@ where
         + FromScalar<Scalar = T::Scalar>,
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
+    #[inline]
     fn from_color_unclamped(color: Xyz<<S::Space as RgbSpace>::WhitePoint, T>) -> Self {
-        let transform_matrix = S::Space::xyz_to_rgb_matrix().map_or_else(
-            || matrix_inverse(rgb_to_xyz_matrix::<S::Space, T::Scalar>()),
-            |matrix| matrix_map(matrix, T::Scalar::from_f64),
-        );
-        Self::from_linear(multiply_xyz_to_rgb(transform_matrix, color))
+        let transform_matrix = Rgb::<Linear<S::Space>, T>::matrix_from_xyz();
+        Self::from_linear(transform_matrix.convert_once(color))
     }
 }
 

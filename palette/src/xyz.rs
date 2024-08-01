@@ -5,26 +5,17 @@ pub mod meta;
 use core::{marker::PhantomData, ops::Mul};
 
 use crate::{
-    angle::{RealAngle, SignedAngle},
     bool_mask::{HasBoolMask, LazySelect},
-    cam16::{
-        Cam16, Cam16IntoUnclamped, Cam16Jch, Cam16Jmh, Cam16Jsh, Cam16Qch, Cam16Qmh, Cam16Qsh,
-        FromCam16Unclamped, WhitePointParameter,
-    },
-    convert::{FromColorUnclamped, IntoColorUnclamped},
-    encoding::IntoLinear,
+    cam16::{FromCam16Unclamped, WhitePointParameter},
+    convert::{ConvertOnce, FromColorUnclamped, IntoColorUnclamped, Matrix3},
+    encoding::{linear::LinearFn, IntoLinear, Linear},
     lms::{
         meta::{HasLmsMatrix, LmsToXyz},
         Lms,
     },
     luma::LumaStandard,
-    matrix::{
-        matrix_map, multiply_3x3_and_vec3, multiply_rgb_to_xyz, multiply_xyz, rgb_to_xyz_matrix,
-    },
-    num::{
-        Abs, Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powf, Powi, Real, Recip,
-        Signum, Sqrt, Trigonometry, Zero,
-    },
+    matrix::{matrix_map, multiply_3x3_and_vec3, rgb_to_xyz_matrix},
+    num::{Arithmetics, FromScalar, IsValidDivisor, One, PartialCmp, Powi, Real, Recip, Zero},
     oklab,
     rgb::{Primaries, Rgb, RgbSpace, RgbStandard},
     stimulus::{Stimulus, StimulusColor},
@@ -149,6 +140,43 @@ where
     }
 }
 
+impl<Wp, T> Xyz<Wp, T> {
+    /// Produce a conversion matrix from linear [`Rgb`] to [`Xyz`].
+    #[inline]
+    pub fn matrix_from_rgb<S>() -> Matrix3<Rgb<S, T>, Self>
+    where
+        T: FromScalar,
+        T::Scalar: Real
+            + Recip
+            + IsValidDivisor<Mask = bool>
+            + Arithmetics
+            + FromScalar<Scalar = T::Scalar>
+            + Clone,
+        Wp: WhitePoint<T::Scalar>,
+        S: RgbStandard<TransferFn = LinearFn>,
+        S::Space: RgbSpace<WhitePoint = Wp>,
+        <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
+        Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
+    {
+        let transform_matrix = S::Space::rgb_to_xyz_matrix()
+            .map_or_else(rgb_to_xyz_matrix::<S::Space, T::Scalar>, |matrix| {
+                matrix_map(matrix, T::Scalar::from_f64)
+            });
+
+        Matrix3::from_array(matrix_map(transform_matrix, T::from_scalar))
+    }
+
+    /// Produce a conversion matrix from [`Lms`] to [`Xyz`].
+    #[inline]
+    pub fn matrix_from_lms<M>() -> Matrix3<Lms<M, T>, Self>
+    where
+        M: HasXyzMeta<XyzMeta = Wp> + HasLmsMatrix,
+        M::LmsMatrix: LmsToXyz<T>,
+    {
+        Matrix3::from_array(M::LmsMatrix::lms_to_xyz_matrix())
+    }
+}
+
 ///<span id="Xyza"></span>[`Xyza`](crate::Xyza) implementations.
 impl<Wp, T, A> Alpha<Xyz<Wp, T>, A> {
     /// Create a CIE XYZ color with transparency.
@@ -188,6 +216,7 @@ impl_reference_component_methods!(Xyz<Wp>, [x, y, z], white_point);
 impl_struct_of_arrays_methods!(Xyz<Wp>, [x, y, z], white_point);
 
 impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
+    #[inline]
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         color
     }
@@ -209,12 +238,10 @@ where
     <S::Space as RgbSpace>::Primaries: Primaries<T::Scalar>,
     Yxy<Any, T::Scalar>: IntoColorUnclamped<Xyz<Any, T::Scalar>>,
 {
+    #[inline]
     fn from_color_unclamped(color: Rgb<S, T>) -> Self {
-        let transform_matrix = S::Space::rgb_to_xyz_matrix()
-            .map_or_else(rgb_to_xyz_matrix::<S::Space, T::Scalar>, |matrix| {
-                matrix_map(matrix, T::Scalar::from_f64)
-            });
-        multiply_rgb_to_xyz(transform_matrix, color.into_linear())
+        let transform_matrix = Self::matrix_from_rgb::<Linear<S::Space>>();
+        transform_matrix.convert_once(color.into_linear())
     }
 }
 
@@ -223,6 +250,7 @@ where
     T: Zero + One + IsValidDivisor + Arithmetics + Clone,
     T::Mask: LazySelect<T> + Clone,
 {
+    #[inline]
     fn from_color_unclamped(color: Yxy<Wp, T>) -> Self {
         let Yxy { x, y, luma, .. } = color;
 
@@ -251,6 +279,7 @@ where
     T::Mask: LazySelect<T>,
     Wp: WhitePoint<T>,
 {
+    #[inline]
     fn from_color_unclamped(color: Lab<Wp, T>) -> Self {
         // Recip call shows performance benefits in benchmarks for this function
         let y = (color.l + T::from_f64(16.0)) * T::from_f64(116.0).recip();
@@ -311,16 +340,15 @@ impl<T> FromColorUnclamped<Oklab<T>> for Xyz<D65, T>
 where
     T: Real + Powi + Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         let m1_inv = oklab::m1_inv();
         let m2_inv = oklab::m2_inv();
 
-        let Xyz {
-            x: l, y: m, z: s, ..
-        } = multiply_xyz(m2_inv, Xyz::new(color.l, color.a, color.b));
+        let [l, m, s] = multiply_3x3_and_vec3(m2_inv, [color.l, color.a, color.b]);
+        let [x, y, z] = multiply_3x3_and_vec3(m1_inv, [l.powi(3), m.powi(3), s.powi(3)]);
 
-        let lms = Xyz::new(l.powi(3), m.powi(3), s.powi(3));
-        multiply_xyz(m1_inv, lms).with_white_point()
+        Self::new(x, y, z)
     }
 }
 
@@ -331,6 +359,7 @@ where
     S: LumaStandard<WhitePoint = Wp>,
     S::TransferFn: IntoLinear<T, T>,
 {
+    #[inline]
     fn from_color_unclamped(color: Luma<S, T>) -> Self {
         Wp::get_xyz().with_white_point::<Wp>() * color.into_linear().luma
     }
@@ -342,65 +371,28 @@ where
     M::LmsMatrix: LmsToXyz<T>,
     T: Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(val: Lms<M, T>) -> Self {
-        multiply_3x3_and_vec3(M::LmsMatrix::lms_to_xyz_matrix(), val.into()).into()
+        Self::matrix_from_lms().convert_once(val)
     }
 }
 
-impl<WpParam, T> FromCam16Unclamped<WpParam, Cam16<T>> for Xyz<WpParam::StaticWp, T>
+impl<WpParam, T, C> FromCam16Unclamped<WpParam, C> for Xyz<WpParam::StaticWp, T>
 where
     WpParam: WhitePointParameter<T>,
     T: FromScalar,
-    Cam16Jch<T>: Cam16IntoUnclamped<WpParam, Self, Scalar = T::Scalar>,
+    crate::cam16::BakedParameters<WpParam, T::Scalar>: ConvertOnce<C, Self>,
 {
     type Scalar = T::Scalar;
 
+    #[inline]
     fn from_cam16_unclamped(
-        cam16: Cam16<T>,
+        cam16: C,
         parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
     ) -> Self {
-        Cam16Jch::from(cam16).cam16_into_unclamped(parameters)
+        parameters.convert_once(cam16)
     }
 }
-
-macro_rules! impl_from_cam16_partial {
-    ($($name: ident),+) => {
-        $(
-            impl<WpParam, T> FromCam16Unclamped<WpParam, $name<T>> for Xyz<WpParam::StaticWp, T>
-            where
-                WpParam: WhitePointParameter<T>,
-                T: Real
-                    + FromScalar
-                    + One
-                    + Zero
-                    + Sqrt
-                    + Powf
-                    + Abs
-                    + Signum
-                    + Arithmetics
-                    + Trigonometry
-                    + RealAngle
-                    + SignedAngle
-                    + PartialCmp
-                    + Clone,
-                T::Mask: LazySelect<T> + Clone,
-                T::Scalar: Clone,
-            {
-                type Scalar = T::Scalar;
-
-                fn from_cam16_unclamped(
-                    cam16: $name<T>,
-                    parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
-                ) -> Self {
-                    crate::cam16::math::cam16_to_xyz(cam16.into_dynamic(), parameters.inner)
-                        .with_white_point()
-                }
-            }
-        )+
-    };
-}
-
-impl_from_cam16_partial!(Cam16Jmh, Cam16Jch, Cam16Jsh, Cam16Qmh, Cam16Qch, Cam16Qsh);
 
 impl_tuple_conversion!(Xyz<Wp> as (T, T, T));
 

@@ -1,14 +1,14 @@
 use crate::{
-    angle::RealAngle,
-    bool_mask::{HasBoolMask, LazySelect},
+    bool_mask::HasBoolMask,
+    convert::Convert,
     hues::Cam16Hue,
-    num::{Abs, Arithmetics, FromScalar, PartialCmp, Powf, Real, Signum, Sqrt, Trigonometry, Zero},
+    num::{FromScalar, Zero},
     Alpha, GetHue, Xyz,
 };
 
 use super::{
-    BakedParameters, Cam16FromUnclamped, Cam16IntoUnclamped, Cam16Jch, Cam16Jmh, Cam16Jsh,
-    Cam16Qch, Cam16Qmh, Cam16Qsh, FromCam16Unclamped, IntoCam16Unclamped, WhitePointParameter,
+    BakedParameters, Cam16FromUnclamped, Cam16IntoUnclamped, IntoCam16Unclamped,
+    WhitePointParameter,
 };
 
 /// CIE CAM16 with an alpha component.
@@ -353,86 +353,18 @@ impl<T, A> Alpha<Cam16<T>, A> {
     }
 }
 
-impl<WpParam, T> Cam16FromUnclamped<WpParam, Xyz<WpParam::StaticWp, T>> for Cam16<T>
+impl<WpParam, T, C> Cam16FromUnclamped<WpParam, C> for Cam16<T>
 where
+    T: FromScalar,
     WpParam: WhitePointParameter<T::Scalar>,
-    T: Real
-        + FromScalar
-        + Arithmetics
-        + Powf
-        + Sqrt
-        + Abs
-        + Signum
-        + Trigonometry
-        + RealAngle
-        + Clone,
-    T::Scalar: Clone,
+    BakedParameters<WpParam, T::Scalar>: Convert<C, Self>,
 {
     type Scalar = T::Scalar;
 
-    fn cam16_from_unclamped(
-        color: Xyz<WpParam::StaticWp, T>,
-        parameters: BakedParameters<WpParam, Self::Scalar>,
-    ) -> Self {
-        super::math::xyz_to_cam16(color.with_white_point(), parameters.inner)
+    fn cam16_from_unclamped(color: C, parameters: BakedParameters<WpParam, Self::Scalar>) -> Self {
+        parameters.convert(color)
     }
 }
-
-macro_rules! impl_from_cam16_partial {
-    ($($name: ident),+) => {
-        $(
-            impl<WpParam, T> Cam16FromUnclamped<WpParam, $name<T>> for Cam16<T>
-            where
-                WpParam: WhitePointParameter<T>,
-                T: Real + FromScalar + Zero + Arithmetics + Sqrt + PartialCmp + Clone,
-                T::Mask: LazySelect<T> + Clone,
-                T::Scalar: Clone
-            {
-                type Scalar = T::Scalar;
-
-                fn cam16_from_unclamped(
-                    cam16: $name<T>,
-                    parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
-                ) -> Self {
-                    let (
-                        luminance,
-                        chromaticity,
-                        hue,
-                    ) = cam16.into_dynamic();
-
-                    let (lightness, brightness) = luminance.into_cam16(parameters.clone());
-                    let (chroma, colorfulness, saturation) =
-                        chromaticity.into_cam16(lightness.clone(), parameters);
-
-                    Cam16 {
-                        lightness,
-                        chroma,
-                        hue,
-                        brightness,
-                        colorfulness,
-                        saturation,
-                    }
-                }
-            }
-
-            impl<WpParam, T> FromCam16Unclamped<WpParam, $name<T>> for Cam16<T>
-            where
-                Self: Cam16FromUnclamped<WpParam, $name<T>>,
-            {
-                type Scalar = <Self as Cam16FromUnclamped<WpParam, $name<T>>>::Scalar;
-
-                fn from_cam16_unclamped(
-                    cam16: $name<T>,
-                    parameters: crate::cam16::BakedParameters<WpParam, Self::Scalar>,
-                ) -> Self {
-                    Self::cam16_from_unclamped(cam16, parameters)
-                }
-            }
-        )+
-    };
-}
-
-impl_from_cam16_partial!(Cam16Jmh, Cam16Jch, Cam16Jsh, Cam16Qmh, Cam16Qch, Cam16Qsh);
 
 impl<T> GetHue for Cam16<T>
 where

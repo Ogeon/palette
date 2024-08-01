@@ -2,8 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{
     bool_mask::HasBoolMask,
-    convert::FromColorUnclamped,
-    matrix::multiply_3x3_and_vec3,
+    convert::{ConvertOnce, FromColorUnclamped, Matrix3},
     num::{Arithmetics, Zero},
     stimulus::{FromStimulus, Stimulus, StimulusColor},
     xyz::meta::HasXyzMeta,
@@ -62,7 +61,7 @@ pub type Lmsa<M, T> = Alpha<Lms<M, T>, T>;
 /// ```
 #[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(palette_internal, component = "T", skip_derives(Xyz))]
+#[palette(palette_internal, component = "T", skip_derives(Lms, Xyz))]
 #[repr(C)]
 pub struct Lms<M, T> {
     /// Stimulus from long wavelengths, or red, or ρ. The typical range is
@@ -180,6 +179,18 @@ where
     }
 }
 
+impl<M, T> Lms<M, T> {
+    /// Produce a conversion matrix from [`Xyz`] to [`Lms`].
+    #[inline]
+    pub fn matrix_from_xyz() -> Matrix3<Xyz<M::XyzMeta, T>, Self>
+    where
+        M: HasXyzMeta + HasLmsMatrix,
+        M::LmsMatrix: XyzToLms<T>,
+    {
+        Matrix3::from_array(M::LmsMatrix::xyz_to_lms_matrix())
+    }
+}
+
 /// <span id="Lmsa"></span>[`Lmsa`][Lmsa] implementations.
 impl<S, T, A> Alpha<Lms<S, T>, A> {
     /// Create an LMSA color.
@@ -258,14 +269,22 @@ impl<S, T, A> Alpha<Lms<S, T>, A> {
     }
 }
 
+impl<M, T> FromColorUnclamped<Lms<M, T>> for Lms<M, T> {
+    #[inline]
+    fn from_color_unclamped(val: Lms<M, T>) -> Self {
+        val
+    }
+}
+
 impl<M, T> FromColorUnclamped<Xyz<M::XyzMeta, T>> for Lms<M, T>
 where
     M: HasLmsMatrix + HasXyzMeta,
     M::LmsMatrix: XyzToLms<T>,
     T: Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(val: Xyz<M::XyzMeta, T>) -> Self {
-        multiply_3x3_and_vec3(M::LmsMatrix::xyz_to_lms_matrix(), val.into()).into()
+        Self::matrix_from_xyz().convert_once(val)
     }
 }
 
