@@ -215,7 +215,6 @@ use palette::{
     encoding,
     white_point,
     rgb::Rgb,
-    chromatic_adaptation::AdaptFrom,
     Srgb
 };
 
@@ -227,9 +226,6 @@ type EqualEnergyStandard = (encoding::Srgb, white_point::E, encoding::Srgb);
 type EqualEnergySrgb<T> = Rgb<EqualEnergyStandard, T>;
 
 let ee_rgb = EqualEnergySrgb::new(1.0, 0.5, 0.3);
-
-// We need to use chromatic adaptation when going between white points.
-let srgb = Srgb::adapt_from(ee_rgb);
 ```
 
 It's also possible to implement the traits for a custom type, for when the built-in options are not enough.

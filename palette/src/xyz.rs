@@ -2,15 +2,20 @@
 
 pub mod meta;
 
-use core::{marker::PhantomData, ops::Mul};
+use core::{
+    any::TypeId,
+    marker::PhantomData,
+    ops::{Div, Mul},
+};
 
 use crate::{
     bool_mask::{HasBoolMask, LazySelect},
     cam16::{FromCam16Unclamped, WhitePointParameter},
+    chromatic_adaptation::{adaptation_matrix, AdaptFromUnclamped},
     convert::{ConvertOnce, FromColorUnclamped, IntoColorUnclamped, Matrix3},
     encoding::{linear::LinearFn, IntoLinear, Linear},
     lms::{
-        meta::{HasLmsMatrix, LmsToXyz},
+        matrix::{HasLmsMatrix, LmsToXyz, XyzToLms},
         Lms,
     },
     luma::LumaStandard,
@@ -87,6 +92,18 @@ impl<Wp, T> Xyz<Wp, T> {
     /// Convert from a `(X, Y, Z)` tuple.
     pub fn from_components((x, y, z): (T, T, T)) -> Self {
         Self::new(x, y, z)
+    }
+
+    /// Normalize `y` to `1.0`.
+    ///
+    /// May produce unexpected values if `y` is `0.0`.
+    pub fn normalize(self) -> Self
+    where
+        T: Div<Output = T> + Clone,
+    {
+        let y = self.y.clone();
+
+        self / y
     }
 
     /// Changes the reference white point without changing the color value.
@@ -219,6 +236,27 @@ impl<Wp, T> FromColorUnclamped<Xyz<Wp, T>> for Xyz<Wp, T> {
     #[inline]
     fn from_color_unclamped(color: Xyz<Wp, T>) -> Self {
         color
+    }
+}
+
+impl<T, Wp1, Wp2> AdaptFromUnclamped<Xyz<Wp1, T>> for Xyz<Wp2, T>
+where
+    T: Zero + Arithmetics + Clone,
+    Wp1: WhitePoint<T> + HasXyzMeta<XyzMeta = Wp1>,
+    Wp2: WhitePoint<T> + HasXyzMeta<XyzMeta = Wp2>,
+{
+    type Scalar = T;
+
+    #[inline]
+    fn adapt_from_unclamped_with<M>(input: Xyz<Wp1, T>) -> Self
+    where
+        M: LmsToXyz<T> + XyzToLms<T>,
+    {
+        if TypeId::of::<Wp1>() != TypeId::of::<Wp2>() {
+            adaptation_matrix::<T, Wp1, Wp2, M>(None, None).convert_once(input)
+        } else {
+            input.with_white_point()
+        }
     }
 }
 
