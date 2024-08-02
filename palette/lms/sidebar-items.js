@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["meta"],"struct":["Iter","Lms","UniformLms"],"type":["BradfordLms","BradfordLmsa","Lmsa","VonKriesLms","VonKriesLmsa"]};
+window.SIDEBAR_ITEMS = {"mod":["matrix"],"struct":["Iter","Lms","UniformLms"],"type":["BradfordLms","BradfordLmsa","Lmsa","VonKriesLms","VonKriesLmsa"]};

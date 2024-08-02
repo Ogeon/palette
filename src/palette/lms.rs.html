@@ -25,21 +25,21 @@
 </span><span class="attr">#[allow(clippy::module_inception)]
 </span><span class="kw">mod </span>lms;
 
-<span class="kw">pub mod </span>meta;
+<span class="kw">pub mod </span>matrix;
 
 <span class="kw">use </span><span class="kw">crate</span>::Alpha;
 
 <span class="kw">pub use </span><span class="self">self</span>::lms::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// LMS that uses the von Kries matrix.
-</span><span class="kw">pub type </span>VonKriesLms&lt;M, T&gt; = Lms&lt;meta::WithLmsMatrix&lt;M, meta::VonKries&gt;, T&gt;;
+</span><span class="kw">pub type </span>VonKriesLms&lt;M, T&gt; = Lms&lt;matrix::WithLmsMatrix&lt;M, matrix::VonKries&gt;, T&gt;;
 
 <span class="doccomment">/// LMSA that uses the von Kries matrix.
-</span><span class="kw">pub type </span>VonKriesLmsa&lt;M, T&gt; = Alpha&lt;Lms&lt;meta::WithLmsMatrix&lt;M, meta::VonKries&gt;, T&gt;, T&gt;;
+</span><span class="kw">pub type </span>VonKriesLmsa&lt;M, T&gt; = Alpha&lt;Lms&lt;matrix::WithLmsMatrix&lt;M, matrix::VonKries&gt;, T&gt;, T&gt;;
 
 <span class="doccomment">/// LMS that uses the Bradford matrix.
-</span><span class="kw">pub type </span>BradfordLms&lt;M, T&gt; = Lms&lt;meta::WithLmsMatrix&lt;M, meta::Bradford&gt;, T&gt;;
+</span><span class="kw">pub type </span>BradfordLms&lt;M, T&gt; = Lms&lt;matrix::WithLmsMatrix&lt;M, matrix::Bradford&gt;, T&gt;;
 
 <span class="doccomment">/// LMSA that uses the Bradford matrix.
-</span><span class="kw">pub type </span>BradfordLmsa&lt;M, T&gt; = Alpha&lt;Lms&lt;meta::WithLmsMatrix&lt;M, meta::Bradford&gt;, T&gt;, T&gt;;
+</span><span class="kw">pub type </span>BradfordLmsa&lt;M, T&gt; = Alpha&lt;Lms&lt;matrix::WithLmsMatrix&lt;M, matrix::Bradford&gt;, T&gt;, T&gt;;
 </code></pre></div></section></main></body></html>
