@@ -1,4 +1,4 @@
-//! Meta types and traits for [`Lms`][super::Lms].
+//! Matrix types and traits for [`Lms`][super::Lms].
 
 use core::marker::PhantomData;
 

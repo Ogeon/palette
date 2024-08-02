@@ -9,7 +9,7 @@ use crate::{
     Alpha, Xyz,
 };
 
-use super::meta::{HasLmsMatrix, XyzToLms};
+use super::matrix::{HasLmsMatrix, XyzToLms};
 
 /// Generic LMS with an alpha component. See [`Lmsa` implementation in
 /// `Alpha`][crate::Alpha#Lmsa].
@@ -33,15 +33,15 @@ pub type Lmsa<M, T> = Alpha<Lms<M, T>, T>;
 /// # Creating a Value
 ///
 /// An LMS value is often derived from another color space, through a conversion
-/// matrix. Two such matrices are [`VonKries`][super::meta::VonKries] and
-/// [`Bradford`][super::meta::Bradford], and Palette offers type aliases in the
+/// matrix. Two such matrices are [`VonKries`][super::matrix::VonKries] and
+/// [`Bradford`][super::matrix::Bradford], and Palette offers type aliases in the
 /// [`lms`][crate::lms] module to make using them a bit more convenient. It's of
 /// course also possible to simply use [`Lms::new`], but it may not be as
 /// intuitive.
 ///
 /// ```
 /// use palette::{
-///     lms::{Lms, VonKriesLms, meta::VonKries},
+///     lms::{Lms, VonKriesLms, matrix::VonKries},
 ///     white_point::D65,
 ///     Srgb, FromColor
 /// };
