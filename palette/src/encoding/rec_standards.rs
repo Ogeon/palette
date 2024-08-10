@@ -209,4 +209,83 @@ mod test {
             assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
         }
     }
+
+    #[cfg(feature = "approx")]
+    mod transfer {
+        use crate::encoding::{rec_standards::RecOetf, FromLinear, IntoLinear};
+
+        #[test]
+        fn lin_to_enc_to_lin() {
+            for i in 0..=100 {
+                let linear = i as f64 / 100.0;
+                let encoded: f64 = RecOetf::from_linear(linear);
+                assert_relative_eq!(linear, RecOetf::into_linear(encoded), epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn enc_to_lin_to_enc() {
+            for i in 0..=100 {
+                let encoded = i as f64 / 100.0;
+                let linear: f64 = RecOetf::into_linear(encoded);
+                assert_relative_eq!(encoded, RecOetf::from_linear(linear), epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn test_u8_f32_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f32 = RecOetf::into_linear(i);
+                let f32_impl = RecOetf::into_linear(i as f32 / 255.0);
+                assert_relative_eq!(u8_impl, f32_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn test_u8_f32_from_impl() {
+            for i in 0..=100 {
+                let float = i as f32 / 100.0;
+                let u8_impl: u8 = RecOetf::from_linear(float);
+                let f32_impl: f32 = RecOetf::from_linear(float);
+                assert_eq!(u8_impl, (255.0 * f32_impl + 0.5) as u8);
+            }
+        }
+
+        #[test]
+        fn test_u8_f64_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f64 = RecOetf::into_linear(i);
+                let f64_impl = RecOetf::into_linear(i as f64 / 255.0);
+                assert_relative_eq!(u8_impl, f64_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn test_u8_f64_from_impl() {
+            for i in 0..=100 {
+                let float = i as f64 / 100.0;
+                let u8_impl: u8 = RecOetf::from_linear(float);
+                let f64_impl: f64 = RecOetf::from_linear(float);
+                assert_eq!(u8_impl, (255.0 * f64_impl + 0.5) as u8);
+            }
+        }
+
+        #[test]
+        fn u8_to_f32_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f32 = RecOetf::into_linear(expected);
+                let result: u8 = RecOetf::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+
+        #[test]
+        fn u8_to_f64_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f64 = RecOetf::into_linear(expected);
+                let result: u8 = RecOetf::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+    }
 }
