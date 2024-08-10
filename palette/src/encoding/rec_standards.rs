@@ -21,6 +21,8 @@ use crate::{
 pub struct Rec2020;
 
 impl<T: Real> Primaries<T> for Rec2020 {
+    // Primary values taken from ITU specification:
+    // https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-2-201510-I!!PDF-E.pdf
     fn red() -> Yxy<Any, T> {
         Yxy::new(T::from_f64(0.708), T::from_f64(0.292), T::from_f64(0.2627))
     }
@@ -39,6 +41,8 @@ impl RgbSpace for Rec2020 {
     #[rustfmt::skip]
     #[inline(always)]
     fn rgb_to_xyz_matrix() -> Option<Mat3<f64>> {
+        // Matrix calculated using specified primary values and white point
+        // using formulas from http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
         Some([
             0.6370102, 0.1446150, 0.1688448,
             0.2627217, 0.6779893, 0.0592890,
@@ -49,6 +53,8 @@ impl RgbSpace for Rec2020 {
     #[rustfmt::skip]
     #[inline(always)]
     fn xyz_to_rgb_matrix() -> Option<Mat3<f64>> {
+        // Matrix calculated using specified primary values and white point
+        // using formulas from http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
         Some([
              1.7165107, -0.3556417, -0.2533455,
             -0.6666930,  1.6165022,  0.0157688,
