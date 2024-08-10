@@ -1,5 +1,7 @@
 //! The ITU-R Recommendation BT.2020 (aka Rec. 2020) standard.
 
+use core::cmp::Ordering;
+
 use crate::{
     bool_mask::LazySelect,
     encoding::{FromLinear, IntoLinear, Srgb},
@@ -9,6 +11,10 @@ use crate::{
     white_point::{Any, D65},
     Mat3, Yxy,
 };
+
+use lookup_tables::*;
+
+mod lookup_tables;
 
 /// The Rec. 2020 standard, color space, and transfer function.
 ///
@@ -122,8 +128,60 @@ where
     fn from_linear(linear: T) -> T {
         lazy_select! {
             if linear.lt(&T::from_f64(BETA)) => T::from_f64(4.5) * &linear,
-            else => linear.clone().powf(T::from_f64(0.45)).mul_sub(T::from_f64(ALPHA), T::from_f64(1.0 - ALPHA))
+            else => linear.clone().powf(T::from_f64(0.45)).mul_sub(T::from_f64(ALPHA), T::from_f64(ALPHA - 1.0))
         }
+    }
+}
+
+impl IntoLinear<f32, u8> for RecOetf {
+    #[inline]
+    fn into_linear(encoded: u8) -> f32 {
+        REC_OETF_U8_TO_F32[encoded as usize]
+    }
+}
+
+impl FromLinear<f32, u8> for RecOetf {
+    #[inline]
+    fn from_linear(linear: f32) -> u8 {
+        const ALPHA_32: f32 = ALPHA as f32;
+        const BETA_32: f32 = BETA as f32;
+        // First if statement handles both non-positive values and NaN
+        let encoded = if linear.partial_cmp(&0.0) != Some(Ordering::Greater) {
+            0.0
+        } else if linear < BETA_32 {
+            4.5 * linear
+        } else if linear < 1.0 {
+            linear.powf(0.45) * ALPHA_32 - (ALPHA_32 - 1.0)
+        } else {
+            1.0
+        };
+
+        (encoded * 255.0 + 0.5) as u8
+    }
+}
+
+impl IntoLinear<f64, u8> for RecOetf {
+    #[inline]
+    fn into_linear(encoded: u8) -> f64 {
+        REC_OETF_U8_TO_F64[encoded as usize]
+    }
+}
+
+impl FromLinear<f64, u8> for RecOetf {
+    #[inline]
+    fn from_linear(linear: f64) -> u8 {
+        // First if statement handles both non-positive values and NaN
+        let encoded = if linear.partial_cmp(&0.0) != Some(Ordering::Greater) {
+            0.0
+        } else if linear < BETA {
+            4.5 * linear
+        } else if linear < 1.0 {
+            linear.powf(0.45) * ALPHA - (ALPHA - 1.0)
+        } else {
+            1.0
+        };
+
+        (encoded * 255.0 + 0.5) as u8
     }
 }
 
