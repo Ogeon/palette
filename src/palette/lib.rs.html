@@ -1430,6 +1430,9 @@
 <a href="#1430" id="1430">1430</a>
 <a href="#1431" id="1431">1431</a>
 <a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
@@ -1744,7 +1747,10 @@
 <span class="attr">#[doc(inline)]
 </span><span class="kw">pub use </span>oklch::{Oklch, Oklcha};
 <span class="attr">#[doc(inline)]
-</span><span class="kw">pub use </span>rgb::{GammaSrgb, GammaSrgba, LinRec2020, LinSrgb, LinSrgba, Rec2020, Rec709, Srgb, Srgba};
+</span><span class="kw">pub use </span>rgb::{
+    AdobeRgb, AdobeRgba, GammaSrgb, GammaSrgba, LinAdobeRgb, LinAdobeRgba, LinRec2020, LinSrgb,
+    LinSrgba, Rec2020, Rec709, Srgb, Srgba,
+};
 <span class="attr">#[doc(inline)]
 </span><span class="kw">pub use </span>xyz::{Xyz, Xyza};
 <span class="attr">#[doc(inline)]

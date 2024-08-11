@@ -28,6 +28,8 @@
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Number and color encoding traits, types and standards.
 //!
 //! Some color spaces, particularly RGB, may be encoded in more than one way and
@@ -35,11 +37,13 @@
 //! represented as type parameters in Palette, as a form of type branding, to
 //! prevent accidental mixups.
 
-</span><span class="kw">pub use </span><span class="self">self</span>::gamma::{F2p2, Gamma};
+</span><span class="kw">pub use </span><span class="self">self</span>::adobe::AdobeRgb;
+<span class="kw">pub use </span><span class="self">self</span>::gamma::{F2p2, Gamma};
 <span class="kw">pub use </span><span class="self">self</span>::linear::Linear;
 <span class="kw">pub use </span><span class="self">self</span>::rec_standards::{Rec2020, Rec709};
 <span class="kw">pub use </span><span class="self">self</span>::srgb::Srgb;
 
+<span class="kw">pub mod </span>adobe;
 <span class="kw">pub mod </span>gamma;
 <span class="kw">pub mod </span>linear;
 <span class="kw">pub mod </span>rec_standards;

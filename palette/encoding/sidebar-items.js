@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["gamma","linear","rec_standards","srgb"],"trait":["FromLinear","IntoLinear"]};
+window.SIDEBAR_ITEMS = {"mod":["adobe","gamma","linear","rec_standards","srgb"],"trait":["FromLinear","IntoLinear"]};
