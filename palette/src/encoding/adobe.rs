@@ -1,13 +1,14 @@
 //! The Adobe RGB (1998) standard.
 
 use crate::{
-    encoding::gamma::GammaFn,
     luma::LumaStandard,
-    num::Real,
+    num::{Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
+
+use super::{FromLinear, IntoLinear};
 
 /// The Adobe RGB (1998) (a.k.a. opRGB) color space and standard.
 ///
@@ -74,12 +75,30 @@ impl RgbSpace for AdobeRgb {
 
 impl RgbStandard for AdobeRgb {
     type Space = AdobeRgb;
-    type TransferFn = GammaFn;
+    type TransferFn = AdobeRgb;
 }
 
 impl LumaStandard for AdobeRgb {
     type WhitePoint = D65;
-    type TransferFn = GammaFn;
+    type TransferFn = AdobeRgb;
+}
+
+impl<T> IntoLinear<T, T> for AdobeRgb
+where
+    T: Real + Powf,
+{
+    fn into_linear(encoded: T) -> T {
+        encoded.powf(T::from_f64(563.0 / 256.0))
+    }
+}
+
+impl<T> FromLinear<T, T> for AdobeRgb
+where
+    T: Real + Powf,
+{
+    fn from_linear(linear: T) -> T {
+        linear.powf(T::from_f64(256.0 / 563.0))
+    }
 }
 
 #[cfg(test)]
@@ -104,6 +123,35 @@ mod test {
             let dynamic = matrix_inverse(rgb_to_xyz_matrix::<AdobeRgb, f64>());
             let constant = AdobeRgb::xyz_to_rgb_matrix().unwrap();
             assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+        }
+    }
+
+    #[cfg(feature = "approx")]
+    mod transfer {
+        use crate::encoding::{AdobeRgb, FromLinear, IntoLinear};
+
+        #[test]
+        fn lin_to_enc_to_lin() {
+            for i in 0..=100 {
+                let linear = i as f64 / 100.0;
+                let encoded: f64 = AdobeRgb::from_linear(linear);
+                assert_relative_eq!(linear, AdobeRgb::into_linear(encoded), epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn enc_to_lin_to_enc() {
+            for i in 0..=100 {
+                let encoded = i as f64 / 100.0;
+                let linear: f64 = AdobeRgb::into_linear(encoded);
+                assert_relative_eq!(encoded, AdobeRgb::from_linear(linear), epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn correct_values() {
+            assert_relative_eq!(AdobeRgb::from_linear(0.5), 0.72965838, epsilon = 0.0000001);
+            assert_relative_eq!(AdobeRgb::into_linear(0.5), 0.21775552, epsilon = 0.0000001);
         }
     }
 }
