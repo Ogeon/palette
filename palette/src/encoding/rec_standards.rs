@@ -1,7 +1,5 @@
 //! The ITU-R Recommendation BT.2020 (aka Rec. 2020) standard.
 
-use core::cmp::Ordering;
-
 use crate::{
     bool_mask::LazySelect,
     encoding::{FromLinear, IntoLinear, Srgb},
@@ -143,20 +141,57 @@ impl IntoLinear<f32, u8> for RecOetf {
 impl FromLinear<f32, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        const ALPHA_32: f32 = ALPHA as f32;
-        const BETA_32: f32 = BETA as f32;
-        // First if statement handles both non-positive values and NaN
-        let encoded = if linear.partial_cmp(&0.0) != Some(Ordering::Greater) {
-            0.0
-        } else if linear < BETA_32 {
-            4.5 * linear
-        } else if linear < 1.0 {
-            linear.powf(0.45) * ALPHA_32 - (ALPHA_32 - 1.0)
-        } else {
-            1.0
+        // Algorithm modeled closely off of `f32_to_srgb8` from fast-srgb8 crate
+        const MAX_FLOAT_BITS: u32 = 0x3f7fffff;
+        const MIN_FLOAT_BITS: u32 = 0x39000000;
+        let max_float = f32::from_bits(MAX_FLOAT_BITS);
+        let min_float = f32::from_bits(MIN_FLOAT_BITS);
+
+        let mut input = linear;
+        // Implemented this way to map NaN to `min_float`
+        if input.partial_cmp(&min_float) != Some(core::cmp::Ordering::Greater) {
+            input = min_float;
+        } else if input > max_float {
+            input = max_float;
+        }
+        let input_bits = input.to_bits();
+        #[cfg(all(not(bench), test))]
+        {
+            debug_assert!((MIN_FLOAT_BITS..=MAX_FLOAT_BITS).contains(&input_bits));
+        }
+        // Safety: all input floats are clamped into the {min_float, max_float} range,
+        // which turns out in this case to guarantee that their bitwise reprs are
+        // clamped to the {MIN_FLOAT_BITS, MAX_FLOAT_BITS} range (guaranteed by the
+        // fact that min_float/max_float are the normal, finite, the same sign, and
+        // not zero).
+        //
+        // Because of that, the smallest result of `input_bits - MIN_FLOAT_BITS` is 0
+        // (when `input_bits` is `MIN_FLOAT_BITS`), and the largest is `0x067fffff`,
+        // (when `input_bits` is `MAX_FLOAT_BITS`). `0x067fffff >> 20` is 0x67, e.g. 103,
+        // and thus all possible results are inbounds for the (104 item) table.
+        // This is all verified in test code.
+        //
+        // Note that the compiler can't figure this out on it's own, so the
+        // get_unchecked does help some.
+        let entry = {
+            let i = ((input_bits - MIN_FLOAT_BITS) >> 20) as usize;
+            #[cfg(all(not(bench), test))]
+            {
+                debug_assert!(TO_REC_OETF_U8.get(i).is_some());
+            }
+            unsafe { *TO_REC_OETF_U8.get_unchecked(i) }
         };
 
-        (encoded * 255.0 + 0.5) as u8
+        let bias = (entry >> 16) << 9;
+        let scale = entry & 0xffff;
+
+        let t = (input_bits >> 12) & 0xff;
+        let res = (bias + scale * t) >> 16;
+        #[cfg(all(not(bench), test))]
+        {
+            debug_assert!(res < 256, "{}", res);
+        }
+        res as u8
     }
 }
 
@@ -170,18 +205,7 @@ impl IntoLinear<f64, u8> for RecOetf {
 impl FromLinear<f64, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f64) -> u8 {
-        // First if statement handles both non-positive values and NaN
-        let encoded = if linear.partial_cmp(&0.0) != Some(Ordering::Greater) {
-            0.0
-        } else if linear < BETA {
-            4.5 * linear
-        } else if linear < 1.0 {
-            linear.powf(0.45) * ALPHA - (ALPHA - 1.0)
-        } else {
-            1.0
-        };
-
-        (encoded * 255.0 + 0.5) as u8
+        RecOetf::from_linear(linear as f32)
     }
 }
 
@@ -242,31 +266,11 @@ mod test {
         }
 
         #[test]
-        fn test_u8_f32_from_impl() {
-            for i in 0..=100 {
-                let float = i as f32 / 100.0;
-                let u8_impl: u8 = RecOetf::from_linear(float);
-                let f32_impl: f32 = RecOetf::from_linear(float);
-                assert_eq!(u8_impl, (255.0 * f32_impl + 0.5) as u8);
-            }
-        }
-
-        #[test]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
                 let u8_impl: f64 = RecOetf::into_linear(i);
                 let f64_impl = RecOetf::into_linear(i as f64 / 255.0);
                 assert_relative_eq!(u8_impl, f64_impl, epsilon = 0.0000001);
-            }
-        }
-
-        #[test]
-        fn test_u8_f64_from_impl() {
-            for i in 0..=100 {
-                let float = i as f64 / 100.0;
-                let u8_impl: u8 = RecOetf::from_linear(float);
-                let f64_impl: f64 = RecOetf::from_linear(float);
-                assert_eq!(u8_impl, (255.0 * f64_impl + 0.5) as u8);
             }
         }
 
