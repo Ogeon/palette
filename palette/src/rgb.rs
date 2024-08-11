@@ -133,6 +133,42 @@ pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 /// create a value and use it.
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
+/// Non-linear Adobe RGB.
+///
+/// This is a gamma 2.2 encoded RGB color space designed to include most colors
+/// producable by CMYK printers.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type AdobeRgb<T = f32> = Rgb<encoding::AdobeRgb, T>;
+
+/// Non-linear Adobe RGB with an alpha component.
+///
+/// This is a transparent version of [`AdobeRgb`], which is commonly used as the
+/// input or output format.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
+pub type AdobeRgba<T = f32> = Rgba<encoding::AdobeRgb, T>;
+
+/// Linear Adobe RGB.
+///
+/// You probably want [`AdobeRgb`] if you are looking for an input or output format.
+/// This is the linear version of Adobe RGB, which is what you would usually convert
+/// to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type LinAdobeRgb<T = f32> = Rgb<Linear<encoding::AdobeRgb>, T>;
+
+/// Linear Adobe RGB with an alpha component.
+///
+/// You probably want [`AdobeRgba`] if you are looking for an input or output format.
+/// This is the linear version of Adobe RGBA, which is what you would usually convert
+/// to before working with the color.
+///
+/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
+/// create a value and use it.
+pub type LinAdobeRgba<T = f32> = Rgba<Linear<encoding::AdobeRgb>, T>;
+
 /// Rec. 709.
 ///
 /// This standard has the same primaries as [`Srgb`], but uses the transfer
