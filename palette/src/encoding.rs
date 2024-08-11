@@ -5,11 +5,13 @@
 //! represented as type parameters in Palette, as a form of type branding, to
 //! prevent accidental mixups.
 
+pub use self::adobe::AdobeRgb;
 pub use self::gamma::{F2p2, Gamma};
 pub use self::linear::Linear;
 pub use self::rec_standards::{Rec2020, Rec709};
 pub use self::srgb::Srgb;
 
+pub mod adobe;
 pub mod gamma;
 pub mod linear;
 pub mod rec_standards;
