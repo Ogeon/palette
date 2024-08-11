@@ -1,4 +1,5 @@
-//! The ITU-R Recommendation BT.2020 (aka Rec. 2020) standard.
+//! The ITU-R Recommendation BT.2020 (Rec. 2020) and BT.709 (Rec. 709) standards and their
+//! associated transfer function.
 
 use crate::{
     bool_mask::LazySelect,

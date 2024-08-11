@@ -312,7 +312,7 @@ pub use oklab::{Oklab, Oklaba};
 #[doc(inline)]
 pub use oklch::{Oklch, Oklcha};
 #[doc(inline)]
-pub use rgb::{GammaSrgb, GammaSrgba, LinSrgb, LinSrgba, Srgb, Srgba};
+pub use rgb::{GammaSrgb, GammaSrgba, LinRec2020, LinSrgb, LinSrgba, Rec2020, Rec709, Srgb, Srgba};
 #[doc(inline)]
 pub use xyz::{Xyz, Xyza};
 #[doc(inline)]
