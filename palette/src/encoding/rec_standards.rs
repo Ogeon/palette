@@ -85,6 +85,7 @@ impl LumaStandard for Rec2020 {
 /// `Rec709` will not use any kind of approximation when converting from `T` to
 /// `T`. This involves calls to `powf`, which may make it too slow for certain
 /// applications.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Rec709;
 
 impl RgbStandard for Rec709 {
@@ -99,6 +100,7 @@ impl LumaStandard for Rec709 {
 
 /// The opto-electronic transfer function used in standard dynamic range (SDR)
 /// standards by the ITU-R such as [`Rec709`] and [`Rec2020`].
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct RecOetf;
 
 const ALPHA: f64 = 1.09929682680944;
