@@ -176,7 +176,7 @@ impl FromLinear<f32, u8> for RecOetf {
         // get_unchecked does help some.
         let entry = {
             let i = ((input_bits - MIN_FLOAT_BITS) >> 20) as usize;
-            #[cfg(all(not(bench), test))]
+            #[cfg(test)]
             {
                 debug_assert!(TO_REC_OETF_U8.get(i).is_some());
             }
