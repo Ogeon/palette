@@ -143,8 +143,8 @@ impl FromLinear<f32, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
         // Algorithm modeled closely off of `f32_to_srgb8` from fast-srgb8 crate
-        const MAX_FLOAT_BITS: u32 = 0x3f7fffff;
-        const MIN_FLOAT_BITS: u32 = 0x39000000;
+        const MAX_FLOAT_BITS: u32 = 0x3f7fffff; // 1.0 - f32::EPSILON
+        const MIN_FLOAT_BITS: u32 = 0x39000000; // 2^(-13)
         let max_float = f32::from_bits(MAX_FLOAT_BITS);
         let min_float = f32::from_bits(MIN_FLOAT_BITS);
 
@@ -156,7 +156,7 @@ impl FromLinear<f32, u8> for RecOetf {
             input = max_float;
         }
         let input_bits = input.to_bits();
-        #[cfg(all(not(bench), test))]
+        #[cfg(test)]
         {
             debug_assert!((MIN_FLOAT_BITS..=MAX_FLOAT_BITS).contains(&input_bits));
         }
@@ -188,7 +188,7 @@ impl FromLinear<f32, u8> for RecOetf {
 
         let t = (input_bits >> 12) & 0xff;
         let res = (bias + scale * t) >> 16;
-        #[cfg(all(not(bench), test))]
+        #[cfg(test)]
         {
             debug_assert!(res < 256, "{}", res);
         }
