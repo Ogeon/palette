@@ -37,7 +37,7 @@ where
         let xyz: Xyz<Wp, T> = color.into_color();
         let lms = Lms::<WithLmsMatrix<Wp, M>, T>::from_color(xyz);
         let clamped_xyz: Xyz<Wp, T> =
-            S::clamp_by_deficiency::<Cn, WithLmsMatrix<Wp, M>, T>(lms.clone(), None).into_color();
+            S::clamp_by_deficiency::<Cn, WithLmsMatrix<Wp, M>, T>(lms, None).into_color();
         clamped_xyz.into_color()
     }
 }
