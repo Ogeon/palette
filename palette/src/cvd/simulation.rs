@@ -67,7 +67,7 @@ where
         <[T; 9] as HasBoolMask>::Mask: LazySelect<[T; 9]>,
     {
         let lms = color.into_color();
-        S::clamp_by_deficiency::<Cn, M, T>(lms.clone(), Some(severity)).into_color()
+        S::clamp_by_deficiency::<Cn, M, T>(lms, Some(severity)).into_color()
     }
 }
 
