@@ -353,6 +353,7 @@ pub mod chromatic_adaptation;
 pub mod color_difference;
 pub mod color_theory;
 pub mod convert;
+pub mod cvd;
 pub mod encoding;
 pub mod hsl;
 pub mod hsluv;

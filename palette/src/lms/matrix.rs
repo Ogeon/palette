@@ -136,6 +136,50 @@ impl HasLmsMatrix for Bradford {
     type LmsMatrix = Self;
 }
 
+/// Represents the transformation matrix developed by Smith, V. C. and Pokorny, J.
+/// that is frequently used when simulating and/or studying color vision deficiency.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct SmithPokorny;
+
+impl<T> XyzToLms<T> for SmithPokorny
+where
+    T: Real,
+{
+    #[rustfmt::skip]
+    #[inline]
+    fn xyz_to_lms_matrix() -> Mat3<T> {
+        // Matrix from http://www.cvrl.org/database/text/cones/sp.htm
+        [
+            T::from_f64( 0.15514), T::from_f64(0.54312), T::from_f64(0.03286),
+            T::from_f64(-0.15514), T::from_f64(0.45684), T::from_f64(0.03286),
+            T::from_f64( 0.00000), T::from_f64(0.00000), T::from_f64(0.00801),
+        ]
+    }
+}
+
+impl<T> LmsToXyz<T> for SmithPokorny
+where
+    T: Real,
+{
+    #[rustfmt::skip]
+    #[inline]
+    fn lms_to_xyz_matrix() -> Mat3<T> {
+        [
+            T::from_f64(2.94481), T::from_f64(-3.50098), T::from_f64( 2.28160),
+            T::from_f64(1.00004), T::from_f64( 1.00004), T::from_f64(-8.20507),
+            T::from_f64(0.00000), T::from_f64( 0.00000), T::from_f64( 124.844),
+        ]
+    }
+}
+
+impl HasXyzMeta for SmithPokorny {
+    type XyzMeta = Any;
+}
+
+impl HasLmsMatrix for SmithPokorny {
+    type LmsMatrix = Self;
+}
+
 /// Represents a unit matrix, for a 1:1 conversion between XYZ to LMS.
 ///
 /// This matrix may be useful in chromatic adaptation, but does otherwise not
