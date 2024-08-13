@@ -169,42 +169,6 @@ pub type LinAdobeRgb<T = f32> = Rgb<Linear<encoding::AdobeRgb>, T>;
 /// create a value and use it.
 pub type LinAdobeRgba<T = f32> = Rgba<Linear<encoding::AdobeRgb>, T>;
 
-/// Non-linear ProPhoto RGB, a wide color gamut RGB format.
-///
-/// This is an RGB standard with a color gamut designed to include 100% of likely
-/// occurring real-world colors.
-///
-/// See [`Rgb`] for more details on how to create a value and use it.
-pub type ProPhotoRgb<T = f64> = Rgb<encoding::ProPhotoRgb, T>;
-
-/// Non-linear ProPhoto RGB with an alpha component.
-///
-/// This is a transparent version of [`ProPhotoRgb`], which is commonly used as the
-/// input or output format.
-///
-/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
-/// create a value and use it.
-pub type ProPhotoRgba<T = f64> = Rgba<encoding::ProPhotoRgb, T>;
-
-/// Linear ProPhoto RGB.
-///
-/// You probably want [`ProPhotoRgb`] if you are looking for an input or output format.
-/// This is the linear version of ProPhoto RGB, which is what you would usually convert
-/// to before working with the color.
-///
-/// See [`Rgb`] for more details on how to create a value and use it.
-pub type LinProPhotoRgb<T = f64> = Rgb<Linear<encoding::ProPhotoRgb>, T>;
-
-/// Linear ProPhoto RGB with an alpha component.
-///
-/// You probably want [`ProPhotoRgba`] if you are looking for an input or output format.
-/// This is the linear version of ProPhoto RGBA, which is what you would usually convert
-/// to before working with the color.
-///
-/// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
-/// create a value and use it.
-pub type LinProPhotoRgba<T = f64> = Rgba<Linear<encoding::ProPhotoRgb>, T>;
-
 /// Rec. 709.
 ///
 /// This standard has the same primaries as [`Srgb`], but uses the transfer
