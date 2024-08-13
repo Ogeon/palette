@@ -314,8 +314,8 @@ pub use oklch::{Oklch, Oklcha};
 #[doc(inline)]
 pub use rgb::{
     AdobeRgb, AdobeRgba, DciP3, DciP3Plus, DisplayP3, GammaSrgb, GammaSrgba, LinAdobeRgb,
-    LinAdobeRgba, LinDciP3, LinDciP3Plus, LinDisplayP3, LinRec2020, LinSrgb, LinSrgba, Rec2020,
-    Rec709, Srgb, Srgba,
+    LinAdobeRgba, LinDciP3, LinDciP3Plus, LinDisplayP3, LinProPhotoRgb, LinProPhotoRgba,
+    LinRec2020, LinSrgb, LinSrgba, ProPhotoRgb, ProPhotoRgba, Rec2020, Rec709, Srgb, Srgba,
 };
 #[doc(inline)]
 pub use xyz::{Xyz, Xyza};
