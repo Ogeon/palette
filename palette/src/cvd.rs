@@ -15,12 +15,12 @@ pub mod simulation;
 /// efficiency and accuracy with extreme values.
 pub type ProtanopiaSimul<S = Vienot1999, M = SmithPokorny> = DichromacySimul<Protan, S, M>;
 
-/// Simulator for deutanopia, a form of dichromacy correlated to a missing or
+/// Simulator for deuteranopia, a form of dichromacy correlated to a missing or
 /// non-functional medium (green) cone.
 ///
 /// By default this uses the [`Vienot1999`] simulation method for the sake of
 /// efficiency and accuracy with extreme values.
-pub type DeutanopiaSimul<S = Vienot1999, M = SmithPokorny> = DichromacySimul<Deutan, S, M>;
+pub type DeuteranopiaSimul<S = Vienot1999, M = SmithPokorny> = DichromacySimul<Deutan, S, M>;
 
 /// Simulator for tritanopia, a form of dichromacy correlated to a missing or
 /// non-functional short (blue) cone.
@@ -37,12 +37,12 @@ pub type TritanopiaSimul<S = Brettel1997, M = SmithPokorny> = DichromacySimul<Tr
 pub type ProtanomalySimul<S = Vienot1999, M = SmithPokorny> =
     AnomalousTrichromacySimul<Protan, S, M>;
 
-/// Simulator for deutanomaly, a form of anomalous trichromacy correlated to an
+/// Simulator for deuteranomaly, a form of anomalous trichromacy correlated to an
 /// anomalous medium (green) cone.
 ///
 /// The current default implementation uses linear interpolation, which is not
 /// ideal, so this default implementation may change in the future.
-pub type DeutanomalySimul<S = Vienot1999, M = SmithPokorny> =
+pub type DeuteranomalySimul<S = Vienot1999, M = SmithPokorny> =
     AnomalousTrichromacySimul<Deutan, S, M>;
 
 /// Simulator for tritanomaly, a form of anomalous trichromacy correlated to an
