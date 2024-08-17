@@ -11,21 +11,6 @@ use crate::{
     Mat3, Xyz, Yxy,
 };
 
-/// The white point of DCI-P3 (Theatrical) is based on a projector with a xenon bulb
-/// with a color temperature of ~6300K
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct XenonBulb;
-
-impl<T: Real> WhitePoint<T> for XenonBulb {
-    fn get_xyz() -> Xyz<Any, T> {
-        Xyz::new(
-            T::from_f64(0.314 / 0.351),
-            T::from_f64(1.0),
-            T::from_f64(0.335 / 0.351),
-        )
-    }
-}
-
 /// The theatrical DCI-P3 standard.
 ///
 /// This standard uses a gamma 2.6 transfer function and a white point of ~6300K that
@@ -45,9 +30,19 @@ impl<T: Real> Primaries<T> for DciP3 {
     }
 }
 
+impl<T: Real> WhitePoint<T> for DciP3 {
+    fn get_xyz() -> Xyz<Any, T> {
+        Xyz::new(
+            T::from_f64(0.314 / 0.351),
+            T::from_f64(1.0),
+            T::from_f64(0.335 / 0.351),
+        )
+    }
+}
+
 impl RgbSpace for DciP3 {
     type Primaries = DciP3;
-    type WhitePoint = XenonBulb;
+    type WhitePoint = DciP3;
 
     #[rustfmt::skip]
     #[inline(always)]
@@ -78,7 +73,7 @@ impl RgbStandard for DciP3 {
 }
 
 impl LumaStandard for DciP3 {
-    type WhitePoint = XenonBulb;
+    type WhitePoint = DciP3;
     type TransferFn = P3Gamma;
 }
 
@@ -108,7 +103,7 @@ impl<T: Real, F> Primaries<T> for DciP3Plus<F> {
 
 impl<F> RgbSpace for DciP3Plus<F> {
     type Primaries = DciP3Plus<F>;
-    type WhitePoint = XenonBulb;
+    type WhitePoint = DciP3;
 
     #[rustfmt::skip]
     #[inline(always)]
@@ -139,7 +134,7 @@ impl<F> RgbStandard for DciP3Plus<F> {
 }
 
 impl<F> LumaStandard for DciP3Plus<F> {
-    type WhitePoint = XenonBulb;
+    type WhitePoint = DciP3;
     type TransferFn = F;
 }
 
