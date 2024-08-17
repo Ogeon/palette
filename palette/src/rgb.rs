@@ -150,6 +150,59 @@ pub type AdobeRgb<T = f32> = Rgb<encoding::AdobeRgb, T>;
 /// create a value and use it.
 pub type AdobeRgba<T = f32> = Rgba<encoding::AdobeRgb, T>;
 
+/// Non-linear DCI-P3, an RGB format used for digital movie distribution.
+///
+/// This is an RGB standard with a color gamut wider than that of [`Srgb`] and a
+/// white point similar to that of a film projector's xenon bulb.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type DciP3<T = f32> = Rgb<encoding::DciP3, T>;
+
+/// Non-linear Canon DCI-P3+, an RGB format with a very wide gamut.
+///
+/// This is an RGB standard with a color gamut much wider than that of [`Srgb`].
+/// It uses the same white point as [`DciP3`], but uses a user-defined transfer
+/// function, represented here by the generic `F`.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type DciP3Plus<F, T = f32> = Rgb<encoding::DciP3Plus<F>, T>;
+
+/// Non-linear Display P3, an RGB format used developed by Apple for wide-gamut
+/// displays.
+///
+/// This is an RGB standard with the same white point and transfer function as
+/// [`Srgb`], but with a wider color gamut.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type DisplayP3<T = f32> = Rgb<encoding::DisplayP3, T>;
+
+/// Linear DCI-P3.
+///
+/// You probably want [`DciP3`] if you are looking for an input or output format.
+/// This is the linear version of DCI-P3, which is what you would usually convert
+/// to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type LinDciP3<T = f32> = Rgb<Linear<encoding::DciP3>, T>;
+
+/// Linear DCI-P3+.
+///
+/// You probably want [`DciP3Plus`] if you are looking for an input or output format.
+/// This is the linear version of DCI-P3+, which is what you would usually convert
+/// to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type LinDciP3Plus<F, T = f32> = Rgb<Linear<encoding::DciP3Plus<F>>, T>;
+
+/// Linear Display P3.
+///
+/// You probably want [`DisplayP3`] if you are looking for an input or output format.
+/// This is the linear version of Display P3, which is what you would usually convert
+/// to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type LinDisplayP3<T = f32> = Rgb<Linear<encoding::DisplayP3>, T>;
+
 /// Linear Adobe RGB.
 ///
 /// You probably want [`AdobeRgb`] if you are looking for an input or output format.
