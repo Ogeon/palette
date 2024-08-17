@@ -30,6 +30,8 @@
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
 <a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Number and color encoding traits, types and standards.
 //!
 //! Some color spaces, particularly RGB, may be encoded in more than one way and
@@ -40,12 +42,14 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::adobe::AdobeRgb;
 <span class="kw">pub use </span><span class="self">self</span>::gamma::{F2p2, Gamma};
 <span class="kw">pub use </span><span class="self">self</span>::linear::Linear;
+<span class="kw">pub use </span><span class="self">self</span>::p3::{DciP3, DciP3Plus, DisplayP3};
 <span class="kw">pub use </span><span class="self">self</span>::rec_standards::{Rec2020, Rec709};
 <span class="kw">pub use </span><span class="self">self</span>::srgb::Srgb;
 
 <span class="kw">pub mod </span>adobe;
 <span class="kw">pub mod </span>gamma;
 <span class="kw">pub mod </span>linear;
+<span class="kw">pub mod </span>p3;
 <span class="kw">pub mod </span>rec_standards;
 <span class="kw">pub mod </span>srgb;
 
