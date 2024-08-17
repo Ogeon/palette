@@ -20,13 +20,25 @@ pub struct DciP3;
 
 impl<T: Real> Primaries<T> for DciP3 {
     fn red() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.680), T::from_f64(0.320), T::from_f64(0.2095))
+        Yxy::new(
+            T::from_f64(0.680),
+            T::from_f64(0.320),
+            T::from_f64(0.209492),
+        )
     }
     fn green() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.265), T::from_f64(0.690), T::from_f64(0.7216))
+        Yxy::new(
+            T::from_f64(0.265),
+            T::from_f64(0.690),
+            T::from_f64(0.721595),
+        )
     }
     fn blue() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.150), T::from_f64(0.060), T::from_f64(0.0689))
+        Yxy::new(
+            T::from_f64(0.150),
+            T::from_f64(0.060),
+            T::from_f64(0.068913),
+        )
     }
 }
 
@@ -87,16 +99,16 @@ pub struct DciP3Plus<F>(PhantomData<F>);
 
 impl<T: Real, F> Primaries<T> for DciP3Plus<F> {
     fn red() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.740), T::from_f64(0.270), T::from_f64(0.2040))
+        Yxy::new(T::from_f64(0.740), T::from_f64(0.270), T::from_f64(0.203986))
     }
     fn green() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.220), T::from_f64(0.780), T::from_f64(0.8826))
+        Yxy::new(T::from_f64(0.220), T::from_f64(0.780), T::from_f64(0.882591))
     }
     fn blue() -> Yxy<Any, T> {
         Yxy::new(
             T::from_f64(0.090),
             T::from_f64(-0.090),
-            T::from_f64(-0.0866),
+            T::from_f64(-0.086577),
         )
     }
 }
@@ -171,13 +183,13 @@ pub struct DisplayP3;
 
 impl<T: Real> Primaries<T> for DisplayP3 {
     fn red() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.680), T::from_f64(0.320), T::from_f64(0.2290))
+        Yxy::new(T::from_f64(0.680), T::from_f64(0.320), T::from_f64(0.22900))
     }
     fn green() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.265), T::from_f64(0.690), T::from_f64(0.6917))
+        Yxy::new(T::from_f64(0.265), T::from_f64(0.690), T::from_f64(0.69173))
     }
     fn blue() -> Yxy<Any, T> {
-        Yxy::new(T::from_f64(0.150), T::from_f64(0.060), T::from_f64(0.0793))
+        Yxy::new(T::from_f64(0.150), T::from_f64(0.060), T::from_f64(0.07927))
     }
 }
 impl RgbSpace for DisplayP3 {
@@ -222,9 +234,12 @@ mod test {
     #[cfg(feature = "approx")]
     mod conversion {
         use crate::{
+            convert::IntoColorUnclamped,
             encoding::p3::{DciP3, DciP3Plus, DisplayP3, P3Gamma},
             matrix::{matrix_inverse, rgb_to_xyz_matrix},
-            rgb::RgbSpace,
+            rgb::{Primaries, RgbSpace},
+            white_point::{Any, WhitePoint, D65},
+            Xyz,
         };
 
         #[test]
@@ -267,6 +282,33 @@ mod test {
             let dynamic = matrix_inverse(rgb_to_xyz_matrix::<DciP3Plus<P3Gamma>, f64>());
             let constant = DciP3Plus::<P3Gamma>::xyz_to_rgb_matrix().unwrap();
             assert_relative_eq!(dynamic[..], constant[..], epsilon = 0.0000001);
+        }
+
+        #[test]
+        fn primaries_display_p3() {
+            let red: Xyz<Any, f64> = DisplayP3::red().into_color_unclamped();
+            let green: Xyz<Any, f64> = DisplayP3::green().into_color_unclamped();
+            let blue: Xyz<Any, f64> = DisplayP3::blue().into_color_unclamped();
+            // Compare sum of primaries to white point.
+            assert_relative_eq!(red + green + blue, D65::get_xyz(), epsilon = 0.00001)
+        }
+
+        #[test]
+        fn primaries_dci_p3() {
+            let red: Xyz<Any, f64> = DciP3::red().into_color_unclamped();
+            let green: Xyz<Any, f64> = DciP3::green().into_color_unclamped();
+            let blue: Xyz<Any, f64> = DciP3::blue().into_color_unclamped();
+            // Compare sum of primaries to white point.
+            assert_relative_eq!(red + green + blue, DciP3::get_xyz(), epsilon = 0.00001)
+        }
+
+        #[test]
+        fn primaries_dci_p3_plus() {
+            let red: Xyz<Any, f64> = DciP3Plus::<P3Gamma>::red().into_color_unclamped();
+            let green: Xyz<Any, f64> = DciP3Plus::<P3Gamma>::green().into_color_unclamped();
+            let blue: Xyz<Any, f64> = DciP3Plus::<P3Gamma>::blue().into_color_unclamped();
+            // Compare sum of primaries to white point.
+            assert_relative_eq!(red + green + blue, DciP3::get_xyz(), epsilon = 0.00001)
         }
     }
 }
