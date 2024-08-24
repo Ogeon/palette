@@ -1,0 +1,17 @@
+[package]
+name = "codegen"
+version = "0.0.0"
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = []
+description = "Code generation crate for palette."
+repository = "https://github.com/Ogeon/palette"
+license = "MIT OR Apache-2.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+anyhow = "1.0.86"
+proc-macro2 = "1.0.86"
+quote = "1.0.37"
+
+

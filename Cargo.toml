@@ -6,6 +6,9 @@ members = [
     # Test crates
     "integration_tests",
     "no_std_test",
-    "benchmarks"
+    "benchmarks",
+
+    # Tool crates
+    "codegen"
 ]
 resolver = "2"
