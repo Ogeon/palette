@@ -24,7 +24,6 @@ license = "MIT OR Apache-2.0"
 edition = "2018"
 resolver = "2"
 categories = ["graphics", "multimedia::images", "no-std"]
-build = "build/main.rs"
 rust-version = "1.61.0"
 
 [features]
