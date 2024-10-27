@@ -12,7 +12,7 @@ pub(crate) struct AlphaDeserializer<'a, D, A> {
     pub alpha: &'a mut Option<A>,
 }
 
-impl<'de, 'a, D, A> Deserializer<'de> for AlphaDeserializer<'a, D, A>
+impl<'de, D, A> Deserializer<'de> for AlphaDeserializer<'_, D, A>
 where
     D: Deserializer<'de>,
     A: Deserialize<'de>,
@@ -305,7 +305,7 @@ struct AlphaSeqVisitor<'a, D, A> {
     alpha: &'a mut Option<A>,
 }
 
-impl<'de, 'a, D, A> Visitor<'de> for AlphaSeqVisitor<'a, D, A>
+impl<'de, D, A> Visitor<'de> for AlphaSeqVisitor<'_, D, A>
 where
     D: Visitor<'de>,
     A: Deserialize<'de>,
@@ -336,7 +336,7 @@ struct AlphaMapVisitor<'a, D, A> {
     field_count: Option<usize>,
 }
 
-impl<'de, 'a, D, A> Visitor<'de> for AlphaMapVisitor<'a, D, A>
+impl<'de, D, A> Visitor<'de> for AlphaMapVisitor<'_, D, A>
 where
     D: Visitor<'de>,
     A: Deserialize<'de>,
@@ -390,7 +390,7 @@ struct MapWrapper<'a, T, A> {
     field_count: Option<usize>,
 }
 
-impl<'a, 'de, T, A> MapAccess<'de> for MapWrapper<'a, T, A>
+impl<'de, T, A> MapAccess<'de> for MapWrapper<'_, T, A>
 where
     T: MapAccess<'de>,
     A: Deserialize<'de>,
@@ -554,7 +554,7 @@ struct StructFieldDeserializer<'a, E> {
     error: PhantomData<fn() -> E>,
 }
 
-impl<'a, 'de, E> Deserializer<'de> for StructFieldDeserializer<'a, E>
+impl<'de, E> Deserializer<'de> for StructFieldDeserializer<'_, E>
 where
     E: serde::de::Error,
 {

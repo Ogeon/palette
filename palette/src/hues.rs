@@ -225,7 +225,7 @@ macro_rules! make_hues {
 
             /// Get a hue, or slice of hues, with references to the values at `index`. See [`slice::get`] for details.
             #[inline(always)]
-            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$name<&<I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$name<&'a <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsRef<[T]>,
@@ -236,7 +236,7 @@ macro_rules! make_hues {
 
             /// Get a hue, or slice of hues, that allows modifying the values at `index`. See [`slice::get_mut`] for details.
             #[inline(always)]
-            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$name<&mut <I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$name<&'a mut <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsMut<[T]>,
