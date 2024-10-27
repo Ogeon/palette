@@ -317,7 +317,7 @@ where
     }
 }
 
-impl<'a, T, U> Deref for FromColorUnclampedMutGuard<'a, T, U>
+impl<T, U> Deref for FromColorUnclampedMutGuard<'_, T, U>
 where
     T: FromColorUnclampedMut<U> + ?Sized,
     U: FromColorUnclampedMut<T> + ?Sized,
@@ -334,7 +334,7 @@ where
     }
 }
 
-impl<'a, T, U> DerefMut for FromColorUnclampedMutGuard<'a, T, U>
+impl<T, U> DerefMut for FromColorUnclampedMutGuard<'_, T, U>
 where
     T: FromColorUnclampedMut<U> + ?Sized,
     U: FromColorUnclampedMut<T> + ?Sized,
@@ -349,7 +349,7 @@ where
     }
 }
 
-impl<'a, T, U> Drop for FromColorUnclampedMutGuard<'a, T, U>
+impl<T, U> Drop for FromColorUnclampedMutGuard<'_, T, U>
 where
     T: FromColorUnclampedMut<U> + ?Sized,
     U: FromColorUnclampedMut<T> + ?Sized,

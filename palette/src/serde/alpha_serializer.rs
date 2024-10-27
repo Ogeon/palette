@@ -230,7 +230,7 @@ fn alpha_serializer_error() -> ! {
     unimplemented!("AlphaSerializer can only serialize structs, maps and sequences")
 }
 
-impl<'a, S, A> SerializeSeq for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeSeq for AlphaSerializer<'_, S, A>
 where
     S: SerializeSeq,
     A: Serialize,
@@ -252,7 +252,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeTuple for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeTuple for AlphaSerializer<'_, S, A>
 where
     S: SerializeTuple,
     A: Serialize,
@@ -274,7 +274,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeTupleStruct for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeTupleStruct for AlphaSerializer<'_, S, A>
 where
     S: SerializeTupleStruct,
     A: Serialize,
@@ -296,7 +296,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeTupleVariant for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeTupleVariant for AlphaSerializer<'_, S, A>
 where
     S: SerializeTupleVariant,
     A: Serialize,
@@ -318,7 +318,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeMap for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeMap for AlphaSerializer<'_, S, A>
 where
     S: SerializeMap,
     A: Serialize,
@@ -355,7 +355,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeStruct for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeStruct for AlphaSerializer<'_, S, A>
 where
     S: SerializeStruct,
     A: Serialize,
@@ -381,7 +381,7 @@ where
     }
 }
 
-impl<'a, S, A> SerializeStructVariant for AlphaSerializer<'a, S, A>
+impl<S, A> SerializeStructVariant for AlphaSerializer<'_, S, A>
 where
     S: SerializeStructVariant,
     A: Serialize,

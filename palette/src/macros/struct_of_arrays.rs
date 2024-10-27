@@ -1044,7 +1044,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             #[inline(always)]
-            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$self_ty<$($phantom_ty,)? &<I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$self_ty<$($phantom_ty,)? &'a <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsRef<[T]>,
@@ -1064,7 +1064,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             #[inline(always)]
-            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$self_ty<$($phantom_ty,)? &mut <I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$self_ty<$($phantom_ty,)? &'a mut <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsMut<[T]>,
@@ -1136,8 +1136,8 @@ macro_rules! impl_struct_of_arrays_methods {
             /// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             #[inline(always)]
             pub fn get<'a, I, T, A>(&'a self, index: I) -> Option<crate::Alpha<
-                $self_ty<$($phantom_ty,)? &<I as core::slice::SliceIndex<[T]>>::Output>,
-                &<I as core::slice::SliceIndex<[A]>>::Output
+                $self_ty<$($phantom_ty,)? &'a <I as core::slice::SliceIndex<[T]>>::Output>,
+                &'a <I as core::slice::SliceIndex<[A]>>::Output
             >>
             where
                 T: 'a,
@@ -1159,8 +1159,8 @@ macro_rules! impl_struct_of_arrays_methods {
             /// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             #[inline(always)]
             pub fn get_mut<'a, I, T, A>(&'a mut self, index: I) -> Option<crate::Alpha<
-                $self_ty<$($phantom_ty,)? &mut <I as core::slice::SliceIndex<[T]>>::Output>,
-                &mut <I as core::slice::SliceIndex<[A]>>::Output
+                $self_ty<$($phantom_ty,)? &'a mut <I as core::slice::SliceIndex<[T]>>::Output>,
+                &'a mut <I as core::slice::SliceIndex<[A]>>::Output
             >>
             where
                 T: 'a,
@@ -1252,7 +1252,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             #[inline(always)]
-            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$self_ty<$($phantom_ty,)? &<I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get<'a, I, T>(&'a self, index: I) -> Option<$self_ty<$($phantom_ty,)? &'a <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsRef<[T]>,
@@ -1270,7 +1270,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             #[inline(always)]
-            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$self_ty<$($phantom_ty,)? &mut <I as core::slice::SliceIndex<[T]>>::Output>>
+            pub fn get_mut<'a, I, T>(&'a mut self, index: I) -> Option<$self_ty<$($phantom_ty,)? &'a mut <I as core::slice::SliceIndex<[T]>>::Output>>
             where
                 T: 'a,
                 C: AsMut<[T]>,
@@ -1343,8 +1343,8 @@ macro_rules! impl_struct_of_arrays_methods_hue {
             /// Get a color, or slice of colors, with references to the components at `index`. See [`slice::get`] for details.
             #[inline(always)]
             pub fn get<'a, I, T, A>(&'a self, index: I) -> Option<crate::Alpha<
-                $self_ty<$($phantom_ty,)? &<I as core::slice::SliceIndex<[T]>>::Output>,
-                &<I as core::slice::SliceIndex<[A]>>::Output
+                $self_ty<$($phantom_ty,)? &'a <I as core::slice::SliceIndex<[T]>>::Output>,
+                &'a <I as core::slice::SliceIndex<[A]>>::Output
             >>
             where
                 T: 'a,
@@ -1366,8 +1366,8 @@ macro_rules! impl_struct_of_arrays_methods_hue {
             /// Get a color, or slice of colors, that allows modifying the components at `index`. See [`slice::get_mut`] for details.
             #[inline(always)]
             pub fn get_mut<'a, I, T, A>(&'a mut self, index: I) -> Option<crate::Alpha<
-                $self_ty<$($phantom_ty,)? &mut <I as core::slice::SliceIndex<[T]>>::Output>,
-                &mut <I as core::slice::SliceIndex<[A]>>::Output
+                $self_ty<$($phantom_ty,)? &'a mut <I as core::slice::SliceIndex<[T]>>::Output>,
+                &'a mut <I as core::slice::SliceIndex<[A]>>::Output
             >>
             where
                 T: 'a,
