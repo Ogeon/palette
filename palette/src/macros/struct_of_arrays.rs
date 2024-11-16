@@ -150,7 +150,7 @@ macro_rules! impl_struct_of_array_traits {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<$($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
 
@@ -268,7 +268,7 @@ macro_rules! impl_struct_of_array_traits {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
@@ -299,7 +299,7 @@ macro_rules! impl_struct_of_array_traits {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
@@ -388,7 +388,7 @@ macro_rules! impl_struct_of_array_traits {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
 
@@ -421,7 +421,7 @@ macro_rules! impl_struct_of_array_traits {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
 
@@ -658,7 +658,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, $($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<$($phantom_ty,)? T> IntoIterator for crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? T>, T>;
 
@@ -780,7 +780,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
@@ -812,7 +812,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a T>, &'a T>;
 
@@ -904,7 +904,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::vec::Vec<T>>, alloc::vec::Vec<T>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
 
@@ -936,7 +936,7 @@ macro_rules! impl_struct_of_array_traits_hue {
         }
 
         #[cfg(feature = "alloc")]
-        impl<'a, 'b, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
+        impl<'a, $($phantom_ty,)? T> IntoIterator for &'a mut crate::alpha::Alpha<$self_ty<$($phantom_ty,)? alloc::boxed::Box<[T]>>, alloc::boxed::Box<[T]>>
         {
             type Item = crate::alpha::Alpha<$self_ty<$($phantom_ty,)? &'a mut T>, &'a mut T>;
 

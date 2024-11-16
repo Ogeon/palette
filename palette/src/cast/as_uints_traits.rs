@@ -69,7 +69,7 @@ pub trait AsUintsMut<A: ?Sized> {
 macro_rules! impl_as_uints {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, C $(, $($ty_input)+)?> AsUints<[C::Uint]> for $owning
+            impl<C $(, $($ty_input)+)?> AsUints<[C::Uint]> for $owning
             where
                 C: UintCast,
             {
@@ -79,7 +79,7 @@ macro_rules! impl_as_uints {
                 }
             }
 
-            impl<'a, C $(, $($ty_input)+)?> AsUintsMut<[C::Uint]> for $owning
+            impl<C $(, $($ty_input)+)?> AsUintsMut<[C::Uint]> for $owning
             where
                 C: UintCast,
             {
@@ -194,7 +194,7 @@ pub trait UintsAsMut<C: ?Sized> {
 macro_rules! impl_uints_as {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, C $(, $($ty_input)+)?> UintsAs<[C]> for $owning
+            impl<C $(, $($ty_input)+)?> UintsAs<[C]> for $owning
             where
                 C: UintCast,
             {
@@ -204,7 +204,7 @@ macro_rules! impl_uints_as {
                 }
             }
 
-            impl<'a, C $(, $($ty_input)+)?> UintsAsMut<[C]> for $owning
+            impl<C $(, $($ty_input)+)?> UintsAsMut<[C]> for $owning
             where
                 C: UintCast,
             {

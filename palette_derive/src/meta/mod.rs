@@ -140,7 +140,7 @@ pub fn assert_path_meta(meta: &Meta) -> Result<()> {
     Ok(())
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub struct KeyValuePair {
     pub key: Ident,
     pub value: Ident,

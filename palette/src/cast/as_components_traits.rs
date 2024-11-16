@@ -57,7 +57,7 @@ pub trait AsComponentsMut<C: ?Sized> {
 macro_rules! impl_as_components {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> AsComponents<[T]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> AsComponents<[T]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -67,7 +67,7 @@ macro_rules! impl_as_components {
                 }
             }
 
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> AsComponentsMut<[T]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> AsComponentsMut<[T]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -192,7 +192,7 @@ pub trait TryComponentsAsMut<C: ?Sized> {
 macro_rules! impl_try_components_as {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> TryComponentsAs<[C]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> TryComponentsAs<[C]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -204,7 +204,7 @@ macro_rules! impl_try_components_as {
                 }
             }
 
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> TryComponentsAsMut<[C]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> TryComponentsAsMut<[C]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
