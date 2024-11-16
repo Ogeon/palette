@@ -468,7 +468,7 @@
 <span class="macro">macro_rules!</span> impl_as_components {
     ($(<span class="macro-nonterminal">$owning</span>:ty $(<span class="kw">where </span>($(<span class="macro-nonterminal">$ty_input</span>:tt)+))<span class="question-mark">?</span>),<span class="kw-2">*</span>) =&gt; {
         $(
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsComponents&lt;[T]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsComponents&lt;[T]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: ArrayCast&lt;Array = [T; N]&gt;,
             {
@@ -478,7 +478,7 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsComponentsMut&lt;[T]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsComponentsMut&lt;[T]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: ArrayCast&lt;Array = [T; N]&gt;,
             {
@@ -603,7 +603,7 @@
 <span class="macro">macro_rules!</span> impl_try_components_as {
     ($(<span class="macro-nonterminal">$owning</span>:ty $(<span class="kw">where </span>($(<span class="macro-nonterminal">$ty_input</span>:tt)+))<span class="question-mark">?</span>),<span class="kw-2">*</span>) =&gt; {
         $(
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; TryComponentsAs&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; TryComponentsAs&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: ArrayCast&lt;Array = [T; N]&gt;,
             {
@@ -615,7 +615,7 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; TryComponentsAsMut&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;T, C, <span class="kw">const </span>N: usize $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; TryComponentsAsMut&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: ArrayCast&lt;Array = [T; N]&gt;,
             {

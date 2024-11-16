@@ -341,7 +341,7 @@
 <span class="macro">macro_rules!</span> impl_as_uints {
     ($(<span class="macro-nonterminal">$owning</span>:ty $(<span class="kw">where </span>($(<span class="macro-nonterminal">$ty_input</span>:tt)+))<span class="question-mark">?</span>),<span class="kw-2">*</span>) =&gt; {
         $(
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsUints&lt;[C::Uint]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsUints&lt;[C::Uint]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: UintCast,
             {
@@ -351,7 +351,7 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsUintsMut&lt;[C::Uint]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; AsUintsMut&lt;[C::Uint]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: UintCast,
             {
@@ -466,7 +466,7 @@
 <span class="macro">macro_rules!</span> impl_uints_as {
     ($(<span class="macro-nonterminal">$owning</span>:ty $(<span class="kw">where </span>($(<span class="macro-nonterminal">$ty_input</span>:tt)+))<span class="question-mark">?</span>),<span class="kw-2">*</span>) =&gt; {
         $(
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; UintsAs&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; UintsAs&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: UintCast,
             {
@@ -476,7 +476,7 @@
                 }
             }
 
-            <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; UintsAsMut&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
+            <span class="kw">impl</span>&lt;C $(, $(<span class="macro-nonterminal">$ty_input</span>)+)<span class="question-mark">?</span>&gt; UintsAsMut&lt;[C]&gt; <span class="kw">for </span><span class="macro-nonterminal">$owning
             </span><span class="kw">where
                 </span>C: UintCast,
             {
