@@ -42,7 +42,6 @@ features = ["libm"] # Uses libm instead of std for floating point math
 These features are enabled by default:
 
 * `"named"` - Enables color constants, located in the `named` module.
-* `"named_from_str"` - Enables `named::from_str`, which maps name strings to colors.
 * `"std"` - Enables use of the standard library. Also enables `"alloc"`.
 * `"alloc"` - Enables implementations for allocating types, such as `Vec` or `Box`.
 * `"approx"` - Enables approximate comparison using [`approx`].
@@ -55,6 +54,10 @@ These features are disabled by default:
 * `"bytemuck"` - Enables casting between plain data types using [`bytemuck`].
 * `"wide"` - Enables support for using SIMD types from [`wide`].
 * `"find-crate"` - Enables derives to find the `palette` crate when it's renamed in `Cargo.toml`.
+
+These features have been deprecated:
+
+* `"named_from_str"` - Alias for `"named"`, still enabled by default. <strike>Enables `named::from_str`, which maps name strings to colors.</strike>
 
 ### Using palette in an embedded environment
 

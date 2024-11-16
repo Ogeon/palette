@@ -101,14 +101,19 @@ fn build_colors(colors: &[ColorEntry]) -> TokenStream {
 }
 
 fn build_from_str(entries: &[ColorEntry]) -> TokenStream {
-    let entries = entries
-        .iter()
-        .map(|ColorEntry { name, constant, .. }| quote! {#name => #constant});
+    let mut map = phf_codegen::Map::new();
+
+    for entry in entries {
+        map.entry(&*entry.name, &entry.constant.to_string());
+    }
+
+    let phf_entries: TokenStream = map
+        .build()
+        .to_string()
+        .parse()
+        .expect("phf should generate a valid token stream");
 
     quote! {
-        #[cfg(feature = "named_from_str")]
-        pub(crate) static COLORS: ::phf::Map<&'static str, crate::rgb::Srgb<u8>> = phf::phf_map! {
-            #(#entries),*
-        };
+        pub(crate) static COLORS: ::phf::Map<&'static str, crate::rgb::Srgb<u8>> = #phf_entries;
     }
 }
