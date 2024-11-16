@@ -53,7 +53,7 @@ pub trait AsArraysMut<A: ?Sized> {
 macro_rules! impl_as_arrays {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> AsArrays<[[T; N]]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> AsArrays<[[T; N]]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -63,7 +63,7 @@ macro_rules! impl_as_arrays {
                 }
             }
 
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> AsArraysMut<[[T; N]]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> AsArraysMut<[[T; N]]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -142,7 +142,7 @@ pub trait ArraysAsMut<C: ?Sized> {
 macro_rules! impl_arrays_as {
     ($($owning:ty $(where ($($ty_input:tt)+))?),*) => {
         $(
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> ArraysAs<[C]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> ArraysAs<[C]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
@@ -152,7 +152,7 @@ macro_rules! impl_arrays_as {
                 }
             }
 
-            impl<'a, T, C, const N: usize $(, $($ty_input)+)?> ArraysAsMut<[C]> for $owning
+            impl<T, C, const N: usize $(, $($ty_input)+)?> ArraysAsMut<[C]> for $owning
             where
                 C: ArrayCast<Array = [T; N]>,
             {
