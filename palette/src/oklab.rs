@@ -545,7 +545,7 @@ mod test {
         /// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
         #[test]
         fn lightness_of_white_is_one() {
-            let rgb: Srgb<f64> = Rgb::from_str("#ffffff").unwrap().into_format();
+            let rgb: Srgb<f64> = Rgb::from_str("#ffffff").unwrap();
             let lin_rgb = LinSrgb::from_color_unclamped(rgb);
             let oklab = Oklab::from_color_unclamped(lin_rgb);
             println!("white {rgb:?} == {oklab:?}");
@@ -565,7 +565,7 @@ mod test {
         #[test]
         fn blue_srgb() {
             // use f64 to be comparable to javascript
-            let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap().into_format();
+            let rgb: Srgb<f64> = Rgb::from_str("#0000ff").unwrap();
             let lin_rgb = LinSrgb::from_color_unclamped(rgb);
             let oklab = Oklab::from_color_unclamped(lin_rgb);
 

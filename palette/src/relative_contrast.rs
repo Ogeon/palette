@@ -26,7 +26,7 @@ use crate::{
 ///
 /// // the rustdoc "DARK" theme background and text colors
 /// let background: Srgb<f32> = Srgb::from(0x353535).into_format();
-/// let foreground = Srgb::from_str("#ddd")?.into_format();
+/// let foreground = Srgb::from_str("#ddd")?;
 ///
 /// assert!(background.has_enhanced_contrast_text(foreground));
 /// # Ok(())
@@ -145,7 +145,7 @@ mod test {
             black.get_contrast_ratio(white)
         );
 
-        let c1 = Srgb::from_str("#600").unwrap().into_format();
+        let c1 = Srgb::from_str("#600").unwrap();
 
         assert_relative_eq!(c1.get_contrast_ratio(white), 13.41, epsilon = 0.01);
         assert_relative_eq!(c1.get_contrast_ratio(black), 1.56, epsilon = 0.01);
@@ -162,12 +162,12 @@ mod test {
         assert!(!c1.has_enhanced_contrast_large_text(black));
         assert!(!c1.has_min_contrast_graphics(black));
 
-        let c1 = Srgb::from_str("#066").unwrap().into_format();
+        let c1 = Srgb::from_str("#066").unwrap();
 
         assert_relative_eq!(c1.get_contrast_ratio(white), 6.79, epsilon = 0.01);
         assert_relative_eq!(c1.get_contrast_ratio(black), 3.09, epsilon = 0.01);
 
-        let c1 = Srgb::from_str("#9f9").unwrap().into_format();
+        let c1 = Srgb::from_str("#9f9").unwrap();
 
         assert_relative_eq!(c1.get_contrast_ratio(white), 1.22, epsilon = 0.01);
         assert_relative_eq!(c1.get_contrast_ratio(black), 17.11, epsilon = 0.01);

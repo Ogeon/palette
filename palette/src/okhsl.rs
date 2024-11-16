@@ -368,7 +368,7 @@ mod tests {
         #[test]
         fn test_srgb_to_okhsl() {
             let red_hex = "#834941";
-            let rgb: Srgb<f64> = Srgb::from_str(red_hex).unwrap().into_format();
+            let rgb: Srgb<f64> = Srgb::from_str(red_hex).unwrap();
             let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
             let oklab = Oklab::from_color_unclamped(lin_rgb);
             println!(
