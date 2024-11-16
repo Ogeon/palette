@@ -13,5 +13,7 @@ publish = false
 anyhow = "1.0.86"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
+phf = "0.11.2"
+phf_codegen = "0.11.2"
 
 
