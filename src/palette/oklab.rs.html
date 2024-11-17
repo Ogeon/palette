@@ -1251,7 +1251,7 @@
         <span class="doccomment">/// Asserts that, for any color space, the lightness of pure white is converted to `l == 1.0`
         </span><span class="attr">#[test]
         </span><span class="kw">fn </span>lightness_of_white_is_one() {
-            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#ffffff"</span>).unwrap().into_format();
+            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#ffffff"</span>).unwrap();
             <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
             <span class="macro">println!</span>(<span class="string">"white {rgb:?} == {oklab:?}"</span>);
@@ -1271,7 +1271,7 @@
         <span class="attr">#[test]
         </span><span class="kw">fn </span>blue_srgb() {
             <span class="comment">// use f64 to be comparable to javascript
-            </span><span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#0000ff"</span>).unwrap().into_format();
+            </span><span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Rgb::from_str(<span class="string">"#0000ff"</span>).unwrap();
             <span class="kw">let </span>lin_rgb = LinSrgb::from_color_unclamped(rgb);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
 

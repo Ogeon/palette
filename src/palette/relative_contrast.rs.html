@@ -201,7 +201,7 @@
 ///
 /// // the rustdoc "DARK" theme background and text colors
 /// let background: Srgb&lt;f32&gt; = Srgb::from(0x353535).into_format();
-/// let foreground = Srgb::from_str("#ddd")?.into_format();
+/// let foreground = Srgb::from_str("#ddd")?;
 ///
 /// assert!(background.has_enhanced_contrast_text(foreground));
 /// # Ok(())
@@ -320,7 +320,7 @@
             black.get_contrast_ratio(white)
         );
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#600"</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#600"</span>).unwrap();
 
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">13.41</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">1.56</span>, epsilon = <span class="number">0.01</span>);
@@ -337,12 +337,12 @@
         <span class="macro">assert!</span>(!c1.has_enhanced_contrast_large_text(black));
         <span class="macro">assert!</span>(!c1.has_min_contrast_graphics(black));
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#066"</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#066"</span>).unwrap();
 
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">6.79</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">3.09</span>, epsilon = <span class="number">0.01</span>);
 
-        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#9f9"</span>).unwrap().into_format();
+        <span class="kw">let </span>c1 = Srgb::from_str(<span class="string">"#9f9"</span>).unwrap();
 
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(white), <span class="number">1.22</span>, epsilon = <span class="number">0.01</span>);
         <span class="macro">assert_relative_eq!</span>(c1.get_contrast_ratio(black), <span class="number">17.11</span>, epsilon = <span class="number">0.01</span>);

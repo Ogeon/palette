@@ -805,7 +805,7 @@
         <span class="attr">#[test]
         </span><span class="kw">fn </span>test_srgb_to_okhsl() {
             <span class="kw">let </span>red_hex = <span class="string">"#834941"</span>;
-            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Srgb::from_str(red_hex).unwrap().into_format();
+            <span class="kw">let </span>rgb: Srgb&lt;f64&gt; = Srgb::from_str(red_hex).unwrap();
             <span class="kw">let </span>lin_rgb = LinSrgb::&lt;f64&gt;::from_color_unclamped(rgb);
             <span class="kw">let </span>oklab = Oklab::from_color_unclamped(lin_rgb);
             <span class="macro">println!</span>(

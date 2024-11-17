@@ -376,6 +376,29 @@
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
 <a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Traits for working with stimulus colors and values, such as RGB and XYZ.
 
 </span><span class="kw">use crate</span>::{
@@ -616,6 +639,26 @@
     };
 }
 
+<span class="macro">macro_rules!</span> convert_uint_to_larger_uint {
+    (<span class="macro-nonterminal">$uint</span>: ident; next <span class="macro-nonterminal">$next</span>: ident ($(<span class="macro-nonterminal">$other</span>: ident),<span class="kw-2">*</span>)) =&gt; {
+        <span class="kw">impl </span>IntoStimulus&lt;<span class="macro-nonterminal">$next</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$uint </span>{
+            <span class="attr">#[inline]
+            </span><span class="kw">fn </span>into_stimulus(<span class="self">self</span>) -&gt; <span class="macro-nonterminal">$next </span>{
+                ((<span class="self">self </span><span class="kw">as </span><span class="macro-nonterminal">$next</span>) &lt;&lt; <span class="self">Self</span>::BITS) | <span class="self">self </span><span class="kw">as </span><span class="macro-nonterminal">$next
+            </span>}
+        }
+
+        $(
+            <span class="kw">impl </span>IntoStimulus&lt;<span class="macro-nonterminal">$other</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$uint </span>{
+                <span class="attr">#[inline]
+                </span><span class="kw">fn </span>into_stimulus(<span class="self">self</span>) -&gt; <span class="macro-nonterminal">$other </span>{
+                    <span class="macro-nonterminal">$next::from_stimulus</span>(<span class="self">self</span>).into_stimulus()
+                }
+            }
+        )*
+    };
+}
+
 <span class="kw">impl </span>IntoStimulus&lt;f64&gt; <span class="kw">for </span>f32 {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_stimulus(<span class="self">self</span>) -&gt; f64 {
@@ -632,16 +675,19 @@
 }
 <span class="macro">convert_double_to_uint!</span>(f64; direct (u8, u16, u32, u64, u128););
 
-<span class="macro">convert_uint_to_uint!</span>(u8; via f32 (u16); via f64 (u32, u64, u128););
+<span class="macro">convert_uint_to_larger_uint!</span>(u8; next u16 (u32, u64, u128));
 
 <span class="macro">convert_uint_to_float!</span>(u16; via f32 (f32); via f64 (f64););
-<span class="macro">convert_uint_to_uint!</span>(u16; via f32 (u8); via f64 (u32, u64, u128););
+<span class="macro">convert_uint_to_uint!</span>(u16; via f32 (u8););
+<span class="macro">convert_uint_to_larger_uint!</span>(u16; next u32 (u64, u128));
 
 <span class="macro">convert_uint_to_float!</span>(u32; via f64 (f32, f64););
-<span class="macro">convert_uint_to_uint!</span>(u32; via f64 (u8, u16, u64, u128););
+<span class="macro">convert_uint_to_uint!</span>(u32; via f64 (u8, u16););
+<span class="macro">convert_uint_to_larger_uint!</span>(u32; next u64 (u128));
 
 <span class="macro">convert_uint_to_float!</span>(u64; via f64 (f32, f64););
-<span class="macro">convert_uint_to_uint!</span>(u64; via f64 (u8, u16, u32, u128););
+<span class="macro">convert_uint_to_uint!</span>(u64; via f64 (u8, u16, u32););
+<span class="macro">convert_uint_to_larger_uint!</span>(u64; next u128 ());
 
 <span class="macro">convert_uint_to_float!</span>(u128; via f64 (f32, f64););
 <span class="macro">convert_uint_to_uint!</span>(u128; via f64 (u8, u16, u32, u64););
