@@ -292,8 +292,6 @@ mod tests {
 
     #[cfg(feature = "approx")]
     mod conversion {
-        use core::str::FromStr;
-
         use crate::{
             convert::FromColorUnclamped, encoding, rgb::Rgb, visual::VisuallyEqual, LinSrgb, Okhsv,
             Oklab, OklabHue, Srgb,
@@ -403,9 +401,7 @@ mod tests {
         #[test]
         fn test_srgb_to_okhsv() {
             let red_hex = "#ff0004";
-            let rgb: Srgb = Rgb::<encoding::Srgb, _>::from_str(red_hex)
-                .unwrap()
-                .into_format();
+            let rgb: Srgb = red_hex.parse().unwrap();
             let okhsv = Okhsv::from_color_unclamped(rgb);
             assert_relative_eq!(okhsv.saturation, 1.0, epsilon = 1e-3);
             assert_relative_eq!(okhsv.value, 1.0, epsilon = 1e-3);

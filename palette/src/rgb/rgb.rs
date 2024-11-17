@@ -29,7 +29,13 @@ use crate::{
     FromColor, GetHue, Hsl, Hsv, IntoColor, Luma, Oklab, RgbHue, Xyz, Yxy,
 };
 
-use super::Primaries;
+use super::{
+    hex::{
+        rgb_from_hex_16bit, rgb_from_hex_32bit, rgb_from_hex_4bit, rgb_from_hex_8bit,
+        rgba_from_hex_16bit, rgba_from_hex_32bit, rgba_from_hex_4bit, rgba_from_hex_8bit,
+    },
+    Primaries,
+};
 
 /// Generic RGB with an alpha component. See the [`Rgba` implementation in
 /// `Alpha`](crate::Alpha#Rgba).
@@ -65,7 +71,12 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 /// // ...or more explicitly like this:
 /// let rgb_u8_from_f32_2 = Srgb::new(0.3f32, 0.8, 0.1).into_format::<u8>();
 ///
-/// // Hexadecimal is also supported, with or without the #:
+/// // Hexadecimal is also supported:
+/// let rgb_from_hex_parse: Srgb<u8> = "#f034e6".parse().unwrap();
+/// let rgb_from_hex_ctor = Srgb::<u8>::from_hex("#f034e6").unwrap();
+/// assert_eq!(rgb_from_hex_parse, rgb_from_hex_ctor);
+///
+/// // The # is optional:
 /// let rgb_from_hex1: Srgb<u8> = "#f034e6".parse().unwrap();
 /// let rgb_from_hex2: Srgb<u8> = "f034e6".parse().unwrap();
 /// assert_eq!(rgb_from_hex1, rgb_from_hex2);
@@ -220,6 +231,40 @@ impl<S, T> Rgb<S, T> {
             blue,
             standard: PhantomData,
         }
+    }
+
+    /// Parses a color hex code into an RGB value.
+    ///
+    /// ```
+    /// use palette::Srgb;
+    ///
+    /// let rgb = Srgb::new(0xf0u8, 0x34, 0xe6);
+    /// let rgb_from_hex = Srgb::from_hex("#f034e6").unwrap();
+    /// assert_eq!(rgb, rgb_from_hex);
+    /// ```
+    ///
+    /// * Optional `#` at the beginning of the string.
+    /// * The accepted string length depends on the bit depth.
+    ///    - `#f8b` and `#ff88bb` require 8 bits or higher.
+    ///    - `#ffff8888bbbb` requires 16 bits or higher.
+    ///    - `#ffffffff88888888bbbbbbbb` requires 32 bits or higher.
+    /// * `f32` accepts formats for `u16` or shorter.
+    /// * `f64` accepts formats for `u32` or shorter.
+    ///
+    /// This function does the same thing as `hex.parse()`:
+    ///
+    /// ```
+    /// use palette::Srgb;
+    ///
+    /// let rgb_from_hex = Srgb::from_hex("#f034e6").unwrap();
+    /// let rgb_from_hex_parse: Srgb<u8> = "#f034e6".parse().unwrap();
+    /// assert_eq!(rgb_from_hex, rgb_from_hex_parse);
+    /// ```
+    pub fn from_hex(hex: &str) -> Result<Self, <Self as FromStr>::Err>
+    where
+        Self: FromStr,
+    {
+        hex.parse()
     }
 
     /// Convert the RGB components into another number type.
@@ -521,6 +566,40 @@ impl<S, T, A> Alpha<Rgb<S, T>, A> {
             color: Rgb::new(red, green, blue),
             alpha,
         }
+    }
+
+    /// Parses a color hex code into an RGBA value.
+    ///
+    /// ```
+    /// use palette::Srgba;
+    ///
+    /// let rgba = Srgba::new(0xf0u8, 0x34, 0xe6, 0xff);
+    /// let rgba_from_hex = Srgba::from_hex("#f034e6ff").unwrap();
+    /// assert_eq!(rgba, rgba_from_hex);
+    /// ```
+    ///
+    /// * Optional `#` at the beginning of the string.
+    /// * The accepted string length depends on the bit depth.
+    ///    - `#f8ba` and `#ff88bbaa` require 8 bits or higher.
+    ///    - `#ffff8888bbbbaaaa` requires 16 bits or higher.
+    ///    - `#ffffffff88888888bbbbbbbbaaaaaaaa` requires 32 bits or higher.
+    /// * `f32` accepts formats for `u16` or shorter.
+    /// * `f64` accepts formats for `u32` or shorter.
+    ///
+    /// This function does the same thing as `hex.parse()`:
+    ///
+    /// ```
+    /// use palette::Srgba;
+    ///
+    /// let rgba_from_hex = Srgba::from_hex("#f034e6ff").unwrap();
+    /// let rgba_from_hex_parse: Srgba<u8> = "#f034e6ff".parse().unwrap();
+    /// assert_eq!(rgba_from_hex, rgba_from_hex_parse);
+    /// ```
+    pub fn from_hex(hex: &str) -> Result<Self, <Self as FromStr>::Err>
+    where
+        Self: FromStr,
+    {
+        hex.parse()
     }
 
     /// Convert the RGBA components into other number types.
@@ -1092,12 +1171,12 @@ impl core::fmt::Display for FromHexError {
             FromHexError::ParseIntError(e) => write!(f, "{}", e),
             FromHexError::HexFormatError(s) => write!(
                 f,
-                "{}, please use format '#fff', 'fff', '#ffffff' or 'ffffff'.",
+                "{}, please use format '#fff', 'fff', '#ffffff', 'ffffff', etc.",
                 s
             ),
             FromHexError::RgbaHexFormatError(s) => write!(
                 f,
-                "{}, please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'.",
+                "{}, please use format '#ffff', 'ffff', '#ffffffff', 'ffffffff', etc.",
                 s
             ),
         }
@@ -1118,25 +1197,13 @@ impl std::error::Error for FromHexError {
 impl<S> FromStr for Rgb<S, u8> {
     type Err = FromHexError;
 
-    /// Parses a color hex code of format '#ff00bb' or '#abc' (with or without the leading '#') into a
-    /// [`Rgb<S, u8>`] instance.
+    /// Parses a color hex code of format '#ff00bb' or '#abc' (with or without
+    /// the leading '#') into an [`Rgb<S, u8>`] value.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
         let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
         match hex_code.len() {
-            3 => {
-                let red = u8::from_str_radix(&hex_code[..1], 16)?;
-                let green = u8::from_str_radix(&hex_code[1..2], 16)?;
-                let blue = u8::from_str_radix(&hex_code[2..3], 16)?;
-                let col: Rgb<S, u8> = Rgb::new(red * 17, green * 17, blue * 17);
-                Ok(col)
-            }
-            6 => {
-                let red = u8::from_str_radix(&hex_code[..2], 16)?;
-                let green = u8::from_str_radix(&hex_code[2..4], 16)?;
-                let blue = u8::from_str_radix(&hex_code[4..6], 16)?;
-                let col: Rgb<S, u8> = Rgb::new(red, green, blue);
-                Ok(col)
-            }
+            3 => Ok(Self::from_components(rgb_from_hex_4bit(hex_code)?)),
+            6 => Ok(Self::from_components(rgb_from_hex_8bit(hex_code)?)),
             _ => Err(FromHexError::HexFormatError("invalid hex code format")),
         }
     }
@@ -1145,27 +1212,137 @@ impl<S> FromStr for Rgb<S, u8> {
 impl<S> FromStr for Rgba<S, u8> {
     type Err = FromHexError;
 
-    /// Parses a color hex code of format '#ff00bbff' or '#abcd' (with or without the leading '#') into a
-    /// [`Rgba<S, u8>`] instance.
+    /// Parses a color hex code of format '#ff00bbff' or '#abcd' (with or
+    /// without the leading '#') into an [`Rgba<S, u8>`] value.
     fn from_str(hex: &str) -> Result<Self, Self::Err> {
         let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
         match hex_code.len() {
-            4 => {
-                let red = u8::from_str_radix(&hex_code[..1], 16)?;
-                let green = u8::from_str_radix(&hex_code[1..2], 16)?;
-                let blue = u8::from_str_radix(&hex_code[2..3], 16)?;
-                let alpha = u8::from_str_radix(&hex_code[3..4], 16)?;
-                let col: Rgba<S, u8> = Rgba::new(red * 17, green * 17, blue * 17, alpha * 17);
-                Ok(col)
-            }
-            8 => {
-                let red = u8::from_str_radix(&hex_code[..2], 16)?;
-                let green = u8::from_str_radix(&hex_code[2..4], 16)?;
-                let blue = u8::from_str_radix(&hex_code[4..6], 16)?;
-                let alpha = u8::from_str_radix(&hex_code[6..8], 16)?;
-                let col: Rgba<S, u8> = Rgba::new(red, green, blue, alpha);
-                Ok(col)
-            }
+            4 => Ok(Self::from_components(rgba_from_hex_4bit(hex_code)?)),
+            8 => Ok(Self::from_components(rgba_from_hex_8bit(hex_code)?)),
+            _ => Err(FromHexError::RgbaHexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgb<S, u16> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code of format '#ffff0000bbbb', or shorter, (with or
+    /// without the leading '#') into an [`Rgb<S, u16>`] value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            3 | 6 => Ok(Rgb::<S, u8>::from_str(hex_code)?.into_format()),
+            12 => Ok(Self::from_components(rgb_from_hex_16bit(hex_code)?)),
+            _ => Err(FromHexError::HexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgba<S, u16> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code of format '#ffff0000bbbbffff', or shorter, (with
+    /// or without the leading '#') into an [`Rgba<S, u16>`] value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            4 | 8 => Ok(Rgba::<S, u8>::from_str(hex_code)?.into_format()),
+            16 => Ok(Self::from_components(rgba_from_hex_16bit(hex_code)?)),
+            _ => Err(FromHexError::RgbaHexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgb<S, u32> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code of format '#ffffffff00000000bbbbbbbb', or
+    /// shorter, (with or without the leading '#') into an [`Rgb<S, u32>`]
+    /// value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            3 | 6 => Ok(Rgb::<S, u8>::from_str(hex_code)?.into_format()),
+            12 => Ok(Rgb::<S, u16>::from_str(hex_code)?.into_format()),
+            24 => Ok(Self::from_components(rgb_from_hex_32bit(hex_code)?)),
+            _ => Err(FromHexError::HexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgba<S, u32> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code of format '#ffffffff00000000bbbbbbbbffffffff',
+    /// or shorter, (with or without the leading '#') into an [`Rgba<S, u32>`]
+    /// value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            4 | 8 => Ok(Rgba::<S, u8>::from_str(hex_code)?.into_format()),
+            16 => Ok(Rgba::<S, u16>::from_str(hex_code)?.into_format()),
+            32 => Ok(Self::from_components(rgba_from_hex_32bit(hex_code)?)),
+            _ => Err(FromHexError::RgbaHexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgb<S, f32> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code for 16 bit components or less into an [`Rgb<S, f32>`] value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            3 | 6 => Ok(Rgb::<S, u8>::from_str(hex_code)?.into_format()),
+            12 => Ok(Rgb::<S, u16>::from_str(hex_code)?.into_format()),
+            _ => Err(FromHexError::HexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgba<S, f32> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code for 16 bit components or less into an [`Rgba<S, f32>`]
+    /// value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            4 | 8 => Ok(Rgba::<S, u8>::from_str(hex_code)?.into_format()),
+            16 => Ok(Rgba::<S, u16>::from_str(hex_code)?.into_format()),
+            _ => Err(FromHexError::RgbaHexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgb<S, f64> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code for 32 bit components or less into an [`Rgb<S, f64>`] value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            3 | 6 => Ok(Rgb::<S, u8>::from_str(hex_code)?.into_format()),
+            12 => Ok(Rgb::<S, u16>::from_str(hex_code)?.into_format()),
+            24 => Ok(Rgb::<S, u32>::from_str(hex_code)?.into_format()),
+            _ => Err(FromHexError::HexFormatError("invalid hex code format")),
+        }
+    }
+}
+
+impl<S> FromStr for Rgba<S, f64> {
+    type Err = FromHexError;
+
+    /// Parses a color hex code for 32 bit components or less into an [`Rgba<S, f64>`]
+    /// value.
+    fn from_str(hex: &str) -> Result<Self, Self::Err> {
+        let hex_code = hex.strip_prefix('#').map_or(hex, |stripped| stripped);
+        match hex_code.len() {
+            4 | 8 => Ok(Rgba::<S, u8>::from_str(hex_code)?.into_format()),
+            16 => Ok(Rgba::<S, u16>::from_str(hex_code)?.into_format()),
+            32 => Ok(Rgba::<S, u32>::from_str(hex_code)?.into_format()),
             _ => Err(FromHexError::RgbaHexFormatError("invalid hex code format")),
         }
     }
@@ -1368,8 +1545,8 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Rgb<S, T> where T: bytemuck::Pod {}
 mod test {
     use core::str::FromStr;
 
-    use crate::encoding::Srgb;
     use crate::rgb::channels;
+    use crate::{encoding::Srgb, rgb::FromHexError};
 
     use super::{Rgb, Rgba};
 
@@ -1525,12 +1702,12 @@ mod test {
     }
 
     #[test]
-    fn from_str() {
+    fn from_str_u8() {
         let c = Rgb::<Srgb, u8>::from_str("#ffffff");
         assert!(c.is_ok());
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
         let c = Rgb::<Srgb, u8>::from_str("#gggggg");
-        assert!(c.is_err());
+        assert!(matches!(c, Err(FromHexError::ParseIntError(_))));
         let c = Rgb::<Srgb, u8>::from_str("#fff");
         assert!(c.is_ok());
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
@@ -1538,16 +1715,12 @@ mod test {
         assert!(c.is_ok());
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(0, 0, 0));
         let c = Rgb::<Srgb, u8>::from_str("");
-        assert!(c.is_err());
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
         let c = Rgb::<Srgb, u8>::from_str("#123456");
         assert!(c.is_ok());
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(18, 52, 86));
         let c = Rgb::<Srgb, u8>::from_str("#iii");
-        assert!(c.is_err());
-        assert_eq!(
-            format!("{}", c.err().unwrap()),
-            "invalid digit found in string"
-        );
+        assert!(matches!(c, Err(FromHexError::ParseIntError(_))));
         let c = Rgb::<Srgb, u8>::from_str("#08f");
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(0, 136, 255));
         let c = Rgb::<Srgb, u8>::from_str("08f");
@@ -1555,11 +1728,11 @@ mod test {
         let c = Rgb::<Srgb, u8>::from_str("ffffff");
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(255, 255, 255));
         let c = Rgb::<Srgb, u8>::from_str("#12");
-        assert!(c.is_err());
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
         assert_eq!(
             format!("{}", c.err().unwrap()),
             "invalid hex code format, \
-             please use format \'#fff\', \'fff\', \'#ffffff\' or \'ffffff\'."
+             please use format '#fff', 'fff', '#ffffff', 'ffffff', etc."
         );
         let c = Rgb::<Srgb, u8>::from_str("da0bce");
         assert_eq!(c.unwrap(), Rgb::<Srgb, u8>::new(218, 11, 206));
@@ -1580,23 +1753,149 @@ mod test {
         let c = Rgba::<Srgb, u8>::from_str("#ffff");
         assert_eq!(c.unwrap(), Rgba::<Srgb, u8>::new(255, 255, 255, 255));
         let c = Rgba::<Srgb, u8>::from_str("#gggggggg");
-        assert!(c.is_err());
+        assert!(matches!(c, Err(FromHexError::ParseIntError(_))));
         assert_eq!(
             format!("{}", c.err().unwrap()),
             "invalid digit found in string"
         );
         let c = Rgba::<Srgb, u8>::from_str("#fff");
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
         assert_eq!(
             format!("{}", c.err().unwrap()),
             "invalid hex code format, \
-            please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'."
+            please use format '#ffff', 'ffff', '#ffffffff', 'ffffffff', etc."
         );
         let c = Rgba::<Srgb, u8>::from_str("#ffffff");
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
+    }
+
+    #[test]
+    fn from_str_u16() {
+        let c = Rgb::<Srgb, u16>::from_str("#f8b");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb));
+        let c = Rgb::<Srgb, u16>::from_str("#ff88bb");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb));
+        let c = Rgb::<Srgb, u16>::from_str("#ffff8888bbbb");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb));
+        let c = Rgb::<Srgb, u16>::from_str("#ffffffff88888888bbbbbbbb");
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
+
+        let c = Rgba::<Srgb, u16>::from_str("#f8ba");
         assert_eq!(
-            format!("{}", c.err().unwrap()),
-            "invalid hex code format, \
-            please use format '#ffff', 'ffff', '#ffffffff' or 'ffffffff'."
+            c.unwrap(),
+            Rgba::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb, 0xaaaa)
         );
+        let c = Rgba::<Srgb, u16>::from_str("#ff88bbaa");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb, 0xaaaa)
+        );
+        let c = Rgba::<Srgb, u16>::from_str("#ffff8888bbbbaaaa");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u16>::new(0xffff, 0x8888, 0xbbbb, 0xaaaa)
+        );
+        let c = Rgba::<Srgb, u16>::from_str("#ffffffff88888888bbbbbbbbaaaaaaaa");
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
+    }
+
+    #[test]
+    fn from_str_u32() {
+        let c = Rgb::<Srgb, u32>::from_str("#f8b");
+        assert_eq!(
+            c.unwrap(),
+            Rgb::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb)
+        );
+        let c = Rgb::<Srgb, u32>::from_str("#ff88bb");
+        assert_eq!(
+            c.unwrap(),
+            Rgb::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb)
+        );
+        let c = Rgb::<Srgb, u32>::from_str("#ffff8888bbbb");
+        assert_eq!(
+            c.unwrap(),
+            Rgb::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb)
+        );
+        let c = Rgb::<Srgb, u32>::from_str("#ffffffff88888888bbbbbbbb");
+        assert_eq!(
+            c.unwrap(),
+            Rgb::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb)
+        );
+        let c = Rgb::<Srgb, u32>::from_str("#ffffffffffffffff8888888888888888bbbbbbbbbbbbbbbb");
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
+
+        let c = Rgba::<Srgb, u32>::from_str("#f8ba");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb, 0xaaaaaaaa)
+        );
+        let c = Rgba::<Srgb, u32>::from_str("#ff88bbaa");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb, 0xaaaaaaaa)
+        );
+        let c = Rgba::<Srgb, u32>::from_str("#ffff8888bbbbaaaa");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb, 0xaaaaaaaa)
+        );
+        let c = Rgba::<Srgb, u32>::from_str("#ffffffff88888888bbbbbbbbaaaaaaaa");
+        assert_eq!(
+            c.unwrap(),
+            Rgba::<Srgb, u32>::new(0xffffffff, 0x88888888, 0xbbbbbbbb, 0xaaaaaaaa)
+        );
+        let c = Rgba::<Srgb, u32>::from_str(
+            "#ffffffffffffffff8888888888888888bbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaa",
+        );
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
+    }
+
+    #[test]
+    fn from_str_f32() {
+        let c = Rgb::<Srgb, f32>::from_str("#fff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f32>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f32>::from_str("#ffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f32>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f32>::from_str("#ffffffffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f32>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f32>::from_str("#ffffffffffffffffffffffff");
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
+
+        let c = Rgba::<Srgb, f32>::from_str("#ffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f32>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f32>::from_str("#ffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f32>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f32>::from_str("#ffffffffffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f32>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f32>::from_str("#ffffffffffffffffffffffffffffffff");
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
+    }
+
+    #[test]
+    fn from_str_f64() {
+        let c = Rgb::<Srgb, f64>::from_str("#fff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f64>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f64>::from_str("#ffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f64>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f64>::from_str("#ffffffffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f64>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f64>::from_str("#ffffffffffffffffffffffff");
+        assert_eq!(c.unwrap(), Rgb::<Srgb, f64>::new(1.0, 1.0, 1.0));
+        let c = Rgb::<Srgb, f64>::from_str("#ffffffffffffffffffffffffffffffffffffffffffffffff");
+        assert!(matches!(c, Err(FromHexError::HexFormatError(_))));
+
+        let c = Rgba::<Srgb, f64>::from_str("#ffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f64>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f64>::from_str("#ffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f64>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f64>::from_str("#ffffffffffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f64>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f64>::from_str("#ffffffffffffffffffffffffffffffff");
+        assert_eq!(c.unwrap(), Rgba::<Srgb, f64>::new(1.0, 1.0, 1.0, 1.0));
+        let c = Rgba::<Srgb, f64>::from_str(
+            "#ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        );
+        assert!(matches!(c, Err(FromHexError::RgbaHexFormatError(_))));
     }
 
     #[test]

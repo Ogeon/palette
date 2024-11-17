@@ -238,6 +238,26 @@ macro_rules! convert_uint_to_uint {
     };
 }
 
+macro_rules! convert_uint_to_larger_uint {
+    ($uint: ident; next $next: ident ($($other: ident),*)) => {
+        impl IntoStimulus<$next> for $uint {
+            #[inline]
+            fn into_stimulus(self) -> $next {
+                ((self as $next) << Self::BITS) | self as $next
+            }
+        }
+
+        $(
+            impl IntoStimulus<$other> for $uint {
+                #[inline]
+                fn into_stimulus(self) -> $other {
+                    $next::from_stimulus(self).into_stimulus()
+                }
+            }
+        )*
+    };
+}
+
 impl IntoStimulus<f64> for f32 {
     #[inline]
     fn into_stimulus(self) -> f64 {
@@ -254,16 +274,19 @@ impl IntoStimulus<f32> for f64 {
 }
 convert_double_to_uint!(f64; direct (u8, u16, u32, u64, u128););
 
-convert_uint_to_uint!(u8; via f32 (u16); via f64 (u32, u64, u128););
+convert_uint_to_larger_uint!(u8; next u16 (u32, u64, u128));
 
 convert_uint_to_float!(u16; via f32 (f32); via f64 (f64););
-convert_uint_to_uint!(u16; via f32 (u8); via f64 (u32, u64, u128););
+convert_uint_to_uint!(u16; via f32 (u8););
+convert_uint_to_larger_uint!(u16; next u32 (u64, u128));
 
 convert_uint_to_float!(u32; via f64 (f32, f64););
-convert_uint_to_uint!(u32; via f64 (u8, u16, u64, u128););
+convert_uint_to_uint!(u32; via f64 (u8, u16););
+convert_uint_to_larger_uint!(u32; next u64 (u128));
 
 convert_uint_to_float!(u64; via f64 (f32, f64););
-convert_uint_to_uint!(u64; via f64 (u8, u16, u32, u128););
+convert_uint_to_uint!(u64; via f64 (u8, u16, u32););
+convert_uint_to_larger_uint!(u64; next u128 ());
 
 convert_uint_to_float!(u128; via f64 (f32, f64););
 convert_uint_to_uint!(u128; via f64 (u8, u16, u32, u64););
