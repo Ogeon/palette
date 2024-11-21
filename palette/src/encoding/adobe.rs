@@ -150,8 +150,52 @@ mod test {
 
         #[test]
         fn correct_values() {
-            assert_relative_eq!(AdobeRgb::from_linear(0.5), 0.72965838, epsilon = 0.0000001);
-            assert_relative_eq!(AdobeRgb::into_linear(0.5), 0.21775552, epsilon = 0.0000001);
+            let half_to_encoded: f64 = AdobeRgb::from_linear(0.5);
+            assert_relative_eq!(half_to_encoded, 0.72965838, epsilon = 0.0000001);
+            let half_to_linear = AdobeRgb::into_linear(0.5);
+            assert_relative_eq!(half_to_linear, 0.21775552, epsilon = 0.0000001);
+        }
+    }
+
+    mod lut {
+        use crate::encoding::{AdobeRgb, FromLinear, IntoLinear};
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u8_f32_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f32 = AdobeRgb::into_linear(i);
+                let f32_impl = AdobeRgb::into_linear(i as f32 / 255.0);
+                assert_relative_eq!(u8_impl, f32_impl, epsilon = 0.000001);
+            }
+        }
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u8_f64_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f64 = AdobeRgb::into_linear(i);
+                let f64_impl = AdobeRgb::into_linear(i as f64 / 255.0);
+                assert_relative_eq!(u8_impl, f64_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn u8_to_f32_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f32 = AdobeRgb::into_linear(expected);
+                let result: u8 = AdobeRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+
+        #[test]
+        fn u8_to_f64_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f64 = AdobeRgb::into_linear(expected);
+                let result: u8 = AdobeRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
         }
     }
 }

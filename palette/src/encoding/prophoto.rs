@@ -117,7 +117,7 @@ mod test {
     mod conversion {
         use crate::{
             convert::IntoColorUnclamped,
-            encoding::prophoto::ProPhotoRgb,
+            encoding::ProPhotoRgb,
             matrix::{matrix_inverse, rgb_to_xyz_matrix},
             rgb::{Primaries, RgbSpace},
             white_point::{Any, WhitePoint, D50},
@@ -145,6 +145,80 @@ mod test {
             let blue: Xyz<Any, f64> = ProPhotoRgb::blue().into_color_unclamped();
             // Compare sum of primaries to white point.
             assert_relative_eq!(red + green + blue, D50::get_xyz(), epsilon = 0.0001);
+        }
+    }
+
+    #[cfg(feature = "approx")]
+    mod transfer {
+        use crate::encoding::{FromLinear, IntoLinear, ProPhotoRgb};
+
+        #[test]
+        fn lin_to_enc_to_lin() {
+            for i in 0..=100 {
+                let linear = i as f64 / 100.0;
+                let encoded: f64 = ProPhotoRgb::from_linear(linear);
+                assert_relative_eq!(
+                    linear,
+                    ProPhotoRgb::into_linear(encoded),
+                    epsilon = 0.0000001
+                );
+            }
+        }
+
+        #[test]
+        fn enc_to_lin_to_enc() {
+            for i in 0..=100 {
+                let encoded = i as f64 / 100.0;
+                let linear: f64 = ProPhotoRgb::into_linear(encoded);
+                assert_relative_eq!(
+                    encoded,
+                    ProPhotoRgb::from_linear(linear),
+                    epsilon = 0.0000001
+                );
+            }
+        }
+    }
+
+    #[cfg(feature = "gamma_lut_u16")]
+    mod lut {
+        use crate::encoding::{FromLinear, IntoLinear, ProPhotoRgb};
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u16_f32_into_impl() {
+            for i in 0..=65535u16 {
+                let u16_impl: f32 = ProPhotoRgb::into_linear(i);
+                let f32_impl = ProPhotoRgb::into_linear(i as f32 / 65535.0);
+                assert_relative_eq!(u16_impl, f32_impl, epsilon = 0.000001);
+            }
+        }
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u16_f64_into_impl() {
+            for i in 0..=65535u16 {
+                let u16_impl: f64 = ProPhotoRgb::into_linear(i);
+                let f64_impl = ProPhotoRgb::into_linear(i as f64 / 65535.0);
+                assert_relative_eq!(u16_impl, f64_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn u16_to_f32_to_u16() {
+            for expected in 0..=65535u16 {
+                let linear: f32 = ProPhotoRgb::into_linear(expected);
+                let result: u16 = ProPhotoRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+
+        #[test]
+        fn u16_to_f64_to_u16() {
+            for expected in 0..=65535u16 {
+                let linear: f64 = ProPhotoRgb::into_linear(expected);
+                let result: u16 = ProPhotoRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
         }
     }
 }
