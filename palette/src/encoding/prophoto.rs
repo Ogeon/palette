@@ -10,6 +10,9 @@ use crate::{
     Mat3, Yxy,
 };
 
+#[cfg(feature = "gamma_lut_u16")]
+use super::lut::{self, prophoto::*};
+
 /// The ProPhoto RGB standard and color space with gamma 2.2 transfer function.
 ///
 /// About 13% of the colors in this space are "[impossible colors](https://en.wikipedia.org/wiki/Impossible_color)"
@@ -21,6 +24,14 @@ use crate::{
 /// `ProPhotoRgb` will not use any kind of approximation when converting from `T` to
 /// `T`. This involves a call to `powf`, which may make it too slow for certain
 /// applications.
+///
+/// Using the `gamma_lut_u16` feature allows certain specialized optimizations:
+///
+/// * When converting from `u16` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values.
+/// * When converting from `f32` or `f64` to `u16`, while converting from linear
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](<https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB>).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ProPhotoRgb;
 
@@ -111,13 +122,50 @@ where
     }
 }
 
+#[cfg(feature = "gamma_lut_u16")]
+impl IntoLinear<f32, u16> for ProPhotoRgb {
+    #[inline]
+    fn into_linear(encoded: u16) -> f32 {
+        PROPHOTO_RGB_U16_TO_F64[encoded as usize] as f32
+    }
+}
+
+#[cfg(feature = "gamma_lut_u16")]
+impl FromLinear<f32, u16> for ProPhotoRgb {
+    #[inline]
+    fn from_linear(linear: f32) -> u16 {
+        lut::linear_f32_to_encoded_u16_with_linear_scale(
+            linear,
+            PROPHOTO_RGB_LINEAR_SCALE,
+            PROPHOTO_RGB_MIN_FLOAT,
+            &TO_PROPHOTO_RGB_U16,
+        )
+    }
+}
+
+#[cfg(feature = "gamma_lut_u16")]
+impl IntoLinear<f64, u16> for ProPhotoRgb {
+    #[inline]
+    fn into_linear(encoded: u16) -> f64 {
+        PROPHOTO_RGB_U16_TO_F64[encoded as usize]
+    }
+}
+
+#[cfg(feature = "gamma_lut_u16")]
+impl FromLinear<f64, u16> for ProPhotoRgb {
+    #[inline]
+    fn from_linear(linear: f64) -> u16 {
+        <ProPhotoRgb>::from_linear(linear as f32)
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[cfg(feature = "approx")]
     mod conversion {
         use crate::{
             convert::IntoColorUnclamped,
-            encoding::prophoto::ProPhotoRgb,
+            encoding::ProPhotoRgb,
             matrix::{matrix_inverse, rgb_to_xyz_matrix},
             rgb::{Primaries, RgbSpace},
             white_point::{Any, WhitePoint, D50},
@@ -145,6 +193,80 @@ mod test {
             let blue: Xyz<Any, f64> = ProPhotoRgb::blue().into_color_unclamped();
             // Compare sum of primaries to white point.
             assert_relative_eq!(red + green + blue, D50::get_xyz(), epsilon = 0.0001);
+        }
+    }
+
+    #[cfg(feature = "approx")]
+    mod transfer {
+        use crate::encoding::{FromLinear, IntoLinear, ProPhotoRgb};
+
+        #[test]
+        fn lin_to_enc_to_lin() {
+            for i in 0..=100 {
+                let linear = i as f64 / 100.0;
+                let encoded: f64 = ProPhotoRgb::from_linear(linear);
+                assert_relative_eq!(
+                    linear,
+                    ProPhotoRgb::into_linear(encoded),
+                    epsilon = 0.0000001
+                );
+            }
+        }
+
+        #[test]
+        fn enc_to_lin_to_enc() {
+            for i in 0..=100 {
+                let encoded = i as f64 / 100.0;
+                let linear: f64 = ProPhotoRgb::into_linear(encoded);
+                assert_relative_eq!(
+                    encoded,
+                    ProPhotoRgb::from_linear(linear),
+                    epsilon = 0.0000001
+                );
+            }
+        }
+    }
+
+    #[cfg(feature = "gamma_lut_u16")]
+    mod lut {
+        use crate::encoding::{FromLinear, IntoLinear, ProPhotoRgb};
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u16_f32_into_impl() {
+            for i in 0..=65535u16 {
+                let u16_impl: f32 = ProPhotoRgb::into_linear(i);
+                let f32_impl = ProPhotoRgb::into_linear(i as f32 / 65535.0);
+                assert_relative_eq!(u16_impl, f32_impl, epsilon = 0.000001);
+            }
+        }
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u16_f64_into_impl() {
+            for i in 0..=65535u16 {
+                let u16_impl: f64 = ProPhotoRgb::into_linear(i);
+                let f64_impl = ProPhotoRgb::into_linear(i as f64 / 65535.0);
+                assert_relative_eq!(u16_impl, f64_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn u16_to_f32_to_u16() {
+            for expected in 0..=65535u16 {
+                let linear: f32 = ProPhotoRgb::into_linear(expected);
+                let result: u16 = ProPhotoRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+
+        #[test]
+        fn u16_to_f64_to_u16() {
+            for expected in 0..=65535u16 {
+                let linear: f64 = ProPhotoRgb::into_linear(expected);
+                let result: u16 = ProPhotoRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
         }
     }
 }

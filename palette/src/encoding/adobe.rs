@@ -1,14 +1,16 @@
 //! The Adobe RGB (1998) standard.
 
 use crate::{
+    encoding::{
+        lut::{self, adobe::*},
+        FromLinear, IntoLinear,
+    },
     luma::LumaStandard,
     num::{Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
-
-use super::{FromLinear, IntoLinear};
 
 /// The Adobe RGB (1998) (a.k.a. opRGB) color space and standard.
 ///
@@ -17,6 +19,20 @@ use super::{FromLinear, IntoLinear};
 /// in cyan-green hues.
 ///
 /// The Adobe RGB standard uses a gamma 2.2 transfer function.
+///
+///# As transfer function
+///
+/// `AdobeRgb` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values.
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](<https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB>).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct AdobeRgb;
 
@@ -101,6 +117,34 @@ where
     }
 }
 
+impl IntoLinear<f32, u8> for AdobeRgb {
+    #[inline]
+    fn into_linear(encoded: u8) -> f32 {
+        ADOBE_RGB_U8_TO_F32[encoded as usize]
+    }
+}
+
+impl FromLinear<f32, u8> for AdobeRgb {
+    #[inline]
+    fn from_linear(linear: f32) -> u8 {
+        lut::linear_f32_to_encoded_u8(linear, ADOBE_RGB_MIN_FLOAT, &TO_ADOBE_RGB_U8)
+    }
+}
+
+impl IntoLinear<f64, u8> for AdobeRgb {
+    #[inline]
+    fn into_linear(encoded: u8) -> f64 {
+        ADOBE_RGB_U8_TO_F64[encoded as usize]
+    }
+}
+
+impl FromLinear<f64, u8> for AdobeRgb {
+    #[inline]
+    fn from_linear(linear: f64) -> u8 {
+        <AdobeRgb>::from_linear(linear as f32)
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[cfg(feature = "approx")]
@@ -150,8 +194,52 @@ mod test {
 
         #[test]
         fn correct_values() {
-            assert_relative_eq!(AdobeRgb::from_linear(0.5), 0.72965838, epsilon = 0.0000001);
-            assert_relative_eq!(AdobeRgb::into_linear(0.5), 0.21775552, epsilon = 0.0000001);
+            let half_to_encoded: f64 = AdobeRgb::from_linear(0.5);
+            assert_relative_eq!(half_to_encoded, 0.72965838, epsilon = 0.0000001);
+            let half_to_linear = AdobeRgb::into_linear(0.5);
+            assert_relative_eq!(half_to_linear, 0.21775552, epsilon = 0.0000001);
+        }
+    }
+
+    mod lut {
+        use crate::encoding::{AdobeRgb, FromLinear, IntoLinear};
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u8_f32_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f32 = AdobeRgb::into_linear(i);
+                let f32_impl = AdobeRgb::into_linear(i as f32 / 255.0);
+                assert_relative_eq!(u8_impl, f32_impl, epsilon = 0.000001);
+            }
+        }
+
+        #[test]
+        #[cfg(feature = "approx")]
+        fn test_u8_f64_into_impl() {
+            for i in 0..=255u8 {
+                let u8_impl: f64 = AdobeRgb::into_linear(i);
+                let f64_impl = AdobeRgb::into_linear(i as f64 / 255.0);
+                assert_relative_eq!(u8_impl, f64_impl, epsilon = 0.0000001);
+            }
+        }
+
+        #[test]
+        fn u8_to_f32_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f32 = AdobeRgb::into_linear(expected);
+                let result: u8 = AdobeRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
+        }
+
+        #[test]
+        fn u8_to_f64_to_u8() {
+            for expected in 0u8..=255u8 {
+                let linear: f64 = AdobeRgb::into_linear(expected);
+                let result: u8 = AdobeRgb::from_linear(linear);
+                assert_eq!(result, expected);
+            }
         }
     }
 }
