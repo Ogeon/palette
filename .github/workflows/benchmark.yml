@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - '**.rs'
+      - '.github/workflows/benchmark.yml'
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
   workflow_dispatch:
@@ -29,7 +30,7 @@ jobs:
       - name: Build the benchmark target(s)
         run: cargo codspeed build -p benchmarks --features all_features
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@v2
+        uses: CodSpeedHQ/action@v3
         with:
           run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
