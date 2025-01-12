@@ -1433,7 +1433,9 @@
 <a href="#1432" id="1432">1432</a>
 <a href="#1433" id="1433">1433</a>
 <a href="#1434" id="1434">1434</a>
-<a href="#1435" id="1435">1435</a></pre></div><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a></pre></div><pre class="rust"><code><span class="doccomment">//! A library that makes linear color calculations and conversion easy and
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
 //!
@@ -1733,6 +1735,7 @@
 <span class="attr">#[doc(inline)]
 </span><span class="kw">pub use </span>lchuv::{Lchuv, Lchuva};
 <span class="attr">#[doc(inline)]
+#[allow(deprecated)]
 </span><span class="kw">pub use </span>luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 <span class="attr">#[doc(inline)]
 </span><span class="kw">pub use </span>luv::{Luv, Luva};
@@ -1747,6 +1750,7 @@
 <span class="attr">#[doc(inline)]
 </span><span class="kw">pub use </span>oklch::{Oklch, Oklcha};
 <span class="attr">#[doc(inline)]
+#[allow(deprecated)]
 </span><span class="kw">pub use </span>rgb::{
     AdobeRgb, AdobeRgba, GammaSrgb, GammaSrgba, LinAdobeRgb, LinAdobeRgba, LinRec2020, LinSrgb,
     LinSrgba, Rec2020, Rec709, Srgb, Srgba,
