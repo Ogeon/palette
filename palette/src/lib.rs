@@ -298,6 +298,7 @@ pub use lch::{Lch, Lcha};
 #[doc(inline)]
 pub use lchuv::{Lchuv, Lchuva};
 #[doc(inline)]
+#[allow(deprecated)]
 pub use luma::{GammaLuma, GammaLumaa, LinLuma, LinLumaa, SrgbLuma, SrgbLumaa};
 #[doc(inline)]
 pub use luv::{Luv, Luva};
@@ -312,6 +313,7 @@ pub use oklab::{Oklab, Oklaba};
 #[doc(inline)]
 pub use oklch::{Oklch, Oklcha};
 #[doc(inline)]
+#[allow(deprecated)]
 pub use rgb::{
     AdobeRgb, AdobeRgba, GammaSrgb, GammaSrgba, LinAdobeRgb, LinAdobeRgba, LinRec2020, LinSrgb,
     LinSrgba, Rec2020, Rec709, Srgb, Srgba,

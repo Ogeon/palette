@@ -60,6 +60,7 @@
 //! colors correctly and still allow advanced users a high degree of
 //! flexibility.
 
+#[allow(deprecated)]
 use crate::{
     encoding::{self, FromLinear, Gamma, IntoLinear, Linear},
     stimulus::{FromStimulus, Stimulus},
@@ -121,6 +122,11 @@ pub type LinSrgba<T = f32> = Rgba<Linear<encoding::Srgb>, T>;
 /// from `u8` at the same time.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
+#[deprecated(
+    since = "0.7.7",
+    note = "`Gamma`, `GammaFn` and `F2p2` are error prone and incorrectly implemented. See `palette::encoding` for possible alternatives or implement `palette::encoding::FromLinear` and `palette::encoding::IntoLinear` for a custom type."
+)]
+#[allow(deprecated)]
 pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 
 /// Gamma 2.2 encoded sRGB with an alpha component.
@@ -132,6 +138,11 @@ pub type GammaSrgb<T = f32> = Rgb<Gamma<encoding::Srgb>, T>;
 ///
 /// See [`Rgb`], [`Rgba`] and [`Alpha`](crate::Alpha) for more details on how to
 /// create a value and use it.
+#[deprecated(
+    since = "0.7.7",
+    note = "`Gamma`, `GammaFn` and `F2p2` are error prone and incorrectly implemented. See `palette::encoding` for possible alternatives or implement `palette::encoding::FromLinear` and `palette::encoding::IntoLinear` for a custom type."
+)]
+#[allow(deprecated)]
 pub type GammaSrgba<T = f32> = Rgba<Gamma<encoding::Srgb>, T>;
 
 /// Non-linear Adobe RGB.
